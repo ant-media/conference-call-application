@@ -7,9 +7,9 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.antmedia.webrtc</groupId>
-	<artifactId>ConferenceCallApp</artifactId>
+	<artifactId>ConferenceCall</artifactId>
 	<packaging>war</packaging>
-	<name>ConferenceCallApp Maven Webapp</name>
+	<name>ConferenceCall Maven Webapp</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,7 +39,7 @@
 		</repository>
 	</distributionManagement>
 	<build>
-		<finalName>ConferenceCallApp</finalName>
+		<finalName>ConferenceCall</finalName>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
 		<plugins>
 			<plugin>
@@ -244,7 +244,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<description>ConferenceCallApp for Ant Media Server</description>
+	<description>ConferenceCall for Ant Media Server</description>
 	<organization>
 		<name>Ant Media</name>
 		<url>http://antmedia.io</url>
