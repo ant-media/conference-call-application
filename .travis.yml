@@ -1,11 +1,23 @@
-language: node_js
-node_js:
-  - lts/*
+dist: focal
+language: java
+
+jdk:
+  - openjdk11
+
+before_install:
+  - nvm install --lts
+
 cache:
   directories:
     - react/node_modules
-script:
+
+install:
   - cd react
   - npm ci
+
+script:
+  - cd react
   - npm run build
-  - cp -a build/. ../webapp/src/main/webapp
+  - cd ..
+  - cp -a react/build/. webapp/src/main/webapp
+  - mvn clean install -DskipTests -Dgpg.skip=true
