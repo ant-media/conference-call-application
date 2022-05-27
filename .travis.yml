@@ -19,16 +19,8 @@ script:
 - cd ..
 - cp -a react/build/. webapp/src/main/webapp
 - cd webapp
-- mvn clean install -DskipTests -Dgpg.skip=true --quiet
-
+# - mvn clean install -DskipTests -Dgpg.skip=true --quiet
+- mvn deploy -DskipTests --quiet --settings mvn-settings.xml
 cache:
   directories:
   - "$HOME/.m2/repository"
-
-deploy:
-- provider: script
-  script: cd webapp && mvn deploy -DskipTests --quiet --settings mvn-settings.xml
-  skip_cleanup: true
-  on:
-    tags: false
-    all_branches: true
