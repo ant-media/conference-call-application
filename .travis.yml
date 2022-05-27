@@ -19,10 +19,10 @@ script:
 - cd ..
 - cp -a react/build/. webapp/src/main/webapp
 - cd webapp
-- mvn clean install -DskipTests -Dgpg.skip=true
+- mvn clean install -DskipTests -Dgpg.skip=true --quiet
 deploy:
 - provider: script
-  script: mvn deploy -DskipTests --quiet --settings mvn-settings.xml
+  script: mvn deploy -DskipTests --quiet --settings mvn-settings.xml 
   skip_cleanup: true
   on:
     tags: false
