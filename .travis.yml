@@ -27,7 +27,8 @@ cache:
 
 deploy:
 - provider: script
-  script: mvn deploy -DskipTests --quiet --settings mvn-settings.xml 
+#  script: mvn deploy -DskipTests --quiet --settings mvn-settings.xml 
+  script: bash ./webapp/deploy.sh
   skip_cleanup: true
   on:
     tags: false
