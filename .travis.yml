@@ -1,31 +1,25 @@
 dist: focal
 language: java
-
 jdk:
-  - openjdk11
-
+- openjdk11
 before_install:
-  - openssl aes-256-cbc -K $encrypted_fb8a77c74dbd_key -iv $encrypted_fb8a77c74dbd_iv
-    -in codesigning.asc.enc -out ./codesigning.asc -d
-  - sudo apt-get update
-  - export GPG_TTY=$(tty) #-> https://github.com/keybase/keybase-issues/issues/2798
-  - gpg2 --batch --fast-import codesigning.asc
-  - nvm install --lts
-
+- openssl aes-256-cbc -K $encrypted_fb8a77c74dbd_key -iv $encrypted_fb8a77c74dbd_iv
+  -in codesigning.asc.enc -out ./codesigning.asc -d
+- sudo apt-get update
+- export GPG_TTY=$(tty)
+- gpg2 --batch --fast-import codesigning.asc
+- nvm install --lts
 cache:
   directories:
-    - react/node_modules
-
+  - react/node_modules
 script:
-  - cd react
-  - npm ci
-  - npm run build
-  - cd ..
-  - cp -a react/build/. webapp/src/main/webapp
-  - cd webapp
-  - mvn clean install -DskipTests -Dgpg.skip=true
-
-
+- cd react
+- npm ci
+- npm run build
+- cd ..
+- cp -a react/build/. webapp/src/main/webapp
+- cd webapp
+- mvn clean install -DskipTests -Dgpg.skip=true
 deploy:
 - provider: script
   script: mvn deploy -DskipTests --quiet --settings mvn-settings.xml
