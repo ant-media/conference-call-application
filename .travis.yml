@@ -12,6 +12,7 @@ before_install:
 cache:
   directories:
   - react/node_modules
+  - "$HOME/.m2/repository"
 script:
 - cd react
 - npm ci
@@ -21,6 +22,3 @@ script:
 - cd webapp
 # - mvn clean install -DskipTests -Dgpg.skip=true --quiet
 - mvn deploy -DskipTests --quiet --settings mvn-settings.xml
-cache:
-  directories:
-  - "$HOME/.m2/repository"
