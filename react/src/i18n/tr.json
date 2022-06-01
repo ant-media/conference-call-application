@@ -1,0 +1,24 @@
+{ 
+    
+    "MicOnNoti": "Mikrofon açık",
+    "MicOffNoti": "Mikrofon kapalı",
+    "MicOnTooltip": "Mikrofonu aç",
+    "MicOffTooltip": "Mikrofonu kapat",
+    "CamOnTooltip": "Kamerayı aç",
+    "CamOffTooltip": "Kamerayı kapat",
+
+    "MoreOptions":"Seçenekler",
+    "CamSettings": "Kamera Ayarları",
+    "MicSettings": "Mikrofon Ayarları",
+    "ReportProblem": "Sorun Bildir",
+
+   
+    "ShareScreen": "Ekran paylaş",
+    "IsSharingScreen": "Ekran paylaşılıyor",
+    "Messages": "Mesajlar",
+    "MessagesInfo":"Mesajlar sadece görüşmedeki kişiler tarafından görülebilir ve görüşme bittiğinde silinir.",
+    "OpenChatTooltip":"Mesajları aç",
+   
+
+    "LeaveCall":"Konuşmadan ayrıl"
+}

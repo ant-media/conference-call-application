@@ -7,7 +7,7 @@ import { SvgIcon } from "./SvgIcon";
 const AntSnackInfo = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.green[60],
   borderRadius: 6,
-  padding: '10px 12px 6px 8px',
+  padding: 8,
 }));
 const AntSnackMessage = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.green[60],
@@ -30,7 +30,7 @@ const SnackMessage = forwardRef((props, ref) => {
 
   return <AntSnackContent ref={ref}>
     {notificationData.variant === "info" && (
-      <AntSnackInfo container justifyContent={"center"} alignItems={"end"}>
+      <AntSnackInfo container justifyContent={"center"} alignItems={"center"}>
         {notificationData.icon && <Grid item sx={{ mr: 0.5 }}>
           {notificationData.icon}
         </Grid>}
@@ -43,7 +43,7 @@ const SnackMessage = forwardRef((props, ref) => {
           notificationData.onClick();
           handleDismiss();
         }}>
-          <Grid container alignItems={"center"}>
+          <Grid container alignItems="center">
             <SvgIcon size={32} color={"white"} name={"message-off"} />
             <Typography sx={{ ml: 0.5 }} variant="subtitle2" color={theme.palette.green[0]}>{`${notificationData.sender}`}</Typography>
           </Grid>

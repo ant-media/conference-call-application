@@ -5,6 +5,8 @@ import { SvgIcon } from '../../SvgIcon';
 import { AntmediaContext } from 'App';
 import { MediaSettingsContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   '&.footer-icon-button':{
@@ -23,12 +25,13 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 
 function MicButton(props) {
   const { rounded,footer } = props;
+  const {t} = useTranslation();
+  
   const antmedia = useContext(AntmediaContext);
-
   const mediaSettings = useContext(MediaSettingsContext);
 
-  const handleOff = () => {
-
+  const handleOff = (e) => {
+    e.stopPropagation();
     mediaSettings?.toggleSetCam({
       eventStreamId: 'localVideo',
       isCameraOn: false,
@@ -44,8 +47,8 @@ function MicButton(props) {
     }
 
   };
-  const handleOn = () => {
-
+  const handleOn = (e) => {
+    e.stopPropagation();
     mediaSettings?.toggleSetCam({
       eventStreamId: 'localVideo',
       isCameraOn: true,
@@ -76,15 +79,15 @@ function MicButton(props) {
   return (
     <>
       {cam && cam.isCameraOn ? (
-        <Tooltip title="Turn off camera" placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={handleOff}>
+        <Tooltip title={t('CamOffTooltip')}  placement="top">
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => handleOff(e)}>
             <SvgIcon size={40} name={'camera'} />
           </CustomizedBtn>
         </Tooltip>
 
       ) : (
-        <Tooltip title="Turn on camera" placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="secondary" sx={rounded ? roundStyle : {}} onClick={handleOn}>
+        <Tooltip title={t('CamOnTooltip')}  placement="top">
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="secondary" sx={rounded ? roundStyle : {}} onClick={(e) => handleOn(e)}>
             <SvgIcon size={40} name={'camera-off'} />
           </CustomizedBtn>
         </Tooltip>

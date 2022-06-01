@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import { SettingsDialog } from "./SettingsDialog";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
-
+import { useTranslation } from 'react-i18next';
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
     height: "100%",
@@ -22,6 +22,7 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 }));
 
 function OptionButton({ footer, ...props }) {
+  const {t} = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -52,7 +53,7 @@ function OptionButton({ footer, ...props }) {
         onClose={handleDialogClose}
         selectFocus={selectFocus}
       />
-      <Tooltip title="More options" placement="top">
+      <Tooltip title={t('MoreOptions')} placement="top">
         <CustomizedBtn
           className={footer ? "footer-icon-button" : ""}
           id="demo-positioned-button"
@@ -87,19 +88,19 @@ function OptionButton({ footer, ...props }) {
           <ListItemIcon>
             <SvgIcon name={"camera"} color={"white"} />
           </ListItemIcon>
-          <ListItemText>Camera settings</ListItemText>
+          <ListItemText>{t('CamSettings')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleDialogOpen("audio")}>
           <ListItemIcon>
             <SvgIcon name={"microphone"} color={"white"} />
           </ListItemIcon>
-          <ListItemText>Microphone settings</ListItemText>
+          <ListItemText>{t('MicSettings')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleDialogOpen("report")}>
           <ListItemIcon>
             <SvgIcon name={"report"} color={"white"} />
           </ListItemIcon>
-          <ListItemText>Report a problem</ListItemText>
+          <ListItemText>{t('ReportProblem')}</ListItemText>
         </MenuItem>
       </Menu>
     </>

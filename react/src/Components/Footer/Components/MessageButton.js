@@ -4,6 +4,7 @@ import { styled } from '@mui/material/styles';
 import { SvgIcon } from '../../SvgIcon';
 import { SettingsContext } from 'pages/AntMedia';
 import { Tooltip, Badge } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   '&.footer-icon-button':{
@@ -20,7 +21,7 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 }));
 
 function MessageButton({ footer, ...props }) {
-  
+  const {t} = useTranslation();
   const settings = useContext(SettingsContext);
   return (
     <Badge
@@ -32,7 +33,7 @@ function MessageButton({ footer, ...props }) {
       }}
       style={{height: '100%',width:'100%'}}
     >
-      <Tooltip title="Chat with everyone" placement="top">
+      <Tooltip title={t('OpenChatTooltip')} placement="top">
         <CustomizedBtn
           onClick={() => {
             if (!settings?.drawerOpen) {

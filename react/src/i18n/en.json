@@ -1,0 +1,32 @@
+{
+
+    "PreviewVideoTip": "You can choose whether open your camera and microphone before you get into room.",
+    "AskName":"What's your name?",
+    "AskNameTip":"At first, we need to know your name to inform room host.",
+    "NamePlaceholder":"Your name",
+    "JoinRoomButton":"I’m ready to join",
+
+    "MoreOptions":"More options",
+    "CamSettings": "Camera Settings",
+    "MicSettings": "Microphone Settings",
+    "ReportProblem": "Report a problem",
+
+    "MicOnNoti": "Microphone on",
+    "MicOffNoti": "Microphone off",
+    "MicOnTooltip": "Turn on microphone",
+    "MicOffTooltip": "Turn off microphone",
+
+    "CamOnTooltip": "Turn on camera",
+    "CamOffTooltip": "Turn off camera",
+    "ShareScreen": "Present now",
+    "IsSharingScreen": "You are presenting",
+
+    "OpenChatTooltip":"Chat with everyone",
+    "Messages": "Messages",
+    "MessagesInfo":"Messages can only be seen by people in the call and are deleted when the call ends.",
+
+    "LeaveCall":"Leave call"
+    
+    
+    
+}

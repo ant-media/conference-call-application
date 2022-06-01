@@ -1,10 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import VideoCard from 'Components/Cards/VideoCard';
 import React, { useContext, useEffect } from 'react';
-
+import Grid from '@mui/material/Grid';
 import Footer from 'Components/Footer/Footer';
 import { AntmediaContext } from 'App';
 import { SettingsContext } from 'pages/AntMedia';
+
+import IconButton from '@mui/material/IconButton';
+import ArrowPrev from '@mui/icons-material/ArrowBackIosRounded';
 
 function debounce(fn, ms) {
   let timer;
@@ -16,6 +19,7 @@ function debounce(fn, ms) {
     }, ms);
   };
 }
+
 function calculateLayout(containerWidth, containerHeight, videoCount, aspectRatio) {
   let bestLayout = {
     area: 0,
@@ -59,7 +63,7 @@ const MeetingRoom = React.memo(props => {
   const { participants } = props;
 
   useEffect(() => {
-    console.log('call use effect for localvideo');
+    
     if (document.getElementById('localVideo')) {
       antmedia.mediaManager.localVideo = document.getElementById('localVideo');
       antmedia.mediaManager.localVideo.srcObject = antmedia.mediaManager.localStream;
@@ -82,7 +86,7 @@ const MeetingRoom = React.memo(props => {
 
     const screenHeight = gallery.getBoundingClientRect().height;
     const videoCount = document.querySelectorAll('#meeting-gallery .single-video-container.not-pinned').length;
-    console.log('videoCount: ', videoCount);
+    
 
     const { width, height, cols } = calculateLayout(screenWidth, screenHeight, videoCount, aspectRatio);
 
@@ -113,6 +117,19 @@ const MeetingRoom = React.memo(props => {
     };
   });
 
+  const getUnpinnedParticipants = () => {
+    const array = [pinnedVideoId !== 'localVideo' && { id: 'localVideo' }, ...participants.filter(v => v.id !== pinnedVideoId)];
+    const filtered = array.filter(Boolean);
+    return [...filtered];
+  };
+  // const paginateUnpinnedParticipants = (participants,perPageCount) => {
+  //   total_pages = Math.ceil(participants.length / per_page);
+  //   return {
+  //     total: participants.length,
+  //   total_pages: total_pages,
+  //   }
+  // }
+
   const pinLayout = pinnedVideoId !== null ? true : false;
   console.log('pinnedVideoIdpinnedVideoIdpinnedVideoIdpinnedVideoId', pinnedVideoId);
   return (
@@ -136,30 +153,30 @@ const MeetingRoom = React.memo(props => {
                 autoPlay
                 name="You"
                 muted
+                hidePin={participants.length===0}
               />
             </div>
             {participants.map(({ id, tracks, name }, index) => (
               <>
-                
                 <div
-                className="single-video-container not-pinned"
-                key={index}
-                style={{
-                  width: "var(--width)",
-                  height: "var(--height)",
-                  maxWidth: "var(--maxwidth)",
-                }}
-              >
-                <VideoCard
-                  onHandlePin={() => {
-                    pinVideo(id);
+                  className="single-video-container not-pinned"
+                  key={index}
+                  style={{
+                    width: 'var(--width)',
+                    height: 'var(--height)',
+                    maxWidth: 'var(--maxwidth)',
                   }}
-                  id={id}
-                  tracks={tracks}
-                  autoPlay
-                  name={name}
-                />
-              </div>
+                >
+                  <VideoCard
+                    onHandlePin={() => {
+                      pinVideo(id);
+                    }}
+                    id={id}
+                    tracks={tracks}
+                    autoPlay
+                    name={name}
+                  />
+                </div>
               </>
             ))}
           </>
@@ -202,95 +219,81 @@ const MeetingRoom = React.memo(props => {
                   </>
                 ))
             )}
-            <div id="unpinned-gallery">
-              {pinnedVideoId !== 'localVideo' && (
-                // participant is pinned show me on the slider
-                <div className="single-video-container unpinned keep-ratio">
-                  <VideoCard
-                    onHandlePin={() => {
-                      pinVideo('localVideo');
-                    }}
-                    id="localVideo"
-                    autoPlay
-                    name="You"
-                    muted
-                  />
-                </div>
-              )}
-              {participants
-                .filter(v => v.id !== pinnedVideoId)
-                .map(({ id, tracks, name }, index) => (
-                  // show all participants except if anyone is pinned
-                  <>
-                    <div className="single-video-container unpinned keep-ratio" key={index} style={{ width: 'var(--width)', height: 'var(--height)' }}>
-                      <VideoCard
-                        onHandlePin={() => {
-                          pinVideo(id);
-                        }}
-                        id={id}
-                        tracks={tracks}
-                        autoPlay
-                        name={name}
-                      />
-                    </div>
-                    <div className="single-video-container unpinned keep-ratio" key={index} style={{ width: 'var(--width)', height: 'var(--height)' }}>
-                      <VideoCard
-                        onHandlePin={() => {
-                          pinVideo(id);
-                        }}
-                        id={id}
-                        tracks={tracks}
-                        autoPlay
-                        name={name}
-                      />
-                    </div>
-                    <div className="single-video-container unpinned keep-ratio" key={index} style={{ width: 'var(--width)', height: 'var(--height)' }}>
-                      <VideoCard
-                        onHandlePin={() => {
-                          pinVideo(id);
-                        }}
-                        id={id}
-                        tracks={tracks}
-                        autoPlay
-                        name={name}
-                      />
-                    </div>
-                    <div className="single-video-container unpinned keep-ratio" key={index} style={{ width: 'var(--width)', height: 'var(--height)' }}>
-                      <VideoCard
-                        onHandlePin={() => {
-                          pinVideo(id);
-                        }}
-                        id={id}
-                        tracks={tracks}
-                        autoPlay
-                        name={name}
-                      />
-                    </div>
-                    <div className="single-video-container unpinned keep-ratio" key={index} style={{ width: 'var(--width)', height: 'var(--height)' }}>
-                      <VideoCard
-                        onHandlePin={() => {
-                          pinVideo(id);
-                        }}
-                        id={id}
-                        tracks={tracks}
-                        autoPlay
-                        name={name}
-                      />
-                    </div>
-                    <div className="single-video-container unpinned keep-ratio" key={index} style={{ width: 'var(--width)', height: 'var(--height)' }}>
-                      <VideoCard
-                        onHandlePin={() => {
-                          pinVideo(id);
-                        }}
-                        id={id}
-                        tracks={tracks}
-                        autoPlay
-                        name={name}
-                      />
-                    </div>
-                  </>
-                ))}
-            </div>
+            <Grid container id="unpinned-gallery" >
+              <Grid item xs='auto' style={{display: 'none'}}>
+                {' '}
+                <IconButton
+                  sx={{
+                    color: '#ffffff',
+                    opacity: '60%',
+                    bgcolor: '#808E8C',
+                    width: { xs: 24, md: 34 },
+                    height: { xs: 24, md: 34 },
+                    minWidth: 'unset',
+                    maxWidth: { xs: 24, md: 34 },
+                    maxHeight: { xs: 36, md: 46 },
+                    borderRadius: '50%',
+                    padding: '4px',
+                  }}
+                >
+                  <ArrowPrev sx={{ width: { xs: 14, md: 16 } }} />
+                </IconButton>
+              </Grid>
+              <Grid item xs={11} >
+                <Grid container >
+                  {getUnpinnedParticipants().map(({ id, tracks, name }, index) => {
+                    if (id !== 'localVideo') {
+                      return (
+                        <Grid item lg={2} className="single-video-container unpinned" key={index} style={{ width: 'var(--width)', height: 'var(--height)' }}>
+                          <VideoCard
+                            onHandlePin={() => {
+                              pinVideo(id);
+                            }}
+                            id={id}
+                            tracks={tracks}
+                            autoPlay
+                            name={name}
+                          />
+                        </Grid>
+                      );
+                    } else {
+                      return (
+                        <Grid item lg={2} className="single-video-container unpinned" key={index}>
+                          <VideoCard
+                            onHandlePin={() => {
+                              pinVideo('localVideo');
+                            }}
+                            id="localVideo"
+                            autoPlay
+                            name="You"
+                            muted
+                          />
+                        </Grid>
+                      );
+                    }
+                  })}
+                </Grid>
+              </Grid>
+              <Grid item xs='auto' style={{display: 'none'}}>
+                {' '}
+                <IconButton
+                  sx={{
+                    color: '#ffffff',
+                    opacity: '60%',
+                    bgcolor: '#808E8C',
+                    width: { xs: 24, md: 34 },
+                    height: { xs: 24, md: 34 },
+                    minWidth: 'unset',
+                    maxWidth: { xs: 24, md: 34 },
+                    maxHeight: { xs: 36, md: 46 },
+                    borderRadius: '50%',
+                    padding: '4px',
+                  }}
+                >
+                  <ArrowPrev sx={{ width: { xs: 14, md: 16 } }} />
+                </IconButton>
+              </Grid>
+            </Grid>
           </>
         )}
       </div>

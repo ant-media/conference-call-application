@@ -5,6 +5,7 @@ import { AntmediaContext } from "App";
 import { MediaSettingsContext } from "pages/AntMedia";
 import { Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useTranslation } from 'react-i18next';
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -21,12 +22,13 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 }));
 
 function ShareScreenButton({ footer, ...props }) {
+  const {t} = useTranslation();
   const antmedia = useContext(AntmediaContext);
   const { isScreenShared, myLocalData } = useContext(MediaSettingsContext);
 
   return (
     <Tooltip
-      title={isScreenShared ? "You are presenting" : "Present now"}
+      title={isScreenShared ? t('IsSharingScreen') : t('ShareScreen')}
       placement="top"
     >
       <CustomizedBtn

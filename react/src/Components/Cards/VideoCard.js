@@ -14,7 +14,7 @@ const CustomizedVideo = styled("video")({
   backgroundColor: "transparent",
 });
 
-const VideoCard = React.memo(({ srcObject, ...props }) => {
+const VideoCard = React.memo(({ srcObject,hidePin, ...props }) => {
   const mediaSettings = useContext(MediaSettingsContext);
 
   const [displayHover, setDisplayHover] = React.useState(false);
@@ -55,8 +55,8 @@ const VideoCard = React.memo(({ srcObject, ...props }) => {
         onMouseEnter={() => setDisplayHover(true)}
         onMouseLeave={(e) => setDisplayHover(false)}
       >
-        {!isLocal && (
-          <Grid
+        
+          {!hidePin && <Grid
             container
             justifyContent={"center"}
             alignItems="center"
@@ -98,8 +98,8 @@ const VideoCard = React.memo(({ srcObject, ...props }) => {
                 </Tooltip>
               </Grid>
             </Grid>
-          </Grid>
-        )}
+          </Grid>}
+        
         <div className={`single-video-card ${isTalking ? " is-talking " : ""}`}>
           <Grid
             sx={isOff ? {} : { display: "none" }}

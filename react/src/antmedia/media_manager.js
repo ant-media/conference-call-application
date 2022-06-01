@@ -1087,6 +1087,7 @@ export class MediaManager
 	  */
 	muteLocalMic() 
 	{
+		console.log('mute');
 		this.isMuted = true;
 		if (this.localStream != null) {
 			this.localStream.getAudioTracks().forEach(track => track.enabled = false);
@@ -1104,6 +1105,7 @@ export class MediaManager
 	 */
 	unmuteLocalMic() 
 	{
+		console.log('unmute');
 		this.isMuted = false;
 		if (this.localStream != null) {
 			this.localStream.getAudioTracks().forEach(track => track.enabled = true);
@@ -1202,15 +1204,6 @@ export class MediaManager
 		this.soundLevelProviderId = setInterval(() => {			
 			levelCallback(soundMeter.instant.toFixed(2));
 		}, period);
-	}
-	
-	/**
-	 * Called by user
-	 * To change media constraints on the fly
-	 * 
-	 */
-	applyConstraints(newConstaints) { 
-		return this.videoTrack.applyConstraints(newConstaints); 
 	}
 }
 
