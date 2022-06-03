@@ -144,7 +144,7 @@ function AntMedia() {
   }
 
   function handleNotificationEvent(obj) {
-    console.log("Received data : ", obj);
+   
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
       var eventStreamId = notificationEvent.streamId;
@@ -208,6 +208,34 @@ function AntMedia() {
           "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON"
         );
         setPinnedVideoId(eventStreamId);
+      } else if (eventType === "SCREEN_SHARED_OFF") {
+        console.log(
+          "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON"
+        );
+        setPinnedVideoId(null);
+      } else if (eventType === "UPDATE_STATUS") {
+        setUserStatus(notificationEvent, eventStreamId);
+      }
+    }
+  }
+  function setUserStatus(notificationEvent, eventStreamId) {
+    if (!isScreenShared && participants.find((p) => p.id === eventStreamId)) {
+      if (!mic.find((m) => m.eventStreamId === eventStreamId)) {
+        toggleSetMic({
+          eventStreamId: eventStreamId,
+          isMicMuted: notificationEvent.mic,
+        });
+      }
+      if (!cam.find((m) => m.eventStreamId === eventStreamId)) {
+        console.log(
+          "tetkektektekktektektkektektketkekte",
+          notificationEvent,
+          cam
+        );
+        toggleSetCam({
+          eventStreamId: eventStreamId,
+          isCameraOn: notificationEvent.camera,
+        });
       }
     }
   }
@@ -217,20 +245,27 @@ function AntMedia() {
     antmedia.leaveFromRoom(roomName);
     setWaitingOrMeetingRoom("waiting");
   }
-  function handleSendNotificationEvent(eventType, publishStreamId) {
+  function handleSendNotificationEvent(eventType, publishStreamId, info) {
     let notEvent = {
       streamId: publishStreamId,
       eventType: eventType,
+      ...(info ? info : {}),
     };
-    console.log(
-      "notEventnotEventnotEventnotEventnotEventnotEvent",
-      publishStreamId,
-      notEvent
-    );
     antmedia.sendData(publishStreamId, JSON.stringify(notEvent));
   }
   function handleRoomInfo(publishStreamId) {
     antmedia.getRoomInfo(roomName, publishStreamId);
+  }
+
+  function updateStatus(obj) {
+    if (roomName !== obj) {
+      console.log("updateStatusupdateStatusupdateStatus", mic);
+
+      handleSendNotificationEvent("UPDATE_STATUS", myLocalData.streamId, {
+        mic: !!mic.find((c) => c.eventStreamId === "localVideo")?.isMicMuted,
+        camera: !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn,
+      });
+    }
   }
   function handleSetMyObj(obj) {
     setMyLocalData(obj);
@@ -302,6 +337,7 @@ function AntMedia() {
       setParticipants((oldParts) =>
         oldParts.filter((p) => streams.find((s) => s === p.id))
       );
+      setPinnedVideoId(null);
     } else if (
       streamList.length > 0 &&
       participants.some((p) => p.name === "")
@@ -327,6 +363,7 @@ function AntMedia() {
   antmedia.handleStreamInformation = handleStreamInformation;
   antmedia.handlePlay = handlePlay;
   antmedia.handleRoomInfo = handleRoomInfo;
+  antmedia.updateStatus = updateStatus;
   antmedia.handleSetMyObj = handleSetMyObj;
   antmedia.handleSendNotificationEvent = handleSendNotificationEvent;
   antmedia.handleNotificationEvent = handleNotificationEvent;
@@ -335,6 +372,7 @@ function AntMedia() {
   antmedia.handleDevices = handleDevices;
   antmedia.handleStartScreenShare = handleStartScreenShare;
   antmedia.handleStopScreenShare = handleStopScreenShare;
+  console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
       <Grid
@@ -394,7 +432,7 @@ function AntMedia() {
                     participants={participants}
                     myLocalData={myLocalData}
                   />
-                  <MessageDrawer />
+                  <MessageDrawer participants={participants} />
                 </>
               </SettingsContext.Provider>
             )}

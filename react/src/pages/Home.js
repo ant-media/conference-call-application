@@ -1,30 +1,27 @@
-import { Grid, Typography } from "@mui/material";
-import { Box } from "@mui/system";
-import React from "react";
-import Link from "@mui/material/Link";
+import { Grid, Typography } from '@mui/material';
+import { Box } from '@mui/system';
+import React from 'react';
+import Link from '@mui/material/Link';
+import { useTranslation } from 'react-i18next';
 
 function Home(props) {
+  const { t } = useTranslation();
   return (
     <>
-      <Grid container justifyContent={"center"}>
+      <Grid container justifyContent={"center"} sx={{ mt: 8 }}>
         <Box py={8}>
           <Typography variant="h1" align="center">
-            ANT MEDIA LANDING
+            Join our meeting room
           </Typography>
-          <Box py={4}>
+          <Box sx={{ pt: 4, pb: 0 }}>
             <Typography variant="h4" align="center">
-              we are going to create meetings from here
+              Real-time meetings by Ant Media
             </Typography>
           </Box>
         </Box>
-        <Grid container justifyContent={"center"}>
-          <Link
-            href={`/room99`}
-            size="large"
-            variant="contained"
-            color="primary"
-          >
-            Create Meeting
+        <Grid container justifyContent={'center'}>
+          <Link href={`/room99`} size="large" variant="contained" color="primary">
+            {t('Create Meeting')}
           </Link>
         </Grid>
       </Grid>

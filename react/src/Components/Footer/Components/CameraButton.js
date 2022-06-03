@@ -9,11 +9,11 @@ import { useTranslation } from 'react-i18next';
 
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
-  '&.footer-icon-button':{
-    
+  '&.footer-icon-button': {
+
     height: '100%',
-    [theme.breakpoints.down('sm')]:{
-      padding:8,
+    [theme.breakpoints.down('sm')]: {
+      padding: 8,
       minWidth: 'unset',
       width: '100%',
     },
@@ -24,27 +24,30 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 }));
 
 function MicButton(props) {
-  const { rounded,footer } = props;
-  const {t} = useTranslation();
-  
+  const { rounded, footer } = props;
+  const { t } = useTranslation();
+
   const antmedia = useContext(AntmediaContext);
   const mediaSettings = useContext(MediaSettingsContext);
 
   const handleOff = (e) => {
     e.stopPropagation();
-    mediaSettings?.toggleSetCam({
-      eventStreamId: 'localVideo',
-      isCameraOn: false,
-    });
+    if (!(mediaSettings?.isScreenShared)) {
+      mediaSettings?.toggleSetCam({
+        eventStreamId: 'localVideo',
+        isCameraOn: false,
+      });
 
-    if (props?.myLocalData?.streamId) {
-      antmedia.turnOffLocalCamera(props.myLocalData.streamId);
-      antmedia.handleSendNotificationEvent('CAM_TURNED_OFF', props.myLocalData.streamId);
+      if (props?.myLocalData?.streamId) {
+        antmedia.turnOffLocalCamera(props.myLocalData.streamId);
+        antmedia.handleSendNotificationEvent('CAM_TURNED_OFF', props.myLocalData.streamId);
+      }
+      else {
+        // if local
+        antmedia.turnOffLocalCamera('localVideo');
+      }
     }
-    else {
-      // if local
-      antmedia.turnOffLocalCamera('localVideo');
-    }
+
 
   };
   const handleOn = (e) => {
@@ -65,28 +68,28 @@ function MicButton(props) {
 
   };
   const roundStyle = {
-    width: {xs:36,md:46},
-    height: {xs:36,md:46},
+    width: { xs: 36, md: 46 },
+    height: { xs: 36, md: 46 },
     minWidth: 'unset',
-    maxWidth: {xs:36,md:46},
-    maxHeight: {xs:36,md:46},
+    maxWidth: { xs: 36, md: 46 },
+    maxHeight: { xs: 36, md: 46 },
     borderRadius: '50%',
     padding: '4px',
   };
-  
+
   const cam = mediaSettings?.cam?.find(m => m.eventStreamId === 'localVideo');
 
   return (
     <>
       {cam && cam.isCameraOn ? (
-        <Tooltip title={t('CamOffTooltip')}  placement="top">
+        <Tooltip title={t('Turn off camera')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => handleOff(e)}>
             <SvgIcon size={40} name={'camera'} />
           </CustomizedBtn>
         </Tooltip>
 
       ) : (
-        <Tooltip title={t('CamOnTooltip')}  placement="top">
+        <Tooltip title={t('Turn on camera')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="secondary" sx={rounded ? roundStyle : {}} onClick={(e) => handleOn(e)}>
             <SvgIcon size={40} name={'camera-off'} />
           </CustomizedBtn>

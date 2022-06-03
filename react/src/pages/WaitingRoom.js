@@ -39,19 +39,19 @@ function WaitingRoom(props) {
             </Grid>
           </Grid>
           <Typography align="center" color="#DDFFFC" sx={{ mt: 2 }}>
-            {t('PreviewVideoTip')}
+            {t('You can choose whether to open your camera and microphone before you get into room')}
           </Typography>
         </Grid>
         <Grid item md={4}>
           <Grid container justifyContent={'center'}>
             <Grid container justifyContent={'center'}>
               <Typography variant="h5" align="center" color={'white'}>
-              {t('AskName')}
+              {t("What's your name?")}
               </Typography>
             </Grid>
             <Grid container justifyContent={'center'} sx={{ mt: {xs:1,md:2.5} }}>
               <Typography variant="h6" align="center" color={'white'} fontWeight={'400'}>
-              {t('AskNameTip')}{' '}
+              {t('At first, we need to know your name to inform room host.')}{' '}
               </Typography>
             </Grid>
 
@@ -61,12 +61,12 @@ function WaitingRoom(props) {
               }}
             >
               <Grid item xs={12} sx={{ mt: 3, mb: 4 }}>
-                <TextField autoFocus required fullWidth color="primary" value={props.streamName} variant="outlined" onChange={e => props.handleStreamName(e.target.value)} placeholder={t('NamePlaceholder')} />
+                <TextField autoFocus required fullWidth color="primary" value={props.streamName} variant="outlined" onChange={e => props.handleStreamName(e.target.value)} placeholder={t('Your name')} />
               </Grid>
               <Grid container justifyContent={'center'}>
                 <Grid item sm={6} xs={12}>
                   <Button fullWidth color="secondary" variant="contained" type="submit">
-                  {t('JoinRoomButton')}
+                  {t("I'm ready to join")}
                   </Button>
                 </Grid>
               </Grid>

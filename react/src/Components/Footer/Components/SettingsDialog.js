@@ -9,9 +9,10 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import { MediaSettingsContext } from "../../../pages/AntMedia";
 import { AntmediaContext } from "../../../App";
-import { Grid, MenuItem, useMediaQuery } from "@mui/material";
+import { Grid, Hidden, MenuItem, useMediaQuery } from "@mui/material";
 import { SvgIcon } from "Components/SvgIcon";
 import { useTheme } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 
 const AntDialogTitle = (props) => {
   const { children, onClose, ...other } = props;
@@ -37,6 +38,7 @@ const AntDialogTitle = (props) => {
 };
 
 export function SettingsDialog(props) {
+  const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
   const { devices, myLocalData } = React.useContext(MediaSettingsContext);
   const [selectedCamera, setSelectedCamera] = React.useState(null);
@@ -44,7 +46,7 @@ export function SettingsDialog(props) {
 
   const antmedia = React.useContext(AntmediaContext);
 
-  console.log("devices: ", devices);
+
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
@@ -77,13 +79,13 @@ export function SettingsDialog(props) {
       maxWidth={"sm"}
     >
       <AntDialogTitle onClose={handleClose}>
-        Set Camera and Microphone
+        {t('Set Camera and Microphone')}
       </AntDialogTitle>
       <DialogContent>
         <Box component="form" sx={{ display: "flex", flexWrap: "wrap" }}>
           <Grid container>
             <Grid container>
-              <InputLabel>Camera</InputLabel>
+              <InputLabel>{t('Camera')}</InputLabel>
             </Grid>
             <Grid container alignItems={"center"} spacing={2}>
               <Grid item xs={10}>
@@ -105,14 +107,16 @@ export function SettingsDialog(props) {
                     ))}
                 </Select>
               </Grid>
-              <Grid item>
-                <SvgIcon size={30} name={"camera"} color={"white"} />
-              </Grid>
+              <Hidden xsDown>
+                <Grid item>
+                  <SvgIcon size={30} name={"camera"} color={"white"} />
+                </Grid>
+              </Hidden>
             </Grid>
           </Grid>
           <Grid container sx={{ mt: 4 }}>
             <Grid container>
-              <InputLabel>Microphone</InputLabel>
+              <InputLabel>{t('Microphone')}</InputLabel>
             </Grid>
             <Grid container alignItems={"center"} spacing={2}>
               <Grid item xs={10}>
@@ -133,9 +137,11 @@ export function SettingsDialog(props) {
                     ))}
                 </Select>
               </Grid>
-              <Grid item>
-                <SvgIcon size={36} name={"microphone"} color={"white"} />
-              </Grid>
+              <Hidden xsDown>
+                <Grid item>
+                  <SvgIcon size={36} name={"microphone"} color={"white"} />
+                </Grid>
+              </Hidden>
             </Grid>
           </Grid>
         </Box>

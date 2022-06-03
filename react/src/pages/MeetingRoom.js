@@ -1,13 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import VideoCard from 'Components/Cards/VideoCard';
 import React, { useContext, useEffect } from 'react';
-import Grid from '@mui/material/Grid';
+
+import Typography from '@mui/material/Typography';
+import Avatar from '@mui/material/Avatar';
+import AvatarGroup from '@mui/material/AvatarGroup';
 import Footer from 'Components/Footer/Footer';
 import { AntmediaContext } from 'App';
 import { SettingsContext } from 'pages/AntMedia';
 
-import IconButton from '@mui/material/IconButton';
-import ArrowPrev from '@mui/icons-material/ArrowBackIosRounded';
+
+
 
 function debounce(fn, ms) {
   let timer;
@@ -58,12 +61,14 @@ function calculateLayout(containerWidth, containerHeight, videoCount, aspectRati
 
 const MeetingRoom = React.memo(props => {
   const antmedia = useContext(AntmediaContext);
+ 
   const settings = useContext(SettingsContext);
   const { drawerOpen, pinnedVideoId, pinVideo } = settings;
   const { participants } = props;
+  console.log('participants: ', participants);
+ 
 
   useEffect(() => {
-    
     if (document.getElementById('localVideo')) {
       antmedia.mediaManager.localVideo = document.getElementById('localVideo');
       antmedia.mediaManager.localVideo.srcObject = antmedia.mediaManager.localStream;
@@ -71,7 +76,6 @@ const MeetingRoom = React.memo(props => {
   }, [pinnedVideoId, participants]);
 
   function handleGalleryResize(calcDrawer) {
-    console.log('handleGalleryResize');
     const gallery = document.getElementById('meeting-gallery');
 
     if (calcDrawer) {
@@ -86,7 +90,6 @@ const MeetingRoom = React.memo(props => {
 
     const screenHeight = gallery.getBoundingClientRect().height;
     const videoCount = document.querySelectorAll('#meeting-gallery .single-video-container.not-pinned').length;
-    
 
     const { width, height, cols } = calculateLayout(screenWidth, screenHeight, videoCount, aspectRatio);
 
@@ -97,7 +100,6 @@ const MeetingRoom = React.memo(props => {
     gallery.style.setProperty('--maxwidth', Width + 'px');
     gallery.style.setProperty('--height', Height + 'px');
     gallery.style.setProperty('--cols', cols + '');
-    console.log('cols: ', cols);
   }
 
   React.useEffect(() => {
@@ -117,21 +119,134 @@ const MeetingRoom = React.memo(props => {
     };
   });
 
+  function stringToColor(string) {
+    let hash = 0;
+    let i;
+
+    /* eslint-disable no-bitwise */
+    for (i = 0; i < string.length; i += 1) {
+      hash = string.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    let color = '#';
+
+    for (i = 0; i < 3; i += 1) {
+      const value = (hash >> (i * 8)) & 0xff;
+      color += `00${value.toString(16)}`.slice(-2);
+    }
+    /* eslint-enable no-bitwise */
+
+    return color;
+  }
+
   const getUnpinnedParticipants = () => {
     const array = [pinnedVideoId !== 'localVideo' && { id: 'localVideo' }, ...participants.filter(v => v.id !== pinnedVideoId)];
     const filtered = array.filter(Boolean);
-    return [...filtered];
+    return filtered;
   };
-  // const paginateUnpinnedParticipants = (participants,perPageCount) => {
-  //   total_pages = Math.ceil(participants.length / per_page);
-  //   return {
-  //     total: participants.length,
-  //   total_pages: total_pages,
-  //   }
-  // }
+
+  const returnUnpinnedGallery = () => {
+    //pinned tile
+    const unpinnedParticipants = getUnpinnedParticipants();
+   
+    const showAsOthersLimitPinned = 4;
+    const showAsOthersSliceIndexPinned = showAsOthersLimitPinned - 2;
+
+    const slicePinnedTiles = unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
+
+    let slicedParticipants = [];
+    if(slicePinnedTiles){
+      slicedParticipants = unpinnedParticipants.slice(0,showAsOthersSliceIndexPinned);
+    }else{
+      slicedParticipants = unpinnedParticipants;
+    }
+    
+    return (
+      <>
+        {slicedParticipants.map(({ id, tracks, name }, index) => {
+          if (id !== 'localVideo') {
+            return (
+              <div className="unpinned">
+                <div className="single-video-container" key={index}>
+                  <VideoCard
+                    onHandlePin={() => {
+                      pinVideo(id);
+                    }}
+                    id={id}
+                    tracks={tracks}
+                    autoPlay
+                    name={name}
+                  />
+                </div>
+              </div>
+            );
+          } else {
+            return (
+              <div className="unpinned">
+                <div className="single-video-container " key={index}>
+                  <VideoCard
+                    onHandlePin={() => {
+                      pinVideo('localVideo');
+                    }}
+                    id="localVideo"
+                    autoPlay
+                    name="You"
+                    muted
+                  />
+                </div>
+              </div>
+            );
+          }
+        })}
+        {slicePinnedTiles && participants.length > 0 && (
+          <div className="unpinned">
+            <div className="single-video-container  others-tile-wrapper">
+              <div className="others-tile-inner">
+                <AvatarGroup max={4} sx={{ justifyContent: 'center' }}>
+                  {unpinnedParticipants
+                    .slice(showAsOthersSliceIndexPinned)
+                    .map(({ name }, index) => {
+                      if (name.length > 0) {
+                        const nameArr = name.split(' ');
+                        const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
+                        const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
+
+                        return (
+                          <Avatar
+                            key={index}
+                            alt={name}
+                            sx={{
+                              bgcolor: stringToColor(name),
+                            }}
+                          >
+                            {initials}
+                          </Avatar>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })}
+                </AvatarGroup>
+                <Typography sx={{ mt: 2, color: '#AFF3EE80' }}>
+                  {unpinnedParticipants.slice(showAsOthersSliceIndexPinned).length} other{unpinnedParticipants.length - 2 > 0 ? 's' : ''}
+                </Typography>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  //main tile
+  const showAsOthersLimit = 6;
+  const showAsOthersSliceIndex = showAsOthersLimit - 2;
+  const sliceTiles = participants.length + 1 > showAsOthersLimit; //plus 1 is me
+
+  //plus 1 is me
 
   const pinLayout = pinnedVideoId !== null ? true : false;
-  console.log('pinnedVideoIdpinnedVideoIdpinnedVideoIdpinnedVideoId', pinnedVideoId);
+
   return (
     <>
       <div id="meeting-gallery" style={{ height: 'calc(100vh - 80px)' }}>
@@ -153,10 +268,10 @@ const MeetingRoom = React.memo(props => {
                 autoPlay
                 name="You"
                 muted
-                hidePin={participants.length===0}
+                hidePin={participants.length === 0}
               />
             </div>
-            {participants.map(({ id, tracks, name }, index) => (
+            {participants.slice(0, sliceTiles ? showAsOthersSliceIndex : participants.length).map(({ id, tracks, name }, index) => (
               <>
                 <div
                   className="single-video-container not-pinned"
@@ -179,9 +294,48 @@ const MeetingRoom = React.memo(props => {
                 </div>
               </>
             ))}
+
+            {sliceTiles && participants.length > 0 && (
+              <div
+                className="single-video-container not-pinned others-tile-wrapper"
+                style={{
+                  width: 'var(--width)',
+                  height: 'var(--height)',
+                  maxWidth: 'var(--maxwidth)',
+                }}
+              >
+                <div className="others-tile-inner">
+                  <AvatarGroup max={4} sx={{ justifyContent: 'center' }}>
+                    {participants.slice(showAsOthersSliceIndex + 1).map(({ name }, index) => {
+                      if (name.length > 0) {
+                        const nameArr = name.split(' ');
+                        const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
+                        const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
+
+                        return (
+                          <Avatar
+                            key={index}
+                            alt={name}
+                            sx={{
+                              bgcolor: stringToColor(name),
+                            }}
+                          >
+                            {initials}
+                          </Avatar>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })}
+                  </AvatarGroup>
+                  <Typography sx={{ mt: 2, color: '#AFF3EE80' }}>
+                    {participants.length - 2} other{participants.length - 2 > 0 ? 's' : ''}
+                  </Typography>
+                </div>
+              </div>
+            )}
           </>
         )}
-
         {pinLayout && ( // if not pinned layout show me first as a regular video
           <>
             {pinnedVideoId === 'localVideo' ? (
@@ -219,81 +373,7 @@ const MeetingRoom = React.memo(props => {
                   </>
                 ))
             )}
-            <Grid container id="unpinned-gallery" >
-              <Grid item xs='auto' style={{display: 'none'}}>
-                {' '}
-                <IconButton
-                  sx={{
-                    color: '#ffffff',
-                    opacity: '60%',
-                    bgcolor: '#808E8C',
-                    width: { xs: 24, md: 34 },
-                    height: { xs: 24, md: 34 },
-                    minWidth: 'unset',
-                    maxWidth: { xs: 24, md: 34 },
-                    maxHeight: { xs: 36, md: 46 },
-                    borderRadius: '50%',
-                    padding: '4px',
-                  }}
-                >
-                  <ArrowPrev sx={{ width: { xs: 14, md: 16 } }} />
-                </IconButton>
-              </Grid>
-              <Grid item xs={11} >
-                <Grid container >
-                  {getUnpinnedParticipants().map(({ id, tracks, name }, index) => {
-                    if (id !== 'localVideo') {
-                      return (
-                        <Grid item lg={2} className="single-video-container unpinned" key={index} style={{ width: 'var(--width)', height: 'var(--height)' }}>
-                          <VideoCard
-                            onHandlePin={() => {
-                              pinVideo(id);
-                            }}
-                            id={id}
-                            tracks={tracks}
-                            autoPlay
-                            name={name}
-                          />
-                        </Grid>
-                      );
-                    } else {
-                      return (
-                        <Grid item lg={2} className="single-video-container unpinned" key={index}>
-                          <VideoCard
-                            onHandlePin={() => {
-                              pinVideo('localVideo');
-                            }}
-                            id="localVideo"
-                            autoPlay
-                            name="You"
-                            muted
-                          />
-                        </Grid>
-                      );
-                    }
-                  })}
-                </Grid>
-              </Grid>
-              <Grid item xs='auto' style={{display: 'none'}}>
-                {' '}
-                <IconButton
-                  sx={{
-                    color: '#ffffff',
-                    opacity: '60%',
-                    bgcolor: '#808E8C',
-                    width: { xs: 24, md: 34 },
-                    height: { xs: 24, md: 34 },
-                    minWidth: 'unset',
-                    maxWidth: { xs: 24, md: 34 },
-                    maxHeight: { xs: 36, md: 46 },
-                    borderRadius: '50%',
-                    padding: '4px',
-                  }}
-                >
-                  <ArrowPrev sx={{ width: { xs: 14, md: 16 } }} />
-                </IconButton>
-              </Grid>
-            </Grid>
+            <div id="unpinned-gallery">{returnUnpinnedGallery()}</div>
           </>
         )}
       </div>

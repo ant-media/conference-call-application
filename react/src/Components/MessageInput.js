@@ -3,6 +3,7 @@ import { Grid, IconButton, InputAdornment, TextField, } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { AntmediaContext } from "App";
 import { SettingsContext } from "pages/AntMedia";
+import { useTranslation } from 'react-i18next';
 
 const MessageInputContainer = styled(Grid)(({ theme }) => ({
     position: 'absolute',
@@ -30,7 +31,7 @@ const MessageTextField = styled(TextField)(({ theme }) => ({
 function MessageInput() {
     const antmedia = useContext(AntmediaContext);
     const settings = React.useContext(SettingsContext);
-
+    const { t } = useTranslation();
     const [text, setText] = useState("")
     const sendMessage = () => {
 
@@ -74,7 +75,7 @@ function MessageInput() {
                         </InputAdornment>,
                     }}
                     fullWidth
-                    placeholder="Send a message"
+                    placeholder={t("Send a message")}
                     variant="outlined"
                 />
             </form>

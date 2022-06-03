@@ -4,19 +4,19 @@ import { MediaSettingsContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
-
+import { useTranslation } from 'react-i18next';
 const CustomizedVideo = styled("video")({
   borderRadius: 4,
   width: "100%",
   height: "100%",
-  objectFit: "cover",
+  objectFit: "cover", //if desktop screenshare is true this must be 'contain'
   objectPosition: "center",
   backgroundColor: "transparent",
 });
 
-const VideoCard = React.memo(({ srcObject,hidePin, ...props }) => {
+const VideoCard = React.memo(({ srcObject,hidePin,onHandlePin, ...props }) => {
   const mediaSettings = useContext(MediaSettingsContext);
-
+  const { t } = useTranslation();
   const [displayHover, setDisplayHover] = React.useState(false);
   const theme = useTheme();
 
@@ -55,7 +55,6 @@ const VideoCard = React.memo(({ srcObject,hidePin, ...props }) => {
         onMouseEnter={() => setDisplayHover(true)}
         onMouseLeave={(e) => setDisplayHover(false)}
       >
-        
           {!hidePin && <Grid
             container
             justifyContent={"center"}
@@ -68,7 +67,7 @@ const VideoCard = React.memo(({ srcObject,hidePin, ...props }) => {
               top: 0,
               height: "100%",
               background: "#2929295c",
-              zIndex: 1,
+              zIndex: 10,
             }}
           >
             <Grid
@@ -80,18 +79,18 @@ const VideoCard = React.memo(({ srcObject,hidePin, ...props }) => {
             >
               <Grid item>
                 <Tooltip
-                  title={`${props.pinned ? "unpin" : "pin"} ${props.name}`}
+                  title={`${props.pinned ? t("unpin") : t("pin")} ${props.name}`}
                   placement="top"
                 >
                   <Fab
-                    onClick={props.onHandlePin}
+                    onClick={onHandlePin}
                     color="primary"
                     aria-label="add"
                     size="small"
                   >
                     <SvgIcon
                       size={36}
-                      name={props.pinned ? "unpin" : "pin"}
+                      name={props.pinned ? t("unpin") : t("pin")}
                       color={theme.palette.grey[80]}
                     />
                   </Fab>
@@ -131,7 +130,7 @@ const VideoCard = React.memo(({ srcObject,hidePin, ...props }) => {
             sx={{ position: "absolute", top: 0, left: 0, p: {xs:1,md:2}, zIndex: 9 }}
           >
             {mic && mic.isMicMuted && (
-              <Tooltip title="mic is muted" placement="top">
+              <Tooltip title={t("mic is muted")} placement="top">
                 <Grid item>
                   <Box sx={cardBtnStyle}>
                     <SvgIcon
@@ -150,7 +149,7 @@ const VideoCard = React.memo(({ srcObject,hidePin, ...props }) => {
             </Grid>
              */}
             {props.pinned && (
-              <Tooltip title="pinned by you" placement="top">
+              <Tooltip title={t("pinned by you")} placement="top">
                 <Grid item>
                   <Box sx={cardBtnStyle}>
                     <SvgIcon

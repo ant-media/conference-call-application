@@ -33,7 +33,7 @@ function MessageButton({ footer, ...props }) {
       }}
       style={{height: '100%',width:'100%'}}
     >
-      <Tooltip title={t('OpenChatTooltip')} placement="top">
+      <Tooltip title={t('Chat with everyone')} placement="top">
         <CustomizedBtn
           onClick={() => {
             if (!settings?.drawerOpen) {

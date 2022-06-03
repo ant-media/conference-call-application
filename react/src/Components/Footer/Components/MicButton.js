@@ -34,7 +34,7 @@ function MicButton(props) {
   const handleMute = (e) => {
     e.stopPropagation();
     enqueueSnackbar({
-      message: t('MicOffNoti'),
+      message: t('Microphone off'),
       variant: 'info',
       icon: <SvgIcon size={24} name={'muted-microphone'} color="#fff" />
     }, {
@@ -48,13 +48,12 @@ function MicButton(props) {
     if (settings?.myLocalData?.streamId) {
       antmedia.handleSendNotificationEvent('MIC_MUTED', settings?.myLocalData?.streamId);
     }
-
-
   };
+  
   const handleUnmute = (e) => {
     e.stopPropagation();
     enqueueSnackbar({
-      message: t('MicOnNoti'),
+      message: t('Microphone on'),
       variant: 'info',
       icon: <SvgIcon size={24} name={'microphone'} color="#fff" />
     }, {
@@ -85,13 +84,13 @@ function MicButton(props) {
   return (
     <>
       {mic && mic.isMicMuted ? (
-        <Tooltip title={t('MicOnTooltip')} placement="top">
+        <Tooltip title={t('Turn on microphone')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e)=>{handleUnmute(e)}}>
             <SvgIcon size={40} name={'muted-microphone'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
       ) : (
-        <Tooltip title={t('MicOffTooltip')} placement="top">
+        <Tooltip title={t('Turn off microphone')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e)=>{handleMute(e)}}>
             <SvgIcon size={40} name={'microphone'} />
           </CustomizedBtn>

@@ -1,4 +1,4 @@
-import { createTheme,responsiveFontSizes } from "@mui/material/styles";
+import { createTheme, responsiveFontSizes } from "@mui/material/styles";
 import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
 import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
@@ -63,6 +63,18 @@ const Theme = createTheme({
     },
   },
   components: {
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          '& fieldset': {
+            borderColor: 'white',
+          }
+        },
+        icon: {
+          color: 'white',
+        }
+      }
+    },
     MuiIconButton: {
       styleOverrides: {
         root: {
@@ -185,6 +197,10 @@ const Theme = createTheme({
     },
     MuiButton: {
       styleOverrides: {
+        outlinedSecondary: {
+          border: `1px solid ${green60}`,
+          color: 'white',
+        },
         root: {
           borderRadius: 6,
           fontSize: 16,

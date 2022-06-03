@@ -1,17 +1,18 @@
-import React, { useContext } from "react";
+import React from "react";
 import Button from "@mui/material/Button";
 import { SvgIcon } from "../../SvgIcon";
-import { AntmediaContext } from "App";
+// import { AntmediaContext } from "App";
 import { Tooltip } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import { useParams } from "react-router-dom";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
-  '&.footer-icon-button':{
-    
+  '&.footer-icon-button': {
+
     height: '100%',
-    [theme.breakpoints.down('sm')]:{
-      padding:8,
+    [theme.breakpoints.down('sm')]: {
+      padding: 8,
       minWidth: 'unset',
       width: '100%',
     },
@@ -22,17 +23,17 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 }));
 
 
-function EndCallButton({footer,...props}) {
-  const antmedia = useContext(AntmediaContext);
+function EndCallButton({ footer, ...props }) {
+  // const antmedia = useContext(AntmediaContext);
+  const { id } = useParams();
+  const { t } = useTranslation();
+  // const exit = () => {
+  //   antmedia.handleLeaveFromRoom();
 
-  const {t} = useTranslation();
-  const exit = () => {
-    antmedia.handleLeaveFromRoom();
-
-  }
+  // }
   return (
-    <Tooltip title={t('LeaveCall')} placement="top">
-      <CustomizedBtn className={footer ? 'footer-icon-button' : ''}  onClick={() => exit()} variant="contained" color="error">
+    <Tooltip title={t('Leave call')} placement="top">
+      <CustomizedBtn component={"a"} href={`/${id}/left-the-room`} className={footer ? 'footer-icon-button' : ''} variant="contained" color="error">
         <SvgIcon size={28} name={"end-call"} />
       </CustomizedBtn>
     </Tooltip>

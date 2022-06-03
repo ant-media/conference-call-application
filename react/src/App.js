@@ -1,20 +1,21 @@
-import './App.css';
+import "./App.css";
 /* eslint-disable eqeqeq */
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import theme from './styles/theme';
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import AntMedia from './pages/AntMedia';
-import Home from './pages/Home';
-import { WebRTCAdaptor } from './antmedia/webrtc_adaptor.js';
-import { getUrlParameter } from './antmedia/fetch.stream.js';
-import { SnackbarProvider } from 'notistack';
-import AntSnackBar from 'Components/AntSnackBar';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
-import i18n from 'i18next';
-import translationEN from 'i18n/en.json';
-import translationTR from 'i18n/tr.json';
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import theme from "./styles/theme";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import AntMedia from "./pages/AntMedia";
+import Home from "./pages/Home";
+import { WebRTCAdaptor } from "./antmedia/webrtc_adaptor.js";
+import { getUrlParameter } from "./antmedia/fetch.stream.js";
+import { SnackbarProvider } from "notistack";
+import AntSnackBar from "Components/AntSnackBar";
+import { initReactI18next } from "react-i18next";
+import LanguageDetector from "i18next-browser-languagedetector";
+import i18n from "i18next";
+import translationEN from "i18n/en.json";
+import translationTR from "i18n/tr.json";
+import LeftTheRoom from "pages/LeftTheRoom";
 
 const resources = {
   en: {
@@ -29,7 +30,7 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    fallbackLng: 'en',
+    fallbackLng: "en",
     interpolation: {
       escapeValue: false,
     },
@@ -38,13 +39,13 @@ i18n
     resources,
   });
 
-if (i18n.language !== 'en' || i18n.language !== 'tr') {
-  if (i18n.language.slice(0, 2) === 'tr') {
-    localStorage.setItem('i18nextLng', 'tr');
-    i18n.changeLanguage('tr');
+if (i18n.language !== "en" || i18n.language !== "tr") {
+  if (i18n.language.slice(0, 2) === "tr") {
+    localStorage.setItem("i18nextLng", "tr");
+    i18n.changeLanguage("tr");
   } else {
-    localStorage.setItem('i18nextLng', 'en');
-    i18n.changeLanguage('en');
+    localStorage.setItem("i18nextLng", "en");
+    i18n.changeLanguage("en");
   }
 }
 
@@ -59,11 +60,11 @@ if (i18n.language !== 'en' || i18n.language !== 'tr') {
  * 7. "subscriberCode": It's experimental.
  */
 
-var token = getUrlParameter('token');
-var publishStreamId = getUrlParameter('streamId');
-var playOnly = getUrlParameter('playOnly');
-var subscriberId = getUrlParameter('subscriberId');
-var subscriberCode = getUrlParameter('subscriberCode');
+var token = getUrlParameter("token");
+var publishStreamId = getUrlParameter("streamId");
+var playOnly = getUrlParameter("playOnly");
+var subscriberId = getUrlParameter("subscriberId");
+var subscriberCode = getUrlParameter("subscriberCode");
 var isPlaying = false;
 var fullScreenId = -1;
 
@@ -82,6 +83,7 @@ var isScreenSharing = false;
 var roomTimerId = -1;
 
 function stopScreenShare() {
+  console.log("app stopScreenShare: ", stopScreenShare);
   if (isScreenSharing) {
     isScreenSharing = false;
   }
@@ -182,17 +184,18 @@ function stopScreenShare() {
 
 function makeFullScreen(divId) {
   if (fullScreenId == divId) {
-    document.getElementById(divId).classList.remove('selected');
-    document.getElementById(divId).classList.add('unselected');
+    document.getElementById(divId).classList.remove("selected");
+    document.getElementById(divId).classList.add("unselected");
     fullScreenId = -1;
   } else {
-    document.getElementsByClassName('publisher-content')[0].className = 'publisher-content chat-active fullscreen-layout';
+    document.getElementsByClassName("publisher-content")[0].className =
+      "publisher-content chat-active fullscreen-layout";
     if (fullScreenId != -1) {
-      document.getElementById(fullScreenId).classList.remove('selected');
-      document.getElementById(fullScreenId).classList.add('unselected');
+      document.getElementById(fullScreenId).classList.remove("selected");
+      document.getElementById(fullScreenId).classList.add("unselected");
     }
-    document.getElementById(divId).classList.remove('unselected');
-    document.getElementById(divId).classList.add('selected');
+    document.getElementById(divId).classList.remove("unselected");
+    document.getElementById(divId).classList.add("selected");
     fullScreenId = divId;
   }
 }
@@ -200,7 +203,7 @@ function makeFullScreen(divId) {
 var pc_config = {
   iceServers: [
     {
-      urls: 'stun:stun1.l.google.com:19302',
+      urls: "stun:stun1.l.google.com:19302",
     },
   ],
 };
@@ -237,14 +240,13 @@ const webRTCAdaptor = new WebRTCAdaptor({
   sdp_constraints: sdpConstraints,
   isPlayMode: playOnly,
   debug: true,
-
   callback: (info, obj) => {
-    if (info == 'initialized') {
-      console.log('initialized');
-    } else if (info == 'joinedTheRoom') {
+    if (info == "initialized") {
+      console.log("initialized");
+    } else if (info == "joinedTheRoom") {
       var room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
-      console.log('joined the room: ' + roomOfStream[obj.streamId]);
+      console.log("joined the room: " + roomOfStream[obj.streamId]);
       console.debug(obj);
 
       publishStreamId = obj.streamId;
@@ -254,27 +256,32 @@ const webRTCAdaptor = new WebRTCAdaptor({
       // streamDetailsList = obj.streamList;
       console.debug(streamIdList);
 
-      webRTCAdaptor.handlePublish(obj.streamId, token, subscriberId, subscriberCode);
+      webRTCAdaptor.handlePublish(
+        obj.streamId,
+        token,
+        subscriberId,
+        subscriberCode
+      );
 
       roomTimerId = setInterval(() => {
         webRTCAdaptor.handleRoomInfo(publishStreamId);
       }, 5000);
-    } else if (info == 'newStreamAvailable') {
+    } else if (info == "newStreamAvailable") {
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
-    } else if (info == 'publish_started') {
+    } else if (info == "publish_started") {
       //stream is being published
-      console.debug('publish started to room: ' + roomOfStream[obj.streamId]);
+      console.debug("publish started to room: " + roomOfStream[obj.streamId]);
       webRTCAdaptor.handleRoomInfo(publishStreamId);
-    } else if (info == 'publish_finished') {
+    } else if (info == "publish_finished") {
       //stream is being finished
-      console.debug('publish finished');
-    } else if (info == 'screen_share_stopped') {
-      console.log('screen share stopped');
-    } else if (info == 'browser_screen_share_supported') {
-      console.log('browser screen share supported');
-    } else if (info == 'leavedFromRoom') {
+      console.debug("publish finished");
+    } else if (info == "screen_share_stopped") {
+      console.log("screen share stopped");
+    } else if (info == "browser_screen_share_supported") {
+      console.log("browser screen share supported");
+    } else if (info == "leavedFromRoom") {
       room = obj.ATTR_ROOM_NAME;
-      console.debug('leaved from the room:' + room);
+      console.debug("leaved from the room:" + room);
       if (roomTimerId != null) {
         clearInterval(roomTimerId);
       }
@@ -283,20 +290,20 @@ const webRTCAdaptor = new WebRTCAdaptor({
       // streamDetailsList = [];
       // isPlaying = false;
       // publishStreamId = null;
-    } else if (info == 'closed') {
-      if (typeof obj != 'undefined') {
-        console.log('Connecton closed: ' + JSON.stringify(obj));
+    } else if (info == "closed") {
+      if (typeof obj != "undefined") {
+        console.log("Connecton closed: " + JSON.stringify(obj));
       }
-    } else if (info == 'play_finished') {
-      console.log('play_finished');
+    } else if (info == "play_finished") {
+      console.log("play_finished");
       isPlaying = false;
-    } else if (info == 'streamInformation') {
+    } else if (info == "streamInformation") {
       webRTCAdaptor.handleStreamInformation(obj);
-    } else if (info == 'roomInformation') {
+    } else if (info == "roomInformation") {
       // console.log("roomInformationroomInformationroomInformationroomInformationroomInformation", obj)
 
       var tempList = [...obj.streams];
-      tempList.push('!' + publishStreamId);
+      tempList.push("!" + publishStreamId);
       webRTCAdaptor.handleRoomEvents(obj);
       if (!isPlaying) {
         webRTCAdaptor.handlePlay(token, tempList);
@@ -308,56 +315,73 @@ const webRTCAdaptor = new WebRTCAdaptor({
       //console.log("objobjobjobjobjobjobjobjobjobjobjobjxx", obj);
       //Check video tracks active/inactive status
       checkTrackStatus(streamIdList, publishStreamId);
-    } else if (info == 'data_channel_opened') {
-      console.log('Data Channel open for stream id', obj);
+    } else if (info == "data_channel_opened") {
+      console.log("Data Channel open for stream id", obj);
+      setInterval(() => {
+        webRTCAdaptor.updateStatus(obj);
+      }, 2000);
+
       // isDataChannelOpen = true;
-    } else if (info == 'data_channel_closed') {
-      console.log('Data Channel closed for stream id', obj);
+    } else if (info == "data_channel_closed") {
+      console.log("Data Channel closed for stream id", obj);
       // isDataChannelOpen = false;
-    } else if (info == 'data_received') {
+    } else if (info == "data_received") {
       try {
         webRTCAdaptor.handleNotificationEvent(obj);
       } catch (e) {
         // var remoteStreamName = getStreamName(obj.streamId);
         // console.log("remoteStreamName: ", remoteStreamName);
       }
-    } else if (info == 'available_devices') {
+    } else if (info == "available_devices") {
       webRTCAdaptor.handleDevices(obj);
     }
   },
   callbackError: function (error, message) {
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
-    if (error.indexOf('publishTimeoutError') != -1 && roomTimerId != null) {
+    if (error.indexOf("publishTimeoutError") != -1 && roomTimerId != null) {
       clearInterval(roomTimerId);
     }
 
-    console.log('error callback: ' + JSON.stringify(error));
+    console.log("error callback: " + JSON.stringify(error));
     var errorMessage = JSON.stringify(error);
-    if (typeof message != 'undefined') {
+    if (typeof message != "undefined") {
       errorMessage = message;
     }
     errorMessage = JSON.stringify(error);
-    if (error.indexOf('NotFoundError') != -1) {
-      errorMessage = 'Camera or Mic are not found or not allowed in your device.';
-    } else if (error.indexOf('NotReadableError') != -1 || error.indexOf('TrackStartError') != -1) {
-      errorMessage = 'Camera or Mic is being used by some other process that does not not allow these devices to be read.';
-    } else if (error.indexOf('OverconstrainedError') != -1 || error.indexOf('ConstraintNotSatisfiedError') != -1) {
-      errorMessage = 'There is no device found that fits your video and audio constraints. You may change video and audio constraints.';
-    } else if (error.indexOf('NotAllowedError') != -1 || error.indexOf('PermissionDeniedError') != -1) {
-      errorMessage = 'You are not allowed to access camera and mic.';
+    if (error.indexOf("NotFoundError") != -1) {
+      errorMessage =
+        "Camera or Mic are not found or not allowed in your device.";
+    } else if (
+      error.indexOf("NotReadableError") != -1 ||
+      error.indexOf("TrackStartError") != -1
+    ) {
+      errorMessage =
+        "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
+    } else if (
+      error.indexOf("OverconstrainedError") != -1 ||
+      error.indexOf("ConstraintNotSatisfiedError") != -1
+    ) {
+      errorMessage =
+        "There is no device found that fits your video and audio constraints. You may change video and audio constraints.";
+    } else if (
+      error.indexOf("NotAllowedError") != -1 ||
+      error.indexOf("PermissionDeniedError") != -1
+    ) {
+      errorMessage = "You are not allowed to access camera and mic.";
       stopScreenShare();
-    } else if (error.indexOf('TypeError') != -1) {
-      errorMessage = 'Video/Audio is required.';
-    } else if (error.indexOf('UnsecureContext') != -1) {
-      errorMessage = 'Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https';
-    } else if (error.indexOf('WebSocketNotSupported') != -1) {
-      errorMessage = 'Fatal Error: WebSocket not supported in this browser';
-    } else if (error.indexOf('no_stream_exist') != -1) {
+    } else if (error.indexOf("TypeError") != -1) {
+      errorMessage = "Video/Audio is required.";
+    } else if (error.indexOf("UnsecureContext") != -1) {
+      errorMessage =
+        "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
+    } else if (error.indexOf("WebSocketNotSupported") != -1) {
+      errorMessage = "Fatal Error: WebSocket not supported in this browser";
+    } else if (error.indexOf("no_stream_exist") != -1) {
       //TODO: removeRemoteVideo(error.streamId);
-    } else if (error.indexOf('data_channel_error') != -1) {
-      errorMessage = 'There was a error during data channel communication';
-    } else if (error.indexOf('ScreenSharePermissionDenied') != -1) {
-      errorMessage = 'You are not allowed to access screen share';
+    } else if (error.indexOf("data_channel_error") != -1) {
+      errorMessage = "There was a error during data channel communication";
+    } else if (error.indexOf("ScreenSharePermissionDenied") != -1) {
+      errorMessage = "You are not allowed to access screen share";
       stopScreenShare();
     }
 
@@ -366,18 +390,18 @@ const webRTCAdaptor = new WebRTCAdaptor({
 });
 
 function getWindowLocation() {
-  document.getElementById('locationHref').value = window.location.href;
+  document.getElementById("locationHref").value = window.location.href;
 }
 
 function copyWindowLocation() {
-  var copyText = document.getElementById('locationHref');
+  var copyText = document.getElementById("locationHref");
 
   /* Select the text field */
   copyText.select();
   copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
   /* Copy the text inside the text field */
-  document.execCommand('copy');
+  document.execCommand("copy");
 }
 
 window.getWindowLocation = getWindowLocation;
@@ -387,25 +411,22 @@ window.makeFullScreen = makeFullScreen;
 export const AntmediaContext = React.createContext(webRTCAdaptor);
 
 function App() {
-  const handleFullScreen = e => {
-    console.log('e: ', e);
-    console.log('e id: ', e.target?.id);
-    if (e.target?.id === 'meeting-gallery'){
+  const handleFullScreen = (e) => {
+    if (e.target?.id === "meeting-gallery") {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen();
       } else {
         document.exitFullscreen();
       }
-    } 
-    
+    }
   };
 
   React.useEffect(() => {
-    window.addEventListener('dblclick', handleFullScreen);
+    window.addEventListener("dblclick", handleFullScreen);
 
     // cleanup this component
     return () => {
-      window.removeEventListener('dblclick', handleFullScreen);
+      window.removeEventListener("dblclick", handleFullScreen);
     };
   }, []);
 
@@ -414,16 +435,19 @@ function App() {
       <CssBaseline />
       <SnackbarProvider
         anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
+          vertical: "top",
+          horizontal: "center",
         }}
         maxSnack={3}
-        content={(key, notificationData) => <AntSnackBar id={key} notificationData={notificationData} />}
+        content={(key, notificationData) => (
+          <AntSnackBar id={key} notificationData={notificationData} />
+        )}
       >
         <AntmediaContext.Provider value={webRTCAdaptor}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/:id" element={<AntMedia />} />
+            <Route path="/:id/left-the-room" element={<LeftTheRoom />} />
           </Routes>
         </AntmediaContext.Provider>
       </SnackbarProvider>
