@@ -7,6 +7,7 @@ import { Tooltip } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import {useTheme} from '@mui/material'
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   '&.footer-icon-button':{
@@ -30,6 +31,7 @@ function MicButton(props) {
   const settings = useContext(MediaSettingsContext);
   const { enqueueSnackbar } = useSnackbar();
   const {t} = useTranslation();
+  const theme = useTheme();
 
   const handleMute = (e) => {
     e.stopPropagation();
@@ -86,13 +88,13 @@ function MicButton(props) {
       {mic && mic.isMicMuted ? (
         <Tooltip title={t('Turn on microphone')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e)=>{handleUnmute(e)}}>
-            <SvgIcon size={40} name={'muted-microphone'} color="#fff" />
+            <SvgIcon size={40} name={'microphone'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
       ) : (
         <Tooltip title={t('Turn off microphone')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e)=>{handleMute(e)}}>
-            <SvgIcon size={40} name={'microphone'} />
+            <SvgIcon size={40} name={'muted-microphone'} color={theme.palette.green[80]} />
           </CustomizedBtn>
         </Tooltip>
       )}

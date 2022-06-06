@@ -13,6 +13,7 @@ const green50 = "#007269";
 const green60 = "#00564F";
 const green70 = "#003935";
 const green80 = "#001D1A";
+const green85 = "#024B46";
 const green90 = "#6BCBC3";
 const chatText = "#DDFFFC";
 
@@ -295,6 +296,7 @@ const Theme = createTheme({
       60: green60,
       70: green70,
       80: green80,
+      85: green85,
       90: green90,
     },
     text: {

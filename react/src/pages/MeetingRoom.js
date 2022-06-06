@@ -8,9 +8,12 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import Footer from 'Components/Footer/Footer';
 import { AntmediaContext } from 'App';
 import { SettingsContext } from 'pages/AntMedia';
+import { useTheme } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-
-
+const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
+  border: `3px solid ${theme.palette.green[85]} !important`,
+}));
 
 function debounce(fn, ms) {
   let timer;
@@ -61,12 +64,11 @@ function calculateLayout(containerWidth, containerHeight, videoCount, aspectRati
 
 const MeetingRoom = React.memo(props => {
   const antmedia = useContext(AntmediaContext);
- 
+
   const settings = useContext(SettingsContext);
   const { drawerOpen, pinnedVideoId, pinVideo } = settings;
   const { participants } = props;
-  console.log('participants: ', participants);
- 
+  const theme = useTheme();
 
   useEffect(() => {
     if (document.getElementById('localVideo')) {
@@ -119,48 +121,65 @@ const MeetingRoom = React.memo(props => {
     };
   });
 
-  function stringToColor(string) {
-    let hash = 0;
-    let i;
-
-    /* eslint-disable no-bitwise */
-    for (i = 0; i < string.length; i += 1) {
-      hash = string.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    let color = '#';
-
-    for (i = 0; i < 3; i += 1) {
-      const value = (hash >> (i * 8)) & 0xff;
-      color += `00${value.toString(16)}`.slice(-2);
-    }
-    /* eslint-enable no-bitwise */
-
-    return color;
-  }
-
   const getUnpinnedParticipants = () => {
     const array = [pinnedVideoId !== 'localVideo' && { id: 'localVideo' }, ...participants.filter(v => v.id !== pinnedVideoId)];
     const filtered = array.filter(Boolean);
     return filtered;
   };
 
+  const OthersTile = ({ users, sliceIndex, count, ...props }) => {
+    return (
+      <div className="others-tile-inner">
+        <AvatarGroup max={4} sx={{ justifyContent: 'center' }}>
+          {users.slice(sliceIndex).map(({ name }, index) => {
+            if (name.length > 0) {
+              const nameArr = name.split(' ');
+              const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
+              const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
+
+              return (
+                <CustomizedAvatar
+                  key={index}
+                  alt={name}
+                  sx={{
+                    bgcolor: theme.palette.green[50],
+                    color: '#fff',
+                    width: { xs: 44, md: 64 },
+                    height: { xs: 44, md: 64 },
+                    fontSize:{ xs: 20, md: 26 },
+                  }}
+                >
+                  {initials}
+                </CustomizedAvatar>
+              );
+            } else {
+              return null;
+            }
+          })}
+        </AvatarGroup>
+        <Typography sx={{ mt: 2, color: '#ffffff' }}>
+          {count} other{count > 1 ? 's' : ''}
+        </Typography>
+      </div>
+    );
+  };
+
   const returnUnpinnedGallery = () => {
     //pinned tile
     const unpinnedParticipants = getUnpinnedParticipants();
-   
-    const showAsOthersLimitPinned = 4;
+
+    const showAsOthersLimitPinned = 5;
     const showAsOthersSliceIndexPinned = showAsOthersLimitPinned - 2;
 
     const slicePinnedTiles = unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
 
     let slicedParticipants = [];
-    if(slicePinnedTiles){
-      slicedParticipants = unpinnedParticipants.slice(0,showAsOthersSliceIndexPinned);
-    }else{
+    if (slicePinnedTiles) {
+      slicedParticipants = unpinnedParticipants.slice(0, showAsOthersSliceIndexPinned);
+    } else {
       slicedParticipants = unpinnedParticipants;
     }
-    
+
     return (
       <>
         {slicedParticipants.map(({ id, tracks, name }, index) => {
@@ -201,36 +220,7 @@ const MeetingRoom = React.memo(props => {
         {slicePinnedTiles && participants.length > 0 && (
           <div className="unpinned">
             <div className="single-video-container  others-tile-wrapper">
-              <div className="others-tile-inner">
-                <AvatarGroup max={4} sx={{ justifyContent: 'center' }}>
-                  {unpinnedParticipants
-                    .slice(showAsOthersSliceIndexPinned)
-                    .map(({ name }, index) => {
-                      if (name.length > 0) {
-                        const nameArr = name.split(' ');
-                        const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
-                        const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
-
-                        return (
-                          <Avatar
-                            key={index}
-                            alt={name}
-                            sx={{
-                              bgcolor: stringToColor(name),
-                            }}
-                          >
-                            {initials}
-                          </Avatar>
-                        );
-                      } else {
-                        return null;
-                      }
-                    })}
-                </AvatarGroup>
-                <Typography sx={{ mt: 2, color: '#AFF3EE80' }}>
-                  {unpinnedParticipants.slice(showAsOthersSliceIndexPinned).length} other{unpinnedParticipants.length - 2 > 0 ? 's' : ''}
-                </Typography>
-              </div>
+              <OthersTile users={unpinnedParticipants} sliceIndex={showAsOthersSliceIndexPinned} count={unpinnedParticipants.slice(showAsOthersSliceIndexPinned).length} />
             </div>
           </div>
         )}
@@ -294,7 +284,15 @@ const MeetingRoom = React.memo(props => {
                 </div>
               </>
             ))}
-
+            <div
+              className="single-video-container not-pinned others-tile-wrapper"
+              style={{
+                width: 'var(--width)',
+                height: 'var(--height)',
+                maxWidth: 'var(--maxwidth)',
+              }}
+            >
+            </div>
             {sliceTiles && participants.length > 0 && (
               <div
                 className="single-video-container not-pinned others-tile-wrapper"
@@ -304,34 +302,7 @@ const MeetingRoom = React.memo(props => {
                   maxWidth: 'var(--maxwidth)',
                 }}
               >
-                <div className="others-tile-inner">
-                  <AvatarGroup max={4} sx={{ justifyContent: 'center' }}>
-                    {participants.slice(showAsOthersSliceIndex + 1).map(({ name }, index) => {
-                      if (name.length > 0) {
-                        const nameArr = name.split(' ');
-                        const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
-                        const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
-
-                        return (
-                          <Avatar
-                            key={index}
-                            alt={name}
-                            sx={{
-                              bgcolor: stringToColor(name),
-                            }}
-                          >
-                            {initials}
-                          </Avatar>
-                        );
-                      } else {
-                        return null;
-                      }
-                    })}
-                  </AvatarGroup>
-                  <Typography sx={{ mt: 2, color: '#AFF3EE80' }}>
-                    {participants.length - 2} other{participants.length - 2 > 0 ? 's' : ''}
-                  </Typography>
-                </div>
+                <OthersTile users={participants} sliceIndex={showAsOthersSliceIndex + 1} count={participants.length - 2} />
               </div>
             )}
           </>

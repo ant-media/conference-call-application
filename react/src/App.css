@@ -176,9 +176,9 @@ form {
 }
 
 .unpinned {
-  height: 33% !important; 
-  max-height: 33%; 
-  min-height: 33%;
+  height: 25% !important; 
+  max-height: 25%; 
+  min-height: 25%;
   width: 100%;
   border-radius:4;
 }
@@ -239,6 +239,7 @@ form {
     left: unset;
   }
   .single-video-card .name-indicator {
-    padding: 4px;
+    padding-bottom: 8px !important;
+    padding: 12px;
   }
 }

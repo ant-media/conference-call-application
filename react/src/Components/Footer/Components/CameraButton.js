@@ -6,7 +6,7 @@ import { AntmediaContext } from 'App';
 import { MediaSettingsContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import {useTheme} from '@mui/material'
+import {useTheme} from '@mui/material';
 
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
