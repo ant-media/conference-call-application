@@ -144,7 +144,6 @@ function AntMedia() {
   }
 
   function handleNotificationEvent(obj) {
-   
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
       var eventStreamId = notificationEvent.streamId;
@@ -214,6 +213,15 @@ function AntMedia() {
         );
         setPinnedVideoId(null);
       } else if (eventType === "UPDATE_STATUS") {
+        let requestedMediaConstraints = {
+          width: 640,
+          height: 480,
+        };
+
+        antmedia.applyConstraints(
+          myLocalData.streamId,
+          requestedMediaConstraints
+        );
         setUserStatus(notificationEvent, eventStreamId);
       }
     }
@@ -227,11 +235,6 @@ function AntMedia() {
         });
       }
       if (!cam.find((m) => m.eventStreamId === eventStreamId)) {
-        console.log(
-          "tetkektektekktektektkektektketkekte",
-          notificationEvent,
-          cam
-        );
         toggleSetCam({
           eventStreamId: eventStreamId,
           isCameraOn: notificationEvent.camera,
@@ -259,8 +262,6 @@ function AntMedia() {
 
   function updateStatus(obj) {
     if (roomName !== obj) {
-      console.log("updateStatusupdateStatusupdateStatus", mic);
-
       handleSendNotificationEvent("UPDATE_STATUS", myLocalData.streamId, {
         mic: !!mic.find((c) => c.eventStreamId === "localVideo")?.isMicMuted,
         camera: !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn,
