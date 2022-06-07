@@ -24,7 +24,7 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 function ShareScreenButton({ footer, ...props }) {
   const { t } = useTranslation();
   const antmedia = useContext(AntmediaContext);
-  const { isScreenShared, myLocalData } = useContext(MediaSettingsContext);
+  const { isScreenShared } = useContext(MediaSettingsContext);
 
   return (
     <Tooltip
@@ -36,17 +36,9 @@ function ShareScreenButton({ footer, ...props }) {
         onClick={() => {
           if (isScreenShared) {
             antmedia.handleStopScreenShare();
-            antmedia.handleSendNotificationEvent(
-              "SCREEN_SHARED_OFF",
-              myLocalData.streamId
-            );
           } else {
             antmedia.handleStartScreenShare();
             // send other that you are sharing screen.
-            antmedia.handleSendNotificationEvent(
-              "SCREEN_SHARED_ON",
-              myLocalData.streamId
-            );
           }
         }}
         variant="contained"

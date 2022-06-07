@@ -78,8 +78,7 @@ var streamIdList = [];
 
 // var isDataChannelOpen = false;
 // var isMicMuted = false;
-var isCameraOff = false;
-var isScreenSharing = false;
+
 var roomTimerId = -1;
 
 // function formatAMPM(date) {
@@ -244,9 +243,9 @@ const webRTCAdaptor = new WebRTCAdaptor({
   isPlayMode: playOnly,
   debug: true,
   callback: (info, obj) => {
-    if (info == "initialized") {
+    if (info === "initialized") {
       console.log("initialized");
-    } else if (info == "joinedTheRoom") {
+    } else if (info === "joinedTheRoom") {
       var room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
       console.log("joined the room: " + roomOfStream[obj.streamId]);
@@ -271,22 +270,22 @@ const webRTCAdaptor = new WebRTCAdaptor({
       }, 5000);
     } else if (info == "newStreamAvailable") {
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
-    } else if (info == "publish_started") {
+    } else if (info === "publish_started") {
       //stream is being published
       console.debug("publish started to room: " + roomOfStream[obj.streamId]);
       webRTCAdaptor.handleRoomInfo(publishStreamId);
-    } else if (info == "publish_finished") {
+    } else if (info === "publish_finished") {
       //stream is being finished
       console.debug("publish finished");
-    } else if (info == "screen_share_stopped") {
+    } else if (info === "screen_share_stopped") {
       console.log("screen share stopped", obj);
       webRTCAdaptor.handleScreenshareNotFromPlatform();
-    } else if (info == "browser_screen_share_supported") {
+    } else if (info === "browser_screen_share_supported") {
       console.log("browser screen share supported");
-    } else if (info == "leavedFromRoom") {
+    } else if (info === "leavedFromRoom") {
       room = obj.ATTR_ROOM_NAME;
       console.debug("leaved from the room:" + room);
-      if (roomTimerId != null) {
+      if (roomTimerId !== null) {
         clearInterval(roomTimerId);
       }
       // we need to reset streams list
@@ -294,16 +293,18 @@ const webRTCAdaptor = new WebRTCAdaptor({
       // streamDetailsList = [];
       // isPlaying = false;
       // publishStreamId = null;
-    } else if (info == "closed") {
-      if (typeof obj != "undefined") {
+    } else if (info === "closed") {
+      if (typeof obj !== "undefined") {
         console.log("Connecton closed: " + JSON.stringify(obj));
       }
-    } else if (info == "play_finished") {
+    } else if (info === "play_finished") {
       console.log("play_finished");
       isPlaying = false;
-    } else if (info == "streamInformation") {
+    } else if (info === "streamInformation") {
       webRTCAdaptor.handleStreamInformation(obj);
-    } else if (info == "roomInformation") {
+    } else if (info === "screen_share_started") {
+      webRTCAdaptor.screenShareOnNotification();
+    } else if (info === "roomInformation") {
       // console.log("roomInformationroomInformationroomInformationroomInformationroomInformation", obj)
 
       var tempList = [...obj.streams];
@@ -391,7 +392,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       webRTCAdaptor.handleScreenshareNotFromPlatform();
     }
 
-    // alert(errorMessage);
+    console.error(errorMessage);
   },
 });
 

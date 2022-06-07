@@ -455,6 +455,9 @@ export class MediaManager {
     navigator.mediaDevices
       .getDisplayMedia(mediaConstraints)
       .then(func)
+      .then(() => {
+        this.callback("screen_share_started");
+      })
       .catch((error) => {
         if (error.name === "NotAllowedError") {
           console.debug("Permission denied error");

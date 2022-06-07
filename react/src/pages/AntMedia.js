@@ -74,6 +74,19 @@ function AntMedia() {
   function handleStartScreenShare() {
     antmedia.switchDesktopCapture(myLocalData.streamId);
     setIsScreenShared(true);
+    // antmedia.screenShareOnNotification();
+  }
+  function screenShareOffNotification() {
+    antmedia.handleSendNotificationEvent(
+      "SCREEN_SHARED_OFF",
+      myLocalData.streamId
+    );
+  }
+  function screenShareOnNotification() {
+    antmedia.handleSendNotificationEvent(
+      "SCREEN_SHARED_ON",
+      myLocalData.streamId
+    );
   }
   function handleScreenshareNotFromPlatform() {
     setIsScreenShared(false);
@@ -86,10 +99,7 @@ function AntMedia() {
     } else {
       antmedia.switchVideoCameraCapture(myLocalData.streamId);
     }
-    antmedia.handleSendNotificationEvent(
-      "SCREEN_SHARED_OFF",
-      myLocalData.streamId
-    );
+    antmedia.screenShareOffNotification();
   }
   function handleStopScreenShare() {
     setIsScreenShared(false);
@@ -104,6 +114,7 @@ function AntMedia() {
 
       // isCameraOff = true;
     }
+    antmedia.screenShareOffNotification();
   }
   function handleSetMessages(msg) {
     setMessages((oldMessages) => {
@@ -244,17 +255,10 @@ function AntMedia() {
           return [...oldMessages, notificationEvent];
         });
       } else if (eventType === "SCREEN_SHARED_ON") {
-        console.log(
-          "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON",
-          eventStreamId
-        );
         setScreenSharedVideoId(eventStreamId);
 
         setPinnedVideoId(eventStreamId);
       } else if (eventType === "SCREEN_SHARED_OFF") {
-        console.log(
-          "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON"
-        );
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
       } else if (eventType === "UPDATE_STATUS") {
@@ -434,6 +438,8 @@ function AntMedia() {
   antmedia.handleLeaveFromRoom = handleLeaveFromRoom;
   antmedia.handleSendMessage = handleSendMessage;
   antmedia.handleDevices = handleDevices;
+  antmedia.screenShareOffNotification = screenShareOffNotification;
+  antmedia.screenShareOnNotification = screenShareOnNotification;
   antmedia.handleStartScreenShare = handleStartScreenShare;
   antmedia.handleStopScreenShare = handleStopScreenShare;
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
