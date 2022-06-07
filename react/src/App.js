@@ -82,20 +82,6 @@ var isCameraOff = false;
 var isScreenSharing = false;
 var roomTimerId = -1;
 
-function stopScreenShare() {
-  console.log("app stopScreenShare: ", stopScreenShare);
-  if (isScreenSharing) {
-    isScreenSharing = false;
-  }
-
-  if (!isCameraOff) {
-    webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
-  } else {
-    webRTCAdaptor.turnOffLocalCamera(publishStreamId);
-    isCameraOff = true;
-  }
-}
-
 // function formatAMPM(date) {
 //   var hours = date.getHours();
 //   var minutes = date.getMinutes();
@@ -388,7 +374,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       error.indexOf("PermissionDeniedError") != -1
     ) {
       errorMessage = "You are not allowed to access camera and mic.";
-      stopScreenShare();
+      webRTCAdaptor.handleScreenshareNotFromPlatform();
     } else if (error.indexOf("TypeError") != -1) {
       errorMessage = "Video/Audio is required.";
     } else if (error.indexOf("UnsecureContext") != -1) {
@@ -402,10 +388,10 @@ const webRTCAdaptor = new WebRTCAdaptor({
       errorMessage = "There was a error during data channel communication";
     } else if (error.indexOf("ScreenSharePermissionDenied") != -1) {
       errorMessage = "You are not allowed to access screen share";
-      stopScreenShare();
+      webRTCAdaptor.handleScreenshareNotFromPlatform();
     }
 
-    alert(errorMessage);
+    // alert(errorMessage);
   },
 });
 
