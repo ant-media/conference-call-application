@@ -708,10 +708,10 @@ export class WebRTCAdaptor {
       this.iceCandidateList[streamId] = new Array();
       if (!this.playStreamId.includes(streamId)) {
         if (this.mediaManager.localStream != null) {
-          let dc = this.remotePeerConnection[streamId];
+          let pc = this.remotePeerConnection[streamId];
           let stream = this.mediaManager.localStream;
           stream.getTracks().forEach(function (track) {
-            dc.addTrack(track, stream);
+            pc.addTrack(track, stream);
           });
         }
       }
@@ -1497,6 +1497,46 @@ export class WebRTCAdaptor {
   }
 
   /**
+   * Called by user
+   *
+   * @param {*} videoTrackId : track id associated with pinned video
+   * @param {*} streamId : streamId of the pinned video
+   * @param {*} enabled : true | false
+   * @returns
+   */
+  assignVideoTrack(videoTrackId, streamId, enabled) {
+    var jsCmd = {
+      command: "assignVideoTrackCommand",
+      streamId: streamId,
+      videoTrackId: videoTrackId,
+      enabled: enabled,
+    };
+
+    this.webSocketAdaptor.send(JSON.stringify(jsCmd));
+  }
+
+  /**
+   * Called by user
+   * video tracks may be less than the participants count
+   * so these parameters are used for assigning video tracks to participants.
+   * This message is used to make pagination in conference.
+   *
+   * @param {*} offset : start index for participant list to play
+   * @param {*} size : number of the participants to play
+   * @returns
+   */
+  updateVideoTrackAssignments(streamId, offset, size) {
+    var jsCmd = {
+      streamId: streamId,
+      command: "updateVideoTrackAssignmentsCommand",
+      offset: offset,
+      size: size,
+    };
+
+    this.webSocketAdaptor.send(JSON.stringify(jsCmd));
+  }
+
+  /**
    * The following messages are forwarded to MediaManager. They are also kept here because of backward compatibility.
    * You can find the details about them in media_manager.js
    */
@@ -1549,6 +1589,10 @@ export class WebRTCAdaptor {
 
   closeStream() {
     this.mediaManager.closeStream();
+  }
+
+  applyConstraints(streamId, newConstaints) {
+    this.mediaManager.applyConstraints(streamId, newConstaints);
   }
 }
 

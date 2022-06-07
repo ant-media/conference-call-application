@@ -52,9 +52,23 @@ function AntMedia() {
   function pinVideo(id) {
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
+      handleNotifyUnpinUser(id);
     } else {
       setPinnedVideoId(id);
+      handleNotifyPinUser(id);
     }
+  }
+
+  function handleNotifyPinUser(id) {
+    console.log("PIN_USER PIN_USER PIN_USER", id);
+    handleSendNotificationEvent("PIN_USER", myLocalData.streamId, {
+      streamId: id,
+    });
+  }
+  function handleNotifyUnpinUser(id) {
+    handleSendNotificationEvent("UNPIN_USER", myLocalData.streamId, {
+      streamId: id,
+    });
   }
   function handleStartScreenShare() {
     setIsScreenShared(true);
@@ -144,7 +158,6 @@ function AntMedia() {
   }
 
   function handleNotificationEvent(obj) {
-   
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
       var eventStreamId = notificationEvent.streamId;
@@ -215,6 +228,32 @@ function AntMedia() {
         setPinnedVideoId(null);
       } else if (eventType === "UPDATE_STATUS") {
         setUserStatus(notificationEvent, eventStreamId);
+      } else if (eventType === "PIN_USER") {
+        console.log("PIN_USER", notificationEvent);
+        if (notificationEvent.streamId === myLocalData.streamId) {
+          let requestedMediaConstraints = {
+            width: 640,
+            height: 480,
+          };
+          console.log("myLocalData.streamId", notificationEvent);
+          antmedia.applyConstraints(
+            myLocalData.streamId,
+            requestedMediaConstraints
+          );
+        }
+      } else if (eventType === "UNPIN_USER") {
+        console.log("UNPIN_USER", notificationEvent);
+        if (notificationEvent.streamId === myLocalData.streamId) {
+          let requestedMediaConstraints = {
+            width: 320,
+            height: 240,
+          };
+          console.log("myLocalData.streamId", notificationEvent);
+          antmedia.applyConstraints(
+            myLocalData.streamId,
+            requestedMediaConstraints
+          );
+        }
       }
     }
   }
@@ -227,11 +266,6 @@ function AntMedia() {
         });
       }
       if (!cam.find((m) => m.eventStreamId === eventStreamId)) {
-        console.log(
-          "tetkektektekktektektkektektketkekte",
-          notificationEvent,
-          cam
-        );
         toggleSetCam({
           eventStreamId: eventStreamId,
           isCameraOn: notificationEvent.camera,
@@ -259,11 +293,10 @@ function AntMedia() {
 
   function updateStatus(obj) {
     if (roomName !== obj) {
-      console.log("updateStatusupdateStatusupdateStatus", mic);
-
       handleSendNotificationEvent("UPDATE_STATUS", myLocalData.streamId, {
         mic: !!mic.find((c) => c.eventStreamId === "localVideo")?.isMicMuted,
         camera: !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn,
+        isPinned: pinnedVideoId,
       });
     }
   }
@@ -372,6 +405,8 @@ function AntMedia() {
   antmedia.handleDevices = handleDevices;
   antmedia.handleStartScreenShare = handleStartScreenShare;
   antmedia.handleStopScreenShare = handleStopScreenShare;
+  antmedia.handleNotifyPinUser = handleNotifyPinUser;
+  antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
   console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">

@@ -215,8 +215,8 @@ var sdpConstraints = {
 
 var mediaConstraints = {
   video: {
-    width: { max: 640 },
-    height: { max: 480 },
+    width: { max: 320 },
+    height: { max: 240 },
   },
   audio: true,
 };
@@ -229,8 +229,25 @@ function checkTrackStatus(streamIdList, publishStreamId) {
     }
   });
 }
+let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
-const websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+if (!websocketURL) {
+  const appName = window.location.pathname.substring(
+    0,
+    window.location.pathname.lastIndexOf("/") + 1
+  );
+  const path =
+    window.location.hostname +
+    ":" +
+    window.location.port +
+    appName +
+    "websocket";
+  websocketURL = "ws://" + path;
+
+  if (window.location.protocol.startsWith("https")) {
+    websocketURL = "wss://" + path;
+  }
+}
 // let streamsList;
 
 const webRTCAdaptor = new WebRTCAdaptor({
@@ -333,7 +350,9 @@ const webRTCAdaptor = new WebRTCAdaptor({
         // console.log("remoteStreamName: ", remoteStreamName);
       }
     } else if (info == "available_devices") {
-      webRTCAdaptor.handleDevices(obj);
+      if (webRTCAdaptor && webRTCAdaptor.handleDevices) {
+        webRTCAdaptor.handleDevices(obj);
+      }
     }
   },
   callbackError: function (error, message) {

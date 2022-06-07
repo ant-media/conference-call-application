@@ -5,7 +5,7 @@ import { AntmediaContext } from "App";
 import { MediaSettingsContext } from "pages/AntMedia";
 import { Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -24,11 +24,11 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 function ShareScreenButton({ footer, ...props }) {
   const { t } = useTranslation();
   const antmedia = useContext(AntmediaContext);
-  const { isScreenShared, myLocalData, cam, toggleSetCam } = useContext(MediaSettingsContext);
+  const { isScreenShared, myLocalData } = useContext(MediaSettingsContext);
 
   return (
     <Tooltip
-      title={isScreenShared ? t('You are presenting') : t('Present now')}
+      title={isScreenShared ? t("You are presenting") : t("Present now")}
       placement="top"
     >
       <CustomizedBtn
@@ -41,14 +41,6 @@ function ShareScreenButton({ footer, ...props }) {
               myLocalData.streamId
             );
           } else {
-            if (cam.find(c => c.eventStreamId === "localVideo" && !c.isCameraOn)) {
-              toggleSetCam({
-                eventStreamId: 'localVideo',
-                isCameraOn: true,
-              });
-              antmedia.turnOnLocalCamera(myLocalData.streamId);
-              antmedia.handleSendNotificationEvent('CAM_TURNED_ON', myLocalData.streamId);
-            }
             antmedia.handleStartScreenShare();
             // send other that you are sharing screen.
             antmedia.handleSendNotificationEvent(
