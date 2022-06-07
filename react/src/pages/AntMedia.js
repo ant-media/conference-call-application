@@ -33,6 +33,7 @@ function AntMedia() {
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState(null);
 
+  const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   // { id: "", tracks:[] },
   const [participants, setParticipants] = useState([]);
@@ -71,12 +72,22 @@ function AntMedia() {
     });
   }
   function handleStartScreenShare() {
-    setIsScreenShared(true);
     antmedia.switchDesktopCapture(myLocalData.streamId);
+    setIsScreenShared(true);
   }
   function handleStopScreenShare() {
     setIsScreenShared(false);
-    antmedia.switchVideoCameraCapture(myLocalData.streamId);
+    if (
+      cam.find(
+        (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
+      )
+    ) {
+      antmedia.turnOffLocalCamera(myLocalData.streamId);
+    } else {
+      antmedia.switchVideoCameraCapture(myLocalData.streamId);
+
+      // isCameraOff = true;
+    }
   }
   function handleSetMessages(msg) {
     setMessages((oldMessages) => {
@@ -218,13 +229,17 @@ function AntMedia() {
         });
       } else if (eventType === "SCREEN_SHARED_ON") {
         console.log(
-          "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON"
+          "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON",
+          eventStreamId
         );
+        setScreenSharedVideoId(eventStreamId);
+
         setPinnedVideoId(eventStreamId);
       } else if (eventType === "SCREEN_SHARED_OFF") {
         console.log(
           "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON"
         );
+        setScreenSharedVideoId(null);
         setPinnedVideoId(null);
       } else if (eventType === "UPDATE_STATUS") {
         setUserStatus(notificationEvent, eventStreamId);
@@ -426,6 +441,7 @@ function AntMedia() {
             devices,
             myLocalData,
             handleDrawerOpen,
+            screenSharedVideoId,
           }}
         >
           <SnackbarProvider
@@ -460,6 +476,7 @@ function AntMedia() {
                   numberOfUnReadMessages,
                   pinVideo,
                   pinnedVideoId,
+                  screenSharedVideoId,
                 }}
               >
                 <>
