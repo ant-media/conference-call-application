@@ -293,7 +293,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
       //stream is being finished
       console.debug("publish finished");
     } else if (info == "screen_share_stopped") {
-      console.log("screen share stopped");
+      console.log("screen share stopped", obj);
+      webRTCAdaptor.handleScreenshareNotFromPlatform();
     } else if (info == "browser_screen_share_supported") {
       console.log("browser screen share supported");
     } else if (info == "leavedFromRoom") {

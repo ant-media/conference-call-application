@@ -75,6 +75,22 @@ function AntMedia() {
     antmedia.switchDesktopCapture(myLocalData.streamId);
     setIsScreenShared(true);
   }
+  function handleScreenshareNotFromPlatform() {
+    setIsScreenShared(false);
+    if (
+      cam.find(
+        (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
+      )
+    ) {
+      antmedia.turnOffLocalCamera(myLocalData.streamId);
+    } else {
+      antmedia.switchVideoCameraCapture(myLocalData.streamId);
+    }
+    antmedia.handleSendNotificationEvent(
+      "SCREEN_SHARED_OFF",
+      myLocalData.streamId
+    );
+  }
   function handleStopScreenShare() {
     setIsScreenShared(false);
     if (
@@ -420,6 +436,7 @@ function AntMedia() {
   antmedia.handleDevices = handleDevices;
   antmedia.handleStartScreenShare = handleStartScreenShare;
   antmedia.handleStopScreenShare = handleStopScreenShare;
+  antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
   console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
