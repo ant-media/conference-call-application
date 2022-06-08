@@ -34,10 +34,10 @@ const VideoCard = React.memo(
 
     const refVideo = useCallback(
       (node) => {
-        if (node && props.tracks)
-          node.srcObject = new MediaStream(props.tracks);
+        if (node && props.track)
+          node.srcObject = new MediaStream([props.track]);
       },
-      [props.tracks]
+      [props.track]
     );
 
     let isOff = mediaSettings?.cam?.find(
@@ -69,7 +69,7 @@ const VideoCard = React.memo(
     const isLocal = props?.id === "localVideo";
     const mirrorView = isLocal && !mediaSettings?.isScreenShared;
 
-    return (
+    return isLocal || props.track?.kind !== "audio" ? (
       <>
         <Grid
           container
@@ -208,6 +208,15 @@ const VideoCard = React.memo(
             )}
           </div>
         </Grid>
+      </>
+    ) : (
+      <>
+        <video
+          style={{ display: "none" }}
+          {...props}
+          ref={refVideo}
+          playsInline
+        ></video>
       </>
     );
   }

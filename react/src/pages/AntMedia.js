@@ -35,8 +35,9 @@ function AntMedia() {
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
-  // { id: "", tracks:[] },
+  // { id: "", track:{} },
   const [participants, setParticipants] = useState([]);
+  const [audioTracks, setAudioTracks] = useState([]);
   const [devices, setDevices] = useState([]);
   const [mic, setMic] = useState([]);
 
@@ -196,6 +197,8 @@ function AntMedia() {
   }
 
   function handleNotificationEvent(obj) {
+    console.log("CALCACLACLACLACLACLALCACLALCLCACLALCAL", obj);
+
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
       var eventStreamId = notificationEvent.streamId;
@@ -361,6 +364,19 @@ function AntMedia() {
       obj
     );
     let index = obj.trackId.substring("ARDAMSx".length);
+    if (obj.track.kind === "audio") {
+      setAudioTracks((sat) => {
+        return [
+          ...sat,
+          {
+            id: index,
+            track: obj.track,
+            streamId: obj.streamId,
+          },
+        ];
+      });
+      return;
+    }
     if (index === publishStreamId) {
       return;
     }
@@ -368,54 +384,29 @@ function AntMedia() {
       return;
     } else {
       setParticipants((spp) => {
-        let participant = spp.find((p) => p.id === index);
-        if (participant) {
-          return spp.map((s) => {
-            if (s.id === index) {
-              return { ...s, tracks: [...participant.tracks, obj.track] };
-            }
-            return s;
-          });
-        } else {
-          return [
-            ...spp,
-            {
-              id: index,
-              tracks: [obj.track],
-              streamId: obj.streamId,
-              isCameraOn: true,
-              name: "",
-            },
-          ];
-        }
+        return [
+          ...spp,
+          {
+            id: index,
+            track: obj.track,
+            streamId: obj.streamId,
+            isCameraOn: true,
+            name: "",
+          },
+        ];
       });
     }
   }
+  console.log("participantsparticipantsparticipants", participants);
   function handleRoomEvents({ streams, streamList }) {
-    //
-    // if anyone leave the room this if will be activated and remove the left user from participant list.
-    if (
-      _.differenceBy(
-        participants,
-        streams.map((s) => ({ id: s })),
-
-        "id"
-      ).length !== 0
-    ) {
-      setParticipants((oldParts) =>
-        oldParts.filter((p) => streams.find((s) => s === p.id))
-      );
-      setPinnedVideoId(null);
-    } else if (
-      streamList.length > 0 &&
-      participants.some((p) => p.name === "")
-    ) {
+    console.log(
+      "GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE",
+      streamList,
+      participants
+    );
+    if (streamList.length < participants.length) {
       setParticipants((oldParts) => {
-        return oldParts.map((p) => {
-          let existStreamer = streamList.find((s) => s.streamId === p.id);
-          if (existStreamer) return { ...p, name: existStreamer.streamName };
-          return p;
-        });
+        return oldParts.slice(0, streamList.length);
       });
     }
   }
@@ -465,6 +456,7 @@ function AntMedia() {
             myLocalData,
             handleDrawerOpen,
             screenSharedVideoId,
+            audioTracks,
           }}
         >
           <SnackbarProvider
@@ -500,6 +492,7 @@ function AntMedia() {
                   pinVideo,
                   pinnedVideoId,
                   screenSharedVideoId,
+                  audioTracks,
                 }}
               >
                 <>
