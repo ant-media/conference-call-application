@@ -110,7 +110,7 @@ form {
   background: rgb(254, 246, 243);
   background: linear-gradient(
     180deg,
-    rgba(254, 246, 243, 0) 20%,
+    rgba(254, 246, 243, 0) 0%,
     rgba(0, 0, 0, 0.5) 100%
   );
 }
@@ -176,9 +176,9 @@ form {
 }
 
 .unpinned {
-  height: 33% !important; 
-  max-height: 33%; 
-  min-height: 33%;
+  height: 25% !important; 
+  max-height: 25%; 
+  min-height: 25%;
   width: 100%;
   border-radius:4;
 }
@@ -221,6 +221,9 @@ form {
 
 /* END OTHERS TILE*/
 
+.layout-radio-label{
+  width:100%;
+}
 
 @media (max-width:900px) {
   .App-header {
@@ -239,6 +242,7 @@ form {
     left: unset;
   }
   .single-video-card .name-indicator {
-    padding: 4px;
+    padding-bottom: 8px !important;
+    padding: 12px;
   }
 }
