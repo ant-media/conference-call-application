@@ -5,6 +5,7 @@ import Menu from '@mui/material/Menu';
 import { styled } from '@mui/material/styles';
 import MenuItem from '@mui/material/MenuItem';
 import { SettingsDialog } from './SettingsDialog';
+import { LayoutSettingsDialog } from './LayoutSettingsDialog';
 import { ListItemIcon, ListItemText, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -27,6 +28,7 @@ function OptionButton({ footer, ...props }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
 
   // if you select camera then we are going to focus on camera button.
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -46,10 +48,20 @@ function OptionButton({ footer, ...props }) {
   const handleDialogClose = value => {
     setDialogOpen(false);
   };
+  const handleLayoutDialogOpen = focus => {
+    setSelectFocus(focus);
+    setLayoutDialogOpen(true);
+    handleClose();
+  };
+
+  const handleLayoutDialogClose = value => {
+    setLayoutDialogOpen(false);
+  };
 
   return (
     <>
       <SettingsDialog open={dialogOpen} onClose={handleDialogClose} selectFocus={selectFocus} />
+      <LayoutSettingsDialog open={layoutDialogOpen} onClose={handleLayoutDialogClose} selectFocus={selectFocus} />
       <Tooltip title={t('More Options')} placement="top">
         <CustomizedBtn
           className={footer ? 'footer-icon-button' : ''}
@@ -81,6 +93,12 @@ function OptionButton({ footer, ...props }) {
           horizontal: 'left',
         }}
       >
+         <MenuItem onClick={() => handleLayoutDialogOpen()}>
+          <ListItemIcon>
+            <SvgIcon name={'layout'} color={'white'} />
+          </ListItemIcon>
+          <ListItemText>{t('Change Layout')}</ListItemText>
+        </MenuItem>
         <MenuItem onClick={() => handleDialogOpen()}>
           <ListItemIcon>
             <SvgIcon name={'call-settings'} color={'white'} />

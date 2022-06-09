@@ -110,7 +110,7 @@ form {
   background: rgb(254, 246, 243);
   background: linear-gradient(
     180deg,
-    rgba(254, 246, 243, 0) 20%,
+    rgba(254, 246, 243, 0) 0%,
     rgba(0, 0, 0, 0.5) 100%
   );
 }
@@ -221,6 +221,9 @@ form {
 
 /* END OTHERS TILE*/
 
+.layout-radio-label{
+  width:100%;
+}
 
 @media (max-width:900px) {
   .App-header {
