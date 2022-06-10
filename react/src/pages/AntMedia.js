@@ -397,7 +397,7 @@ function AntMedia() {
       });
     }
   }
-  console.log("participantsparticipantsparticipants", participants);
+  //console.log("participantsparticipantsparticipants", participants);
   function handleRoomEvents({ streams, streamList }) {
     console.log(
       "GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE",
@@ -412,6 +412,7 @@ function AntMedia() {
   }
 
   function handleDevices(obj) {
+   //console.log('deniz5 set devices obj: ', obj);
     setDevices(obj);
   }
 
@@ -436,7 +437,7 @@ function AntMedia() {
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
-  console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
+  //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
       <Grid

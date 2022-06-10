@@ -41,6 +41,7 @@ export function SettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
   const { devices, myLocalData } = React.useContext(MediaSettingsContext);
+  //console.log('deniz6 settings devices: ',  devices);
   const [selectedCamera, setSelectedCamera] = React.useState(null);
   const [selectedMicrophone, setSelectedMicrophone] = React.useState(null);
 
