@@ -88,13 +88,13 @@ function MicButton(props) {
       {mic && mic.isMicMuted ? (
         <Tooltip title={t('Turn on microphone')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e)=>{handleUnmute(e)}}>
-            <SvgIcon size={40} name={'microphone'} color="#fff" />
+            <SvgIcon size={40} name={'muted-microphone'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
       ) : (
         <Tooltip title={t('Turn off microphone')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e)=>{handleMute(e)}}>
-            <SvgIcon size={40} name={'muted-microphone'} color={theme.palette.green[80]} />
+              <SvgIcon size={40} name={'microphone'} color={theme.palette.green[80]} />
           </CustomizedBtn>
         </Tooltip>
       )}
