@@ -52,13 +52,15 @@ function AntMedia() {
       isCameraOn: true, //start with camera on
     },
   ]);
-  function pinVideo(id) {
+  function pinVideo(id, videoLabel = "") {
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
       handleNotifyUnpinUser(id);
+      antmedia.assignVideoTrack(videoLabel, id, false)
     } else {
       setPinnedVideoId(id);
       handleNotifyPinUser(id);
+      antmedia.assignVideoTrack(videoLabel, id, true)
     }
   }
 
@@ -278,6 +280,7 @@ function AntMedia() {
             myLocalData.streamId,
             requestedMediaConstraints
           );
+
         }
       } else if (eventType === "UNPIN_USER") {
         console.log("UNPIN_USER", notificationEvent);
@@ -426,22 +429,18 @@ function AntMedia() {
       streamList,
       participants
     );
-    let isChanged = false;
-    setParticipants((oldParts) => {
-      const newParts = _.cloneDeep(oldParts);
-      newParts.forEach(p => {
-        const newName = streamList.find(s => s.streamId === p.id)?.streamName
-        if (p.name !== newName) {
-          p.name = newName
-          isChanged = true
-        }
-      })
-      if (streamList.length < participants.length) {
-        newParts.slice(0, streamList.length);
-        isChanged = true
-      }
-      return isChanged ? newParts : oldParts
-    });
+    // setParticipants((oldParts) => {
+    //   // if (streamList.length < participants.length) {
+    //   //   return oldParts.filter(0, streamList.length);
+    //   // }
+    //   return oldParts.map(p => {
+    //     const newName = streamList.find(s => s.streamId === p.id)?.streamName
+    //     if (p.name !== newName) {
+    //       return { ...p, name: newName }
+    //     }
+    //     return p
+    //   })
+    // });
   }
 
 

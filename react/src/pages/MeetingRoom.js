@@ -199,14 +199,14 @@ const MeetingRoom = React.memo((props) => {
 
     return (
       <>
-        {slicedParticipants.map(({ id, track, name }, index) => {
+        {slicedParticipants.map(({ id, videoLabel, track, name }, index) => {
           if (id !== "localVideo") {
             return (
               <div className="unpinned">
                 <div className="single-video-container" key={index}>
                   <VideoCard
                     onHandlePin={() => {
-                      pinVideo(id);
+                      pinVideo(id, videoLabel);
                     }}
                     id={id}
                     track={track}
@@ -293,7 +293,7 @@ const MeetingRoom = React.memo((props) => {
                 0,
                 sliceTiles ? showAsOthersSliceIndex : participants.length
               )
-              .map(({ id, track, name }, index) => (
+              .map(({ id, videoLabel, track, name }, index) => (
                 <>
                   <div
                     className="single-video-container not-pinned"
@@ -306,7 +306,7 @@ const MeetingRoom = React.memo((props) => {
                   >
                     <VideoCard
                       onHandlePin={() => {
-                        pinVideo(id);
+                        pinVideo(id, videoLabel);
                       }}
                       id={id}
                       track={track}
@@ -351,7 +351,7 @@ const MeetingRoom = React.memo((props) => {
               //pinned participant
               participants
                 .filter((v) => v.id === pinnedVideoId)
-                .map(({ id, track, name }, index) => (
+                  .map(({ id, videoLabel, track, name }, index) => (
                   <>
                     <div
                       className="single-video-container pinned keep-ratio"
@@ -364,7 +364,7 @@ const MeetingRoom = React.memo((props) => {
                         name={name}
                         pinned
                         onHandlePin={() => {
-                          pinVideo(id);
+                          pinVideo(id, videoLabel);
                         }}
                       />
                     </div>
