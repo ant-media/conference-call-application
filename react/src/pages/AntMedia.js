@@ -40,6 +40,7 @@ function AntMedia() {
   const [audioTracks, setAudioTracks] = useState([]);
   const [devices, setDevices] = useState([]);
   const [mic, setMic] = useState([]);
+  const [talkers, setTalkers] = useState([]);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -197,9 +198,8 @@ function AntMedia() {
   }
 
   function handleNotificationEvent(obj) {
-    console.log("CALCACLACLACLACLACLALCACLALCLCACLALCAL", obj);
-
     var notificationEvent = JSON.parse(obj.data);
+    console.log("CALCACLACLACLACLACLALCACLALCLCACLALCAL", notificationEvent);
     if (notificationEvent != null && typeof notificationEvent == "object") {
       var eventStreamId = notificationEvent.streamId;
       var eventType = notificationEvent.eventType;
@@ -293,6 +293,9 @@ function AntMedia() {
           );
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") {
+        if (!notificationEvent.payload.trackId) {
+          return
+        }
         let isChanged = false;
         setParticipants((oldParticipants) => {
           const newParticipants = _.cloneDeep(oldParticipants);
@@ -305,6 +308,11 @@ function AntMedia() {
           return isChanged ? newParticipants : oldParticipants;
         }
         );
+      } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
+        setTalkers(oldTalkers => {
+          const newTalkers = notificationEvent.payload.filter(p => p.trackId !== "" && p.audioLevel > 100).map((p) => p.trackId.substring("ARDAMSx".length))
+          return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
+        });
       }
     }
   }
@@ -476,6 +484,7 @@ function AntMedia() {
             isScreenShared,
             mic,
             cam,
+            talkers,
             toggleSetCam,
             toggleSetMic,
             devices,

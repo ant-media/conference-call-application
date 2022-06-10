@@ -73,7 +73,12 @@ const VideoCard = React.memo(
       <>
         <Grid
           container
-          style={{ height: "100%", width: "100%", position: "relative" }}
+          style={{
+            height: "100%", width: "100%", position: "relative", ...(mediaSettings.talkers.includes(props.id) ? {
+              border: `4px solid ${theme.palette.primary.main}`,
+              borderRadius: '10px'
+            } : {})
+          }}
           onMouseEnter={() => setDisplayHover(true)}
           onMouseLeave={(e) => setDisplayHover(false)}
         >
