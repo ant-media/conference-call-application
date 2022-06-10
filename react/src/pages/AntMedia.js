@@ -292,6 +292,19 @@ function AntMedia() {
             requestedMediaConstraints
           );
         }
+      } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") {
+        let isChanged = false;
+        setParticipants((oldParticipants) => {
+          const newParticipants = _.cloneDeep(oldParticipants);
+          newParticipants.forEach((p) => {
+            if (p.videoLabel === notificationEvent.payload.videoLabel && p.id !== notificationEvent.payload.trackId) {
+              p.id = notificationEvent.payload.trackId;
+              isChanged = true;
+            }
+          })
+          return isChanged ? newParticipants : oldParticipants;
+        }
+        );
       }
     }
   }
@@ -388,6 +401,7 @@ function AntMedia() {
           ...spp,
           {
             id: index,
+            videoLabel: index,
             track: obj.track,
             streamId: obj.streamId,
             isCameraOn: true,
@@ -404,12 +418,24 @@ function AntMedia() {
       streamList,
       participants
     );
-    if (streamList.length < participants.length) {
-      setParticipants((oldParts) => {
-        return oldParts.slice(0, streamList.length);
-      });
-    }
+    let isChanged = false;
+    setParticipants((oldParts) => {
+      const newParts = _.cloneDeep(oldParts);
+      newParts.forEach(p => {
+        const newName = streamList.find(s => s.streamId === p.id)?.streamName
+        if (p.name !== newName) {
+          p.name = newName
+          isChanged = true
+        }
+      })
+      if (streamList.length < participants.length) {
+        newParts.slice(0, streamList.length);
+        isChanged = true
+      }
+      return isChanged ? newParts : oldParts
+    });
   }
+
 
   function handleDevices(obj) {
     setDevices(obj);
