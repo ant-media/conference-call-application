@@ -74,10 +74,7 @@ const VideoCard = React.memo(
         <Grid
           container
           style={{
-            height: "100%", width: "100%", position: "relative", ...(mediaSettings.talkers.includes(props.id) ? {
-              border: `4px solid ${theme.palette.primary.main}`,
-              borderRadius: '10px'
-            } : {})
+            height: "100%", width: "100%", position: "relative",
           }}
           onMouseEnter={() => setDisplayHover(true)}
           onMouseLeave={(e) => setDisplayHover(false)}
@@ -96,6 +93,7 @@ const VideoCard = React.memo(
                 height: "100%",
                 background: "#2929295c",
                 zIndex: 10,
+                borderRadius: "10px",
               }}
             >
               <Grid
@@ -132,6 +130,13 @@ const VideoCard = React.memo(
 
           <div
             className={`single-video-card ${isTalking ? " is-talking " : ""}`}
+            style={{
+              ...(mediaSettings.talkers.includes(props.id) ? {
+                // boxShadow: `${theme.palette.primary.main} 0px 0px 0px 4px`,
+                outline: `thick solid ${theme.palette.primary.main}`,
+                borderRadius: '10px'
+              } : {})
+            }}
           >
             <Grid
               sx={isOff ? {} : { display: "none" }}
