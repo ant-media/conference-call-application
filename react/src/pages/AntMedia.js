@@ -426,21 +426,27 @@ function AntMedia() {
   function handleRoomEvents({ streams, streamList }) {
     console.log(
       "GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE",
+      streams,
       streamList,
       participants
     );
-    // setParticipants((oldParts) => {
-    //   // if (streamList.length < participants.length) {
-    //   //   return oldParts.filter(0, streamList.length);
-    //   // }
-    //   return oldParts.map(p => {
-    //     const newName = streamList.find(s => s.streamId === p.id)?.streamName
-    //     if (p.name !== newName) {
-    //       return { ...p, name: newName }
-    //     }
-    //     return p
-    //   })
-    // });
+    setParticipants((oldParts) => {
+      if (streams.length < participants.length) {
+        return oldParts.slice(0, streams.length)
+      }
+      if (oldParts.find(p => p.name === '')) {
+        return oldParts.map(p => {
+          const newName = streamList.find(s => s.streamId === p.id)?.streamName
+          if (p.name !== newName) {
+            return { ...p, name: newName }
+          }
+          return p
+        })
+      }
+      return oldParts
+    }
+    );
+
   }
 
 
