@@ -1,28 +1,15 @@
 import React, { useContext } from 'react';
 import { Grid, Typography, Button, TextField, Container } from '@mui/material';
 import VideoCard from 'Components/Cards/VideoCard';
-import MicButton from 'Components/Footer/Components/MicButton';
+import MicButton, { CustomizedBtn, roundStyle } from 'Components/Footer/Components/MicButton';
 import CameraButton from 'Components/Footer/Components/CameraButton';
 import { useParams } from 'react-router-dom';
 import { AntmediaContext } from 'App';
 import { useTranslation } from 'react-i18next';
 import { SettingsDialog } from 'Components/Footer/Components/SettingsDialog';
 import { SvgIcon } from 'Components/SvgIcon';
-import { styled } from '@mui/material/styles';
 
-const CustomizedBtn = styled(Button)(({ theme }) => ({
-  '&.footer-icon-button': {
-    height: '100%',
-    [theme.breakpoints.down('sm')]: {
-      padding: 8,
-      minWidth: 'unset',
-      width: '100%',
-    },
-    '& > svg': {
-      width: 36,
-    },
-  },
-}));
+
 
 function WaitingRoom(props) {
   const { id } = useParams();
@@ -68,7 +55,7 @@ function WaitingRoom(props) {
                 <CustomizedBtn
                   variant="contained"
                   color="secondary"
-                  sx={{ width: { xs: 36, md: 46 }, height: { xs: 36, md: 46 }, minWidth: 'unset', maxWidth: { xs: 36, md: 46 }, maxHeight: { xs: 36, md: 46 }, borderRadius: '50%', padding: '4px' }}
+                  sx={roundStyle}
                   onClick={() => handleDialogOpen()}
                 >
                   <SvgIcon size={40} name={'settings'} color={'white'} />

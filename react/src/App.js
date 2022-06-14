@@ -274,6 +274,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       //stream is being published
       console.debug("publish started to room: " + roomOfStream[obj.streamId]);
       webRTCAdaptor.handleRoomInfo(publishStreamId);
+      webRTCAdaptor.enableLocalIsTalking()
     } else if (info === "publish_finished") {
       //stream is being finished
       console.debug("publish finished");
@@ -338,7 +339,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
         // console.log("remoteStreamName: ", remoteStreamName);
       }
     } else if (info == "available_devices") {
-        webRTCAdaptor.devices = obj;   
+      webRTCAdaptor.devices = obj;
     }
   },
   callbackError: function (error, message) {

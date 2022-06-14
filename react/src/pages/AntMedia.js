@@ -55,11 +55,11 @@ function AntMedia() {
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
       handleNotifyUnpinUser(id);
-      antmedia.assignVideoTrack(videoLabel, id, false)
+      antmedia.assignVideoTrack(videoLabel, id, false);
     } else {
       setPinnedVideoId(id);
       handleNotifyPinUser(id);
-      antmedia.assignVideoTrack(videoLabel, id, true)
+      antmedia.assignVideoTrack(videoLabel, id, true);
     }
   }
 
@@ -86,6 +86,16 @@ function AntMedia() {
     );
   }
   function screenShareOnNotification() {
+    console.log(
+      "screenShareOnNotificationscreenShareOnNotificationscreenShareOnNotification"
+    );
+    antmedia.screenShareOffNotification();
+    let requestedMediaConstraints = {
+      width: 1920,
+      height: 1080,
+    };
+    antmedia.applyConstraints(myLocalData.streamId, requestedMediaConstraints);
+
     antmedia.handleSendNotificationEvent(
       "SCREEN_SHARED_ON",
       myLocalData.streamId
@@ -103,6 +113,11 @@ function AntMedia() {
       antmedia.switchVideoCameraCapture(myLocalData.streamId);
     }
     antmedia.screenShareOffNotification();
+    let requestedMediaConstraints = {
+      width: 320,
+      height: 240,
+    };
+    antmedia.applyConstraints(myLocalData.streamId, requestedMediaConstraints);
   }
   function handleStopScreenShare() {
     setIsScreenShared(false);
@@ -279,7 +294,6 @@ function AntMedia() {
             myLocalData.streamId,
             requestedMediaConstraints
           );
-
         }
       } else if (eventType === "UNPIN_USER") {
         console.log("UNPIN_USER", notificationEvent);
@@ -296,23 +310,27 @@ function AntMedia() {
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") {
         if (!notificationEvent.payload.trackId) {
-          return
+          return;
         }
         let isChanged = false;
         setParticipants((oldParticipants) => {
           const newParticipants = _.cloneDeep(oldParticipants);
           newParticipants.forEach((p) => {
-            if (p.videoLabel === notificationEvent.payload.videoLabel && p.id !== notificationEvent.payload.trackId) {
+            if (
+              p.videoLabel === notificationEvent.payload.videoLabel &&
+              p.id !== notificationEvent.payload.trackId
+            ) {
               p.id = notificationEvent.payload.trackId;
               isChanged = true;
             }
-          })
+          });
           return isChanged ? newParticipants : oldParticipants;
-        }
-        );
+        });
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
-        setTalkers(oldTalkers => {
-          const newTalkers = notificationEvent.payload.filter(p => p.trackId !== "" && p.audioLevel > 100).map((p) => p.trackId.substring("ARDAMSx".length))
+        setTalkers((oldTalkers) => {
+          const newTalkers = notificationEvent.payload
+            .filter((p) => p.trackId !== "" && p.audioLevel > 100)
+            .map((p) => p.trackId.substring("ARDAMSx".length));
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
       }
@@ -431,22 +449,33 @@ function AntMedia() {
     );
     setParticipants((oldParts) => {
       if (streams.length < participants.length) {
-        return oldParts.slice(0, streams.length)
+        return oldParts.slice(0, streams.length);
       }
-      if (oldParts.find(p => p.name === '')) {
-        return oldParts.map(p => {
-          const newName = streamList.find(s => s.streamId === p.id)?.streamName
+      if (oldParts.find((p) => p.name === "")) {
+        return oldParts.map((p) => {
+          const newName = streamList.find(
+            (s) => s.streamId === p.id
+          )?.streamName;
           if (p.name !== newName) {
-            return { ...p, name: newName }
+            return { ...p, name: newName };
           }
-          return p
-        })
+          return p;
+        });
       }
-      return oldParts
-    }
-    );
-
+      return oldParts;
+    });
   }
+
+  function enableLocalIsTalking() {
+    antmedia.enableAudioLevelForLocalStream((value) => {
+      // sounds under 0.01 are probably background noise
+      if (value > 0.01) {
+        setTalkers(oldTalkers => [...oldTalkers, 'localVideo']);
+      } else {
+        setTalkers(oldTalkers => oldTalkers.filter(t => t !== 'localVideo'));
+      }
+    }, 200);
+  };
 
   // custom functions
   antmedia.handlePlayVideo = handlePlayVideo;
@@ -468,6 +497,7 @@ function AntMedia() {
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
+  antmedia.enableLocalIsTalking = enableLocalIsTalking;
   //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
