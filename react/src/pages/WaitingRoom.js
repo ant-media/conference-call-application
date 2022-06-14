@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Grid, Typography, Button, TextField, Container } from '@mui/material';
 import VideoCard from 'Components/Cards/VideoCard';
-import MicButton from 'Components/Footer/Components/MicButton';
+import MicButton, { CustomizedBtn, roundStyle } from 'Components/Footer/Components/MicButton';
 import CameraButton from 'Components/Footer/Components/CameraButton';
 import { useParams } from 'react-router-dom';
 import { AntmediaContext } from 'App';
@@ -49,8 +49,10 @@ function WaitingRoom(props) {
               <Grid item>
                 <MicButton rounded />
               </Grid>
-              <Grid item sx={{position:'absolute',bottom: 28, right: 8}} onClick={() => handleDialogOpen()}>
-              <SvgIcon size={40} name={'option'} color={'white'} />
+              <Grid item sx={{ position: 'absolute', bottom: 16, right: 16 }} onClick={() => handleDialogOpen()}>
+                <CustomizedBtn variant="contained" color="secondary" sx={roundStyle} onClick={(e) => { handleDialogOpen(e) }}>
+                  <SvgIcon size={40} name={'settings'} color={'white'} />
+                </CustomizedBtn>
 
               </Grid>
             </Grid>

@@ -9,9 +9,18 @@ import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import {useTheme} from '@mui/material'
 
-const CustomizedBtn = styled(Button)(({ theme }) => ({
-  '&.footer-icon-button':{
-    
+export const roundStyle = {
+  width: { xs: 36, md: 46 },
+  height: { xs: 36, md: 46 },
+  minWidth: 'unset',
+  maxWidth: { xs: 36, md: 46 },
+  maxHeight: { xs: 36, md: 46 },
+  borderRadius: '50%',
+  padding: '4px',
+};
+
+export const CustomizedBtn = styled(Button)(({ theme }) => ({
+  '&.footer-icon-button': {
     height: '100%',
     [theme.breakpoints.down('sm')]:{
       padding:8,
@@ -70,15 +79,6 @@ function MicButton(props) {
       antmedia.handleSendNotificationEvent('MIC_UNMUTED', settings?.myLocalData?.streamId);
 
     }
-  };
-  const roundStyle = {
-    width: {xs:36,md:46},
-    height: {xs:36,md:46},
-    minWidth: 'unset',
-    maxWidth: {xs:36,md:46},
-    maxHeight: {xs:36,md:46},
-    borderRadius: '50%',
-    padding: '4px',
   };
 
   const mic = settings?.mic?.find(m => m.eventStreamId === 'localVideo');
