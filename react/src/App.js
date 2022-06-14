@@ -338,14 +338,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
         // console.log("remoteStreamName: ", remoteStreamName);
       }
     } else if (info == "available_devices") {
-      // console.log('deniz1 available_devices: ');
-      // console.log('deniz2 webRTCAdaptor: ', webRTCAdaptor);
-      // console.log('deniz3 obj: ', obj);
-      // console.log('webRTCAdaptor?.handleDevices: ', webRTCAdaptor.handleDevices);
-      if (webRTCAdaptor?.handleDevices) {
-       // console.log('deniz4 called webRTCAdaptor.handleDevices: ');
-        webRTCAdaptor.handleDevices(obj);
-      }
+        webRTCAdaptor.devices = obj;   
     }
   },
   callbackError: function (error, message) {

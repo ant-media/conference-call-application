@@ -33,9 +33,10 @@ function MessageInput() {
     const settings = React.useContext(SettingsContext);
     const { t } = useTranslation();
     const [text, setText] = useState("")
+    console.log('deniz1 text: ', text);
     const sendMessage = () => {
+        console.log('deniz2 sendMessage: ', sendMessage);
 
-        console.log("send activated")
         antmedia.handleSendMessage(text)
         settings?.handleSetMessages({
             name: "You",

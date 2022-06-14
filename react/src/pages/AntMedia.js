@@ -38,7 +38,6 @@ function AntMedia() {
   // { id: "", track:{} },
   const [participants, setParticipants] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
-  const [devices, setDevices] = useState([]);
   const [mic, setMic] = useState([]);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -197,7 +196,7 @@ function AntMedia() {
   }
 
   function handleNotificationEvent(obj) {
-    console.log("CALCACLACLACLACLACLALCACLALCLCACLALCAL", obj);
+
 
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
@@ -411,10 +410,6 @@ function AntMedia() {
     }
   }
 
-  function handleDevices(obj) {
-   //console.log('deniz5 set devices obj: ', obj);
-    setDevices(obj);
-  }
 
   // custom functions
   antmedia.handlePlayVideo = handlePlayVideo;
@@ -429,7 +424,6 @@ function AntMedia() {
   antmedia.handleNotificationEvent = handleNotificationEvent;
   antmedia.handleLeaveFromRoom = handleLeaveFromRoom;
   antmedia.handleSendMessage = handleSendMessage;
-  antmedia.handleDevices = handleDevices;
   antmedia.screenShareOffNotification = screenShareOffNotification;
   antmedia.screenShareOnNotification = screenShareOnNotification;
   antmedia.handleStartScreenShare = handleStartScreenShare;
@@ -453,7 +447,6 @@ function AntMedia() {
             cam,
             toggleSetCam,
             toggleSetMic,
-            devices,
             myLocalData,
             handleDrawerOpen,
             screenSharedVideoId,

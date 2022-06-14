@@ -6,10 +6,14 @@ import CameraButton from 'Components/Footer/Components/CameraButton';
 import { useParams } from 'react-router-dom';
 import { AntmediaContext } from 'App';
 import { useTranslation } from 'react-i18next';
+import { SettingsDialog } from 'Components/Footer/Components/SettingsDialog';
+import { SvgIcon } from 'Components/SvgIcon';
 
 function WaitingRoom(props) {
   const { id } = useParams();
   const {t} = useTranslation();
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [selectFocus, setSelectFocus] = React.useState(null);
 
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
@@ -19,12 +23,21 @@ function WaitingRoom(props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   function joinRoom() {
     antmedia.joinRoom(roomName, undefined);
     props.handleChangeRoomStatus('meeting');
   }
+  const handleDialogOpen = focus => {
+    setSelectFocus(focus);
+    setDialogOpen(true);
+  };
+  const handleDialogClose = value => {
+    setDialogOpen(false);
+  };
   return (
     <Container>
+      <SettingsDialog open={dialogOpen} onClose={handleDialogClose} selectFocus={selectFocus} />
       <Grid container spacing={4} justifyContent="space-between" alignItems={'center'}>
         <Grid item md={7} alignSelf="stretch" >
           <Grid container className="waiting-room-video" sx={{  position: 'relative' }}>
@@ -35,6 +48,10 @@ function WaitingRoom(props) {
               </Grid>
               <Grid item>
                 <MicButton rounded />
+              </Grid>
+              <Grid item sx={{position:'absolute',bottom: 28, right: 8}} onClick={() => handleDialogOpen()}>
+              <SvgIcon size={40} name={'option'} color={'white'} />
+
               </Grid>
             </Grid>
           </Grid>
