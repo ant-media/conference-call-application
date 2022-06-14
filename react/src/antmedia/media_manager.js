@@ -1292,7 +1292,7 @@ export class MediaManager {
       }
       console.log(
         "Added sound meter for stream: " +
-          streamId +
+        'localVideo' +
           " = " +
           soundMeter.instant.toFixed(2)
       );

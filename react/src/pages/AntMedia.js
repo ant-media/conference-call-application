@@ -448,6 +448,17 @@ function AntMedia() {
 
   }
 
+  function enableLocalIsTalking() {
+    antmedia.enableAudioLevelForLocalStream((value) => {
+      // sounds under 0.01 are probably background noise
+      if (value > 0.01) {
+        setTalkers(oldTalkers => [...oldTalkers, 'localVideo']);
+      } else {
+        setTalkers(oldTalkers => oldTalkers.filter(t => t !== 'localVideo'));
+      }
+    }, 200);
+  };
+
   // custom functions
   antmedia.handlePlayVideo = handlePlayVideo;
   antmedia.handleRoomEvents = handleRoomEvents;
@@ -468,6 +479,7 @@ function AntMedia() {
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
+  antmedia.enableLocalIsTalking = enableLocalIsTalking;
   //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
