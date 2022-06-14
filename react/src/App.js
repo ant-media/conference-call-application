@@ -338,7 +338,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
         // console.log("remoteStreamName: ", remoteStreamName);
       }
     } else if (info == "available_devices") {
-        webRTCAdaptor.devices = obj;   
+      webRTCAdaptor.devices = obj;
     }
   },
   callbackError: function (error, message) {
