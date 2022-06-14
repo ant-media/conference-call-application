@@ -6,12 +6,10 @@ import { SettingsContext } from "pages/AntMedia";
 import { useTranslation } from "react-i18next";
 
 const MessageInputContainer = styled(Grid)(({ theme }) => ({
-  position: "absolute",
+ 
   padding: "16px 16px 8px 16px",
   background: theme.palette.green[70],
-  zIndex: 1,
-  bottom: 8,
-  left: 0,
+
 }));
 const MessageTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {

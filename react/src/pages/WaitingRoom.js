@@ -8,10 +8,25 @@ import { AntmediaContext } from 'App';
 import { useTranslation } from 'react-i18next';
 import { SettingsDialog } from 'Components/Footer/Components/SettingsDialog';
 import { SvgIcon } from 'Components/SvgIcon';
+import { styled } from '@mui/material/styles';
+
+const CustomizedBtn = styled(Button)(({ theme }) => ({
+  '&.footer-icon-button': {
+    height: '100%',
+    [theme.breakpoints.down('sm')]: {
+      padding: 8,
+      minWidth: 'unset',
+      width: '100%',
+    },
+    '& > svg': {
+      width: 36,
+    },
+  },
+}));
 
 function WaitingRoom(props) {
   const { id } = useParams();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectFocus, setSelectFocus] = React.useState(null);
 
@@ -39,8 +54,8 @@ function WaitingRoom(props) {
     <Container>
       <SettingsDialog open={dialogOpen} onClose={handleDialogClose} selectFocus={selectFocus} />
       <Grid container spacing={4} justifyContent="space-between" alignItems={'center'}>
-        <Grid item md={7} alignSelf="stretch" >
-          <Grid container className="waiting-room-video" sx={{  position: 'relative' }}>
+        <Grid item md={7} alignSelf="stretch">
+          <Grid container className="waiting-room-video" sx={{ position: 'relative' }}>
             <VideoCard id="localVideo" autoPlay muted hidePin={true} />
             <Grid container columnSpacing={2} justifyContent="center" alignItems="center" sx={{ position: 'absolute', bottom: 0, left: 0, p: 2, zIndex: 10 }}>
               <Grid item>
@@ -49,9 +64,15 @@ function WaitingRoom(props) {
               <Grid item>
                 <MicButton rounded />
               </Grid>
-              <Grid item sx={{position:'absolute',bottom: 28, right: 8}} onClick={() => handleDialogOpen()}>
-              <SvgIcon size={40} name={'option'} color={'white'} />
-
+              <Grid item sx={{ position: 'absolute', bottom: 16, right: 8 }}>
+                <CustomizedBtn
+                  variant="contained"
+                  color="secondary"
+                  sx={{ width: { xs: 36, md: 46 }, height: { xs: 36, md: 46 }, minWidth: 'unset', maxWidth: { xs: 36, md: 46 }, maxHeight: { xs: 36, md: 46 }, borderRadius: '50%', padding: '4px' }}
+                  onClick={() => handleDialogOpen()}
+                >
+                  <SvgIcon size={40} name={'settings'} color={'white'} />
+                </CustomizedBtn>
               </Grid>
             </Grid>
           </Grid>
@@ -63,12 +84,12 @@ function WaitingRoom(props) {
           <Grid container justifyContent={'center'}>
             <Grid container justifyContent={'center'}>
               <Typography variant="h5" align="center" color={'white'}>
-              {t("What's your name?")}
+                {t("What's your name?")}
               </Typography>
             </Grid>
-            <Grid container justifyContent={'center'} sx={{ mt: {xs:1,md:2.5} }}>
+            <Grid container justifyContent={'center'} sx={{ mt: { xs: 1, md: 2.5 } }}>
               <Typography variant="h6" align="center" color={'white'} fontWeight={'400'}>
-              {t('At first, we need to know your name to inform room host.')}{' '}
+                {t('At first, we need to know your name to inform room host.')}{' '}
               </Typography>
             </Grid>
 
@@ -78,12 +99,21 @@ function WaitingRoom(props) {
               }}
             >
               <Grid item xs={12} sx={{ mt: 3, mb: 4 }}>
-                <TextField autoFocus required fullWidth color="primary" value={props.streamName} variant="outlined" onChange={e => props.handleStreamName(e.target.value)} placeholder={t('Your name')} />
+                <TextField
+                  autoFocus
+                  required
+                  fullWidth
+                  color="primary"
+                  value={props.streamName}
+                  variant="outlined"
+                  onChange={e => props.handleStreamName(e.target.value)}
+                  placeholder={t('Your name')}
+                />
               </Grid>
               <Grid container justifyContent={'center'}>
                 <Grid item sm={6} xs={12}>
                   <Button fullWidth color="secondary" variant="contained" type="submit">
-                  {t("I'm ready to join")}
+                    {t("I'm ready to join")}
                   </Button>
                 </Grid>
               </Grid>

@@ -73,7 +73,7 @@ function OptionButton({ footer, ...props }) {
           aria-expanded={open ? 'true' : undefined}
           onClick={handleClick}
         >
-          <SvgIcon size={40} name={'option'} color={open ? 'black' : 'white'} />
+          <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'white'} />
         </CustomizedBtn>
       </Tooltip>
       <Menu
@@ -95,20 +95,20 @@ function OptionButton({ footer, ...props }) {
       >
          <MenuItem onClick={() => handleLayoutDialogOpen()}>
           <ListItemIcon>
-            <SvgIcon name={'layout'} color={'white'} />
+            <SvgIcon size={36} name={'layout'} color={'white'} />
           </ListItemIcon>
           <ListItemText>{t('Change Layout')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleDialogOpen()}>
           <ListItemIcon>
-            <SvgIcon name={'call-settings'} color={'white'} />
+            <SvgIcon size={36} name={'call-settings'} color={'white'} />
           </ListItemIcon>
           <ListItemText>{t('Call Settings')}</ListItemText>
         </MenuItem>
 
         <MenuItem component={'a'} href="https://github.com/ant-media/Ant-Media-Server/issues" target={'_blank'} rel="noopener noreferrer">
           <ListItemIcon>
-            <SvgIcon name={'report'} color={'white'} />
+            <SvgIcon size={36} name={'report'} color={'white'} />
           </ListItemIcon>
           <ListItemText>{t('Report Problem')}</ListItemText>
         </MenuItem>

@@ -38,7 +38,7 @@ const TabGrid = styled(Grid)(({ theme }) => ({
   height: '100%',
   paddingBottom: 16,
   paddingTop: 16,
-  flexWrap:'nowrap'
+  flexWrap: 'nowrap',
 }));
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: '#ffffff',
@@ -73,8 +73,8 @@ export default function MessageDrawer(props) {
   };
   const getParticipantItem = (videoId, name) => {
     return (
-      <Grid container  alignItems="center" justifyContent="space-between" style={{borderBottomWidth: 1}} sx={{ borderColor: 'primary.main'}}>
-        <Grid item sx={{pr:1}}>
+      <Grid container alignItems="center" justifyContent="space-between" style={{ borderBottomWidth: 1 }} sx={{ borderColor: 'primary.main' }}>
+        <Grid item sx={{ pr: 1 }}>
           <ParticipantName variant="body1">{name}</ParticipantName>
         </Grid>
         <Grid item>
@@ -99,7 +99,7 @@ export default function MessageDrawer(props) {
   }
   return (
     <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={drawerOpen} variant="persistent">
-      <MessageGrid container direction="column" style={{ flex:'auto',overFlowY:'auto' }}>
+      <MessageGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
         <Grid item container justifyContent="space-between" alignItems="center">
           <Tabs
             TabIndicatorProps={{
@@ -118,15 +118,16 @@ export default function MessageDrawer(props) {
             <SvgIcon size={24} name={'close'} color={'white'} />
           </Button>
         </Grid>
-        <Grid item xs={12} container style={{ flex: 'auto' }}>
+        <Grid item container justifyContent="space-between" alignItems="center" id="paper-props" style={{ flex: '1 1 auto',overflowY:'auto'}}>
           <TabPanel value={value} index={0}>
-            <TabGrid container direction={'column'}>
-              <TextContainer container>
+            <TabGrid container sx={{pb:0}} direction={'column'}>
+              <TextContainer item container>
                 <Typography color={theme.palette.green[0]} style={{ fontSize: 12 }} variant="body2" align="center">
                   {t('Messages can only be seen by people in the call and are deleted when the call ends')}
                 </Typography>
               </TextContainer>
-              <Grid container sx={{ mt: 1 }} style={{ flexWrap:'nowrap' }} id="paper-props">
+              <Grid item container sx={{ mt: 1 }} style={{ flexWrap: 'nowrap',flex:'auto',overflowY:'auto' }} >
+                {' '}
                 <Grid item xs={12}>
                   {settings?.messages.map((m, index) => (
                     <Grid item key={index} xs={12}>
@@ -156,6 +157,7 @@ export default function MessageDrawer(props) {
             </TabGrid>
           </TabPanel>
         </Grid>
+        
       </MessageGrid>
     </AntDrawer>
   );
