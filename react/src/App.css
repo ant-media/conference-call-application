@@ -36,9 +36,7 @@ form {
 #paper-props::-webkit-scrollbar {
   width: 12px;
 }
-#paper-props {
-  overflow: hidden;
-}
+
 #paper-props:hover {
   overflow-y: overlay;
 }

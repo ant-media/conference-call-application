@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from '@mui/material/Button';
-import { SvgIcon } from '../../SvgIcon';
+import { SvgIcon } from 'Components/SvgIcon';
 import Menu from '@mui/material/Menu';
 import { styled } from '@mui/material/styles';
 import MenuItem from '@mui/material/MenuItem';

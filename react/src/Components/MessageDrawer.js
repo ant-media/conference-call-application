@@ -38,6 +38,7 @@ const TabGrid = styled(Grid)(({ theme }) => ({
   height: '100%',
   paddingBottom: 16,
   paddingTop: 16,
+  flexWrap:'nowrap'
 }));
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: '#ffffff',
@@ -98,7 +99,7 @@ export default function MessageDrawer(props) {
   }
   return (
     <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={drawerOpen} variant="persistent">
-      <MessageGrid container direction="column" style={{ height: 'calc( 100% - 80px )' }}>
+      <MessageGrid container direction="column" style={{ flex:'auto',overFlowY:'auto' }}>
         <Grid item container justifyContent="space-between" alignItems="center">
           <Tabs
             TabIndicatorProps={{
@@ -125,7 +126,7 @@ export default function MessageDrawer(props) {
                   {t('Messages can only be seen by people in the call and are deleted when the call ends')}
                 </Typography>
               </TextContainer>
-              <Grid container sx={{ mt: 1 }} style={{ height: 'calc( 100% - 208px )' }} id="paper-props">
+              <Grid container sx={{ mt: 1 }} style={{ flexWrap:'nowrap' }} id="paper-props">
                 <Grid item xs={12}>
                   {settings?.messages.map((m, index) => (
                     <Grid item key={index} xs={12}>

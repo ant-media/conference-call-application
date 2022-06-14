@@ -38,7 +38,6 @@ function AntMedia() {
   // { id: "", track:{} },
   const [participants, setParticipants] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
-  const [devices, setDevices] = useState([]);
   const [mic, setMic] = useState([]);
   const [talkers, setTalkers] = useState([]);
 
@@ -422,7 +421,7 @@ function AntMedia() {
       });
     }
   }
-  console.log("participantsparticipantsparticipants", participants);
+  //console.log("participantsparticipantsparticipants", participants);
   function handleRoomEvents({ streams, streamList }) {
     console.log(
       "GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE",
@@ -449,11 +448,6 @@ function AntMedia() {
 
   }
 
-
-  function handleDevices(obj) {
-    setDevices(obj);
-  }
-
   // custom functions
   antmedia.handlePlayVideo = handlePlayVideo;
   antmedia.handleRoomEvents = handleRoomEvents;
@@ -467,7 +461,6 @@ function AntMedia() {
   antmedia.handleNotificationEvent = handleNotificationEvent;
   antmedia.handleLeaveFromRoom = handleLeaveFromRoom;
   antmedia.handleSendMessage = handleSendMessage;
-  antmedia.handleDevices = handleDevices;
   antmedia.screenShareOffNotification = screenShareOffNotification;
   antmedia.screenShareOnNotification = screenShareOnNotification;
   antmedia.handleStartScreenShare = handleStartScreenShare;
@@ -475,7 +468,7 @@ function AntMedia() {
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
-  console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
+  //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
       <Grid
@@ -492,7 +485,6 @@ function AntMedia() {
             talkers,
             toggleSetCam,
             toggleSetMic,
-            devices,
             myLocalData,
             handleDrawerOpen,
             screenSharedVideoId,
