@@ -85,13 +85,13 @@ function MicButton(props) {
       {cam && cam.isCameraOn ? (
         <Tooltip title={t('Turn off camera')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => handleOff(e)}>
-            <SvgIcon size={40} name={'camera'} color={theme.palette.green[80]} />
+            <SvgIcon size={40} name={'camera-off'} color={theme.palette.green[80]} />
           </CustomizedBtn>
         </Tooltip>
       ) : (
         <Tooltip title={t('Turn on camera')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="secondary" sx={rounded ? roundStyle : {}} onClick={(e) => handleOn(e)}>
-              <SvgIcon size={40} name={'camera-off'} color={'#ffffff'} />
+              <SvgIcon size={40} name={'camera'} color={'#ffffff'} />
           </CustomizedBtn>
         </Tooltip>
       )}
