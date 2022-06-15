@@ -470,12 +470,14 @@ function AntMedia() {
     antmedia.enableAudioLevelForLocalStream((value) => {
       // sounds under 0.01 are probably background noise
       if (value > 0.01) {
-        setTalkers(oldTalkers => [...oldTalkers, 'localVideo']);
+        setTalkers((oldTalkers) => [...oldTalkers, "localVideo"]);
       } else {
-        setTalkers(oldTalkers => oldTalkers.filter(t => t !== 'localVideo'));
+        setTalkers((oldTalkers) =>
+          oldTalkers.filter((t) => t !== "localVideo")
+        );
       }
     }, 200);
-  };
+  }
 
   // custom functions
   antmedia.handlePlayVideo = handlePlayVideo;

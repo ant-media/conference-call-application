@@ -6,10 +6,8 @@ import { SettingsContext } from "pages/AntMedia";
 import { useTranslation } from "react-i18next";
 
 const MessageInputContainer = styled(Grid)(({ theme }) => ({
- 
   padding: "16px 16px 8px 16px",
   background: theme.palette.green[70],
-
 }));
 const MessageTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
@@ -24,7 +22,7 @@ const MessageTextField = styled(TextField)(({ theme }) => ({
     borderRadius: 30,
   },
 }));
-function MessageInput() {
+const MessageInput = React.memo(() => {
   const antmedia = useContext(AntmediaContext);
   const settings = React.useContext(SettingsContext);
   const { t } = useTranslation();
@@ -89,6 +87,6 @@ function MessageInput() {
       </form>
     </MessageInputContainer>
   );
-}
+});
 
 export default MessageInput;

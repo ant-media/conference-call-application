@@ -1,56 +1,64 @@
-import * as React from 'react';
-import Drawer from '@mui/material/Drawer';
-import { SettingsContext } from 'pages/AntMedia';
-import { styled } from '@mui/material/styles';
-import { Button, Grid, Typography, useTheme, Stack, Tabs, Tab } from '@mui/material';
-import { SvgIcon } from './SvgIcon';
-import MessageCard from './Cards/MessageCard';
-import MessageInput from './MessageInput';
-import { useTranslation } from 'react-i18next';
+import * as React from "react";
+import Drawer from "@mui/material/Drawer";
+import { SettingsContext } from "pages/AntMedia";
+import { styled } from "@mui/material/styles";
+import {
+  Button,
+  Grid,
+  Typography,
+  useTheme,
+  Stack,
+  Tabs,
+  Tab,
+} from "@mui/material";
+import { SvgIcon } from "./SvgIcon";
+import MessageCard from "./Cards/MessageCard";
+import MessageInput from "./MessageInput";
+import { useTranslation } from "react-i18next";
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
-  '& .MuiBackdrop-root': {
-    backgroundColor: 'transparent',
+  "& .MuiBackdrop-root": {
+    backgroundColor: "transparent",
   },
-  '& .MuiPaper-root': {
+  "& .MuiPaper-root": {
     padding: 12,
-    backgroundColor: 'transparent',
-    boxShadow: 'unset',
+    backgroundColor: "transparent",
+    boxShadow: "unset",
     width: 360,
-    border: 'unset',
+    border: "unset",
   },
 }));
 const TextContainer = styled(Grid)(({ theme }) => ({
-  padding: '10px 18px 8px 18px',
+  padding: "10px 18px 8px 18px",
   background: theme.palette.green[60],
   borderRadius: 6,
   color: theme.palette.green[0],
 }));
 
 const MessageGrid = styled(Grid)(({ theme }) => ({
-  position: 'relative',
+  position: "relative",
   padding: 16,
   background: theme.palette.green[70],
   borderRadius: 10,
 }));
 const TabGrid = styled(Grid)(({ theme }) => ({
-  position: 'relative',
-  height: '100%',
+  position: "relative",
+  height: "100%",
   paddingBottom: 16,
   paddingTop: 16,
-  flexWrap: 'nowrap',
+  flexWrap: "nowrap",
 }));
 const ParticipantName = styled(Typography)(({ theme }) => ({
-  color: '#ffffff',
+  color: "#ffffff",
   fontWeight: 500,
   fontSize: 14,
 }));
 const PinBtn = styled(Button)(({ theme }) => ({
-  '&:hover': {
+  "&:hover": {
     backgroundColor: theme.palette.green[50],
   },
 }));
-export default function MessageDrawer(props) {
+const MessageDrawer = React.memo((props) => {
   const settings = React.useContext(SettingsContext);
   const { drawerOpen, pinnedVideoId, pinVideo } = settings;
   const [value, setValue] = React.useState(0);
@@ -62,28 +70,47 @@ export default function MessageDrawer(props) {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-  const TabPanel = props => {
+  const TabPanel = (props) => {
     const { children, value, index, ...other } = props;
 
     return (
-      <div role="tabpanel" hidden={value !== index} id={`drawer-tabpanel-${index}`} aria-labelledby={`drawer-tab-${index}`} {...other} style={{ height: '100%', width: '100%' }}>
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`drawer-tabpanel-${index}`}
+        aria-labelledby={`drawer-tab-${index}`}
+        {...other}
+        style={{ height: "100%", width: "100%" }}
+      >
         {value === index && children}
       </div>
     );
   };
   const getParticipantItem = (videoId, name) => {
     return (
-      <Grid container alignItems="center" justifyContent="space-between" style={{ borderBottomWidth: 1 }} sx={{ borderColor: 'primary.main' }}>
+      <Grid
+        container
+        alignItems="center"
+        justifyContent="space-between"
+        style={{ borderBottomWidth: 1 }}
+        sx={{ borderColor: "primary.main" }}
+      >
         <Grid item sx={{ pr: 1 }}>
           <ParticipantName variant="body1">{name}</ParticipantName>
         </Grid>
         <Grid item>
           {pinnedVideoId === videoId ? (
-            <PinBtn sx={{ minWidth: 'unset', pt: 1, pb: 1 }} onClick={() => pinVideo(videoId)}>
+            <PinBtn
+              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+              onClick={() => pinVideo(videoId)}
+            >
               <SvgIcon size={28} name="unpin" color="#fff" />
             </PinBtn>
           ) : (
-            <PinBtn sx={{ minWidth: 'unset', pt: 1, pb: 1 }} onClick={() => pinVideo(videoId)}>
+            <PinBtn
+              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+              onClick={() => pinVideo(videoId)}
+            >
               <SvgIcon size={28} name="pin" color="#fff" />
             </PinBtn>
           )}
@@ -94,44 +121,91 @@ export default function MessageDrawer(props) {
   function a11yProps(index) {
     return {
       id: `drawer-tab-${index}`,
-      'aria-controls': `drawer-tabpanel-${index}`,
+      "aria-controls": `drawer-tabpanel-${index}`,
     };
   }
   return (
-    <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={drawerOpen} variant="persistent">
-      <MessageGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
+    <AntDrawer
+      transitionDuration={200}
+      anchor={"right"}
+      id="message-drawer"
+      open={drawerOpen}
+      variant="persistent"
+    >
+      <MessageGrid
+        container
+        direction="column"
+        style={{ flexWrap: "nowrap", height: "100%", overflow: "hidden" }}
+      >
         <Grid item container justifyContent="space-between" alignItems="center">
           <Tabs
             TabIndicatorProps={{
               sx: {
-                display: 'none',
+                display: "none",
               },
             }}
             value={value}
             onChange={handleChange}
             aria-label="messages and participant tabs"
           >
-            <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Messages')} {...a11yProps(0)} />
-            <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Participants')} {...a11yProps(1)} />
+            <Tab
+              disableRipple
+              sx={{ color: "#ffffff80", p: 1, pl: 0 }}
+              label={t("Messages")}
+              {...a11yProps(0)}
+            />
+            <Tab
+              disableRipple
+              sx={{ color: "#ffffff80", p: 1, pl: 0 }}
+              label={t("Participants")}
+              {...a11yProps(1)}
+            />
           </Tabs>
-          <Button sx={{ minWidth: 30 }} onClick={() => settings?.handleDrawerOpen(false)}>
-            <SvgIcon size={24} name={'close'} color={'white'} />
+          <Button
+            sx={{ minWidth: 30 }}
+            onClick={() => settings?.handleDrawerOpen(false)}
+          >
+            <SvgIcon size={24} name={"close"} color={"white"} />
           </Button>
         </Grid>
-        <Grid item container justifyContent="space-between" alignItems="center" id="paper-props" style={{ flex: '1 1 auto',overflowY:'auto'}}>
+        <Grid
+          item
+          container
+          justifyContent="space-between"
+          alignItems="center"
+          id="paper-props"
+          style={{ flex: "1 1 auto", overflowY: "auto" }}
+        >
           <TabPanel value={value} index={0}>
-            <TabGrid container sx={{pb:0}} direction={'column'}>
+            <TabGrid container sx={{ pb: 0 }} direction={"column"}>
               <TextContainer item container>
-                <Typography color={theme.palette.green[0]} style={{ fontSize: 12 }} variant="body2" align="center">
-                  {t('Messages can only be seen by people in the call and are deleted when the call ends')}
+                <Typography
+                  color={theme.palette.green[0]}
+                  style={{ fontSize: 12 }}
+                  variant="body2"
+                  align="center"
+                >
+                  {t(
+                    "Messages can only be seen by people in the call and are deleted when the call ends"
+                  )}
                 </Typography>
               </TextContainer>
-              <Grid item container sx={{ mt: 1 }} style={{ flexWrap: 'nowrap',flex:'auto',overflowY:'auto' }} >
-                {' '}
+              <Grid
+                item
+                container
+                sx={{ mt: 1 }}
+                style={{ flexWrap: "nowrap", flex: "auto", overflowY: "auto" }}
+              >
+                {" "}
                 <Grid item xs={12}>
                   {settings?.messages.map((m, index) => (
                     <Grid item key={index} xs={12}>
-                      <MessageCard date={m.date} isMe={m?.eventType ? false : true} name={m.name} message={m.message} />
+                      <MessageCard
+                        date={m.date}
+                        isMe={m?.eventType ? false : true}
+                        name={m.name}
+                        message={m.message}
+                      />
                     </Grid>
                   ))}
                 </Grid>
@@ -141,14 +215,17 @@ export default function MessageDrawer(props) {
           </TabPanel>
           <TabPanel value={value} index={1}>
             <TabGrid container>
-              <Stack sx={{width:'100%'}} spacing={2}>
+              <Stack sx={{ width: "100%" }} spacing={2}>
                 <Grid container>
                   <SvgIcon size={28} name="participants" color="#fff" />
-                  <ParticipantName variant="body2" style={{ marginLeft: 4, fontWeight: 500 }}>
+                  <ParticipantName
+                    variant="body2"
+                    style={{ marginLeft: 4, fontWeight: 500 }}
+                  >
                     {participants.length + 1}
                   </ParticipantName>
                 </Grid>
-                {getParticipantItem('localVideo', 'You')}
+                {getParticipantItem("localVideo", "You")}
 
                 {participants.map(({ id, name }, index) => {
                   return getParticipantItem(id, name);
@@ -157,8 +234,8 @@ export default function MessageDrawer(props) {
             </TabGrid>
           </TabPanel>
         </Grid>
-        
       </MessageGrid>
     </AntDrawer>
   );
-}
+});
+export default MessageDrawer;

@@ -1,15 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import VideoCard from 'Components/Cards/VideoCard';
-import React, { useContext, useEffect } from 'react';
+import VideoCard from "Components/Cards/VideoCard";
+import React, { useContext, useEffect } from "react";
 
-import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import AvatarGroup from '@mui/material/AvatarGroup';
-import Footer from 'Components/Footer/Footer';
-import { AntmediaContext } from 'App';
-import { SettingsContext } from 'pages/AntMedia';
-import { useTheme } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
+import AvatarGroup from "@mui/material/AvatarGroup";
+import Footer from "Components/Footer/Footer";
+import { AntmediaContext } from "App";
+import { SettingsContext } from "pages/AntMedia";
+import { useTheme } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
 const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
   border: `3px solid ${theme.palette.green[85]} !important`,
@@ -76,12 +76,13 @@ const MeetingRoom = React.memo((props) => {
   const theme = useTheme();
 
   useEffect(() => {
-    if (document.getElementById("localVideo")) {
+    let localVid = document.getElementById("localVideo");
+    if (localVid) {
       antmedia.mediaManager.localVideo = document.getElementById("localVideo");
       antmedia.mediaManager.localVideo.srcObject =
         antmedia.mediaManager.localStream;
     }
-  }, [pinnedVideoId, participants]);
+  }, [pinnedVideoId]);
 
   function handleGalleryResize(calcDrawer) {
     const gallery = document.getElementById("meeting-gallery");
@@ -146,12 +147,13 @@ const MeetingRoom = React.memo((props) => {
   const OthersTile = ({ users, sliceIndex, count, ...props }) => {
     return (
       <div className="others-tile-inner">
-        <AvatarGroup max={4} sx={{ justifyContent: 'center' }}>
+        <AvatarGroup max={4} sx={{ justifyContent: "center" }}>
           {users.slice(sliceIndex).map(({ name }, index) => {
             if (name.length > 0) {
-              const nameArr = name.split(' ');
-              const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
-              const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
+              const nameArr = name.split(" ");
+              const secondLetter = nameArr.length > 1 ? nameArr[1][0] : "";
+              const initials =
+                `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
 
               return (
                 <CustomizedAvatar
@@ -159,10 +161,10 @@ const MeetingRoom = React.memo((props) => {
                   alt={name}
                   sx={{
                     bgcolor: theme.palette.green[50],
-                    color: '#fff',
+                    color: "#fff",
                     width: { xs: 44, md: 64 },
                     height: { xs: 44, md: 64 },
-                    fontSize:{ xs: 20, md: 26 },
+                    fontSize: { xs: 20, md: 26 },
                   }}
                 >
                   {initials}
@@ -173,8 +175,8 @@ const MeetingRoom = React.memo((props) => {
             }
           })}
         </AvatarGroup>
-        <Typography sx={{ mt: 2, color: '#ffffff' }}>
-          {count} other{count > 1 ? 's' : ''}
+        <Typography sx={{ mt: 2, color: "#ffffff" }}>
+          {count} other{count > 1 ? "s" : ""}
         </Typography>
       </div>
     );
@@ -192,7 +194,10 @@ const MeetingRoom = React.memo((props) => {
 
     let slicedParticipants = [];
     if (slicePinnedTiles) {
-      slicedParticipants = unpinnedParticipants.slice(0, showAsOthersSliceIndexPinned);
+      slicedParticipants = unpinnedParticipants.slice(
+        0,
+        showAsOthersSliceIndexPinned
+      );
     } else {
       slicedParticipants = unpinnedParticipants;
     }
@@ -237,7 +242,14 @@ const MeetingRoom = React.memo((props) => {
         {slicePinnedTiles && participants.length > 0 && (
           <div className="unpinned">
             <div className="single-video-container  others-tile-wrapper">
-              <OthersTile users={unpinnedParticipants} sliceIndex={showAsOthersSliceIndexPinned} count={unpinnedParticipants.slice(showAsOthersSliceIndexPinned).length} />
+              <OthersTile
+                users={unpinnedParticipants}
+                sliceIndex={showAsOthersSliceIndexPinned}
+                count={
+                  unpinnedParticipants.slice(showAsOthersSliceIndexPinned)
+                    .length
+                }
+              />
             </div>
           </div>
         )}
@@ -326,7 +338,11 @@ const MeetingRoom = React.memo((props) => {
                   maxWidth: "var(--maxwidth)",
                 }}
               >
-                <OthersTile users={participants} sliceIndex={showAsOthersSliceIndex + 1} count={participants.length - 2} />
+                <OthersTile
+                  users={participants}
+                  sliceIndex={showAsOthersSliceIndex + 1}
+                  count={participants.length - 2}
+                />
               </div>
             )}
           </>
@@ -351,7 +367,7 @@ const MeetingRoom = React.memo((props) => {
               //pinned participant
               participants
                 .filter((v) => v.id === pinnedVideoId)
-                  .map(({ id, videoLabel, track, name }, index) => (
+                .map(({ id, videoLabel, track, name }, index) => (
                   <>
                     <div
                       className="single-video-container pinned keep-ratio"
