@@ -1,10 +1,12 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { styled } from "@mui/material/styles";
 import { MediaSettingsContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
 import { useTranslation } from "react-i18next";
+import { AntmediaContext } from "../../App";
+import _ from 'lodash'
 const CustomizedVideo = styled("video")({
   borderRadius: 4,
   width: "100%",
@@ -17,6 +19,7 @@ const CustomizedVideo = styled("video")({
 const VideoCard = React.memo(
   ({ srcObject, hidePin, onHandlePin, ...props }) => {
     const mediaSettings = useContext(MediaSettingsContext);
+    const antmedia = useContext(AntmediaContext);
     const { t } = useTranslation();
     const [displayHover, setDisplayHover] = React.useState(false);
     const theme = useTheme();
@@ -65,9 +68,25 @@ const VideoCard = React.memo(
     }
     const mic = mediaSettings?.mic?.find((m) => m.eventStreamId === props?.id);
 
-    let isTalking = false;
+    const [isTalking, setIsTalking] = React.useState(false);
+    const throttledSetIsTalking = useRef(_.throttle((value) => {
+      setIsTalking(value)
+    }, 1000))
     const isLocal = props?.id === "localVideo";
     const mirrorView = isLocal && !mediaSettings?.isScreenShared;
+    useEffect(() => {
+      if (isLocal && mediaSettings.isPublished) {
+        antmedia.enableAudioLevelForLocalStream((value) => {
+          // sounds under 0.01 are probably background noise
+          if (value > 0.01) {
+            setIsTalking(true);
+          } else {
+            throttledSetIsTalking.current(false);
+          }
+        }, 100);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mediaSettings.isPublished])
 
     return isLocal || props.track?.kind !== "audio" ? (
       <>
@@ -129,9 +148,9 @@ const VideoCard = React.memo(
           )}
 
           <div
-            className={`single-video-card ${isTalking ? " is-talking " : ""}`}
+            className={`single-video-card`}
             style={{
-              ...(mediaSettings.talkers.includes(props.id) ? {
+              ...(isTalking || mediaSettings.talkers.includes(props.id) ? {
                 // boxShadow: `${theme.palette.primary.main} 0px 0px 0px 4px`,
                 outline: `thick solid ${theme.palette.primary.main}`,
                 borderRadius: '10px'

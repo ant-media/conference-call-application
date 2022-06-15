@@ -89,6 +89,7 @@ const MessageDrawer = React.memo((props) => {
   const getParticipantItem = (videoId, name) => {
     return (
       <Grid
+        key={videoId}
         container
         alignItems="center"
         justifyContent="space-between"
@@ -210,7 +211,6 @@ const MessageDrawer = React.memo((props) => {
                   ))}
                 </Grid>
               </Grid>
-              <MessageInput />
             </TabGrid>
           </TabPanel>
           <TabPanel value={value} index={1}>
@@ -234,6 +234,7 @@ const MessageDrawer = React.memo((props) => {
             </TabGrid>
           </TabPanel>
         </Grid>
+        {value === 0 && <MessageInput />}
       </MessageGrid>
     </AntDrawer>
   );

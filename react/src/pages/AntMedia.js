@@ -40,6 +40,7 @@ function AntMedia() {
   const [audioTracks, setAudioTracks] = useState([]);
   const [mic, setMic] = useState([]);
   const [talkers, setTalkers] = useState([]);
+  const [isPublished, setIsPublished] = useState(false);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -329,7 +330,7 @@ function AntMedia() {
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         setTalkers((oldTalkers) => {
           const newTalkers = notificationEvent.payload
-            .filter((p) => p.trackId !== "" && p.audioLevel > 100)
+            .filter((p) => p.trackId !== "" && p.audioLevel > 150)
             .map((p) => p.trackId.substring("ARDAMSx".length));
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
@@ -368,6 +369,7 @@ function AntMedia() {
   }
   function handleRoomInfo(publishStreamId) {
     antmedia.getRoomInfo(roomName, publishStreamId);
+    setIsPublished(true);
   }
 
   function updateStatus(obj) {
@@ -466,18 +468,6 @@ function AntMedia() {
     });
   }
 
-  function enableLocalIsTalking() {
-    antmedia.enableAudioLevelForLocalStream((value) => {
-      // sounds under 0.01 are probably background noise
-      if (value > 0.01) {
-        setTalkers((oldTalkers) => [...oldTalkers, "localVideo"]);
-      } else {
-        setTalkers((oldTalkers) =>
-          oldTalkers.filter((t) => t !== "localVideo")
-        );
-      }
-    }, 200);
-  }
 
   // custom functions
   antmedia.handlePlayVideo = handlePlayVideo;
@@ -499,7 +489,6 @@ function AntMedia() {
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
-  antmedia.enableLocalIsTalking = enableLocalIsTalking;
   //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
@@ -521,6 +510,7 @@ function AntMedia() {
             handleDrawerOpen,
             screenSharedVideoId,
             audioTracks,
+            isPublished
           }}
         >
           <SnackbarProvider
