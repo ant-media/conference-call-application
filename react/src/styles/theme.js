@@ -67,14 +67,14 @@ const Theme = createTheme({
     MuiSelect: {
       styleOverrides: {
         root: {
-          '& fieldset': {
-            borderColor: 'white',
-          }
+          "& fieldset": {
+            borderColor: "white",
+          },
         },
         icon: {
-          color: 'white',
-        }
-      }
+          color: "white",
+        },
+      },
     },
     MuiIconButton: {
       styleOverrides: {
@@ -200,7 +200,7 @@ const Theme = createTheme({
       styleOverrides: {
         outlinedSecondary: {
           border: `1px solid ${green60}`,
-          color: 'white',
+          color: "white",
         },
         root: {
           borderRadius: 6,
