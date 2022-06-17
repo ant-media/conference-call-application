@@ -62,7 +62,7 @@ const MessageDrawer = React.memo((props) => {
   const settings = React.useContext(SettingsContext);
   const { drawerOpen, pinnedVideoId, pinVideo } = settings;
   const [value, setValue] = React.useState(0);
-  const { participants } = props;
+  const { allParticipants } = props;
 
   const theme = useTheme();
   const { t } = useTranslation();
@@ -222,13 +222,13 @@ const MessageDrawer = React.memo((props) => {
                     variant="body2"
                     style={{ marginLeft: 4, fontWeight: 500 }}
                   >
-                    {participants.length + 1}
+                    {allParticipants.length + 1}
                   </ParticipantName>
                 </Grid>
                 {getParticipantItem("localVideo", "You")}
 
-                {participants.map(({ id, name }, index) => {
-                  return getParticipantItem(id, name);
+                {allParticipants.map(({ id,  streamName }, index) => {
+                  return getParticipantItem(id, streamName);
                 })}
               </Stack>
             </TabGrid>

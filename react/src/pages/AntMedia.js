@@ -37,6 +37,7 @@ function AntMedia() {
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   // { id: "", track:{} },
   const [participants, setParticipants] = useState([]);
+  const [allParticipants, setAllParticipants] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
   const [mic, setMic] = useState([]);
   const [talkers, setTalkers] = useState([]);
@@ -443,12 +444,13 @@ function AntMedia() {
   }
   //console.log("participantsparticipantsparticipants", participants);
   function handleRoomEvents({ streams, streamList }) {
-    console.log(
-      "GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE",
-      streams,
-      streamList,
-      participants
-    );
+    // console.log(
+    //   "GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE",
+    //   streams,
+    //   streamList,
+    //   participants
+    // );
+    setAllParticipants(streamList);
     setParticipants((oldParts) => {
       if (streams.length < participants.length) {
         return oldParts.slice(0, streams.length);
@@ -552,9 +554,10 @@ function AntMedia() {
                 <>
                   <MeetingRoom
                     participants={participants}
+                    allParticipants={allParticipants}
                     myLocalData={myLocalData}
                   />
-                  <MessageDrawer participants={participants} />
+                  <MessageDrawer  allParticipants={allParticipants} />
                 </>
               </SettingsContext.Provider>
             )}
