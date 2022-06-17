@@ -226,4 +226,8 @@
 		<auth-constraint />
 	</security-constraint>
 
+	<error-page>
+		<error-code>404</error-code>
+		<location>/spa.jsp</location>
+	</error-page>
 </web-app>

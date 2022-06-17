@@ -3,6 +3,7 @@ import { Box } from '@mui/system';
 import React from 'react';
 import Link from '@mui/material/Link';
 import { useTranslation } from 'react-i18next';
+import { Link as RouterLink } from 'react-router-dom';
 
 function Home(props) {
   const { t } = useTranslation();
@@ -20,7 +21,7 @@ function Home(props) {
           </Box>
         </Box>
         <Grid container justifyContent={'center'}>
-          <Link href={`/room99`} size="large" variant="contained" color="primary">
+          <Link component={RouterLink} to={`/room99`} size="large" variant="contained" color="primary">
             {t('Create Meeting')}
           </Link>
         </Grid>
