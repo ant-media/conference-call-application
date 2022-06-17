@@ -13,7 +13,7 @@ function DummyCard() {
       justifyContent="center"
       alignItems={"center"}
     >
-      <Avatar src={defaultAvatar} style={{ width: 128, height: 128 }} />{" "}
+      <Avatar src={defaultAvatar} style={{ width: '20%',height:'auto',aspectRatio: '1 / 1',maxWidth: 128, maxHeight: 128 }} />{" "}
     </Grid>
   );
 }

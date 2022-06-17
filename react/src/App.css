@@ -83,8 +83,7 @@ form {
   border-radius: 4px;
 }
 .single-video-card .talking-indicator-light {
-  border: 3px solid var(--green-10);
-  opacity: 0;
+  border: 2px solid #00C2B2;
   position: absolute;
   top: 0;
   left: 0;
@@ -93,9 +92,7 @@ form {
   border-radius: 4px;
   z-index: 10;
 }
-.single-video-card.is-talking .talking-indicator-light {
-  opacity: 1;
-}
+
 .single-video-card .name-indicator {
   position: absolute;
   z-index: 9;
