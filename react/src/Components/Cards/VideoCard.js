@@ -11,7 +11,6 @@ const CustomizedVideo = styled('video')({
   borderRadius: 4,
   width: '100%',
   height: '100%',
-  objectFit: 'cover', //if desktop screenshare is true this must be 'contain'
   objectPosition: 'center',
   backgroundColor: 'transparent',
 });
@@ -61,6 +60,7 @@ const VideoCard = React.memo(({ srcObject, hidePin, onHandlePin, ...props }) => 
   );
   const isLocal = props?.id === 'localVideo';
   const mirrorView = isLocal && !mediaSettings?.isScreenShared;
+  const isScreenSharing = mediaSettings?.isScreenShared || mediaSettings?.screenSharedVideoId === props?.id;
   useEffect(() => {
     if (isLocal && mediaSettings.isPublished) {
       antmedia.enableAudioLevelForLocalStream(value => {
@@ -137,7 +137,7 @@ const VideoCard = React.memo(({ srcObject, hidePin, onHandlePin, ...props }) => 
               transform: mirrorView ? 'rotateY(180deg)' : 'none',
             }}
           >
-            <CustomizedVideo {...props} ref={refVideo} playsInline></CustomizedVideo>
+            <CustomizedVideo {...props} style={{objectFit: isScreenSharing ? 'contain' : 'cover'}} ref={refVideo} playsInline></CustomizedVideo>
           </Grid>
 
           <div
