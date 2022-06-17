@@ -37,7 +37,7 @@ function LeftTheRoom(props) {
                 </Box>
                 <Grid container justifyContent={"center"} spacing={2} sx={{ mt: 2 }} alignItems="center">
                     <Grid item lg={1} md={3} sm={2} xs={3}>
-                        <Button fullWidth color="secondary" variant="outlined" component={"a"} href={`/${id}`}  >{t('Rejoin')}</Button>
+                        <Button fullWidth color="secondary" variant="outlined" component={Link} to={`/${id}`}  >{t('Rejoin')}</Button>
                     </Grid>
                     <Grid item lg={2} md={5} sm={6} xs={8}>
                         <Button fullWidth color="secondary" variant="contained" component={Link} to={`/`}  >{t('Return to home screen')}</Button>
