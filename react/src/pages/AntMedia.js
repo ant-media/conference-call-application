@@ -339,10 +339,9 @@ function AntMedia() {
     }
   }
   function setUserStatus(notificationEvent, eventStreamId) {
-    console.log("notificationEvent", notificationEvent.isScreenShared)
+    console.log("notificationEvent", notificationEvent.isScreenShared);
     if (notificationEvent.isScreenShared) {
       setScreenSharedVideoId(eventStreamId);
-
     }
 
     if (!isScreenShared && participants.find((p) => p.id === eventStreamId)) {
@@ -385,7 +384,7 @@ function AntMedia() {
         mic: !!mic.find((c) => c.eventStreamId === "localVideo")?.isMicMuted,
         camera: !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn,
         isPinned: pinnedVideoId,
-        isScreenShared: isScreenShared
+        isScreenShared: isScreenShared,
       });
     }
   }
@@ -456,17 +455,15 @@ function AntMedia() {
       streams,
       streamList,
       participants,
-      allParticipants,
+      allParticipants
     );
     setAllParticipants(streamList);
     setParticipants((oldParts) => {
       if (streams.length < participants.length) {
-        return oldParts.slice(0, streams.length);
+        return _.orderBy(oldParts, "videoLabel").slice(0, streams.length);
       }
       return oldParts.map((p) => {
-        const newName = streamList.find(
-          (s) => s.streamId === p.id
-        )?.streamName;
+        const newName = streamList.find((s) => s.streamId === p.id)?.streamName;
         if (p.name !== newName) {
           return { ...p, name: newName };
         }
@@ -474,7 +471,6 @@ function AntMedia() {
       });
     });
   }
-
 
   // custom functions
   antmedia.handlePlayVideo = handlePlayVideo;
@@ -517,7 +513,7 @@ function AntMedia() {
             handleDrawerOpen,
             screenSharedVideoId,
             audioTracks,
-            isPublished
+            isPublished,
           }}
         >
           <SnackbarProvider
