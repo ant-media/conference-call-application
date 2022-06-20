@@ -444,18 +444,19 @@ function AntMedia() {
   }
   //console.log("participantsparticipantsparticipants", participants);
   function handleRoomEvents({ streams, streamList }) {
-    // console.log(
-    //   "GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE",
-    //   streams,
-    //   streamList,
-    //   participants
-    // );
+    console.log(
+      "GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE",
+      streams,
+      streamList,
+      participants,
+      allParticipants,
+    );
     setAllParticipants(streamList);
     setParticipants((oldParts) => {
       if (streams.length < participants.length) {
         return oldParts.slice(0, streams.length);
       }
-      if (oldParts.find((p) => p.name === "")) {
+      if (oldParts.find((p) => !p.name)) {
         return oldParts.map((p) => {
           const newName = streamList.find(
             (s) => s.streamId === p.id
@@ -557,7 +558,7 @@ function AntMedia() {
                     allParticipants={allParticipants}
                     myLocalData={myLocalData}
                   />
-                  <MessageDrawer  allParticipants={allParticipants} />
+                  <MessageDrawer allParticipants={allParticipants} />
                 </>
               </SettingsContext.Provider>
             )}
