@@ -189,8 +189,8 @@ const MeetingRoom = React.memo(props => {
         {slicedParticipants.map(({ id, videoLabel, track, name }, index) => {
           if (id !== 'localVideo') {
             return (
-              <div className="unpinned">
-                <div className="single-video-container" key={index}>
+              <div className="unpinned" key={index}>
+                <div className="single-video-container">
                   <VideoCard
                     onHandlePin={() => {
                       pinVideo(id, videoLabel);
@@ -244,7 +244,7 @@ const MeetingRoom = React.memo(props => {
   return (
     <>
       {audioTracks.map((audio, index) => (
-        <VideoCard onHandlePin={() => { }} id={audio.streamId} track={audio.track} autoPlay name={''} style={{ display: 'none' }} />
+        <VideoCard key={index} onHandlePin={() => { }} id={audio.streamId} track={audio.track} autoPlay name={''} style={{ display: 'none' }} />
       ))}
       <div id="meeting-gallery" style={{ height: 'calc(100vh - 80px)' }}>
         {!pinLayout && ( // if not pinned layout show me first as a regular video
