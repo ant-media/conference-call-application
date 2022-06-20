@@ -15,7 +15,7 @@ const CustomizedVideo = styled('video')({
   backgroundColor: 'transparent',
 });
 
-const VideoCard = React.memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
+const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   const mediaSettings = useContext(MediaSettingsContext);
   const antmedia = useContext(AntmediaContext);
   const { t } = useTranslation();
@@ -118,12 +118,12 @@ const VideoCard = React.memo(({ srcObject, hidePin, onHandlePin, ...props }) => 
 
         <div
           className={`single-video-card`}
-          // style={{
-          //   ...(isTalking || mediaSettings.talkers.includes(props.id) ? {
-          //     outline: `thick solid ${theme.palette.primary.main}`,
-          //     borderRadius: '10px'
-          //   } : {})
-          // }}
+        // style={{
+        //   ...(isTalking || mediaSettings.talkers.includes(props.id) ? {
+        //     outline: `thick solid ${theme.palette.primary.main}`,
+        //     borderRadius: '10px'
+        //   } : {})
+        // }}
         >
           <Grid sx={isOff ? {} : { display: 'none' }} style={{ height: '100%' }} container>
             <DummyCard />
@@ -137,7 +137,7 @@ const VideoCard = React.memo(({ srcObject, hidePin, onHandlePin, ...props }) => 
               transform: mirrorView ? 'rotateY(180deg)' : 'none',
             }}
           >
-            <CustomizedVideo {...props} style={{objectFit: isScreenSharing ? 'contain' : 'cover'}} ref={refVideo} playsInline></CustomizedVideo>
+            <CustomizedVideo {...props} style={{ objectFit: isScreenSharing ? 'contain' : 'cover' }} ref={refVideo} playsInline></CustomizedVideo>
           </Grid>
 
           <div
@@ -200,6 +200,6 @@ const VideoCard = React.memo(({ srcObject, hidePin, onHandlePin, ...props }) => 
       <video style={{ display: 'none' }} {...props} ref={refVideo} playsInline></video>
     </>
   );
-});
+};
 
 export default VideoCard;

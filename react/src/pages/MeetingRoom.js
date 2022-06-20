@@ -134,8 +134,8 @@ const MeetingRoom = React.memo(props => {
     return (
       <div className="others-tile-inner">
         <AvatarGroup max={4} sx={{ justifyContent: 'center' }}>
-          {users.reverse().slice(sliceIndex).map(({ name,streamName }, index) => {
-            let username  = name || streamName;
+          {users.reverse().slice(sliceIndex).map(({ name, streamName }, index) => {
+            let username = name || streamName;
             if (username?.length > 0) {
               const nameArr = username.split(' ');
               const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
@@ -233,7 +233,7 @@ const MeetingRoom = React.memo(props => {
   };
 
   //main tile
-  const showAsOthersLimit = 3;
+  const showAsOthersLimit = 5;
   const showAsOthersSliceIndex = showAsOthersLimit - 2;
   const sliceTiles = allParticipants.length + 1 > showAsOthersLimit; //plus 1 is me
 
@@ -244,7 +244,7 @@ const MeetingRoom = React.memo(props => {
   return (
     <>
       {audioTracks.map((audio, index) => (
-        <VideoCard onHandlePin={() => {}} id={audio.streamId} track={audio.track} autoPlay name={''} style={{ display: 'none' }} />
+        <VideoCard onHandlePin={() => { }} id={audio.streamId} track={audio.track} autoPlay name={''} style={{ display: 'none' }} />
       ))}
       <div id="meeting-gallery" style={{ height: 'calc(100vh - 80px)' }}>
         {!pinLayout && ( // if not pinned layout show me first as a regular video
@@ -301,7 +301,7 @@ const MeetingRoom = React.memo(props => {
                   maxWidth: 'var(--maxwidth)',
                 }}
               >
-                <OthersTile users={allParticipants} sliceIndex={showAsOthersSliceIndex + 1} count={allParticipants.length - 2} />
+                <OthersTile users={allParticipants} sliceIndex={showAsOthersSliceIndex + 1} count={allParticipants.length - 4} />
               </div>
             )}
           </>

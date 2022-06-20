@@ -339,6 +339,12 @@ function AntMedia() {
     }
   }
   function setUserStatus(notificationEvent, eventStreamId) {
+    console.log("notificationEvent", notificationEvent.isScreenShared)
+    if (notificationEvent.isScreenShared) {
+      setScreenSharedVideoId(eventStreamId);
+
+    }
+
     if (!isScreenShared && participants.find((p) => p.id === eventStreamId)) {
       if (!mic.find((m) => m.eventStreamId === eventStreamId)) {
         toggleSetMic({
@@ -379,6 +385,7 @@ function AntMedia() {
         mic: !!mic.find((c) => c.eventStreamId === "localVideo")?.isMicMuted,
         camera: !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn,
         isPinned: pinnedVideoId,
+        isScreenShared: isScreenShared
       });
     }
   }
@@ -456,18 +463,15 @@ function AntMedia() {
       if (streams.length < participants.length) {
         return oldParts.slice(0, streams.length);
       }
-      if (oldParts.find((p) => !p.name)) {
-        return oldParts.map((p) => {
-          const newName = streamList.find(
-            (s) => s.streamId === p.id
-          )?.streamName;
-          if (p.name !== newName) {
-            return { ...p, name: newName };
-          }
-          return p;
-        });
-      }
-      return oldParts;
+      return oldParts.map((p) => {
+        const newName = streamList.find(
+          (s) => s.streamId === p.id
+        )?.streamName;
+        if (p.name !== newName) {
+          return { ...p, name: newName };
+        }
+        return p;
+      });
     });
   }
 
@@ -492,7 +496,7 @@ function AntMedia() {
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
-  //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
+  console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
       <Grid

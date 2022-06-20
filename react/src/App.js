@@ -269,6 +269,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
         webRTCAdaptor.handleRoomInfo(publishStreamId);
       }, 5000);
     } else if (info == "newStreamAvailable") {
+      console.log("BERKBERKBERKBERKBREKBREBKERBKREBKRE", obj)
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") {
       //stream is being published
