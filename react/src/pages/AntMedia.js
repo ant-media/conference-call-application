@@ -137,20 +137,20 @@ function AntMedia() {
     antmedia.screenShareOffNotification();
   }
   function handleSetMessages(msg) {
-    
+
     setMessages((oldMessages) => {
       let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
       const isSameUser = lastMessage?.name === msg?.name;
-      const sentInSameTime =  lastMessage?.date === msg?.date;
+      const sentInSameTime = lastMessage?.date === msg?.date;
 
-      if(isSameUser && sentInSameTime){
+      if (isSameUser && sentInSameTime) {
         //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line 
-        lastMessage.message = lastMessage.message +'\n'+ msg.message;
+        lastMessage.message = lastMessage.message + '\n' + msg.message;
         return oldMessages;
-      }else{
+      } else {
         return [...oldMessages, msg];
       }
-      
+
     });
   }
   useEffect(() => {
@@ -328,17 +328,17 @@ function AntMedia() {
         }
         let isChanged = false;
         setParticipants((oldParticipants) => {
-          const newParticipants = _.cloneDeep(oldParticipants);
-          newParticipants.forEach((p) => {
+
+          return oldParticipants.map((p) => {
             if (
               p.videoLabel === notificationEvent.payload.videoLabel &&
               p.id !== notificationEvent.payload.trackId
             ) {
-              p.id = notificationEvent.payload.trackId;
-              isChanged = true;
+              return { ...p, id: notificationEvent.payload.trackId }
             }
+            return p;
           });
-          return isChanged ? newParticipants : oldParticipants;
+
         });
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         setTalkers((oldTalkers) => {
@@ -351,9 +351,12 @@ function AntMedia() {
     }
   }
   function setUserStatus(notificationEvent, eventStreamId) {
-    console.log("notificationEvent", notificationEvent.isScreenShared);
+
     if (notificationEvent.isScreenShared) {
+      console.log("notificationEvent", notificationEvent, eventStreamId);
       setScreenSharedVideoId(eventStreamId);
+      setPinnedVideoId(eventStreamId);
+
     }
 
     if (!isScreenShared && participants.find((p) => p.id === eventStreamId)) {
