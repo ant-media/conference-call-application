@@ -350,7 +350,7 @@ function AntMedia() {
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         setTalkers((oldTalkers) => {
           const newTalkers = notificationEvent.payload
-            .filter((p) => p.trackId !== "" && p.audioLevel > 150)
+            .filter((p) => p.trackId !== "" && p.audioLevel > 150 && (screenSharedVideoId !== p.trackId.substring("ARDAMSx".length)))
             .map((p) => p.trackId.substring("ARDAMSx".length));
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
