@@ -12,7 +12,7 @@ function MessageCard(props) {
   const { date, name, message,isMe } = props;
   
   return (
-    <Grid container sx={{ mb: 3 }} dire>
+    <Grid container sx={{ mb: 3 }} justifyContent={isMe ? 'flex-end' : 'flex-start'} >
       <Grid container alignItems={'center'} justifyContent={isMe ? 'flex-end' : 'flex-start'}>
         <Typography variant="body1" color="white" style={{fontSize:14}}>
           {name}{'  '}
@@ -21,8 +21,8 @@ function MessageCard(props) {
           {date}
         </Typography>
       </Grid>
-      <Grid container sx={{ mt: 1 }} justifyContent={isMe ? 'flex-end' : 'flex-start'}>
-        <HyperTypography variant="body1" fontSize={14} color="white" align="left" fontWeight={400} lineHeight={1.4}>
+      <Grid item xs={8} sx={{ mt: 1 }} >
+        <HyperTypography variant="body1" fontSize={14} color="white" align={isMe ? 'right':'left'} fontWeight={400} lineHeight={1.4}>
           {urlify(message)}
         </HyperTypography>
       </Grid>

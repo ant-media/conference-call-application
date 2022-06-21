@@ -125,6 +125,7 @@ const MessageDrawer = React.memo((props) => {
       "aria-controls": `drawer-tabpanel-${index}`,
     };
   }
+  console.log('messages: ', settings?.messages);
   return (
     <AntDrawer
       transitionDuration={200}
@@ -200,6 +201,7 @@ const MessageDrawer = React.memo((props) => {
                 {" "}
                 <Grid item xs={12}>
                   {settings?.messages.map((m, index) => (
+                    
                     <Grid item key={index} xs={12}>
                       <MessageCard
                         date={m.date}
