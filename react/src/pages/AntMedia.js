@@ -86,6 +86,11 @@ function AntMedia() {
       "SCREEN_SHARED_OFF",
       myLocalData.streamId
     );
+    //if i stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
+    if (pinnedVideoId === "localVideo") {
+      setPinnedVideoId(null);
+    }
+
   }
   function screenShareOnNotification() {
     console.log(
@@ -102,6 +107,8 @@ function AntMedia() {
       "SCREEN_SHARED_ON",
       myLocalData.streamId
     );
+
+    setPinnedVideoId("localVideo");
   }
   function handleScreenshareNotFromPlatform() {
     setIsScreenShared(false);
