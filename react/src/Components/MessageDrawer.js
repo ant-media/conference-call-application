@@ -26,6 +26,11 @@ const AntDrawer = styled(Drawer)(({ theme }) => ({
     boxShadow: "unset",
     width: 360,
     border: "unset",
+    [theme.breakpoints.down('sm')]: {
+      width: '100%',
+      padding: 0,
+      backgroundColor: theme.palette.green70,
+    },
   },
 }));
 const TextContainer = styled(Grid)(({ theme }) => ({
@@ -125,7 +130,7 @@ const MessageDrawer = React.memo((props) => {
       "aria-controls": `drawer-tabpanel-${index}`,
     };
   }
-  
+
   return (
     <AntDrawer
       transitionDuration={200}
@@ -201,7 +206,7 @@ const MessageDrawer = React.memo((props) => {
                 {" "}
                 <Grid item xs={12}>
                   {settings?.messages.map((m, index) => (
-                    
+
                     <Grid item key={index} xs={12}>
                       <MessageCard
                         date={m.date}
@@ -229,7 +234,7 @@ const MessageDrawer = React.memo((props) => {
                 </Grid>
                 {getParticipantItem("localVideo", "You")}
 
-                {allParticipants.map(({ id,  streamName }, index) => {
+                {allParticipants.map(({ id, streamName }, index) => {
                   return getParticipantItem(id, streamName);
                 })}
               </Stack>

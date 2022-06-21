@@ -8,6 +8,10 @@ import { useTranslation } from "react-i18next";
 const MessageInputContainer = styled(Grid)(({ theme }) => ({
   padding: "16px 16px 8px 16px",
   background: theme.palette.green[70],
+  [theme.breakpoints.down('sm')]: {
+    width: '100%',
+    padding: "16px 0px 8px 0px",
+  },
 }));
 const MessageTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
