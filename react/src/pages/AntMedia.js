@@ -137,8 +137,20 @@ function AntMedia() {
     antmedia.screenShareOffNotification();
   }
   function handleSetMessages(msg) {
+    
     setMessages((oldMessages) => {
-      return [...oldMessages, msg];
+      let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
+      const isSameUser = lastMessage?.name === msg?.name;
+      const sentInSameTime =  lastMessage?.date === msg?.date;
+
+      if(isSameUser && sentInSameTime){
+        //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line 
+        lastMessage.message = lastMessage.message +'\n'+ msg.message;
+        return oldMessages;
+      }else{
+        return [...oldMessages, msg];
+      }
+      
     });
   }
   useEffect(() => {

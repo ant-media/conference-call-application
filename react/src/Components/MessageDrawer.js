@@ -125,7 +125,7 @@ const MessageDrawer = React.memo((props) => {
       "aria-controls": `drawer-tabpanel-${index}`,
     };
   }
-  console.log('messages: ', settings?.messages);
+  
   return (
     <AntDrawer
       transitionDuration={200}
