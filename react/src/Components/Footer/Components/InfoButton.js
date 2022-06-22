@@ -14,6 +14,11 @@ const StyledListItemText = styled(ListItemText)(({ theme }) => ({
     fontSize: 14,
   },
 }));
+const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
+  cursor: 'default',
+  padding:'8px 12px',
+  paddingTop: 4
+}));
 
 function InfoButton(props) {
   const { t } = useTranslation();
@@ -27,7 +32,12 @@ function InfoButton(props) {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const meetingLink = 'meetinglink.com/id';
+  const meetingLink = window.location.href;
+
+  const getResolution = () => {
+    const { width, height } = document.getElementById('localVideo').srcObject.getVideoTracks()[0].getSettings();
+    return width+' x '+height;
+  }
 
   return (
     <>
@@ -39,7 +49,7 @@ function InfoButton(props) {
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
           onClick={handleClick}
-          sx={{ px: 1, py: 1.5, minWidth: 'unset' }}
+          sx={{ ml:0.5,px: 1, py: 1.5, minWidth: 'unset' }}
         >
           <SvgIcon size={20} name={'info'} viewBox="0 0 500 500" color="#fff" />
         </Button>
@@ -65,9 +75,10 @@ function InfoButton(props) {
         <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color="#fff">
           {t('Meeting link')}
         </Typography>
-        <MenuItem sx={{ px: 1.5, py: 1, cursor: 'default' }}>
-          <StyledListItemText>{meetingLink}</StyledListItemText>
+        <StyledMenuItem >
+          <StyledListItemText>{meetingLink.replace(/^https?:\/\//, '')}</StyledListItemText>
           <ListItemIcon sx={{ pl: 1, cursor: 'pointer' }}>
+            <Tooltip title={t('Copy meeting link')} placement="top">
             <Button
               sx={{ minWidth: 'unset', px: 1.5, py: 0.5 }}
               variant="text"
@@ -86,8 +97,15 @@ function InfoButton(props) {
             >
               <SvgIcon size={14} viewBox="0 0 500 1000" name={'copy'} color={'white'} />
             </Button>
+            </Tooltip>
           </ListItemIcon>
-        </MenuItem>
+        </StyledMenuItem>
+        <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color="#fff">
+          {t('Resolution')}
+        </Typography>
+        <StyledMenuItem>
+        <StyledListItemText>{getResolution()}</StyledListItemText>
+        </StyledMenuItem>
       </Menu>
     </>
   );

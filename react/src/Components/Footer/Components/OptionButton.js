@@ -70,7 +70,7 @@ function OptionButton({ footer, ...props }) {
         onClose={handleLayoutDialogClose}
         selectFocus={selectFocus}
       />
-      <Tooltip title={t("More Options")} placement="top">
+      <Tooltip title={t("More options")} placement="top">
         <CustomizedBtn
           className={footer ? "footer-icon-button" : ""}
           id="demo-positioned-button"

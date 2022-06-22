@@ -5,7 +5,7 @@
   "Please enter your name, this will be visible to the host and other participants.": "Please enter your name, this will be visible to the host and other participants.",
   "Your name": "Your name",
   "I'm ready to join": "I'm ready to join",
-  "More Options": "More Options",
+  "More options": "More options",
   "Call Settings": "Call Settings",
   "Set Camera and Microphone": "Set Camera and Microphone",
   "Camera": "Camera",
@@ -35,5 +35,7 @@
   "Return to home screen": "Return to home screen",
   "Meeting link":"Meeting link",
   "Info":"Info",
-  "Link copied":"Link copied"
+  "Link copied":"Link copied",
+  "Resolution":"Resolution",
+  "Copy meeting link":"Copy meeting link"
 }
