@@ -60,7 +60,7 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   );
   const isLocal = props?.id === 'localVideo';
   const mirrorView = isLocal && !mediaSettings?.isScreenShared;
-  const isScreenSharing = mediaSettings?.isScreenShared || mediaSettings?.screenSharedVideoId === props?.id;
+  const isScreenSharing = mediaSettings?.isScreenShared && mediaSettings?.screenSharedVideoId === props?.id;
   useEffect(() => {
     if (isLocal && mediaSettings.isPublished) {
       antmedia.enableAudioLevelForLocalStream(value => {

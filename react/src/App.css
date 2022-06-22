@@ -168,6 +168,7 @@ form {
   flex-direction: column;
   padding-right: 8px;
   height: 100%;
+  margin-left: auto;
 }
 
 .unpinned {
