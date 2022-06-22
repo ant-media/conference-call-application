@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Grid, Typography, Button, TextField, Container } from "@mui/material";
+import { Grid, Typography, Button, TextField, Container ,Tooltip} from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
 import MicButton, {
   CustomizedBtn,
@@ -79,6 +79,7 @@ function WaitingRoom(props) {
                 <MicButton rounded />
               </Grid>
               <Grid item sx={{ position: "absolute", bottom: 16, right: 16 }}>
+                <Tooltip title={t("More options")} placement="top">
                 <CustomizedBtn
                   variant="contained"
                   color="secondary"
@@ -87,6 +88,7 @@ function WaitingRoom(props) {
                 >
                   <SvgIcon size={40} name={"settings"} color={"white"} />
                 </CustomizedBtn>
+                </Tooltip>
               </Grid>
             </Grid>
           </Grid>

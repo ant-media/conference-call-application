@@ -16,6 +16,7 @@ const green80 = "#001D1A";
 const green85 = "#024B46";
 const green90 = "#6BCBC3";
 const chatText = "#DDFFFC";
+const darkGray ="#222B2A";
 
 const error = "#DF0515";
 const primaryColor = green10;
@@ -298,6 +299,9 @@ const Theme = createTheme({
       80: green80,
       85: green85,
       90: green90,
+    },
+    gray:{
+      90: darkGray
     },
     text: {
       primary: "#FFFFFF",

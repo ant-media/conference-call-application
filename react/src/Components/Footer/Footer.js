@@ -3,6 +3,7 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import styled from "@mui/material/styles/styled";
 import { SvgIcon } from "../SvgIcon";
+import InfoButton from "./Components/InfoButton";
 import MicButton from "./Components/MicButton";
 import CameraButton from "./Components/CameraButton";
 import OptionButton from "./Components/OptionButton";
@@ -37,6 +38,7 @@ function Footer(props) {
           <Typography color="#ffffff" variant="h6">
             {id}
           </Typography>
+          <InfoButton/>
         </Grid>
       </Grid>
       <Grid item>

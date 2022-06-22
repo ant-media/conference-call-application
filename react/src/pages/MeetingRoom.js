@@ -68,8 +68,13 @@ const MeetingRoom = React.memo(props => {
   const settings = useContext(SettingsContext);
   const { drawerOpen, pinnedVideoId, pinVideo, audioTracks } = settings;
   const { participants, allParticipants } = props;
-  console.log('participants: ', participants);
-  console.log('allParticipants: ', allParticipants);
+
+  const filterOthersTile = (all,showing) => {
+    //this func is gonna be used don't delete
+    const participantIds = showing.map(({id})=> id);
+    const othersIds = all.filter(p => !participantIds.includes(p.id))
+  }
+  //filterOthersTile(allParticipants,participants);
   const theme = useTheme();
 
   useEffect(() => {
