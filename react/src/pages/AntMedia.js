@@ -307,7 +307,10 @@ function AntMedia() {
           eventStreamId,
           screenSharedVideoId
         );
-        if (notificationEvent.streamId === myLocalData.streamId) {
+        if (
+          notificationEvent.streamId === myLocalData.streamId &&
+          !isScreenShared
+        ) {
           let requestedMediaConstraints = {
             width: 640,
             height: 480,
@@ -320,7 +323,10 @@ function AntMedia() {
         }
       } else if (eventType === "UNPIN_USER") {
         console.log("UNPIN_USER", notificationEvent);
-        if (notificationEvent.streamId === myLocalData.streamId) {
+        if (
+          notificationEvent.streamId === myLocalData.streamId &&
+          !isScreenShared
+        ) {
           let requestedMediaConstraints = {
             width: 320,
             height: 240,
