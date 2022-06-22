@@ -66,7 +66,6 @@ function AntMedia() {
   }
 
   function handleNotifyPinUser(id) {
-    console.log("PIN_USER PIN_USER PIN_USER", id);
     handleSendNotificationEvent("PIN_USER", myLocalData.streamId, {
       streamId: id,
     });
@@ -78,7 +77,7 @@ function AntMedia() {
   }
   function handleStartScreenShare() {
     antmedia.switchDesktopCapture(myLocalData.streamId);
-    setIsScreenShared(true);
+
     // antmedia.screenShareOnNotification();
   }
   function screenShareOffNotification() {
@@ -90,12 +89,12 @@ function AntMedia() {
     if (pinnedVideoId === "localVideo") {
       setPinnedVideoId(null);
     }
-
   }
   function screenShareOnNotification() {
     console.log(
       "screenShareOnNotificationscreenShareOnNotificationscreenShareOnNotification"
     );
+    setIsScreenShared(true);
     antmedia.screenShareOffNotification();
     let requestedMediaConstraints = {
       width: 1920,
@@ -144,20 +143,18 @@ function AntMedia() {
     antmedia.screenShareOffNotification();
   }
   function handleSetMessages(msg) {
-
     setMessages((oldMessages) => {
       let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
       const isSameUser = lastMessage?.name === msg?.name;
       const sentInSameTime = lastMessage?.date === msg?.date;
 
       if (isSameUser && sentInSameTime) {
-        //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line 
-        lastMessage.message = lastMessage.message + '\n' + msg.message;
+        //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
+        lastMessage.message = lastMessage.message + "\n" + msg.message;
         return oldMessages;
       } else {
         return [...oldMessages, msg];
       }
-
     });
   }
   useEffect(() => {
@@ -304,7 +301,12 @@ function AntMedia() {
       } else if (eventType === "UPDATE_STATUS") {
         setUserStatus(notificationEvent, eventStreamId);
       } else if (eventType === "PIN_USER") {
-        console.log("PIN_USER", notificationEvent);
+        console.log(
+          "PIN_USERPIN_USERPIN_USERPIN_USERPIN_USERPIN_USERPIN_USERPIN_USER",
+          notificationEvent,
+          eventStreamId,
+          screenSharedVideoId
+        );
         if (notificationEvent.streamId === myLocalData.streamId) {
           let requestedMediaConstraints = {
             width: 640,
@@ -335,22 +337,25 @@ function AntMedia() {
         }
         let isChanged = false;
         setParticipants((oldParticipants) => {
-
           return oldParticipants.map((p) => {
             if (
               p.videoLabel === notificationEvent.payload.videoLabel &&
               p.id !== notificationEvent.payload.trackId
             ) {
-              return { ...p, id: notificationEvent.payload.trackId }
+              return { ...p, id: notificationEvent.payload.trackId };
             }
             return p;
           });
-
         });
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         setTalkers((oldTalkers) => {
           const newTalkers = notificationEvent.payload
-            .filter((p) => p.trackId !== "" && p.audioLevel > 150 && (screenSharedVideoId !== p.trackId.substring("ARDAMSx".length)))
+            .filter(
+              (p) =>
+                p.trackId !== "" &&
+                p.audioLevel > 150 &&
+                screenSharedVideoId !== p.trackId.substring("ARDAMSx".length)
+            )
             .map((p) => p.trackId.substring("ARDAMSx".length));
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
@@ -358,12 +363,10 @@ function AntMedia() {
     }
   }
   function setUserStatus(notificationEvent, eventStreamId) {
-
     if (notificationEvent.isScreenShared) {
       console.log("notificationEvent", notificationEvent, eventStreamId);
       setScreenSharedVideoId(eventStreamId);
       setPinnedVideoId(eventStreamId);
-
     }
 
     if (!isScreenShared && participants.find((p) => p.id === eventStreamId)) {
