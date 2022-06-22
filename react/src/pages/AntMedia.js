@@ -365,8 +365,11 @@ function AntMedia() {
   function setUserStatus(notificationEvent, eventStreamId) {
     if (notificationEvent.isScreenShared) {
       console.log("notificationEvent", notificationEvent, eventStreamId);
-      setScreenSharedVideoId(eventStreamId);
-      setPinnedVideoId(eventStreamId);
+      // if the participant was already pin someone than we should not update it
+      if (!screenSharedVideoId) {
+        setScreenSharedVideoId(eventStreamId);
+        setPinnedVideoId(eventStreamId);
+      }
     }
 
     if (!isScreenShared && participants.find((p) => p.id === eventStreamId)) {
