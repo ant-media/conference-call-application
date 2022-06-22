@@ -341,7 +341,6 @@ function AntMedia() {
         if (!notificationEvent.payload.trackId) {
           return;
         }
-        let isChanged = false;
         setParticipants((oldParticipants) => {
           return oldParticipants.map((p) => {
             if (
