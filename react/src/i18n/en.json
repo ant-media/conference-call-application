@@ -32,5 +32,8 @@
   "You have left the meeting": "You have left the meeting",
   "You can rejoin the meeting, or return to the home page.": "You can rejoin the meeting, or return to the home page.",
   "Rejoin": "Rejoin",
-  "Return to home screen": "Return to home screen"
+  "Return to home screen": "Return to home screen",
+  "Meeting link":"Meeting link",
+  "Info":"Info",
+  "Link copied":"Link copied"
 }

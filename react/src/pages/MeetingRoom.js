@@ -70,6 +70,13 @@ const MeetingRoom = React.memo(props => {
   const { participants, allParticipants } = props;
   console.log('participants: ', participants);
   console.log('allParticipants: ', allParticipants);
+
+  const filterOthersTile = (all,showing) => {
+    const participantIds = showing.map(({id})=> id);
+    const othersIds = all.filter(p => !participantIds.includes(p.id))
+    console.log('othersIds: ', othersIds);
+  }
+  filterOthersTile(allParticipants,participants);
   const theme = useTheme();
 
   useEffect(() => {

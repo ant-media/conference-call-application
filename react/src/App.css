@@ -241,3 +241,11 @@ form {
     padding: 12px;
   }
 }
+@media (max-width: 600px){
+  #unpinned-gallery{
+    display: none;
+  }
+  .single-video-container.pinned{
+    height: auto;
+  }
+}
