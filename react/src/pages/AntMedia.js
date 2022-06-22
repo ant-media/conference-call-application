@@ -493,7 +493,7 @@ function AntMedia() {
     setAllParticipants(streamList);
     setParticipants((oldParts) => {
       if (streams.length < participants.length) {
-        return _.orderBy(oldParts, "videoLabel").slice(0, streams.length);
+        return oldParts.filter((p) => streams.includes(p.id));
       }
       return oldParts.map((p) => {
         const newName = streamList.find((s) => s.streamId === p.id)?.streamName;
