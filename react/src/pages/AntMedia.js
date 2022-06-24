@@ -296,6 +296,10 @@ function AntMedia() {
 
         setPinnedVideoId(eventStreamId);
         if (participants.find((p) => p.id === eventStreamId)) {
+          console.log(
+            "AUHUHAUHAUHAHUHAUAHUAHUAHUAHUHAU",
+            participants.find((p) => p.id === eventStreamId)
+          );
           antmedia.assignVideoTrack(
             participants.find((p) => p.id === eventStreamId).videoLabel,
             id,
@@ -382,6 +386,10 @@ function AntMedia() {
         setScreenSharedVideoId(eventStreamId);
         setPinnedVideoId(eventStreamId);
         if (participants.find((p) => p.id === eventStreamId)) {
+          console.log(
+            "AUHUHAUHAUHAHUHAUAHUAHUAHUAHUHAU status",
+            participants.find((p) => p.id === eventStreamId)
+          );
           antmedia.assignVideoTrack(
             participants.find((p) => p.id === eventStreamId).videoLabel,
             id,
