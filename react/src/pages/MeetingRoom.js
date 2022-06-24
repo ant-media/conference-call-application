@@ -69,10 +69,10 @@ const MeetingRoom = React.memo(props => {
   const { drawerOpen, pinnedVideoId, pinVideo, audioTracks } = settings;
   const { participants, allParticipants } = props;
 
-  const filterOthersTile = (all, showing) => {
+  const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({ id }) => id);
     const othersIds = all.filter(p => !participantIds.includes(p.streamId));
-    return othersIds;
+    return othersIds.sort((a, b) => a.streamName.localeCompare(b.streamName));
   };
   const theme = useTheme();
 
@@ -134,12 +134,12 @@ const MeetingRoom = React.memo(props => {
     return filtered;
   };
 
-  const OthersTile = () => {
+  const OthersTile = (maxGroup) => {
     const count = allParticipants.length - showAsOthersLimit + 1;
     return (
       <div className="others-tile-inner">
-        <AvatarGroup max={4} sx={{ justifyContent: 'center' }}>
-          {filterOthersTile(allParticipants, participants).map(({ name, streamName }, index) => {
+        <AvatarGroup max={maxGroup} sx={{ justifyContent: 'center' }}>
+          {filterAndSortOthersTile(allParticipants, participants).map(({ name, streamName }, index) => {
             let username = name || streamName;
             if (username?.length > 0) {
               const nameArr = username.split(' ');
@@ -228,7 +228,7 @@ const MeetingRoom = React.memo(props => {
         })}
         {sliceTiles && participants.length > 0 && (
           <div className="unpinned">
-            <div className="single-video-container  others-tile-wrapper">{OthersTile()}</div>
+            <div className="single-video-container  others-tile-wrapper">{OthersTile(2)}</div>
           </div>
         )}
       </>
@@ -301,7 +301,7 @@ const MeetingRoom = React.memo(props => {
                   maxWidth: 'var(--maxwidth)',
                 }}
               >
-                {OthersTile()}
+                {OthersTile(4)}
               </div>
             )}
           </>

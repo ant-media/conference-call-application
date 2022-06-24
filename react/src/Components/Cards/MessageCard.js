@@ -22,7 +22,7 @@ function MessageCard(props) {
         </Typography>
       </Grid>
       <Grid item xs={8} sx={{ mt: 1 }} >
-        <HyperTypography variant="body1" fontSize={14} style={{whiteSpace:'pre-wrap'}} color="white" align={isMe ? 'right':'left'} fontWeight={400} lineHeight={1.4}>
+        <HyperTypography variant="body1" fontSize={14} style={{whiteSpace:'pre-wrap',overflowWrap: 'break-word'}} color="white" align={isMe ? 'right':'left'} fontWeight={400} lineHeight={1.4}>
           {urlify(message)}
         </HyperTypography>
       </Grid>
