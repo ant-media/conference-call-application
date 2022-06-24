@@ -295,6 +295,17 @@ function AntMedia() {
         setScreenSharedVideoId(eventStreamId);
 
         setPinnedVideoId(eventStreamId);
+        if (participants.find((p) => p.id === eventStreamId)) {
+          console.log(
+            "AUHUHAUHAUHAHUHAUAHUAHUAHUAHUHAU",
+            participants.find((p) => p.id === eventStreamId)
+          );
+          antmedia.assignVideoTrack(
+            participants.find((p) => p.id === eventStreamId).videoLabel,
+            id,
+            false
+          );
+        }
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
@@ -374,6 +385,17 @@ function AntMedia() {
       if (!screenSharedVideoId) {
         setScreenSharedVideoId(eventStreamId);
         setPinnedVideoId(eventStreamId);
+        if (participants.find((p) => p.id === eventStreamId)) {
+          console.log(
+            "AUHUHAUHAUHAHUHAUAHUAHUAHUAHUHAU status",
+            participants.find((p) => p.id === eventStreamId)
+          );
+          antmedia.assignVideoTrack(
+            participants.find((p) => p.id === eventStreamId).videoLabel,
+            id,
+            false
+          );
+        }
       }
     }
 
