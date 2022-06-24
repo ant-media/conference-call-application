@@ -66,11 +66,9 @@ const PinBtn = styled(Button)(({ theme }) => ({
 const MessageDrawer = React.memo((props) => {
   const settings = React.useContext(SettingsContext);
   const mediaSettings = React.useContext(MediaSettingsContext);
-  console.log('settings: ', mediaSettings);
   const { drawerOpen, pinnedVideoId, pinVideo } = settings;
   const [value, setValue] = React.useState(0);
   const { allParticipants } = props;
-  console.log('msgx allParticipants: ',  allParticipants);
 
   const theme = useTheme();
   const { t } = useTranslation();
@@ -238,8 +236,13 @@ const MessageDrawer = React.memo((props) => {
                 </Grid>
                 {getParticipantItem("localVideo", "You")}
 
-                {allParticipants.map(({ id, streamName }, index) => {
-                  return getParticipantItem(id, streamName);
+                {allParticipants.map(({ streamId, streamName }, index) => {
+                  if(mediaSettings?.myLocalData?.streamId !== streamId){
+                    return getParticipantItem(streamId, streamName);
+                  }else{
+                    return '';
+                  }
+                  
                 })}
               </Stack>
             </TabGrid>
