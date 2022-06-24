@@ -1,6 +1,6 @@
 import * as React from "react";
 import Drawer from "@mui/material/Drawer";
-import { SettingsContext } from "pages/AntMedia";
+import { SettingsContext,MediaSettingsContext } from "pages/AntMedia";
 import { styled } from "@mui/material/styles";
 import {
   Button,
@@ -65,9 +65,12 @@ const PinBtn = styled(Button)(({ theme }) => ({
 }));
 const MessageDrawer = React.memo((props) => {
   const settings = React.useContext(SettingsContext);
+  const mediaSettings = React.useContext(MediaSettingsContext);
+  console.log('settings: ', mediaSettings);
   const { drawerOpen, pinnedVideoId, pinVideo } = settings;
   const [value, setValue] = React.useState(0);
   const { allParticipants } = props;
+  console.log('msgx allParticipants: ',  allParticipants);
 
   const theme = useTheme();
   const { t } = useTranslation();
@@ -75,6 +78,7 @@ const MessageDrawer = React.memo((props) => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
   const TabPanel = (props) => {
     const { children, value, index, ...other } = props;
 

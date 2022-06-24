@@ -233,7 +233,7 @@ function AntMedia() {
 
   function handleNotificationEvent(obj) {
     var notificationEvent = JSON.parse(obj.data);
-    console.log("CALCACLACLACLACLACLALCACLALCLCACLALCAL", notificationEvent);
+    //console.log("CALCACLACLACLACLACLALCACLALCLCACLALCAL", notificationEvent);
     if (notificationEvent != null && typeof notificationEvent == "object") {
       var eventStreamId = notificationEvent.streamId;
       var eventType = notificationEvent.eventType;
@@ -525,7 +525,7 @@ function AntMedia() {
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
-  console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
+  //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
       <Grid
