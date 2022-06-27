@@ -8,11 +8,24 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import Footer from 'Components/Footer/Footer';
 import { AntmediaContext } from 'App';
 import { SettingsContext } from 'pages/AntMedia';
-import { useTheme } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
   border: `3px solid ${theme.palette.green[85]} !important`,
+}));
+const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
+  '& div[class*="MuiAvatar-root-MuiAvatarGroup-avatar"]': {
+    border: `3px solid ${theme.palette.green[85]} !important`,
+    backgroundColor: theme.palette.green[80],
+    color: '#fff',
+    width: 64,
+    height: 64,
+    [theme.breakpoints.down('md')]: {
+      width: 44,
+      height: 44,
+      fontSize: 16,
+    },
+  },
 }));
 
 function debounce(fn, ms) {
@@ -74,7 +87,6 @@ const MeetingRoom = React.memo(props => {
     const othersIds = all.filter(p => !participantIds.includes(p.streamId));
     return othersIds.sort((a, b) => a.streamName.localeCompare(b.streamName));
   };
-  const theme = useTheme();
 
   useEffect(() => {
     let localVid = document.getElementById('localVideo');
@@ -134,12 +146,14 @@ const MeetingRoom = React.memo(props => {
     return filtered;
   };
 
-  const OthersTile = (maxGroup) => {
+  const OthersTile = (maxGroup, small) => {
     const count = allParticipants.length - showAsOthersLimit + 1;
+    const others = filterAndSortOthersTile(allParticipants, participants);
+    const sidebarStyle = small ? { width: { xs: 44, md: 64 }, height: { xs: 44, md: 64 } } : { width: { xs: 44, md: 54 }, height: { xs: 44, md: 54 } };
     return (
       <div className="others-tile-inner">
-        <AvatarGroup max={maxGroup} sx={{ justifyContent: 'center' }}>
-          {filterAndSortOthersTile(allParticipants, participants).map(({ name, streamName }, index) => {
+        <CustomizedAvatarGroup max={maxGroup} sx={{ justifyContent: 'center' }}>
+          {[...others, ...others, ...others].map(({ name, streamName }, index) => {
             let username = name || streamName;
             if (username?.length > 0) {
               const nameArr = username.split(' ');
@@ -151,11 +165,10 @@ const MeetingRoom = React.memo(props => {
                   key={index}
                   alt={username}
                   sx={{
-                    bgcolor: theme.palette.green[50],
+                    bgcolor: 'green.50',
                     color: '#fff',
-                    width: { xs: 44, md: 64 },
-                    height: { xs: 44, md: 64 },
-                    fontSize: { xs: 20, md: 26 },
+                    ...sidebarStyle,
+                    fontSize: { xs: 16, md: 22 },
                   }}
                 >
                   {initials}
@@ -165,7 +178,7 @@ const MeetingRoom = React.memo(props => {
               return null;
             }
           })}
-        </AvatarGroup>
+        </CustomizedAvatarGroup>
         <Typography sx={{ mt: 2, color: '#ffffff' }}>
           {count} other{count > 1 ? 's' : ''}
         </Typography>

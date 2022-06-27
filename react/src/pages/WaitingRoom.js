@@ -9,32 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { SettingsDialog } from 'Components/Footer/Components/SettingsDialog';
 import { SvgIcon } from 'Components/SvgIcon';
 
-import Avatar from '@mui/material/Avatar';
-import AvatarGroup from '@mui/material/AvatarGroup';
-import { styled } from '@mui/material/styles';
-const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
-  maxWidth: '35%',
-  aspectRatio: '1/1',
-  height: 'fit-content',
-  border: `3px solid ${theme.palette.green[85]} !important`,
-  width: 64,
-  [theme.breakpoints.down('md')]:{
-    width: 44,
-  },
-}));
-const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
-  '& .MuiAvatar-root:first-child': {
-    border: `3px solid ${theme.palette.green[85]} !important`,
-    backgroundColor: theme.palette.green[80],
-    color: '#fff',
-    width: 64,
-    aspectRatio: '1/1',
-  height: 'fit-content',
-  [theme.breakpoints.down('md')]:{
-    width: 44,
-  },
-  },
-}));
+
 function WaitingRoom(props) {
   const { id } = useParams();
   const { t } = useTranslation();
@@ -62,15 +37,7 @@ function WaitingRoom(props) {
   const handleDialogClose = value => {
     setDialogOpen(false);
   };
-  const otherTest = [
-    { streamId: '1', streamName: 'a' },
-    { streamId: '2', streamName: 'b' },
-    { streamId: '3', streamName: 'c' },
-    { streamId: '4', streamName: 'd' },
-    { streamId: '5', streamName: 'e' },
-    { streamId: '6', streamName: 'f' },
-    { streamId: '7', streamName: 'g' },
-  ];
+
   return (
     <Container>
       <SettingsDialog open={dialogOpen} onClose={handleDialogClose} selectFocus={selectFocus} />
@@ -110,40 +77,7 @@ function WaitingRoom(props) {
             {t('You can choose whether to open your camera and microphone before you get into room')}
           </Typography>
         </Grid>
-        <Grid item>
-          <div className="single-video-container  others-tile-wrapper">
-            <div className="others-tile-inner">
-              <CustomizedAvatarGroup max={4} sx={{ justifyContent: 'center' }}>
-                {otherTest.map(({ name, streamName }, index) => {
-                  let username = name || streamName;
-                  if (username?.length > 0) {
-                    const nameArr = username.split(' ');
-                    const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
-                    const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
-
-                    return (
-                      <CustomizedAvatar
-                        key={index}
-                        alt={username}
-                        sx={{
-                          bgcolor: 'green.50',
-                          color: '#fff',
-                          width: { xs: 44, md: 64 },
-                          fontSize: { xs: 16, md: 22 },
-                        }}
-                      >
-                        {initials}
-                      </CustomizedAvatar>
-                    );
-                  } else {
-                    return null;
-                  }
-                })}
-              </CustomizedAvatarGroup>
-              <Typography sx={{ mt: 2, color: '#ffffff' }}>1 others</Typography>
-            </div>
-          </div>
-        </Grid>
+      
         <Grid item md={4}>
           <Grid container justifyContent={'center'}>
             <Grid container justifyContent={'center'}>
