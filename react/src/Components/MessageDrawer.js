@@ -182,8 +182,8 @@ const MessageDrawer = React.memo((props) => {
           container
           justifyContent="space-between"
           alignItems="center"
-          id="paper-props"
-          style={{ flex: "1 1 auto", overflowY: "auto" }}
+          
+          style={{ flex: "1 1 auto", overflowY: "hidden" }}
         >
           <TabPanel value={value} index={0}>
             <TabGrid container sx={{ pb: 0 }} direction={"column"}>
@@ -203,6 +203,7 @@ const MessageDrawer = React.memo((props) => {
                 item
                 container
                 sx={{ mt: 1 }}
+                id="paper-props"
                 style={{ flexWrap: "nowrap", flex: "auto", overflowY: "auto" }}
               >
                 {" "}
