@@ -1,8 +1,8 @@
-import React, { forwardRef, useCallback } from "react";
-import { SnackbarContent, useSnackbar } from "notistack";
-import { styled } from "@mui/material/styles";
+import React, { forwardRef, useCallback } from 'react';
+import { SnackbarContent, useSnackbar } from 'notistack';
+import { styled } from '@mui/material/styles';
 import { Grid, Typography, useTheme } from '@mui/material';
-import { SvgIcon } from "./SvgIcon";
+import { SvgIcon } from './SvgIcon';
 
 const AntSnackInfo = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.green[60],
@@ -13,11 +13,9 @@ const AntSnackMessage = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.green[60],
   borderRadius: 6,
   padding: '16px 16px 12px 16px',
-  cursor: 'pointer'
+  cursor: 'pointer',
 }));
-const AntSnackContent = styled(SnackbarContent)(({ theme }) => ({
-
-}));
+const AntSnackContent = styled(SnackbarContent)(({ theme }) => ({}));
 const SnackMessage = forwardRef((props, ref) => {
   const { notificationData } = props;
   const { closeSnackbar } = useSnackbar();
@@ -28,32 +26,51 @@ const SnackMessage = forwardRef((props, ref) => {
     closeSnackbar();
   }, [closeSnackbar]);
 
-  return <AntSnackContent ref={ref}>
-    {notificationData.variant === "info" && (
-      <AntSnackInfo container justifyContent={"center"} alignItems={"center"}>
-        {notificationData.icon && <Grid item sx={{ mr: 0.5 }}>
-          {notificationData.icon}
-        </Grid>}
-        <Typography variant="subtitle2" color={theme.palette.green[0]}>{notificationData.message}</Typography>
-      </AntSnackInfo>
-    )}
-    {
-      notificationData.variant === "message" && (
-        <AntSnackMessage container onClick={() => {
-          notificationData.onClick();
-          handleDismiss();
-        }}>
+  return (
+    <AntSnackContent ref={ref}>
+      {notificationData.variant === 'info' && (
+        <AntSnackInfo container justifyContent={'center'} alignItems={'center'}>
+          {notificationData.icon && (
+            <Grid item sx={{ mr: 0.5 }}>
+              {notificationData.icon}
+            </Grid>
+          )}
+          <Typography variant="subtitle2" color={theme.palette.green[0]}>
+            {notificationData.message}
+          </Typography>
+        </AntSnackInfo>
+      )}
+      {notificationData.variant === 'message' && (
+        <AntSnackMessage
+          container
+          onClick={() => {
+            notificationData.onClick();
+            handleDismiss();
+          }}
+        >
           <Grid container alignItems="center">
-            <SvgIcon size={32} color={"white"} name={"message-off"} />
+            <SvgIcon size={32} color={'white'} name={'message-off'} />
             <Typography sx={{ ml: 0.5 }} variant="subtitle2" color={theme.palette.green[0]}>{`${notificationData.sender}`}</Typography>
           </Grid>
-          <Grid container sx={{ mt: 1 }} style={{ marginLeft: 6 }}>
-            <Typography variant="subtitle2" color={theme.palette.green[0]}>{notificationData.message}</Typography>
+          <Grid container sx={{ mt: 1 }} style={{ marginLeft: 6, maxWidth: 200 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: '3',
+                WebkitBoxOrient: 'vertical',
+              }}
+              color={theme.palette.green[0]}
+            >
+              {notificationData.message}
+            </Typography>
           </Grid>
         </AntSnackMessage>
-      )
-    }
-  </AntSnackContent>;
+      )}
+    </AntSnackContent>
+  );
 });
 
 export default SnackMessage;

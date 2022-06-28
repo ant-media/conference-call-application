@@ -149,11 +149,13 @@ const MeetingRoom = React.memo(props => {
   const OthersTile = (maxGroup, small) => {
     const count = allParticipants.length - showAsOthersLimit + 1;
     const others = filterAndSortOthersTile(allParticipants, participants);
+    //test purposes
+    //others = [...others, ...others, ...others];
     const sidebarStyle = small ? { width: { xs: 44, md: 64 }, height: { xs: 44, md: 64 } } : { width: { xs: 44, md: 54 }, height: { xs: 44, md: 54 } };
     return (
       <div className="others-tile-inner">
         <CustomizedAvatarGroup max={maxGroup} sx={{ justifyContent: 'center' }}>
-          {[...others, ...others, ...others].map(({ name, streamName }, index) => {
+          {others.map(({ name, streamName }, index) => {
             let username = name || streamName;
             if (username?.length > 0) {
               const nameArr = username.split(' ');
