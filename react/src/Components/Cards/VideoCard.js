@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import { styled } from "@mui/material/styles";
+import { alpha,styled } from "@mui/material/styles";
 import { MediaSettingsContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
@@ -14,6 +14,10 @@ const CustomizedVideo = styled("video")({
   objectPosition: "center",
   backgroundColor: "transparent",
 });
+const CustomizedBox = styled(Box)(({ theme }) => ({
+  backgroundColor: alpha(theme.palette.gray[90], 0.3),
+}));
+
 
 const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   const mediaSettings = useContext(MediaSettingsContext);
@@ -26,7 +30,6 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "green.10",
     width: { xs: "6vw", md: 32 },
     height: { xs: "6vw", md: 32 },
     borderRadius: "50%",
@@ -118,6 +121,7 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
             container
             justifyContent={"center"}
             alignItems="center"
+            className="pin-overlay"
             sx={{
               opacity: displayHover ? 1 : 0,
               transition: "opacity 0.3s ease",
@@ -127,7 +131,6 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
               height: "100%",
               background: "#2929295c",
               zIndex: 10,
-              borderRadius: "10px",
             }}
           >
             <Grid
@@ -220,13 +223,13 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
             {mic && mic.isMicMuted && (
               <Tooltip title={t("mic is muted")} placement="top">
                 <Grid item>
-                  <Box sx={cardBtnStyle}>
+                  <CustomizedBox  sx={cardBtnStyle}>
                     <SvgIcon
                       size={32}
                       name={"muted-microphone"}
-                      color={theme.palette.grey[80]}
+                      color="#fff"
                     />
-                  </Box>
+                  </CustomizedBox>
                 </Grid>
               </Tooltip>
             )}
@@ -239,13 +242,13 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
             {props.pinned && (
               <Tooltip title={t("pinned by you")} placement="top">
                 <Grid item>
-                  <Box sx={cardBtnStyle}>
+                  <CustomizedBox sx={cardBtnStyle} >
                     <SvgIcon
                       size={36}
-                      name={"pin"}
-                      color={theme.palette.grey[80]}
+                      name={"unpin"}
+                      color="#fff"
                     />
-                  </Box>
+                  </CustomizedBox>
                 </Grid>
               </Tooltip>
             )}

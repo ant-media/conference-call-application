@@ -81,6 +81,8 @@ const MeetingRoom = React.memo(props => {
   const settings = useContext(SettingsContext);
   const { drawerOpen, pinnedVideoId, pinVideo, audioTracks } = settings;
   const { participants, allParticipants } = props;
+  // console.log('xxx ALL Participants: ', allParticipants);
+  // console.log('xxx VIDEO participants: ', participants);
 
   const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({ id }) => id);
@@ -147,7 +149,7 @@ const MeetingRoom = React.memo(props => {
   };
 
   const OthersTile = (maxGroup, small) => {
-    const count = allParticipants.length - showAsOthersLimit + 1;
+    const count = allParticipants.length - showAsOthersLimit;
     const others = filterAndSortOthersTile(allParticipants, participants);
     //test purposes
     //others = [...others, ...others, ...others];
@@ -205,7 +207,7 @@ const MeetingRoom = React.memo(props => {
     }
 
     return (
-      <>
+      slicedParticipants.length > 0 ? <>
         {slicedParticipants.map(({ id, videoLabel, track, name }, index) => {
           if (id !== 'localVideo') {
             return (
@@ -246,13 +248,15 @@ const MeetingRoom = React.memo(props => {
             <div className="single-video-container  others-tile-wrapper">{OthersTile(2)}</div>
           </div>
         )}
-      </>
+      </>:
+    <Typography variant="body2" sx={{color: 'green.50',mt:3}}>No other participants.</Typography>
     );
   };
 
   //main tile other limit set, max count
-  const showAsOthersLimit = 3; // the total video cards i want to see on screen including my local video card but excluding the others tile. if this is set to 3, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
-  const sliceTiles = allParticipants.length + 1 > showAsOthersLimit; //plus 1 is me
+  const showAsOthersLimit = 2; // the total video cards i want to see on screen excluding my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
+  //with 2 active video participants + 1 me + 1 card
+  const sliceTiles = participants.length + 1 > showAsOthersLimit; //plus 1 is me
 
   const pinLayout = pinnedVideoId !== null ? true : false;
 
@@ -325,6 +329,7 @@ const MeetingRoom = React.memo(props => {
           <>
             {pinnedVideoId === 'localVideo' ? (
               // pinned myself
+              // ${participants.length === 0 ? ' no-participants ' : ''}
               <div className="single-video-container pinned keep-ratio">
                 <VideoCard
                   onHandlePin={() => {
