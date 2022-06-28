@@ -77,7 +77,7 @@ function WaitingRoom(props) {
             {t('You can choose whether to open your camera and microphone before you get into room')}
           </Typography>
         </Grid>
-      
+
         <Grid item md={4}>
           <Grid container justifyContent={'center'}>
             <Grid container justifyContent={'center'}>
@@ -87,7 +87,7 @@ function WaitingRoom(props) {
             </Grid>
             <Grid container justifyContent={'center'} sx={{ mt: { xs: 1, md: 2.5 } }}>
               <Typography variant="h6" align="center" color={'white'} fontWeight={'400'} style={{ fontSize: 18 }}>
-                {t('Please enter your name, this will be visible to the host and other participants.')}{' '}
+                {t('Please enter your name. This will be visible to the host and other participants.')}{' '}
               </Typography>
             </Grid>
 
