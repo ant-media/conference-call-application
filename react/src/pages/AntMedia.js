@@ -42,6 +42,8 @@ function AntMedia() {
   const [mic, setMic] = useState([]);
   const [talkers, setTalkers] = useState([]);
   const [isPublished, setIsPublished] = useState(false);
+  const [selectedCamera, setSelectedCamera] = React.useState('');
+  const [selectedMicrophone, setSelectedMicrophone] = React.useState('');
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -569,6 +571,10 @@ function AntMedia() {
             screenSharedVideoId,
             audioTracks,
             isPublished,
+            setSelectedCamera,
+            selectedCamera,
+            selectedMicrophone,
+            setSelectedMicrophone
           }}
         >
           <SnackbarProvider

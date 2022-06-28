@@ -199,11 +199,12 @@ var sdpConstraints = {
 };
 
 var mediaConstraints = {
-  // setting constraints here breaks source switching on firefox.
-  video: {
-    width: { max: 320 },
-    height: { max: 240 },
-  },
+  // setting constraints here breaks source switching on firefox and possibly on chrome as well.
+  // video: {
+  //   width: { max: 320 },
+  //   height: { max: 240 },
+  // },
+  video: true,
   audio: true,
 };
 

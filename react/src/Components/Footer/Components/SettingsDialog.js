@@ -40,10 +40,7 @@ const AntDialogTitle = props => {
 export function SettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
-  const { myLocalData } = React.useContext(MediaSettingsContext);
-
-  const [selectedCamera, setSelectedCamera] = React.useState(null);
-  const [selectedMicrophone, setSelectedMicrophone] = React.useState(null);
+  const { myLocalData, setSelectedCamera, selectedCamera, setSelectedMicrophone, selectedMicrophone } = React.useContext(MediaSettingsContext);
 
   const antmedia = React.useContext(AntmediaContext);
   const { devices } = antmedia;
@@ -67,9 +64,10 @@ export function SettingsDialog(props) {
     if (devices) {
       const camera = devices.find(d => d.kind === 'videoinput');
       const audio = devices.find(d => d.kind === 'audioinput');
-      if (camera) setSelectedCamera(camera.deviceId);
-      if (audio) setSelectedMicrophone(audio.deviceId);
+      if (camera && selectedCamera === '') setSelectedCamera(camera.deviceId);
+      if (audio && selectedMicrophone === '') setSelectedMicrophone(audio.deviceId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devices]);
 
   return (
@@ -115,7 +113,7 @@ export function SettingsDialog(props) {
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
                 <Select autoFocus={selectFocus === 'audio'} variant="outlined" fullWidth value={selectedMicrophone} onChange={e => switchAudioMode(e.target.value)} sx={{ color: 'white' }}>
-                  { devices && devices?.length > 0 && devices
+                  {devices && devices?.length > 0 && devices
                     .filter(device => device.kind === 'audioinput')
                     .map(device => (
                       <MenuItem key={device.deviceId} value={device.deviceId}>
