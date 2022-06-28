@@ -254,7 +254,7 @@ const MeetingRoom = React.memo(props => {
   };
 
   //main tile other limit set, max count
-  const showAsOthersLimit = 2; // the total video cards i want to see on screen excluding my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
+  const showAsOthersLimit = 3; // the total video cards i want to see on screen excluding my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
   //with 2 active video participants + 1 me + 1 card
   const sliceTiles = participants.length + 1 > showAsOthersLimit; //plus 1 is me
 
