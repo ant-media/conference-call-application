@@ -55,7 +55,12 @@ function AntMedia() {
       isCameraOn: true, //start with camera on
     },
   ]);
-  function pinVideo(id, videoLabel = '') {
+  function pinVideo(id, videoLabelProp = '') {
+    let videoLabel = videoLabelProp
+    if (videoLabel === '') {
+      // if videoLabel is missing select the first videoLabel you find
+      videoLabel = participants.find(p => p.videoLabel !== p.id).videoLabel
+    }
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
       handleNotifyUnpinUser(id);
@@ -422,6 +427,7 @@ function AntMedia() {
     if (index === roomName) {
       return;
     } else {
+      console.log("add participant yunus", index)
       setParticipants(spp => {
         return [
           ...spp,
@@ -453,6 +459,9 @@ function AntMedia() {
         return p;
       });
     });
+    if (!streams.includes(pinnedVideoId)) {
+      setPinnedVideoId(null)
+    }
   }
 
   // custom functions
