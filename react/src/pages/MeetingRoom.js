@@ -149,7 +149,6 @@ const MeetingRoom = React.memo(props => {
   };
 
   const OthersTile = (maxGroup, small) => {
-    const count = allParticipants.length - showAsOthersLimit;
     const others = filterAndSortOthersTile(allParticipants, participants);
     //test purposes
     //others = [...others, ...others, ...others];
@@ -184,7 +183,7 @@ const MeetingRoom = React.memo(props => {
           })}
         </CustomizedAvatarGroup>
         <Typography sx={{ mt: 2, color: '#ffffff' }}>
-          {count} other{count > 1 ? 's' : ''}
+          {others.length} other{others.length > 1 ? 's' : ''}
         </Typography>
       </div>
     );
@@ -254,9 +253,10 @@ const MeetingRoom = React.memo(props => {
   };
 
   //main tile other limit set, max count
-  const showAsOthersLimit = 3; // the total video cards i want to see on screen excluding my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
+  const showAsOthersLimit = 3; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
   //with 2 active video participants + 1 me + 1 card
-  const sliceTiles = participants.length + 1 > showAsOthersLimit; //plus 1 is me
+  const sliceTiles = allParticipants.length + 1 > showAsOthersLimit; //plus 1 is me
+
 
   const pinLayout = pinnedVideoId !== null ? true : false;
 
