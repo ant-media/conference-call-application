@@ -199,6 +199,7 @@ var sdpConstraints = {
 };
 
 var mediaConstraints = {
+  // setting constraints here breaks source switching on firefox.
   video: {
     width: { max: 320 },
     height: { max: 240 },
@@ -357,18 +358,21 @@ const webRTCAdaptor = new WebRTCAdaptor({
     if (error.indexOf("NotFoundError") != -1) {
       errorMessage =
         "Camera or Mic are not found or not allowed in your device.";
+      alert(errorMessage);
     } else if (
       error.indexOf("NotReadableError") != -1 ||
       error.indexOf("TrackStartError") != -1
     ) {
       errorMessage =
         "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
+      alert(errorMessage);
     } else if (
       error.indexOf("OverconstrainedError") != -1 ||
       error.indexOf("ConstraintNotSatisfiedError") != -1
     ) {
       errorMessage =
         "There is no device found that fits your video and audio constraints. You may change video and audio constraints.";
+      alert(errorMessage);
     } else if (
       error.indexOf("NotAllowedError") != -1 ||
       error.indexOf("PermissionDeniedError") != -1
@@ -389,6 +393,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
     } else if (error.indexOf("ScreenSharePermissionDenied") != -1) {
       errorMessage = "You are not allowed to access screen share";
       webRTCAdaptor.handleScreenshareNotFromPlatform();
+    } else if (error.indexOf("WebSocketNotConnected") != -1) {
+      errorMessage = "WebSocket Connection is disconnected.";
     }
 
     console.error(errorMessage);
