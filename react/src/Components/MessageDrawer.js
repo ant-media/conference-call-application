@@ -1,12 +1,12 @@
 import * as React from 'react';
 import Drawer from '@mui/material/Drawer';
 import { styled } from '@mui/material/styles';
-import { Button, Grid, Typography, useTheme, Tabs, Tab } from '@mui/material';
-import { SvgIcon } from './SvgIcon';
+import {  Grid, Typography, useTheme, Tabs, Tab } from '@mui/material';
 import MessageCard from './Cards/MessageCard';
 import MessageInput from './MessageInput';
 import { useTranslation } from 'react-i18next';
 import ParticipantTab from './ParticipantTab';
+import CloseDrawerButton from './DrawerButton';
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
   '& .MuiBackdrop-root': {
@@ -47,15 +47,7 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const MessageDrawer = React.memo(props => {
-  //const settings = React.useContext(MessagesContext);
-  const settings = {
-    drawerOpen: true,
-    messages: [],
-    
-  };
-  console.log('settings: ', settings);
-
-  const { drawerOpen,handleDrawerOpen, messages=[] } = props;
+  const { drawerOpen, messages=[] } = props;
   const [value, setValue] = React.useState(0);
   const { allParticipants } = props;
 
@@ -100,9 +92,7 @@ const MessageDrawer = React.memo(props => {
             <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Messages')} {...a11yProps(0)} />
             <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Participants')} {...a11yProps(1)} />
           </Tabs>
-          <Button sx={{ minWidth: 30 }} onClick={() => handleDrawerOpen(false)}>
-            <SvgIcon size={24} name={'close'} color={'white'} />
-          </Button>
+          <CloseDrawerButton />
         </Grid>
         <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
           <TabPanel value={value} index={0}>

@@ -276,7 +276,7 @@ function AntMedia() {
           let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
           const isSameUser = lastMessage?.name === notificationEvent?.name;
           const sentInSameTime = lastMessage?.date === notificationEvent?.date;
-    
+
           if (isSameUser && sentInSameTime) {
             //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
             lastMessage.message = lastMessage.message + '\n' + notificationEvent.message;
@@ -544,12 +544,16 @@ function AntMedia() {
                   pinnedVideoId,
                   screenSharedVideoId,
                   audioTracks,
-                   allParticipants
+                  allParticipants,
                 }}
               >
                 <>
                   <MeetingRoom participants={participants} allParticipants={allParticipants} myLocalData={myLocalData} />
-                  <MessageDrawer drawerOpen={drawerOpen} messages={messages} />
+                  <MessageDrawer
+                    drawerOpen={drawerOpen}
+                    
+                    messages={messages}
+                  />
                 </>
               </SettingsContext.Provider>
             )}
