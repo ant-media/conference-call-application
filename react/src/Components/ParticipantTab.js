@@ -23,8 +23,7 @@ function ParticipantTab(props) {
   const mediaSettings = React.useContext(MediaSettingsContext);
   const settings = React.useContext(SettingsContext);
 
-  const { pinnedVideoId, pinVideo } = settings;
-  const { allParticipants } = props;
+  const { pinnedVideoId, pinVideo,allParticipants } = settings;
   const getParticipantItem = (videoId, name) => {
     return (
       <Grid key={videoId} container alignItems="center" justifyContent="space-between" style={{ borderBottomWidth: 1 }} sx={{ borderColor: 'primary.main' }}>

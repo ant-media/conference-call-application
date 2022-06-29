@@ -544,6 +544,7 @@ function AntMedia() {
                   pinnedVideoId,
                   screenSharedVideoId,
                   audioTracks,
+                   allParticipants
                 }}
               >
                 <>
