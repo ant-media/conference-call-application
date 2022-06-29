@@ -1,6 +1,5 @@
 import * as React from 'react';
 import Drawer from '@mui/material/Drawer';
-import { SettingsContext } from 'pages/AntMedia';
 import { styled } from '@mui/material/styles';
 import { Button, Grid, Typography, useTheme, Tabs, Tab } from '@mui/material';
 import { SvgIcon } from './SvgIcon';
@@ -48,9 +47,15 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const MessageDrawer = React.memo(props => {
-  const settings = React.useContext(SettingsContext);
+  //const settings = React.useContext(MessagesContext);
+  const settings = {
+    drawerOpen: true,
+    messages: [],
+    
+  };
+  console.log('settings: ', settings);
 
-  const { drawerOpen } = settings;
+  const { drawerOpen,handleDrawerOpen, messages=[] } = props;
   const [value, setValue] = React.useState(0);
   const { allParticipants } = props;
 
@@ -95,7 +100,7 @@ const MessageDrawer = React.memo(props => {
             <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Messages')} {...a11yProps(0)} />
             <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Participants')} {...a11yProps(1)} />
           </Tabs>
-          <Button sx={{ minWidth: 30 }} onClick={() => settings?.handleDrawerOpen(false)}>
+          <Button sx={{ minWidth: 30 }} onClick={() => handleDrawerOpen(false)}>
             <SvgIcon size={24} name={'close'} color={'white'} />
           </Button>
         </Grid>
@@ -110,7 +115,7 @@ const MessageDrawer = React.memo(props => {
               <Grid item container sx={{ mt: 1 }} id="paper-props" style={{ flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto' }}>
                 {' '}
                 <Grid item xs={12}>
-                  {settings?.messages.map((m, index) => (
+                  {messages.map((m, index) => (
                     <Grid item key={index} xs={12}>
                       <MessageCard date={m.date} isMe={m?.eventType ? false : true} name={m.name} message={m.message} />
                     </Grid>

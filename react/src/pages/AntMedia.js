@@ -56,10 +56,10 @@ function AntMedia() {
     },
   ]);
   function pinVideo(id, videoLabelProp = '') {
-    let videoLabel = videoLabelProp
+    let videoLabel = videoLabelProp;
     if (videoLabel === '') {
       // if videoLabel is missing select the first videoLabel you find
-      videoLabel = participants.find(p => p.videoLabel !== p.id).videoLabel
+      videoLabel = participants.find(p => p.videoLabel !== p.id).videoLabel;
     }
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
@@ -133,24 +133,25 @@ function AntMedia() {
     }
     antmedia.screenShareOffNotification();
   }
-  function handleSetMessages(msg) {
+  function handleSetMessages(newMessage) {
     setMessages(oldMessages => {
       let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
-      const isSameUser = lastMessage?.name === msg?.name;
-      const sentInSameTime = lastMessage?.date === msg?.date;
+      const isSameUser = lastMessage?.name === newMessage?.name;
+      const sentInSameTime = lastMessage?.date === newMessage?.date;
 
       if (isSameUser && sentInSameTime) {
         //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
-        lastMessage.message = lastMessage.message + '\n' + msg.message;
-        return oldMessages;
+        lastMessage.message = lastMessage.message + '\n' + newMessage.message;
+        return [...oldMessages]; // dont make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
       } else {
-        return [...oldMessages, msg];
+        return [...oldMessages, newMessage];
       }
     });
   }
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
   function scrollToBottom() {
     let objDiv = document.getElementById('paper-props');
     if (objDiv) objDiv.scrollTop = objDiv?.scrollHeight;
@@ -272,7 +273,17 @@ function AntMedia() {
           setNumberOfUnReadMessages(numb => numb + 1);
         }
         setMessages(oldMessages => {
-          return [...oldMessages, notificationEvent];
+          let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
+          const isSameUser = lastMessage?.name === notificationEvent?.name;
+          const sentInSameTime = lastMessage?.date === notificationEvent?.date;
+    
+          if (isSameUser && sentInSameTime) {
+            //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
+            lastMessage.message = lastMessage.message + '\n' + notificationEvent.message;
+            return [...oldMessages]; // dont make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
+          } else {
+            return [...oldMessages, notificationEvent];
+          }
         });
       } else if (eventType === 'SCREEN_SHARED_ON') {
         setScreenSharedVideoId(eventStreamId);
@@ -427,7 +438,7 @@ function AntMedia() {
     if (index === roomName) {
       return;
     } else {
-      console.log("add participant yunus", index)
+      console.log('add participant yunus', index);
       setParticipants(spp => {
         return [
           ...spp,
@@ -460,7 +471,7 @@ function AntMedia() {
       });
     });
     if (!streams.includes(pinnedVideoId)) {
-      setPinnedVideoId(null)
+      setPinnedVideoId(null);
     }
   }
 
@@ -504,7 +515,7 @@ function AntMedia() {
             setSelectedCamera,
             selectedCamera,
             selectedMicrophone,
-            setSelectedMicrophone
+            setSelectedMicrophone,
           }}
         >
           <SnackbarProvider
@@ -537,7 +548,7 @@ function AntMedia() {
               >
                 <>
                   <MeetingRoom participants={participants} allParticipants={allParticipants} myLocalData={myLocalData} />
-                  <MessageDrawer allParticipants={allParticipants} />
+                  <MessageDrawer drawerOpen={drawerOpen} messages={messages} />
                 </>
               </SettingsContext.Provider>
             )}
