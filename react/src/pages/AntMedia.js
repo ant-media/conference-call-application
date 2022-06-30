@@ -339,7 +339,7 @@ function AntMedia() {
           antmedia.applyConstraints(myLocalData.streamId, requestedMediaConstraints);
         }
       } else if (eventType === 'VIDEO_TRACK_ASSIGNMENT_CHANGE') {
-        console.log('eventType: ', eventType,notificationEvent);
+        console.log('eventType: ', eventType, notificationEvent);
         if (!notificationEvent.payload.trackId) {
           return;
         }
@@ -362,8 +362,8 @@ function AntMedia() {
     }
   }
   function setUserStatus(notificationEvent, eventStreamId) {
+    console.log('notificationEvent', notificationEvent, eventStreamId);
     if (notificationEvent.isScreenShared) {
-      console.log('notificationEvent', notificationEvent, eventStreamId);
       // if the participant was already pin someone than we should not update it
       if (!screenSharedVideoId) {
         setScreenSharedVideoId(eventStreamId);
@@ -417,7 +417,7 @@ function AntMedia() {
       handleSendNotificationEvent('UPDATE_STATUS', myLocalData.streamId, {
         mic: !!mic.find(c => c.eventStreamId === 'localVideo')?.isMicMuted,
         camera: !!cam.find(c => c.eventStreamId === 'localVideo')?.isCameraOn,
-        isPinned: pinnedVideoId,
+        isPinned: pinnedVideoId === 'localVideo' ? myLocalData.streamId : pinnedVideoId,
         isScreenShared: isScreenShared,
       });
     }
@@ -489,7 +489,7 @@ function AntMedia() {
         return p;
       });
     });
-    if (!streams.includes(pinnedVideoId)) {
+    if (pinnedVideoId !== 'localVideo' && !streams.includes(pinnedVideoId)) {
       setPinnedVideoId(null);
     }
   }
