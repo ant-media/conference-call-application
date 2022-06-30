@@ -77,10 +77,21 @@ function AntMedia() {
       streamId: id,
     });
   }
+
   function handleNotifyUnpinUser(id) {
     handleSendNotificationEvent('UNPIN_USER', myLocalData.streamId, {
       streamId: id,
     });
+  }
+  function handleSetMaxVideoTrackCount(maxTrackCount) {
+    if (myLocalData?.streamId) {
+      console.log('set maxTrackCount: ', maxTrackCount);
+      console.log('myLocalData: ', myLocalData);
+      console.log('antmedia: ', antmedia);
+      antmedia.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
+
+      localStorage.setItem('myMaxTrackCount', maxTrackCount);
+    }
   }
   function handleStartScreenShare() {
     antmedia.switchDesktopCapture(myLocalData.streamId);
@@ -148,6 +159,10 @@ function AntMedia() {
       }
     });
   }
+  useEffect(() => {
+    handleSetMaxVideoTrackCount(3);
+  }, [myLocalData]);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -455,8 +470,10 @@ function AntMedia() {
     }
   }
   //console.log("participantsparticipantsparticipants", participants);
-  function handleRoomEvents({ streams, streamList }) {
-    console.log('GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE', streams, streamList, participants, allParticipants);
+  function handleRoomEvents({ streams, streamList, ...rest }) {
+    console.log('GWEGWE stream', streams, streamList);
+    console.log('rest: ', rest);
+    // console.log('GWEGWE prev participants', participants, allParticipants);
     setAllParticipants(streamList);
     setParticipants(oldParts => {
       if (streams.length < participants.length) {
@@ -495,6 +512,7 @@ function AntMedia() {
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
+  antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
   //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
@@ -549,11 +567,7 @@ function AntMedia() {
               >
                 <>
                   <MeetingRoom participants={participants} allParticipants={allParticipants} myLocalData={myLocalData} />
-                  <MessageDrawer
-                    drawerOpen={drawerOpen}
-                    
-                    messages={messages}
-                  />
+                  <MessageDrawer drawerOpen={drawerOpen} messages={messages} />
                 </>
               </SettingsContext.Provider>
             )}

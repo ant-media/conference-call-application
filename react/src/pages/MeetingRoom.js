@@ -81,8 +81,8 @@ const MeetingRoom = React.memo(props => {
   const settings = useContext(SettingsContext);
   const { drawerOpen, pinnedVideoId, pinVideo, audioTracks } = settings;
   const { participants, allParticipants } = props;
-  // console.log('xxx ALL Participants: ', allParticipants);
-  // console.log('xxx VIDEO participants: ', participants);
+   console.log('xxx ALL Participants: ', allParticipants);
+   console.log('xxx VIDEO participants: ', participants);
 
   const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({ id }) => id);

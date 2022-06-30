@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import DialogContent from '@mui/material/DialogContent';
 import { SettingsContext } from 'pages/AntMedia';
+import { AntmediaContext } from "App";
 
 import { Grid, Typography, useMediaQuery } from '@mui/material';
 import { SvgIcon } from 'Components/SvgIcon';
@@ -43,6 +44,7 @@ export function LayoutSettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open } = props;
   const settings = React.useContext(SettingsContext);
+  const antmedia = React.useContext(AntmediaContext);
   const { pinnedVideoId, pinVideo } = settings;
   const [layout, setLayout] = React.useState(pinnedVideoId !== null ? 'sidebar' : 'tiled'); //just for radioo buttons
 
@@ -109,6 +111,8 @@ export function LayoutSettingsDialog(props) {
             </FormControl>
           </Grid>
         </Box>
+        <button onClick={()=>{antmedia.handleSetMaxVideoTrackCount(2)}}>set max video to 2</button>
+        <button onClick={()=>{antmedia.handleSetMaxVideoTrackCount(1)}}>set max video to 1</button>
       </DialogContent>
     </Dialog>
   );
