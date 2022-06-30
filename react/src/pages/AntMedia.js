@@ -89,7 +89,9 @@ function AntMedia() {
       console.log('myLocalData: ', myLocalData);
       console.log('antmedia: ', antmedia);
       antmedia.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
-
+      handleSendNotificationEvent('UNPIN_USER', myLocalData.streamId, {
+        streamId: id,
+      });
       localStorage.setItem('myMaxTrackCount', maxTrackCount);
     }
   }
@@ -159,9 +161,9 @@ function AntMedia() {
       }
     });
   }
-  useEffect(() => {
-    handleSetMaxVideoTrackCount(3);
-  }, [myLocalData]);
+  // useEffect(() => {
+  //   handleSetMaxVideoTrackCount(3);
+  // }, [myLocalData]);
 
   useEffect(() => {
     scrollToBottom();
@@ -337,6 +339,7 @@ function AntMedia() {
           antmedia.applyConstraints(myLocalData.streamId, requestedMediaConstraints);
         }
       } else if (eventType === 'VIDEO_TRACK_ASSIGNMENT_CHANGE') {
+        console.log('eventType: ', eventType,notificationEvent);
         if (!notificationEvent.payload.trackId) {
           return;
         }
@@ -470,9 +473,8 @@ function AntMedia() {
     }
   }
   //console.log("participantsparticipantsparticipants", participants);
-  function handleRoomEvents({ streams, streamList, ...rest }) {
+  function handleRoomEvents({ streams, streamList, }) {
     console.log('GWEGWE stream', streams, streamList);
-    console.log('rest: ', rest);
     // console.log('GWEGWE prev participants', participants, allParticipants);
     setAllParticipants(streamList);
     setParticipants(oldParts => {

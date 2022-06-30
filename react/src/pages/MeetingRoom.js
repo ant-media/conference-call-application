@@ -80,10 +80,11 @@ const MeetingRoom = React.memo(props => {
 
   const settings = useContext(SettingsContext);
   const { drawerOpen, pinnedVideoId, pinVideo, audioTracks } = settings;
-  const { participants, allParticipants } = props;
-   console.log('xxx ALL Participants: ', allParticipants);
-   console.log('xxx VIDEO participants: ', participants);
-
+  const { participants, allParticipants,myLocalData } = props;
+  // console.log('myLocalData: ', myLocalData);
+  //  console.log('xxx ALL Participants: ', allParticipants);
+  //  console.log('xxx VIDEO participants: ', participants);
+  const allParticipantsExceptLocal = allParticipants.filter(p => p.streamId !== myLocalData?.streamId )
   const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({ id }) => id);
     const othersIds = all.filter(p => !participantIds.includes(p.streamId));
@@ -149,7 +150,7 @@ const MeetingRoom = React.memo(props => {
   };
 
   const OthersTile = (maxGroup, small) => {
-    const others = filterAndSortOthersTile(allParticipants, participants);
+    const others = filterAndSortOthersTile(allParticipantsExceptLocal, participants);
     //test purposes
     //others = [...others, ...others, ...others];
     const sidebarStyle = small ? { width: { xs: 44, md: 64 }, height: { xs: 44, md: 64 } } : { width: { xs: 44, md: 54 }, height: { xs: 44, md: 54 } };
@@ -255,7 +256,7 @@ const MeetingRoom = React.memo(props => {
   //main tile other limit set, max count
   const showAsOthersLimit = 3; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
   //with 2 active video participants + 1 me + 1 card
-  const sliceTiles = allParticipants.length + 1 > showAsOthersLimit; //plus 1 is me
+  const sliceTiles = allParticipantsExceptLocal.length + 1 > showAsOthersLimit; //plus 1 is me
 
 
   const pinLayout = pinnedVideoId !== null ? true : false;

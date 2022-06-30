@@ -244,6 +244,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
   isPlayMode: playOnly,
   debug: true,
   callback: (info, obj) => {
+    console.log('info, obj: ', info, obj);
     if (info === "initialized") {
       console.log("initialized");
     } else if (info === "joinedTheRoom") {
