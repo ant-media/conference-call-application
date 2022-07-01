@@ -18,8 +18,8 @@ const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
     border: `3px solid ${theme.palette.green[85]} !important`,
     backgroundColor: theme.palette.green[80],
     color: '#fff',
-    width: 64,
-    height: 64,
+    width: 54,
+    height: 54,
     [theme.breakpoints.down('md')]: {
       width: 44,
       height: 44,
@@ -79,12 +79,12 @@ const MeetingRoom = React.memo(props => {
   const antmedia = useContext(AntmediaContext);
 
   const settings = useContext(SettingsContext);
-  const { drawerOpen, pinnedVideoId, pinVideo, audioTracks } = settings;
-  const { participants, allParticipants,myLocalData } = props;
+  const { drawerOpen, pinnedVideoId, pinVideo, audioTracks, maxVideoTrackCount } = settings;
+  const { participants, allParticipants, myLocalData } = props;
   // console.log('myLocalData: ', myLocalData);
   //  console.log('xxx ALL Participants: ', allParticipants);
   //  console.log('xxx VIDEO participants: ', participants);
-  const allParticipantsExceptLocal = allParticipants.filter(p => p.streamId !== myLocalData?.streamId )
+  const allParticipantsExceptLocal = allParticipants.filter(p => p.streamId !== myLocalData?.streamId)
   const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({ id }) => id);
     const othersIds = all.filter(p => !participantIds.includes(p.streamId));
@@ -248,13 +248,13 @@ const MeetingRoom = React.memo(props => {
             <div className="single-video-container  others-tile-wrapper">{OthersTile(2)}</div>
           </div>
         )}
-      </>:
-    <Typography variant="body2" sx={{color: 'green.50',mt:3}}>No other participants.</Typography>
+      </> :
+        <Typography variant="body2" sx={{ color: 'green.50', mt: 3 }}>No other participants.</Typography>
     );
   };
 
   //main tile other limit set, max count
-  const showAsOthersLimit = 3; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
+  const showAsOthersLimit = maxVideoTrackCount + 1; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
   //with 2 active video participants + 1 me + 1 card
   const sliceTiles = allParticipantsExceptLocal.length + 1 > showAsOthersLimit; //plus 1 is me
 
@@ -264,7 +264,7 @@ const MeetingRoom = React.memo(props => {
   return (
     <>
       {audioTracks.map((audio, index) => (
-        <VideoCard key={index} onHandlePin={() => {}} id={audio.streamId} track={audio.track} autoPlay name={''} style={{ display: 'none' }} />
+        <VideoCard key={index} onHandlePin={() => { }} id={audio.streamId} track={audio.track} autoPlay name={''} style={{ display: 'none' }} />
       ))}
       <div id="meeting-gallery" style={{ height: 'calc(100vh - 80px)' }}>
         {!pinLayout && ( // if not pinned layout show me first as a regular video

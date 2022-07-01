@@ -45,15 +45,15 @@ export function LayoutSettingsDialog(props) {
   const { onClose, selectedValue, open } = props;
   const settings = React.useContext(SettingsContext);
   const antmedia = React.useContext(AntmediaContext);
-  const { pinnedVideoId, pinVideo } = settings;
+  const { pinnedVideoId, pinVideo, setMaxVideoTrackCount, globals } = settings;
   const [layout, setLayout] = React.useState(pinnedVideoId !== null ? 'sidebar' : 'tiled'); //just for radioo buttons
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
-  React.useEffect(()=>{
+  React.useEffect(() => {
     setLayout(pinnedVideoId !== null ? 'sidebar' : 'tiled');
-  },[pinnedVideoId])
+  }, [pinnedVideoId])
   const handleClose = () => {
     onClose(selectedValue);
   };
@@ -72,7 +72,7 @@ export function LayoutSettingsDialog(props) {
       const firstParticipant = participants.length > 1 ? participants[1] : participants[0]
 
       //pin the first participant
-      pinVideo(firstParticipant?.id  ? firstParticipant.id : 'localVideo');
+      pinVideo(firstParticipant?.id ? firstParticipant.id : 'localVideo');
     }
   };
   const radioLabel = (label, icon) => {
@@ -87,6 +87,11 @@ export function LayoutSettingsDialog(props) {
       </Grid>
     );
   };
+  const handleChange = (count) => {
+    antmedia.handleSetMaxVideoTrackCount(count)
+    setMaxVideoTrackCount(count)
+    globals.maxVideoTrackCount = count
+  }
   //const actualLayout = pinnedVideoId !== null ? 'sidebar' : 'tiled';
   return (
     <Dialog onClose={handleClose} open={open} fullScreen={fullScreen} maxWidth={'xs'}>
@@ -111,8 +116,8 @@ export function LayoutSettingsDialog(props) {
             </FormControl>
           </Grid>
         </Box>
-        <button onClick={()=>{antmedia.handleSetMaxVideoTrackCount(2)}}>set max video to 2</button>
-        <button onClick={()=>{antmedia.handleSetMaxVideoTrackCount(1)}}>set max video to 1</button>
+        <button onClick={() => handleChange(2)}>set max video to 2</button>
+        <button onClick={() => handleChange(3)}>set max video to 3</button>
       </DialogContent>
     </Dialog>
   );

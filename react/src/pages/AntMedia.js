@@ -13,6 +13,10 @@ import AntSnackBar from 'Components/AntSnackBar';
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
 
+const globals = {
+  maxVideoTrackCount: 2
+}
+
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
@@ -44,6 +48,7 @@ function AntMedia() {
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState('');
   const [selectedMicrophone, setSelectedMicrophone] = React.useState('');
+  const [maxVideoTrackCount, setMaxVideoTrackCount] = React.useState(2)
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -354,7 +359,7 @@ function AntMedia() {
       } else if (eventType === 'AUDIO_TRACK_ASSIGNMENT') {
         setTalkers(oldTalkers => {
           const newTalkers = notificationEvent.payload
-            .filter(p => p.trackId !== '' && p.audioLevel > 150 && screenSharedVideoId !== p.trackId.substring('ARDAMSx'.length))
+            .filter(p => p.trackId !== '' && p.audioLevel > 10 && screenSharedVideoId !== p.trackId.substring('ARDAMSx'.length))
             .map(p => p.trackId.substring('ARDAMSx'.length));
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
@@ -423,7 +428,7 @@ function AntMedia() {
     }
   }
   function handleSetMyObj(obj) {
-    setMyLocalData(obj);
+    setMyLocalData({ ...obj, streamName });
   }
   function handlePlay(token, tempList) {
     antmedia.play(roomName, token, roomName, tempList);
@@ -536,6 +541,8 @@ function AntMedia() {
             selectedCamera,
             selectedMicrophone,
             setSelectedMicrophone,
+            setParticipants,
+            participants
           }}
         >
           <SnackbarProvider
@@ -565,6 +572,9 @@ function AntMedia() {
                   screenSharedVideoId,
                   audioTracks,
                   allParticipants,
+                  setMaxVideoTrackCount,
+                  maxVideoTrackCount,
+                  globals
                 }}
               >
                 <>

@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { alpha, styled } from "@mui/material/styles";
-import { MediaSettingsContext } from "pages/AntMedia";
+import { MediaSettingsContext, SettingsContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
@@ -21,10 +21,12 @@ const CustomizedBox = styled(Box)(({ theme }) => ({
 
 const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   const mediaSettings = useContext(MediaSettingsContext);
+  const settings = useContext(SettingsContext)
   const antmedia = useContext(AntmediaContext);
   const { t } = useTranslation();
   const [displayHover, setDisplayHover] = React.useState(false);
   const theme = useTheme();
+  const { setParticipants, participants } = mediaSettings
 
   const cardBtnStyle = {
     display: "flex",
@@ -46,8 +48,18 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   );
   React.useEffect(() => {
     if (props.track?.kind === "video") {
+      props.track.onended = (event) => {
+        console.log(`trackeventend ${props.track.id}`);
+      };
       props.track.onmute = (event) => {
-        console.log(`onmute! ${props.track.id}`);
+        console.log(`trackevent mute`, props);
+        console.log('trackevent participants: ', participants);
+        console.log('trackevent maxVideoTrackCount: ', settings?.globals?.maxVideoTrackCount);
+        if (participants.length > settings?.globals?.maxVideoTrackCount) {
+          setParticipants(oldParts => {
+            return oldParts.filter(p => p.videoLabel !== props.id)
+          });
+        }
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -254,7 +266,7 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
           {props.name && (
             <div className="name-indicator">
               <Typography color="white" align="left" className="name">
-                {props.name} {process.env.NODE_ENV === 'development' ? `${isLocal ? mediaSettings.myLocalData?.streamId : props.id} ${isLocal ? props.id : props.track?.id}` : ''}
+                {props.name} {process.env.NODE_ENV === 'development' ? `${isLocal ? mediaSettings.myLocalData?.streamId + ' ' + props.id + ' ' + mediaSettings.myLocalData?.streamName : props.id + ' ' + props.track?.id}` : ''}
               </Typography>
             </div>
           )}
