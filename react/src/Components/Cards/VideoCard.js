@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import { alpha,styled } from "@mui/material/styles";
-import { MediaSettingsContext } from "pages/AntMedia";
+import { alpha, styled } from "@mui/material/styles";
+import { MediaSettingsContext, SettingsContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
@@ -21,10 +21,12 @@ const CustomizedBox = styled(Box)(({ theme }) => ({
 
 const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   const mediaSettings = useContext(MediaSettingsContext);
+  const settings = useContext(SettingsContext)
   const antmedia = useContext(AntmediaContext);
   const { t } = useTranslation();
   const [displayHover, setDisplayHover] = React.useState(false);
   const theme = useTheme();
+  const { setParticipants, participants } = mediaSettings
 
   const cardBtnStyle = {
     display: "flex",
@@ -44,15 +46,24 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
     },
     [props.track]
   );
-  // React.useEffect(() => {
-  //   console.log("props.track", props.track);
-  //   if (props.track?.kind === "video") {
-  //     props.track.onmute = (event) => {
-  //       var remove = true;
-  //       alert(`cıkıyorrrr! ${props.id}`);
-  //     };
-  //   }
-  // }, []);
+  React.useEffect(() => {
+    if (props.track?.kind === "video") {
+      props.track.onended = (event) => {
+        console.log(`trackeventend ${props.track.id}`);
+      };
+      props.track.onmute = (event) => {
+        console.log(`trackevent mute`, props);
+        console.log('trackevent participants: ', participants);
+        console.log('trackevent maxVideoTrackCount: ', settings?.globals?.maxVideoTrackCount);
+        if (participants.length > settings?.globals?.maxVideoTrackCount) {
+          setParticipants(oldParts => {
+            return oldParts.filter(p => p.videoLabel !== props.id)
+          });
+        }
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   let isOff = mediaSettings?.cam?.find(
     (c) => c.eventStreamId === props?.id && !c?.isCameraOn
@@ -142,9 +153,8 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
             >
               <Grid item>
                 <Tooltip
-                  title={`${props.pinned ? t("unpin") : t("pin")} ${
-                    props.name
-                  }`}
+                  title={`${props.pinned ? t("unpin") : t("pin")} ${props.name
+                    }`}
                   placement="top"
                 >
                   <Fab
@@ -167,12 +177,12 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
 
         <div
           className={`single-video-card`}
-          // style={{
-          //   ...(isTalking || mediaSettings.talkers.includes(props.id) ? {
-          //     outline: `thick solid ${theme.palette.primary.main}`,
-          //     borderRadius: '10px'
-          //   } : {})
-          // }}
+        // style={{
+        //   ...(isTalking || mediaSettings.talkers.includes(props.id) ? {
+        //     outline: `thick solid ${theme.palette.primary.main}`,
+        //     borderRadius: '10px'
+        //   } : {})
+        // }}
         >
           <Grid
             sx={isOff ? {} : { display: "none" }}
@@ -223,7 +233,7 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
             {mic && mic.isMicMuted && (
               <Tooltip title={t("mic is muted")} placement="top">
                 <Grid item>
-                  <CustomizedBox  sx={cardBtnStyle}>
+                  <CustomizedBox sx={cardBtnStyle}>
                     <SvgIcon
                       size={32}
                       name={"muted-microphone"}
@@ -256,7 +266,7 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
           {props.name && (
             <div className="name-indicator">
               <Typography color="white" align="left" className="name">
-                {props.name}
+                {props.name} {process.env.NODE_ENV === 'development' ? `${isLocal ? mediaSettings.myLocalData?.streamId + ' ' + props.id + ' ' + mediaSettings.myLocalData?.streamName : props.id + ' ' + props.track?.id}` : ''}
               </Typography>
             </div>
           )}

@@ -1,10 +1,11 @@
 import { Button, Grid, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
+import React, { useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTranslation } from 'react-i18next';
+import { AntmediaContext } from "../App";
 
 function useWidth() {
     const theme = useTheme();
@@ -18,10 +19,16 @@ function useWidth() {
     );
 }
 function LeftTheRoom(props) {
+    const antmedia = useContext(AntmediaContext);
     const { id } = useParams();
     const width = useWidth();
-    const {t} = useTranslation();
+    const { t } = useTranslation();
     const layouts = { xl: 32, lg: 24, md: 24, sm: 16, xs: 12 }
+
+    React.useEffect(() => {
+        if (antmedia.publishStreamId) antmedia.handleLeaveFromRoom();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
     return (
         <>
             <Grid container justifyContent={"center"} sx={{ mt: layouts[width] }}>

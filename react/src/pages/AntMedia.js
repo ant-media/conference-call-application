@@ -13,6 +13,10 @@ import AntSnackBar from 'Components/AntSnackBar';
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
 
+const globals = {
+  maxVideoTrackCount: 2
+}
+
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
@@ -44,6 +48,7 @@ function AntMedia() {
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState('');
   const [selectedMicrophone, setSelectedMicrophone] = React.useState('');
+  const [maxVideoTrackCount, setMaxVideoTrackCount] = React.useState(2)
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -77,10 +82,23 @@ function AntMedia() {
       streamId: id,
     });
   }
+
   function handleNotifyUnpinUser(id) {
     handleSendNotificationEvent('UNPIN_USER', myLocalData.streamId, {
       streamId: id,
     });
+  }
+  function handleSetMaxVideoTrackCount(maxTrackCount) {
+    if (myLocalData?.streamId) {
+      console.log('set maxTrackCount: ', maxTrackCount);
+      console.log('myLocalData: ', myLocalData);
+      console.log('antmedia: ', antmedia);
+      antmedia.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
+      handleSendNotificationEvent('UNPIN_USER', myLocalData.streamId, {
+        streamId: id,
+      });
+      localStorage.setItem('myMaxTrackCount', maxTrackCount);
+    }
   }
   function handleStartScreenShare() {
     antmedia.switchDesktopCapture(myLocalData.streamId);
@@ -148,6 +166,10 @@ function AntMedia() {
       }
     });
   }
+  // useEffect(() => {
+  //   handleSetMaxVideoTrackCount(3);
+  // }, [myLocalData]);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -322,6 +344,7 @@ function AntMedia() {
           antmedia.applyConstraints(myLocalData.streamId, requestedMediaConstraints);
         }
       } else if (eventType === 'VIDEO_TRACK_ASSIGNMENT_CHANGE') {
+        console.log('eventType: ', eventType, notificationEvent);
         if (!notificationEvent.payload.trackId) {
           return;
         }
@@ -336,7 +359,7 @@ function AntMedia() {
       } else if (eventType === 'AUDIO_TRACK_ASSIGNMENT') {
         setTalkers(oldTalkers => {
           const newTalkers = notificationEvent.payload
-            .filter(p => p.trackId !== '' && p.audioLevel > 150 && screenSharedVideoId !== p.trackId.substring('ARDAMSx'.length))
+            .filter(p => p.trackId !== '' && p.audioLevel > 10 && screenSharedVideoId !== p.trackId.substring('ARDAMSx'.length))
             .map(p => p.trackId.substring('ARDAMSx'.length));
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
@@ -344,8 +367,8 @@ function AntMedia() {
     }
   }
   function setUserStatus(notificationEvent, eventStreamId) {
+    console.log('notificationEvent', notificationEvent, eventStreamId);
     if (notificationEvent.isScreenShared) {
-      console.log('notificationEvent', notificationEvent, eventStreamId);
       // if the participant was already pin someone than we should not update it
       if (!screenSharedVideoId) {
         setScreenSharedVideoId(eventStreamId);
@@ -399,13 +422,13 @@ function AntMedia() {
       handleSendNotificationEvent('UPDATE_STATUS', myLocalData.streamId, {
         mic: !!mic.find(c => c.eventStreamId === 'localVideo')?.isMicMuted,
         camera: !!cam.find(c => c.eventStreamId === 'localVideo')?.isCameraOn,
-        isPinned: pinnedVideoId,
+        isPinned: pinnedVideoId === 'localVideo' ? myLocalData.streamId : pinnedVideoId,
         isScreenShared: isScreenShared,
       });
     }
   }
   function handleSetMyObj(obj) {
-    setMyLocalData(obj);
+    setMyLocalData({ ...obj, streamName });
   }
   function handlePlay(token, tempList) {
     antmedia.play(roomName, token, roomName, tempList);
@@ -455,8 +478,9 @@ function AntMedia() {
     }
   }
   //console.log("participantsparticipantsparticipants", participants);
-  function handleRoomEvents({ streams, streamList }) {
-    console.log('GWEGWEGWEGWEGEWGWEGWEGWEGWEGWEGWGEGWEGWEGWE', streams, streamList, participants, allParticipants);
+  function handleRoomEvents({ streams, streamList, }) {
+    console.log('GWEGWE stream', streams, streamList);
+    // console.log('GWEGWE prev participants', participants, allParticipants);
     setAllParticipants(streamList);
     setParticipants(oldParts => {
       if (streams.length < participants.length) {
@@ -470,7 +494,7 @@ function AntMedia() {
         return p;
       });
     });
-    if (!streams.includes(pinnedVideoId)) {
+    if (pinnedVideoId !== 'localVideo' && !streams.includes(pinnedVideoId)) {
       setPinnedVideoId(null);
     }
   }
@@ -495,6 +519,7 @@ function AntMedia() {
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
+  antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
   //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
@@ -516,6 +541,8 @@ function AntMedia() {
             selectedCamera,
             selectedMicrophone,
             setSelectedMicrophone,
+            setParticipants,
+            participants
           }}
         >
           <SnackbarProvider
@@ -545,15 +572,14 @@ function AntMedia() {
                   screenSharedVideoId,
                   audioTracks,
                   allParticipants,
+                  setMaxVideoTrackCount,
+                  maxVideoTrackCount,
+                  globals
                 }}
               >
                 <>
                   <MeetingRoom participants={participants} allParticipants={allParticipants} myLocalData={myLocalData} />
-                  <MessageDrawer
-                    drawerOpen={drawerOpen}
-                    
-                    messages={messages}
-                  />
+                  <MessageDrawer drawerOpen={drawerOpen} messages={messages} />
                 </>
               </SettingsContext.Provider>
             )}
