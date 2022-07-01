@@ -45,7 +45,7 @@ function ParticipantTab(props) {
     );
   };
   return (
-    <div>
+    <div style={{ width: '100%' }}>
       <Stack sx={{ width: '100%' }} spacing={2}>
         <Grid container>
           <SvgIcon size={28} name="participants" color="#fff" />

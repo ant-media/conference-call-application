@@ -14,6 +14,7 @@ const AntSnackMessage = styled(Grid)(({ theme }) => ({
   borderRadius: 6,
   padding: '16px 16px 12px 16px',
   cursor: 'pointer',
+  width: 320
 }));
 const AntSnackContent = styled(SnackbarContent)(({ theme }) => ({}));
 const SnackMessage = forwardRef((props, ref) => {
@@ -52,15 +53,16 @@ const SnackMessage = forwardRef((props, ref) => {
             <SvgIcon size={32} color={'white'} name={'message-off'} />
             <Typography sx={{ ml: 0.5 }} variant="subtitle2" color={theme.palette.green[0]}>{`${notificationData.sender}`}</Typography>
           </Grid>
-          <Grid container sx={{ mt: 1 }} style={{ marginLeft: 6, maxWidth: 200 }}>
+          <Grid container sx={{ mt: 1 }} style={{ marginLeft: 6 }}>
             <Typography
               variant="subtitle2"
               sx={{
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 display: '-webkit-box',
-                WebkitLineClamp: '3',
+                WebkitLineClamp: '2',
                 WebkitBoxOrient: 'vertical',
+                overflowWrap:'anywhere'
               }}
               color={theme.palette.green[0]}
             >
