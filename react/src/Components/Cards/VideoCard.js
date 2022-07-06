@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useEffect } from "react";
 import { alpha, styled } from "@mui/material/styles";
 import { MediaSettingsContext, SettingsContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
@@ -6,7 +6,6 @@ import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
 import { useTranslation } from "react-i18next";
 import { AntmediaContext } from "../../App";
-import _ from "lodash";
 const CustomizedVideo = styled("video")({
   borderRadius: 4,
   width: "100%",
