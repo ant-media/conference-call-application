@@ -91,11 +91,8 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   const mic = mediaSettings?.mic?.find((m) => m.eventStreamId === props?.id);
 
   const [isTalking, setIsTalking] = React.useState(false);
-  const throttledSetIsTalking = useRef(
-    _.throttle((value) => {
-      setIsTalking(value);
-    }, 1000)
-  );
+  const timeoutRef = React.useRef(null)
+
   const isLocal = props?.id === "localVideo";
   const mirrorView = isLocal && !mediaSettings?.isScreenShared;
   const isScreenSharing =
@@ -107,10 +104,12 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
         console.log('value: ', value);
         // sounds under 0.01 are probably background noise
         if (value >= 0.01) {
-          setIsTalking(true);
+          if (isTalking === false) setIsTalking(true)
+          clearInterval(timeoutRef.current);
+          timeoutRef.current = setTimeout(() => {
+            setIsTalking(false)
+          }, 1000)
           antmedia.updateAudioLevel(props.id, value);
-        } else {
-          throttledSetIsTalking.current(false);
         }
       }, 100);
     }
