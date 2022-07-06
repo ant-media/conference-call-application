@@ -12,12 +12,20 @@ import { styled } from '@mui/material/styles';
 
 const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
   border: `3px solid ${theme.palette.green[85]} !important`,
+  width: 54,
+    height: 54,
+    [theme.breakpoints.down('md')]: {
+      width: 44,
+      height: 44,
+      fontSize: 16,
+    },
 }));
 const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
-  '& div[class*="MuiAvatar-root-MuiAvatarGroup-avatar"]': {
+  
+  '&.plus-avatar-visible:first-child.MuiAvatar-root ':{
     border: `3px solid ${theme.palette.green[85]} !important`,
-    backgroundColor: theme.palette.green[80],
-    color: '#fff',
+    backgroundColor: `${theme.palette.green[80]} !important`,
+    color: '#fff !important',
     width: 54,
     height: 54,
     [theme.breakpoints.down('md')]: {
@@ -25,7 +33,7 @@ const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
       height: 44,
       fontSize: 16,
     },
-  },
+  }
 }));
 
 function debounce(fn, ms) {
@@ -84,7 +92,7 @@ const MeetingRoom = React.memo(props => {
   // console.log('myLocalData: ', myLocalData);
   //  console.log('xxx ALL Participants: ', allParticipants);
   //  console.log('xxx VIDEO participants: ', participants);
-  const allParticipantsExceptLocal = allParticipants.filter(p => p.streamId !== myLocalData?.streamId)
+  const allParticipantsExceptLocal = allParticipants.filter(p => p.streamId !== myLocalData?.streamId);
   const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({ id }) => id);
     const othersIds = all.filter(p => !participantIds.includes(p.streamId));
@@ -156,7 +164,7 @@ const MeetingRoom = React.memo(props => {
     const sidebarStyle = small ? { width: { xs: 44, md: 64 }, height: { xs: 44, md: 64 } } : { width: { xs: 44, md: 54 }, height: { xs: 44, md: 54 } };
     return (
       <div className="others-tile-inner">
-        <CustomizedAvatarGroup max={maxGroup} sx={{ justifyContent: 'center' }}>
+        <CustomizedAvatarGroup className={others.lenght > maxGroup ? "plus-avatar-visible" : ''} max={maxGroup} sx={{ justifyContent: 'center' }}>
           {others.map(({ name, streamName }, index) => {
             let username = name || streamName;
             if (username?.length > 0) {
@@ -206,8 +214,8 @@ const MeetingRoom = React.memo(props => {
       slicedParticipants = unpinnedParticipants;
     }
 
-    return (
-      slicedParticipants.length > 0 ? <>
+    return slicedParticipants.length > 0 ? (
+      <>
         {slicedParticipants.map(({ id, videoLabel, track, name }, index) => {
           if (id !== 'localVideo') {
             return (
@@ -248,8 +256,11 @@ const MeetingRoom = React.memo(props => {
             <div className="single-video-container  others-tile-wrapper">{OthersTile(2)}</div>
           </div>
         )}
-      </> :
-        <Typography variant="body2" sx={{ color: 'green.50', mt: 3 }}>No other participants.</Typography>
+      </>
+    ) : (
+      <Typography variant="body2" sx={{ color: 'green.50', mt: 3 }}>
+        No other participants.
+      </Typography>
     );
   };
 
@@ -258,13 +269,12 @@ const MeetingRoom = React.memo(props => {
   //with 2 active video participants + 1 me + 1 card
   const sliceTiles = allParticipantsExceptLocal.length + 1 > showAsOthersLimit; //plus 1 is me
 
-
   const pinLayout = pinnedVideoId !== null ? true : false;
 
   return (
     <>
       {audioTracks.map((audio, index) => (
-        <VideoCard key={index} onHandlePin={() => { }} id={audio.streamId} track={audio.track} autoPlay name={''} style={{ display: 'none' }} />
+        <VideoCard key={index} onHandlePin={() => {}} id={audio.streamId} track={audio.track} autoPlay name={''} style={{ display: 'none' }} />
       ))}
       <div id="meeting-gallery" style={{ height: 'calc(100vh - 80px)' }}>
         {!pinLayout && ( // if not pinned layout show me first as a regular video
@@ -311,7 +321,46 @@ const MeetingRoom = React.memo(props => {
                 </div>
               </>
             ))}
+            <div
+              className="single-video-container not-pinned others-tile-wrapper"
+              style={{
+                width: 'var(--width)',
+                height: 'var(--height)',
+                maxWidth: 'var(--maxwidth)',
+              }}
+            >
+              <div className="others-tile-inner">
+                <CustomizedAvatarGroup className="plus-avatar-visible" max={2} sx={{ justifyContent: 'center' }}>
+                  {[{name:'a'},{name:'a'},{name:'a'}].map(({ name, streamName }, index) => {
+                    let username = name || streamName;
+                    if (username?.length > 0) {
+                      const nameArr = username.split(' ');
+                      const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
+                      const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
 
+                      return (
+                        <CustomizedAvatar
+                          key={index}
+                          alt={username}
+                          sx={{
+                            bgcolor: 'green.50',
+                            color: '#fff',
+                            fontSize: { xs: 16, md: 22 },
+                          }}
+                        >
+                          {initials}
+                        </CustomizedAvatar>
+                      );
+                    } else {
+                      return null;
+                    }
+                  })}
+                </CustomizedAvatarGroup>
+                <Typography sx={{ mt: 2, color: '#ffffff' }}>
+                  1 other
+                </Typography>
+              </div>
+            </div>
             {sliceTiles && participants.length > 0 && (
               <div
                 className="single-video-container not-pinned others-tile-wrapper"
