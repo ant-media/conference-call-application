@@ -595,18 +595,18 @@ export class WebRTCAdaptor {
       } else {
         console.log(
           "Candidate's protocol(full sdp: " +
-            event.candidate.candidate +
-            ") is not supported. Supported protocols: " +
-            this.candidateTypes
+          event.candidate.candidate +
+          ") is not supported. Supported protocols: " +
+          this.candidateTypes
         );
         if (event.candidate.candidate != "") {
           //
           this.callbackError(
             "protocol_not_supported",
             "Support protocols: " +
-              this.candidateTypes.toString() +
-              " candidate: " +
-              event.candidate.candidate
+            this.candidateTypes.toString() +
+            " candidate: " +
+            event.candidate.candidate
           );
         }
       }
@@ -697,9 +697,9 @@ export class WebRTCAdaptor {
       var closedStreamId = streamId;
       console.log(
         "stream id in init peer connection: " +
-          streamId +
-          " close stream id: " +
-          closedStreamId
+        streamId +
+        " close stream id: " +
+        closedStreamId
       );
       this.remotePeerConnection[streamId] = new RTCPeerConnection(
         this.peerconnection_config
@@ -920,11 +920,11 @@ export class WebRTCAdaptor {
         if (this.debug) {
           console.debug(
             "set remote description is succesfull with response: " +
-              response +
-              " for stream : " +
-              streamId +
-              " and type: " +
-              type
+            response +
+            " for stream : " +
+            streamId +
+            " and type: " +
+            type
           );
           console.debug(conf);
         }
@@ -1041,9 +1041,9 @@ export class WebRTCAdaptor {
         .catch((error) => {
           console.error(
             "ice candiate cannot be added for stream id: " +
-              streamId +
-              " error is: " +
-              error
+            streamId +
+            " error is: " +
+            error
           );
           console.error(candidate);
         });
@@ -1051,12 +1051,12 @@ export class WebRTCAdaptor {
       if (this.debug) {
         console.log(
           "Candidate's protocol(" +
-            candidate.protocol +
-            ") is not supported." +
-            "Candidate: " +
-            candidate.candidate +
-            " Supported protocols:" +
-            this.candidateTypes
+          candidate.protocol +
+          ") is not supported." +
+          "Candidate: " +
+          candidate.candidate +
+          " Supported protocols:" +
+          this.candidateTypes
         );
       }
     }
@@ -1454,13 +1454,30 @@ export class WebRTCAdaptor {
       }
       console.log(
         "Added sound meter for stream: " +
-          streamId +
-          " = " +
-          soundMeter.instant.toFixed(2)
+        streamId +
+        " = " +
+        soundMeter.instant.toFixed(2)
       );
     });
 
     this.soundMeters[streamId] = soundMeter;
+  }
+
+  /**
+   * Called by user
+   * This message is used to send audio level in a conference.
+   *
+   * @param {*} value : audio lavel
+   * @returns 
+   */
+  updateAudioLevel(streamId, value) {
+    var jsCmd = {
+      streamId: streamId,
+      command: "updateAudioLevel",
+      level: value,
+    };
+
+    this.webSocketAdaptor.send(JSON.stringify(jsCmd));
   }
 
   /**
@@ -1535,24 +1552,24 @@ export class WebRTCAdaptor {
 
     this.webSocketAdaptor.send(JSON.stringify(jsCmd));
   }
-  
- /**
-	 * Called by user
-	 * This message is used to set max video track count in a conference.
-	 *
-	 * @param {*} maxTrackCount : maximum video track count
-	 * @returns 
-	 */
 
-	setMaxVideoTrackCount(streamId, maxTrackCount) {
-		var jsCmd = {
-				streamId : streamId,
-				command : "setMaxVideoTrackCountCommand",
-				maxTrackCount : maxTrackCount,
-		};
+  /**
+    * Called by user
+    * This message is used to set max video track count in a conference.
+    *
+    * @param {*} maxTrackCount : maximum video track count
+    * @returns 
+    */
 
-		this.webSocketAdaptor.send(JSON.stringify(jsCmd));
-	}
+  setMaxVideoTrackCount(streamId, maxTrackCount) {
+    var jsCmd = {
+      streamId: streamId,
+      command: "setMaxVideoTrackCountCommand",
+      maxTrackCount: maxTrackCount,
+    };
+
+    this.webSocketAdaptor.send(JSON.stringify(jsCmd));
+  }
   /**
    * The following messages are forwarded to MediaManager. They are also kept here because of backward compatibility.
    * You can find the details about them in media_manager.js

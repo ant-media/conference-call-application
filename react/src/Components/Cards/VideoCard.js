@@ -104,9 +104,11 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   useEffect(() => {
     if (isLocal && mediaSettings.isPublished) {
       antmedia.enableAudioLevelForLocalStream((value) => {
+        console.log('value: ', value);
         // sounds under 0.01 are probably background noise
-        if (value > 0.01) {
+        if (value >= 0.01) {
           setIsTalking(true);
+          antmedia.updateAudioLevel(props.id, value);
         } else {
           throttledSetIsTalking.current(false);
         }
