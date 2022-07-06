@@ -1,7 +1,7 @@
 import { createTheme, responsiveFontSizes } from "@mui/material/styles";
 import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
 import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
-import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
+import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
 
 const green0 = "#AFF3EE";
