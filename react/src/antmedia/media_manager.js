@@ -1,10 +1,10 @@
-import { SoundMeter } from "./soundmeter.js";
+import { SoundMeter } from "./soundmeter.js"
 
-/**
- * Media management class is responsible to manage audio and video
- * sources and tracks management for the local stream.
- * Also audio and video properties (like bitrate) are managed by this class .
- */
+/** 
+ * Media management class is responsible to manage audio and video 
+ * sources and tracks management for the local stream. 
+ * Also audio and video properties (like bitrate) are managed by this class . 
+*/
 export class MediaManager {
   constructor(initialValues) {
     /**
@@ -22,7 +22,7 @@ export class MediaManager {
      * The cam_location below is effective when camera and screen is send at the same time.
      * possible values are top and bottom. It's on right all the time
      */
-    this.camera_location = "top";
+    this.camera_location = "top"
 
     /**
      * The cam_margin below is effective when camera and screen is send at the same time.
@@ -71,9 +71,10 @@ export class MediaManager {
     this.previousAudioTrack = null;
 
     /**
-     * The screen video track in screen+camera mode
-     */
+    * The screen video track in screen+camera mode
+    */
     this.desktopStream = null;
+
 
     /**
      * The camera (overlay) video track in screen+camera mode
@@ -81,22 +82,22 @@ export class MediaManager {
     this.smallVideoTrack = null;
 
     /**
-     * Audio context to use for meter, mix, gain
+     * Audio context to use for meter, mix, gain 
      */
     this.audioContext = new AudioContext();
 
     /**
      * the main audio in single audio case
      * the primary audio in mixed audio case
-     *
+     * 
      * its volume can be controled
-     *
+     * 
      */
     this.primaryAudioTrackGainNode = null;
 
     /**
      * the secondary audio in mixed audio case
-     *
+     * 
      * its volume can be controled
      */
     this.secondaryAudioTrackGainNode = null;
@@ -151,9 +152,11 @@ export class MediaManager {
     // It should be compatible with previous version
     if (this.mediaConstraints.video == "camera") {
       this.publishMode = "camera";
-    } else if (this.mediaConstraints.video == "screen") {
+    }
+    else if (this.mediaConstraints.video == "screen") {
       this.publishMode = "screen";
-    } else if (this.mediaConstraints.video == "screen+camera") {
+    }
+    else if (this.mediaConstraints.video == "screen+camera") {
       this.publishMode = "screen+camera";
     }
 
@@ -171,27 +174,21 @@ export class MediaManager {
     this.getDevices();
     this.trackDeviceChange();
 
-    if (
-      typeof this.mediaConstraints.video != "undefined" &&
-      this.mediaConstraints.video != false
-    ) {
+    if (typeof this.mediaConstraints.video != "undefined" && this.mediaConstraints.video != false) {
       this.openStream(this.mediaConstraints, this.mode);
-    } else {
+    }
+    else {
       // get only audio
       var media_audio_constraint = { audio: this.mediaConstraints.audio };
-      this.navigatorUserMedia(
-        media_audio_constraint,
-        (stream) => {
-          this.gotStream(stream);
-        },
-        true
-      );
+      this.navigatorUserMedia(media_audio_constraint, stream => {
+        this.gotStream(stream);
+      }, true)
     }
   }
 
   /*
-   * Called to checks if Websocket and media usage are allowed
-   */
+  * Called to checks if Websocket and media usage are allowed
+  */
   checkWebRTCPermissions() {
     if (!("WebSocket" in window)) {
       console.log("WebSocket not supported.");
@@ -200,17 +197,11 @@ export class MediaManager {
     }
 
     if (typeof navigator.mediaDevices == "undefined") {
-      console.log(
-        "Cannot open camera and mic because of unsecure context. Please Install SSL(https)"
-      );
+      console.log("Cannot open camera and mic because of unsecure context. Please Install SSL(https)");
       this.callbackError("UnsecureContext");
       return;
     }
-    if (
-      typeof navigator.mediaDevices == "undefined" ||
-      navigator.mediaDevices == undefined ||
-      navigator.mediaDevices == null
-    ) {
+    if (typeof navigator.mediaDevices == "undefined" || navigator.mediaDevices == undefined || navigator.mediaDevices == null) {
       this.callbackError("getUserMediaIsNotAllowed");
     }
   }
@@ -219,47 +210,43 @@ export class MediaManager {
    * Called to get the available video and audio devices on the system
    */
   getDevices() {
-    navigator.mediaDevices
-      .enumerateDevices()
-      .then((devices) => {
-        let deviceArray = new Array();
-        let checkAudio = false;
-        let checkVideo = false;
-        devices.forEach((device) => {
-          if (device.kind == "audioinput" || device.kind == "videoinput") {
-            deviceArray.push(device);
-            if (device.kind == "audioinput") {
-              checkAudio = true;
-            }
-            if (device.kind == "videoinput") {
-              checkVideo = true;
-            }
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+      let deviceArray = new Array();
+      let checkAudio = false
+      let checkVideo = false
+      devices.forEach(device => {
+        if (device.kind == "audioinput" || device.kind == "videoinput") {
+          deviceArray.push(device);
+          if (device.kind == "audioinput") {
+            checkAudio = true;
           }
-        });
-        this.callback("available_devices", deviceArray);
-
-        //TODO is the following part necessary. why?
-        if (checkAudio == false && this.localStream == null) {
-          console.log("Audio input not found");
-          console.log("Retrying to get user media without audio");
-          if (this.inputDeviceNotFoundLimit < 2) {
-            if (checkVideo != false) {
-              this.openStream({ video: true, audio: false }, this.mode);
-              this.inputDeviceNotFoundLimit++;
-            } else {
-              console.log("Video input not found");
-              alert("There is no video or audio input");
-            }
-          } else {
-            alert("No input device found, publish is not possible");
+          if (device.kind == "videoinput") {
+            checkVideo = true;
           }
         }
-      })
-      .catch((err) => {
-        console.error(
-          "Cannot get devices -> error name: " + err.name + ": " + err.message
-        );
       });
+      this.callback("available_devices", deviceArray);
+
+      //TODO is the following part necessary. why?
+      if (checkAudio == false && this.localStream == null) {
+        console.log("Audio input not found")
+        console.log("Retrying to get user media without audio")
+        if (this.inputDeviceNotFoundLimit < 2) {
+          if (checkVideo != false) {
+            this.openStream({ video: true, audio: false }, this.mode)
+            this.inputDeviceNotFoundLimit++;
+          } else {
+            console.log("Video input not found")
+            alert("There is no video or audio input")
+          }
+        }
+        else {
+          alert("No input device found, publish is not possible");
+        }
+      }
+    }).catch(err => {
+      console.error("Cannot get devices -> error name: " + err.name + ": " + err.message);
+    });
   }
 
   /*
@@ -268,109 +255,92 @@ export class MediaManager {
   trackDeviceChange() {
     navigator.mediaDevices.ondevicechange = () => {
       this.getDevices();
-    };
+    }
   }
 
   /**
    * This function create a canvas which combines screen video and camera video as an overlay
-   *
+   * 
    * @param {*} stream : screen share stream
-   * @param {*} streamId
+   * @param {*} streamId 
    * @param {*} onEndedCallback : callback when called on screen share stop
    */
   setDesktopwithCameraSource(stream, streamId, onEndedCallback) {
     this.desktopStream = stream;
-    this.navigatorUserMedia(
-      { video: true, audio: false },
-      (cameraStream) => {
-        this.smallVideoTrack = cameraStream.getVideoTracks()[0];
+    this.navigatorUserMedia({ video: true, audio: false }, cameraStream => {
+      this.smallVideoTrack = cameraStream.getVideoTracks()[0];
 
-        //create a canvas element
-        var canvas = document.createElement("canvas");
-        var canvasContext = canvas.getContext("2d");
+      //create a canvas element
+      var canvas = document.createElement("canvas");
+      var canvasContext = canvas.getContext("2d");
 
-        //create video element for screen
-        //var screenVideo = document.getElementById('sourceVideo');
-        var screenVideo = document.createElement("video");
+      //create video element for screen
+      //var screenVideo = document.getElementById('sourceVideo');
+      var screenVideo = document.createElement('video');
 
-        screenVideo.srcObject = stream;
-        screenVideo.play();
-        //create video element for camera
-        var cameraVideo = document.createElement("video");
+      screenVideo.srcObject = stream;
+      screenVideo.play();
+      //create video element for camera
+      var cameraVideo = document.createElement('video');
 
-        cameraVideo.srcObject = cameraStream;
-        cameraVideo.play();
-        var canvasStream = canvas.captureStream(15);
+      cameraVideo.srcObject = cameraStream;
+      cameraVideo.play();
+      var canvasStream = canvas.captureStream(15);
 
-        if (this.localStream == null) {
-          this.gotStream(canvasStream);
-        } else {
-          this.updateVideoTrack(canvasStream, streamId, onended, null);
+      if (this.localStream == null) {
+        this.gotStream(canvasStream);
+      }
+      else {
+        this.updateVideoTrack(canvasStream, streamId, onended, null);
+      }
+      if (onEndedCallback != null) {
+        stream.getVideoTracks()[0].onended = function (event) {
+          onEndedCallback(event);
         }
-        if (onEndedCallback != null) {
-          stream.getVideoTracks()[0].onended = function (event) {
-            onEndedCallback(event);
-          };
+      }
+
+      //update the canvas
+      setInterval(() => {
+        //draw screen to canvas
+        canvas.width = screenVideo.videoWidth;
+        canvas.height = screenVideo.videoHeight;
+        canvasContext.drawImage(screenVideo, 0, 0, canvas.width, canvas.height);
+
+        var cameraWidth = screenVideo.videoWidth * (this.camera_percent / 100);
+        var cameraHeight = (cameraVideo.videoHeight / cameraVideo.videoWidth) * cameraWidth
+
+        var positionX = (canvas.width - cameraWidth) - this.camera_margin;
+        var positionY;
+
+        if (this.camera_location == "top") {
+          positionY = this.camera_margin;
         }
-
-        //update the canvas
-        setInterval(() => {
-          //draw screen to canvas
-          canvas.width = screenVideo.videoWidth;
-          canvas.height = screenVideo.videoHeight;
-          canvasContext.drawImage(
-            screenVideo,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
-
-          var cameraWidth =
-            screenVideo.videoWidth * (this.camera_percent / 100);
-          var cameraHeight =
-            (cameraVideo.videoHeight / cameraVideo.videoWidth) * cameraWidth;
-
-          var positionX = canvas.width - cameraWidth - this.camera_margin;
-          var positionY;
-
-          if (this.camera_location == "top") {
-            positionY = this.camera_margin;
-          } else {
-            //if not top, make it bottom
-            //draw camera on right bottom corner
-            positionY = canvas.height - cameraHeight - this.camera_margin;
-          }
-          canvasContext.drawImage(
-            cameraVideo,
-            positionX,
-            positionY,
-            cameraWidth,
-            cameraHeight
-          );
-        }, 66);
-      },
-      true
-    );
+        else { //if not top, make it bottom
+          //draw camera on right bottom corner
+          positionY = (canvas.height - cameraHeight) - this.camera_margin;
+        }
+        canvasContext.drawImage(cameraVideo, positionX, positionY, cameraWidth, cameraHeight);
+      }, 66);
+    }, true)
   }
 
   /**
    * This function does these:
-   * 	1. Remove the audio track from the stream provided if it is camera. Other case
+   * 	1. Remove the audio track from the stream provided if it is camera. Other case 
    * 	   is screen video + system audio track. In this case audio is kept in stream.
    * 	2. Open audio track again if audio constaint isn't false
    * 	3. Make audio track Gain Node to be able to volume adjustable
-   *  4. If screen is shared and system audio is available then the system audio and
+   *  4. If screen is shared and system audio is available then the system audio and 
    *     opened audio track are mixed
-   *
-   * @param {*} mediaConstraints
-   * @param {*} audioConstraint
-   * @param {*} stream
-   * @param {*} streamId
+   * 
+   * @param {*} mediaConstraints 
+   * @param {*} audioConstraint 
+   * @param {*} stream 
+   * @param {*} streamId 
    */
   prepareStreamTracks(mediaConstraints, audioConstraint, stream, streamId) {
     //this trick, getting audio and video separately, make us add or remove tracks on the fly
-    var audioTracks = stream.getAudioTracks();
+    var audioTracks = stream.getAudioTracks()
     if (audioTracks.length > 0 && this.publishMode == "camera") {
       audioTracks[0].stop();
       stream.removeTrack(audioTracks[0]);
@@ -378,87 +348,78 @@ export class MediaManager {
     //now get only audio to add this stream
     if (audioConstraint != "undefined" && audioConstraint != false) {
       var media_audio_constraint = { audio: audioConstraint };
-      this.navigatorUserMedia(
-        media_audio_constraint,
-        (audioStream) => {
-          //here audioStream has onr audio track only
-          audioStream = this.setGainNodeStream(audioStream);
-          // now audio stream has two audio strams.
-          // 1. Gain Node : this will be added to local stream to publish
-          // 2. Original audio track : keep its reference to stop later
+      this.navigatorUserMedia(media_audio_constraint, audioStream => {
 
-          //add callback if desktop is sharing
-          var onended = (event) => {
-            this.callback("screen_share_stopped");
-            this.setVideoCameraSource(streamId, mediaConstraints, null, true);
-          };
+        //here audioStream has onr audio track only
+        audioStream = this.setGainNodeStream(audioStream);
+        // now audio stream has two audio strams.
+        // 1. Gain Node : this will be added to local stream to publish
+        // 2. Original audio track : keep its reference to stop later
 
-          if (this.publishMode == "screen") {
-            this.updateVideoTrack(stream, streamId, onended, true);
-            if (audioTracks.length > 0) {
-              //system audio share case, then mix it with device audio
-              audioStream = this.mixAudioStreams(stream, audioStream);
-            }
-            this.updateAudioTrack(audioStream, streamId, null);
-          } else if (this.publishMode == "screen+camera") {
-            if (audioTracks.length > 0) {
-              //system audio share case, then mix it with device audio
-              audioStream = this.mixAudioStreams(stream, audioStream);
-            }
-            this.updateAudioTrack(audioStream, streamId, null);
-            this.setDesktopwithCameraSource(stream, streamId, onended);
-          } else {
-            if (audioConstraint != false && audioConstraint != undefined) {
-              stream.addTrack(audioStream.getAudioTracks()[0]);
-            }
-            this.gotStream(stream);
+        //add callback if desktop is sharing
+        var onended = event => {
+          this.callback("screen_share_stopped");
+          this.setVideoCameraSource(streamId, mediaConstraints, null, true);
+        }
+
+        if (this.publishMode == "screen") {
+          this.updateVideoTrack(stream, streamId, onended, true);
+          if (audioTracks.length > 0) { //system audio share case, then mix it with device audio
+            audioStream = this.mixAudioStreams(stream, audioStream);
           }
-        },
-        true
-      );
-    } else {
+          this.updateAudioTrack(audioStream, streamId, null);
+        }
+        else if (this.publishMode == "screen+camera") {
+          if (audioTracks.length > 0) { //system audio share case, then mix it with device audio
+            audioStream = this.mixAudioStreams(stream, audioStream);
+          }
+          this.updateAudioTrack(audioStream, streamId, null);
+          this.setDesktopwithCameraSource(stream, streamId, onended);
+        }
+        else {
+          if (audioConstraint != false && audioConstraint != undefined) {
+            stream.addTrack(audioStream.getAudioTracks()[0]);
+          }
+          this.gotStream(stream);
+        }
+      }, true)
+    }
+    else {
       this.gotStream(stream);
     }
   }
 
   /**
    * Called to get user media (camera and/or mic)
-   *
+   * 
    * @param {*} mediaConstraints : media constaint
    * @param {*} func : callback on success. The stream which is got, is passed as parameter to this function
    * @param {*} catch_error : error is checked if catch_error is true
    */
   navigatorUserMedia(mediaConstraints, func, catch_error) {
     if (catch_error == true) {
-      navigator.mediaDevices
-        .getUserMedia(mediaConstraints)
-        .then(func)
-        .catch((error) => {
-          if (error.name == "NotFoundError") {
-            this.getDevices();
-          } else {
-            this.callbackError(error.name, error.message);
-          }
-        });
+      navigator.mediaDevices.getUserMedia(mediaConstraints).then(func).catch(error => {
+        if (error.name == "NotFoundError") {
+          this.getDevices()
+        } else {
+          this.callbackError(error.name, error.message);
+        }
+      });
     } else {
-      navigator.mediaDevices.getUserMedia(mediaConstraints).then(func);
+      navigator.mediaDevices.getUserMedia(mediaConstraints).then(func)
     }
   }
 
   /**
    * Called to get display media (screen share)
-   *
+   * 
    * @param {*} mediaConstraints : media constaint
    * @param {*} func : callback on success. The stream which is got, is passed as parameter to this function
    */
   navigatorDisplayMedia(mediaConstraints, func) {
-    navigator.mediaDevices
-      .getDisplayMedia(mediaConstraints)
+    navigator.mediaDevices.getDisplayMedia(mediaConstraints)
       .then(func)
-      .then(() => {
-        this.callback("screen_share_started");
-      })
-      .catch((error) => {
+      .catch(error => {
         if (error.name === "NotAllowedError") {
           console.debug("Permission denied error");
           this.callbackError("ScreenSharePermissionDenied");
@@ -467,11 +428,12 @@ export class MediaManager {
           if (this.localStream == null) {
             var mediaConstraints = {
               video: true,
-              audio: true,
+              audio: true
             };
 
             this.openStream(mediaConstraints);
-          } else {
+          }
+          else {
             this.switchVideoCameraCapture(streamId);
           }
         }
@@ -480,38 +442,26 @@ export class MediaManager {
 
   /**
    * Called to get the media (User Media or Display Media)
-   * @param {*} mediaConstraints
-   * @param {*} audioConstraint
-   * @param {*} streamId
+   * @param {*} mediaConstraints 
+   * @param {*} audioConstraint 
+   * @param {*} streamId 
    */
   getMedia(mediaConstraints, audioConstraint, streamId) {
     // Check Media Constraint video value screen or screen + camera
     if (this.publishMode == "screen+camera" || this.publishMode == "screen") {
-      this.navigatorDisplayMedia(mediaConstraints, (stream) => {
-        if (this.smallVideoTrack) this.smallVideoTrack.stop();
-        this.prepareStreamTracks(
-          mediaConstraints,
-          audioConstraint,
-          stream,
-          streamId
-        );
-      });
+      this.navigatorDisplayMedia(mediaConstraints, (stream => {
+        if (this.smallVideoTrack)
+          this.smallVideoTrack.stop();
+        this.prepareStreamTracks(mediaConstraints, audioConstraint, stream, streamId);
+      }));
     }
     // If mediaConstraints only user camera
     else {
-      this.navigatorUserMedia(
-        mediaConstraints,
-        (stream) => {
-          if (this.smallVideoTrack) this.smallVideoTrack.stop();
-          this.prepareStreamTracks(
-            mediaConstraints,
-            audioConstraint,
-            stream,
-            streamId
-          );
-        },
-        true
-      );
+      this.navigatorUserMedia(mediaConstraints, (stream => {
+        if (this.smallVideoTrack)
+          this.smallVideoTrack.stop();
+        this.prepareStreamTracks(mediaConstraints, audioConstraint, stream, streamId);
+      }), true);
     }
   }
 
@@ -521,16 +471,14 @@ export class MediaManager {
   openStream(mediaConstraints) {
     this.mediaConstraints = mediaConstraints;
     var audioConstraint = false;
-    if (
-      typeof mediaConstraints.audio != "undefined" &&
-      mediaConstraints.audio != false
-    ) {
+    if (typeof mediaConstraints.audio != "undefined" && mediaConstraints.audio != false) {
       audioConstraint = mediaConstraints.audio;
     }
 
     if (typeof mediaConstraints.video != "undefined") {
       this.getMedia(mediaConstraints, audioConstraint);
-    } else {
+    }
+    else {
       console.error("MediaConstraint video is not defined");
       this.callbackError("media_constraint_video_not_defined");
     }
@@ -569,30 +517,28 @@ export class MediaManager {
     }
   }
 
+
   /**
    * Checks browser supports screen share feature
    * if exist it calls callback with "browser_screen_share_supported"
    */
   checkBrowserScreenShareSupported() {
-    if (
-      (typeof navigator.mediaDevices != "undefined" &&
-        navigator.mediaDevices.getDisplayMedia) ||
-      navigator.getDisplayMedia
-    ) {
+    if ((typeof navigator.mediaDevices != "undefined" && navigator.mediaDevices.getDisplayMedia) || navigator.getDisplayMedia) {
       this.callback("browser_screen_share_supported");
     }
-  }
+  };
 
   /**
    * Changes the secondary stream gain in mixed audio mode
-   *
-   * @param {*} enable
+   * 
+   * @param {*} enable 
    */
   enableSecondStreamInMixedAudio(enable) {
     if (this.secondaryAudioTrackGainNode != null) {
       if (enable) {
         this.secondaryAudioTrackGainNode.gain.value = 1;
-      } else {
+      }
+      else {
         this.secondaryAudioTrackGainNode.gain.value = 0;
       }
     }
@@ -600,8 +546,8 @@ export class MediaManager {
 
   /**
    * Changes local stream when new stream is prepared
-   *
-   * @param {*} stream
+   *  
+   * @param {*} stream 
    */
   gotStream(stream) {
     this.localStream = stream;
@@ -617,8 +563,7 @@ export class MediaManager {
    * Please don't forget to disable this function with disableAudioLevelWhenMuted if you use it.
    */
   enableAudioLevelWhenMuted() {
-    navigator.mediaDevices
-      .getUserMedia({ video: false, audio: true })
+    navigator.mediaDevices.getUserMedia({ video: false, audio: true })
       .then((stream) => {
         this.mutedAudioStream = stream;
         const soundMeter = new SoundMeter(this.audioContext);
@@ -633,15 +578,16 @@ export class MediaManager {
             }
           }, 200);
         });
+
       })
       .catch(function (err) {
-        console.log("Can't get the soundlevel on mute");
+        console.log("Can't get the soundlevel on mute")
       });
   }
 
   disableAudioLevelWhenMuted() {
     if (this.meterRefresh != null) {
-      clearInterval(this.meterRefresh);
+      clearInterval(this.meterRefresh)
     }
 
     if (this.mutedAudioStream != null) {
@@ -651,8 +597,9 @@ export class MediaManager {
     }
   }
 
+
   /**
-   * This method mixed the first stream audio to the second stream audio and
+   * This method mixed the first stream audio to the second stream audio and 
    * @param {*} stream  : Primary stream that contain video and audio (system audio)
    * @param {*} secondStream :stream has device audio
    * @returns mixed stream.
@@ -675,11 +622,10 @@ export class MediaManager {
       this.primaryAudioTrackGainNode.gain.value = 1;
       var audioSource = this.audioContext.createMediaStreamSource(stream);
 
-      audioSource
-        .connect(this.primaryAudioTrackGainNode)
-        .connect(audioDestionation);
-    } else {
-      console.debug("Origin stream does not have audio track");
+      audioSource.connect(this.primaryAudioTrackGainNode).connect(audioDestionation);
+    }
+    else {
+      console.debug("Origin stream does not have audio track")
     }
 
     if (secondStream.getAudioTracks().length > 0) {
@@ -688,13 +634,11 @@ export class MediaManager {
       //Adjust the gain for second sound
       this.secondaryAudioTrackGainNode.gain.value = 1;
 
-      var audioSource2 =
-        this.audioContext.createMediaStreamSource(secondStream);
-      audioSource2
-        .connect(this.secondaryAudioTrackGainNode)
-        .connect(audioDestionation);
-    } else {
-      console.debug("Second stream does not have audio track");
+      var audioSource2 = this.audioContext.createMediaStreamSource(secondStream);
+      audioSource2.connect(this.secondaryAudioTrackGainNode).connect(audioDestionation);
+    }
+    else {
+      console.debug("Second stream does not have audio track")
     }
 
     audioDestionation.stream.getAudioTracks().forEach(function (track) {
@@ -707,15 +651,12 @@ export class MediaManager {
 
   /**
    * This method creates a Gain Node stream to make the audio track adjustable
-   *
-   * @param {*} stream
-   * @returns
+   * 
+   * @param {*} stream 
+   * @returns 
    */
   setGainNodeStream(stream) {
-    if (
-      this.mediaConstraints.audio != false &&
-      typeof this.mediaConstraints.audio != "undefined"
-    ) {
+    if (this.mediaConstraints.audio != false && typeof this.mediaConstraints.audio != "undefined") {
       // Get the videoTracks from the stream.
       const videoTracks = stream.getVideoTracks();
 
@@ -723,36 +664,36 @@ export class MediaManager {
       const audioTracks = stream.getAudioTracks();
 
       /**
-       * Create a new audio context and build a stream source,
-       * stream destination and a gain node. Pass the stream into
-       * the mediaStreamSource so we can use it in the Web Audio API.
-       */
+      * Create a new audio context and build a stream source,
+      * stream destination and a gain node. Pass the stream into 
+      * the mediaStreamSource so we can use it in the Web Audio API.
+      */
       this.audioContext = new AudioContext();
       let mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
-      let mediaStreamDestination =
-        this.audioContext.createMediaStreamDestination();
+      let mediaStreamDestination = this.audioContext.createMediaStreamDestination();
       this.primaryAudioTrackGainNode = this.audioContext.createGain();
 
       /**
-       * Connect the stream to the gainNode so that all audio
-       * passes through the gain and can be controlled by it.
-       * Then pass the stream from the gain to the mediaStreamDestination
-       * which can pass it back to the RTC client.
-       */
+      * Connect the stream to the gainNode so that all audio
+      * passes through the gain and can be controlled by it.
+      * Then pass the stream from the gain to the mediaStreamDestination
+      * which can pass it back to the RTC client.
+      */
       mediaStreamSource.connect(this.primaryAudioTrackGainNode);
       this.primaryAudioTrackGainNode.connect(mediaStreamDestination);
 
       if (this.currentVolume == null) {
         this.primaryAudioTrackGainNode.gain.value = 1;
-      } else {
+      }
+      else {
         this.primaryAudioTrackGainNode.gain.value = this.currentVolume;
       }
 
       /**
-       * The mediaStreamDestination.stream outputs a MediaStream object
-       * containing a single AudioMediaStreamTrack. Add the video track
-       * to the new stream to rejoin the video with the controlled audio.
-       */
+      * The mediaStreamDestination.stream outputs a MediaStream object
+      * containing a single AudioMediaStreamTrack. Add the video track
+      * to the new stream to rejoin the video with the controlled audio.
+      */
       const controlledStream = mediaStreamDestination.stream;
 
       for (const videoTrack of videoTracks) {
@@ -768,62 +709,50 @@ export class MediaManager {
       this.previousAudioTrack = controlledStream.getAudioTracks()[1];
 
       /**
-       * Use the stream that went through the gainNode. This
-       * is the same stream but with altered input volume levels.
-       */
+      * Use the stream that went through the gainNode. This
+      * is the same stream but with altered input volume levels.
+      */
       return controlledStream;
     }
     return stream;
   }
 
   /**
-   * Called by User
+   * Called by User 
    * to switch the Screen Share mode
-   *
-   * @param {*} streamId
+   * 
+   * @param {*} streamId 
    */
   switchDesktopCapture(streamId) {
     this.publishMode = "screen";
 
     var audioConstraint = false;
-    if (
-      typeof this.mediaConstraints.audio != "undefined" &&
-      this.mediaConstraints.audio != false
-    ) {
+    if (typeof this.mediaConstraints.audio != "undefined" && this.mediaConstraints.audio != false) {
       audioConstraint = this.mediaConstraints.audio;
     }
 
-    if (
-      typeof this.mediaConstraints.video != "undefined" &&
-      this.mediaConstraints.video != false
-    ) {
-      this.mediaConstraints.video = true;
+    if (typeof this.mediaConstraints.video != "undefined" && this.mediaConstraints.video != false) {
+      this.mediaConstraints.video = true
     }
 
     this.getMedia(this.mediaConstraints, audioConstraint, streamId);
   }
 
   /**
-   * Called by User
+   * Called by User 
    * to switch the Screen Share with Camera mode
-   *
-   * @param {*} streamId
+   * 
+   * @param {*} streamId 
    */
   switchDesktopCaptureWithCamera(streamId) {
-    if (
-      typeof this.mediaConstraints.video != "undefined" &&
-      this.mediaConstraints.video != false
-    ) {
-      this.mediaConstraints.video = true;
+    if (typeof this.mediaConstraints.video != "undefined" && this.mediaConstraints.video != false) {
+      this.mediaConstraints.video = true
     }
 
     this.publishMode = "screen+camera";
 
     var audioConstraint = false;
-    if (
-      typeof this.mediaConstraints.audio != "undefined" &&
-      this.mediaConstraints.audio != false
-    ) {
+    if (typeof this.mediaConstraints.audio != "undefined" && this.mediaConstraints.audio != false) {
       audioConstraint = this.mediaConstraints.audio;
     }
     this.getMedia(this.mediaConstraints, audioConstraint, streamId);
@@ -836,36 +765,36 @@ export class MediaManager {
   updateLocalAudioStream(stream, onEndedCallback) {
     var newAudioTrack = stream.getAudioTracks()[0];
 
-    if (
-      this.localStream != null &&
-      this.localStream.getAudioTracks()[0] != null
-    ) {
+    if (this.localStream != null && this.localStream.getAudioTracks()[0] != null) {
       var audioTrack = this.localStream.getAudioTracks()[0];
       this.localStream.removeTrack(audioTrack);
       audioTrack.stop();
       this.localStream.addTrack(newAudioTrack);
-    } else if (this.localStream != null) {
+    }
+    else if (this.localStream != null) {
       this.localStream.addTrack(newAudioTrack);
-    } else {
+    }
+    else {
       this.localStream = stream;
     }
 
-    if (this.localVideo != null) {
-      //it can be null
+    if (this.localVideo != null) {   //it can be null
       this.localVideo.srcObject = this.localStream;
     }
 
     if (onEndedCallback != null) {
       stream.getAudioTracks()[0].onended = function (event) {
         onEndedCallback(event);
-      };
+      }
     }
 
     if (this.isMuted) {
       this.muteLocalMic();
-    } else {
+    }
+    else {
       this.unmuteLocalMic();
     }
+
   }
 
   /**
@@ -879,17 +808,16 @@ export class MediaManager {
 
     var newVideoTrack = stream.getVideoTracks()[0];
 
-    if (
-      this.localStream != null &&
-      this.localStream.getVideoTracks()[0] != null
-    ) {
+    if (this.localStream != null && this.localStream.getVideoTracks()[0] != null) {
       var videoTrack = this.localStream.getVideoTracks()[0];
       this.localStream.removeTrack(videoTrack);
       videoTrack.stop();
       this.localStream.addTrack(newVideoTrack);
-    } else if (this.localStream != null) {
+    }
+    else if (this.localStream != null) {
       this.localStream.addTrack(newVideoTrack);
-    } else {
+    }
+    else {
       this.localStream = stream;
     }
 
@@ -900,95 +828,76 @@ export class MediaManager {
     if (onEndedCallback != null) {
       stream.getVideoTracks()[0].onended = function (event) {
         onEndedCallback(event);
-      };
+      }
     }
   }
 
   /**
-   * Called by User
+   * Called by User 
    * to change video source
-   *
-   * @param {*} streamId
-   * @param {*} deviceId
+   * 
+   * @param {*} streamId 
+   * @param {*} deviceId 
    */
   switchAudioInputSource(streamId, deviceId) {
     //stop the track because in some android devices need to close the current camera stream
     var audioTrack = this.localStream.getAudioTracks()[0];
     if (audioTrack) {
       audioTrack.stop();
-    } else {
+    }
+    else {
       console.warn("There is no audio track in local stream");
     }
 
     if (typeof deviceId != "undefined") {
       if (this.mediaConstraints.audio !== true)
         this.mediaConstraints.audio.deviceId = deviceId;
-      else this.mediaConstraints.audio = { deviceId: deviceId };
+      else
+        this.mediaConstraints.audio = { "deviceId": deviceId };
 
-      //to change only audio track set video false otherwise issue #3826 occurs on Android
-      let tempMediaConstraints = {
-        video: false,
-        audio: { deviceId: deviceId },
-      };
-      this.setAudioInputSource(
-        streamId,
-        tempMediaConstraints,
-        null,
-        true,
-        deviceId
-      );
-    } else {
-      this.setAudioInputSource(
-        streamId,
-        this.mediaConstraints,
-        null,
-        true,
-        deviceId
-      );
+      //to change only audio track set video false otherwise issue #3826 occurs on Android 
+      let tempMediaConstraints = { "video": false, "audio": { "deviceId": deviceId } };
+      this.setAudioInputSource(streamId, tempMediaConstraints, null, true, deviceId);
+    }
+    else {
+      this.setAudioInputSource(streamId, this.mediaConstraints, null, true, deviceId);
     }
   }
+
 
   /**
    * This method sets Audio Input Source and called when you change audio device
    * It calls updateAudioTrack function to update local audio stream.
    */
   setAudioInputSource(streamId, mediaConstraints, onEndedCallback) {
-    this.navigatorUserMedia(
-      mediaConstraints,
-      (stream) => {
-        stream = this.setGainNodeStream(stream);
-        this.updateAudioTrack(
-          stream,
-          streamId,
-          mediaConstraints,
-          onEndedCallback
-        );
-      },
-      true
-    );
+    this.navigatorUserMedia(mediaConstraints, stream => {
+      stream = this.setGainNodeStream(stream);
+      this.updateAudioTrack(stream, streamId, mediaConstraints, onEndedCallback);
+    }, true);
   }
 
   /**
-   * Called by User
+     * Called by User 
    * to change video camera capture
-   *
+   * 
    * @param {*} streamId Id of the stream to be changed.
    * @param {*} deviceId Id of the device which will use as a media device
    * @param {*} onEndedCallback callback for when the switching video state is completed, can be used to understand if it is loading or not
-   *
-   * This method is used to switch to video capture.
+   * 
+   * This method is used to switch to video capture. 
    */
   switchVideoCameraCapture(streamId, deviceId, onEndedCallback) {
     //stop the track because in some android devices need to close the current camera stream
     var videoTrack = this.localStream.getVideoTracks()[0];
     if (videoTrack) {
       videoTrack.stop();
-    } else {
+    }
+    else {
       console.warn("There is no video track in local stream");
     }
 
     this.publishMode = "camera";
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
+    navigator.mediaDevices.enumerateDevices().then(devices => {
       for (let i = 0; i < devices.length; i++) {
         if (devices[i].kind == "videoinput") {
           //Adjust video source only if there is a matching device id with the given one.
@@ -1001,103 +910,78 @@ export class MediaManager {
             break;
           }
         }
-      }
+      };
       //If no matching device found don't adjust the media constraints let it be true instead of a device ID
-      console.debug(
-        "Given deviceId = " +
-          deviceId +
-          " - Media constraints video property = " +
-          this.mediaConstraints.video
-      );
-      this.setVideoCameraSource(
-        streamId,
-        this.mediaConstraints,
-        null,
-        true,
-        deviceId
-      );
-    });
+      console.debug("Given deviceId = " + deviceId + " - Media constraints video property = " + this.mediaConstraints.video);
+      this.setVideoCameraSource(streamId, this.mediaConstraints, null, true, deviceId);
+    })
+
   }
 
   /**
    * This method sets Video Input Source and called when you change video device
    * It calls updateVideoTrack function to update local video stream.
    */
-  setVideoCameraSource(
-    streamId,
-    mediaConstraints,
-    onEndedCallback,
-    stopDesktop
-  ) {
-    this.navigatorUserMedia(
-      mediaConstraints,
-      (stream) => {
-        if (stopDesktop && this.secondaryAudioTrackGainNode) {
-          //This audio track update is necessary for such a case:
-          //If you enable screen share with browser audio and then
-          //return back to the camera, the audio should be only from mic.
-          //If, we don't update audio with the following lines,
-          //the mixed (mic+browser) audio would be streamed in the camera mode.
-          this.secondaryAudioTrackGainNode = null;
-          stream = this.setGainNodeStream(stream);
-          this.updateAudioTrack(
-            stream,
-            streamId,
-            mediaConstraints,
-            onEndedCallback
-          );
-        }
+  setVideoCameraSource(streamId, mediaConstraints, onEndedCallback, stopDesktop) {
+    this.navigatorUserMedia(mediaConstraints, stream => {
+      if (stopDesktop && this.secondaryAudioTrackGainNode) {
+        //This audio track update is necessary for such a case:
+        //If you enable screen share with browser audio and then 
+        //return back to the camera, the audio should be only from mic.
+        //If, we don't update audio with the following lines, 
+        //the mixed (mic+browser) audio would be streamed in the camera mode.
+        this.secondaryAudioTrackGainNode = null;
+        stream = this.setGainNodeStream(stream);
+        this.updateAudioTrack(stream, streamId, mediaConstraints, onEndedCallback);
+      }
 
-        this.updateVideoTrack(stream, streamId, onEndedCallback, stopDesktop);
-      },
-      true
-    );
+      this.updateVideoTrack(stream, streamId, onEndedCallback, stopDesktop);
+    }, true);
   }
+
 
   /**
    * Updates the audio track in the audio sender
    * getSender method is set on MediaManagercreation by WebRTCAdaptor
-   *
-   * @param {*} stream
-   * @param {*} streamId
-   * @param {*} onEndedCallback
+   * 
+   * @param {*} stream 
+   * @param {*} streamId 
+   * @param {*} onEndedCallback 
    */
   updateAudioTrack(stream, streamId, onEndedCallback) {
     var audioTrackSender = this.getSender(streamId, "audio");
     if (audioTrackSender) {
-      audioTrackSender
-        .replaceTrack(stream.getAudioTracks()[0])
-        .then((result) => {
-          this.updateLocalAudioStream(stream, onEndedCallback);
-        })
-        .catch(function (error) {
-          console.log(error.name);
-        });
-    } else {
+      audioTrackSender.replaceTrack(stream.getAudioTracks()[0]).then(result => {
+        this.updateLocalAudioStream(stream, onEndedCallback);
+
+      }).catch(function (error) {
+        console.log(error.name);
+      });
+    }
+    else {
       this.updateLocalAudioStream(stream, onEndedCallback);
     }
   }
 
   /**
-   * Updates the video track in the video sender
-   * getSender method is set on MediaManagercreation by WebRTCAdaptor
-   *
-   * @param {*} stream
-   * @param {*} streamId
-   * @param {*} onEndedCallback
-   */
+    * Updates the video track in the video sender
+    * getSender method is set on MediaManagercreation by WebRTCAdaptor
+    * 
+    * @param {*} stream 
+    * @param {*} streamId 
+    * @param {*} onEndedCallback 
+    */
   updateVideoTrack(stream, streamId, onEndedCallback, stopDesktop) {
     var videoTrackSender = this.getSender(streamId, "video");
     if (videoTrackSender) {
-      videoTrackSender
-        .replaceTrack(stream.getVideoTracks()[0])
-        .then((result) => {
-          this.updateLocalVideoStream(stream, onEndedCallback, stopDesktop);
-        })
-        .catch((error) => {
-          console.log(error.name);
-        });
-    } else {
+      videoTrackSender.replaceTrack(stream.getVideoTracks()[0]).then(result => {
+        this.updateLocalVideoStream(stream, onEndedCallback, stopDesktop);
+
+      }).catch(error => {
+        console.log(error.name);
+      });
+    }
+    else {
       this.updateLocalVideoStream(stream, onEndedCallback, stopDesktop);
     }
   }
@@ -1107,7 +991,7 @@ export class MediaManager {
    * Tihs method create a black frame to reduce data transfer
    */
   initializeDummyFrame() {
-    this.dummyCanvas.getContext("2d").fillRect(0, 0, 320, 240);
+    this.dummyCanvas.getContext('2d').fillRect(0, 0, 320, 240);
     this.replacementStream = this.dummyCanvas.captureStream();
   }
 
@@ -1123,11 +1007,13 @@ export class MediaManager {
       let choosenId;
       if (streamId != null || typeof streamId != "undefined") {
         choosenId = streamId;
-      } else {
+      }
+      else {
         choosenId = this.publishStreamId;
       }
       this.updateVideoTrack(this.replacementStream, choosenId, null, true);
-    } else {
+    }
+    else {
       this.callbackError("NoActiveConnection");
     }
 
@@ -1150,29 +1036,22 @@ export class MediaManager {
       this.blackFrameTimer = null;
     }
     if (this.localStream == null) {
-      this.navigatorUserMedia(
-        this.mediaConstraints,
-        (stream) => {
-          this.gotStream(stream);
-        },
-        false
-      );
+      this.navigatorUserMedia(this.mediaConstraints, stream => {
+        this.gotStream(stream);
+      }, false);
     }
     //This method will get the camera track and replace it with dummy track
     else {
-      this.navigatorUserMedia(
-        this.mediaConstraints,
-        (stream) => {
-          let choosenId;
-          if (streamId != null || typeof streamId != "undefined") {
-            choosenId = streamId;
-          } else {
-            choosenId = this.publishStreamId;
-          }
-          this.updateVideoTrack(stream, choosenId, null, true);
-        },
-        false
-      );
+      this.navigatorUserMedia(this.mediaConstraints, stream => {
+        let choosenId;
+        if (streamId != null || typeof streamId != "undefined") {
+          choosenId = streamId;
+        }
+        else {
+          choosenId = this.publishStreamId;
+        }
+        this.updateVideoTrack(stream, choosenId, null, true);
+      }, false);
     }
   }
 
@@ -1183,10 +1062,9 @@ export class MediaManager {
   muteLocalMic() {
     this.isMuted = true;
     if (this.localStream != null) {
-      this.localStream
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = false));
-    } else {
+      this.localStream.getAudioTracks().forEach(track => track.enabled = false);
+    }
+    else {
       this.callbackError("NoActiveConnection");
     }
   }
@@ -1194,16 +1072,15 @@ export class MediaManager {
   /**
    * Called by User
    * to unmute local audio streaming
-   *
+   * 
    * if there is audio it calls callbackError with "AudioAlreadyActive" parameter
    */
   unmuteLocalMic() {
     this.isMuted = false;
     if (this.localStream != null) {
-      this.localStream
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = true));
-    } else {
+      this.localStream.getAudioTracks().forEach(track => track.enabled = true);
+    }
+    else {
       this.callbackError("NoActiveConnection");
     }
   }
@@ -1213,17 +1090,14 @@ export class MediaManager {
    */
   getVideoSender(streamId) {
     var videoSender = null;
-    if (
-      typeof adapter !== "undefined" &&
-      adapter !== null &&
-      (adapter.browserDetails.browser === "chrome" ||
-        adapter.browserDetails.browser === "firefox" ||
-        (adapter.browserDetails.browser === "safari" &&
-          adapter.browserDetails.version >= 64)) &&
-      "RTCRtpSender" in window &&
-      "setParameters" in window.RTCRtpSender.prototype
-    ) {
+    if (typeof adapter !== "undefined" && adapter !== null && ((adapter.browserDetails.browser === 'chrome' ||
+      (adapter.browserDetails.browser === 'firefox' ||
+        adapter.browserDetails.browser === 'safari' &&
+        adapter.browserDetails.version >= 64)) &&
+      'RTCRtpSender' in window &&
+      'setParameters' in window.RTCRtpSender.prototype)) {
       videoSender = this.getSender(streamId, "video");
+
     }
     return videoSender;
   }
@@ -1244,25 +1118,26 @@ export class MediaManager {
         parameters.encodings = [{}];
       }
 
-      if (bandwidth === "unlimited") {
+      if (bandwidth === 'unlimited') {
         delete parameters.encodings[0].maxBitrate;
-      } else {
+      }
+      else {
         parameters.encodings[0].maxBitrate = bandwidth * 1000;
       }
 
-      return videoSender.setParameters(parameters);
-    } else {
-      errorDefinition =
-        "Video sender not found to change bandwidth. Streaming may not be active";
+      return videoSender.setParameters(parameters)
+    }
+    else {
+      errorDefinition = "Video sender not found to change bandwidth. Streaming may not be active";
     }
 
     return Promise.reject(errorDefinition);
-  }
+  };
 
   /**
    * Called by user
    * sets the volume level
-   *
+   * 
    * @param {*} volumeLevel : Any number between 0 and 1.
    */
   setVolumeLevel(volumeLevel) {
@@ -1279,7 +1154,7 @@ export class MediaManager {
   /**
    * Called by user
    * To create a sound meter for the local stream
-   *
+   * 
    * @param {*} levelCallback : callback to provide the audio level to user
    * @param {*} period : measurement period
    */
@@ -1290,12 +1165,7 @@ export class MediaManager {
         alert(e);
         return;
       }
-      console.log(
-        "Added sound meter for stream: " +
-        'localVideo' +
-          " = " +
-          soundMeter.instant.toFixed(2)
-      );
+      // console.log("Added sound meter for stream: " + streamId + " = " + soundMeter.instant.toFixed(2));
     });
 
     this.soundLevelProviderId = setInterval(() => {
@@ -1306,12 +1176,13 @@ export class MediaManager {
   /**
    * Called by user
    * To change media constraints on the fly
-   *
+   * 
    */
   applyConstraints(streamId, newConstaints) {
     var videoTrackSender = this.getSender(streamId, "video");
-    return videoTrackSender.track.applyConstraints(newConstaints).catch((e) => {
-      console.error("Error while applying capture constraints:", e.message);
+    return videoTrackSender.track.applyConstraints(newConstaints).catch(e => {
+      console.error('Error while applying capture constraints:', e.message);
     });
   }
 }
+
