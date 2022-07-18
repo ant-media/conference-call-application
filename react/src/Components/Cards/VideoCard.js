@@ -100,7 +100,6 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   useEffect(() => {
     if (isLocal && mediaSettings.isPublished) {
       antmedia.enableAudioLevelForLocalStream((value) => {
-        console.log('value: ', value);
         // sounds under 0.01 are probably background noise
         if (value >= 0.01) {
           if (isTalking === false) setIsTalking(true)
@@ -108,7 +107,7 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
           timeoutRef.current = setTimeout(() => {
             setIsTalking(false)
           }, 1000)
-          antmedia.updateAudioLevel(props.id, value);
+          antmedia.updateAudioLevel(mediaSettings?.myLocalData?.streamId, Math.floor(value * 100));
         }
       }, 100);
     }
