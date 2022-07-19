@@ -1,21 +1,31 @@
 import * as React from 'react';
-import DialogTitle from '@mui/material/DialogTitle';
-import Dialog from '@mui/material/Dialog';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import DialogContent from '@mui/material/DialogContent';
-import { SettingsContext } from 'pages/AntMedia';
-import { AntmediaContext } from "App";
+import { styled,alpha } from '@mui/material/styles';
 
-import { Grid, Typography, useMediaQuery } from '@mui/material';
-import { SvgIcon } from 'Components/SvgIcon';
+import { Grid, Typography, useMediaQuery, Dialog, DialogTitle, DialogContent, Button, Box, Slider, Radio, RadioGroup, FormControlLabel, FormControl } from '@mui/material';
+
 import { useTheme } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
+import { SettingsContext } from 'pages/AntMedia';
+import { AntmediaContext } from 'App';
+import { useTranslation } from 'react-i18next';
+import { SvgIcon } from 'Components/SvgIcon';
+import debounce from "lodash/debounce"
+
+const CustomizedSlider= styled(Slider)(({ theme }) => ({
+  marginBottom: 0,
+  
+  '&.MuiSlider-dragging .MuiSlider-thumb':{
+    boxShadow: `0px 0px 0px 10px ${alpha(theme.palette.primary.main, 0.3)}`,
+  },
+  '& div[class*="MuiAvatar-root-MuiAvatarGroup-avatar"]': {
+    
+    [theme.breakpoints.down('md')]: {
+      width: 44,
+      height: 44,
+      fontSize: 16,
+    },
+  },
+}));
 
 const AntDialogTitle = props => {
   const { children, onClose, ...other } = props;
@@ -53,7 +63,7 @@ export function LayoutSettingsDialog(props) {
 
   React.useEffect(() => {
     setLayout(pinnedVideoId !== null ? 'sidebar' : 'tiled');
-  }, [pinnedVideoId])
+  }, [pinnedVideoId]);
   const handleClose = () => {
     onClose(selectedValue);
   };
@@ -64,12 +74,11 @@ export function LayoutSettingsDialog(props) {
 
     if (mode === 'tiled') {
       console.log('switch to tiled');
-
       //unpin the pinned video
       pinVideo(pinnedVideoId);
     } else if (mode === 'sidebar') {
-      const participants = document.querySelectorAll('.single-video-container.not-pinned video')
-      const firstParticipant = participants.length > 1 ? participants[1] : participants[0]
+      const participants = document.querySelectorAll('.single-video-container.not-pinned video');
+      const firstParticipant = participants.length > 1 ? participants[1] : participants[0];
 
       //pin the first participant
       pinVideo(firstParticipant?.id ? firstParticipant.id : 'localVideo');
@@ -87,11 +96,12 @@ export function LayoutSettingsDialog(props) {
       </Grid>
     );
   };
-  const handleChange = (count) => {
-    antmedia.handleSetMaxVideoTrackCount(count)
-    setMaxVideoTrackCount(count)
-    globals.maxVideoTrackCount = count
-  }
+  const handleMaxVideoTrackCountChange = count => {
+    antmedia.handleSetMaxVideoTrackCount(count);
+    setMaxVideoTrackCount(count);
+    globals.maxVideoTrackCount = count;
+  };
+  const debouncedHandleMaxVideoTrackCountChange = debounce(handleMaxVideoTrackCountChange,500)
   //const actualLayout = pinnedVideoId !== null ? 'sidebar' : 'tiled';
   return (
     <Dialog onClose={handleClose} open={open} fullScreen={fullScreen} maxWidth={'xs'}>
@@ -99,25 +109,53 @@ export function LayoutSettingsDialog(props) {
       <Typography variant="body2" color="#fff">
         {t('You can choose either tiled or sidebar view.')}
       </Typography>
-      <DialogContent sx={{ pl: 1, pr: 1 }}>
+      <DialogContent sx={{ px: 1}}>
         <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
           <Grid container>
             <FormControl sx={{ width: '100%' }}>
-              <RadioGroup
-                aria-labelledby="layout-radio-buttons"
-                defaultValue={pinnedVideoId !== null ? 'sidebar' : 'tiled'}
-                value={layout}
-                onChange={changeLayout}
-                name="layout-radio-buttons-group"
-              >
+              <RadioGroup aria-labelledby="layout-radio-buttons" defaultValue={pinnedVideoId !== null ? 'sidebar' : 'tiled'} value={layout} onChange={changeLayout} name="layout-radio-buttons-group">
                 <FormControlLabel classes={{ label: 'layout-radio-label' }} sx={{ width: '100%', pb: 1 }} value="tiled" control={<Radio />} label={radioLabel('Tiled', 'tiled')} />
                 <FormControlLabel classes={{ label: 'layout-radio-label' }} sx={{ width: '100%' }} value="sidebar" control={<Radio />} label={radioLabel('Sidebar', 'sidebar')} />
               </RadioGroup>
             </FormControl>
           </Grid>
+          <Typography color="#fff" sx={{fontWeight: 600,mt:2.5, mb:2}}>Change tile placement</Typography>
+          <Grid container alignItems="center" justifyContent="space-between" columnSpacing={5}  >
+            <Grid item>
+              <SvgIcon size={20} name={'filled-tiles-2x2'} color={'#cacaca'} viewBox="0 0 30 30"/>
+            </Grid>
+           <Grid item xs>
+           <CustomizedSlider
+              aria-label="video track count"
+              valueLabelDisplay="auto"
+              defaultValue={3}
+              step={null}
+              min={3}
+              max={12}
+              marks={[
+                {
+                  value: 3,
+                },
+                {
+                  value: 6,
+                },
+                {
+                  value: 9,
+                },
+                {
+                  value: 12,
+                },
+              ]}
+              onChange={e => {
+                debouncedHandleMaxVideoTrackCountChange(e.target.value);
+              }}
+            />
+           </Grid>
+           <Grid item>
+              <SvgIcon size={30} name={'filled-tiles-3x3'} color={'#cacaca'} viewBox="0 0 30 30" />
+            </Grid>
+          </Grid>
         </Box>
-        <button onClick={() => handleChange(2)}>set max video to 2</button>
-        <button onClick={() => handleChange(3)}>set max video to 3</button>
       </DialogContent>
     </Dialog>
   );
