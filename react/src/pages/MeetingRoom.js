@@ -1,39 +1,41 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import VideoCard from 'Components/Cards/VideoCard';
 import React, { useContext, useEffect } from 'react';
+import { AntmediaContext } from 'App';
+import { SettingsContext } from 'pages/AntMedia';
 
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import Footer from 'Components/Footer/Footer';
-import { AntmediaContext } from 'App';
-import { SettingsContext } from 'pages/AntMedia';
 import { styled } from '@mui/material/styles';
+
 
 const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
   border: `3px solid ${theme.palette.green[85]} !important`,
-  width: 54,
-    height: 54,
+  color: '#fff',
+    width: 44,
+    height: 44,
     [theme.breakpoints.down('md')]: {
-      width: 44,
-      height: 44,
+      width: 34,
+      height: 34,
       fontSize: 16,
     },
 }));
+
 const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
-  
-  '&.plus-avatar-visible:first-child.MuiAvatar-root ':{
+  '& div:not(.regular-avatar)': {
     border: `3px solid ${theme.palette.green[85]} !important`,
-    backgroundColor: `${theme.palette.green[80]} !important`,
-    color: '#fff !important',
-    width: 54,
-    height: 54,
+    backgroundColor: theme.palette.green[80],
+    color: '#fff',
+    width: 44,
+    height: 44,
     [theme.breakpoints.down('md')]: {
-      width: 44,
-      height: 44,
-      fontSize: 16,
+      width: 34,
+      height: 34,
+      fontSize: 14,
     },
-  }
+  },
 }));
 
 function debounce(fn, ms) {
@@ -89,10 +91,9 @@ const MeetingRoom = React.memo(props => {
   const settings = useContext(SettingsContext);
   const { drawerOpen, pinnedVideoId, pinVideo, audioTracks, maxVideoTrackCount } = settings;
   const { participants, allParticipants, myLocalData } = props;
-  // console.log('myLocalData: ', myLocalData);
-  //  console.log('xxx ALL Participants: ', allParticipants);
-  //  console.log('xxx VIDEO participants: ', participants);
+
   const allParticipantsExceptLocal = allParticipants.filter(p => p.streamId !== myLocalData?.streamId);
+
   const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({ id }) => id);
     const othersIds = all.filter(p => !participantIds.includes(p.streamId));
@@ -159,12 +160,10 @@ const MeetingRoom = React.memo(props => {
 
   const OthersTile = (maxGroup, small) => {
     const others = filterAndSortOthersTile(allParticipantsExceptLocal, participants);
-    //test purposes
-    //others = [...others, ...others, ...others];
-    const sidebarStyle = small ? { width: { xs: 44, md: 64 }, height: { xs: 44, md: 64 } } : { width: { xs: 44, md: 54 }, height: { xs: 44, md: 54 } };
+   
     return (
       <div className="others-tile-inner">
-        <CustomizedAvatarGroup className={others.lenght > maxGroup ? "plus-avatar-visible" : ''} max={maxGroup} sx={{ justifyContent: 'center' }}>
+        <CustomizedAvatarGroup max={maxGroup} sx={{ justifyContent: 'center' }}>
           {others.map(({ name, streamName }, index) => {
             let username = name || streamName;
             if (username?.length > 0) {
@@ -176,10 +175,10 @@ const MeetingRoom = React.memo(props => {
                 <CustomizedAvatar
                   key={index}
                   alt={username}
+                  className="regular-avatar"
                   sx={{
                     bgcolor: 'green.50',
                     color: '#fff',
-                    ...sidebarStyle,
                     fontSize: { xs: 16, md: 22 },
                   }}
                 >
@@ -270,7 +269,7 @@ const MeetingRoom = React.memo(props => {
   const sliceTiles = allParticipantsExceptLocal.length + 1 > showAsOthersLimit; //plus 1 is me
 
   const pinLayout = pinnedVideoId !== null ? true : false;
-
+  // const testPart = [{ name: 'a' }, { name: 'a' }];
   return (
     <>
       {audioTracks.map((audio, index) => (
@@ -321,7 +320,8 @@ const MeetingRoom = React.memo(props => {
                 </div>
               </>
             ))}
-            <div
+            {/* others tile test start - to be deleted */}
+            {/* <div
               className="single-video-container not-pinned others-tile-wrapper"
               style={{
                 width: 'var(--width)',
@@ -330,8 +330,8 @@ const MeetingRoom = React.memo(props => {
               }}
             >
               <div className="others-tile-inner">
-                <CustomizedAvatarGroup className="plus-avatar-visible" max={2} sx={{ justifyContent: 'center' }}>
-                  {[{name:'a'},{name:'a'},{name:'a'}].map(({ name, streamName }, index) => {
+                <CustomizedAvatarGroup className="styled-avatar-group " max={2} sx={{ justifyContent: 'center' }}>
+                  {testPart.map(({ name, streamName }, index) => {
                     let username = name || streamName;
                     if (username?.length > 0) {
                       const nameArr = username.split(' ');
@@ -342,6 +342,7 @@ const MeetingRoom = React.memo(props => {
                         <CustomizedAvatar
                           key={index}
                           alt={username}
+                          className="regular-avatar"
                           sx={{
                             bgcolor: 'green.50',
                             color: '#fff',
@@ -356,11 +357,10 @@ const MeetingRoom = React.memo(props => {
                     }
                   })}
                 </CustomizedAvatarGroup>
-                <Typography sx={{ mt: 2, color: '#ffffff' }}>
-                  1 other
-                </Typography>
+                <Typography sx={{ mt: 2, color: '#ffffff' }}>1 other</Typography>
               </div>
-            </div>
+            </div> */}
+            {/* others tile test end - to be deleted */}
             {sliceTiles && participants.length > 0 && (
               <div
                 className="single-video-container not-pinned others-tile-wrapper"
