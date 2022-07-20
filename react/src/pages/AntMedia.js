@@ -337,15 +337,18 @@ function AntMedia() {
         });
       } else if (eventType === "SCREEN_SHARED_ON") {
         setScreenSharedVideoId(eventStreamId);
+        console.log(
+          "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON",
+          notificationEvent,
+          participants
+        );
 
-        if (participants.find((p) => p.id === eventStreamId)) {
-          antmedia.assignVideoTrack(
-            participants.find((p) => p.id === eventStreamId).videoLabel,
-            eventStreamId,
-            false
-          );
-          setPinnedVideoId(eventStreamId);
-        }
+        let videoLab = participants.find((p) => p.id === eventStreamId)
+          ?.videoLabel
+          ? participants.find((p) => p.id === eventStreamId).videoLabel
+          : "videoTrack0";
+        antmedia.assignVideoTrack(videoLab, eventStreamId, false);
+        setPinnedVideoId(eventStreamId);
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
@@ -431,11 +434,11 @@ function AntMedia() {
             "AUHUHAUHAUHAHUHAUAHUAHUAHUAHUHAU status",
             participants.find((p) => p.id === eventStreamId)
           );
-          antmedia.assignVideoTrack(
-            participants.find((p) => p.id === eventStreamId).videoLabel,
-            eventStreamId,
-            false
-          );
+          let videoLab = participants.find((p) => p.id === eventStreamId)
+            ?.videoLabel
+            ? participants.find((p) => p.id === eventStreamId).videoLabel
+            : "videoTrack0";
+          antmedia.assignVideoTrack(videoLab, eventStreamId, false);
         }
       }
     }
