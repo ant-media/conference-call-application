@@ -109,6 +109,11 @@ export class MediaManager {
     this.localStream = null;
 
     /**
+         * this is the sound meter object for the local stream
+         */
+    this.localStreamSoundMeter = null;
+
+    /**
      * Timer to create black frame to publish when video is muted
      */
     this.blackFrameTimer = null;
@@ -795,6 +800,9 @@ export class MediaManager {
       this.unmuteLocalMic();
     }
 
+    if (this.localStreamSoundMeter != null) {
+      this.connectSoundMeterToLocalStream();
+    }
   }
 
   /**
@@ -1159,18 +1167,26 @@ export class MediaManager {
    * @param {*} period : measurement period
    */
   enableAudioLevelForLocalStream(levelCallback, period) {
-    const soundMeter = new SoundMeter(this.audioContext);
-    soundMeter.connectToSource(this.localStream, function (e) {
+    this.localStreamSoundMeter = new SoundMeter(this.audioContext);
+    this.connectSoundMeterToLocalStream();
+
+    this.soundLevelProviderId = setInterval(() => {
+      levelCallback(this.localStreamSoundMeter.instant.toFixed(2));
+    }, period);
+  }
+
+  /**
+     * Connects the local stream to Sound Meter
+     * It should be called when local stream changes
+     */
+  connectSoundMeterToLocalStream() {
+    this.localStreamSoundMeter.connectToSource(this.localStream, function (e) {
       if (e) {
         alert(e);
         return;
       }
       // console.log("Added sound meter for stream: " + streamId + " = " + soundMeter.instant.toFixed(2));
     });
-
-    this.soundLevelProviderId = setInterval(() => {
-      levelCallback(soundMeter.instant.toFixed(2));
-    }, period);
   }
 
   /**
