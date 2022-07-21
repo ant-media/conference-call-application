@@ -16,7 +16,7 @@ export const MediaSettingsContext = React.createContext(null);
 const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
-  maxVideoTrackCount: 2, 
+  maxVideoTrackCount: 2,
 };
 
 function AntMedia() {
@@ -55,7 +55,7 @@ function AntMedia() {
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState("");
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
-
+  const timeoutRef = React.useRef(null)
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [messages, setMessages] = useState([]);
@@ -411,15 +411,19 @@ function AntMedia() {
           });
         });
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
+        clearInterval(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+          setTalkers([])
+        }, 1000)
         setTalkers((oldTalkers) => {
           const newTalkers = notificationEvent.payload
             .filter(
               (p) =>
                 p.trackId !== "" &&
-                p.audioLevel > 10 &&
-                screenSharedVideoId !== p.trackId.substring("ARDAMSx".length)
+                screenSharedVideoId !== p.trackId &&
+                p.audioLevel !== 0
             )
-            .map((p) => p.trackId.substring("ARDAMSx".length));
+            .map((p) => p.trackId);
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
       }

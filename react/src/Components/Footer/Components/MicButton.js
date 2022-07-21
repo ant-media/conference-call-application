@@ -21,8 +21,8 @@ export const roundStyle = {
 export const CustomizedBtn = styled(Button)(({ theme }) => ({
   '&.footer-icon-button': {
     height: '100%',
-    [theme.breakpoints.down('sm')]:{
-      padding:8,
+    [theme.breakpoints.down('sm')]: {
+      padding: 8,
       minWidth: 'unset',
       width: '100%',
     },
@@ -34,11 +34,11 @@ export const CustomizedBtn = styled(Button)(({ theme }) => ({
 
 
 function MicButton(props) {
-  const { rounded,footer } = props;
+  const { rounded, footer } = props;
   const antmedia = useContext(AntmediaContext);
   const settings = useContext(MediaSettingsContext);
   const { enqueueSnackbar } = useSnackbar();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const handleMute = (e) => {
     e.stopPropagation();
@@ -56,9 +56,10 @@ function MicButton(props) {
     antmedia.muteLocalMic();
     if (settings?.myLocalData?.streamId) {
       antmedia.handleSendNotificationEvent('MIC_MUTED', settings?.myLocalData?.streamId);
+      antmedia.updateAudioLevel(settings?.myLocalData?.streamId, 0);
     }
   };
-  
+
   const handleUnmute = (e) => {
     e.stopPropagation();
     enqueueSnackbar({
@@ -85,14 +86,14 @@ function MicButton(props) {
     <>
       {mic && mic.isMicMuted ? (
         <Tooltip title={t('Turn on microphone')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="error" onClick={(e)=>{handleUnmute(e)}}>
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="error" onClick={(e) => { handleUnmute(e) }}>
             <SvgIcon size={40} name={'muted-microphone'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
       ) : (
         <Tooltip title={t('Turn off microphone')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e)=>{handleMute(e)}}>
-              <SvgIcon size={40} name={'microphone'}  color='inherit' />
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => { handleMute(e) }}>
+            <SvgIcon size={40} name={'microphone'} color='inherit' />
           </CustomizedBtn>
         </Tooltip>
       )}
