@@ -1,11 +1,11 @@
 import * as React from 'react';
 import Drawer from '@mui/material/Drawer';
 import { styled } from '@mui/material/styles';
-import {  Grid, Typography, useTheme, Tabs, Tab } from '@mui/material';
-import MessageCard from './Cards/MessageCard';
+import {  Grid,  Tabs, Tab } from '@mui/material';
 import MessageInput from './MessageInput';
 import { useTranslation } from 'react-i18next';
 import ParticipantTab from './ParticipantTab';
+import MessagesTab from './MessagesTab';
 import CloseDrawerButton from './DrawerButton';
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
@@ -25,12 +25,6 @@ const AntDrawer = styled(Drawer)(({ theme }) => ({
     },
   },
 }));
-const TextContainer = styled(Grid)(({ theme }) => ({
-  padding: '10px 18px 8px 18px',
-  background: theme.palette.green[60],
-  borderRadius: 6,
-  color: theme.palette.green[0],
-}));
 
 const MessageGrid = styled(Grid)(({ theme }) => ({
   position: 'relative',
@@ -47,11 +41,10 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const MessageDrawer = React.memo(props => {
-  const { drawerOpen, messages=[] } = props;
+  const { drawerOpen, messages = [] } = props;
   const [value, setValue] = React.useState(0);
   const { allParticipants } = props;
 
-  const theme = useTheme();
   const { t } = useTranslation();
 
   const handleChange = (event, newValue) => {
@@ -97,21 +90,7 @@ const MessageDrawer = React.memo(props => {
         <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
           <TabPanel value={value} index={0}>
             <TabGrid container sx={{ pb: 0 }} direction={'column'}>
-              <TextContainer item container>
-                <Typography color={theme.palette.green[0]} style={{ fontSize: 12 }} variant="body2" align="center">
-                  {t('Messages can only be seen by people in the call and are deleted when the call ends')}
-                </Typography>
-              </TextContainer>
-              <Grid item container sx={{ mt: 1 }} id="paper-props" style={{ flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto' }}>
-                {' '}
-                <Grid item xs={12}>
-                  {messages.map((m, index) => (
-                    <Grid item key={index} xs={12}>
-                      <MessageCard date={m.date} isMe={m?.eventType ? false : true} name={m.name} message={m.message} />
-                    </Grid>
-                  ))}
-                </Grid>
-              </Grid>
+              <MessagesTab messages={messages}/>
             </TabGrid>
           </TabPanel>
           <TabPanel value={value} index={1}>
