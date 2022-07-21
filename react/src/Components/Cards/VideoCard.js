@@ -45,6 +45,7 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
     },
     [props.track]
   );
+  
   React.useEffect(() => {
     if (props.track?.kind === "video") {
       props.track.onended = (event) => {

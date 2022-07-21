@@ -14,22 +14,29 @@ export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
 
 const globals = {
-  maxVideoTrackCount: 2,
+  //this settings is to keep consistent with the sdk until backend for the app is setup
+  // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
+  maxVideoTrackCount: 2, 
 };
 
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
+
   // drawerOpen for message components.
   const [drawerOpen, setDrawerOpen] = useState(false);
-  // whenever i joined the room, i will get my unique id and stream settings from webRTC.
+
+  // whenever i join the room, i will get my unique id and stream settings from webRTC.
   // So that whenever i did something i will inform other participants that this action belongs to me by sending my streamId.
   const [myLocalData, setMyLocalData] = useState(null);
+
   // this is my own name when i enter the room.
   const [streamName, setStreamName] = useState("");
+
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
+
 
   //we are going to store number of unread messages to display on screen if user has not opened message component.
   const [numberOfUnReadMessages, setNumberOfUnReadMessages] = useState(0);
@@ -48,7 +55,6 @@ function AntMedia() {
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState("");
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
-  const [maxVideoTrackCount, setMaxVideoTrackCount] = React.useState(2);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -97,7 +103,7 @@ function AntMedia() {
       handleSendNotificationEvent("UNPIN_USER", myLocalData.streamId, {
         streamId: id,
       });
-      localStorage.setItem("myMaxTrackCount", maxTrackCount);
+      globals.maxVideoTrackCount = maxTrackCount;
     }
   }
   function handleStartScreenShare() {
@@ -185,9 +191,6 @@ function AntMedia() {
       }
     });
   }
-  // useEffect(() => {
-  //   handleSetMaxVideoTrackCount(3);
-  // }, [myLocalData]);
 
   useEffect(() => {
     scrollToBottom();
@@ -657,8 +660,6 @@ function AntMedia() {
                   screenSharedVideoId,
                   audioTracks,
                   allParticipants,
-                  setMaxVideoTrackCount,
-                  maxVideoTrackCount,
                   globals,
                 }}
               >

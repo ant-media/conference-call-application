@@ -55,7 +55,7 @@ export function LayoutSettingsDialog(props) {
   const { onClose, selectedValue, open } = props;
   const settings = React.useContext(SettingsContext);
   const antmedia = React.useContext(AntmediaContext);
-  const { pinnedVideoId, pinVideo, setMaxVideoTrackCount, globals } = settings;
+  const { pinnedVideoId, pinVideo,globals } = settings;
   const [layout, setLayout] = React.useState(pinnedVideoId !== null ? 'sidebar' : 'tiled'); //just for radioo buttons
 
   const theme = useTheme();
@@ -97,12 +97,15 @@ export function LayoutSettingsDialog(props) {
     );
   };
   const handleMaxVideoTrackCountChange = count => {
-    antmedia.handleSetMaxVideoTrackCount(count);
-    setMaxVideoTrackCount(count);
-    globals.maxVideoTrackCount = count;
+    //why the minus 1? because what user sees is (my local video + maxvideoTrackCount) 
+    //so if the user sets the tiles to 6 it means (1 + 5) respectively to the statement above.
+    //what the count number actually is the second variable in that.
+    antmedia.handleSetMaxVideoTrackCount(count - 1);
+    
   };
   const debouncedHandleMaxVideoTrackCountChange = debounce(handleMaxVideoTrackCountChange,500)
   //const actualLayout = pinnedVideoId !== null ? 'sidebar' : 'tiled';
+
   return (
     <Dialog onClose={handleClose} open={open} fullScreen={fullScreen} maxWidth={'xs'}>
       <AntDialogTitle onClose={handleClose}>{t('Change Layout')}</AntDialogTitle>
@@ -119,7 +122,7 @@ export function LayoutSettingsDialog(props) {
               </RadioGroup>
             </FormControl>
           </Grid>
-          <Typography color="#fff" sx={{fontWeight: 600,mt:2.5, mb:2}}>Change tile placement</Typography>
+          <Typography color="#fff" sx={{fontWeight: 600,mt:2.5, mb:2}}>Change tile count</Typography>
           <Grid container alignItems="center" justifyContent="space-between" columnSpacing={5}  >
             <Grid item>
               <SvgIcon size={20} name={'filled-tiles-2x2'} color={'#cacaca'} viewBox="0 0 30 30"/>
@@ -128,7 +131,7 @@ export function LayoutSettingsDialog(props) {
            <CustomizedSlider
               aria-label="video track count"
               valueLabelDisplay="auto"
-              defaultValue={3}
+              defaultValue={ globals.maxVideoTrackCount ? globals.maxVideoTrackCount + 1 : 3 }
               step={null}
               min={3}
               max={12}
