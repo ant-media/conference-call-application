@@ -7,6 +7,11 @@ import { BrowserRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 const appName = "/" + window.location.pathname.split("/")[1];
+
+if (process.env.NODE_ENV === 'production') {
+  console.log = function () {};
+}
+
 root.render(
   <React.StrictMode>
     <BrowserRouter basename={`${appName}`}>
