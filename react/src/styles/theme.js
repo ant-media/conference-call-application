@@ -1,30 +1,30 @@
-import { createTheme, responsiveFontSizes } from "@mui/material/styles";
-import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
-import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
-import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
-import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
+import { createTheme, responsiveFontSizes } from '@mui/material/styles';
+import OpenSansRegular from '../static/Fonts/OpenSans/OpenSans-Regular.ttf';
+import OpenSansMedium from '../static/Fonts/OpenSans/OpenSans-Medium.ttf';
+import OpenSansSemiBold from '../static/Fonts/OpenSans/OpenSans-SemiBold.ttf';
+import OpenSansBold from '../static/Fonts/OpenSans/OpenSans-Bold.ttf';
 
-const green0 = "#AFF3EE";
-const green10 = "#00E5D2";
-const green20 = "#00C8B8";
-const green30 = "#00AC9E";
-const green40 = "#008F83";
-const green50 = "#007269";
-const green60 = "#00564F";
-const green70 = "#003935";
-const green80 = "#001D1A";
-const green85 = "#024B46";
-const green90 = "#6BCBC3";
-const chatText = "#DDFFFC";
-const darkGray ="#222B2A";
+const green0 = '#AFF3EE';
+const green10 = '#00E5D2';
+const green20 = '#00C8B8';
+const green30 = '#00AC9E';
+const green40 = '#008F83';
+const green50 = '#007269';
+const green60 = '#00564F';
+const green70 = '#003935';
+const green80 = '#001D1A';
+const green85 = '#024B46';
+const green90 = '#6BCBC3';
+const chatText = '#DDFFFC';
+const darkGray = '#222B2A';
 
-const error = "#DF0515";
+const error = '#DF0515';
 const primaryColor = green10;
 const secondaryColor = green60;
 const Theme = createTheme({
   typography: {
     allVariants: {
-      color: "#FFFFFF",
+      color: '#FFFFFF',
       fontFamily: "'OpenSans'",
     },
     h1: {
@@ -40,7 +40,7 @@ const Theme = createTheme({
     },
     h5: {
       fontSize: 40,
-      letterSpacing: "-0.007em",
+      letterSpacing: '-0.007em',
     },
     h6: {
       fontSize: 20,
@@ -51,12 +51,12 @@ const Theme = createTheme({
       fontSize: 16,
       fontWeight: 500,
       lineHeight: 1.2,
-      color: "#10243E",
+      color: '#10243E',
     },
     body2: {
       fontSize: 14,
       lineHeight: 1.2,
-      color: "#10243E",
+      color: '#10243E',
     },
     link: {
       fontSize: 16,
@@ -68,12 +68,12 @@ const Theme = createTheme({
     MuiSelect: {
       styleOverrides: {
         root: {
-          "& fieldset": {
-            borderColor: "white",
+          '& fieldset': {
+            borderColor: 'white',
           },
         },
         icon: {
-          color: "white",
+          color: 'white',
         },
       },
     },
@@ -87,7 +87,7 @@ const Theme = createTheme({
     MuiFab: {
       styleOverrides: {
         root: {
-          boxShadow: "unset",
+          boxShadow: 'unset',
         },
       },
     },
@@ -101,16 +101,16 @@ const Theme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          padding: "12px 40px 32px",
-          width: "100%",
+          padding: '12px 40px 32px',
+          width: '100%',
         },
       },
     },
     MuiDialogTitle: {
       styleOverrides: {
         root: {
-          color: "white",
-          padding: "24px 0",
+          color: 'white',
+          padding: '24px 0',
           fontSize: 24,
         },
       },
@@ -119,7 +119,7 @@ const Theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 6,
-          background: "#022824",
+          background: '#022824',
         },
       },
     },
@@ -128,7 +128,7 @@ const Theme = createTheme({
         root: {
           paddingTop: 16,
           paddingBottom: 16,
-          color: "white",
+          color: 'white',
         },
       },
     },
@@ -142,7 +142,7 @@ const Theme = createTheme({
     MuiListItemText: {
       styleOverrides: {
         primary: {
-          color: "white",
+          color: 'white',
         },
       },
     },
@@ -176,8 +176,8 @@ const Theme = createTheme({
         },
         input: {
           borderRadius: 6,
-          padding: "11.5px 20px",
-          "&::placeholder": {
+          padding: '11.5px 20px',
+          '&::placeholder': {
             fontSize: 16,
             color: secondaryColor,
             opacity: 1,
@@ -188,8 +188,8 @@ const Theme = createTheme({
     MuiFilledInput: {
       styleOverrides: {
         input: {
-          padding: "12px 16px",
-          "&::placeholder": {
+          padding: '12px 16px',
+          '&::placeholder': {
             fontSize: 14,
             color: primaryColor,
             opacity: 0.8,
@@ -201,46 +201,82 @@ const Theme = createTheme({
       styleOverrides: {
         outlinedSecondary: {
           border: `1px solid ${green60}`,
-          color: "white",
+          color: 'white',
         },
+
         root: {
           borderRadius: 6,
           fontSize: 16,
           fontWeight: 500,
-          lineHeight: "24px",
+          lineHeight: '24px',
           borderWidth: 2,
-          padding: "10px 4px",
-          textTransform: "initial",
+          padding: '10px 4px',
+          textTransform: 'initial',
           minWidth: 60,
         },
         containedError: {
           borderColor: error,
+          '&.Mui-disabled': {
+            opacity: 0.5,
+            cursor: 'not-allowed',
+            color: '#ffffff',
+            boxShadow: 'none',
+            borderColor: error,
+            backgroundColor: error,
+            pointerEvents: 'unset'
+          },
         },
         outlinedPrimary: {
-          backgroundColor: "#fff",
+          backgroundColor: '#fff',
           borderColor: primaryColor,
-          "&:hover": {
+          '&:hover': {
             border: `2px solid ${primaryColor}`,
             backgroundColor: primaryColor,
-            color: "#fff",
+            color: '#fff',
+          },
+          '&.Mui-disabled': {
+            opacity: 0.5,
+            cursor: 'not-allowed',
+            color: '#ffffff',
+            boxShadow: 'none',
+            borderColor: primaryColor,
+            pointerEvents: 'unset'
           },
         },
         contained: {
-          boxShadow: "none",
+          boxShadow: 'none',
           borderWidth: 2,
-          borderColor: "inherit",
-          borderStyle: "solid",
-          "&:hover": {
-            boxShadow: "none",
+          borderColor: 'inherit',
+          borderStyle: 'solid',
+          '&:hover': {
+            boxShadow: 'none',
           },
         },
         containedPrimary: {
-          boxShadow: "none",
+          boxShadow: 'none',
           borderColor: primaryColor,
+          '&.Mui-disabled': {
+            opacity: 0.5,
+            cursor: 'not-allowed',
+            color: '#ffffff',
+            boxShadow: 'none',
+            borderColor: primaryColor,
+            backgroundColor: primaryColor,
+            pointerEvents: 'unset'
+          },
         },
         containedSecondary: {
-          boxShadow: "none",
+          boxShadow: 'none',
           borderColor: secondaryColor,
+          '&.Mui-disabled': {
+            opacity: 0.5,
+            cursor: 'not-allowed',
+            color: '#ffffff',
+            boxShadow: 'none',
+            borderColor: secondaryColor,
+            backgroundColor: secondaryColor,
+            pointerEvents: 'unset'
+          },
         },
       },
     },
@@ -300,12 +336,12 @@ const Theme = createTheme({
       85: green85,
       90: green90,
     },
-    gray:{
-      90: darkGray
+    gray: {
+      90: darkGray,
     },
     text: {
-      primary: "#FFFFFF",
-      default: "#FFFFFF",
+      primary: '#FFFFFF',
+      default: '#FFFFFF',
       secondary: chatText, // dark4
     },
   },

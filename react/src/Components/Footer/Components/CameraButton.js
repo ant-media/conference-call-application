@@ -28,10 +28,11 @@ function MicButton(props) {
 
   const antmedia = useContext(AntmediaContext);
   const mediaSettings = useContext(MediaSettingsContext);
+  const { isScreenShared } = mediaSettings;
 
   const handleOff = (e) => {
     e.stopPropagation();
-    if (!mediaSettings?.isScreenShared) {
+    if (!isScreenShared) {
       mediaSettings?.toggleSetCam({
         eventStreamId: "localVideo",
         isCameraOn: false,
@@ -77,18 +78,18 @@ function MicButton(props) {
   };
 
   const cam = mediaSettings?.cam?.find((m) => m.eventStreamId === "localVideo");
-
+ 
   return (
     <>
       {cam && cam.isCameraOn ? (
-        <Tooltip title={t('Turn off camera')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => handleOff(e)}>
+        <Tooltip title={isScreenShared ? t('Camera is disabled while screensharing'):t('Turn off camera')} placement="top">
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={isScreenShared} onClick={(e) => handleOff(e)}>
             <SvgIcon size={40} name={'camera'}  color='inherit'/>
           </CustomizedBtn>
         </Tooltip>
       ) : (
-        <Tooltip title={t('Turn on camera')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} onClick={(e) => handleOn(e)}>
+        <Tooltip title={isScreenShared ? t('Camera is disabled while screensharing'):t('Turn on camera')} placement="top">
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={isScreenShared} onClick={(e) => handleOn(e)}>
               <SvgIcon size={40} name={'camera-off'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
