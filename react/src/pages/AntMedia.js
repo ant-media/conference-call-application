@@ -142,6 +142,8 @@ function AntMedia() {
     );
 
     setPinnedVideoId("localVideo");
+    // send fake audio level to get screen sharing user on a videotrack
+    antmedia.updateAudioLevel(myLocalData.streamId, 10);
   }
   function handleScreenshareNotFromPlatform() {
     setIsScreenShared(false);
