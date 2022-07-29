@@ -8,6 +8,7 @@ import { AntmediaContext } from 'App';
 import { useTranslation } from 'react-i18next';
 import { SettingsDialog } from 'Components/Footer/Components/SettingsDialog';
 import { SvgIcon } from 'Components/SvgIcon';
+import { useSnackbar } from 'notistack';
 
 
 function WaitingRoom(props) {
@@ -18,6 +19,7 @@ function WaitingRoom(props) {
 
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
+  const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
     antmedia.mediaManager.localVideo = document.getElementById('localVideo');
@@ -26,11 +28,32 @@ function WaitingRoom(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function joinRoom() {
+  function joinRoom(e) {
+    if (antmedia.mediaManager.localStream === null) {
+      e.preventDefault();
+      enqueueSnackbar({
+        message: t('You need to allow microphone and camera permissions before joining'),
+        variant: 'info',
+        icon: <SvgIcon size={24} name={'muted-microphone'} color="#fff" />
+      }, {
+        autoHideDuration: 1500,
+      });
+      return
+    }
     antmedia.joinRoom(roomName, undefined);
     props.handleChangeRoomStatus('meeting');
   }
   const handleDialogOpen = focus => {
+    if (antmedia.mediaManager.localStream === null) {
+      enqueueSnackbar({
+        message: t('You need to allow microphone and camera permissions before changing settings'),
+        variant: 'info',
+        icon: <SvgIcon size={24} name={'muted-microphone'} color="#fff" />
+      }, {
+        autoHideDuration: 1500,
+      });
+      return
+    }
     setSelectFocus(focus);
     setDialogOpen(true);
   };
@@ -92,8 +115,8 @@ function WaitingRoom(props) {
             </Grid>
 
             <form
-              onSubmit={() => {
-                joinRoom();
+              onSubmit={(e) => {
+                joinRoom(e);
               }}
             >
               <Grid item xs={12} sx={{ mt: 3, mb: 4 }}>

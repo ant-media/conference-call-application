@@ -42,6 +42,16 @@ function MicButton(props) {
 
   const handleMute = (e) => {
     e.stopPropagation();
+    if (antmedia.mediaManager.localStream === null) {
+      enqueueSnackbar({
+        message: t('You need to allow camera and microphone permissions before muting yourself'),
+        variant: 'info',
+        icon: <SvgIcon size={24} name={'muted-microphone'} color="#fff" />
+      }, {
+        autoHideDuration: 1500,
+      });
+      return
+    }
     enqueueSnackbar({
       message: t('Microphone off'),
       variant: 'info',
