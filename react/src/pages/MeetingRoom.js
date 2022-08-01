@@ -10,17 +10,16 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import Footer from 'Components/Footer/Footer';
 import { styled } from '@mui/material/styles';
 
-
 const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
   border: `3px solid ${theme.palette.green[85]} !important`,
   color: '#fff',
-    width: 44,
-    height: 44,
-    [theme.breakpoints.down('md')]: {
-      width: 34,
-      height: 34,
-      fontSize: 16,
-    },
+  width: 44,
+  height: 44,
+  [theme.breakpoints.down('md')]: {
+    width: 34,
+    height: 34,
+    fontSize: 16,
+  },
 }));
 
 const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
@@ -89,7 +88,7 @@ const MeetingRoom = React.memo(props => {
   const antmedia = useContext(AntmediaContext);
 
   const settings = useContext(SettingsContext);
-  const { drawerOpen, pinnedVideoId, pinVideo, audioTracks, maxVideoTrackCount } = settings;
+  const { drawerOpen, pinnedVideoId, pinVideo, audioTracks, globals } = settings;
   const { participants, allParticipants, myLocalData } = props;
 
   const allParticipantsExceptLocal = allParticipants.filter(p => p.streamId !== myLocalData?.streamId);
@@ -160,7 +159,7 @@ const MeetingRoom = React.memo(props => {
 
   const OthersTile = (maxGroup, small) => {
     const others = filterAndSortOthersTile(allParticipantsExceptLocal, participants);
-   
+
     return (
       <div className="others-tile-inner">
         <CustomizedAvatarGroup max={maxGroup} sx={{ justifyContent: 'center' }}>
@@ -200,8 +199,10 @@ const MeetingRoom = React.memo(props => {
   const returnUnpinnedGallery = () => {
     //pinned tile
     const unpinnedParticipants = getUnpinnedParticipants();
+    //console.log('unpinnedParticipants: ', unpinnedParticipants);
 
     const showAsOthersLimitPinned = 5;
+    //console.log('showAsOthersLimitPinned: ', showAsOthersLimitPinned);
     const showAsOthersSliceIndexPinned = showAsOthersLimitPinned - 2;
 
     const slicePinnedTiles = unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
@@ -264,9 +265,10 @@ const MeetingRoom = React.memo(props => {
   };
 
   //main tile other limit set, max count
-  const showAsOthersLimit = maxVideoTrackCount + 1; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
+  const showAsOthersLimit = globals.maxVideoTrackCount + 1; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
   //with 2 active video participants + 1 me + 1 card
   const sliceTiles = allParticipantsExceptLocal.length + 1 > showAsOthersLimit; //plus 1 is me
+
 
   const pinLayout = pinnedVideoId !== null ? true : false;
   // const testPart = [{ name: 'a' }, { name: 'a' }];
@@ -320,47 +322,6 @@ const MeetingRoom = React.memo(props => {
                 </div>
               </>
             ))}
-            {/* others tile test start - to be deleted */}
-            {/* <div
-              className="single-video-container not-pinned others-tile-wrapper"
-              style={{
-                width: 'var(--width)',
-                height: 'var(--height)',
-                maxWidth: 'var(--maxwidth)',
-              }}
-            >
-              <div className="others-tile-inner">
-                <CustomizedAvatarGroup className="styled-avatar-group " max={2} sx={{ justifyContent: 'center' }}>
-                  {testPart.map(({ name, streamName }, index) => {
-                    let username = name || streamName;
-                    if (username?.length > 0) {
-                      const nameArr = username.split(' ');
-                      const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
-                      const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
-
-                      return (
-                        <CustomizedAvatar
-                          key={index}
-                          alt={username}
-                          className="regular-avatar"
-                          sx={{
-                            bgcolor: 'green.50',
-                            color: '#fff',
-                            fontSize: { xs: 16, md: 22 },
-                          }}
-                        >
-                          {initials}
-                        </CustomizedAvatar>
-                      );
-                    } else {
-                      return null;
-                    }
-                  })}
-                </CustomizedAvatarGroup>
-                <Typography sx={{ mt: 2, color: '#ffffff' }}>1 other</Typography>
-              </div>
-            </div> */}
-            {/* others tile test end - to be deleted */}
             {sliceTiles && participants.length > 0 && (
               <div
                 className="single-video-container not-pinned others-tile-wrapper"

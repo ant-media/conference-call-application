@@ -126,8 +126,7 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
               left: 0,
               top: 0,
               height: '100%',
-              background: '#2929295c',
-              zIndex: 10,
+              zIndex: 100,
             }}
           >
             <Grid container justifyContent={'center'} alignItems="center" style={{ height: '100%' }} spacing={2}>
