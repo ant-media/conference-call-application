@@ -37,7 +37,6 @@ function AntMedia() {
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
 
-
   //we are going to store number of unread messages to display on screen if user has not opened message component.
   const [numberOfUnReadMessages, setNumberOfUnReadMessages] = useState(0);
 
@@ -55,7 +54,7 @@ function AntMedia() {
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState("");
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
-  const timeoutRef = React.useRef(null)
+  const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [messages, setMessages] = useState([]);
@@ -415,8 +414,8 @@ function AntMedia() {
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
-          setTalkers([])
-        }, 1000)
+          setTalkers([]);
+        }, 1000);
         setTalkers((oldTalkers) => {
           const newTalkers = notificationEvent.payload
             .filter(
@@ -432,23 +431,32 @@ function AntMedia() {
     }
   }
   function setUserStatus(notificationEvent, eventStreamId) {
-    console.log("notificationEvent", notificationEvent, eventStreamId);
+    console.log(
+      "notificationEvent",
+      notificationEvent,
+      eventStreamId,
+      screenSharedVideoId
+    );
     if (notificationEvent.isScreenShared) {
       // if the participant was already pin someone than we should not update it
       if (!screenSharedVideoId) {
         setScreenSharedVideoId(eventStreamId);
         setPinnedVideoId(eventStreamId);
-        if (participants.find((p) => p.id === eventStreamId)) {
-          console.log(
-            "AUHUHAUHAUHAHUHAUAHUAHUAHUAHUHAU status",
-            participants.find((p) => p.id === eventStreamId)
-          );
-          let videoLab = participants.find((p) => p.id === eventStreamId)
-            ?.videoLabel
-            ? participants.find((p) => p.id === eventStreamId).videoLabel
-            : "videoTrack0";
-          antmedia.assignVideoTrack(videoLab, eventStreamId, false);
-        }
+
+        console.log(
+          "AUHUHAUHAUHAHUHAUAHUAHUAHUAHUHAU status",
+          participants.find((p) => p.id === eventStreamId)
+        );
+        let videoLab = participants.find((p) => p.id === eventStreamId)
+          ?.videoLabel
+          ? participants.find((p) => p.id === eventStreamId).videoLabel
+          : "videoTrack0";
+        console.log(
+          "qwfwqfqw fqwf wqfwqfwqfqwfqw 12312312312",
+          videoLab,
+          eventStreamId
+        );
+        antmedia.assignVideoTrack(videoLab, eventStreamId, false);
       }
     }
 
