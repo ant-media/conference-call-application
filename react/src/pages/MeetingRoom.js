@@ -157,8 +157,14 @@ const MeetingRoom = React.memo(props => {
     return filtered;
   };
 
-  const OthersTile = (maxGroup, small) => {
-    const others = filterAndSortOthersTile(allParticipantsExceptLocal, participants);
+  const OthersTile = (maxGroup,othersArray=[]) => {
+    let others=[];
+    console.log('others: ', others);
+    if(othersArray?.length > 0){
+      others = othersArray
+    }else{
+      others = filterAndSortOthersTile(allParticipantsExceptLocal, participants);
+    }
 
     return (
       <div className="others-tile-inner">
@@ -198,8 +204,7 @@ const MeetingRoom = React.memo(props => {
 
   const returnUnpinnedGallery = () => {
     //pinned tile
-    const unpinnedParticipants = getUnpinnedParticipants();
-    //console.log('unpinnedParticipants: ', unpinnedParticipants);
+    let unpinnedParticipants = getUnpinnedParticipants();
 
     const showAsOthersLimitPinned = 5;
     //console.log('showAsOthersLimitPinned: ', showAsOthersLimitPinned);
@@ -208,11 +213,16 @@ const MeetingRoom = React.memo(props => {
     const slicePinnedTiles = unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
 
     let slicedParticipants = [];
+   // console.log('slicePinnedTiles: ', slicePinnedTiles);
     if (slicePinnedTiles) {
       slicedParticipants = unpinnedParticipants.slice(0, showAsOthersSliceIndexPinned);
+      unpinnedParticipants = unpinnedParticipants.slice(showAsOthersSliceIndexPinned);
     } else {
       slicedParticipants = unpinnedParticipants;
     }
+    // console.log('slicedParticipants: ', slicedParticipants);
+    // console.log('sliceTiles: ', sliceTiles);
+    // console.log('unpinnedParticipants2: ', unpinnedParticipants);
 
     return slicedParticipants.length > 0 ? (
       <>
@@ -251,10 +261,16 @@ const MeetingRoom = React.memo(props => {
             );
           }
         })}
-        {sliceTiles && participants.length > 0 && (
+        { sliceTiles ? (
           <div className="unpinned">
             <div className="single-video-container  others-tile-wrapper">{OthersTile(2)}</div>
           </div>
+        ) : (
+          slicePinnedTiles && (
+            <div className="unpinned">
+              <div className="single-video-container  others-tile-wrapper">{OthersTile(2,unpinnedParticipants)}</div>
+            </div>
+          )
         )}
       </>
     ) : (
@@ -268,7 +284,6 @@ const MeetingRoom = React.memo(props => {
   const showAsOthersLimit = globals.maxVideoTrackCount + 1; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
   //with 2 active video participants + 1 me + 1 card
   const sliceTiles = allParticipantsExceptLocal.length + 1 > showAsOthersLimit; //plus 1 is me
-
 
   const pinLayout = pinnedVideoId !== null ? true : false;
   // const testPart = [{ name: 'a' }, { name: 'a' }];
