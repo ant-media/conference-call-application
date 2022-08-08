@@ -48,12 +48,7 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   React.useEffect(() => {
     if (props.track?.kind === 'video') {
       props.track.onended = event => {
-        console.log(`trackeventend ${props.track.id}`);
-      };
-      props.track.onmute = event => {
-        console.log(`trackevent mute`, props);
-        console.log('trackevent participants: ', participants);
-        console.log('trackevent maxVideoTrackCount: ', settings?.globals?.maxVideoTrackCount);
+        console.log(`trackeventend ${props.id}`);
         if (participants.length > settings?.globals?.maxVideoTrackCount) {
           setParticipants(oldParts => {
             return oldParts.filter(p => p.videoLabel !== props.id);
@@ -143,12 +138,12 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
 
         <div
           className={`single-video-card`}
-          // style={{
-          //   ...(isTalking || mediaSettings.talkers.includes(props.id) ? {
-          //     outline: `thick solid ${theme.palette.primary.main}`,
-          //     borderRadius: '10px'
-          //   } : {})
-          // }}
+        // style={{
+        //   ...(isTalking || mediaSettings.talkers.includes(props.id) ? {
+        //     outline: `thick solid ${theme.palette.primary.main}`,
+        //     borderRadius: '10px'
+        //   } : {})
+        // }}
         >
           <Grid sx={isOff ? {} : { display: 'none' }} style={{ height: '100%' }} container>
             <DummyCard />

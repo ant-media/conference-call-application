@@ -37,7 +37,6 @@ function AntMedia() {
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
 
-
   //we are going to store number of unread messages to display on screen if user has not opened message component.
   const [numberOfUnReadMessages, setNumberOfUnReadMessages] = useState(0);
 
@@ -55,7 +54,7 @@ function AntMedia() {
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState("");
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
-  const timeoutRef = React.useRef(null)
+  const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [messages, setMessages] = useState([]);
@@ -68,9 +67,12 @@ function AntMedia() {
   ]);
   function pinVideo(id, videoLabelProp = "") {
     let videoLabel = videoLabelProp;
+    console.log("videoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabel", id, videoLabel, participants)
     if (videoLabel === "") {
       // if videoLabel is missing select the first videoLabel you find
+      // 1 -2 -3 -4 -5 -6 -7 -8 -9
       videoLabel = participants.find((p) => p.videoLabel !== p.id).videoLabel;
+
     }
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
@@ -341,19 +343,13 @@ function AntMedia() {
           }
         });
       } else if (eventType === "SCREEN_SHARED_ON") {
-        setScreenSharedVideoId(eventStreamId);
-        console.log(
-          "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON",
-          notificationEvent,
-          participants
-        );
 
         let videoLab = participants.find((p) => p.id === eventStreamId)
           ?.videoLabel
           ? participants.find((p) => p.id === eventStreamId).videoLabel
-          : "videoTrack0";
-        antmedia.assignVideoTrack(videoLab, eventStreamId, false);
-        setPinnedVideoId(eventStreamId);
+          : "";
+        pinVideo(eventStreamId, videoLab)
+        setScreenSharedVideoId(eventStreamId);
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
@@ -415,8 +411,8 @@ function AntMedia() {
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
-          setTalkers([])
-        }, 1000)
+          setTalkers([]);
+        }, 1000);
         setTalkers((oldTalkers) => {
           const newTalkers = notificationEvent.payload
             .filter(
@@ -432,23 +428,21 @@ function AntMedia() {
     }
   }
   function setUserStatus(notificationEvent, eventStreamId) {
-    console.log("notificationEvent", notificationEvent, eventStreamId);
+    console.log(
+      "notificationEvent",
+      notificationEvent,
+      eventStreamId,
+      screenSharedVideoId
+    );
     if (notificationEvent.isScreenShared) {
       // if the participant was already pin someone than we should not update it
       if (!screenSharedVideoId) {
         setScreenSharedVideoId(eventStreamId);
-        setPinnedVideoId(eventStreamId);
-        if (participants.find((p) => p.id === eventStreamId)) {
-          console.log(
-            "AUHUHAUHAUHAHUHAUAHUAHUAHUAHUHAU status",
-            participants.find((p) => p.id === eventStreamId)
-          );
-          let videoLab = participants.find((p) => p.id === eventStreamId)
-            ?.videoLabel
-            ? participants.find((p) => p.id === eventStreamId).videoLabel
-            : "videoTrack0";
-          antmedia.assignVideoTrack(videoLab, eventStreamId, false);
-        }
+        let videoLab = participants.find((p) => p.id === eventStreamId)
+          ?.videoLabel
+          ? participants.find((p) => p.id === eventStreamId).videoLabel
+          : "";
+        pinVideo(eventStreamId, videoLab)
       }
     }
 
@@ -522,7 +516,7 @@ function AntMedia() {
       "handlePlayVideohandlePlayVideohandlePlayVideohandlePlayVideo",
       obj
     );
-    let index = obj.trackId.substring("ARDAMSx".length);
+    let index = obj?.trackId?.substring("ARDAMSx".length);
     if (obj.track.kind === "audio") {
       setAudioTracks((sat) => {
         return [
@@ -543,19 +537,22 @@ function AntMedia() {
       return;
     } else {
       console.log("add participant yunus", index);
-      setParticipants((spp) => {
-        return [
-          ...spp,
-          {
-            id: index,
-            videoLabel: index,
-            track: obj.track,
-            streamId: obj.streamId,
-            isCameraOn: true,
-            name: "",
-          },
-        ];
-      });
+      if (obj?.trackId) {
+        setParticipants((spp) => {
+          return [
+            ...spp,
+            {
+              id: index,
+              videoLabel: index,
+              track: obj.track,
+              streamId: obj.streamId,
+              isCameraOn: true,
+              name: "",
+            },
+          ];
+        });
+      }
+
     }
   }
   //console.log("participantsparticipantsparticipants", participants);
