@@ -149,7 +149,7 @@ export function LayoutSettingsDialog(props) {
                   value: 12,
                 },
               ]}
-              onChange={e => {
+              onChangeCommitted={e => {
                 debouncedHandleMaxVideoTrackCountChange(e.target.value);
               }}
             />
