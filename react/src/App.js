@@ -208,6 +208,8 @@ var mediaConstraints = {
 };
 
 function checkTrackStatus(streamIdList, publishStreamId) {
+  console.log("checkTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatus", streamIdList)
+
   streamIdList.forEach(function (item) {
     var video = document.getElementById(item);
     if (video != null && !video.srcObject?.active) {

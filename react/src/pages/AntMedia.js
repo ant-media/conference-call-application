@@ -67,9 +67,12 @@ function AntMedia() {
   ]);
   function pinVideo(id, videoLabelProp = "") {
     let videoLabel = videoLabelProp;
+    console.log("videoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabel", id, videoLabel, participants)
     if (videoLabel === "") {
       // if videoLabel is missing select the first videoLabel you find
+      // 1 -2 -3 -4 -5 -6 -7 -8 -9
       videoLabel = participants.find((p) => p.videoLabel !== p.id).videoLabel;
+
     }
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
@@ -340,19 +343,13 @@ function AntMedia() {
           }
         });
       } else if (eventType === "SCREEN_SHARED_ON") {
-        setScreenSharedVideoId(eventStreamId);
-        console.log(
-          "SCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ONSCREEN_SHARED_ON",
-          notificationEvent,
-          participants
-        );
 
         let videoLab = participants.find((p) => p.id === eventStreamId)
           ?.videoLabel
           ? participants.find((p) => p.id === eventStreamId).videoLabel
-          : "videoTrack0";
-        antmedia.assignVideoTrack(videoLab, eventStreamId, false);
-        setPinnedVideoId(eventStreamId);
+          : "";
+        pinVideo(eventStreamId, videoLab)
+        setScreenSharedVideoId(eventStreamId);
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
@@ -441,22 +438,11 @@ function AntMedia() {
       // if the participant was already pin someone than we should not update it
       if (!screenSharedVideoId) {
         setScreenSharedVideoId(eventStreamId);
-        setPinnedVideoId(eventStreamId);
-
-        console.log(
-          "AUHUHAUHAUHAHUHAUAHUAHUAHUAHUHAU status",
-          participants.find((p) => p.id === eventStreamId)
-        );
         let videoLab = participants.find((p) => p.id === eventStreamId)
           ?.videoLabel
           ? participants.find((p) => p.id === eventStreamId).videoLabel
-          : "videoTrack0";
-        console.log(
-          "qwfwqfqw fqwf wqfwqfwqfqwfqw 12312312312",
-          videoLab,
-          eventStreamId
-        );
-        antmedia.assignVideoTrack(videoLab, eventStreamId, false);
+          : "";
+        pinVideo(eventStreamId, videoLab)
       }
     }
 
