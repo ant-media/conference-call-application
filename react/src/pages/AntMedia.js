@@ -516,7 +516,7 @@ function AntMedia() {
       "handlePlayVideohandlePlayVideohandlePlayVideohandlePlayVideo",
       obj
     );
-    let index = obj.trackId.substring("ARDAMSx".length);
+    let index = obj?.trackId?.substring("ARDAMSx".length);
     if (obj.track.kind === "audio") {
       setAudioTracks((sat) => {
         return [
@@ -537,19 +537,22 @@ function AntMedia() {
       return;
     } else {
       console.log("add participant yunus", index);
-      setParticipants((spp) => {
-        return [
-          ...spp,
-          {
-            id: index,
-            videoLabel: index,
-            track: obj.track,
-            streamId: obj.streamId,
-            isCameraOn: true,
-            name: "",
-          },
-        ];
-      });
+      if (obj?.trackId) {
+        setParticipants((spp) => {
+          return [
+            ...spp,
+            {
+              id: index,
+              videoLabel: index,
+              track: obj.track,
+              streamId: obj.streamId,
+              isCameraOn: true,
+              name: "",
+            },
+          ];
+        });
+      }
+
     }
   }
   //console.log("participantsparticipantsparticipants", participants);

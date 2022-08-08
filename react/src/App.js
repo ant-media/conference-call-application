@@ -208,7 +208,7 @@ var mediaConstraints = {
 };
 
 function checkTrackStatus(streamIdList, publishStreamId) {
-  console.log("checkTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatus", streamIdList)
+  console.log("checkTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatus", streamIdList, publishStreamId)
 
   streamIdList.forEach(function (item) {
     var video = document.getElementById(item);
@@ -324,7 +324,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       // streamDetailsList = obj.streamList;
       //console.log("objobjobjobjobjobjobjobjobjobjobjobjxx", obj);
       //Check video tracks active/inactive status
-      checkTrackStatus(streamIdList, publishStreamId);
+      // checkTrackStatus(streamIdList, publishStreamId);
     } else if (info == "data_channel_opened") {
       console.log("Data Channel open for stream id", obj);
       setInterval(() => {
