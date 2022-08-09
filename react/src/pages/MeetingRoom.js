@@ -1,21 +1,21 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import VideoCard from 'Components/Cards/VideoCard';
-import React, { useContext, useEffect } from 'react';
-import { AntmediaContext } from 'App';
-import { SettingsContext } from 'pages/AntMedia';
+import VideoCard from "Components/Cards/VideoCard";
+import React, { useContext, useEffect } from "react";
+import { AntmediaContext } from "App";
+import { SettingsContext } from "pages/AntMedia";
 
-import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import AvatarGroup from '@mui/material/AvatarGroup';
-import Footer from 'Components/Footer/Footer';
-import { styled } from '@mui/material/styles';
+import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
+import AvatarGroup from "@mui/material/AvatarGroup";
+import Footer from "Components/Footer/Footer";
+import { styled } from "@mui/material/styles";
 
 const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
   border: `3px solid ${theme.palette.green[85]} !important`,
-  color: '#fff',
+  color: "#fff",
   width: 44,
   height: 44,
-  [theme.breakpoints.down('md')]: {
+  [theme.breakpoints.down("md")]: {
     width: 34,
     height: 34,
     fontSize: 16,
@@ -23,13 +23,13 @@ const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
 }));
 
 const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
-  '& div:not(.regular-avatar)': {
+  "& div:not(.regular-avatar)": {
     border: `3px solid ${theme.palette.green[85]} !important`,
     backgroundColor: theme.palette.green[80],
-    color: '#fff',
+    color: "#fff",
     width: 44,
     height: 44,
-    [theme.breakpoints.down('md')]: {
+    [theme.breakpoints.down("md")]: {
       width: 34,
       height: 34,
       fontSize: 14,
@@ -39,16 +39,21 @@ const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
 
 function debounce(fn, ms) {
   let timer;
-  return _ => {
+  return (_) => {
     clearTimeout(timer);
-    timer = setTimeout(_ => {
+    timer = setTimeout((_) => {
       timer = null;
       fn.apply(this, arguments);
     }, ms);
   };
 }
 
-function calculateLayout(containerWidth, containerHeight, videoCount, aspectRatio) {
+function calculateLayout(
+  containerWidth,
+  containerHeight,
+  videoCount,
+  aspectRatio
+) {
   let bestLayout = {
     area: 0,
     cols: 0,
@@ -84,54 +89,65 @@ function calculateLayout(containerWidth, containerHeight, videoCount, aspectRati
   return bestLayout;
 }
 
-const MeetingRoom = React.memo(props => {
+const MeetingRoom = React.memo((props) => {
   const antmedia = useContext(AntmediaContext);
 
   const settings = useContext(SettingsContext);
-  const { drawerOpen, pinnedVideoId, pinVideo, audioTracks, globals } = settings;
+  const { drawerOpen, pinnedVideoId, pinVideo, audioTracks, globals } =
+    settings;
   const { participants, allParticipants, myLocalData } = props;
 
-  const allParticipantsExceptLocal = allParticipants.filter(p => p.streamId !== myLocalData?.streamId);
+  const allParticipantsExceptLocal = allParticipants.filter(
+    (p) => p.streamId !== myLocalData?.streamId
+  );
 
   const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({ id }) => id);
-    const othersIds = all.filter(p => !participantIds.includes(p.streamId));
+    const othersIds = all.filter((p) => !participantIds.includes(p.streamId));
     return othersIds.sort((a, b) => a.streamName.localeCompare(b.streamName));
   };
 
   useEffect(() => {
-    let localVid = document.getElementById('localVideo');
+    let localVid = document.getElementById("localVideo");
     if (localVid) {
-      antmedia.mediaManager.localVideo = document.getElementById('localVideo');
-      antmedia.mediaManager.localVideo.srcObject = antmedia.mediaManager.localStream;
+      antmedia.mediaManager.localVideo = document.getElementById("localVideo");
+      antmedia.mediaManager.localVideo.srcObject =
+        antmedia.mediaManager.localStream;
     }
   }, [pinnedVideoId]);
 
   function handleGalleryResize(calcDrawer) {
-    const gallery = document.getElementById('meeting-gallery');
+    const gallery = document.getElementById("meeting-gallery");
 
     if (calcDrawer) {
       if (drawerOpen) {
-        gallery.classList.add('drawer-open');
+        gallery.classList.add("drawer-open");
       } else {
-        gallery.classList.remove('drawer-open');
+        gallery.classList.remove("drawer-open");
       }
     }
     const aspectRatio = 16 / 9;
     const screenWidth = gallery.getBoundingClientRect().width;
 
     const screenHeight = gallery.getBoundingClientRect().height;
-    const videoCount = document.querySelectorAll('#meeting-gallery .single-video-container.not-pinned').length;
+    const videoCount = document.querySelectorAll(
+      "#meeting-gallery .single-video-container.not-pinned"
+    ).length;
 
-    const { width, height, cols } = calculateLayout(screenWidth, screenHeight, videoCount, aspectRatio);
+    const { width, height, cols } = calculateLayout(
+      screenWidth,
+      screenHeight,
+      videoCount,
+      aspectRatio
+    );
 
     let Width = width - 8;
     let Height = height - 8;
 
-    gallery.style.setProperty('--width', `calc(100% / ${cols})`);
-    gallery.style.setProperty('--maxwidth', Width + 'px');
-    gallery.style.setProperty('--height', Height + 'px');
-    gallery.style.setProperty('--cols', cols + '');
+    gallery.style.setProperty("--width", `calc(100% / ${cols})`);
+    gallery.style.setProperty("--maxwidth", Width + "px");
+    gallery.style.setProperty("--height", Height + "px");
+    gallery.style.setProperty("--cols", cols + "");
   }
 
   React.useEffect(() => {
@@ -144,37 +160,44 @@ const MeetingRoom = React.memo(props => {
 
   React.useEffect(() => {
     const debouncedHandleResize = debounce(handleGalleryResize, 500);
-    window.addEventListener('resize', debouncedHandleResize);
+    window.addEventListener("resize", debouncedHandleResize);
 
-    return _ => {
-      window.removeEventListener('resize', debouncedHandleResize);
+    return (_) => {
+      window.removeEventListener("resize", debouncedHandleResize);
     };
   });
 
   const getUnpinnedParticipants = () => {
-    const array = [pinnedVideoId !== 'localVideo' && { id: 'localVideo' }, ...participants.filter(v => v.id !== pinnedVideoId)];
+    const array = [
+      pinnedVideoId !== "localVideo" && { id: "localVideo" },
+      ...participants.filter((v) => v.id !== pinnedVideoId),
+    ];
     const filtered = array.filter(Boolean);
     return filtered;
   };
 
-  const OthersTile = (maxGroup,othersArray=[]) => {
-    let others=[];
-    console.log('others: ', others);
-    if(othersArray?.length > 0){
-      others = othersArray
-    }else{
-      others = filterAndSortOthersTile(allParticipantsExceptLocal, participants);
+  const OthersTile = (maxGroup, othersArray = []) => {
+    let others = [];
+    console.log("others: ", others);
+    if (othersArray?.length > 0) {
+      others = othersArray;
+    } else {
+      others = filterAndSortOthersTile(
+        allParticipantsExceptLocal,
+        participants
+      );
     }
 
     return (
       <div className="others-tile-inner">
-        <CustomizedAvatarGroup max={maxGroup} sx={{ justifyContent: 'center' }}>
+        <CustomizedAvatarGroup max={maxGroup} sx={{ justifyContent: "center" }}>
           {others.map(({ name, streamName }, index) => {
             let username = name || streamName;
             if (username?.length > 0) {
-              const nameArr = username.split(' ');
-              const secondLetter = nameArr.length > 1 ? nameArr[1][0] : '';
-              const initials = `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
+              const nameArr = username.split(" ");
+              const secondLetter = nameArr.length > 1 ? nameArr[1][0] : "";
+              const initials =
+                `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
 
               return (
                 <CustomizedAvatar
@@ -182,8 +205,8 @@ const MeetingRoom = React.memo(props => {
                   alt={username}
                   className="regular-avatar"
                   sx={{
-                    bgcolor: 'green.50',
-                    color: '#fff',
+                    bgcolor: "green.50",
+                    color: "#fff",
                     fontSize: { xs: 16, md: 22 },
                   }}
                 >
@@ -195,8 +218,8 @@ const MeetingRoom = React.memo(props => {
             }
           })}
         </CustomizedAvatarGroup>
-        <Typography sx={{ mt: 2, color: '#ffffff' }}>
-          {others.length} other{others.length > 1 ? 's' : ''}
+        <Typography sx={{ mt: 2, color: "#ffffff" }}>
+          {others.length} other{others.length > 1 ? "s" : ""}
         </Typography>
       </div>
     );
@@ -210,13 +233,19 @@ const MeetingRoom = React.memo(props => {
     //console.log('showAsOthersLimitPinned: ', showAsOthersLimitPinned);
     const showAsOthersSliceIndexPinned = showAsOthersLimitPinned - 2;
 
-    const slicePinnedTiles = unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
+    const slicePinnedTiles =
+      unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
 
     let slicedParticipants = [];
-   // console.log('slicePinnedTiles: ', slicePinnedTiles);
+    // console.log('slicePinnedTiles: ', slicePinnedTiles);
     if (slicePinnedTiles) {
-      slicedParticipants = unpinnedParticipants.slice(0, showAsOthersSliceIndexPinned);
-      unpinnedParticipants = unpinnedParticipants.slice(showAsOthersSliceIndexPinned);
+      slicedParticipants = unpinnedParticipants.slice(
+        0,
+        showAsOthersSliceIndexPinned
+      );
+      unpinnedParticipants = unpinnedParticipants.slice(
+        showAsOthersSliceIndexPinned
+      );
     } else {
       slicedParticipants = unpinnedParticipants;
     }
@@ -227,7 +256,7 @@ const MeetingRoom = React.memo(props => {
     return slicedParticipants.length > 0 ? (
       <>
         {slicedParticipants.map(({ id, videoLabel, track, name }, index) => {
-          if (id !== 'localVideo') {
+          if (id !== "localVideo") {
             return (
               <div className="unpinned" key={index}>
                 <div className="single-video-container">
@@ -249,7 +278,7 @@ const MeetingRoom = React.memo(props => {
                 <div className="single-video-container " key={index}>
                   <VideoCard
                     onHandlePin={() => {
-                      pinVideo('localVideo');
+                      pinVideo("localVideo");
                     }}
                     id="localVideo"
                     autoPlay
@@ -261,20 +290,24 @@ const MeetingRoom = React.memo(props => {
             );
           }
         })}
-        { sliceTiles ? (
+        {sliceTiles ? (
           <div className="unpinned">
-            <div className="single-video-container  others-tile-wrapper">{OthersTile(2)}</div>
+            <div className="single-video-container  others-tile-wrapper">
+              {OthersTile(2)}
+            </div>
           </div>
         ) : (
           slicePinnedTiles && (
             <div className="unpinned">
-              <div className="single-video-container  others-tile-wrapper">{OthersTile(2,unpinnedParticipants)}</div>
+              <div className="single-video-container  others-tile-wrapper">
+                {OthersTile(2, unpinnedParticipants)}
+              </div>
             </div>
           )
         )}
       </>
     ) : (
-      <Typography variant="body2" sx={{ color: 'green.50', mt: 3 }}>
+      <Typography variant="body2" sx={{ color: "green.50", mt: 3 }}>
         No other participants.
       </Typography>
     );
@@ -290,22 +323,30 @@ const MeetingRoom = React.memo(props => {
   return (
     <>
       {audioTracks.map((audio, index) => (
-        <VideoCard key={index} onHandlePin={() => {}} id={audio.streamId} track={audio.track} autoPlay name={''} style={{ display: 'none' }} />
+        <VideoCard
+          key={index}
+          onHandlePin={() => {}}
+          id={audio.streamId}
+          track={audio.track}
+          autoPlay
+          name={""}
+          style={{ display: "none" }}
+        />
       ))}
-      <div id="meeting-gallery" style={{ height: 'calc(100vh - 80px)' }}>
+      <div id="meeting-gallery" style={{ height: "calc(100vh - 80px)" }}>
         {!pinLayout && ( // if not pinned layout show me first as a regular video
           <>
             <div
               className="single-video-container not-pinned"
               style={{
-                width: 'var(--width)',
-                height: 'var(--height)',
-                maxWidth: 'var(--maxwidth)',
+                width: "var(--width)",
+                height: "var(--height)",
+                maxWidth: "var(--maxwidth)",
               }}
             >
               <VideoCard
                 onHandlePin={() => {
-                  pinVideo('localVideo');
+                  pinVideo("localVideo");
                 }}
                 id="localVideo"
                 autoPlay
@@ -320,9 +361,9 @@ const MeetingRoom = React.memo(props => {
                   className="single-video-container not-pinned"
                   key={index}
                   style={{
-                    width: 'var(--width)',
-                    height: 'var(--height)',
-                    maxWidth: 'var(--maxwidth)',
+                    width: "var(--width)",
+                    height: "var(--height)",
+                    maxWidth: "var(--maxwidth)",
                   }}
                 >
                   <VideoCard
@@ -341,9 +382,9 @@ const MeetingRoom = React.memo(props => {
               <div
                 className="single-video-container not-pinned others-tile-wrapper"
                 style={{
-                  width: 'var(--width)',
-                  height: 'var(--height)',
-                  maxWidth: 'var(--maxwidth)',
+                  width: "var(--width)",
+                  height: "var(--height)",
+                  maxWidth: "var(--maxwidth)",
                 }}
               >
                 {OthersTile(4)}
@@ -353,13 +394,13 @@ const MeetingRoom = React.memo(props => {
         )}
         {pinLayout && (
           <>
-            {pinnedVideoId === 'localVideo' ? (
+            {pinnedVideoId === "localVideo" ? (
               // pinned myself
               // ${participants.length === 0 ? ' no-participants ' : ''}
               <div className="single-video-container pinned keep-ratio">
                 <VideoCard
                   onHandlePin={() => {
-                    pinVideo('localVideo');
+                    pinVideo("localVideo");
                   }}
                   id="localVideo"
                   autoPlay
@@ -370,24 +411,29 @@ const MeetingRoom = React.memo(props => {
               </div>
             ) : (
               //pinned participant
-              participants
-                .filter(v => v.id === pinnedVideoId)
-                .map(({ id, videoLabel, track, name }, index) => (
-                  <>
-                    <div className="single-video-container pinned keep-ratio" key={`pin-${index}`}>
-                      <VideoCard
-                        id={id}
-                        track={track}
-                        autoPlay
-                        name={name}
-                        pinned
-                        onHandlePin={() => {
-                          pinVideo(id, videoLabel);
-                        }}
-                      />
-                    </div>
-                  </>
-                ))
+
+              participants.find((v) => v.id === pinnedVideoId) && (
+                <div className="single-video-container pinned keep-ratio">
+                  <VideoCard
+                    id={participants.find((v) => v.id === pinnedVideoId)?.id}
+                    track={
+                      participants.find((v) => v.id === pinnedVideoId)?.track
+                    }
+                    autoPlay
+                    name={
+                      participants.find((v) => v.id === pinnedVideoId)?.name
+                    }
+                    pinned
+                    onHandlePin={() => {
+                      pinVideo(
+                        participants.find((v) => v.id === pinnedVideoId)?.id,
+                        participants.find((v) => v.id === pinnedVideoId)
+                          ?.videoLabel
+                      );
+                    }}
+                  />
+                </div>
+              )
             )}
             <div id="unpinned-gallery">{returnUnpinnedGallery()}</div>
           </>

@@ -207,16 +207,16 @@ var mediaConstraints = {
   audio: true,
 };
 
-function checkTrackStatus(streamIdList, publishStreamId) {
-  console.log("checkTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatus", streamIdList, publishStreamId)
+// function checkTrackStatus(streamIdList, publishStreamId) {
+//   console.log("checkTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatuscheckTrackStatus", streamIdList, publishStreamId)
 
-  streamIdList.forEach(function (item) {
-    var video = document.getElementById(item);
-    if (video != null && !video.srcObject?.active) {
-      webRTCAdaptor.handlePlayVideo(item, publishStreamId);
-    }
-  });
-}
+//   streamIdList.forEach(function (item) {
+//     var video = document.getElementById(item);
+//     if (video != null && !video.srcObject?.active) {
+//       webRTCAdaptor.handlePlayVideo(item, publishStreamId);
+//     }
+//   });
+// }
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
@@ -273,7 +273,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
         webRTCAdaptor.handleRoomInfo(publishStreamId);
       }, 5000);
     } else if (info == "newStreamAvailable") {
-      console.log("BERKBERKBERKBERKBREKBREBKERBKREBKRE", obj)
+      console.log("BERKBERKBERKBERKBREKBREBKERBKREBKRE", obj);
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") {
       //stream is being published
