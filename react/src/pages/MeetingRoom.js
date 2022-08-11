@@ -325,7 +325,7 @@ const MeetingRoom = React.memo((props) => {
       {audioTracks.map((audio, index) => (
         <VideoCard
           key={index}
-          onHandlePin={() => {}}
+          onHandlePin={() => { }}
           id={audio.streamId}
           track={audio.track}
           autoPlay
@@ -355,7 +355,7 @@ const MeetingRoom = React.memo((props) => {
                 hidePin={participants.length === 0}
               />
             </div>
-            {participants.map(({ id, videoLabel, track, name }, index) => (
+            {participants.filter(p => p.videoLabel !== p.id).map(({ id, videoLabel, track, name }, index) => (
               <>
                 <div
                   className="single-video-container not-pinned"

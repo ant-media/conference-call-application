@@ -537,7 +537,7 @@ function AntMedia() {
       return;
     } else {
       console.log("add participant yunus", index);
-      if (obj?.trackId) {
+      if (obj?.trackId && !participants.some(p => p.id === index)) {
         setParticipants((spp) => {
           return [
             ...spp,

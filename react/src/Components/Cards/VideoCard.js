@@ -46,18 +46,18 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
   );
 
   React.useEffect(() => {
-    if (props.track?.kind === 'video') {
+    if (props.track?.kind === 'video' && !props.track.onended) {
       props.track.onended = event => {
         console.log(`trackeventend ${props.id}`);
         if (participants.length > settings?.globals?.maxVideoTrackCount) {
           setParticipants(oldParts => {
-            return oldParts.filter(p => p.videoLabel !== props.id);
+            return oldParts.filter(p => !(p.id === props.id || p.videoLabel === props.id));
           });
         }
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.track]);
 
   let isOff = mediaSettings?.cam?.find(c => c.eventStreamId === props?.id && !c?.isCameraOn);
 
