@@ -58,8 +58,8 @@ function ParticipantTab(props) {
     );
   };
   return (
-    <div style={{ width: "100%" }}>
-      <Stack sx={{ width: "100%", overflowY: "auto" }} spacing={2}>
+    <div style={{ width: "100%", overflowY: "auto" }}>
+      <Stack sx={{ width: "100%", }} spacing={2}>
         <Grid container>
           <SvgIcon size={28} name="participants" color="#fff" />
           <ParticipantName
