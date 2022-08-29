@@ -177,7 +177,7 @@ function findDominantSpeaker(streamSoundList) {
 }
 
 function handleNotificationEvent(obj) {
-    
+
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof (notificationEvent) == "object") {
         var eventStreamId = notificationEvent.streamId;

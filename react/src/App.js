@@ -15,7 +15,6 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import i18n from "i18next";
 import translationEN from "i18n/en.json";
 import translationTR from "i18n/tr.json";
-import LeftTheRoom from "pages/LeftTheRoom";
 
 const resources = {
   en: {
@@ -462,7 +461,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/:id" element={<AntMedia />} />
-            <Route path="/:id/left-the-room" element={<LeftTheRoom />} />
           </Routes>
         </AntmediaContext.Provider>
       </SnackbarProvider>

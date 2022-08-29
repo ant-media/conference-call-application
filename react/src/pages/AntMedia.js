@@ -9,6 +9,7 @@ import MessageDrawer from "Components/MessageDrawer";
 import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
+import LeftTheRoom from "./LeftTheRoom";
 
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
@@ -45,6 +46,7 @@ function AntMedia() {
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
+  const [leftTheRoom, setLeftTheRoom] = useState(false)
   // { id: "", track:{} },
   const [participants, setParticipants] = useState([]);
   const [allParticipants, setAllParticipants] = useState([]);
@@ -462,6 +464,7 @@ function AntMedia() {
     }
   }
   function handleLeaveFromRoom() {
+    console.log("left")
     // we need to empty participant array. i f we are going to leave it in the first place.
     setParticipants([]);
     antmedia.leaveFromRoom(roomName);
@@ -626,6 +629,7 @@ function AntMedia() {
             setSelectedMicrophone,
             setParticipants,
             participants,
+            setLeftTheRoom
           }}
         >
           <SnackbarProvider
@@ -638,7 +642,7 @@ function AntMedia() {
               <AntSnackBar id={key} notificationData={notificationData} />
             )}
           >
-            {waitingOrMeetingRoom === "waiting" ? (
+            {leftTheRoom ? <LeftTheRoom /> : waitingOrMeetingRoom === "waiting" ? (
               <WaitingRoom
                 streamName={streamName}
                 handleStreamName={(name) => setStreamName(name)}

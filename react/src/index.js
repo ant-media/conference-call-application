@@ -6,15 +6,16 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-const appName = "/" + window.location.pathname.split("/")[1];
+let appName = undefined
 
 if (process.env.NODE_ENV !== 'development') {
-  console.log = function () {};
+  appName = "/" + window.location.pathname.split("/")[1];
+  console.log = function () { };
 }
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter basename={`${appName}`}>
+    <BrowserRouter basename={appName}>
       <App />
     </BrowserRouter>
   </React.StrictMode>

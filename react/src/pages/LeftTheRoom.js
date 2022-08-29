@@ -1,7 +1,7 @@
 import { Button, Grid, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React, { useContext } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTranslation } from 'react-i18next';
@@ -44,10 +44,10 @@ function LeftTheRoom(props) {
                 </Box>
                 <Grid container justifyContent={"center"} spacing={2} sx={{ mt: 2 }} alignItems="center">
                     <Grid item lg={1} md={3} sm={2} xs={3}>
-                        <Button fullWidth color="secondary" variant="outlined" component={Link} to={`/${id}`}  >{t('Rejoin')}</Button>
+                        <Button fullWidth color="secondary" variant="outlined" component={"a"} href={`/${id}`}>{t('Rejoin')}</Button>
                     </Grid>
                     <Grid item lg={2} md={5} sm={6} xs={8}>
-                        <Button fullWidth color="secondary" variant="contained" component={Link} to={`/`}  >{t('Return to home screen')}</Button>
+                        <Button fullWidth color="secondary" variant="contained" component={"a"} href={`/`}>{t('Return to home screen')}</Button>
                     </Grid>
                 </Grid>
             </Grid>
