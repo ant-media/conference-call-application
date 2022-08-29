@@ -14,6 +14,7 @@
     "i18next": "^21.8.4",
     "i18next-browser-languagedetector": "^6.1.4",
     "lodash": "^4.17.21",
+    "nanoid": "^4.0.0",
     "notistack": "^2.0.5",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
