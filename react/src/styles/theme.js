@@ -4,8 +4,8 @@ import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
 
-const getTheme = (primary, secondary, background, color70) => {
-  const green0 = "#AFF3EE";
+const getTheme = (primary, secondary, background, color70, textColor) => {
+  const green0 = textColor ? textColor : "#AFF3EE";
   const green10 = primary ? primary : "#00E5D2";
   const green20 = "#00C8B8";
   const green30 = "#00AC9E";
@@ -15,7 +15,7 @@ const getTheme = (primary, secondary, background, color70) => {
   const green70 = color70 ? color70 : "#003935";
   const green80 = background ? background : "#001D1A";
   const green85 = "#024B46";
-  const green90 = "#6BCBC3";
+  const green90 = textColor ? textColor : "#6BCBC3";
   const chatText = "#DDFFFC";
   const darkGray = "#222B2A";
 
@@ -25,7 +25,7 @@ const getTheme = (primary, secondary, background, color70) => {
   const Theme = createTheme({
     typography: {
       allVariants: {
-        color: "#FFFFFF",
+        color: textColor ? textColor : "#FFFFFF",
         fontFamily: "'OpenSans'",
       },
       h1: {
