@@ -4,7 +4,7 @@ import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
 
-const getTheme = (primary, secondary, background) => {
+const getTheme = (primary, secondary, background, color70) => {
   const green0 = "#AFF3EE";
   const green10 = primary ? primary : "#00E5D2";
   const green20 = "#00C8B8";
@@ -12,7 +12,7 @@ const getTheme = (primary, secondary, background) => {
   const green40 = "#008F83";
   const green50 = "#007269";
   const green60 = secondary ? secondary : "#00564F";
-  const green70 = "#003935";
+  const green70 = color70 ? color70 : "#003935";
   const green80 = background ? background : "#001D1A";
   const green85 = "#024B46";
   const green90 = "#6BCBC3";

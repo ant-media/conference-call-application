@@ -441,7 +441,7 @@ function App() {
       window.removeEventListener("dblclick", handleFullScreen);
     };
   }, []);
-  // "#d2c8f1", "#d2c8f1", "#000"
+  // "#d2c8f1", "#323135", "#000", "#1b1b1b"
   return (
     <ThemeProvider theme={theme()}>
       <CssBaseline />
