@@ -441,9 +441,9 @@ function App() {
       window.removeEventListener("dblclick", handleFullScreen);
     };
   }, []);
-
+  // "#d2c8f1", "#d2c8f1", "#000"
   return (
-    <ThemeProvider theme={theme("#d2c8f1", "#d2c8f1", "#000")}>
+    <ThemeProvider theme={theme()}>
       <CssBaseline />
       <SnackbarProvider
         anchorOrigin={{
