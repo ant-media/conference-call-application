@@ -3,9 +3,6 @@ import "./App.css";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./styles/theme";
 import React from "react";
-import { Routes, Route } from "react-router-dom";
-import AntMedia from "./pages/AntMedia";
-import Home from "./pages/Home";
 import { WebRTCAdaptor } from "./antmedia/webrtc_adaptor.js";
 import { getUrlParameter } from "./antmedia/fetch.stream.js";
 import { SnackbarProvider } from "notistack";
@@ -15,6 +12,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import i18n from "i18next";
 import translationEN from "i18n/en.json";
 import translationTR from "i18n/tr.json";
+import CustomRoutes from "CustomRoutes";
 
 const resources = {
   en: {
@@ -445,7 +443,7 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme("#d2c8f1", "#d2c8f1", "#000")}>
       <CssBaseline />
       <SnackbarProvider
         anchorOrigin={{
@@ -458,10 +456,7 @@ function App() {
         )}
       >
         <AntmediaContext.Provider value={webRTCAdaptor}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/:id" element={<AntMedia />} />
-          </Routes>
+          <CustomRoutes />
         </AntmediaContext.Provider>
       </SnackbarProvider>
     </ThemeProvider>
