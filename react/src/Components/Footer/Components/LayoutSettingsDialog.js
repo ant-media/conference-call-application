@@ -134,7 +134,7 @@ export function LayoutSettingsDialog(props) {
                 defaultValue={globals.maxVideoTrackCount ? globals.maxVideoTrackCount + 1 : 3}
                 step={null}
                 min={3}
-                max={12}
+                max={30}
                 marks={[
                   {
                     value: 3,
@@ -143,10 +143,10 @@ export function LayoutSettingsDialog(props) {
                     value: 6,
                   },
                   {
-                    value: 9,
+                    value: 12,
                   },
                   {
-                    value: 12,
+                    value: 30,
                   },
                 ]}
                 onChange={e => {
