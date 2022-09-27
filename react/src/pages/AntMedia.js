@@ -46,7 +46,7 @@ function AntMedia() {
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
-  const [leftTheRoom, setLeftTheRoom] = useState(false)
+  const [leftTheRoom, setLeftTheRoom] = useState(false);
   // { id: "", track:{} },
   const [participants, setParticipants] = useState([]);
   const [allParticipants, setAllParticipants] = useState([]);
@@ -69,12 +69,16 @@ function AntMedia() {
   ]);
   function pinVideo(id, videoLabelProp = "") {
     let videoLabel = videoLabelProp;
-    console.log("videoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabel", id, videoLabel, participants)
+    console.log(
+      "videoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabel",
+      id,
+      videoLabel,
+      participants
+    );
     if (videoLabel === "") {
       // if videoLabel is missing select the first videoLabel you find
       // 1 -2 -3 -4 -5 -6 -7 -8 -9
       videoLabel = participants.find((p) => p.videoLabel !== p.id).videoLabel;
-
     }
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
@@ -345,12 +349,11 @@ function AntMedia() {
           }
         });
       } else if (eventType === "SCREEN_SHARED_ON") {
-
         let videoLab = participants.find((p) => p.id === eventStreamId)
           ?.videoLabel
           ? participants.find((p) => p.id === eventStreamId).videoLabel
           : "";
-        pinVideo(eventStreamId, videoLab)
+        pinVideo(eventStreamId, videoLab);
         setScreenSharedVideoId(eventStreamId);
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
@@ -395,20 +398,30 @@ function AntMedia() {
           );
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") {
-        console.log("eventType: ", eventType, notificationEvent);
+        console.log(
+          "eventType: VIDEO_TRACK_ASSIGNMENT_CHANGE yunus",
+          eventType,
+          notificationEvent
+        );
         if (!notificationEvent.payload.trackId) {
           return;
         }
         setParticipants((oldParticipants) => {
-          return oldParticipants.map((p) => {
-            if (
-              p.videoLabel === notificationEvent.payload.videoLabel &&
-              p.id !== notificationEvent.payload.trackId
-            ) {
-              return { ...p, id: notificationEvent.payload.trackId };
-            }
-            return p;
-          });
+          return oldParticipants
+            .filter((p) => p.id !== notificationEvent.payload.trackId)
+            .map((p) => {
+              if (
+                p.videoLabel === notificationEvent.payload.videoLabel &&
+                p.id !== notificationEvent.payload.trackId
+              ) {
+                return {
+                  ...p,
+                  id: notificationEvent.payload.trackId,
+                  oldId: p.id,
+                };
+              }
+              return p;
+            });
         });
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
@@ -444,7 +457,7 @@ function AntMedia() {
           ?.videoLabel
           ? participants.find((p) => p.id === eventStreamId).videoLabel
           : "";
-        pinVideo(eventStreamId, videoLab)
+        pinVideo(eventStreamId, videoLab);
       }
     }
 
@@ -464,7 +477,7 @@ function AntMedia() {
     }
   }
   function handleLeaveFromRoom() {
-    console.log("left")
+    console.log("left");
     // we need to empty participant array. i f we are going to leave it in the first place.
     setParticipants([]);
     antmedia.leaveFromRoom(roomName);
@@ -539,11 +552,10 @@ function AntMedia() {
     if (index === roomName) {
       return;
     } else {
-      console.log("add participant yunus", index);
-      if (obj?.trackId && !participants.some(p => p.id === index)) {
+      if (obj?.trackId && !participants.some((p) => p.id === index)) {
         setParticipants((spp) => {
           return [
-            ...spp,
+            ...spp.filter((p) => p.id !== index),
             {
               id: index,
               videoLabel: index,
@@ -554,8 +566,14 @@ function AntMedia() {
             },
           ];
         });
+        console.log(
+          "add participant yunus",
+          index,
+          obj,
+          participants,
+          allParticipants
+        );
       }
-
     }
   }
   //console.log("participantsparticipantsparticipants", participants);
@@ -629,7 +647,7 @@ function AntMedia() {
             setSelectedMicrophone,
             setParticipants,
             participants,
-            setLeftTheRoom
+            setLeftTheRoom,
           }}
         >
           <SnackbarProvider
@@ -642,7 +660,9 @@ function AntMedia() {
               <AntSnackBar id={key} notificationData={notificationData} />
             )}
           >
-            {leftTheRoom ? <LeftTheRoom /> : waitingOrMeetingRoom === "waiting" ? (
+            {leftTheRoom ? (
+              <LeftTheRoom />
+            ) : waitingOrMeetingRoom === "waiting" ? (
               <WaitingRoom
                 streamName={streamName}
                 handleStreamName={(name) => setStreamName(name)}
