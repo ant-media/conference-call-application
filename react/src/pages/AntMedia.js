@@ -68,17 +68,22 @@ function AntMedia() {
     },
   ]);
   function pinVideo(id, videoLabelProp = "") {
+    // id is for pinning user.
     let videoLabel = videoLabelProp;
     if (videoLabel === "") {
       // if videoLabel is missing select the first videoLabel you find
       // 1 -2 -3 -4 -5 -6 -7 -8 -9
       videoLabel = participants.find((p) => p.videoLabel !== p.id).videoLabel;
     }
+    // if we already pin the targeted user then we are going to remove it from pinned video.
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
       handleNotifyUnpinUser(id);
       antmedia.assignVideoTrack(videoLabel, id, false);
-    } else {
+    }
+    // if there is no pinned video we are gonna pin the targeted user.
+    // and we need to inform pinned user.
+    else {
       setPinnedVideoId(id);
       handleNotifyPinUser(id);
       antmedia.assignVideoTrack(videoLabel, id, true);
@@ -86,29 +91,29 @@ function AntMedia() {
   }
 
   function handleNotifyPinUser(id) {
+    // If I PIN USER then i am going to inform pinned user.
+    // Why? Because if i pin someone, pinned user's resolution has to change for better visibility.
     handleSendNotificationEvent("PIN_USER", myLocalData.streamId, {
       streamId: id,
     });
   }
 
   function handleNotifyUnpinUser(id) {
+    // If I UNPIN USER then i am going to inform pinned user.
+    // Why? We need to decrease resolution for pinned user's internet usage.
     handleSendNotificationEvent("UNPIN_USER", myLocalData.streamId, {
       streamId: id,
     });
   }
   function handleSetMaxVideoTrackCount(maxTrackCount) {
+    // I am changing maximum participant number on the screen. Default is 3.
     if (myLocalData?.streamId) {
       antmedia.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
-      handleSendNotificationEvent("UNPIN_USER", myLocalData.streamId, {
-        streamId: id,
-      });
       globals.maxVideoTrackCount = maxTrackCount;
     }
   }
   function handleStartScreenShare() {
     antmedia.switchDesktopCapture(myLocalData.streamId);
-
-    // antmedia.screenShareOnNotification();
   }
   function screenShareOffNotification() {
     antmedia.handleSendNotificationEvent(
@@ -541,7 +546,7 @@ function AntMedia() {
     }
   }
 
-  // custom functions
+  // START custom functions
   antmedia.handlePlayVideo = handlePlayVideo;
   antmedia.handleRoomEvents = handleRoomEvents;
   antmedia.handlePublish = handlePublish;
@@ -562,6 +567,7 @@ function AntMedia() {
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
   antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
+  // END custom functions
   return (
     <Grid container className="App">
       <Grid
