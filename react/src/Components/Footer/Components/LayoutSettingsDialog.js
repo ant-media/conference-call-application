@@ -92,7 +92,6 @@ export function LayoutSettingsDialog(props) {
     setLayout(mode);
 
     if (mode === "tiled") {
-      console.log("switch to tiled");
       //unpin the pinned video
       pinVideo(pinnedVideoId);
     } else if (mode === "sidebar") {

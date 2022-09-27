@@ -178,7 +178,6 @@ const MeetingRoom = React.memo((props) => {
 
   const OthersTile = (maxGroup, othersArray = []) => {
     let others = [];
-    console.log("others: ", others);
     if (othersArray?.length > 0) {
       others = othersArray;
     } else {
@@ -230,14 +229,12 @@ const MeetingRoom = React.memo((props) => {
     let unpinnedParticipants = getUnpinnedParticipants();
 
     const showAsOthersLimitPinned = 5;
-    //console.log('showAsOthersLimitPinned: ', showAsOthersLimitPinned);
     const showAsOthersSliceIndexPinned = showAsOthersLimitPinned - 2;
 
     const slicePinnedTiles =
       unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
 
     let slicedParticipants = [];
-    // console.log('slicePinnedTiles: ', slicePinnedTiles);
     if (slicePinnedTiles) {
       slicedParticipants = unpinnedParticipants.slice(
         0,
@@ -249,9 +246,6 @@ const MeetingRoom = React.memo((props) => {
     } else {
       slicedParticipants = unpinnedParticipants;
     }
-    // console.log('slicedParticipants: ', slicedParticipants);
-    // console.log('sliceTiles: ', sliceTiles);
-    // console.log('unpinnedParticipants2: ', unpinnedParticipants);
 
     return slicedParticipants.length > 0 ? (
       <>
@@ -325,7 +319,7 @@ const MeetingRoom = React.memo((props) => {
       {audioTracks.map((audio, index) => (
         <VideoCard
           key={index}
-          onHandlePin={() => { }}
+          onHandlePin={() => {}}
           id={audio.streamId}
           track={audio.track}
           autoPlay
@@ -355,29 +349,31 @@ const MeetingRoom = React.memo((props) => {
                 hidePin={participants.length === 0}
               />
             </div>
-            {participants.filter(p => p.videoLabel !== p.id).map(({ id, videoLabel, track, name }, index) => (
-              <>
-                <div
-                  className="single-video-container not-pinned"
-                  key={index}
-                  style={{
-                    width: "var(--width)",
-                    height: "var(--height)",
-                    maxWidth: "var(--maxwidth)",
-                  }}
-                >
-                  <VideoCard
-                    onHandlePin={() => {
-                      pinVideo(id, videoLabel);
+            {participants
+              .filter((p) => p.videoLabel !== p.id)
+              .map(({ id, videoLabel, track, name }, index) => (
+                <>
+                  <div
+                    className="single-video-container not-pinned"
+                    key={index}
+                    style={{
+                      width: "var(--width)",
+                      height: "var(--height)",
+                      maxWidth: "var(--maxwidth)",
                     }}
-                    id={id}
-                    track={track}
-                    autoPlay
-                    name={name}
-                  />
-                </div>
-              </>
-            ))}
+                  >
+                    <VideoCard
+                      onHandlePin={() => {
+                        pinVideo(id, videoLabel);
+                      }}
+                      id={id}
+                      track={track}
+                      autoPlay
+                      name={name}
+                    />
+                  </div>
+                </>
+              ))}
             {sliceTiles && participants.length > 0 && (
               <div
                 className="single-video-container not-pinned others-tile-wrapper"
