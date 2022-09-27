@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { memo, useCallback, useContext, useEffect } from "react";
 import { alpha, styled } from "@mui/material/styles";
 import { MediaSettingsContext, SettingsContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
@@ -17,7 +17,7 @@ const CustomizedBox = styled(Box)(({ theme }) => ({
   backgroundColor: alpha(theme.palette.gray[90], 0.3),
 }));
 
-const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
+const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
   const mediaSettings = useContext(MediaSettingsContext);
   const settings = useContext(SettingsContext);
   const antmedia = useContext(AntmediaContext);
@@ -286,6 +286,6 @@ const VideoCard = ({ srcObject, hidePin, onHandlePin, ...props }) => {
       ></video>
     </>
   );
-};
+});
 
 export default VideoCard;
