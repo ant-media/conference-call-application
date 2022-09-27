@@ -69,12 +69,6 @@ function AntMedia() {
   ]);
   function pinVideo(id, videoLabelProp = "") {
     let videoLabel = videoLabelProp;
-    console.log(
-      "videoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabelvideoLabel",
-      id,
-      videoLabel,
-      participants
-    );
     if (videoLabel === "") {
       // if videoLabel is missing select the first videoLabel you find
       // 1 -2 -3 -4 -5 -6 -7 -8 -9
@@ -104,9 +98,6 @@ function AntMedia() {
   }
   function handleSetMaxVideoTrackCount(maxTrackCount) {
     if (myLocalData?.streamId) {
-      console.log("set maxTrackCount: ", maxTrackCount);
-      console.log("myLocalData: ", myLocalData);
-      console.log("antmedia: ", antmedia);
       antmedia.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
       handleSendNotificationEvent("UNPIN_USER", myLocalData.streamId, {
         streamId: id,
@@ -130,9 +121,6 @@ function AntMedia() {
     }
   }
   function screenShareOnNotification() {
-    console.log(
-      "screenShareOnNotificationscreenShareOnNotificationscreenShareOnNotification"
-    );
     setIsScreenShared(true);
     antmedia.screenShareOffNotification();
     let requestedMediaConstraints = {
@@ -140,10 +128,6 @@ function AntMedia() {
       height: 1080,
     };
     antmedia.applyConstraints(myLocalData.streamId, requestedMediaConstraints);
-    console.log(
-      "myLocalDatamyLocalDatamyLocalDatamyLocalDatamyLocalDatamyLocalData",
-      myLocalData
-    );
     antmedia.handleSendNotificationEvent(
       "SCREEN_SHARED_ON",
       myLocalData.streamId
@@ -223,12 +207,6 @@ function AntMedia() {
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
-        console.log(
-          "handleSendMessagehandleSendMessagehandleSendMessagehandleSendMessage",
-          message,
-          myLocalData
-        );
-
         antmedia.sendData(
           myLocalData.streamId,
           JSON.stringify({
@@ -279,37 +257,31 @@ function AntMedia() {
 
   function handleNotificationEvent(obj) {
     var notificationEvent = JSON.parse(obj.data);
-    //console.log("CALCACLACLACLACLACLALCACLALCLCACLALCAL", notificationEvent);
     if (notificationEvent != null && typeof notificationEvent == "object") {
       var eventStreamId = notificationEvent.streamId;
       var eventType = notificationEvent.eventType;
 
       if (eventType === "CAM_TURNED_OFF") {
-        console.log("Camera turned off for : ", eventStreamId, participants);
         toggleSetCam({
           eventStreamId: eventStreamId,
           isCameraOn: false,
         });
       } else if (eventType === "CAM_TURNED_ON") {
-        console.log("Camera turned on for : ", eventStreamId);
         toggleSetCam({
           eventStreamId: eventStreamId,
           isCameraOn: true,
         });
       } else if (eventType === "MIC_MUTED") {
-        console.log("Microphone muted for : ", eventStreamId);
         toggleSetMic({
           eventStreamId: eventStreamId,
           isMicMuted: true,
         });
       } else if (eventType === "MIC_UNMUTED") {
-        console.log("Microphone unmuted for : ", eventStreamId);
         toggleSetMic({
           eventStreamId: eventStreamId,
           isMicMuted: false,
         });
       } else if (eventType === "MESSAGE_RECEIVED") {
-        console.log("wqfwqfwqfwqfwqfwq", notificationEvent);
         // if message arrives.
         // if there is an new message and user has not opened message component then we are going to increase number of unread messages by one.
         // we are gonna also send snackbar.
@@ -361,12 +333,6 @@ function AntMedia() {
       } else if (eventType === "UPDATE_STATUS") {
         setUserStatus(notificationEvent, eventStreamId);
       } else if (eventType === "PIN_USER") {
-        console.log(
-          "PIN_USERPIN_USERPIN_USERPIN_USERPIN_USERPIN_USERPIN_USERPIN_USER",
-          notificationEvent,
-          eventStreamId,
-          screenSharedVideoId
-        );
         if (
           notificationEvent.streamId === myLocalData.streamId &&
           !isScreenShared
@@ -375,14 +341,12 @@ function AntMedia() {
             width: 640,
             height: 480,
           };
-          console.log("myLocalData.streamId", notificationEvent);
           antmedia.applyConstraints(
             myLocalData.streamId,
             requestedMediaConstraints
           );
         }
       } else if (eventType === "UNPIN_USER") {
-        console.log("UNPIN_USER", notificationEvent);
         if (
           notificationEvent.streamId === myLocalData.streamId &&
           !isScreenShared
@@ -391,18 +355,12 @@ function AntMedia() {
             width: 320,
             height: 240,
           };
-          console.log("myLocalData.streamId", notificationEvent);
           antmedia.applyConstraints(
             myLocalData.streamId,
             requestedMediaConstraints
           );
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") {
-        console.log(
-          "eventType: VIDEO_TRACK_ASSIGNMENT_CHANGE yunus",
-          eventType,
-          notificationEvent
-        );
         if (!notificationEvent.payload.trackId) {
           return;
         }
@@ -443,12 +401,6 @@ function AntMedia() {
     }
   }
   function setUserStatus(notificationEvent, eventStreamId) {
-    console.log(
-      "notificationEvent",
-      notificationEvent,
-      eventStreamId,
-      screenSharedVideoId
-    );
     if (notificationEvent.isScreenShared) {
       // if the participant was already pin someone than we should not update it
       if (!screenSharedVideoId) {
@@ -477,7 +429,6 @@ function AntMedia() {
     }
   }
   function handleLeaveFromRoom() {
-    console.log("left");
     // we need to empty participant array. i f we are going to leave it in the first place.
     setParticipants([]);
     antmedia.leaveFromRoom(roomName);
@@ -528,10 +479,6 @@ function AntMedia() {
     );
   }
   function handlePlayVideo(obj, publishStreamId) {
-    console.log(
-      "handlePlayVideohandlePlayVideohandlePlayVideohandlePlayVideo",
-      obj
-    );
     let index = obj?.trackId?.substring("ARDAMSx".length);
     if (obj.track.kind === "audio") {
       setAudioTracks((sat) => {
@@ -566,20 +513,10 @@ function AntMedia() {
             },
           ];
         });
-        console.log(
-          "add participant yunus",
-          index,
-          obj,
-          participants,
-          allParticipants
-        );
       }
     }
   }
-  //console.log("participantsparticipantsparticipants", participants);
   function handleRoomEvents({ streams, streamList }) {
-    console.log("GWEGWE stream", streams, streamList);
-    // console.log('GWEGWE prev participants', participants, allParticipants);
     setAllParticipants(streamList);
     setParticipants((oldParts) => {
       if (streams.length < participants.length) {
@@ -619,7 +556,6 @@ function AntMedia() {
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
   antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
-  //console.log("UPDATE_STATUSUPDATE_STATUSUPDATE_STATUS OUTSIDE", participants);
   return (
     <Grid container className="App">
       <Grid
