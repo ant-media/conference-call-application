@@ -517,11 +517,17 @@ function AntMedia() {
     }
   }
   function handleRoomEvents({ streams, streamList }) {
+    // [allParticipant, setAllParticipants] => list of every user
     setAllParticipants(streamList);
+    // [participants,setParticipants] => number of visible participants due to tile count. If tile count is 3
+    // then number of participants will be 3.
+    // We are basically, finding names and match the names with the particular videos.
+    // We do this because we can't get names from other functions.
     setParticipants((oldParts) => {
       if (streams.length < participants.length) {
         return oldParts.filter((p) => streams.includes(p.id));
       }
+      // matching the names.
       return oldParts.map((p) => {
         const newName = streamList.find((s) => s.streamId === p.id)?.streamName;
         if (p.name !== newName) {
