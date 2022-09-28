@@ -371,7 +371,11 @@ function AntMedia() {
         }
         setParticipants((oldParticipants) => {
           return oldParticipants
-            .filter((p) => p.id !== notificationEvent.payload.trackId)
+            .filter(
+              (p) =>
+                p.videoLabel === notificationEvent.payload.videoLabel ||
+                p.id !== notificationEvent.payload.trackId
+            )
             .map((p) => {
               if (
                 p.videoLabel === notificationEvent.payload.videoLabel &&
