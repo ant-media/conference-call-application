@@ -35,4 +35,9 @@ Moreover, the application has been designed to be fully mobile-friendly from gro
 
 ![Installing Conference Application](https://antmedia.io/wp-content/uploads/2022/10/Adding-Conference-App-1024x436.jpeg "Installing Conference Application")
 
-
+## Usage
+* Visit "https://<your_antmediaserver_url>/<application_name_from_installation_step>"
+* Click "Create Meeting"
+* Enter a name for yourself and join the meeting
+* Click on the info button to get the meeting link or just copy it from the browser url. 
+* Share it with anyone you want to start video conferencing
