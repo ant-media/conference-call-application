@@ -2,7 +2,6 @@ import React from "react";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import styled from "@mui/material/styles/styled";
-import { SvgIcon } from "../SvgIcon";
 import InfoButton from "./Components/InfoButton";
 import MicButton from "./Components/MicButton";
 import CameraButton from "./Components/CameraButton";
@@ -34,8 +33,10 @@ function Footer(props) {
     >
       <Grid item sx={{ display: { xs: "none", sm: "block" } }}>
         <Grid container alignItems={"center"}>
-          <SvgIcon size={56} name={"ant-media-light"} color="white" />
-          <Typography color="#ffffff" variant="h6">
+          <a href="https://portmeet.com/" alt="portmeet website" target="_blank" rel="noreferrer">
+          <img src="./favicon-32x32.png" alt="portmeet logo" style={{width: '22px',marginRight: 4}}/>
+          </a>
+          <Typography color="#ffffff" variant="body1">
             {id}
           </Typography>
           <InfoButton/>
