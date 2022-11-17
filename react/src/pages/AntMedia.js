@@ -441,6 +441,7 @@ function AntMedia() {
     // we need to empty participant array. i f we are going to leave it in the first place.
     setParticipants([]);
     antmedia.leaveFromRoom(roomName);
+    antmedia.turnOffLocalCamera(myLocalData.streamId);
     setWaitingOrMeetingRoom("waiting");
   }
   function handleSendNotificationEvent(eventType, publishStreamId, info) {
