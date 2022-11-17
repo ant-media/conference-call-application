@@ -253,7 +253,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       errorMessage = "WebSocket Connection is disconnected.";
     }
 
-    console.error(errorMessage);
+    alert(errorMessage);
   },
 });
 
