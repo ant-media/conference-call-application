@@ -180,6 +180,7 @@ function WaitingRoom(props) {
                   variant="outlined"
                   onChange={(e) => props.handleStreamName(e.target.value)}
                   placeholder={t("Your name")}
+                  id="participant_name"
                 />
               </Grid>
               <Grid container justifyContent={"center"}>
@@ -189,6 +190,7 @@ function WaitingRoom(props) {
                     color="secondary"
                     variant="contained"
                     type="submit"
+                    id="room_join_button"
                   >
                     {t("I'm ready to join")}
                   </Button>
