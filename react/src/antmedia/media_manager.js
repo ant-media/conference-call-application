@@ -507,9 +507,9 @@ export class MediaManager {
         }
         return stream;
       })
-      .then(() => {
-        this.callback("screen_share_started");
-      })
+      //.then(() => {
+      //  this.callback("screen_share_started");
+      //})
       .catch((error) => {
         if (error.name === "NotAllowedError") {
           console.debug("Permission denied error");
