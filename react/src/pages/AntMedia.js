@@ -18,12 +18,15 @@ const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
   maxVideoTrackCount: 5,
+  trackEvents:[],
 };
 
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
+
+  
 
   // drawerOpen for message components.
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -60,6 +63,8 @@ function AntMedia() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [messages, setMessages] = useState([]);
+
+
 
   const [cam, setCam] = useState([
     {
@@ -105,6 +110,12 @@ function AntMedia() {
       streamId: id,
     });
   }
+
+  function handleSetInitialMaxVideoTrackCount(maxTrackCount) {
+    globals.maxVideoTrackCount = maxTrackCount;
+    console.log("Initial max video track count:"+maxTrackCount);
+  }
+
   function handleSetMaxVideoTrackCount(maxTrackCount) {
     // I am changing maximum participant number on the screen. Default is 3.
     if (myLocalData?.streamId) {
@@ -113,7 +124,10 @@ function AntMedia() {
     }
   }
   function handleStartScreenShare() {
-    antmedia.switchDesktopCapture(myLocalData.streamId);
+    antmedia.switchDesktopCapture(myLocalData.streamId)
+    .then(()=>{
+      screenShareOnNotification();
+    });
   }
   function screenShareOffNotification() {
     antmedia.handleSendNotificationEvent(
@@ -140,7 +154,7 @@ function AntMedia() {
 
     setPinnedVideoId("localVideo");
     // send fake audio level to get screen sharing user on a videotrack
-    antmedia.updateAudioLevel(myLocalData.streamId, 10);
+    // TODO: antmedia.updateAudioLevel(myLocalData.streamId, 10);
   }
   function handleScreenshareNotFromPlatform() {
     setIsScreenShared(false);
@@ -212,6 +226,11 @@ function AntMedia() {
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
+        if(message == "debugme") {
+          antmedia.getDebugInfo(myLocalData.streamId);
+          return;
+        }
+
         antmedia.sendData(
           myLocalData.streamId,
           JSON.stringify({
@@ -227,6 +246,33 @@ function AntMedia() {
       }
     }
   }
+
+  function handleDebugInfo(debugInfo) {
+    var infoText = "Client Debug Info\n";
+    infoText += "Events:\n";
+    infoText += JSON.stringify(globals.trackEvents)+"\n";
+    infoText += "Participants ("+participants.length+"):\n";
+    infoText += JSON.stringify(participants)+"\n";
+    infoText += "----------------------\n";
+    infoText += debugInfo;
+
+    //fake message to add chat
+    var obj = {
+      streamId: myLocalData.streamId,
+      data: JSON.stringify({
+        eventType: "MESSAGE_RECEIVED",
+        name: "Debugger",
+        date: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        message: infoText,
+      }),
+    };
+      
+    handleNotificationEvent(obj);
+  }
+
   function toggleSetCam(data) {
     setCam((camList) => {
       let arr = _.cloneDeep(camList);
@@ -366,6 +412,7 @@ function AntMedia() {
           );
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") {
+        console.log(JSON.stringify(obj));
         if (!notificationEvent.payload.trackId) {
           return;
         }
@@ -469,6 +516,7 @@ function AntMedia() {
     }
   }
   function handleSetMyObj(obj) {
+    handleSetInitialMaxVideoTrackCount(obj.maxTrackCount);
     setMyLocalData({ ...obj, streamName });
   }
   function handlePlay(token, tempList) {
@@ -490,6 +538,8 @@ function AntMedia() {
   }
   function handlePlayVideo(obj, publishStreamId) {
     let index = obj?.trackId?.substring("ARDAMSx".length);
+    globals.trackEvents.push({track:obj.track.id, event:"added"});
+
     if (obj.track.kind === "audio") {
       setAudioTracks((sat) => {
         return [
@@ -572,6 +622,7 @@ function AntMedia() {
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
   antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
+  antmedia.handleDebugInfo = handleDebugInfo;
   // END custom functions
   return (
     <Grid container className="App">

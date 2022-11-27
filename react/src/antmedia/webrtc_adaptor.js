@@ -1581,6 +1581,21 @@ export class WebRTCAdaptor {
 
   /**
    * Called by user
+   * This message is used to get debug data from server for debugging purposes in conference.
+   *
+   * @returns
+   */
+  getDebugInfo(streamId, maxTrackCount) {
+    var jsCmd = {
+      streamId: streamId,
+      command: "getDebugInfo",
+    };
+
+    this.webSocketAdaptor.send(JSON.stringify(jsCmd));
+  }
+
+  /**
+   * Called by user
    * This message is used to send audio level in a conference.
    *
    * @param {*} value : audio lavel

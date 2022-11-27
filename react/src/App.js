@@ -93,13 +93,25 @@ var sdpConstraints = {
   OfferToReceiveVideo: false,
 };
 
-var mediaConstraints = {
-  // setting constraints here breaks source switching on firefox.
+
+var videoQualityConstraints = {
   video: {
     width: { max: 320 },
     height: { max: 240 },
-  },
-  audio: true,
+  }
+}
+
+var audioQualityConstraints = {
+  audio:{
+    noiseSuppression: true,
+    echoCancellation: true
+  }
+}
+
+var mediaConstraints = {
+  // setting constraints here breaks source switching on firefox.
+  video: videoQualityConstraints.video,
+  audio: audioQualityConstraints.audio,
 };
 
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
@@ -198,6 +210,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
       } catch (e) {}
     } else if (info == "available_devices") {
       webRTCAdaptor.devices = obj;
+    } else if (info == "debugInfo") {
+      webRTCAdaptor.handleDebugInfo(obj.debugInfo);
     }
   },
   callbackError: function (error, message) {
@@ -237,6 +251,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       webRTCAdaptor.handleScreenshareNotFromPlatform();
     } else if (error.indexOf("TypeError") != -1) {
       errorMessage = "Video/Audio is required.";
+      webRTCAdaptor.mediaManager.getDevices();
     } else if (error.indexOf("UnsecureContext") != -1) {
       errorMessage =
         "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";

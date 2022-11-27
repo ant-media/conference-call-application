@@ -48,12 +48,16 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
   React.useEffect(() => {
     if (props.track?.kind === "video" && !props.track.onended) {
       props.track.onended = (event) => {
+        settings?.globals?.trackEvents.push({track:props.track.id,event:"removed"});
         if (participants.length > settings?.globals?.maxVideoTrackCount) {
+          console.log("video before:"+JSON.stringify(participants));
           setParticipants((oldParts) => {
             return oldParts.filter(
               (p) => !(p.id === props.id || p.videoLabel === props.id)
             );
           });
+          console.log("video after:"+JSON.stringify(participants));
+
         }
       };
     }
