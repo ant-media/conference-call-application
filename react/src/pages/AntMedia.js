@@ -226,7 +226,7 @@ function AntMedia() {
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
-        if(message == "debugme") {
+        if(message === "debugme") {
           antmedia.getDebugInfo(myLocalData.streamId);
           return;
         }
