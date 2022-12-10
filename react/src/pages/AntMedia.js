@@ -584,6 +584,7 @@ function AntMedia() {
 
     if(option === "none") {
       videoEffect.removeEffect();
+      antmedia.closeCustomVideoSource(this.streamId)
     }
     else if(option === "blur") {
       videoEffect.enableBlur();
