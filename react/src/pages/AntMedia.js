@@ -59,6 +59,7 @@ function AntMedia() {
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState("");
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
+  const [selectedBackgroundMode, setSelectedBackgroundMode] = React.useState("");
   const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -649,6 +650,8 @@ function AntMedia() {
             selectedCamera,
             selectedMicrophone,
             setSelectedMicrophone,
+            selectedBackgroundMode,
+            setSelectedBackgroundMode,
             setParticipants,
             participants,
             setLeftTheRoom,
