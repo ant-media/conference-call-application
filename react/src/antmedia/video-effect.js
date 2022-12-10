@@ -1,4 +1,5 @@
-import { SelfieSegmentation } from "./external/selfie-segmentation/selfie_segmentation.js" 
+import { SelfieSegmentation } from "./external/selfie-segmentation/selfie_segmentation.js"
+import React from "react";
 
 /**
  * This class is used to apply a video effect to the video stream.
@@ -34,7 +35,11 @@ export function VideoEffect() {
 
         this.webRTCAdaptor = webRTCAdaptor;
         this.streamId = streamId;
-        this.virtualBackgroundImage = virtualBackgroundImage;
+        this.virtualBackgroundImage = document.createElement("img");
+        this.virtualBackgroundImage.id = "virtualBackgroundImage";
+        this.virtualBackgroundImage.src = "virtual-background.png";
+        this.virtualBackgroundImage.style.visibility = "hidden";
+        this.virtualBackgroundImage.alt = "virtual-background";
         this.rawLocalVideo = document.createElement('video');
         this.rawLocalVideo.id = "rawLocalVideo";
         this.rawLocalVideo.width = 640;
@@ -217,8 +222,9 @@ export function VideoEffect() {
      */
     this.drawImageDirectly = function(image) {
         this.ctx.save();
-        this.ctx.globalCompositeOperation = "source-over";
         this.ctx.filter = "none";
+        this.ctx.clearRect(0, 0, this.effectCanvas.width, this.effectCanvas.height);
+        this.ctx.globalCompositeOperation = "source-over";
         this.ctx.drawImage(image, 0, 0, image.width, image.height);
         this.ctx.restore();
     }
@@ -230,15 +236,15 @@ export function VideoEffect() {
      * @param virtualBackgroundImage
      */
     this.drawVirtualBackground = function(image, segmentation, virtualBackgroundImage) {
-        //this.ctx.save();
+        this.ctx.save();
         this.ctx.filter = "none";
         this.ctx.clearRect(0, 0, this.effectCanvas.width, this.effectCanvas.height);
         this.ctx.drawImage(segmentation, 0, 0, this.effectCanvas.width, this.effectCanvas.height);
         this.ctx.globalCompositeOperation = 'source-out';
-        this.ctx.drawImage(virtualBackgroundImage, 0, 0, virtualBackgroundImage.width, virtualBackgroundImage.height, 20, 20, this.effectCanvas.width, this.effectCanvas.height);
+        this.ctx.drawImage(virtualBackgroundImage, 0, 0, virtualBackgroundImage.width, virtualBackgroundImage.height, 0, 0, this.effectCanvas.width, this.effectCanvas.height);
         this.ctx.globalCompositeOperation = 'destination-atop';
         this.ctx.drawImage(image, 0, 0, this.effectCanvas.width, this.effectCanvas.height);
-        //this.ctx.restore();
+        this.ctx.restore();
     }
 
     /**
@@ -248,6 +254,7 @@ export function VideoEffect() {
      * @param blurAmount
      */
     this.drawBlurBackground = function(image, segmentation, blurAmount) {
+        this.ctx.save();
         this.ctx.clearRect(0, 0, this.effectCanvas.width, this.effectCanvas.height);
 
         this.ctx.globalCompositeOperation = "copy";

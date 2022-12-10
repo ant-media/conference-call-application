@@ -10,6 +10,7 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
+import {VideoEffect} from "../antmedia/video-effect";
 
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
@@ -577,6 +578,20 @@ function AntMedia() {
       }
     }
   }
+  function handleBackgroundReplacement(option) {
+    let videoEffect = new VideoEffect();
+    videoEffect.init(antmedia, "", null, null);
+
+    if(option === "none") {
+      videoEffect.removeEffect();
+    }
+    else if(option === "blur") {
+      videoEffect.enableBlur();
+    }
+    else if(option === "background") {
+      videoEffect.enableVirtualBackground();
+    }
+  }
   function handleRoomEvents({ streams, streamList }) {
     // [allParticipant, setAllParticipants] => list of every user
     setAllParticipants(streamList);
@@ -624,6 +639,7 @@ function AntMedia() {
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
   antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
   antmedia.handleDebugInfo = handleDebugInfo;
+  antmedia.handleBackgroundReplacement = handleBackgroundReplacement;
   // END custom functions
   return (
     <Grid container className="App">

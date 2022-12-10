@@ -63,7 +63,7 @@ export function SettingsDialog(props) {
 
   function setBackground(value) {
     setSelectedBackgroundMode(value);
-    props.handleBackgroundReplacement(value);
+    antmedia.handleBackgroundReplacement(value);
   }
 
   React.useEffect(() => {

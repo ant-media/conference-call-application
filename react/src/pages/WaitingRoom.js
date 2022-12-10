@@ -19,7 +19,6 @@ import { useTranslation } from "react-i18next";
 import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
-import { VideoEffect } from "../antmedia/video-effect.js";
 
 
 
@@ -98,29 +97,13 @@ function WaitingRoom(props) {
     setDialogOpen(false);
   };
 
-  function handleBackgroundReplacement(option) {
-    let virtualBackgroundImage = document.getElementById("virtualBackgroundImage");
-    let videoEffect = new VideoEffect();
-    videoEffect.init(antmedia, "", virtualBackgroundImage, null);
-
-    if(option === "none") {
-       //TODO:
-    }
-    else if(option === "blur") {
-      videoEffect.enableBlur();
-    }
-    else if(option === "background") {
-      videoEffect.enableVirtualBackground();
-    }
-  }
-
   return (
     <Container>
       <SettingsDialog
         open={dialogOpen}
         onClose={handleDialogClose}
         selectFocus={selectFocus}
-        handleBackgroundReplacement={handleBackgroundReplacement}
+        handleBackgroundReplacement={props.handleBackgroundReplacement}
       />
       <Grid
         container
@@ -135,7 +118,6 @@ function WaitingRoom(props) {
             sx={{ position: "relative" }}
           >
             <VideoCard id="localVideo" autoPlay muted hidePin={true} />
-				    <img id="virtualBackgroundImage" alt="aa" hidden src="virtual-background.png" />
             
             <Grid
               container
