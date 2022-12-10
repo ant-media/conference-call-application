@@ -213,6 +213,13 @@ const webRTCAdaptor = new WebRTCAdaptor({
     } else if (info == "debugInfo") {
       webRTCAdaptor.handleDebugInfo(obj.debugInfo);
     }
+    else if (info == "ice_connection_state_changed") {
+      console.log("iceConnectionState Changed: ",JSON.stringify(obj))
+      var iceState = obj.state;
+      if (iceState == null || iceState == "failed" || iceState == "disconnected"){
+        alert("!! Connection closed. Please rejoin the meeting");
+      }	
+    }
   },
   callbackError: function (error, message) {
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
