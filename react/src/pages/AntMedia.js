@@ -26,6 +26,7 @@ function AntMedia() {
   const { id } = useParams();
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
+  const videoEffect = new VideoEffect();
 
   
 
@@ -61,6 +62,7 @@ function AntMedia() {
   const [selectedCamera, setSelectedCamera] = React.useState("");
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
   const [selectedBackgroundMode, setSelectedBackgroundMode] = React.useState("");
+  const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
   const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -579,18 +581,37 @@ function AntMedia() {
     }
   }
   function handleBackgroundReplacement(option) {
-    let videoEffect = new VideoEffect();
     videoEffect.init(antmedia, "", null, null);
 
     if(option === "none") {
       videoEffect.removeEffect();
-      antmedia.closeCustomVideoSource(this.streamId)
+      antmedia.closeCustomVideoSource(this.streamId);
+      setIsVideoEffectRunning(false);
     }
     else if(option === "blur") {
       videoEffect.enableBlur();
+      setIsVideoEffectRunning(true);
     }
     else if(option === "background") {
       videoEffect.enableVirtualBackground();
+      setIsVideoEffectRunning(true);
+    }
+  }
+  function checkAndTurnOnLocalCamera(streamId) {
+    if(isVideoEffectRunning) {
+      videoEffect.turnOnLocalCamera(antmedia);
+    }
+    else {
+      antmedia.turnOnLocalCamera(streamId);
+    }
+  }
+
+  function checkAndTurnOffLocalCamera(streamId) {
+    if(isVideoEffectRunning) {
+      videoEffect.turnOffLocalCamera(antmedia);
+    }
+    else {
+      antmedia.turnOffLocalCamera(streamId);
     }
   }
   function handleRoomEvents({ streams, streamList }) {
@@ -641,6 +662,8 @@ function AntMedia() {
   antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
   antmedia.handleDebugInfo = handleDebugInfo;
   antmedia.handleBackgroundReplacement = handleBackgroundReplacement;
+  antmedia.checkAndTurnOnLocalCamera = checkAndTurnOnLocalCamera;
+  antmedia.checkAndTurnOffLocalCamera = checkAndTurnOffLocalCamera;
   // END custom functions
   return (
     <Grid container className="App">
@@ -669,6 +692,7 @@ function AntMedia() {
             setSelectedMicrophone,
             selectedBackgroundMode,
             setSelectedBackgroundMode,
+            setIsVideoEffectRunning,
             setParticipants,
             participants,
             setLeftTheRoom,

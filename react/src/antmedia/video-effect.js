@@ -84,6 +84,14 @@ export function VideoEffect() {
         window.videoEffect.loadSelfieSegmentation();
     }
 
+    this.turnOnLocalCamera = function(antmedia) {
+        antmedia.mediaManager.localStream.getVideoTracks()[0].enabled = true;
+    }
+
+    this.turnOffLocalCamera = function(antmedia) {
+        antmedia.mediaManager.localStream.getVideoTracks()[0].enabled = false;
+    }
+
     /**
      * This method is used to activate the virtual background effect to the video stream.
      */
