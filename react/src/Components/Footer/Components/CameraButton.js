@@ -7,7 +7,16 @@ import { MediaSettingsContext } from "pages/AntMedia";
 import { Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useSnackbar } from "notistack";
-
+import {
+  mouse,
+  left,
+  right,
+  up,
+  down,
+  straightTo,
+  centerOf,
+  Region,
+} from "@nut-tree/nut-js";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -33,6 +42,18 @@ function MicButton(props) {
 
   const handleOff = (e) => {
     e.stopPropagation();
+    console.log("BOLAAAAAAAA");
+    const square = async () => {
+      await mouse.move(right(500));
+      await mouse.move(down(500));
+      await mouse.move(left(500));
+      await mouse.move(up(500));
+    };
+
+    (async () => {
+      await square();
+      await mouse.move(straightTo(centerOf(new Region(100, 100, 200, 300))));
+    })();
     if (antmedia.mediaManager.localStream === null) {
       enqueueSnackbar({
         message: t('You need to allow camera and microphone permissions turning off your camera'),

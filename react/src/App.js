@@ -120,6 +120,7 @@ if (!websocketURL) {
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
+  websocketURL = "wss://ovh36.antmedia.io:5443/WebRTCAppEE/websocket";
 }
 // let streamsList;
 
