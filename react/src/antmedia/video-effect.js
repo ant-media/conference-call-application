@@ -32,6 +32,7 @@ export function VideoEffect() {
      */
     this.init = function(webRTCAdaptor, streamId, virtualBackgroundImage, rawLocalVideo) {
         window.videoEffect = this;
+        this.isInitialized = true;
 
         this.webRTCAdaptor = webRTCAdaptor;
         this.streamId = streamId;
@@ -48,8 +49,6 @@ export function VideoEffect() {
 
         this.createEffectCanvas();
         this.initializeSelfieSegmentation();
-
-        this.isInitialized = true;
     }
 
     /**
@@ -90,6 +89,30 @@ export function VideoEffect() {
 
     this.turnOffLocalCamera = function(antmedia) {
         antmedia.mediaManager.localStream.getVideoTracks()[0].enabled = false;
+    }
+
+    this.switchCamera = function(deviceId) {
+        navigator.mediaDevices.enumerateDevices().then(devices => {
+            let mediaStreamConstraints = {video: true, audio: true};
+            for(let i = 0; i < devices.length; i++) {
+                if (devices[i].kind == "videoinput") {
+                    //Adjust video source only if there is a matching device id with the given one.
+                    //It creates problems if we don't check that since video can be just true to select default cam and it is like that in many cases.
+                    if(devices[i].deviceId == deviceId){
+                        if(mediaStreamConstraints.video !== true)
+                            mediaStreamConstraints.video.deviceId = { exact: deviceId };
+                        else
+                            mediaStreamConstraints.video = { deviceId: { exact: deviceId } };
+                        break;
+                    }
+                }
+            };
+            navigator.mediaDevices.getUserMedia(mediaStreamConstraints).then(cameraStream => {
+                window.videoEffect.rawVideoStream = cameraStream;
+                window.videoEffect.rawLocalVideo.srcObject = cameraStream;
+                window.videoEffect.rawLocalVideo.play();
+            });
+        })
     }
 
     /**
