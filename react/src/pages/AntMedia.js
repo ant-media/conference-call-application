@@ -581,18 +581,23 @@ function AntMedia() {
     }
   }
   function handleBackgroundReplacement(option) {
-    videoEffect.init(antmedia, "", null, null);
+    if (!videoEffect.isInitialized) {
+      videoEffect.init(antmedia, myLocalData.streamId, null, null);
+    }
 
     if(option === "none") {
+      videoEffect.streamId = myLocalData.streamId;
       videoEffect.removeEffect();
-      antmedia.closeCustomVideoSource(this.streamId);
+      antmedia.closeCustomVideoSource(myLocalData.streamId);
       setIsVideoEffectRunning(false);
     }
     else if(option === "blur") {
+      videoEffect.streamId = myLocalData.streamId;
       videoEffect.enableBlur();
       setIsVideoEffectRunning(true);
     }
     else if(option === "background") {
+      videoEffect.streamId = myLocalData.streamId;
       videoEffect.enableVirtualBackground();
       setIsVideoEffectRunning(true);
     }
