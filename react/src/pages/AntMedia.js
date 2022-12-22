@@ -584,20 +584,18 @@ function AntMedia() {
     if (!videoEffect.isInitialized) {
       videoEffect.init(antmedia, myLocalData.streamId, null, null);
     }
+    videoEffect.streamId = myLocalData.streamId;
 
     if(option === "none") {
-      videoEffect.streamId = myLocalData.streamId;
       videoEffect.removeEffect();
       antmedia.closeCustomVideoSource(myLocalData.streamId);
       setIsVideoEffectRunning(false);
     }
     else if(option === "blur") {
-      videoEffect.streamId = myLocalData.streamId;
       videoEffect.enableBlur();
       setIsVideoEffectRunning(true);
     }
     else if(option === "background") {
-      videoEffect.streamId = myLocalData.streamId;
       videoEffect.enableVirtualBackground();
       setIsVideoEffectRunning(true);
     }
