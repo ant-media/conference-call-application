@@ -8,6 +8,7 @@ import CameraButton from "./Components/CameraButton";
 import OptionButton from "./Components/OptionButton";
 import ShareScreenButton from "./Components/ShareScreenButton";
 import MessageButton from "./Components/MessageButton";
+import ParticipantListButton from "./Components/ParticipantListButton";
 import EndCallButton from "./Components/EndCallButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
@@ -63,6 +64,9 @@ function Footer(props) {
           </Grid>
           <Grid item xs={2}>
             <MessageButton footer />
+          </Grid>
+          <Grid item xs={2}>
+            <ParticipantListButton footer />
           </Grid>
           <Grid item xs={2}>
             <EndCallButton footer />
