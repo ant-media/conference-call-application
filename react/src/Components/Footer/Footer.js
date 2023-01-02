@@ -49,26 +49,26 @@ function Footer(props) {
           justifyContent="center"
           columnSpacing={{ xs: 1, sm: 2 }}
         >
-          <Grid item xs={2}>
+          <Grid item xs={0}>
             <OptionButton footer />
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={0}>
             <CameraButton {...props} footer />
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={0}>
             <MicButton footer />
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={0}>
             {" "}
             <ShareScreenButton footer />
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={0}>
             <MessageButton footer />
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={0}>
             <ParticipantListButton footer />
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={0}>
             <EndCallButton footer />
           </Grid>
         </Grid>
