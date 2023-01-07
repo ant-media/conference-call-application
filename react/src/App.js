@@ -120,8 +120,7 @@ if (!websocketURL) {
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
-
-  websocketURL = "wss://meet.antmedia.io:5443/Conference/websocket";
+  
 }
 // let streamsList;
 
