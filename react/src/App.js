@@ -13,7 +13,6 @@ import i18n from "i18next";
 import translationEN from "i18n/en.json";
 import translationTR from "i18n/tr.json";
 import CustomRoutes from "CustomRoutes";
-import {SvgIcon} from "./Components/SvgIcon";
 
 const resources = {
   en: {
