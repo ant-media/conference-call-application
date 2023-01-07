@@ -13,6 +13,7 @@ import i18n from "i18next";
 import translationEN from "i18n/en.json";
 import translationTR from "i18n/tr.json";
 import CustomRoutes from "CustomRoutes";
+import {SvgIcon} from "./Components/SvgIcon";
 
 const resources = {
   en: {
@@ -120,8 +121,28 @@ if (!websocketURL) {
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
+
+  websocketURL = "wss://meet.antmedia.io:5443/Conference/websocket";
 }
 // let streamsList;
+
+function showPoorNetworkConnectionWarning() {
+  let alertElement = document.getElementsByClassName("alert")[0];
+  if (alertElement !== undefined && alertElement !== null &&alertElement.classList.contains("hide")) {
+    alertElement.classList.remove("hide");
+    alertElement.classList.add("show");
+    alertElement.style.opacity = 1;
+  }
+}
+
+function hidePoorNetworkConnectionWarning() {
+  let alertElement = document.getElementsByClassName("alert")[0];
+  if (alertElement !== undefined && alertElement !== null &&alertElement.classList.contains("show")) {
+    alertElement.classList.remove("show");
+    alertElement.classList.add("hide");
+    alertElement.style.opacity = 0;
+  }
+}
 
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
@@ -151,10 +172,11 @@ const webRTCAdaptor = new WebRTCAdaptor({
       roomTimerId = setInterval(() => {
         webRTCAdaptor.handleRoomInfo(publishStreamId);
       }, 5000);
-    } else if (info == "newStreamAvailable") {
+    } else if (info === "newStreamAvailable") {
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") {
       //stream is being published
+      webRTCAdaptor.enableStats(publishStreamId);
       webRTCAdaptor.handleRoomInfo(publishStreamId);
     } else if (info === "publish_finished") {
       //stream is being finished
@@ -162,14 +184,17 @@ const webRTCAdaptor = new WebRTCAdaptor({
       webRTCAdaptor.handleScreenshareNotFromPlatform();
     } else if (info === "browser_screen_share_supported") {
     } else if (info === "leavedFromRoom") {
+      hidePoorNetworkConnectionWarning();
       room = obj.ATTR_ROOM_NAME;
       if (roomTimerId !== null) {
         clearInterval(roomTimerId);
       }
     } else if (info === "closed") {
       if (typeof obj !== "undefined") {
+        hidePoorNetworkConnectionWarning();
       }
     } else if (info === "play_finished") {
+      hidePoorNetworkConnectionWarning();
       isPlaying = false;
     } else if (info === "streamInformation") {
       webRTCAdaptor.handleStreamInformation(obj);
@@ -184,25 +209,44 @@ const webRTCAdaptor = new WebRTCAdaptor({
         isPlaying = true;
       }
       //Lastly updates the current streamlist with the fetched one.
-    } else if (info == "data_channel_opened") {
+    } else if (info === "data_channel_opened") {
       setInterval(() => {
         webRTCAdaptor.updateStatus(obj);
       }, 2000);
 
       // isDataChannelOpen = true;
-    } else if (info == "data_channel_closed") {
+    } else if (info === "data_channel_closed") {
       // isDataChannelOpen = false;
-    } else if (info == "data_received") {
+    } else if (info === "data_received") {
       try {
         webRTCAdaptor.handleNotificationEvent(obj);
       } catch (e) {}
-    } else if (info == "available_devices") {
+    } else if (info === "available_devices") {
       webRTCAdaptor.devices = obj;
+    } else if (info === "updated_stats") {
+      console.log("Average outgoing bitrate " + obj.averageOutgoingBitrate + " kbits/sec"
+          + " Current outgoing bitrate: " + obj.currentOutgoingBitrate + " kbits/sec"
+          + " video source width: " + obj.resWidth + " video source height: " + obj.resHeight
+          + "frame width: " + obj.frameWidth + " frame height: " + obj.frameHeight
+          + " video packetLost: "  + obj.videoPacketsLost + " audio packetsLost: " + obj.audioPacketsLost
+          + " video RTT: " + obj.videoRoundTripTime + " audio RTT: " + obj.audioRoundTripTime
+          + " video jitter: " + obj.videoJitter + " audio jitter: " + obj.audioJitter);
+      let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
+      let packetLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+      let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
+      let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
+      let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
+
+      if (rtt >= 150 || packetLost >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth || true) {
+        showPoorNetworkConnectionWarning();
+      } else {
+        hidePoorNetworkConnectionWarning();
+      }
     }
   },
   callbackError: function (error, message) {
-    //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
-    if (error.indexOf("publishTimeoutError") != -1 && roomTimerId != null) {
+    //some possible errors, NotFoundError, SecurityError,PermissionDeniedError
+    if (error.indexOf("publishTimeoutError") !== -1 && roomTimerId != null) {
       clearInterval(roomTimerId);
     }
 
@@ -211,13 +255,13 @@ const webRTCAdaptor = new WebRTCAdaptor({
       errorMessage = message;
     }
     errorMessage = JSON.stringify(error);
-    if (error.indexOf("NotFoundError") != -1) {
+    if (error.indexOf("NotFoundError") !== -1) {
       errorMessage =
         "Camera or Mic are not found or not allowed in your device.";
       alert(errorMessage);
     } else if (
-      error.indexOf("NotReadableError") != -1 ||
-      error.indexOf("TrackStartError") != -1
+      error.indexOf("NotReadableError") !== -1 ||
+      error.indexOf("TrackStartError") !== -1
     ) {
       errorMessage =
         "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
@@ -253,6 +297,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       errorMessage = "WebSocket Connection is disconnected.";
     }
 
+    hidePoorNetworkConnectionWarning();
     alert(errorMessage);
   },
 });
@@ -315,6 +360,10 @@ function App() {
           <CustomRoutes />
         </AntmediaContext.Provider>
       </SnackbarProvider>
+      <div className="alert hide">
+        <span className="fas fa-exclamation-circle"></span>
+        <span className="msg">Connection is not stable. Please check your internet connection!</span>
+      </div>
     </ThemeProvider>
   );
 }
