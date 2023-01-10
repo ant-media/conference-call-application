@@ -121,7 +121,6 @@ if (!websocketURL) {
     websocketURL = "wss://" + path;
   }
 
-  websocketURL = "wss://meet.antmedia.io:5443/Conference/websocket";
 }
 // let streamsList;
 
