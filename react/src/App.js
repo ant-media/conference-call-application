@@ -120,7 +120,7 @@ if (!websocketURL) {
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
-  
+
 }
 // let streamsList;
 
@@ -235,7 +235,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
       let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
 
-      if (rtt >= 150 || packetLost >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth || true) {
+      if (rtt >= 150 || packetLost >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
         showPoorNetworkConnectionWarning();
       } else {
         hidePoorNetworkConnectionWarning();
