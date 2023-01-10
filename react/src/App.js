@@ -120,6 +120,8 @@ if (!websocketURL) {
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
+
+  websocketURL = "wss://meet.antmedia.io:5443/Conference/websocket";
 }
 // let streamsList;
 
@@ -257,6 +259,94 @@ const webRTCAdaptor = new WebRTCAdaptor({
   },
 });
 
+var speedTestObject = {
+  message: "Please wait while we are testing your connection speed",
+  isfinished: false
+};
+
+let speedTestCounter = 0;
+const webRTCAdaptorSpeedTest = new WebRTCAdaptor({
+  websocket_url: "wss://ovh36.antmedia.io:5443/WebRTCAppEE/websocket",
+  mediaConstraints: mediaConstraints,
+  peerconnection_config: pc_config,
+  sdp_constraints: sdpConstraints,
+  isPlayMode: playOnly,
+  debug: true,
+  callback : (info, obj) => {
+    if (info !== "pong") {
+      console.log(info, obj);
+    }
+    if (info == "initialized") {
+      console.log("initialized");
+      webRTCAdaptorSpeedTest.turnOffLocalCamera("streamId");
+      webRTCAdaptorSpeedTest.muteLocalMic();
+
+    } else if (info == "publish_started") {
+      //stream is being published
+      console.log("publish started");
+      speedTestCounter = 0;
+      webRTCAdaptorSpeedTest.turnOnLocalCamera("streamId");
+      webRTCAdaptorSpeedTest.unmuteLocalMic();
+      webRTCAdaptorSpeedTest.enableStats(obj.streamId);
+
+    } else if (info == "publish_finished") {
+      //stream is being finished
+      console.log("publish finished");
+      webRTCAdaptorSpeedTest.turnOffLocalCamera("streamId");
+      webRTCAdaptorSpeedTest.muteLocalMic();
+    }
+    else if (info == "closed") {
+      //console.log("Connection closed");
+      if (typeof obj != "undefined") {
+        console.log("Connecton closed: " + JSON.stringify(obj));
+      }
+    }
+    else if (info == "pong") {
+      //ping/pong message are sent to and received from server to make the connection alive all the time
+      //It's especially useful when load balancer or firewalls close the websocket connection due to inactivity
+    }
+    else if (info == "ice_connection_state_changed") {
+      console.log("iceConnectionState Changed: ",JSON.stringify(obj));
+    }
+    else if (info == "updated_stats") {
+      speedTestCounter++;
+      if(speedTestCounter > 2) {
+        webRTCAdaptorSpeedTest.stop("streamId");
+
+        let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
+        let packetLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+        let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
+        let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
+        let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
+
+        console.log("* rtt: " + rtt);
+        console.log("* packetLost: " + packetLost);
+        console.log("* jitter: " + jitter);
+        console.log("* outgoingBitrate: " + outgoingBitrate);
+        console.log("* bandwidth: " + bandwidth);
+
+        if (rtt >= 150 || packetLost >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
+          console.log("-> Your Connection is bad");
+          speedTestObject.message = "Your Connection is bad";
+        } else if (rtt >= 50 || packetLost >= 1 || jitter >= 30 || outgoingBitrate >= bandwidth) {
+          console.log("-> Your connection is fair");
+          speedTestObject.message = "Your connection is fair";
+        } else {
+          console.log("-> Your connection is good");
+          speedTestObject.message = "Your connection is good";
+        }
+        speedTestObject.isfinished = true;
+      }
+    }
+    else {
+      console.log( info + " notification received");
+    }
+  },
+  callbackError : function(error) {
+    console.log("error callback: " +  JSON.stringify(error));
+  }
+});
+
 function getWindowLocation() {
   document.getElementById("locationHref").value = window.location.href;
 }
@@ -277,7 +367,8 @@ window.copyWindowLocation = copyWindowLocation;
 window.makeFullScreen = makeFullScreen;
 
 export const AntmediaContext = React.createContext(webRTCAdaptor);
-
+export const AntmediaSpeedTestContext = React.createContext(webRTCAdaptorSpeedTest);
+export const SpeedTestObjectContext = React.createContext(speedTestObject);
 function App() {
   const handleFullScreen = (e) => {
     if (e.target?.id === "meeting-gallery") {
@@ -311,9 +402,13 @@ function App() {
           <AntSnackBar id={key} notificationData={notificationData} />
         )}
       >
-        <AntmediaContext.Provider value={webRTCAdaptor}>
-          <CustomRoutes />
-        </AntmediaContext.Provider>
+        <SpeedTestObjectContext.Provider value={speedTestObject}>
+          <AntmediaSpeedTestContext.Provider value={webRTCAdaptorSpeedTest}>
+            <AntmediaContext.Provider value={webRTCAdaptor}>
+              <CustomRoutes />
+            </AntmediaContext.Provider>
+          </AntmediaSpeedTestContext.Provider>
+        </SpeedTestObjectContext.Provider>
       </SnackbarProvider>
     </ThemeProvider>
   );

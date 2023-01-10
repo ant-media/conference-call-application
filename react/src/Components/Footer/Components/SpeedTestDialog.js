@@ -37,7 +37,7 @@ const AntDialogTitle = props => {
   );
 };
 
-export function SettingsDialog(props) {
+export function SpeedTestDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
   const { myLocalData, setSelectedCamera, selectedCamera, setSelectedMicrophone, selectedMicrophone, speedTestBeforeLogin, setSpeedTestBeforeLogin } = React.useContext(MediaSettingsContext);
@@ -146,7 +146,7 @@ export function SettingsDialog(props) {
   );
 }
 
-SettingsDialog.propTypes = {
+SpeedTestDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
 };

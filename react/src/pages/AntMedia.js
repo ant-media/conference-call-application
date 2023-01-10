@@ -55,6 +55,8 @@ function AntMedia() {
   const [talkers, setTalkers] = useState([]);
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState("");
+  const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(true);
+  const [speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal] = useState(false);
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
   const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -596,6 +598,10 @@ function AntMedia() {
             isPublished,
             setSelectedCamera,
             selectedCamera,
+            speedTestBeforeLogin,
+            setSpeedTestBeforeLogin,
+            speedTestBeforeLoginModal,
+            setSpeedTestBeforeLoginModal,
             selectedMicrophone,
             setSelectedMicrophone,
             setParticipants,
