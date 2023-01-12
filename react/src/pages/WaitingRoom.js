@@ -20,6 +20,8 @@ import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 
+
+
 function WaitingRoom(props) {
   const { id } = useParams();
   const { t } = useTranslation();
@@ -38,6 +40,16 @@ function WaitingRoom(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
   function joinRoom(e) {
     if (antmedia.mediaManager.localStream === null) {
       e.preventDefault();
@@ -55,11 +67,15 @@ function WaitingRoom(props) {
       );
       return;
     }
-    antmedia.joinRoom(roomName, undefined);
+    var generatedStreamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
+
+    console.log("generatedStreamId:"+generatedStreamId);
+
+    antmedia.joinRoom(roomName, generatedStreamId);
     props.handleChangeRoomStatus("meeting");
   }
   const handleDialogOpen = (focus) => {
-    if (antmedia.mediaManager.localStream === null) {
+    if (false && antmedia.mediaManager.localStream === null) {
       enqueueSnackbar(
         {
           message: t(
@@ -87,6 +103,7 @@ function WaitingRoom(props) {
         open={dialogOpen}
         onClose={handleDialogClose}
         selectFocus={selectFocus}
+        handleBackgroundReplacement={props.handleBackgroundReplacement}
       />
       <Grid
         container
@@ -101,6 +118,7 @@ function WaitingRoom(props) {
             sx={{ position: "relative" }}
           >
             <VideoCard id="localVideo" autoPlay muted hidePin={true} />
+            
             <Grid
               container
               columnSpacing={2}
