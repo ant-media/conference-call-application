@@ -20,5 +20,5 @@ script:
 - cd ..
 - cp -a react/build/. webapp/src/main/webapp
 - cd webapp
-# - mvn clean install -DskipTests -Dgpg.skip=true --quiet
-- mvn deploy -DskipTests --settings mvn-settings.xml
+- mvn clean install -DskipTests -Dgpg.skip=true
+# - mvn deploy -DskipTests --settings mvn-settings.xml
