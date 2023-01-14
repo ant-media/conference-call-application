@@ -134,25 +134,8 @@ if (!websocketURL) {
   }
 
 }
-// let streamsList;
 
-function showPoorNetworkConnectionWarning() {
-  let alertElement = document.getElementsByClassName("alert")[0];
-  if (alertElement !== undefined && alertElement !== null &&alertElement.classList.contains("hide")) {
-    alertElement.classList.remove("hide");
-    alertElement.classList.add("show");
-    alertElement.style.opacity = 1;
-  }
-}
-
-function hidePoorNetworkConnectionWarning() {
-  let alertElement = document.getElementsByClassName("alert")[0];
-  if (alertElement !== undefined && alertElement !== null &&alertElement.classList.contains("show")) {
-    alertElement.classList.remove("show");
-    alertElement.classList.add("hide");
-    alertElement.style.opacity = 0;
-  }
-}
+let packageLostPreviewState = 0;
 
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
@@ -194,17 +177,12 @@ const webRTCAdaptor = new WebRTCAdaptor({
       webRTCAdaptor.handleScreenshareNotFromPlatform();
     } else if (info === "browser_screen_share_supported") {
     } else if (info === "leavedFromRoom") {
-      hidePoorNetworkConnectionWarning();
       room = obj.ATTR_ROOM_NAME;
       if (roomTimerId !== null) {
         clearInterval(roomTimerId);
       }
     } else if (info === "closed") {
-      if (typeof obj !== "undefined") {
-        hidePoorNetworkConnectionWarning();
-      }
     } else if (info === "play_finished") {
-      hidePoorNetworkConnectionWarning();
       isPlaying = false;
     } else if (info === "streamInformation") {
       webRTCAdaptor.handleStreamInformation(obj);
@@ -234,24 +212,18 @@ const webRTCAdaptor = new WebRTCAdaptor({
     } else if (info === "available_devices") {
       webRTCAdaptor.devices = obj;
     } else if (info === "updated_stats") {
-      console.log("Average outgoing bitrate " + obj.averageOutgoingBitrate + " kbits/sec"
-          + " Current outgoing bitrate: " + obj.currentOutgoingBitrate + " kbits/sec"
-          + " video source width: " + obj.resWidth + " video source height: " + obj.resHeight
-          + "frame width: " + obj.frameWidth + " frame height: " + obj.frameHeight
-          + " video packetLost: "  + obj.videoPacketsLost + " audio packetsLost: " + obj.audioPacketsLost
-          + " video RTT: " + obj.videoRoundTripTime + " audio RTT: " + obj.audioRoundTripTime
-          + " video jitter: " + obj.videoJitter + " audio jitter: " + obj.audioJitter);
       let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
-      let packetLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+      let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
       let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
       let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
       let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
 
-      if (rtt >= 150 || packetLost >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
-        showPoorNetworkConnectionWarning();
-      } else {
-        hidePoorNetworkConnectionWarning();
+      if (rtt >= 150 || (packageLost-packageLostPreviewState) >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
+        webRTCAdaptor.displayPoorNetworkConnectionWarning();
       }
+
+      packageLostPreviewState = packageLost;
+
     } else if (info == "debugInfo") {
       webRTCAdaptor.handleDebugInfo(obj.debugInfo);
     }
@@ -317,7 +289,6 @@ const webRTCAdaptor = new WebRTCAdaptor({
       errorMessage = "WebSocket Connection is disconnected.";
     }
 
-    hidePoorNetworkConnectionWarning();
     alert(errorMessage);
   },
 });
@@ -380,10 +351,6 @@ function App() {
           <CustomRoutes />
         </AntmediaContext.Provider>
       </SnackbarProvider>
-      <div className="alert hide">
-        <span className="fas fa-exclamation-circle"></span>
-        <span className="msg">Connection is not stable. Please check your internet connection!</span>
-      </div>
     </ThemeProvider>
   );
 }
