@@ -93,16 +93,16 @@ const MeetingRoom = React.memo((props) => {
   const antmedia = useContext(AntmediaContext);
 
   const settings = useContext(SettingsContext);
-  const { drawerOpen, pinnedVideoId, pinVideo, audioTracks, globals } =
-    settings;
-  const { participants, allParticipants, myLocalData } = props;
+  const {drawerOpen, pinnedVideoId, pinVideo, audioTracks, globals} =
+      settings;
+  const {participants, allParticipants, myLocalData} = props;
 
   const allParticipantsExceptLocal = allParticipants.filter(
-    (p) => p.streamId !== myLocalData?.streamId
+      (p) => p.streamId !== myLocalData?.streamId
   );
 
   const filterAndSortOthersTile = (all, showing) => {
-    const participantIds = showing.map(({ id }) => id);
+    const participantIds = showing.map(({id}) => id);
     const othersIds = all.filter((p) => !participantIds.includes(p.streamId));
     return othersIds.sort((a, b) => a.streamName.localeCompare(b.streamName));
   };
@@ -112,7 +112,7 @@ const MeetingRoom = React.memo((props) => {
     if (localVid) {
       antmedia.mediaManager.localVideo = document.getElementById("localVideo");
       antmedia.mediaManager.localVideo.srcObject =
-        antmedia.mediaManager.localStream;
+          antmedia.mediaManager.localStream;
     }
   }, [pinnedVideoId]);
 
@@ -131,14 +131,14 @@ const MeetingRoom = React.memo((props) => {
 
     const screenHeight = gallery.getBoundingClientRect().height;
     const videoCount = document.querySelectorAll(
-      "#meeting-gallery .single-video-container.not-pinned"
+        "#meeting-gallery .single-video-container.not-pinned"
     ).length;
 
-    const { width, height, cols } = calculateLayout(
-      screenWidth,
-      screenHeight,
-      videoCount,
-      aspectRatio
+    const {width, height, cols} = calculateLayout(
+        screenWidth,
+        screenHeight,
+        videoCount,
+        aspectRatio
     );
 
     let Width = width - 8;
@@ -169,7 +169,7 @@ const MeetingRoom = React.memo((props) => {
 
   const getUnpinnedParticipants = () => {
     const array = [
-      pinnedVideoId !== "localVideo" && { id: "localVideo" },
+      pinnedVideoId !== "localVideo" && {id: "localVideo"},
       ...participants.filter((v) => v.id !== pinnedVideoId),
     ];
     const filtered = array.filter(Boolean);
@@ -182,45 +182,45 @@ const MeetingRoom = React.memo((props) => {
       others = othersArray;
     } else {
       others = filterAndSortOthersTile(
-        allParticipantsExceptLocal,
-        participants
+          allParticipantsExceptLocal,
+          participants
       );
     }
 
     return (
-      <div className="others-tile-inner">
-        <CustomizedAvatarGroup max={maxGroup} sx={{ justifyContent: "center" }}>
-          {others.map(({ name, streamName }, index) => {
-            let username = name || streamName;
-            if (username?.length > 0) {
-              const nameArr = username.split(" ");
-              const secondLetter = nameArr.length > 1 ? nameArr[1][0] : "";
-              const initials =
-                `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
+        <div className="others-tile-inner">
+          <CustomizedAvatarGroup max={maxGroup} sx={{justifyContent: "center"}}>
+            {others.map(({name, streamName}, index) => {
+              let username = name || streamName;
+              if (username?.length > 0) {
+                const nameArr = username.split(" ");
+                const secondLetter = nameArr.length > 1 ? nameArr[1][0] : "";
+                const initials =
+                    `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
 
-              return (
-                <CustomizedAvatar
-                  key={index}
-                  alt={username}
-                  className="regular-avatar"
-                  sx={{
-                    bgcolor: "green.50",
-                    color: "#fff",
-                    fontSize: { xs: 16, md: 22 },
-                  }}
-                >
-                  {initials}
-                </CustomizedAvatar>
-              );
-            } else {
-              return null;
-            }
-          })}
-        </CustomizedAvatarGroup>
-        <Typography sx={{ mt: 2, color: "#ffffff" }}>
-          {others.length} other{others.length > 1 ? "s" : ""}
-        </Typography>
-      </div>
+                return (
+                    <CustomizedAvatar
+                        key={index}
+                        alt={username}
+                        className="regular-avatar"
+                        sx={{
+                          bgcolor: "green.50",
+                          color: "#fff",
+                          fontSize: {xs: 16, md: 22},
+                        }}
+                    >
+                      {initials}
+                    </CustomizedAvatar>
+                );
+              } else {
+                return null;
+              }
+            })}
+          </CustomizedAvatarGroup>
+          <Typography sx={{mt: 2, color: "#ffffff"}}>
+            {others.length} other{others.length > 1 ? "s" : ""}
+          </Typography>
+        </div>
     );
   };
 
@@ -232,78 +232,78 @@ const MeetingRoom = React.memo((props) => {
     const showAsOthersSliceIndexPinned = showAsOthersLimitPinned - 2;
 
     const slicePinnedTiles =
-      unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
+        unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
 
     let slicedParticipants = [];
     if (slicePinnedTiles) {
       slicedParticipants = unpinnedParticipants.slice(
-        0,
-        showAsOthersSliceIndexPinned
+          0,
+          showAsOthersSliceIndexPinned
       );
       unpinnedParticipants = unpinnedParticipants.slice(
-        showAsOthersSliceIndexPinned
+          showAsOthersSliceIndexPinned
       );
     } else {
       slicedParticipants = unpinnedParticipants;
     }
 
     return slicedParticipants.length > 0 ? (
-      <>
-        {slicedParticipants.map(({ id, videoLabel, track, name }, index) => {
-          if (id !== "localVideo") {
-            return (
-              <div className="unpinned" key={index}>
-                <div className="single-video-container">
-                  <VideoCard
-                    onHandlePin={() => {
-                      pinVideo(id, videoLabel);
-                    }}
-                    id={id}
-                    track={track}
-                    autoPlay
-                    name={name}
-                  />
-                </div>
-              </div>
-            );
-          } else {
-            return (
+        <>
+          {slicedParticipants.map(({id, videoLabel, track, name}, index) => {
+            if (id !== "localVideo") {
+              return (
+                  <div className="unpinned" key={index}>
+                    <div className="single-video-container">
+                      <VideoCard
+                          onHandlePin={() => {
+                            pinVideo(id, videoLabel);
+                          }}
+                          id={id}
+                          track={track}
+                          autoPlay
+                          name={name}
+                      />
+                    </div>
+                  </div>
+              );
+            } else if (!antmedia.isPlayMode) {
+              return (
+                  <div className="unpinned">
+                    <div className="single-video-container " key={index}>
+                      <VideoCard
+                          onHandlePin={() => {
+                            pinVideo("localVideo");
+                          }}
+                          id="localVideo"
+                          autoPlay
+                          name="You"
+                          muted
+                      />
+                    </div>
+                  </div>
+              );
+            }
+          })}
+          {sliceTiles ? (
               <div className="unpinned">
-                <div className="single-video-container " key={index}>
-                  <VideoCard
-                    onHandlePin={() => {
-                      pinVideo("localVideo");
-                    }}
-                    id="localVideo"
-                    autoPlay
-                    name="You"
-                    muted
-                  />
+                <div className="single-video-container  others-tile-wrapper">
+                  {OthersTile(2)}
                 </div>
               </div>
-            );
-          }
-        })}
-        {sliceTiles ? (
-          <div className="unpinned">
-            <div className="single-video-container  others-tile-wrapper">
-              {OthersTile(2)}
-            </div>
-          </div>
-        ) : (
-          slicePinnedTiles && (
-            <div className="unpinned">
-              <div className="single-video-container  others-tile-wrapper">
-                {OthersTile(2, unpinnedParticipants)}
-              </div>
-            </div>
-          )
-        )}
-      </>
+          ) : (
+              slicePinnedTiles && (
+                  <div className="unpinned">
+                    <div className="single-video-container  others-tile-wrapper">
+                      {OthersTile(2, unpinnedParticipants)}
+                    </div>
+                  </div>
+              )
+          )}
+        </>
     ) : (
-      <Typography variant="body2" sx={{ color: "green.50", mt: 3 }}>
-        No other participants.
-      </Typography>
+        <Typography variant="body2" sx={{color: "green.50", mt: 3}}>
+          No other participants.
+        </Typography>
     );
   };
 
@@ -314,130 +314,223 @@ const MeetingRoom = React.memo((props) => {
 
   const pinLayout = pinnedVideoId !== null ? true : false;
   // const testPart = [{ name: 'a' }, { name: 'a' }];
-  return (
-    <>
-      {audioTracks.map((audio, index) => (
-        <VideoCard
-          key={index}
-          onHandlePin={() => {}}
-          id={audio.streamId}
-          track={audio.track}
-          autoPlay
-          name={""}
-          style={{ display: "none" }}
-        />
-      ))}
-      <div id="meeting-gallery" style={{ height: "calc(100vh - 80px)" }}>
-        {!pinLayout && ( // if not pinned layout show me first as a regular video
-          <>
-            <div
-              className="single-video-container not-pinned"
-              style={{
-                width: "var(--width)",
-                height: "var(--height)",
-                maxWidth: "var(--maxwidth)",
-              }}
-            >
+  if (antmedia.isPlayMode === false) {
+    return (
+        <>
+          {audioTracks.map((audio, index) => (
               <VideoCard
-                onHandlePin={() => {
-                  pinVideo("localVideo");
-                }}
-                id="localVideo"
-                autoPlay
-                name="You"
-                muted
-                hidePin={participants.length === 0}
+                  key={index}
+                  onHandlePin={() => {
+                  }}
+                  id={audio.streamId}
+                  track={audio.track}
+                  autoPlay
+                  name={""}
+                  style={{display: "none"}}
               />
-            </div>
-            {participants
-              .filter((p) => p.videoLabel !== p.id)
-              .map(({ id, videoLabel, track, name }, index) => (
+          ))}
+          <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
+            {!pinLayout && ( // if not pinned layout show me first as a regular video
                 <>
                   <div
-                    className="single-video-container not-pinned"
-                    key={index}
-                    style={{
-                      width: "var(--width)",
-                      height: "var(--height)",
-                      maxWidth: "var(--maxwidth)",
-                    }}
+                      className="single-video-container not-pinned"
+                      style={{
+                        width: "var(--width)",
+                        height: "var(--height)",
+                        maxWidth: "var(--maxwidth)",
+                      }}
                   >
                     <VideoCard
-                      onHandlePin={() => {
-                        pinVideo(id, videoLabel);
-                      }}
-                      id={id}
-                      track={track}
-                      autoPlay
-                      name={name}
+                        onHandlePin={() => {
+                          pinVideo("localVideo");
+                        }}
+                        id="localVideo"
+                        autoPlay
+                        name="You"
+                        muted
+                        hidePin={participants.length === 0}
                     />
                   </div>
+                  {participants
+                      .filter((p) => p.videoLabel !== p.id)
+                      .map(({id, videoLabel, track, name}, index) => (
+                          <>
+                            <div
+                                className="single-video-container not-pinned"
+                                key={index}
+                                style={{
+                                  width: "var(--width)",
+                                  height: "var(--height)",
+                                  maxWidth: "var(--maxwidth)",
+                                }}
+                            >
+                              <VideoCard
+                                  onHandlePin={() => {
+                                    pinVideo(id, videoLabel);
+                                  }}
+                                  id={id}
+                                  track={track}
+                                  autoPlay
+                                  name={name}
+                              />
+                            </div>
+                          </>
+                      ))}
+                  {sliceTiles && participants.length > 0 && (
+                      <div
+                          className="single-video-container not-pinned others-tile-wrapper"
+                          style={{
+                            width: "var(--width)",
+                            height: "var(--height)",
+                            maxWidth: "var(--maxwidth)",
+                          }}
+                      >
+                        {OthersTile(4)}
+                      </div>
+                  )}
                 </>
-              ))}
-            {sliceTiles && participants.length > 0 && (
-              <div
-                className="single-video-container not-pinned others-tile-wrapper"
-                style={{
-                  width: "var(--width)",
-                  height: "var(--height)",
-                  maxWidth: "var(--maxwidth)",
-                }}
-              >
-                {OthersTile(4)}
-              </div>
             )}
-          </>
-        )}
-        {pinLayout && (
-          <>
-            {pinnedVideoId === "localVideo" ? (
-              // pinned myself
-              // ${participants.length === 0 ? ' no-participants ' : ''}
-              <div className="single-video-container pinned keep-ratio">
-                <VideoCard
-                  onHandlePin={() => {
-                    pinVideo("localVideo");
-                  }}
-                  id="localVideo"
-                  autoPlay
-                  name="You"
-                  muted
-                  pinned
-                />
-              </div>
-            ) : (
-              //pinned participant
+            {pinLayout && (
+                <>
+                  {pinnedVideoId === "localVideo" ? (
+                      // pinned myself
+                      // ${participants.length === 0 ? ' no-participants ' : ''}
+                      <div className="single-video-container pinned keep-ratio">
+                        <VideoCard
+                            onHandlePin={() => {
+                              pinVideo("localVideo");
+                            }}
+                            id="localVideo"
+                            autoPlay
+                            name="You"
+                            muted
+                            pinned
+                        />
+                      </div>
+                  ) : (
+                      //pinned participant
 
-              participants.find((v) => v.id === pinnedVideoId) && (
-                <div className="single-video-container pinned keep-ratio">
-                  <VideoCard
-                    id={participants.find((v) => v.id === pinnedVideoId)?.id}
-                    track={
-                      participants.find((v) => v.id === pinnedVideoId)?.track
-                    }
-                    autoPlay
-                    name={
-                      participants.find((v) => v.id === pinnedVideoId)?.name
-                    }
-                    pinned
-                    onHandlePin={() => {
-                      pinVideo(
-                        participants.find((v) => v.id === pinnedVideoId)?.id,
-                        participants.find((v) => v.id === pinnedVideoId)
-                          ?.videoLabel
-                      );
-                    }}
-                  />
-                </div>
-              )
+                      participants.find((v) => v.id === pinnedVideoId) && (
+                          <div className="single-video-container pinned keep-ratio">
+                            <VideoCard
+                                id={participants.find((v) => v.id === pinnedVideoId)?.id}
+                                track={
+                                  participants.find((v) => v.id === pinnedVideoId)?.track
+                                }
+                                autoPlay
+                                name={
+                                  participants.find((v) => v.id === pinnedVideoId)?.name
+                                }
+                                pinned
+                                onHandlePin={() => {
+                                  pinVideo(
+                                      participants.find((v) => v.id === pinnedVideoId)?.id,
+                                      participants.find((v) => v.id === pinnedVideoId)
+                                          ?.videoLabel
+                                  );
+                                }}
+                            />
+                          </div>
+                      )
+                  )}
+                  <div id="unpinned-gallery">{returnUnpinnedGallery()}</div>
+                </>
             )}
-            <div id="unpinned-gallery">{returnUnpinnedGallery()}</div>
-          </>
-        )}
-      </div>
-      <Footer {...props} />
-    </>
-  );
+          </div>
+          <Footer {...props} />
+        </>
+    );
+  } else {
+    return (
+        <>
+          {audioTracks.map((audio, index) => (
+              <VideoCard
+                  key={index}
+                  onHandlePin={() => {
+                  }}
+                  id={audio.streamId}
+                  track={audio.track}
+                  autoPlay
+                  name={""}
+                  style={{display: "none"}}
+              />
+          ))}
+          <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
+            {!pinLayout && ( // if not pinned layout show me first as a regular video
+                <>
+                  {participants
+                      .filter((p) => p.videoLabel !== p.id)
+                      .map(({id, videoLabel, track, name}, index) => (
+                          <>
+                            <div
+                                className="single-video-container not-pinned"
+                                key={index}
+                                style={{
+                                  width: "var(--width)",
+                                  height: "var(--height)",
+                                  maxWidth: "var(--maxwidth)",
+                                }}
+                            >
+                              <VideoCard
+                                  onHandlePin={() => {
+                                    pinVideo(id, videoLabel);
+                                  }}
+                                  id={id}
+                                  track={track}
+                                  autoPlay
+                                  name={name}
+                              />
+                            </div>
+                          </>
+                      ))}
+                  {sliceTiles && participants.length > 0 && (
+                      <div
+                          className="single-video-container not-pinned others-tile-wrapper"
+                          style={{
+                            width: "var(--width)",
+                            height: "var(--height)",
+                            maxWidth: "var(--maxwidth)",
+                          }}
+                      >
+                        {OthersTile(4)}
+                      </div>
+                  )}
+                </>
+            )}
+            {pinLayout && (
+                <>
+                      //pinned participant
+
+                      participants.find((v) => v.id === pinnedVideoId) && (
+                          <div className="single-video-container pinned keep-ratio">
+                            <VideoCard
+                                id={participants.find((v) => v.id === pinnedVideoId)?.id}
+                                track={
+                                  participants.find((v) => v.id === pinnedVideoId)?.track
+                                }
+                                autoPlay
+                                name={
+                                  participants.find((v) => v.id === pinnedVideoId)?.name
+                                }
+                                pinned
+                                onHandlePin={() => {
+                                  pinVideo(
+                                      participants.find((v) => v.id === pinnedVideoId)?.id,
+                                      participants.find((v) => v.id === pinnedVideoId)
+                                          ?.videoLabel
+                                  );
+                                }}
+                            />
+                          </div>
+                      )
+                  <div id="unpinned-gallery">{returnUnpinnedGallery()}</div>
+                </>
+            )}
+          </div>
+          <Footer {...props} />
+        </>
+    );
+  }
 });
 
 export default MeetingRoom;

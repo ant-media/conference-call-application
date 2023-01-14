@@ -8,6 +8,7 @@ import { SettingsDialog } from "./SettingsDialog";
 import { LayoutSettingsDialog } from "./LayoutSettingsDialog";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import {getUrlParameter} from "../../../antmedia/fetch.stream";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -58,76 +59,145 @@ function OptionButton({ footer, ...props }) {
     setLayoutDialogOpen(false);
   };
 
-  return (
-    <>
-      <SettingsDialog
-        open={dialogOpen}
-        onClose={handleDialogClose}
-        selectFocus={selectFocus}
-      />
-      <LayoutSettingsDialog
-        open={layoutDialogOpen}
-        onClose={handleLayoutDialogClose}
-        selectFocus={selectFocus}
-      />
-      <Tooltip title={t("More options")} placement="top">
-        <CustomizedBtn
-          className={footer ? "footer-icon-button" : ""}
-          id="demo-positioned-button"
-          variant="contained"
-          color={open ? "primary" : "secondary"}
-          aria-controls={open ? "demo-positioned-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
-          onClick={handleClick}
-        >
-          <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'white'} />
-        </CustomizedBtn>
-      </Tooltip>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-      >
-        <MenuItem onClick={() => handleLayoutDialogOpen()}>
-          <ListItemIcon>
-            <SvgIcon size={36} name={"layout"} color={"white"} />
-          </ListItemIcon>
-          <ListItemText>{t("Change Layout")}</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => handleDialogOpen()}>
-          <ListItemIcon>
-            <SvgIcon size={36} name={"call-settings"} color={"white"} />
-          </ListItemIcon>
-          <ListItemText>{t("Call Settings")}</ListItemText>
-        </MenuItem>
+  const playOnly = getUrlParameter("playOnly");
 
-        <MenuItem
-          component={"a"}
-          href="https://github.com/ant-media/Ant-Media-Server/issues"
-          target={"_blank"}
-          rel="noopener noreferrer"
-        >
-          <ListItemIcon>
-            <SvgIcon size={36} name={"report"} color={"white"} />
-          </ListItemIcon>
-          <ListItemText>{t("Report Problem")}</ListItemText>
-        </MenuItem>
-      </Menu>
-    </>
-  );
+  if (playOnly !== null && playOnly !== undefined && playOnly === 'true') {
+    return (
+        <>
+          <SettingsDialog
+              open={dialogOpen}
+              onClose={handleDialogClose}
+              selectFocus={selectFocus}
+          />
+          <LayoutSettingsDialog
+              open={layoutDialogOpen}
+              onClose={handleLayoutDialogClose}
+              selectFocus={selectFocus}
+          />
+          <Tooltip title={t("More options")} placement="top">
+            <CustomizedBtn
+                className={footer ? "footer-icon-button" : ""}
+                id="demo-positioned-button"
+                variant="contained"
+                color={open ? "primary" : "secondary"}
+                aria-controls={open ? "demo-positioned-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+                onClick={handleClick}
+            >
+              <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'white'}/>
+            </CustomizedBtn>
+          </Tooltip>
+          <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                "aria-labelledby": "basic-button",
+              }}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              transformOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+          >
+            <MenuItem onClick={() => handleLayoutDialogOpen()}>
+              <ListItemIcon>
+                <SvgIcon size={36} name={"layout"} color={"white"}/>
+              </ListItemIcon>
+              <ListItemText>{t("Change Layout")}</ListItemText>
+            </MenuItem>
+
+            <MenuItem
+                component={"a"}
+                href="https://github.com/ant-media/conference-call-application/issues"
+                target={"_blank"}
+                rel="noopener noreferrer"
+            >
+              <ListItemIcon>
+                <SvgIcon size={36} name={"report"} color={"white"}/>
+              </ListItemIcon>
+              <ListItemText>{t("Report Problem")}</ListItemText>
+            </MenuItem>
+          </Menu>
+        </>
+    );
+  } else {
+    return (
+        <>
+          <SettingsDialog
+              open={dialogOpen}
+              onClose={handleDialogClose}
+              selectFocus={selectFocus}
+          />
+          <LayoutSettingsDialog
+              open={layoutDialogOpen}
+              onClose={handleLayoutDialogClose}
+              selectFocus={selectFocus}
+          />
+          <Tooltip title={t("More options")} placement="top">
+            <CustomizedBtn
+                className={footer ? "footer-icon-button" : ""}
+                id="demo-positioned-button"
+                variant="contained"
+                color={open ? "primary" : "secondary"}
+                aria-controls={open ? "demo-positioned-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+                onClick={handleClick}
+            >
+              <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'white'} />
+            </CustomizedBtn>
+          </Tooltip>
+          <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                "aria-labelledby": "basic-button",
+              }}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              transformOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+          >
+            <MenuItem onClick={() => handleLayoutDialogOpen()}>
+              <ListItemIcon>
+                <SvgIcon size={36} name={"layout"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Change Layout")}</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={() => handleDialogOpen()}>
+              <ListItemIcon>
+                <SvgIcon size={36} name={"call-settings"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Call Settings")}</ListItemText>
+            </MenuItem>
+
+            <MenuItem
+                component={"a"}
+                href="https://github.com/ant-media/conference-call-application/issues"
+                target={"_blank"}
+                rel="noopener noreferrer"
+            >
+              <ListItemIcon>
+                <SvgIcon size={36} name={"report"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Report Problem")}</ListItemText>
+            </MenuItem>
+          </Menu>
+        </>
+    );
+  }
 }
 
 export default OptionButton;

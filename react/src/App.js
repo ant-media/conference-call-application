@@ -141,6 +141,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
   peerconnection_config: pc_config,
   sdp_constraints: sdpConstraints,
   isPlayMode: playOnly,
+  dataChannelEnabled: true,
   debug: true,
   callback: (info, obj) => {
     if (info === "initialized") {
@@ -151,14 +152,18 @@ const webRTCAdaptor = new WebRTCAdaptor({
       publishStreamId = obj.streamId;
 
       webRTCAdaptor.handleSetMyObj(obj);
-      // streamDetailsList = obj.streamList;
+      let streamDetailsList = obj.streamList;
 
-      webRTCAdaptor.handlePublish(
-        obj.streamId,
-        token,
-        subscriberId,
-        subscriberCode
-      );
+      if (playOnly)  {
+        webRTCAdaptor.play(obj.ATTR_ROOM_NAME, token, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
+      } else {
+        webRTCAdaptor.handlePublish(
+            obj.streamId,
+            token,
+            subscriberId,
+            subscriberCode
+        );
+      }
 
       roomTimerId = setInterval(() => {
         webRTCAdaptor.handleRoomInfo(publishStreamId);
@@ -218,7 +223,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       var iceState = obj.state;
       if (iceState == null || iceState == "failed" || iceState == "disconnected"){
         alert("!! Connection closed. Please rejoin the meeting");
-      }	
+      }
     }
   },
   callbackError: function (error, message) {

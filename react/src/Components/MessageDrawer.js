@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import ParticipantTab from './ParticipantTab';
 import MessagesTab from './MessagesTab';
 import CloseDrawerButton from './DrawerButton';
+import {getUrlParameter} from "../antmedia/fetch.stream";
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
   '& .MuiBackdrop-root': {
@@ -68,40 +69,80 @@ const MessageDrawer = React.memo(props => {
     };
   }
 
-  return (
-    <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={drawerOpen} variant="persistent">
-      <MessageGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
-        <Grid item container justifyContent="space-between" alignItems="center">
-          <Tabs
-            TabIndicatorProps={{
-              sx: {
-                display: 'none',
-              },
-            }}
-            value={value}
-            onChange={handleChange}
-            aria-label="messages and participant tabs"
-          >
-            <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Messages')} {...a11yProps(0)} />
-            <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Participants')} {...a11yProps(1)} />
-          </Tabs>
-          <CloseDrawerButton />
-        </Grid>
-        <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
-          <TabPanel value={value} index={0}>
-            <TabGrid container sx={{ pb: 0 }} direction={'column'}>
-              <MessagesTab messages={messages}/>
-            </TabGrid>
-          </TabPanel>
-          <TabPanel value={value} index={1}>
-            <TabGrid container>
-              <ParticipantTab allParticipants={allParticipants} />
-            </TabGrid>
-          </TabPanel>
-        </Grid>
-        {value === 0 && <MessageInput />}
-      </MessageGrid>
-    </AntDrawer>
-  );
+  const playOnly = getUrlParameter("playOnly");
+
+  if (playOnly !== null && playOnly !== undefined && playOnly === 'true') {
+    return (
+        <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={drawerOpen} variant="persistent">
+          <MessageGrid container direction="column" style={{flexWrap: 'nowrap', height: '100%', overflow: 'hidden'}}>
+            <Grid item container justifyContent="space-between" alignItems="center">
+              <Tabs
+                  TabIndicatorProps={{
+                    sx: {
+                      display: 'none',
+                    },
+                  }}
+                  value={value}
+                  onChange={handleChange}
+                  aria-label="messages and participant tabs"
+              >
+                <Tab disableRipple sx={{color: '#ffffff80', p: 1, pl: 0}} label={t('Messages')} {...a11yProps(0)} />
+                <Tab disableRipple sx={{color: '#ffffff80', p: 1, pl: 0}} label={t('Participants')} {...a11yProps(1)} />
+              </Tabs>
+              <CloseDrawerButton/>
+            </Grid>
+            <Grid item container justifyContent="space-between" alignItems="center"
+                  style={{flex: '1 1 auto', overflowY: 'hidden'}}>
+              <TabPanel value={value} index={0}>
+                <TabGrid container sx={{pb: 0}} direction={'column'}>
+                  <MessagesTab messages={messages}/>
+                </TabGrid>
+              </TabPanel>
+              <TabPanel value={value} index={1}>
+                <TabGrid container>
+                  <ParticipantTab allParticipants={allParticipants}/>
+                </TabGrid>
+              </TabPanel>
+            </Grid>
+          </MessageGrid>
+        </AntDrawer>
+    );
+  } else {
+    return (
+        <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={drawerOpen} variant="persistent">
+          <MessageGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
+            <Grid item container justifyContent="space-between" alignItems="center">
+              <Tabs
+                  TabIndicatorProps={{
+                    sx: {
+                      display: 'none',
+                    },
+                  }}
+                  value={value}
+                  onChange={handleChange}
+                  aria-label="messages and participant tabs"
+              >
+                <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Messages')} {...a11yProps(0)} />
+                <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Participants')} {...a11yProps(1)} />
+              </Tabs>
+              <CloseDrawerButton />
+            </Grid>
+            <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
+              <TabPanel value={value} index={0}>
+                <TabGrid container sx={{ pb: 0 }} direction={'column'}>
+                  <MessagesTab messages={messages}/>
+                </TabGrid>
+              </TabPanel>
+              <TabPanel value={value} index={1}>
+                <TabGrid container>
+                  <ParticipantTab allParticipants={allParticipants} />
+                </TabGrid>
+              </TabPanel>
+            </Grid>
+            {value === 0 && <MessageInput />}
+          </MessageGrid>
+        </AntDrawer>
+    );
+  }
 });
 export default MessageDrawer;
