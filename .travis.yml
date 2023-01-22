@@ -9,18 +9,10 @@ before_install:
 - export GPG_TTY=$(tty)
 - gpg2 --batch --fast-import codesigning.asc
 - nvm install --lts
-- (if [ $(git ls-remote https://github.com/ant-media/ant-media-server-parent.git $CI_COMMIT_REF_NAME  | wc -l) == "1" ];  
-        then 
-          echo " $CI_COMMIT_REF_NAME branch found";  
-          git clone -b $CI_COMMIT_REF_NAME https://github.com/ant-media/ant-media-server-parent.git;  
-        
-        else
-          echo "branch not found. Checking out master"; 
-          git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git;  
-      fi)
-    - cd ant-media-server-parent;
-    - mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
-    - cd ..;
+- git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git;
+- cd ant-media-server-parent;
+- mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
+- cd ..;
 cache:
   directories:
   - react/node_modules
