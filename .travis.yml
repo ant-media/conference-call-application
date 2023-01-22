@@ -11,7 +11,7 @@ before_install:
 - nvm install --lts
 - git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git;
 - cd ant-media-server-parent;
-- mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
+- mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
 - cd ..;
 cache:
   directories:
