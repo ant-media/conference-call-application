@@ -196,7 +196,8 @@ function AntMedia() {
       let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
       const isSameUser = lastMessage?.name === newMessage?.name;
       const sentInSameTime = lastMessage?.date === newMessage?.date;
-      newMessage.date = new Date(newMessage?.date).toLocaleString(getLang(), { timeZone: newMessage?.timezone, hour: "2-digit", minute: "2-digit" });
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      newMessage.date = new Date(newMessage?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
 
       if (isSameUser && sentInSameTime) {
         //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
@@ -246,8 +247,7 @@ function AntMedia() {
             eventType: "MESSAGE_RECEIVED",
             message: message,
             name: streamName,
-            date: new Date().toString(),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            date: new Date().toString()
           })
         );
       }
