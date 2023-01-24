@@ -241,13 +241,15 @@ function AntMedia() {
           return;
         }
 
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
         antmedia.sendData(
           myLocalData.streamId,
           JSON.stringify({
             eventType: "MESSAGE_RECEIVED",
             message: message,
             name: streamName,
-            date: new Date().toString()
+            date: new Date().toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" })
           })
         );
       }
