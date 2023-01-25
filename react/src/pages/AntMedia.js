@@ -241,15 +241,13 @@ function AntMedia() {
           return;
         }
 
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
         antmedia.sendData(
           myLocalData.streamId,
           JSON.stringify({
             eventType: "MESSAGE_RECEIVED",
             message: message,
             name: streamName,
-            date: new Date().toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" })
+            date: new Date().toString()
           })
         );
       }
@@ -342,6 +340,8 @@ function AntMedia() {
           isMicMuted: false,
         });
       } else if (eventType === "MESSAGE_RECEIVED") {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        notificationEvent.date = new Date(notificationEvent?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
         // if message arrives.
         // if there is an new message and user has not opened message component then we are going to increase number of unread messages by one.
         // we are gonna also send snackbar.
