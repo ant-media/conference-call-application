@@ -2,10 +2,8 @@ import * as React from 'react';
 import Drawer from '@mui/material/Drawer';
 import { styled } from '@mui/material/styles';
 import {  Grid,  Tabs, Tab } from '@mui/material';
-import MessageInput from './MessageInput';
 import { useTranslation } from 'react-i18next';
 import ParticipantTab from './ParticipantTab';
-import MessagesTab from './MessagesTab';
 import CloseDrawerButton from './DrawerButton';
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
@@ -26,7 +24,7 @@ const AntDrawer = styled(Drawer)(({ theme }) => ({
   },
 }));
 
-const MessageGrid = styled(Grid)(({ theme }) => ({
+const ParticipantListGrid = styled(Grid)(({ theme }) => ({
   position: 'relative',
   padding: 16,
   background: theme.palette.green[70],
@@ -41,7 +39,7 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const ParticipantListDrawer = React.memo(props => {
-  const { drawerOpen, messages = [] } = props;
+  const { participantListDrawerOpen = [] } = props;
   const [value, setValue] = React.useState(0);
   const { allParticipants } = props;
 
@@ -69,17 +67,32 @@ const ParticipantListDrawer = React.memo(props => {
   }
 
   return (
-    <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={drawerOpen} variant="persistent">
-      <MessageGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
-        <Grid item container justifyContent="space-between" alignItems="center">
-          <CloseDrawerButton />
-        </Grid>
-        <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
-          <ParticipantTab allParticipants={allParticipants} />
-        </Grid>
-        {value === 0 && <MessageInput />}
-      </MessageGrid>
-    </AntDrawer>
+      <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={participantListDrawerOpen} variant="persistent">
+        <ParticipantListGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
+          <Grid item container justifyContent="space-between" alignItems="center">
+            <Tabs
+                TabIndicatorProps={{
+                  sx: {
+                    display: 'none',
+                  },
+                }}
+                value={value}
+                onChange={handleChange}
+                aria-label="participant tab"
+            >
+              <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Participants')} {...a11yProps(0)} />
+            </Tabs>
+            <CloseDrawerButton />
+          </Grid>
+          <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
+            <TabPanel value={value} index={0}>
+              <TabGrid container>
+                <ParticipantTab allParticipants={allParticipants} />
+              </TabGrid>
+            </TabPanel>
+          </Grid>
+        </ParticipantListGrid>
+      </AntDrawer>
   );
 });
 export default ParticipantListDrawer;

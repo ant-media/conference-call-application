@@ -28,16 +28,13 @@ function ParticipantListButton({ footer, ...props }) {
       <Tooltip title={t('Participant List')} placement="top">
         <CustomizedBtn
           onClick={() => {
-            if (!settings?.drawerOpen) {
-              settings?.toggleSetNumberOfUnreadMessages(0);
-            }
-            settings?.handleDrawerOpen(!settings?.drawerOpen);
+            settings?.handleParticipantListOpen(!settings?.participantListDrawerOpen);
           }}
           variant="contained"
           className={footer ? 'footer-icon-button' : ''}
-          color={settings?.drawerOpen ? 'primary' : 'secondary'}
+          color={settings?.participantListDrawerOpen ? 'primary' : 'secondary'}
         >
-          <SvgIcon size={32} color={settings?.drawerOpen ? 'black' : 'white'} name={'participants'} />
+          <SvgIcon size={32} color={settings?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
             {allParticipants.length + 1}
         </CustomizedBtn>
       </Tooltip>
