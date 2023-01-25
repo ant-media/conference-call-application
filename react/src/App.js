@@ -218,7 +218,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
       let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
 
-      if (rtt >= 150 || (packageLost-packageLostPreviewState) >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
+      if (rtt >= 150 /* || (packageLost-packageLostPreviewState) >= 2.5 */ || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
         webRTCAdaptor.displayPoorNetworkConnectionWarning();
       }
 
