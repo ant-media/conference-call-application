@@ -11,6 +11,7 @@ import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
 import {VideoEffect} from "../antmedia/video-effect";
+import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
@@ -29,7 +30,11 @@ function AntMedia() {
   const videoEffect = new VideoEffect();
 
   // drawerOpen for message components.
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
+
+  // drawerOpen for participant list components.
+  const [participantListDrawerOpen, setParticipantListDrawerOpen] = useState(false);
+
 
   // whenever i join the room, i will get my unique id and stream settings from webRTC.
   // So that whenever i did something i will inform other participants that this action belongs to me by sending my streamId.
@@ -223,9 +228,19 @@ function AntMedia() {
     let objDiv = document.getElementById("paper-props");
     if (objDiv) objDiv.scrollTop = objDiv?.scrollHeight;
   }
-  function handleDrawerOpen(open) {
+  function handleMessageDrawerOpen(open) {
     closeSnackbar();
-    setDrawerOpen(open);
+    setMessageDrawerOpen(open);
+    if (open) {
+      setParticipantListDrawerOpen(false);
+    }
+  }
+
+  function handleParticipantListOpen(open) {
+    setParticipantListDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+    }
   }
 
   function handleSendMessage(message) {
@@ -345,14 +360,14 @@ function AntMedia() {
         // if message arrives.
         // if there is an new message and user has not opened message component then we are going to increase number of unread messages by one.
         // we are gonna also send snackbar.
-        if (!drawerOpen) {
+        if (!messageDrawerOpen) {
           enqueueSnackbar(
             {
               sender: notificationEvent.name,
               message: notificationEvent.message,
               variant: "message",
               onClick: () => {
-                setDrawerOpen(true);
+                handleMessageDrawerOpen(true);
                 setNumberOfUnReadMessages(0);
               },
             },
@@ -690,7 +705,8 @@ function AntMedia() {
             toggleSetCam,
             toggleSetMic,
             myLocalData,
-            handleDrawerOpen,
+            handleMessageDrawerOpen,
+            handleParticipantListOpen,
             screenSharedVideoId,
             audioTracks,
             isPublished,
@@ -732,8 +748,10 @@ function AntMedia() {
                   mic,
                   cam,
                   toggleSetCam,
-                  drawerOpen,
-                  handleDrawerOpen,
+                  messageDrawerOpen,
+                  handleMessageDrawerOpen,
+                  participantListDrawerOpen,
+                  handleParticipantListOpen,
                   handleSetMessages,
                   messages,
                   toggleSetNumberOfUnreadMessages,
@@ -752,7 +770,8 @@ function AntMedia() {
                     allParticipants={allParticipants}
                     myLocalData={myLocalData}
                   />
-                  <MessageDrawer drawerOpen={drawerOpen} messages={messages} />
+                  <MessageDrawer messageDrawerOpen={messageDrawerOpen} messages={messages} />
+                  <ParticipantListDrawer participantListDrawerOpen={participantListDrawerOpen} />
                 </>
               </SettingsContext.Provider>
             )}
