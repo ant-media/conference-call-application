@@ -28,8 +28,6 @@ function AntMedia() {
   const antmedia = useContext(AntmediaContext);
   const videoEffect = new VideoEffect();
 
-  
-
   // drawerOpen for message components.
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -198,15 +196,23 @@ function AntMedia() {
       let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
       const isSameUser = lastMessage?.name === newMessage?.name;
       const sentInSameTime = lastMessage?.date === newMessage?.date;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      newMessage.date = new Date(newMessage?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
 
       if (isSameUser && sentInSameTime) {
         //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
         lastMessage.message = lastMessage.message + "\n" + newMessage.message;
-        return [...oldMessages]; // dont make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
+        return [...oldMessages]; // don't make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
       } else {
         return [...oldMessages, newMessage];
       }
     });
+  }
+
+  function getLang() {
+    if (navigator.languages !== undefined)
+      return navigator.languages[0];
+    return navigator.language;
   }
 
   useEffect(() => {
@@ -241,10 +247,7 @@ function AntMedia() {
             eventType: "MESSAGE_RECEIVED",
             message: message,
             name: streamName,
-            date: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            date: new Date().toString()
           })
         );
       }
@@ -273,7 +276,7 @@ function AntMedia() {
         message: infoText,
       }),
     };
-      
+
     handleNotificationEvent(obj);
   }
 
@@ -337,6 +340,8 @@ function AntMedia() {
           isMicMuted: false,
         });
       } else if (eventType === "MESSAGE_RECEIVED") {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        notificationEvent.date = new Date(notificationEvent?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
         // if message arrives.
         // if there is an new message and user has not opened message component then we are going to increase number of unread messages by one.
         // we are gonna also send snackbar.
