@@ -12,6 +12,7 @@ import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
 import {VideoEffect} from "../antmedia/video-effect";
 import {SvgIcon} from "../Components/SvgIcon";
+import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
@@ -29,10 +30,12 @@ function AntMedia() {
   const antmedia = useContext(AntmediaContext);
   const videoEffect = new VideoEffect();
 
-
-
   // drawerOpen for message components.
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
+
+  // drawerOpen for participant list components.
+  const [participantListDrawerOpen, setParticipantListDrawerOpen] = useState(false);
+
 
   // whenever i join the room, i will get my unique id and stream settings from webRTC.
   // So that whenever i did something i will inform other participants that this action belongs to me by sending my streamId.
@@ -216,15 +219,23 @@ function AntMedia() {
       let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
       const isSameUser = lastMessage?.name === newMessage?.name;
       const sentInSameTime = lastMessage?.date === newMessage?.date;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      newMessage.date = new Date(newMessage?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
 
       if (isSameUser && sentInSameTime) {
         //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
         lastMessage.message = lastMessage.message + "\n" + newMessage.message;
-        return [...oldMessages]; // dont make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
+        return [...oldMessages]; // don't make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
       } else {
         return [...oldMessages, newMessage];
       }
     });
+  }
+
+  function getLang() {
+    if (navigator.languages !== undefined)
+      return navigator.languages[0];
+    return navigator.language;
   }
 
   useEffect(() => {
@@ -235,9 +246,19 @@ function AntMedia() {
     let objDiv = document.getElementById("paper-props");
     if (objDiv) objDiv.scrollTop = objDiv?.scrollHeight;
   }
-  function handleDrawerOpen(open) {
+  function handleMessageDrawerOpen(open) {
     closeSnackbar();
-    setDrawerOpen(open);
+    setMessageDrawerOpen(open);
+    if (open) {
+      setParticipantListDrawerOpen(false);
+    }
+  }
+
+  function handleParticipantListOpen(open) {
+    setParticipantListDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+    }
   }
 
   function handleSendMessage(message) {
@@ -259,10 +280,7 @@ function AntMedia() {
             eventType: "MESSAGE_RECEIVED",
             message: message,
             name: streamName,
-            date: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            date: new Date().toString()
           })
         );
       }
@@ -355,17 +373,19 @@ function AntMedia() {
           isMicMuted: false,
         });
       } else if (eventType === "MESSAGE_RECEIVED") {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        notificationEvent.date = new Date(notificationEvent?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
         // if message arrives.
         // if there is an new message and user has not opened message component then we are going to increase number of unread messages by one.
         // we are gonna also send snackbar.
-        if (!drawerOpen) {
+        if (!messageDrawerOpen) {
           enqueueSnackbar(
             {
               sender: notificationEvent.name,
               message: notificationEvent.message,
               variant: "message",
               onClick: () => {
-                setDrawerOpen(true);
+                handleMessageDrawerOpen(true);
                 setNumberOfUnReadMessages(0);
               },
             },
@@ -704,7 +724,8 @@ function AntMedia() {
             toggleSetCam,
             toggleSetMic,
             myLocalData,
-            handleDrawerOpen,
+            handleMessageDrawerOpen,
+            handleParticipantListOpen,
             screenSharedVideoId,
             audioTracks,
             isPublished,
@@ -746,8 +767,10 @@ function AntMedia() {
                   mic,
                   cam,
                   toggleSetCam,
-                  drawerOpen,
-                  handleDrawerOpen,
+                  messageDrawerOpen,
+                  handleMessageDrawerOpen,
+                  participantListDrawerOpen,
+                  handleParticipantListOpen,
                   handleSetMessages,
                   messages,
                   toggleSetNumberOfUnreadMessages,
@@ -766,7 +789,8 @@ function AntMedia() {
                     allParticipants={allParticipants}
                     myLocalData={myLocalData}
                   />
-                  <MessageDrawer drawerOpen={drawerOpen} messages={messages} />
+                  <MessageDrawer messageDrawerOpen={messageDrawerOpen} messages={messages} />
+                  <ParticipantListDrawer participantListDrawerOpen={participantListDrawerOpen} />
                 </>
               </SettingsContext.Provider>
             )}
