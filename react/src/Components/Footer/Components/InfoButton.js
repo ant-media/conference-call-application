@@ -37,11 +37,12 @@ function InfoButton(props) {
   const meetingLink = window.location.href;
 
   const getResolution = () => {
-    if (antmedia.isPlayMode) {
-      return "";
-    } else {
-      const {width, height} = document.getElementById('localVideo').srcObject.getVideoTracks()[0].getSettings();
-      return width + ' x ' + height;
+      // Sometimes, it takes some time to get the video track. So, we have to try catch it.
+    try {
+        const {width, height} = document.getElementById('localVideo').srcObject.getVideoTracks()[0].getSettings();
+        return width + ' x ' + height;
+    } catch (e) {
+        return "";
     }
   }
 
