@@ -499,8 +499,7 @@ const MeetingRoom = React.memo((props) => {
             )}
             {pinLayout && (
                 <>
-                      //pinned participant
-
+                  {/* pinned participant */}
                       participants.find((v) => v.id === pinnedVideoId) && (
                           <div className="single-video-container pinned keep-ratio">
                             <VideoCard
