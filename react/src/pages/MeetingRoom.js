@@ -93,9 +93,9 @@ const MeetingRoom = React.memo((props) => {
   const antmedia = useContext(AntmediaContext);
 
   const settings = useContext(SettingsContext);
-  const {drawerOpen, pinnedVideoId, pinVideo, audioTracks, globals} =
-      settings;
-  const {participants, allParticipants, myLocalData} = props;
+  const { messageDrawerOpen, participantListDrawerOpen, pinnedVideoId, pinVideo, audioTracks, globals } =
+    settings;
+  const { participants, allParticipants, myLocalData } = props;
 
   const allParticipantsExceptLocal = allParticipants.filter(
       (p) => p.streamId !== myLocalData?.streamId
@@ -120,7 +120,7 @@ const MeetingRoom = React.memo((props) => {
     const gallery = document.getElementById("meeting-gallery");
 
     if (calcDrawer) {
-      if (drawerOpen) {
+      if (messageDrawerOpen || participantListDrawerOpen) {
         gallery.classList.add("drawer-open");
       } else {
         gallery.classList.remove("drawer-open");
@@ -156,7 +156,7 @@ const MeetingRoom = React.memo((props) => {
 
   React.useEffect(() => {
     handleGalleryResize(true);
-  }, [drawerOpen]);
+  }, [messageDrawerOpen, participantListDrawerOpen]);
 
   React.useEffect(() => {
     const debouncedHandleResize = debounce(handleGalleryResize, 500);

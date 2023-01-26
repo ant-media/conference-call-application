@@ -8,6 +8,7 @@ import CameraButton from "./Components/CameraButton";
 import OptionButton from "./Components/OptionButton";
 import ShareScreenButton from "./Components/ShareScreenButton";
 import MessageButton from "./Components/MessageButton";
+import ParticipantListButton from "./Components/ParticipantListButton";
 import EndCallButton from "./Components/EndCallButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
@@ -51,17 +52,20 @@ function Footer(props) {
                 justifyContent="center"
                 columnSpacing={{xs: 1, sm: 2}}
             >
-              <Grid item xs={4}>
-                <OptionButton footer/>
-              </Grid>
-              <Grid item xs={4}>
-                <MessageButton footer/>
-              </Grid>
-              <Grid item xs={4}>
-                <EndCallButton footer/>
-              </Grid>
-            </Grid>
+          <Grid item xs={0}>
+            <OptionButton footer />
           </Grid>
+          <Grid item xs={0}>
+            <MessageButton footer />
+          </Grid>
+          <Grid item xs={0}>
+            <ParticipantListButton footer />
+          </Grid>
+          <Grid item xs={0}>
+            <EndCallButton footer />
+          </Grid>
+        </Grid>
+      </Grid>
 
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <TimeZone/>
@@ -92,23 +96,26 @@ function Footer(props) {
                 justifyContent="center"
                 columnSpacing={{xs: 1, sm: 2}}
             >
-              <Grid item xs={2}>
+              <Grid item xs={0}>
                 <OptionButton footer/>
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={0}>
                 <CameraButton {...props} footer/>
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={0}>
                 <MicButton footer/>
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={0}>
                 {" "}
                 <ShareScreenButton footer/>
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={0}>
                 <MessageButton footer/>
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={0}>
+                  <ParticipantListButton footer />
+              </Grid>
+              <Grid item xs={0}>
                 <EndCallButton footer/>
               </Grid>
             </Grid>

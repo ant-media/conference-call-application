@@ -4,7 +4,6 @@ import { styled } from '@mui/material/styles';
 import {  Grid,  Tabs, Tab } from '@mui/material';
 import MessageInput from './MessageInput';
 import { useTranslation } from 'react-i18next';
-import ParticipantTab from './ParticipantTab';
 import MessagesTab from './MessagesTab';
 import CloseDrawerButton from './DrawerButton';
 import {AntmediaContext} from "../App";
@@ -42,7 +41,7 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const MessageDrawer = React.memo(props => {
-  const { drawerOpen, messages = [] } = props;
+  const { messageDrawerOpen, messages = [] } = props;
   const [value, setValue] = React.useState(0);
   const { allParticipants } = props;
   const antmedia = React.useContext(AntmediaContext);
