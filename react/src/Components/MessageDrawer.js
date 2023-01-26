@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import ParticipantTab from './ParticipantTab';
 import MessagesTab from './MessagesTab';
 import CloseDrawerButton from './DrawerButton';
-import {getUrlParameter} from "../antmedia/fetch.stream";
+import {AntmediaContext} from "../App";
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
   '& .MuiBackdrop-root': {
@@ -45,6 +45,7 @@ const MessageDrawer = React.memo(props => {
   const { drawerOpen, messages = [] } = props;
   const [value, setValue] = React.useState(0);
   const { allParticipants } = props;
+  const antmedia = React.useContext(AntmediaContext);
 
   const { t } = useTranslation();
 
@@ -69,9 +70,7 @@ const MessageDrawer = React.memo(props => {
     };
   }
 
-  const playOnly = getUrlParameter("playOnly");
-
-  if (playOnly !== null && playOnly !== undefined && playOnly === 'true') {
+  if (antmedia.isPlayMode) {
     return (
         <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={drawerOpen} variant="persistent">
           <MessageGrid container direction="column" style={{flexWrap: 'nowrap', height: '100%', overflow: 'hidden'}}>

@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import { ListItemIcon, ListItemText, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
-import {getUrlParameter} from "../../../antmedia/fetch.stream";
+import {AntmediaContext} from "../../../App";
 
 const StyledListItemText = styled(ListItemText)(({ theme }) => ({
   '& .MuiListItemText-primary': {
@@ -26,6 +26,7 @@ function InfoButton(props) {
   const { enqueueSnackbar } = useSnackbar();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+  const antmedia = useContext(AntmediaContext);
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget);
@@ -35,10 +36,8 @@ function InfoButton(props) {
   };
   const meetingLink = window.location.href;
 
-  const playOnly = getUrlParameter("playOnly");
-
   const getResolution = () => {
-    if (playOnly !== null && playOnly !== undefined && playOnly === 'true') {
+    if (antmedia.isPlayMode) {
       return "";
     } else {
       const {width, height} = document.getElementById('localVideo').srcObject.getVideoTracks()[0].getSettings();
@@ -46,7 +45,7 @@ function InfoButton(props) {
     }
   }
 
-  if (playOnly !== null && playOnly !== undefined && playOnly === 'true') {
+  if (antmedia.isPlayMode) {
     return (
         <>
           <Tooltip title={t('Info')} placement="top">

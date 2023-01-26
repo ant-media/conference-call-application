@@ -8,7 +8,7 @@ import { SettingsDialog } from "./SettingsDialog";
 import { LayoutSettingsDialog } from "./LayoutSettingsDialog";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import {getUrlParameter} from "../../../antmedia/fetch.stream";
+import { AntmediaContext } from "App";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -30,6 +30,7 @@ function OptionButton({ footer, ...props }) {
   const open = Boolean(anchorEl);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
+  const antmedia = React.useContext(AntmediaContext);
 
   // if you select camera then we are going to focus on camera button.
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -59,9 +60,7 @@ function OptionButton({ footer, ...props }) {
     setLayoutDialogOpen(false);
   };
 
-  const playOnly = getUrlParameter("playOnly");
-
-  if (playOnly !== null && playOnly !== undefined && playOnly === 'true') {
+  if (antmedia.isPlayMode) {
     return (
         <>
           <SettingsDialog

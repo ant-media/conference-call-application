@@ -11,7 +11,7 @@ import MessageButton from "./Components/MessageButton";
 import EndCallButton from "./Components/EndCallButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
-import {getUrlParameter} from "../../antmedia/fetch.stream";
+import {AntmediaContext} from "../../App";
 
 const CustomizedGrid = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.green[80],
@@ -25,9 +25,9 @@ const CustomizedGrid = styled(Grid)(({ theme }) => ({
 }));
 function Footer(props) {
   const { id } = useParams();
-  const playOnly = getUrlParameter("playOnly");
+  const antmedia = React.useContext(AntmediaContext);
 
-  if (playOnly !== null && playOnly !== undefined && playOnly === 'true') {
+  if (antmedia.isPlayMode) {
     return (
         <CustomizedGrid
             container
