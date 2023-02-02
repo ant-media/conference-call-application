@@ -601,29 +601,32 @@ function AntMedia() {
     }
   }
 
-  // START custom functions
-  antmedia.handlePlayVideo = handlePlayVideo;
-  antmedia.handleRoomEvents = handleRoomEvents;
-  antmedia.handlePublish = handlePublish;
-  antmedia.handleStreamInformation = handleStreamInformation;
-  antmedia.handlePlay = handlePlay;
-  antmedia.handleRoomInfo = handleRoomInfo;
-  antmedia.updateStatus = updateStatus;
-  antmedia.handleSetMyObj = handleSetMyObj;
-  antmedia.handleSendNotificationEvent = handleSendNotificationEvent;
-  antmedia.handleNotificationEvent = handleNotificationEvent;
-  antmedia.handleLeaveFromRoom = handleLeaveFromRoom;
-  antmedia.handleSendMessage = handleSendMessage;
-  antmedia.screenShareOffNotification = screenShareOffNotification;
-  antmedia.screenShareOnNotification = screenShareOnNotification;
-  antmedia.handleStartScreenShare = handleStartScreenShare;
-  antmedia.handleStopScreenShare = handleStopScreenShare;
-  antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
-  antmedia.handleNotifyPinUser = handleNotifyPinUser;
-  antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
-  antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
-  antmedia.handleDebugInfo = handleDebugInfo;
-  // END custom functions
+  function setCustomFunctions() {
+    // START custom functions
+    antmedia.handlePlayVideo = handlePlayVideo;
+    antmedia.handleRoomEvents = handleRoomEvents;
+    antmedia.handlePublish = handlePublish;
+    antmedia.handleStreamInformation = handleStreamInformation;
+    antmedia.handlePlay = handlePlay;
+    antmedia.handleRoomInfo = handleRoomInfo;
+    antmedia.updateStatus = updateStatus;
+    antmedia.handleSetMyObj = handleSetMyObj;
+    antmedia.handleSendNotificationEvent = handleSendNotificationEvent;
+    antmedia.handleNotificationEvent = handleNotificationEvent;
+    antmedia.handleLeaveFromRoom = handleLeaveFromRoom;
+    antmedia.handleSendMessage = handleSendMessage;
+    antmedia.screenShareOffNotification = screenShareOffNotification;
+    antmedia.screenShareOnNotification = screenShareOnNotification;
+    antmedia.handleStartScreenShare = handleStartScreenShare;
+    antmedia.handleStopScreenShare = handleStopScreenShare;
+    antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
+    antmedia.handleNotifyPinUser = handleNotifyPinUser;
+    antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
+    antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
+    antmedia.handleDebugInfo = handleDebugInfo;
+    // END custom functions
+  }
+  setCustomFunctions();
   return (
     <Grid container className="App">
       <Grid

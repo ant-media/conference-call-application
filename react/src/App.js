@@ -60,7 +60,6 @@ if (playOnly == null) {
 
 var roomOfStream = [];
 
-var roomTimerId = -1;
 
 function makeFullScreen(divId) {
   if (fullScreenId == divId) {
@@ -133,9 +132,40 @@ if (!websocketURL) {
     websocketURL = "wss://" + path;
   }
 }
-// let streamsList;
 
-const webRTCAdaptor = new WebRTCAdaptor({
+function checkAndRepublishIfRequired() {
+  if(reconnecting) {
+    console.log("Reconnecting...");
+    return;
+  }
+  var iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
+  console.log("Ice state checked = " + iceState);
+
+  if (iceState == null || iceState == "failed" || iceState == "disconnected") {
+          webRTCAdaptor.leaveFromRoom(room);
+          webRTCAdaptor.mediaManager.localStreamSoundMeter.stop();
+          webRTCAdaptor.closePeerConnection(publishStreamId);
+          webRTCAdaptor.closeWebSocket();
+          
+          //clearInterval(autoRepublishIntervalJob);
+          //clearInterval(statusUpdateIntervalJob);
+          //autoRepublishIntervalJob = null;
+          reconnecting = true;
+          isPlaying = false;
+          webRTCAdaptor.checkWebSocketConnection();
+          console.log("rrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeesssssssssssssssss")
+  }
+}
+
+var autoRepublishIntervalJob = null;
+var roomInfoHandleJob = null;
+
+var statusUpdateIntervalJob = null;
+var webRTCAdaptor = null;
+var room = null;
+var reconnecting = false;
+
+webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
   mediaConstraints: mediaConstraints,
   peerconnection_config: pc_config,
@@ -144,30 +174,37 @@ const webRTCAdaptor = new WebRTCAdaptor({
   debug: true,
   callback: (info, obj) => {
     if (info === "initialized") {
+      if(reconnecting) {
+        webRTCAdaptor.joinRoom(room, publishStreamId);
+      }
     } else if (info === "joinedTheRoom") {
-      var room = obj.ATTR_ROOM_NAME;
+      room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
-
       publishStreamId = obj.streamId;
-
       webRTCAdaptor.handleSetMyObj(obj);
       // streamDetailsList = obj.streamList;
-
       webRTCAdaptor.handlePublish(
         obj.streamId,
         token,
         subscriberId,
         subscriberCode
       );
-
-      roomTimerId = setInterval(() => {
-        webRTCAdaptor.handleRoomInfo(publishStreamId);
-      }, 5000);
+      if(roomInfoHandleJob == null) {
+        roomInfoHandleJob = setInterval(() => {
+          webRTCAdaptor.handleRoomInfo(publishStreamId);
+        }, 5000);
+      }
     } else if (info == "newStreamAvailable") {
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") {
       //stream is being published
       webRTCAdaptor.handleRoomInfo(publishStreamId);
+      if (autoRepublishIntervalJob == null) {
+          autoRepublishIntervalJob = setInterval(() => {
+                checkAndRepublishIfRequired();
+          }, 3000);
+      }
+      reconnecting = false;
     } else if (info === "publish_finished") {
       //stream is being finished
     } else if (info === "screen_share_stopped") {
@@ -175,8 +212,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
     } else if (info === "browser_screen_share_supported") {
     } else if (info === "leavedFromRoom") {
       room = obj.ATTR_ROOM_NAME;
-      if (roomTimerId !== null) {
-        clearInterval(roomTimerId);
+      if (roomInfoHandleJob !== null) {
+        clearInterval(roomInfoHandleJob);
       }
     } else if (info === "closed") {
       if (typeof obj !== "undefined") {
@@ -197,10 +234,9 @@ const webRTCAdaptor = new WebRTCAdaptor({
       }
       //Lastly updates the current streamlist with the fetched one.
     } else if (info == "data_channel_opened") {
-      setInterval(() => {
+      statusUpdateIntervalJob = setInterval(() => {
         webRTCAdaptor.updateStatus(obj);
       }, 2000);
-
       // isDataChannelOpen = true;
     } else if (info == "data_channel_closed") {
       // isDataChannelOpen = false;
@@ -217,16 +253,15 @@ const webRTCAdaptor = new WebRTCAdaptor({
       console.log("iceConnectionState Changed: ",JSON.stringify(obj))
       var iceState = obj.state;
       if (iceState == null || iceState == "failed" || iceState == "disconnected"){
-        alert("!! Connection closed. Please rejoin the meeting");
+        console.log("!! Connection closed. Please rejoin the meeting");
       }	
     }
   },
   callbackError: function (error, message) {
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
-    if (error.indexOf("publishTimeoutError") != -1 && roomTimerId != null) {
-      clearInterval(roomTimerId);
+    if (error.indexOf("publishTimeoutError") != -1 && roomInfoHandleJob != null) {
+      clearInterval(roomInfoHandleJob);
     }
-
     var errorMessage = JSON.stringify(error);
     if (typeof message != "undefined") {
       errorMessage = message;
@@ -274,10 +309,12 @@ const webRTCAdaptor = new WebRTCAdaptor({
     } else if (error.indexOf("WebSocketNotConnected") != -1) {
       errorMessage = "WebSocket Connection is disconnected.";
     }
-
-    alert(errorMessage);
+    if(!reconnecting) {
+      alert(errorMessage);
+    }
   },
 });
+
 
 function getWindowLocation() {
   document.getElementById("locationHref").value = window.location.href;
@@ -297,6 +334,9 @@ function copyWindowLocation() {
 window.getWindowLocation = getWindowLocation;
 window.copyWindowLocation = copyWindowLocation;
 window.makeFullScreen = makeFullScreen;
+
+
+window.webRTCAdaptor = webRTCAdaptor;
 
 export const AntmediaContext = React.createContext(webRTCAdaptor);
 
