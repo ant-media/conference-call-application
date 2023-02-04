@@ -22,13 +22,18 @@ const globals = {
   trackEvents:[],
 };
 
+const JoinModes = {
+  Legacy: "legacy",
+  MCU: "mcu"
+}
+
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
   const videoEffect = new VideoEffect();
 
-  
+
 
   // drawerOpen for message components.
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -48,6 +53,8 @@ function AntMedia() {
 
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState(null);
+
+  const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.Legacy);
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
@@ -125,6 +132,14 @@ function AntMedia() {
     if (myLocalData?.streamId) {
       antmedia.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
       globals.maxVideoTrackCount = maxTrackCount;
+    }
+  }
+
+  function enableDisableMCU(isMCUEnabled) {
+    if (isMCUEnabled) {
+      setRoomJoinMode(JoinModes.MCU);
+    } else {
+      setRoomJoinMode(JoinModes.Legacy);
     }
   }
   function handleStartScreenShare() {
@@ -273,7 +288,7 @@ function AntMedia() {
         message: infoText,
       }),
     };
-      
+
     handleNotificationEvent(obj);
   }
 
@@ -658,6 +673,7 @@ function AntMedia() {
   antmedia.screenShareOffNotification = screenShareOffNotification;
   antmedia.screenShareOnNotification = screenShareOnNotification;
   antmedia.handleStartScreenShare = handleStartScreenShare;
+  antmedia.enableDisableMCU = enableDisableMCU;
   antmedia.handleStopScreenShare = handleStopScreenShare;
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
@@ -687,6 +703,7 @@ function AntMedia() {
             myLocalData,
             handleDrawerOpen,
             screenSharedVideoId,
+            roomJoinMode,
             audioTracks,
             isPublished,
             setSelectedCamera,
@@ -736,6 +753,7 @@ function AntMedia() {
                   pinVideo,
                   pinnedVideoId,
                   screenSharedVideoId,
+                  roomJoinMode,
                   audioTracks,
                   allParticipants,
                   globals,
