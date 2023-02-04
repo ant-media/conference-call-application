@@ -37,10 +37,7 @@ const MessageInput = React.memo(() => {
       settings?.handleSetMessages({
         name: "You",
         message: text,
-        date: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        date: new Date().toString()
       });
       setText("");
     }
