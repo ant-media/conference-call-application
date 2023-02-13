@@ -120,6 +120,7 @@ if (!websocketURL) {
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
+  //websocketURL = "ws://localhost:5080/Conference/websocket";
 
 }
 // let streamsList;
@@ -265,7 +266,7 @@ var speedTestObject = {
 
 let speedTestCounter = 0;
 const webRTCAdaptorSpeedTest = new WebRTCAdaptor({
-  websocket_url: "wss://ovh36.antmedia.io:5443/WebRTCAppEE/websocket",
+  websocket_url: websocketURL,
   mediaConstraints: mediaConstraints,
   peerconnection_config: pc_config,
   sdp_constraints: sdpConstraints,
