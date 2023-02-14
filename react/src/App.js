@@ -278,8 +278,6 @@ const webRTCAdaptorSpeedTest = new WebRTCAdaptor({
     }
     if (info == "initialized") {
       console.log("initialized");
-      webRTCAdaptorSpeedTest.turnOffLocalCamera("streamId");
-      webRTCAdaptorSpeedTest.muteLocalMic();
 
     } else if (info == "publish_started") {
       //stream is being published
