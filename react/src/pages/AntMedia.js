@@ -601,14 +601,18 @@ function AntMedia() {
     }
   }
   function handleBackgroundReplacement(option) {
-    if (!videoEffect.isInitialized) {
-      videoEffect.init(antmedia, myLocalData.streamId, null, null);
+    let streamId = '';
+    if (typeof myLocalData !== 'undefined' && myLocalData !== null) {
+        streamId = myLocalData.streamId;
     }
-    videoEffect.streamId = myLocalData.streamId;
+    if (!videoEffect.isInitialized) {
+      videoEffect.init(antmedia, streamId, null, null);
+    }
+    videoEffect.streamId = streamId;
 
     if(option === "none") {
       videoEffect.removeEffect();
-      antmedia.closeCustomVideoSource(myLocalData.streamId);
+      antmedia.closeCustomVideoSource(streamId);
       setIsVideoEffectRunning(false);
     }
     else if(option === "blur") {
