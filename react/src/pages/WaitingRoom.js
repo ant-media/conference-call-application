@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next";
 import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
-import {MediaSettingsContext, SettingsContext} from "./AntMedia";
+import {MediaSettingsContext} from "./AntMedia";
 
 
 
