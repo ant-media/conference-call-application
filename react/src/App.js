@@ -119,7 +119,6 @@ if (!websocketURL) {
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
-  websocketURL = "ws://localhost:5080/Conference/websocket";
 }
 // let streamsList;
 
