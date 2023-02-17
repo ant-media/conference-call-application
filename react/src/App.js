@@ -80,19 +80,6 @@ function makeFullScreen(divId) {
   }
 }
 
-var pc_config = {
-  iceServers: [
-    {
-      urls: "stun:stun1.l.google.com:19302",
-    },
-  ],
-};
-
-var sdpConstraints = {
-  OfferToReceiveAudio: false,
-  OfferToReceiveVideo: false,
-};
-
 
 var videoQualityConstraints = {
   video: {
@@ -132,14 +119,13 @@ if (!websocketURL) {
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
+  websocketURL = "ws://localhost:5080/Conference/websocket";
 }
 // let streamsList;
 
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
   mediaConstraints: mediaConstraints,
-  peerconnection_config: pc_config,
-  sdp_constraints: sdpConstraints,
   isPlayMode: playOnly,
   debug: true,
   callback: (info, obj) => {
@@ -218,7 +204,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       var iceState = obj.state;
       if (iceState == null || iceState == "failed" || iceState == "disconnected"){
         alert("!! Connection closed. Please rejoin the meeting");
-      }	
+      }
     }
   },
   callbackError: function (error, message) {
