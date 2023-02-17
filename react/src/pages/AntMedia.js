@@ -618,11 +618,7 @@ function AntMedia() {
   }
 
   function handleBackgroundReplacement(option) {
-    let streamId = '';
     let effectName;
-    if (typeof myLocalData !== 'undefined' && myLocalData !== null) {
-        streamId = myLocalData.streamId;
-    }
 
     if(option === "none") {
       effectName = VideoEffect.NO_EFFECT;
