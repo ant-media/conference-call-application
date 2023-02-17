@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next";
 import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
-import {SettingsContext} from "./AntMedia";
+import {MediaSettingsContext, SettingsContext} from "./AntMedia";
 
 
 
@@ -31,8 +31,8 @@ function WaitingRoom(props) {
 
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
-  const settings = useContext(SettingsContext);
-  const { roomJoinMode } = settings;
+  const mediaSettings = useContext(MediaSettingsContext);
+  const { roomJoinMode } = mediaSettings;
   const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {

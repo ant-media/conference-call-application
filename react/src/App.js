@@ -149,6 +149,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
   debug: true,
   callback: (info, obj) => {
     if (info === "initialized") {
+      webRTCAdaptor.enableDisableMCU(mcuEnabled);
     } else if (info === "joinedTheRoom") {
       var room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
