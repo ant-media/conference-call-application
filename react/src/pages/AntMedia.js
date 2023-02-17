@@ -24,7 +24,7 @@ const globals = {
 };
 
 const JoinModes = {
-  Legacy: "legacy",
+  MULTITRACK: "multitrack",
   MCU: "mcu"
 }
 
@@ -57,7 +57,7 @@ function AntMedia() {
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState(null);
 
-  const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.Legacy);
+  const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
@@ -142,7 +142,7 @@ function AntMedia() {
     if (isMCUEnabled) {
       setRoomJoinMode(JoinModes.MCU);
     } else {
-      setRoomJoinMode(JoinModes.Legacy);
+      setRoomJoinMode(JoinModes.MULTITRACK);
     }
   }
   function handleStartScreenShare() {
