@@ -85,19 +85,6 @@ function makeFullScreen(divId) {
   }
 }
 
-var pc_config = {
-  iceServers: [
-    {
-      urls: "stun:stun1.l.google.com:19302",
-    },
-  ],
-};
-
-var sdpConstraints = {
-  OfferToReceiveAudio: false,
-  OfferToReceiveVideo: false,
-};
-
 
 var videoQualityConstraints = {
   video: {
@@ -143,8 +130,6 @@ if (!websocketURL) {
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
   mediaConstraints: mediaConstraints,
-  peerconnection_config: pc_config,
-  sdp_constraints: sdpConstraints,
   isPlayMode: playOnly,
   debug: true,
   callback: (info, obj) => {
