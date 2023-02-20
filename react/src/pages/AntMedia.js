@@ -23,6 +23,11 @@ const globals = {
   trackEvents:[],
 };
 
+const JoinModes = {
+  MULTITRACK: "multitrack",
+  MCU: "mcu"
+}
+
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
@@ -51,6 +56,8 @@ function AntMedia() {
 
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState(null);
+
+  const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
@@ -128,6 +135,14 @@ function AntMedia() {
     if (myLocalData?.streamId) {
       antmedia.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
       globals.maxVideoTrackCount = maxTrackCount;
+    }
+  }
+
+  function enableDisableMCU(isMCUEnabled) {
+    if (isMCUEnabled) {
+      setRoomJoinMode(JoinModes.MCU);
+    } else {
+      setRoomJoinMode(JoinModes.MULTITRACK);
     }
   }
   function handleStartScreenShare() {
@@ -682,6 +697,7 @@ function AntMedia() {
   antmedia.screenShareOffNotification = screenShareOffNotification;
   antmedia.screenShareOnNotification = screenShareOnNotification;
   antmedia.handleStartScreenShare = handleStartScreenShare;
+  antmedia.enableDisableMCU = enableDisableMCU;
   antmedia.handleStopScreenShare = handleStopScreenShare;
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
@@ -712,6 +728,7 @@ function AntMedia() {
             handleMessageDrawerOpen,
             handleParticipantListOpen,
             screenSharedVideoId,
+            roomJoinMode,
             audioTracks,
             isPublished,
             setSelectedCamera,
@@ -763,6 +780,7 @@ function AntMedia() {
                   pinVideo,
                   pinnedVideoId,
                   screenSharedVideoId,
+                  roomJoinMode,
                   audioTracks,
                   allParticipants,
                   globals,

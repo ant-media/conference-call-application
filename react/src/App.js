@@ -47,12 +47,17 @@ if (i18n.language !== "en" || i18n.language !== "tr") {
 }
 
 var token = getUrlParameter("token");
+var mcuEnabled = getUrlParameter("mcuEnabled");
 var publishStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var isPlaying = false;
 var fullScreenId = -1;
+
+if (mcuEnabled == null) {
+    mcuEnabled = false;
+}
 
 if (playOnly == null) {
   playOnly = false;
@@ -144,6 +149,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
   debug: true,
   callback: (info, obj) => {
     if (info === "initialized") {
+      webRTCAdaptor.enableDisableMCU(mcuEnabled);
     } else if (info === "joinedTheRoom") {
       var room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
@@ -218,7 +224,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       var iceState = obj.state;
       if (iceState == null || iceState == "failed" || iceState == "disconnected"){
         alert("!! Connection closed. Please rejoin the meeting");
-      }	
+      }
     }
   },
   callbackError: function (error, message) {
