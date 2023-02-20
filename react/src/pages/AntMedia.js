@@ -494,6 +494,19 @@ function AntMedia() {
             .map((p) => p.trackId);
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
+      } else if (eventType === "REQUEST") {
+        let command = notificationEvent.command;
+        switch (command) {
+          case "closeCamera":
+            antmedia.turnOffLocalCamera(notificationEvent.streamId);
+            break;
+          case "muteMicrophone":
+            antmedia.muteLocalMic();
+            break;
+          case "removeFromMeeting":
+            handleLeaveFromRoom();
+            break;
+        }
       }
     }
   }
