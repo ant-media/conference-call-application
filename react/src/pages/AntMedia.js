@@ -269,6 +269,23 @@ function AntMedia() {
     }
   }
 
+  function handleSendModerateMessage(data) {
+    if (myLocalData.streamId) {
+      let iceState = antmedia.iceConnectionState(myLocalData.streamId);
+      if (
+          iceState !== null &&
+          iceState !== "failed" &&
+          iceState !== "disconnected"
+      ) {
+
+        antmedia.sendData(
+            myLocalData.streamId,
+            data
+        );
+      }
+    }
+  }
+
   function handleDebugInfo(debugInfo) {
     var infoText = "Client Debug Info\n";
     infoText += "Events:\n";
@@ -679,6 +696,7 @@ function AntMedia() {
   antmedia.handleNotificationEvent = handleNotificationEvent;
   antmedia.handleLeaveFromRoom = handleLeaveFromRoom;
   antmedia.handleSendMessage = handleSendMessage;
+  antmedia.handleSendModerateMessage = handleSendModerateMessage;
   antmedia.screenShareOffNotification = screenShareOffNotification;
   antmedia.screenShareOnNotification = screenShareOnNotification;
   antmedia.handleStartScreenShare = handleStartScreenShare;

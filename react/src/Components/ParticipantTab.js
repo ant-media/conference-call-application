@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { SettingsContext, MediaSettingsContext } from "pages/AntMedia";
+import ParticipantOptionsButton from "./ParticipantOptionsButton";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: "#ffffff",
@@ -38,21 +39,7 @@ function ParticipantTab(props) {
           <ParticipantName variant="body1">{name}</ParticipantName>
         </Grid>
         <Grid item>
-          {pinnedVideoId === videoId ? (
-            <PinBtn
-              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => pinVideo(videoId)}
-            >
-              <SvgIcon size={28} name="unpin" color="#fff" />
-            </PinBtn>
-          ) : (
-            <PinBtn
-              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => pinVideo(videoId)}
-            >
-              <SvgIcon size={28} name="pin" color="#fff" />
-            </PinBtn>
-          )}
+          <ParticipantOptionsButton videoId={videoId}/>
         </Grid>
       </Grid>
     );
