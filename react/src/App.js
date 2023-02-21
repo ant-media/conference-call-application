@@ -147,13 +147,9 @@ function checkAndRepublishIfRequired() {
           webRTCAdaptor.closePeerConnection(publishStreamId);
           webRTCAdaptor.closeWebSocket();
           
-          //clearInterval(autoRepublishIntervalJob);
-          //clearInterval(statusUpdateIntervalJob);
-          //autoRepublishIntervalJob = null;
           reconnecting = true;
           isPlaying = false;
           webRTCAdaptor.checkWebSocketConnection();
-          console.log("rrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeesssssssssssssssss")
   }
 }
 
