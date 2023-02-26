@@ -506,6 +506,8 @@ function AntMedia() {
           case "removeFromMeeting":
             handleLeaveFromRoom();
             break;
+          default:
+            break;
         }
       }
     }
