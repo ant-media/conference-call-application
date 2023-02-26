@@ -213,7 +213,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       webRTCAdaptor.devices = obj;
     } else if (info === "updated_stats") {
       let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
-      let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+      //let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
       let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
       let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
       let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
