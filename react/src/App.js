@@ -135,7 +135,7 @@ if (!websocketURL) {
 
 }
 
-let packageLostPreviewState = 0;
+//let packageLostPreviewState = 0;
 
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
