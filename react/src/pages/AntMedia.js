@@ -700,6 +700,19 @@ function AntMedia() {
     }
   }
 
+  function getSelectedDevices() {
+    let devices = {
+      videoDeviceId: selectedCamera,
+      audioDeviceId: selectedMicrophone
+    }
+    return devices;
+  }
+
+  function setSelectedDevices(devices) {
+    setSelectedCamera(devices.videoDeviceId);
+    setSelectedMicrophone(devices.audioDeviceId);
+  }
+
   // START custom functions
   antmedia.handlePlayVideo = handlePlayVideo;
   antmedia.handleRoomEvents = handleRoomEvents;
@@ -726,6 +739,8 @@ function AntMedia() {
   antmedia.handleBackgroundReplacement = handleBackgroundReplacement;
   antmedia.checkAndTurnOnLocalCamera = checkAndTurnOnLocalCamera;
   antmedia.checkAndTurnOffLocalCamera = checkAndTurnOffLocalCamera;
+  antmedia.getSelectedDevices = getSelectedDevices;
+  antmedia.setSelectedDevices = setSelectedDevices;
   // END custom functions
   return (
     <Grid container className="App">
