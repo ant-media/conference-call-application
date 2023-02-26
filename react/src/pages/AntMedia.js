@@ -709,8 +709,12 @@ function AntMedia() {
   }
 
   function setSelectedDevices(devices) {
-    setSelectedCamera(devices.videoDeviceId);
-    setSelectedMicrophone(devices.audioDeviceId);
+    if (devices.videoDeviceId !== null && devices.videoDeviceId !== undefined) {
+      setSelectedCamera(devices.videoDeviceId);
+    }
+    if (devices.audioDeviceId !== null && devices.audioDeviceId !== undefined) {
+      setSelectedMicrophone(devices.audioDeviceId);
+    }
   }
 
   // START custom functions
