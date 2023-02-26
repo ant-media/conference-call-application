@@ -14,17 +14,11 @@ const ParticipantName = styled(Typography)(({ theme }) => ({
   fontSize: 14,
 }));
 
-const PinBtn = styled(Button)(({ theme }) => ({
-  "&:hover": {
-    backgroundColor: theme.palette.green[50],
-  },
-}));
-
 function ParticipantTab(props) {
   const mediaSettings = React.useContext(MediaSettingsContext);
   const settings = React.useContext(SettingsContext);
 
-  const { pinnedVideoId, pinVideo, allParticipants } = settings;
+  const { allParticipants } = settings;
   const getParticipantItem = (videoId, name) => {
     return (
       <Grid
