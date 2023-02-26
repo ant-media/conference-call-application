@@ -36,16 +36,16 @@ function MessageButton({ footer, ...props }) {
       <Tooltip title={t('Chat with everyone')} placement="top">
         <CustomizedBtn
           onClick={() => {
-            if (!settings?.drawerOpen) {
+            if (!settings?.messageDrawerOpen) {
               settings?.toggleSetNumberOfUnreadMessages(0);
             }
-            settings?.handleDrawerOpen(!settings?.drawerOpen);
+            settings?.handleMessageDrawerOpen(!settings?.messageDrawerOpen);
           }}
           variant="contained"
           className={footer ? 'footer-icon-button' : ''}
-          color={settings?.drawerOpen ? 'primary' : 'secondary'}
+          color={settings?.messageDrawerOpen ? 'primary' : 'secondary'}
         >
-          <SvgIcon size={40} color={settings?.drawerOpen ? 'black' : 'white'} name={'message-off'} />
+          <SvgIcon size={40} color={settings?.messageDrawerOpen ? 'black' : 'white'} name={'message-off'} />
         </CustomizedBtn>
       </Tooltip>
     </Badge>

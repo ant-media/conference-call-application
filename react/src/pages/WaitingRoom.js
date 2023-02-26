@@ -36,6 +36,8 @@ function WaitingRoom(props) {
   const antmedia = useContext(AntmediaContext);
   const antmediaSpeedTest = useContext(AntmediaSpeedTestContext);
   const speedTestObject = useContext(SpeedTestObjectContext);
+  const mediaSettings = useContext(MediaSettingsContext);
+  const { roomJoinMode } = mediaSettings;
   const { enqueueSnackbar } = useSnackbar();
   const { speedTestBeforeLogin, speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal, setLeftTheRoom } = React.useContext(MediaSettingsContext);
 
@@ -64,33 +66,47 @@ function WaitingRoom(props) {
 
     return () => clearInterval(timer)
   }, )
+  function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
 
   function joinRoom(e) {
-    if (antmedia.mediaManager.localStream === null) {
+    if (antmedia.mediaManager.localStream === null && antmedia.isPlayMode === false) {
       e.preventDefault();
       enqueueSnackbar(
-        {
-          message: t(
-            "You need to allow microphone and camera permissions before joining"
-          ),
-          variant: "info",
-          icon: <SvgIcon size={24} name={"muted-microphone"} color="#fff" />,
-        },
-        {
-          autoHideDuration: 1500,
-        }
+          {
+            message: t(
+                "You need to allow microphone and camera permissions before joining"
+            ),
+            variant: "info",
+            icon: <SvgIcon size={24} name={"muted-microphone"} color="#fff" />,
+          },
+          {
+            autoHideDuration: 1500,
+          }
       );
+      return;
     } else if (speedTestBeforeLogin) {
-      antmediaSpeedTest.publish("streamId", "");
+      antmediaSpeedTest.publish(roomName + "SpeedTest", "");
       e.preventDefault();
       setSpeedTestBeforeLoginModal(true);
     } else {
-      antmedia.joinRoom(roomName, undefined);
+      var generatedStreamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
+
+      console.log("generatedStreamId:"+generatedStreamId);
+
+      antmedia.joinRoom(roomName, generatedStreamId, roomJoinMode);
       props.handleChangeRoomStatus("meeting");
     }
   }
   const handleDialogOpen = (focus) => {
-    if (antmedia.mediaManager.localStream === null) {
+    if (false && antmedia.mediaManager.localStream === null) {
       enqueueSnackbar(
         {
           message: t(
@@ -118,6 +134,7 @@ function WaitingRoom(props) {
         open={dialogOpen}
         onClose={handleDialogClose}
         selectFocus={selectFocus}
+        handleBackgroundReplacement={props.handleBackgroundReplacement}
       />
       <Grid
         container
@@ -132,6 +149,7 @@ function WaitingRoom(props) {
             sx={{ position: "relative" }}
           >
             <VideoCard id="localVideo" autoPlay muted hidePin={true} />
+
             <Grid
               container
               columnSpacing={2}
@@ -203,7 +221,7 @@ function WaitingRoom(props) {
               speedTestObject.isfinished = false;
             }}>Close</Button>
             <Button sx={buttonVisibility} onClick={()=>{
-              antmedia.joinRoom(roomName, undefined);
+              antmedia.joinRoom(roomName, undefined, roomJoinMode);
               props.handleChangeRoomStatus("meeting");
               speedTestObject.message = "Please wait while we are testing your connection speed";
               speedTestObject.isfinished = false;

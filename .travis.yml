@@ -9,6 +9,10 @@ before_install:
 - export GPG_TTY=$(tty)
 - gpg2 --batch --fast-import codesigning.asc
 - nvm install --lts
+- git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git;
+- cd ant-media-server-parent;
+- mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
+- cd ..;
 cache:
   directories:
   - react/node_modules

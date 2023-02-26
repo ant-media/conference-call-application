@@ -4,7 +4,6 @@ import { styled } from '@mui/material/styles';
 import {  Grid,  Tabs, Tab } from '@mui/material';
 import MessageInput from './MessageInput';
 import { useTranslation } from 'react-i18next';
-import ParticipantTab from './ParticipantTab';
 import MessagesTab from './MessagesTab';
 import CloseDrawerButton from './DrawerButton';
 
@@ -41,9 +40,8 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const MessageDrawer = React.memo(props => {
-  const { drawerOpen, messages = [] } = props;
+  const { messageDrawerOpen, messages = [] } = props;
   const [value, setValue] = React.useState(0);
-  const { allParticipants } = props;
 
   const { t } = useTranslation();
 
@@ -69,7 +67,7 @@ const MessageDrawer = React.memo(props => {
   }
 
   return (
-    <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={drawerOpen} variant="persistent">
+    <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={messageDrawerOpen} variant="persistent">
       <MessageGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
         <Grid item container justifyContent="space-between" alignItems="center">
           <Tabs
@@ -80,10 +78,9 @@ const MessageDrawer = React.memo(props => {
             }}
             value={value}
             onChange={handleChange}
-            aria-label="messages and participant tabs"
+            aria-label="messages tab"
           >
             <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Messages')} {...a11yProps(0)} />
-            <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Participants')} {...a11yProps(1)} />
           </Tabs>
           <CloseDrawerButton />
         </Grid>
@@ -91,11 +88,6 @@ const MessageDrawer = React.memo(props => {
           <TabPanel value={value} index={0}>
             <TabGrid container sx={{ pb: 0 }} direction={'column'}>
               <MessagesTab messages={messages}/>
-            </TabGrid>
-          </TabPanel>
-          <TabPanel value={value} index={1}>
-            <TabGrid container>
-              <ParticipantTab allParticipants={allParticipants} />
             </TabGrid>
           </TabPanel>
         </Grid>

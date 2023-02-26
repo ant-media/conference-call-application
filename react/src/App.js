@@ -47,12 +47,17 @@ if (i18n.language !== "en" || i18n.language !== "tr") {
 }
 
 var token = getUrlParameter("token");
+var mcuEnabled = getUrlParameter("mcuEnabled");
 var publishStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var isPlaying = false;
 var fullScreenId = -1;
+
+if (mcuEnabled == null) {
+    mcuEnabled = false;
+}
 
 if (playOnly == null) {
   playOnly = false;
@@ -80,26 +85,25 @@ function makeFullScreen(divId) {
   }
 }
 
-var pc_config = {
-  iceServers: [
-    {
-      urls: "stun:stun1.l.google.com:19302",
-    },
-  ],
-};
 
-var sdpConstraints = {
-  OfferToReceiveAudio: false,
-  OfferToReceiveVideo: false,
-};
-
-var mediaConstraints = {
-  // setting constraints here breaks source switching on firefox.
+var videoQualityConstraints = {
   video: {
     width: { max: 320 },
     height: { max: 240 },
-  },
-  audio: true,
+  }
+}
+
+var audioQualityConstraints = {
+  audio:{
+    noiseSuppression: true,
+    echoCancellation: true
+  }
+}
+
+var mediaConstraints = {
+  // setting constraints here breaks source switching on firefox.
+  video: videoQualityConstraints.video,
+  audio: audioQualityConstraints.audio,
 };
 
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
@@ -128,12 +132,11 @@ if (!websocketURL) {
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
   mediaConstraints: mediaConstraints,
-  peerconnection_config: pc_config,
-  sdp_constraints: sdpConstraints,
   isPlayMode: playOnly,
   debug: true,
   callback: (info, obj) => {
     if (info === "initialized") {
+      webRTCAdaptor.enableDisableMCU(mcuEnabled);
     } else if (info === "joinedTheRoom") {
       var room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
@@ -200,6 +203,15 @@ const webRTCAdaptor = new WebRTCAdaptor({
       } catch (e) {}
     } else if (info == "available_devices") {
       webRTCAdaptor.devices = obj;
+    } else if (info == "debugInfo") {
+      webRTCAdaptor.handleDebugInfo(obj.debugInfo);
+    }
+    else if (info == "ice_connection_state_changed") {
+      console.log("iceConnectionState Changed: ",JSON.stringify(obj))
+      var iceState = obj.state;
+      if (iceState == null || iceState == "failed" || iceState == "disconnected"){
+        alert("!! Connection closed. Please rejoin the meeting");
+      }
     }
   },
   callbackError: function (error, message) {
@@ -239,6 +251,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       webRTCAdaptor.handleScreenshareNotFromPlatform();
     } else if (error.indexOf("TypeError") != -1) {
       errorMessage = "Video/Audio is required.";
+      webRTCAdaptor.mediaManager.getDevices();
     } else if (error.indexOf("UnsecureContext") != -1) {
       errorMessage =
         "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";

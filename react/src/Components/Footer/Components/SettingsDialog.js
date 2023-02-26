@@ -40,7 +40,7 @@ const AntDialogTitle = props => {
 export function SettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
-  const { myLocalData, setSelectedCamera, selectedCamera, setSelectedMicrophone, selectedMicrophone, speedTestBeforeLogin, setSpeedTestBeforeLogin } = React.useContext(MediaSettingsContext);
+  const { myLocalData, setSelectedCamera, selectedCamera, setSelectedMicrophone, selectedMicrophone, setSelectedBackgroundMode, selectedBackgroundMode, speedTestBeforeLogin, setSpeedTestBeforeLogin } = React.useContext(MediaSettingsContext);
 
   const antmedia = React.useContext(AntmediaContext);
   const { devices } = antmedia;
@@ -60,12 +60,19 @@ export function SettingsDialog(props) {
     setSelectedMicrophone(value);
     antmedia.switchAudioInputSource(myLocalData?.streamId, value);
   }
+
+  function setBackground(value) {
+    setSelectedBackgroundMode(value);
+    antmedia.handleBackgroundReplacement(value);
+  }
+
   React.useEffect(() => {
     if (devices) {
       const camera = devices.find(d => d.kind === 'videoinput');
       const audio = devices.find(d => d.kind === 'audioinput');
       if (camera && selectedCamera === '') setSelectedCamera(camera.deviceId);
       if (audio && selectedMicrophone === '') setSelectedMicrophone(audio.deviceId);
+      if (selectedBackgroundMode === '') setSelectedBackgroundMode('none');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devices]);
@@ -130,16 +137,38 @@ export function SettingsDialog(props) {
             </Grid>
           </Grid>
           <Grid container sx={{ mt: 4 }}>
-            <Grid item xs={10}>
-              <Checkbox
-                  checked={speedTestBeforeLogin}
-                  onChange={e => {setSpeedTestBeforeLogin(e.target.checked)}}
-                  inputProps={{ 'aria-label': 'controlled' }}
-              />
-              Speed Test Before Join
+            <Grid container>
+              <InputLabel>{t('Background')}</InputLabel>
+            </Grid>
+            <Grid container alignItems={'center'} spacing={2}>
+              <Grid item xs={10}>
+                <Select variant="outlined" fullWidth value={selectedBackgroundMode} onChange={e => setBackground(e.target.value)} sx={{ color: 'white' }}>
+                  <MenuItem key="none" value="none">
+                    None
+                  </MenuItem>
+                  <MenuItem key="blur" value="blur">
+                    Blur
+                  </MenuItem>
+                  <MenuItem key="background" value="background">
+                    Virtual Background
+                  </MenuItem>
+                </Select>
+              </Grid>
+              <Hidden xsDown>
+                <Grid item>
+                  <SvgIcon size={36} name={'background-replacement'} color={'white'} />
+                </Grid>
+              </Hidden>
+            </Grid>
+          <Grid item xs={10}>
+            <Checkbox
+                checked={speedTestBeforeLogin}
+                onChange={e => {setSpeedTestBeforeLogin(e.target.checked)}}
+                inputProps={{ 'aria-label': 'controlled' }}
+            />
+            Speed Test Before Join
           </Grid>
           </Grid>
-
         </Box>
       </DialogContent>
     </Dialog>
