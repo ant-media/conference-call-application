@@ -2,7 +2,6 @@ import React from "react";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { SettingsContext, MediaSettingsContext } from "pages/AntMedia";
