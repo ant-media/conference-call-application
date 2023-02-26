@@ -222,7 +222,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
         webRTCAdaptor.displayPoorNetworkConnectionWarning();
       }
 
-      packageLostPreviewState = packageLost;
+      // packageLostPreviewState = packageLost;
 
     } else if (info == "debugInfo") {
       webRTCAdaptor.handleDebugInfo(obj.debugInfo);
