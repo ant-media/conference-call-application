@@ -133,7 +133,10 @@ export function SpeedTestDialog(props) {
             <Grid item xs={10}>
               <Checkbox
                   checked={speedTestBeforeLogin}
-                  onChange={e => {setSpeedTestBeforeLogin(e.target.checked)}}
+                  onChange={e => {
+                    setSpeedTestBeforeLogin(e.target.checked)
+                    localStorage.setItem('conference-speed-test-before-login', e.target.checked)
+                  }}
                   inputProps={{ 'aria-label': 'controlled' }}
               />
               Speed Test Before Join

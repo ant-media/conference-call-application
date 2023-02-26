@@ -69,7 +69,6 @@ function AntMedia() {
   const [talkers, setTalkers] = useState([]);
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState("");
-  const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(true);
   const [speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal] = useState(false);
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
   const [selectedBackgroundMode, setSelectedBackgroundMode] = React.useState("");
@@ -80,6 +79,9 @@ function AntMedia() {
 
   const [messages, setMessages] = useState([]);
 
+  let speedTestBeforeLoginValue = localStorage.getItem('conference-speed-test-before-login');
+  speedTestBeforeLoginValue = speedTestBeforeLoginValue === "true";
+  const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(speedTestBeforeLoginValue);
 
 
   const [cam, setCam] = useState([

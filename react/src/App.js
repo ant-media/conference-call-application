@@ -281,8 +281,6 @@ let speedTestCounter = 0;
 const webRTCAdaptorSpeedTest = new WebRTCAdaptor({
   websocket_url: websocketURL,
   mediaConstraints: mediaConstraints,
-  peerconnection_config: pc_config,
-  sdp_constraints: sdpConstraints,
   isPlayMode: playOnly,
   debug: true,
   callback : (info, obj) => {
