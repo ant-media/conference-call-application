@@ -65,7 +65,7 @@ function WaitingRoom(props) {
     }
 
     return () => clearInterval(timer)
-  }, )
+  }, timer)
   function makeid(length) {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -96,6 +96,8 @@ function WaitingRoom(props) {
       antmediaSpeedTest.publish(roomName + "SpeedTest", "");
       e.preventDefault();
       setSpeedTestBeforeLoginModal(true);
+      timer = setInterval(() => {
+      }, 1)
     } else {
       var generatedStreamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
 
