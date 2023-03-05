@@ -201,6 +201,7 @@ webRTCAdaptor = new WebRTCAdaptor({
       room = obj.ATTR_ROOM_NAME;
       if (roomInfoHandleJob !== null) {
         clearInterval(roomInfoHandleJob);
+        clearInterval(statusUpdateIntervalJob);
       }
     } else if (info === "closed") {
       if (typeof obj !== "undefined") {
