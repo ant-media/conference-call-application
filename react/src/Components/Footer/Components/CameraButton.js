@@ -49,14 +49,14 @@ function MicButton(props) {
         isCameraOn: false,
       });
       if (props?.myLocalData?.streamId) {
-        antmedia.turnOffLocalCamera(props.myLocalData.streamId);
+        antmedia.checkAndTurnOffLocalCamera(props.myLocalData.streamId);
         antmedia.handleSendNotificationEvent(
           "CAM_TURNED_OFF",
           props.myLocalData.streamId
         );
       } else {
         // if local
-        antmedia.turnOffLocalCamera("localVideo");
+        antmedia.checkAndTurnOffLocalCamera("localVideo");
       }
     }
   };
@@ -68,14 +68,14 @@ function MicButton(props) {
     });
 
     if (props?.myLocalData?.streamId) {
-      antmedia.turnOnLocalCamera(props.myLocalData.streamId);
+      antmedia.checkAndTurnOnLocalCamera(props.myLocalData.streamId);
       antmedia.handleSendNotificationEvent(
         "CAM_TURNED_ON",
         props.myLocalData.streamId
       );
     } else {
       // if local
-      antmedia.turnOnLocalCamera("localVideo");
+      antmedia.checkAndTurnOnLocalCamera("localVideo");
     }
   };
   const roundStyle = {

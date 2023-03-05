@@ -40,7 +40,7 @@ const AntDialogTitle = props => {
 export function SettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
-  const { myLocalData, setSelectedCamera, selectedCamera, setSelectedMicrophone, selectedMicrophone } = React.useContext(MediaSettingsContext);
+  const { myLocalData, setSelectedCamera, selectedCamera, setSelectedMicrophone, selectedMicrophone, setSelectedBackgroundMode, selectedBackgroundMode } = React.useContext(MediaSettingsContext);
 
   const antmedia = React.useContext(AntmediaContext);
   const { devices } = antmedia;
@@ -62,7 +62,8 @@ export function SettingsDialog(props) {
   }
 
   function setBackground(value) {
-    props.handleBackgroundReplacement(value);
+    setSelectedBackgroundMode(value);
+    antmedia.handleBackgroundReplacement(value);
   }
 
   React.useEffect(() => {
@@ -71,6 +72,7 @@ export function SettingsDialog(props) {
       const audio = devices.find(d => d.kind === 'audioinput');
       if (camera && selectedCamera === '') setSelectedCamera(camera.deviceId);
       if (audio && selectedMicrophone === '') setSelectedMicrophone(audio.deviceId);
+      if (selectedBackgroundMode === '') setSelectedBackgroundMode('none');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devices]);
@@ -140,7 +142,7 @@ export function SettingsDialog(props) {
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
-                <Select variant="outlined" fullWidth  onChange={e => setBackground(e.target.value)} sx={{ color: 'white' }}>
+                <Select variant="outlined" fullWidth value={selectedBackgroundMode} onChange={e => setBackground(e.target.value)} sx={{ color: 'white' }}>
                   <MenuItem key="none" value="none">
                     None
                   </MenuItem>
@@ -154,7 +156,7 @@ export function SettingsDialog(props) {
               </Grid>
               <Hidden xsDown>
                 <Grid item>
-                  <SvgIcon size={36} name={'microphone'} color={'white'} />
+                  <SvgIcon size={36} name={'background-replacement'} color={'white'} />
                 </Grid>
               </Hidden>
             </Grid>

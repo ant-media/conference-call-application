@@ -10,6 +10,8 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
+import {VideoEffect} from "../antmedia/video-effect";
+import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
@@ -21,15 +23,22 @@ const globals = {
   trackEvents:[],
 };
 
+const JoinModes = {
+  MULTITRACK: "multitrack",
+  MCU: "mcu"
+}
+
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
 
-  
-
   // drawerOpen for message components.
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
+
+  // drawerOpen for participant list components.
+  const [participantListDrawerOpen, setParticipantListDrawerOpen] = useState(false);
+
 
   // whenever i join the room, i will get my unique id and stream settings from webRTC.
   // So that whenever i did something i will inform other participants that this action belongs to me by sending my streamId.
@@ -47,6 +56,8 @@ function AntMedia() {
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState(null);
 
+  const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
+
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
@@ -59,6 +70,9 @@ function AntMedia() {
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState("");
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
+  const [selectedBackgroundMode, setSelectedBackgroundMode] = React.useState("");
+  const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
+  const [virtualBackground, setVirtualBackground] = React.useState(null);
   const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -121,6 +135,14 @@ function AntMedia() {
     if (myLocalData?.streamId) {
       antmedia.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
       globals.maxVideoTrackCount = maxTrackCount;
+    }
+  }
+
+  function enableDisableMCU(isMCUEnabled) {
+    if (isMCUEnabled) {
+      setRoomJoinMode(JoinModes.MCU);
+    } else {
+      setRoomJoinMode(JoinModes.MULTITRACK);
     }
   }
   function handleStartScreenShare() {
@@ -194,15 +216,23 @@ function AntMedia() {
       let lastMessage = oldMessages[oldMessages.length - 1]; //this must remain mutable
       const isSameUser = lastMessage?.name === newMessage?.name;
       const sentInSameTime = lastMessage?.date === newMessage?.date;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      newMessage.date = new Date(newMessage?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
 
       if (isSameUser && sentInSameTime) {
         //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
         lastMessage.message = lastMessage.message + "\n" + newMessage.message;
-        return [...oldMessages]; // dont make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
+        return [...oldMessages]; // don't make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
       } else {
         return [...oldMessages, newMessage];
       }
     });
+  }
+
+  function getLang() {
+    if (navigator.languages !== undefined)
+      return navigator.languages[0];
+    return navigator.language;
   }
 
   useEffect(() => {
@@ -213,9 +243,19 @@ function AntMedia() {
     let objDiv = document.getElementById("paper-props");
     if (objDiv) objDiv.scrollTop = objDiv?.scrollHeight;
   }
-  function handleDrawerOpen(open) {
+  function handleMessageDrawerOpen(open) {
     closeSnackbar();
-    setDrawerOpen(open);
+    setMessageDrawerOpen(open);
+    if (open) {
+      setParticipantListDrawerOpen(false);
+    }
+  }
+
+  function handleParticipantListOpen(open) {
+    setParticipantListDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+    }
   }
 
   function handleSendMessage(message) {
@@ -237,10 +277,7 @@ function AntMedia() {
             eventType: "MESSAGE_RECEIVED",
             message: message,
             name: streamName,
-            date: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            date: new Date().toString()
           })
         );
       }
@@ -269,7 +306,7 @@ function AntMedia() {
         message: infoText,
       }),
     };
-      
+
     handleNotificationEvent(obj);
   }
 
@@ -333,17 +370,19 @@ function AntMedia() {
           isMicMuted: false,
         });
       } else if (eventType === "MESSAGE_RECEIVED") {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        notificationEvent.date = new Date(notificationEvent?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
         // if message arrives.
         // if there is an new message and user has not opened message component then we are going to increase number of unread messages by one.
         // we are gonna also send snackbar.
-        if (!drawerOpen) {
+        if (!messageDrawerOpen) {
           enqueueSnackbar(
             {
               sender: notificationEvent.name,
               message: notificationEvent.message,
               variant: "message",
               onClick: () => {
-                setDrawerOpen(true);
+                handleMessageDrawerOpen(true);
                 setNumberOfUnReadMessages(0);
               },
             },
@@ -576,6 +615,66 @@ function AntMedia() {
       }
     }
   }
+
+  function setVirtualBackgroundImage(imageUrl) {
+    let virtualBackgroundImage = document.createElement("img");
+    virtualBackgroundImage.id = "virtualBackgroundImage";
+    virtualBackgroundImage.style.visibility = "hidden";
+    virtualBackgroundImage.alt = "virtual-background";
+
+    if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
+        virtualBackgroundImage.src = imageUrl;
+    } else {
+      virtualBackgroundImage.src = "virtual-background.png";
+    }
+
+    setVirtualBackground(virtualBackgroundImage);
+    antmedia.setBackgroundImage(virtualBackgroundImage);
+  }
+
+  function handleBackgroundReplacement(option) {
+    let effectName;
+
+    if(option === "none") {
+      effectName = VideoEffect.NO_EFFECT;
+      setIsVideoEffectRunning(false);
+    }
+    else if(option === "blur") {
+      effectName = VideoEffect.BLUR_BACKGROUND;
+      setIsVideoEffectRunning(true);
+    }
+    else if(option === "background") {
+      if (virtualBackground === null) {
+        setVirtualBackgroundImage(null);
+      }
+      effectName = VideoEffect.VIRTUAL_BACKGROUND
+      setIsVideoEffectRunning(true);
+    }
+    antmedia.enableEffect(effectName).then(() => {
+      console.log("Effect: "+ effectName+" is enabled");
+    }).catch(err => {
+      console.error("Effect: "+ effectName+" is not enabled. Error is " + err);
+      setIsVideoEffectRunning(false);
+    });
+  }
+  function checkAndTurnOnLocalCamera(streamId) {
+    debugger;
+    if(isVideoEffectRunning) {
+      antmedia.mediaManager.localStream.getVideoTracks()[0].enabled = true;
+    }
+    else {
+      antmedia.turnOnLocalCamera(streamId);
+    }
+  }
+
+  function checkAndTurnOffLocalCamera(streamId) {
+    if(isVideoEffectRunning) {
+      antmedia.mediaManager.localStream.getVideoTracks()[0].enabled = false;
+    }
+    else {
+      antmedia.turnOffLocalCamera(streamId);
+    }
+  }
   function handleRoomEvents({ streams, streamList }) {
     // [allParticipant, setAllParticipants] => list of every user
     setAllParticipants(streamList);
@@ -601,32 +700,33 @@ function AntMedia() {
     }
   }
 
-  function setCustomFunctions() {
-    // START custom functions
-    antmedia.handlePlayVideo = handlePlayVideo;
-    antmedia.handleRoomEvents = handleRoomEvents;
-    antmedia.handlePublish = handlePublish;
-    antmedia.handleStreamInformation = handleStreamInformation;
-    antmedia.handlePlay = handlePlay;
-    antmedia.handleRoomInfo = handleRoomInfo;
-    antmedia.updateStatus = updateStatus;
-    antmedia.handleSetMyObj = handleSetMyObj;
-    antmedia.handleSendNotificationEvent = handleSendNotificationEvent;
-    antmedia.handleNotificationEvent = handleNotificationEvent;
-    antmedia.handleLeaveFromRoom = handleLeaveFromRoom;
-    antmedia.handleSendMessage = handleSendMessage;
-    antmedia.screenShareOffNotification = screenShareOffNotification;
-    antmedia.screenShareOnNotification = screenShareOnNotification;
-    antmedia.handleStartScreenShare = handleStartScreenShare;
-    antmedia.handleStopScreenShare = handleStopScreenShare;
-    antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
-    antmedia.handleNotifyPinUser = handleNotifyPinUser;
-    antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
-    antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
-    antmedia.handleDebugInfo = handleDebugInfo;
-    // END custom functions
-  }
-  setCustomFunctions();
+  // START custom functions
+  antmedia.handlePlayVideo = handlePlayVideo;
+  antmedia.handleRoomEvents = handleRoomEvents;
+  antmedia.handlePublish = handlePublish;
+  antmedia.handleStreamInformation = handleStreamInformation;
+  antmedia.handlePlay = handlePlay;
+  antmedia.handleRoomInfo = handleRoomInfo;
+  antmedia.updateStatus = updateStatus;
+  antmedia.handleSetMyObj = handleSetMyObj;
+  antmedia.handleSendNotificationEvent = handleSendNotificationEvent;
+  antmedia.handleNotificationEvent = handleNotificationEvent;
+  antmedia.handleLeaveFromRoom = handleLeaveFromRoom;
+  antmedia.handleSendMessage = handleSendMessage;
+  antmedia.screenShareOffNotification = screenShareOffNotification;
+  antmedia.screenShareOnNotification = screenShareOnNotification;
+  antmedia.handleStartScreenShare = handleStartScreenShare;
+  antmedia.enableDisableMCU = enableDisableMCU;
+  antmedia.handleStopScreenShare = handleStopScreenShare;
+  antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
+  antmedia.handleNotifyPinUser = handleNotifyPinUser;
+  antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
+  antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;
+  antmedia.handleDebugInfo = handleDebugInfo;
+  antmedia.handleBackgroundReplacement = handleBackgroundReplacement;
+  antmedia.checkAndTurnOnLocalCamera = checkAndTurnOnLocalCamera;
+  antmedia.checkAndTurnOffLocalCamera = checkAndTurnOffLocalCamera;
+
   return (
     <Grid container className="App">
       <Grid
@@ -644,14 +744,19 @@ function AntMedia() {
             toggleSetCam,
             toggleSetMic,
             myLocalData,
-            handleDrawerOpen,
+            handleMessageDrawerOpen,
+            handleParticipantListOpen,
             screenSharedVideoId,
+            roomJoinMode,
             audioTracks,
             isPublished,
             setSelectedCamera,
             selectedCamera,
             selectedMicrophone,
             setSelectedMicrophone,
+            selectedBackgroundMode,
+            setSelectedBackgroundMode,
+            setIsVideoEffectRunning,
             setParticipants,
             participants,
             setLeftTheRoom,
@@ -683,8 +788,10 @@ function AntMedia() {
                   mic,
                   cam,
                   toggleSetCam,
-                  drawerOpen,
-                  handleDrawerOpen,
+                  messageDrawerOpen,
+                  handleMessageDrawerOpen,
+                  participantListDrawerOpen,
+                  handleParticipantListOpen,
                   handleSetMessages,
                   messages,
                   toggleSetNumberOfUnreadMessages,
@@ -692,6 +799,7 @@ function AntMedia() {
                   pinVideo,
                   pinnedVideoId,
                   screenSharedVideoId,
+                  roomJoinMode,
                   audioTracks,
                   allParticipants,
                   globals,
@@ -703,7 +811,8 @@ function AntMedia() {
                     allParticipants={allParticipants}
                     myLocalData={myLocalData}
                   />
-                  <MessageDrawer drawerOpen={drawerOpen} messages={messages} />
+                  <MessageDrawer messageDrawerOpen={messageDrawerOpen} messages={messages} />
+                  <ParticipantListDrawer participantListDrawerOpen={participantListDrawerOpen} />
                 </>
               </SettingsContext.Provider>
             )}
