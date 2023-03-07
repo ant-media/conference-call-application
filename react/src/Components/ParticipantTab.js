@@ -59,8 +59,7 @@ function ParticipantTab(props) {
       </Grid>
     );
   };
-  if (antmedia.isPlayMode === false) {
-    return (
+  return (
         <div style={{width: "100%", overflowY: "auto"}}>
           <Stack sx={{width: "100%",}} spacing={2}>
             <Grid container>
@@ -69,45 +68,21 @@ function ParticipantTab(props) {
                   variant="body2"
                   style={{marginLeft: 4, fontWeight: 500}}
               >
-                {allParticipants.length + 1}
+                {antmedia.isPlayMode === false ? allParticipants.length + 1 : allParticipants.length}
               </ParticipantName>
             </Grid>
-            {getParticipantItem("localVideo", "You")}
+            {antmedia.isPlayMode === false ? getParticipantItem("localVideo", "You") : ""}
+            {allParticipants.map(({streamId, streamName}, index) => {
+              if (mediaSettings?.myLocalData?.streamId !== streamId) {
+                return getParticipantItem(streamId, streamName);
+              } else {
+                return "";
+              }
+            })}
+          </Stack>
+        </div>
+    );
 
-            {allParticipants.map(({streamId, streamName}, index) => {
-              if (mediaSettings?.myLocalData?.streamId !== streamId) {
-                return getParticipantItem(streamId, streamName);
-              } else {
-                return "";
-              }
-            })}
-          </Stack>
-        </div>
-    );
-  } else {
-    return (
-        <div style={{width: "100%", overflowY: "auto"}}>
-          <Stack sx={{width: "100%",}} spacing={2}>
-            <Grid container>
-              <SvgIcon size={28} name="participants" color="#fff"/>
-              <ParticipantName
-                  variant="body2"
-                  style={{marginLeft: 4, fontWeight: 500}}
-              >
-                {allParticipants.length}
-              </ParticipantName>
-            </Grid>
-            {allParticipants.map(({streamId, streamName}, index) => {
-              if (mediaSettings?.myLocalData?.streamId !== streamId) {
-                return getParticipantItem(streamId, streamName);
-              } else {
-                return "";
-              }
-            })}
-          </Stack>
-        </div>
-    );
-  }
 }
 
 export default ParticipantTab;

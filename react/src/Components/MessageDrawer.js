@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Drawer from '@mui/material/Drawer';
 import { styled } from '@mui/material/styles';
-import {  Grid,  Tabs, Tab } from '@mui/material';
+import {Grid, Tabs, Tab, Typography} from '@mui/material';
 import MessageInput from './MessageInput';
 import { useTranslation } from 'react-i18next';
 import MessagesTab from './MessagesTab';
@@ -68,38 +68,7 @@ const MessageDrawer = React.memo(props => {
     };
   }
 
-  if (antmedia.isPlayMode) {
-    return (
-        <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={messageDrawerOpen} variant="persistent">
-          <MessageGrid container direction="column" style={{flexWrap: 'nowrap', height: '100%', overflow: 'hidden'}}>
-            <Grid item container justifyContent="space-between" alignItems="center">
-              <Tabs
-                  TabIndicatorProps={{
-                    sx: {
-                      display: 'none',
-                    },
-                  }}
-                  value={value}
-                  onChange={handleChange}
-                  aria-label="messages and participant tabs"
-              >
-                <Tab disableRipple sx={{color: '#ffffff80', p: 1, pl: 0}} label={t('Messages')} {...a11yProps(0)} />
-              </Tabs>
-              <CloseDrawerButton/>
-            </Grid>
-            <Grid item container justifyContent="space-between" alignItems="center"
-                  style={{flex: '1 1 auto', overflowY: 'hidden'}}>
-              <TabPanel value={value} index={0}>
-                <TabGrid container sx={{pb: 0}} direction={'column'}>
-                  <MessagesTab messages={messages}/>
-                </TabGrid>
-              </TabPanel>
-            </Grid>
-          </MessageGrid>
-        </AntDrawer>
-    );
-  } else {
-    return (
+return (
         <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={messageDrawerOpen} variant="persistent">
           <MessageGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
             <Grid item container justifyContent="space-between" alignItems="center">
@@ -124,10 +93,14 @@ const MessageDrawer = React.memo(props => {
                 </TabGrid>
               </TabPanel>
             </Grid>
-            {value === 0 && <MessageInput />}
+
+            {antmedia.isPlayMode === false && value === 0 ?
+            <MessageInput />
+                : <Typography variant="body2" sx={{px: 1.5, py: 0.5, fontSize: 12, fontWeight: 700}} color="#fff">
+                  {t('You cannot send message in play only mode')}
+                </Typography>}
           </MessageGrid>
         </AntDrawer>
     );
-  }
 });
 export default MessageDrawer;

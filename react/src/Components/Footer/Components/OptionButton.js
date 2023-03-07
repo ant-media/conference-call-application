@@ -60,72 +60,6 @@ function OptionButton({ footer, ...props }) {
     setLayoutDialogOpen(false);
   };
 
-  if (antmedia.isPlayMode) {
-    return (
-        <>
-          <SettingsDialog
-              open={dialogOpen}
-              onClose={handleDialogClose}
-              selectFocus={selectFocus}
-          />
-          <LayoutSettingsDialog
-              open={layoutDialogOpen}
-              onClose={handleLayoutDialogClose}
-              selectFocus={selectFocus}
-          />
-          <Tooltip title={t("More options")} placement="top">
-            <CustomizedBtn
-                className={footer ? "footer-icon-button" : ""}
-                id="demo-positioned-button"
-                variant="contained"
-                color={open ? "primary" : "secondary"}
-                aria-controls={open ? "demo-positioned-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-                onClick={handleClick}
-            >
-              <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'white'}/>
-            </CustomizedBtn>
-          </Tooltip>
-          <Menu
-              id="basic-menu"
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleClose}
-              MenuListProps={{
-                "aria-labelledby": "basic-button",
-              }}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              transformOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-          >
-            <MenuItem onClick={() => handleLayoutDialogOpen()}>
-              <ListItemIcon>
-                <SvgIcon size={36} name={"layout"} color={"white"}/>
-              </ListItemIcon>
-              <ListItemText>{t("Change Layout")}</ListItemText>
-            </MenuItem>
-
-            <MenuItem
-                component={"a"}
-                href="https://github.com/ant-media/conference-call-application/issues"
-                target={"_blank"}
-                rel="noopener noreferrer"
-            >
-              <ListItemIcon>
-                <SvgIcon size={36} name={"report"} color={"white"}/>
-              </ListItemIcon>
-              <ListItemText>{t("Report Problem")}</ListItemText>
-            </MenuItem>
-          </Menu>
-        </>
-    );
-  } else {
     return (
         <>
           <SettingsDialog
@@ -175,12 +109,15 @@ function OptionButton({ footer, ...props }) {
               </ListItemIcon>
               <ListItemText>{t("Change Layout")}</ListItemText>
             </MenuItem>
+
+              {antmedia.isPlayMode === false ?
             <MenuItem onClick={() => handleDialogOpen()}>
               <ListItemIcon>
                 <SvgIcon size={36} name={"call-settings"} color={"white"} />
               </ListItemIcon>
               <ListItemText>{t("Call Settings")}</ListItemText>
             </MenuItem>
+                    : null}
 
             <MenuItem
                 component={"a"}
@@ -196,7 +133,6 @@ function OptionButton({ footer, ...props }) {
           </Menu>
         </>
     );
-  }
 }
 
 export default OptionButton;

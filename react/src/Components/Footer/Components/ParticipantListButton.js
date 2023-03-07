@@ -27,8 +27,7 @@ function ParticipantListButton({ footer, ...props }) {
     const {allParticipants } = settings;
     const antmedia = useContext(AntmediaContext);
 
-    if (antmedia.isPlayMode) {
-        return (
+    return (
             <Tooltip title={t('Participant List')} placement="top">
                 <CustomizedBtn
                     onClick={() => {
@@ -39,27 +38,10 @@ function ParticipantListButton({ footer, ...props }) {
                     color={settings?.participantListDrawerOpen ? 'primary' : 'secondary'}
                 >
                     <SvgIcon size={32} color={settings?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
-                    {allParticipants.length}
+                    {antmedia.isPlayMode === false ? allParticipants.length + 1 : allParticipants.length}
                 </CustomizedBtn>
             </Tooltip>
         );
-    } else {
-        return (
-            <Tooltip title={t('Participant List')} placement="top">
-                <CustomizedBtn
-                    onClick={() => {
-                        settings?.handleParticipantListOpen(!settings?.participantListDrawerOpen);
-                    }}
-                    variant="contained"
-                    className={footer ? 'footer-icon-button' : ''}
-                    color={settings?.participantListDrawerOpen ? 'primary' : 'secondary'}
-                >
-                    <SvgIcon size={32} color={settings?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
-                    {allParticipants.length + 1}
-                </CustomizedBtn>
-            </Tooltip>
-        );
-    }
 }
 
 export default ParticipantListButton;
