@@ -134,7 +134,6 @@ function checkAndRepublishIfRequired() {
   console.log("Ice state checked = " + iceState);
 
   if (iceState == null || iceState == "failed" || iceState == "disconnected") {
-          webRTCAdaptor.leaveFromRoom(room);
           webRTCAdaptor.mediaManager.localStreamSoundMeter.stop();
           webRTCAdaptor.closePeerConnection(publishStreamId);
           webRTCAdaptor.closeWebSocket();
@@ -161,7 +160,7 @@ webRTCAdaptor = new WebRTCAdaptor({
   callback: (info, obj) => {
     if (info === "initialized") {
       if(reconnecting) {
-        webRTCAdaptor.joinRoom(room, publishStreamId);
+        webRTCAdaptor.leaveFromRoom(room);
       }
       webRTCAdaptor.enableDisableMCU(mcuEnabled);
     } else if (info === "joinedTheRoom") {
@@ -202,6 +201,9 @@ webRTCAdaptor = new WebRTCAdaptor({
       if (roomInfoHandleJob !== null) {
         clearInterval(roomInfoHandleJob);
         clearInterval(statusUpdateIntervalJob);
+      }
+      if(reconnecting) {
+        webRTCAdaptor.joinRoom(room, publishStreamId);
       }
     } else if (info === "closed") {
       if (typeof obj !== "undefined") {
