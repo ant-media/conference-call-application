@@ -676,7 +676,6 @@ function AntMedia() {
     });
   }
   function checkAndTurnOnLocalCamera(streamId) {
-    debugger;
     if(isVideoEffectRunning) {
       antmedia.mediaManager.localStream.getVideoTracks()[0].enabled = true;
     }

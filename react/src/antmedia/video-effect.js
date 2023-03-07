@@ -189,7 +189,6 @@ export class VideoEffect
             console.error("VideoEffect is not initialized!");
             return;
         }
-        debugger;
         switch (effectName) {
             case VideoEffect.DEEPAR:
             case VideoEffect.VIRTUAL_BACKGROUND:
