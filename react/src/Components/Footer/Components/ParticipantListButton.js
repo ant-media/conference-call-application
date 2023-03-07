@@ -5,6 +5,7 @@ import { SvgIcon } from '../../SvgIcon';
 import { SettingsContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import {AntmediaContext} from "../../../App";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   '&.footer-icon-button':{
@@ -21,24 +22,26 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 }));
 
 function ParticipantListButton({ footer, ...props }) {
-  const {t} = useTranslation();
-  const settings = useContext(SettingsContext);
-  const {allParticipants } = settings;
-  return (
-      <Tooltip title={t('Participant List')} placement="top">
-        <CustomizedBtn
-          onClick={() => {
-            settings?.handleParticipantListOpen(!settings?.participantListDrawerOpen);
-          }}
-          variant="contained"
-          className={footer ? 'footer-icon-button' : ''}
-          color={settings?.participantListDrawerOpen ? 'primary' : 'secondary'}
-        >
-          <SvgIcon size={32} color={settings?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
-            {allParticipants.length + 1}
-        </CustomizedBtn>
-      </Tooltip>
-  );
+    const {t} = useTranslation();
+    const settings = useContext(SettingsContext);
+    const {allParticipants } = settings;
+    const antmedia = useContext(AntmediaContext);
+
+    return (
+            <Tooltip title={t('Participant List')} placement="top">
+                <CustomizedBtn
+                    onClick={() => {
+                        settings?.handleParticipantListOpen(!settings?.participantListDrawerOpen);
+                    }}
+                    variant="contained"
+                    className={footer ? 'footer-icon-button' : ''}
+                    color={settings?.participantListDrawerOpen ? 'primary' : 'secondary'}
+                >
+                    <SvgIcon size={32} color={settings?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
+                    {antmedia.isPlayMode === false ? allParticipants.length + 1 : allParticipants.length}
+                </CustomizedBtn>
+            </Tooltip>
+        );
 }
 
 export default ParticipantListButton;

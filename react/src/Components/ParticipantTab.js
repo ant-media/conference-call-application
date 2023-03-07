@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useContext} from "react";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { SettingsContext, MediaSettingsContext } from "pages/AntMedia";
+import { AntmediaContext } from "App";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: "#ffffff",
@@ -20,6 +21,7 @@ const PinBtn = styled(Button)(({ theme }) => ({
 }));
 
 function ParticipantTab(props) {
+  const antmedia = useContext(AntmediaContext);
   const mediaSettings = React.useContext(MediaSettingsContext);
   const settings = React.useContext(SettingsContext);
 
@@ -58,29 +60,29 @@ function ParticipantTab(props) {
     );
   };
   return (
-    <div style={{ width: "100%", overflowY: "auto" }}>
-      <Stack sx={{ width: "100%", }} spacing={2}>
-        <Grid container>
-          <SvgIcon size={28} name="participants" color="#fff" />
-          <ParticipantName
-            variant="body2"
-            style={{ marginLeft: 4, fontWeight: 500 }}
-          >
-            {allParticipants.length + 1}
-          </ParticipantName>
-        </Grid>
-        {getParticipantItem("localVideo", "You")}
+        <div style={{width: "100%", overflowY: "auto"}}>
+          <Stack sx={{width: "100%",}} spacing={2}>
+            <Grid container>
+              <SvgIcon size={28} name="participants" color="#fff"/>
+              <ParticipantName
+                  variant="body2"
+                  style={{marginLeft: 4, fontWeight: 500}}
+              >
+                {antmedia.isPlayMode === false ? allParticipants.length + 1 : allParticipants.length}
+              </ParticipantName>
+            </Grid>
+            {antmedia.isPlayMode === false ? getParticipantItem("localVideo", "You") : ""}
+            {allParticipants.map(({streamId, streamName}, index) => {
+              if (mediaSettings?.myLocalData?.streamId !== streamId) {
+                return getParticipantItem(streamId, streamName);
+              } else {
+                return "";
+              }
+            })}
+          </Stack>
+        </div>
+    );
 
-        {allParticipants.map(({ streamId, streamName }, index) => {
-          if (mediaSettings?.myLocalData?.streamId !== streamId) {
-            return getParticipantItem(streamId, streamName);
-          } else {
-            return "";
-          }
-        })}
-      </Stack>
-    </div>
-  );
 }
 
 export default ParticipantTab;
