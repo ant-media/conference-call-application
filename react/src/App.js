@@ -85,6 +85,46 @@ function makeFullScreen(divId) {
   }
 }
 
+function checkAndUpdateVideoAudioSources() {
+  let isVideoDeviceAvailable = false;
+  let isAudioDeviceAvailable = false;
+  let selectedDevices = webRTCAdaptor.getSelectedDevices();
+  let currentCameraDeviceId = selectedDevices.videoDeviceId;
+  let currentAudioDeviceId = selectedDevices.audioDeviceId;
+
+  // check if the selected devices are still available
+  for(let index = 0; index < webRTCAdaptor.devices.length; index++) {
+    if (webRTCAdaptor.devices[index].kind == "videoinput" && webRTCAdaptor.devices[index].deviceId == selectedDevices.videoDeviceId) {
+      isVideoDeviceAvailable = true;
+    }
+    if (webRTCAdaptor.devices[index].kind == "audioinput" && webRTCAdaptor.devices[index].deviceId == selectedDevices.audioDeviceId) {
+      isAudioDeviceAvailable = true;
+    }
+  }
+
+  // if the selected devices are not available, select the first available device
+  if (selectedDevices.videoDeviceId == '' || isVideoDeviceAvailable == false) {
+    const camera = webRTCAdaptor.devices.find(d => d.kind === 'videoinput');
+    if (camera) {
+      selectedDevices.videoDeviceId = camera.deviceId;
+    }
+  }
+  if (selectedDevices.audioDeviceId == '' || isAudioDeviceAvailable == false) {
+    const audio = webRTCAdaptor.devices.find(d => d.kind === 'audioinput');
+    if (audio) {
+      selectedDevices.audioDeviceId = audio.deviceId;
+    }
+  }
+
+  webRTCAdaptor.setSelectedDevices(selectedDevices);
+
+  if (currentCameraDeviceId !== selectedDevices.videoDeviceId) {
+    webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+  }
+  if (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId == 'default') {
+    webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+  }
+}
 
 var videoQualityConstraints = {
   video: {
@@ -200,6 +240,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       } catch (e) {}
     } else if (info === "available_devices") {
       webRTCAdaptor.devices = obj;
+      checkAndUpdateVideoAudioSources();
     } else if (info === "updated_stats") {
       let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
       let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
