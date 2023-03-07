@@ -266,7 +266,7 @@ const MeetingRoom = React.memo((props) => {
                     </div>
                   </div>
               );
-            } else if (!antmedia.isPlayMode) {
+            } else if (antmedia.isPlayMode === false) {
               return (
                   <div className="unpinned">
                     <div className="single-video-container " key={index}>
@@ -282,6 +282,8 @@ const MeetingRoom = React.memo((props) => {
                     </div>
                   </div>
               );
+            } else {
+              return null;
             }
           })}
           {sliceTiles ? (
