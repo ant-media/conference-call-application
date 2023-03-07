@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
+import {MediaSettingsContext} from "./AntMedia";
 
 
 
@@ -30,6 +31,8 @@ function WaitingRoom(props) {
 
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
+  const mediaSettings = useContext(MediaSettingsContext);
+  const { roomJoinMode } = mediaSettings;
   const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
@@ -71,7 +74,7 @@ function WaitingRoom(props) {
 
     console.log("generatedStreamId:"+generatedStreamId);
 
-    antmedia.joinRoom(roomName, generatedStreamId);
+    antmedia.joinRoom(roomName, generatedStreamId, roomJoinMode);
     props.handleChangeRoomStatus("meeting");
   }
   const handleDialogOpen = (focus) => {
@@ -118,7 +121,7 @@ function WaitingRoom(props) {
             sx={{ position: "relative" }}
           >
             <VideoCard id="localVideo" autoPlay muted hidePin={true} />
-            
+
             <Grid
               container
               columnSpacing={2}

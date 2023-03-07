@@ -24,11 +24,15 @@ const globals = {
   trackEvents:[],
 };
 
+const JoinModes = {
+  MULTITRACK: "multitrack",
+  MCU: "mcu"
+}
+
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
-  const videoEffect = new VideoEffect();
 
   // drawerOpen for message components.
   const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
@@ -53,6 +57,8 @@ function AntMedia() {
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState(null);
 
+  const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
+
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
@@ -67,6 +73,7 @@ function AntMedia() {
   const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
   const [selectedBackgroundMode, setSelectedBackgroundMode] = React.useState("");
   const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
+  const [virtualBackground, setVirtualBackground] = React.useState(null);
   const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -129,6 +136,14 @@ function AntMedia() {
     if (myLocalData?.streamId) {
       antmedia.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
       globals.maxVideoTrackCount = maxTrackCount;
+    }
+  }
+
+  function enableDisableMCU(isMCUEnabled) {
+    if (isMCUEnabled) {
+      setRoomJoinMode(JoinModes.MCU);
+    } else {
+      setRoomJoinMode(JoinModes.MULTITRACK);
     }
   }
   function handleStartScreenShare() {
@@ -618,29 +633,52 @@ function AntMedia() {
       }
     }
   }
-  function handleBackgroundReplacement(option) {
-    if (!videoEffect.isInitialized) {
-      videoEffect.init(antmedia, myLocalData.streamId, null, null);
+
+  function setVirtualBackgroundImage(imageUrl) {
+    let virtualBackgroundImage = document.createElement("img");
+    virtualBackgroundImage.id = "virtualBackgroundImage";
+    virtualBackgroundImage.style.visibility = "hidden";
+    virtualBackgroundImage.alt = "virtual-background";
+
+    if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
+        virtualBackgroundImage.src = imageUrl;
+    } else {
+      virtualBackgroundImage.src = "virtual-background.png";
     }
-    videoEffect.streamId = myLocalData.streamId;
+
+    setVirtualBackground(virtualBackgroundImage);
+    antmedia.setBackgroundImage(virtualBackgroundImage);
+  }
+
+  function handleBackgroundReplacement(option) {
+    let effectName;
 
     if(option === "none") {
-      videoEffect.removeEffect();
-      antmedia.closeCustomVideoSource(myLocalData.streamId);
+      effectName = VideoEffect.NO_EFFECT;
       setIsVideoEffectRunning(false);
     }
     else if(option === "blur") {
-      videoEffect.enableBlur();
+      effectName = VideoEffect.BLUR_BACKGROUND;
       setIsVideoEffectRunning(true);
     }
     else if(option === "background") {
-      videoEffect.enableVirtualBackground();
+      if (virtualBackground === null) {
+        setVirtualBackgroundImage(null);
+      }
+      effectName = VideoEffect.VIRTUAL_BACKGROUND
       setIsVideoEffectRunning(true);
     }
+    antmedia.enableEffect(effectName).then(() => {
+      console.log("Effect: "+ effectName+" is enabled");
+    }).catch(err => {
+      console.error("Effect: "+ effectName+" is not enabled. Error is " + err);
+      setIsVideoEffectRunning(false);
+    });
   }
   function checkAndTurnOnLocalCamera(streamId) {
+    debugger;
     if(isVideoEffectRunning) {
-      videoEffect.turnOnLocalCamera(antmedia);
+      antmedia.mediaManager.localStream.getVideoTracks()[0].enabled = true;
     }
     else {
       antmedia.turnOnLocalCamera(streamId);
@@ -649,7 +687,7 @@ function AntMedia() {
 
   function checkAndTurnOffLocalCamera(streamId) {
     if(isVideoEffectRunning) {
-      videoEffect.turnOffLocalCamera(antmedia);
+      antmedia.mediaManager.localStream.getVideoTracks()[0].enabled = false;
     }
     else {
       antmedia.turnOffLocalCamera(streamId);
@@ -696,6 +734,7 @@ function AntMedia() {
   antmedia.screenShareOffNotification = screenShareOffNotification;
   antmedia.screenShareOnNotification = screenShareOnNotification;
   antmedia.handleStartScreenShare = handleStartScreenShare;
+  antmedia.enableDisableMCU = enableDisableMCU;
   antmedia.handleStopScreenShare = handleStopScreenShare;
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
   antmedia.displayPoorNetworkConnectionWarning = displayPoorNetworkConnectionWarning;
@@ -727,6 +766,7 @@ function AntMedia() {
             handleMessageDrawerOpen,
             handleParticipantListOpen,
             screenSharedVideoId,
+            roomJoinMode,
             audioTracks,
             isPublished,
             setSelectedCamera,
@@ -778,6 +818,7 @@ function AntMedia() {
                   pinVideo,
                   pinnedVideoId,
                   screenSharedVideoId,
+                  roomJoinMode,
                   audioTracks,
                   allParticipants,
                   globals,

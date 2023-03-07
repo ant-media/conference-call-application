@@ -47,12 +47,17 @@ if (i18n.language !== "en" || i18n.language !== "tr") {
 }
 
 var token = getUrlParameter("token");
+var mcuEnabled = getUrlParameter("mcuEnabled");
 var publishStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var isPlaying = false;
 var fullScreenId = -1;
+
+if (mcuEnabled == null) {
+    mcuEnabled = false;
+}
 
 if (playOnly == null) {
   playOnly = false;
@@ -79,19 +84,6 @@ function makeFullScreen(divId) {
     fullScreenId = divId;
   }
 }
-
-var pc_config = {
-  iceServers: [
-    {
-      urls: "stun:stun1.l.google.com:19302",
-    },
-  ],
-};
-
-var sdpConstraints = {
-  OfferToReceiveAudio: false,
-  OfferToReceiveVideo: false,
-};
 
 
 var videoQualityConstraints = {
@@ -140,12 +132,11 @@ if (!websocketURL) {
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
   mediaConstraints: mediaConstraints,
-  peerconnection_config: pc_config,
-  sdp_constraints: sdpConstraints,
   isPlayMode: playOnly,
   debug: true,
   callback: (info, obj) => {
     if (info === "initialized") {
+      webRTCAdaptor.enableDisableMCU(mcuEnabled);
     } else if (info === "joinedTheRoom") {
       var room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
