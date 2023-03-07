@@ -10,7 +10,8 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
-import {VideoEffect} from "../antmedia/video-effect";
+import {VideoEffect} from "@antmedia/webrtc_adaptor/dist/video-effect";
+import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 export const SettingsContext = React.createContext(null);
@@ -177,6 +178,23 @@ function AntMedia() {
     setPinnedVideoId("localVideo");
     // send fake audio level to get screen sharing user on a videotrack
     // TODO: antmedia.updateAudioLevel(myLocalData.streamId, 10);
+  }
+
+  function displayPoorNetworkConnectionWarning() {
+    enqueueSnackbar(
+        {
+          message: "Your connection is not stable. Please check your internet connection!",
+          variant: "info",
+          icon: <SvgIcon size={24} name={'report'} color="red" />
+        },
+        {
+          autoHideDuration: 5000,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+        }
+    );
   }
   function handleScreenshareNotFromPlatform() {
     setIsScreenShared(false);
@@ -658,7 +676,6 @@ function AntMedia() {
     });
   }
   function checkAndTurnOnLocalCamera(streamId) {
-    debugger;
     if(isVideoEffectRunning) {
       antmedia.mediaManager.localStream.getVideoTracks()[0].enabled = true;
     }
@@ -736,6 +753,7 @@ function AntMedia() {
   antmedia.enableDisableMCU = enableDisableMCU;
   antmedia.handleStopScreenShare = handleStopScreenShare;
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
+  antmedia.displayPoorNetworkConnectionWarning = displayPoorNetworkConnectionWarning;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
   antmedia.handleSetMaxVideoTrackCount = handleSetMaxVideoTrackCount;

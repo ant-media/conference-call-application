@@ -3,8 +3,8 @@ import "./App.css";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./styles/theme";
 import React from "react";
-import { WebRTCAdaptor } from "./antmedia/webrtc_adaptor.js";
-import { getUrlParameter } from "./antmedia/fetch.stream.js";
+import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor";
+import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/fetch.stream";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import { initReactI18next } from "react-i18next";
@@ -164,8 +164,8 @@ if (!websocketURL) {
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
+
 }
-// let streamsList;
 
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
@@ -194,10 +194,11 @@ const webRTCAdaptor = new WebRTCAdaptor({
       roomTimerId = setInterval(() => {
         webRTCAdaptor.handleRoomInfo(publishStreamId);
       }, 5000);
-    } else if (info == "newStreamAvailable") {
+    } else if (info === "newStreamAvailable") {
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") {
       //stream is being published
+      webRTCAdaptor.enableStats(publishStreamId);
       webRTCAdaptor.handleRoomInfo(publishStreamId);
     } else if (info === "publish_finished") {
       //stream is being finished
@@ -210,8 +211,6 @@ const webRTCAdaptor = new WebRTCAdaptor({
         clearInterval(roomTimerId);
       }
     } else if (info === "closed") {
-      if (typeof obj !== "undefined") {
-      }
     } else if (info === "play_finished") {
       isPlaying = false;
     } else if (info === "streamInformation") {
@@ -227,21 +226,38 @@ const webRTCAdaptor = new WebRTCAdaptor({
         isPlaying = true;
       }
       //Lastly updates the current streamlist with the fetched one.
-    } else if (info == "data_channel_opened") {
+    } else if (info === "data_channel_opened") {
       setInterval(() => {
         webRTCAdaptor.updateStatus(obj);
       }, 2000);
 
       // isDataChannelOpen = true;
-    } else if (info == "data_channel_closed") {
+    } else if (info === "data_channel_closed") {
       // isDataChannelOpen = false;
-    } else if (info == "data_received") {
+    } else if (info === "data_received") {
       try {
         webRTCAdaptor.handleNotificationEvent(obj);
       } catch (e) {}
-    } else if (info == "available_devices") {
+    } else if (info === "available_devices") {
       webRTCAdaptor.devices = obj;
       checkAndUpdateVideoAudioSources();
+    } else if (info === "updated_stats") {
+      let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
+      let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
+      let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
+      let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
+
+      let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+      let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
+      let packageLostPercentage = 0;
+      if (packageLost !== 0) {
+        packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
+      }
+
+      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
+        webRTCAdaptor.displayPoorNetworkConnectionWarning();
+      }
+
     } else if (info == "debugInfo") {
       webRTCAdaptor.handleDebugInfo(obj.debugInfo);
     }
@@ -254,8 +270,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
     }
   },
   callbackError: function (error, message) {
-    //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
-    if (error.indexOf("publishTimeoutError") != -1 && roomTimerId != null) {
+    //some possible errors, NotFoundError, SecurityError,PermissionDeniedError
+    if (error.indexOf("publishTimeoutError") !== -1 && roomTimerId != null) {
       clearInterval(roomTimerId);
     }
 
@@ -264,13 +280,13 @@ const webRTCAdaptor = new WebRTCAdaptor({
       errorMessage = message;
     }
     errorMessage = JSON.stringify(error);
-    if (error.indexOf("NotFoundError") != -1) {
+    if (error.indexOf("NotFoundError") !== -1) {
       errorMessage =
         "Camera or Mic are not found or not allowed in your device.";
       alert(errorMessage);
     } else if (
-      error.indexOf("NotReadableError") != -1 ||
-      error.indexOf("TrackStartError") != -1
+      error.indexOf("NotReadableError") !== -1 ||
+      error.indexOf("TrackStartError") !== -1
     ) {
       errorMessage =
         "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
