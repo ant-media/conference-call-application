@@ -4,6 +4,8 @@ export class PeerStats {
         this.streamId = streamId;
         this.totalBytesReceivedCount = 0;
         this.totalBytesSent = 0;
+        this.totalVideoPacketsSent = 0;
+        this.totalAudioPacketsSent = 0;
         this.videoPacketsLost = 0;
         this.fractionLost = 0;
         this.startTime = 0;

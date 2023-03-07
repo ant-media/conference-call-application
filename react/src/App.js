@@ -127,8 +127,6 @@ if (!websocketURL) {
 
 }
 
-//let packageLostPreviewState = 0;
-
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
   mediaConstraints: mediaConstraints,
@@ -204,16 +202,20 @@ const webRTCAdaptor = new WebRTCAdaptor({
       webRTCAdaptor.devices = obj;
     } else if (info === "updated_stats") {
       let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
-      //let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
       let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
       let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
       let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
 
-      if (rtt >= 150 /* || (packageLost-packageLostPreviewState) >= 2.5 */ || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
-        webRTCAdaptor.displayPoorNetworkConnectionWarning();
+      let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+      let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
+      let packageLostPercentage = 0;
+      if (packageLost !== 0) {
+        packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
       }
 
-      // packageLostPreviewState = packageLost;
+      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
+        webRTCAdaptor.displayPoorNetworkConnectionWarning();
+      }
 
     } else if (info == "debugInfo") {
       webRTCAdaptor.handleDebugInfo(obj.debugInfo);
