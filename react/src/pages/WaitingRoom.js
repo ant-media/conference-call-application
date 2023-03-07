@@ -99,8 +99,7 @@ function WaitingRoom(props) {
     setDialogOpen(false);
   };
 
-  if (antmedia.isPlayMode === false) {
-    return (
+  return (
         <Container>
           <SettingsDialog
               open={dialogOpen}
@@ -108,12 +107,16 @@ function WaitingRoom(props) {
               selectFocus={selectFocus}
               handleBackgroundReplacement={props.handleBackgroundReplacement}
           />
+
+
           <Grid
               container
               spacing={4}
               justifyContent="space-between"
               alignItems={"center"}
           >
+
+            { antmedia.isPlayMode === false ?
             <Grid item md={7} alignSelf="stretch">
               <Grid
                   container
@@ -161,8 +164,9 @@ function WaitingRoom(props) {
                 )}
               </Typography>
             </Grid>
+            : null}
 
-            <Grid item md={4}>
+            <Grid item md={antmedia.isPlayMode === false ? 4 : 12}>
               <Grid container justifyContent={"center"}>
                 <Grid container justifyContent={"center"}>
                   <Typography variant="h5" align="center">
@@ -223,75 +227,6 @@ function WaitingRoom(props) {
           </Grid>
         </Container>
     );
-  } else {
-    return (
-        <Container>
-          <SettingsDialog
-              open={dialogOpen}
-              onClose={handleDialogClose}
-              selectFocus={selectFocus}
-              handleBackgroundReplacement={props.handleBackgroundReplacement}
-          />
-
-              <Grid container justifyContent={"center"}>
-                <Grid container justifyContent={"center"}>
-                  <Typography variant="h5" align="center">
-                    {t("What's your name?")}
-                  </Typography>
-                </Grid>
-                <Grid
-                    container
-                    justifyContent={"center"}
-                    sx={{mt: {xs: 1, md: 2.5}}}
-                >
-                  <Typography
-                      variant="h6"
-                      align="center"
-                      fontWeight={"400"}
-                      style={{fontSize: 18}}
-                  >
-                    {t(
-                        "Please enter your name. This will be visible to the host and other participants."
-                    )}{" "}
-                  </Typography>
-                </Grid>
-
-                <form
-                    onSubmit={(e) => {
-                      joinRoom(e);
-                    }}
-                >
-                  <Grid item xs={12} sx={{mt: 3, mb: 4}}>
-                    <TextField
-                        autoFocus
-                        required
-                        fullWidth
-                        color="primary"
-                        value={props.streamName}
-                        variant="outlined"
-                        onChange={(e) => props.handleStreamName(e.target.value)}
-                        placeholder={t("Your name")}
-                        id="participant_name"
-                    />
-                  </Grid>
-                  <Grid container justifyContent={"center"}>
-                    <Grid item sm={6} xs={12}>
-                      <Button
-                          fullWidth
-                          color="secondary"
-                          variant="contained"
-                          type="submit"
-                          id="room_join_button"
-                      >
-                        {t("I'm ready to join")}
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </form>
-              </Grid>
-        </Container>
-    )
-  }
 }
 
 export default WaitingRoom;
