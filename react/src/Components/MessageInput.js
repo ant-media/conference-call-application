@@ -1,9 +1,8 @@
 import React, { useContext, useState } from "react";
 import { Grid, IconButton, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { AntmediaContext } from "App";
-import { SettingsContext } from "pages/AntMedia";
 import { useTranslation } from "react-i18next";
+import { ConferenceContext } from 'pages/AntMedia';
 
 const MessageInputContainer = styled(Grid)(({ theme }) => ({
   padding: "16px 16px 8px 16px",
@@ -27,14 +26,14 @@ const MessageTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 const MessageInput = React.memo(() => {
-  const antmedia = useContext(AntmediaContext);
-  const settings = React.useContext(SettingsContext);
+  const conference = React.useContext(ConferenceContext);
+
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const sendMessage = () => {
     if (text) {
-      antmedia.handleSendMessage(text);
-      settings?.handleSetMessages({
+      conference.handleSendMessage(text);
+      conference?.handleSetMessages({
         name: "You",
         message: text,
         date: new Date().toString()

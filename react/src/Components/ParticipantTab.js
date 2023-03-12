@@ -5,8 +5,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
-import { SettingsContext, MediaSettingsContext } from "pages/AntMedia";
-import { AntmediaContext } from "App";
+import { ConferenceContext } from "pages/AntMedia";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: "#ffffff",
@@ -21,11 +20,8 @@ const PinBtn = styled(Button)(({ theme }) => ({
 }));
 
 function ParticipantTab(props) {
-  const antmedia = useContext(AntmediaContext);
-  const mediaSettings = React.useContext(MediaSettingsContext);
-  const settings = React.useContext(SettingsContext);
+  const conference = React.useContext(ConferenceContext);
 
-  const { pinnedVideoId, pinVideo, allParticipants } = settings;
   const getParticipantItem = (videoId, name) => {
     return (
       <Grid
@@ -40,17 +36,17 @@ function ParticipantTab(props) {
           <ParticipantName variant="body1">{name}</ParticipantName>
         </Grid>
         <Grid item>
-          {pinnedVideoId === videoId ? (
+          {conference.pinnedVideoId === videoId ? (
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => pinVideo(videoId)}
+              onClick={() => conference.pinVideo(videoId)}
             >
               <SvgIcon size={28} name="unpin" color="#fff" />
             </PinBtn>
           ) : (
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => pinVideo(videoId)}
+              onClick={() => conference.pinVideo(videoId)}
             >
               <SvgIcon size={28} name="pin" color="#fff" />
             </PinBtn>
@@ -68,12 +64,12 @@ function ParticipantTab(props) {
                   variant="body2"
                   style={{marginLeft: 4, fontWeight: 500}}
               >
-                {antmedia.isPlayMode === false ? allParticipants.length + 1 : allParticipants.length}
+                {conference.isPlayOnly === false ? conference.allParticipants.length + 1 : conference.allParticipants.length}
               </ParticipantName>
             </Grid>
-            {antmedia.isPlayMode === false ? getParticipantItem("localVideo", "You") : ""}
-            {allParticipants.map(({streamId, streamName}, index) => {
-              if (mediaSettings?.myLocalData?.streamId !== streamId) {
+            {conference.isPlayOnly === false ? getParticipantItem("localVideo", "You") : ""}
+            {conference.allParticipants.map(({streamId, streamName}, index) => {
+              if (conference?.myLocalData?.streamId !== streamId) {
                 return getParticipantItem(streamId, streamName);
               } else {
                 return "";

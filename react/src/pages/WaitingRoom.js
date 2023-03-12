@@ -14,12 +14,11 @@ import MicButton, {
 } from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
 import { useParams } from "react-router-dom";
-import { AntmediaContext } from "App";
 import { useTranslation } from "react-i18next";
 import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
-import {MediaSettingsContext} from "./AntMedia";
+import { ConferenceContext } from "./AntMedia";
 
 
 
@@ -30,20 +29,17 @@ function WaitingRoom(props) {
   const [selectFocus, setSelectFocus] = React.useState(null);
 
   const roomName = id;
-  const antmedia = useContext(AntmediaContext);
-  const mediaSettings = useContext(MediaSettingsContext);
-  const { roomJoinMode } = mediaSettings;
+  
+  const conference = useContext(ConferenceContext);
   const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    if(!antmedia.isPlayMode) {
-      antmedia.mediaManager.localVideo = document.getElementById("localVideo");
-      antmedia.mediaManager.localVideo.srcObject =
-          antmedia.mediaManager.localStream;
+    if(!conference.isPlayOnly &&conference.initialized) {
+      conference.setLocalVideo(document.getElementById("localVideo"));
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [conference.initialized]);
 
   function makeid(length) {
     var result           = '';
@@ -56,7 +52,7 @@ function WaitingRoom(props) {
   }
 
   function joinRoom(e) {
-    if (antmedia.mediaManager.localStream === null && antmedia.isPlayMode === false) {
+    if (conference.localVideo === null && conference.isPlayOnly === false) {
       e.preventDefault();
       enqueueSnackbar(
         {
@@ -72,15 +68,15 @@ function WaitingRoom(props) {
       );
       return;
     }
-    var generatedStreamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
+    var generatedStreamId = conference.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
 
     console.log("generatedStreamId:"+generatedStreamId);
 
-    antmedia.joinRoom(roomName, generatedStreamId, roomJoinMode);
-    props.handleChangeRoomStatus("meeting");
+    conference.joinRoom(roomName, generatedStreamId, conference.roomJoinMode);
+    conference.setWaitingOrMeetingRoom("meeting");
   }
   const handleDialogOpen = (focus) => {
-    if (false && antmedia.mediaManager.localStream === null) {
+    if (false && conference.localVideo === null) {
       enqueueSnackbar(
         {
           message: t(
@@ -108,7 +104,7 @@ function WaitingRoom(props) {
               open={dialogOpen}
               onClose={handleDialogClose}
               selectFocus={selectFocus}
-              handleBackgroundReplacement={props.handleBackgroundReplacement}
+              handleBackgroundReplacement={conference.handleBackgroundReplacement}
           />
 
 
@@ -119,7 +115,7 @@ function WaitingRoom(props) {
               alignItems={"center"}
           >
 
-            { antmedia.isPlayMode === false ?
+            { conference.isPlayOnly === false ?
             <Grid item md={7} alignSelf="stretch">
               <Grid
                   container
@@ -169,7 +165,7 @@ function WaitingRoom(props) {
             </Grid>
             : null}
 
-            <Grid item md={antmedia.isPlayMode === false ? 4 : 12}>
+            <Grid item md={conference.isPlayOnly === false ? 4 : 12}>
               <Grid container justifyContent={"center"}>
                 <Grid container justifyContent={"center"}>
                   <Typography variant="h5" align="center">
@@ -204,9 +200,9 @@ function WaitingRoom(props) {
                         required
                         fullWidth
                         color="primary"
-                        value={props.streamName}
+                        value={conference.streamName}
                         variant="outlined"
-                        onChange={(e) => props.handleStreamName(e.target.value)}
+                        onChange={(e) => conference.setStreamName(e.target.value)}
                         placeholder={t("Your name")}
                         id="participant_name"
                     />

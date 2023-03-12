@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
-import { AntmediaContext } from 'App';
-import { MediaSettingsContext } from 'pages/AntMedia';
+import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { styled } from '@mui/material/styles';
@@ -35,14 +34,13 @@ export const CustomizedBtn = styled(Button)(({ theme }) => ({
 
 function MicButton(props) {
   const { rounded, footer } = props;
-  const antmedia = useContext(AntmediaContext);
-  const settings = useContext(MediaSettingsContext);
+  const conference = useContext(ConferenceContext);
   const { enqueueSnackbar } = useSnackbar();
   const { t } = useTranslation();
 
   const handleMute = (e) => {
     e.stopPropagation();
-    if (antmedia.mediaManager.localStream === null) {
+    if (conference.localVideo === null) {
       enqueueSnackbar({
         message: t('You need to allow camera and microphone permissions before muting yourself'),
         variant: 'info',
@@ -59,14 +57,14 @@ function MicButton(props) {
     }, {
       autoHideDuration: 1500,
     });
-    settings?.toggleSetMic({
+    conference?.toggleSetMic({
       eventStreamId: 'localVideo',
       isMicMuted: true,
     });
-    antmedia.muteLocalMic();
-    if (settings?.myLocalData?.streamId) {
-      antmedia.handleSendNotificationEvent('MIC_MUTED', settings?.myLocalData?.streamId);
-      antmedia.updateAudioLevel(settings?.myLocalData?.streamId, 0);
+    conference.muteLocalMic();
+    if (conference?.myLocalData?.streamId) {
+      conference.handleSendNotificationEvent('MIC_MUTED', conference?.myLocalData?.streamId);
+      conference.updateAudioLevel(0);
     }
   };
 
@@ -79,18 +77,18 @@ function MicButton(props) {
     }, {
       autoHideDuration: 1500,
     });
-    settings?.toggleSetMic({
+    conference?.toggleSetMic({
       eventStreamId: 'localVideo',
       isMicMuted: false,
     });
-    antmedia.unmuteLocalMic();
-    if (settings?.myLocalData?.streamId) {
-      antmedia.handleSendNotificationEvent('MIC_UNMUTED', settings?.myLocalData?.streamId);
+    conference.unmuteLocalMic();
+    if (conference?.myLocalData?.streamId) {
+      conference.handleSendNotificationEvent('MIC_UNMUTED', conference?.myLocalData?.streamId);
 
     }
   };
 
-  const mic = settings?.mic?.find(m => m.eventStreamId === 'localVideo');
+  const mic = conference?.mic?.find(m => m.eventStreamId === 'localVideo');
 
   return (
     <>
