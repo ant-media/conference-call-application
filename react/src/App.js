@@ -196,7 +196,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
       publishStreamId = obj.streamId;
 
       if (admin) {
-        webRTCAdaptorForAdmin.joinRoom("alistener", publishStreamId+"listener", "legacy");
+        webRTCAdaptor.admin = true;
+        webRTCAdaptorForAdmin.joinRoom(room + "listener", publishStreamId+"listener", "legacy");
       }
 
       webRTCAdaptor.handleSetMyObj(obj);
@@ -402,14 +403,7 @@ const webRTCAdaptorForAdmin = new WebRTCAdaptor({
     if (info === "initialized") {
     } else if (info === "pong") {
     }else if (info === "joinedTheRoom") {
-      //let roomName = obj.ATTR_ROOM_NAME;
       var room = obj.ATTR_ROOM_NAME;
-      //roomOfStream[obj.streamId] = room;
-
-      //publishStreamId = obj.streamId;
-
-      //webRTCAdaptor.handleSetMyObj(obj);
-      //let streamDetailsList = obj.streamList;
 
       webRTCAdaptorForAdmin.publish(
           obj.streamId,

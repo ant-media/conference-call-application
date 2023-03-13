@@ -286,12 +286,20 @@ function AntMedia() {
         iceState !== "disconnected"
       ) {
         let commandList = message.split('*');
-        if (commandList.length > 1 && commandList[0] === "admin") {
-          antmediaadmin.sendData(myLocalData.streamId + "listener",
-              JSON.stringify({
-                streamId: commandList[0],
-                eventType: commandList[1]
-              }));
+        if (commandList.length > 3 && commandList[0] === "admin" && antmedia.admin && antmedia.admin === true) {
+          if (commandList[1] === "publisher_room") {
+            antmedia.sendData(myLocalData.streamId,
+                JSON.stringify({
+                  streamId: commandList[2],
+                  eventType: commandList[3]
+                }));
+          } else if (commandList[1] === "listener_room") {
+            antmediaadmin.sendData(myLocalData.streamId + "listener",
+                JSON.stringify({
+                  streamId: commandList[2],
+                  eventType: commandList[3]
+                }));
+          }
           return;
         }
         if(message === "debugme") {
@@ -593,7 +601,6 @@ function AntMedia() {
     antmedia.play(obj.streamId, "", roomName);
   }
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
-    debugger;
     antmedia.publish(
       publishStreamId,
       token,
