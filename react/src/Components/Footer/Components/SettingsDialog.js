@@ -9,7 +9,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import { MediaSettingsContext } from '../../../pages/AntMedia';
 import { AntmediaContext } from '../../../App';
-import { Grid, Hidden, MenuItem, useMediaQuery } from '@mui/material';
+import { Checkbox, Grid, Hidden, MenuItem, useMediaQuery } from '@mui/material';
 import { SvgIcon } from 'Components/SvgIcon';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +40,7 @@ const AntDialogTitle = props => {
 export function SettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
-  const { myLocalData, setSelectedCamera, selectedCamera, setSelectedMicrophone, selectedMicrophone, setSelectedBackgroundMode, selectedBackgroundMode } = React.useContext(MediaSettingsContext);
+  const { myLocalData, setSelectedCamera, selectedCamera, setSelectedMicrophone, selectedMicrophone, setSelectedBackgroundMode, selectedBackgroundMode, speedTestBeforeLogin, setSpeedTestBeforeLogin } = React.useContext(MediaSettingsContext);
 
   const antmedia = React.useContext(AntmediaContext);
   const { devices } = antmedia;
@@ -159,6 +159,16 @@ export function SettingsDialog(props) {
                   <SvgIcon size={36} name={'background-replacement'} color={'white'} />
                 </Grid>
               </Hidden>
+            </Grid>
+          </Grid>
+          <Grid container sx={{ mt: 4 }}>
+            <Grid item xs={10}>
+              <Checkbox
+                  checked={speedTestBeforeLogin}
+                  onChange={e => {setSpeedTestBeforeLogin(e.target.checked)}}
+                  inputProps={{ 'aria-label': 'controlled' }}
+              />
+              Speed Test Before Join
             </Grid>
           </Grid>
         </Box>

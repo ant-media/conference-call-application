@@ -78,6 +78,9 @@ function AntMedia() {
   const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
+  const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(false);
+  const [speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal] = useState(false);
+
   const [messages, setMessages] = useState([]);
 
 
@@ -817,6 +820,10 @@ function AntMedia() {
             roomJoinMode,
             audioTracks,
             isPublished,
+            speedTestBeforeLogin,
+            setSpeedTestBeforeLogin,
+            speedTestBeforeLoginModal,
+            setSpeedTestBeforeLoginModal,
             setSelectedCamera,
             selectedCamera,
             selectedMicrophone,

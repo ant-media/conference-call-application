@@ -6,6 +6,7 @@ import {
   TextField,
   Container,
   Tooltip,
+  Modal
 } from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
 import MicButton, {
@@ -14,13 +15,13 @@ import MicButton, {
 } from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
 import { useParams } from "react-router-dom";
-import { AntmediaContext } from "App";
+import { AntmediaContext, AntmediaSpeedTestContext, SpeedTestObjectContext } from "App";
 import { useTranslation } from "react-i18next";
 import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 import {MediaSettingsContext} from "./AntMedia";
-
+import {Box} from "@mui/system";
 
 
 function WaitingRoom(props) {
@@ -29,11 +30,18 @@ function WaitingRoom(props) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectFocus, setSelectFocus] = React.useState(null);
 
+  let timer;
+  const [count, setCount] = React.useState(0);
+  const [buttonVisibility, setButtonVisibility] = React.useState({visibility: "hidden"});
+
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
   const mediaSettings = useContext(MediaSettingsContext);
   const { roomJoinMode } = mediaSettings;
+  const antmediaSpeedTest = useContext(AntmediaSpeedTestContext);
+  const speedTestObject = useContext(SpeedTestObjectContext);
   const { enqueueSnackbar } = useSnackbar();
+  const { speedTestBeforeLogin, speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal, setLeftTheRoom } = React.useContext(MediaSettingsContext);
 
   React.useEffect(() => {
     if(!antmedia.onlyDataChannel) {
@@ -44,6 +52,24 @@ function WaitingRoom(props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const updateCount = () => {
+    timer = !timer && setInterval(() => {
+      setCount(count + 1)
+    }, 5000)
+  };
+
+  React.useEffect(() => {
+    updateCount()
+
+    if (speedTestObject.isfinished === true) {
+      setButtonVisibility({visibility: "visible"});
+    } else {
+      setButtonVisibility({visibility: "hidden"});
+    }
+
+    return () => clearInterval(timer)
+  }, )
 
   function makeid(length) {
     var result           = '';
@@ -71,13 +97,18 @@ function WaitingRoom(props) {
         }
       );
       return;
+    } else if (speedTestBeforeLogin) {
+      antmediaSpeedTest.publish(roomName + "SpeedTest", "");
+      e.preventDefault();
+      setSpeedTestBeforeLoginModal(true);
+    } else {
+      var generatedStreamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
+
+      console.log("generatedStreamId:"+generatedStreamId);
+
+      antmedia.joinRoom(roomName, generatedStreamId, roomJoinMode);
+      props.handleChangeRoomStatus("meeting");
     }
-    var generatedStreamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
-
-    console.log("generatedStreamId:"+generatedStreamId);
-
-    antmedia.joinRoom(roomName, generatedStreamId, roomJoinMode);
-    props.handleChangeRoomStatus("meeting");
   }
   const handleDialogOpen = (focus) => {
     if (false && antmedia.mediaManager.localStream === null) {
@@ -168,6 +199,46 @@ function WaitingRoom(props) {
               </Typography>
             </Grid>
             : null}
+
+            <Modal
+                open={speedTestBeforeLoginModal}
+                onClose={()=>{console.log("close")}}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+              <Box sx = {{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 400,
+                bgcolor: 'green.70',
+                border: '2px solid #000',
+                boxShadow: 24,
+                pt: 2,
+                px: 4,
+                pb: 3,
+              }}>
+                <Typography id="modal-modal-title" variant="h6" component="h2" sx={{position: "center"}}>
+                  Connection Test
+                </Typography>
+                <Typography id="modal-modal-description" sx={{ mt: 2, color: "white" }}>
+                  {speedTestObject.message}
+                </Typography>
+                <Button sx={buttonVisibility} onClick={()=>{
+                  setSpeedTestBeforeLoginModal(false);
+                  setLeftTheRoom(true);
+                  speedTestObject.message = "Please wait while we are testing your connection speed";
+                  speedTestObject.isfinished = false;
+                }}>Close</Button>
+                <Button sx={buttonVisibility} onClick={()=>{
+                  antmedia.joinRoom(roomName, undefined, roomJoinMode);
+                  props.handleChangeRoomStatus("meeting");
+                  speedTestObject.message = "Please wait while we are testing your connection speed";
+                  speedTestObject.isfinished = false;
+                }}>Join</Button>
+              </Box>
+            </Modal>
 
             <Grid item md={antmedia.onlyDataChannel === false ? 4 : 12}>
               <Grid container justifyContent={"center"}>
