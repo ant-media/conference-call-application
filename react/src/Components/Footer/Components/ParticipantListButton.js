@@ -38,7 +38,7 @@ function ParticipantListButton({ footer, ...props }) {
                     color={settings?.participantListDrawerOpen ? 'primary' : 'secondary'}
                 >
                     <SvgIcon size={32} color={settings?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
-                    {antmedia.isPlayMode === false ? allParticipants.length + 1 : allParticipants.length}
+                    {antmedia.onlyDataChannel === false ? allParticipants.length + 1 : allParticipants.length}
                 </CustomizedBtn>
             </Tooltip>
         );

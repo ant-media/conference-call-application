@@ -3,8 +3,8 @@ import "./App.css";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./styles/theme";
 import React from "react";
-import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor";
-import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/fetch.stream";
+import { WebRTCAdaptor } from "./antmedia/webrtc_adaptor.js";
+import { getUrlParameter } from "./antmedia/fetch.stream";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import { initReactI18next } from "react-i18next";
@@ -50,8 +50,10 @@ var token = getUrlParameter("token");
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var publishStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
+var onlyDataChannel = getUrlParameter("onlyDataChannel");
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
+var admin = getUrlParameter("admin");
 var isPlaying = false;
 var fullScreenId = -1;
 
@@ -61,6 +63,14 @@ if (mcuEnabled == null) {
 
 if (playOnly == null) {
   playOnly = false;
+}
+
+if (onlyDataChannel == null) {
+    onlyDataChannel = false;
+}
+
+if (admin == null) {
+  admin = false;
 }
 
 var roomOfStream = [];
@@ -167,34 +177,37 @@ if (!websocketURL) {
 
 }
 
+let makeOnlyDataChannelPublisher = false;
+let roomName;
+
 const webRTCAdaptor = new WebRTCAdaptor({
   websocket_url: websocketURL,
   mediaConstraints: mediaConstraints,
-  isPlayMode: playOnly,
-  dataChannelEnabled: true,
+  onlyDataChannel: onlyDataChannel,
   debug: true,
   callback: (info, obj) => {
     if (info === "initialized") {
       webRTCAdaptor.enableDisableMCU(mcuEnabled);
     } else if (info === "joinedTheRoom") {
+      roomName = obj.ATTR_ROOM_NAME;
       var room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
 
       publishStreamId = obj.streamId;
 
+      if (admin) {
+        webRTCAdaptorForAdmin.joinRoom("alistener", publishStreamId+"listener", "legacy");
+      }
+
       webRTCAdaptor.handleSetMyObj(obj);
       let streamDetailsList = obj.streamList;
 
-      if (playOnly)  {
-        webRTCAdaptor.play(obj.ATTR_ROOM_NAME, token, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
-      } else {
-        webRTCAdaptor.handlePublish(
+      webRTCAdaptor.handlePublish(
             obj.streamId,
             token,
             subscriberId,
             subscriberCode
         );
-      }
 
       roomTimerId = setInterval(() => {
         webRTCAdaptor.handleRoomInfo(publishStreamId);
@@ -205,6 +218,11 @@ const webRTCAdaptor = new WebRTCAdaptor({
       //stream is being published
       webRTCAdaptor.enableStats(publishStreamId);
       webRTCAdaptor.handleRoomInfo(publishStreamId);
+      if (webRTCAdaptor.mediaManager.localStream != null) {
+        webRTCAdaptor.mediaManager.localVideo = document.getElementById("localVideo");
+        webRTCAdaptor.mediaManager.localVideo.srcObject =
+            webRTCAdaptor.mediaManager.localStream;
+      }
     } else if (info === "publish_finished") {
       //stream is being finished
     } else if (info === "screen_share_stopped") {
@@ -214,6 +232,13 @@ const webRTCAdaptor = new WebRTCAdaptor({
       room = obj.ATTR_ROOM_NAME;
       if (roomTimerId !== null) {
         clearInterval(roomTimerId);
+      }
+      if (makeOnlyDataChannelPublisher) {
+        makeOnlyDataChannelPublisher = false;
+        webRTCAdaptor.resetAllParticipants();
+        webRTCAdaptor.resetPartipants();
+        webRTCAdaptor.onlyDataChannel = false;
+        webRTCAdaptor.joinRoom(room, publishStreamId, "legacy");
       }
     } else if (info === "closed") {
     } else if (info === "play_finished") {
@@ -241,6 +266,35 @@ const webRTCAdaptor = new WebRTCAdaptor({
       // isDataChannelOpen = false;
     } else if (info === "data_received") {
       try {
+        let notificationEvent = JSON.parse(obj.data);
+        if (notificationEvent != null && typeof notificationEvent == "object") {
+          let eventStreamId = notificationEvent.streamId;
+          let eventType = notificationEvent.eventType;
+          if (eventType === "GRANT_BECOME_PUBLISHER" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+            makeOnlyDataChannelPublisher = true;
+            webRTCAdaptor.leaveFromRoom(roomName);
+          } else if (eventType === "CLOSE_YOUR_CAMERA" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+            webRTCAdaptor.toggleSetCam({
+              eventStreamId: "localVideo",
+              isCameraOn: false,
+            });
+            webRTCAdaptor.turnOffLocalCamera(publishStreamId);
+            webRTCAdaptor.handleSendNotificationEvent(
+                "CAM_TURNED_OFF",
+                publishStreamId
+            );
+          } else if (eventType === "CLOSE_YOUR_MICROPHONE" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+            webRTCAdaptor.toggleSetMic({
+              eventStreamId: 'localVideo',
+              isMicMuted: true,
+            });
+            webRTCAdaptor.muteLocalMic();
+            webRTCAdaptor.handleSendNotificationEvent(
+                "MIC_MUTED",
+                publishStreamId
+            );
+          }
+        }
         webRTCAdaptor.handleNotificationEvent(obj);
       } catch (e) {}
     } else if (info === "available_devices") {
@@ -319,6 +373,13 @@ const webRTCAdaptor = new WebRTCAdaptor({
       errorMessage = "Fatal Error: WebSocket not supported in this browser";
     } else if (error.indexOf("no_stream_exist") != -1) {
       //TODO: removeRemoteVideo(error.streamId);
+      console.log("no_stream_exist");
+      isPlaying = false;
+      return;
+    } else if (error.indexOf("already_playing") != -1) {
+      console.log("already_playing");
+      isPlaying = false;
+      return;
     } else if (error.indexOf("data_channel_error") != -1) {
       errorMessage = "There was a error during data channel communication";
     } else if (error.indexOf("ScreenSharePermissionDenied") != -1) {
@@ -328,7 +389,123 @@ const webRTCAdaptor = new WebRTCAdaptor({
       errorMessage = "WebSocket Connection is disconnected.";
     }
 
-    alert(errorMessage);
+    //alert(errorMessage);
+  },
+});
+
+const webRTCAdaptorForAdmin = new WebRTCAdaptor({
+  websocket_url: websocketURL,
+  mediaConstraints: mediaConstraints,
+  onlyDataChannel: true,
+  debug: true,
+  callback: (info, obj) => {
+    if (info === "initialized") {
+    } else if (info === "pong") {
+    }else if (info === "joinedTheRoom") {
+      //let roomName = obj.ATTR_ROOM_NAME;
+      var room = obj.ATTR_ROOM_NAME;
+      //roomOfStream[obj.streamId] = room;
+
+      //publishStreamId = obj.streamId;
+
+      //webRTCAdaptor.handleSetMyObj(obj);
+      //let streamDetailsList = obj.streamList;
+
+      webRTCAdaptorForAdmin.publish(
+          obj.streamId,
+          token,
+          subscriberId,
+          subscriberCode,
+          obj.streamId,
+          room,
+          "{someKey:somveValue}"
+      );
+    } else if (info === "newStreamAvailable") {
+    } else if (info === "publish_started") {
+      //stream is being published
+    } else if (info === "publish_finished") {
+      //stream is being finished
+    } else if (info === "screen_share_stopped") {
+      //webRTCAdaptor.handleScreenshareNotFromPlatform();
+    } else if (info === "browser_screen_share_supported") {
+    } else if (info === "leavedFromRoom") {
+    } else if (info === "closed") {
+    } else if (info === "play_finished") {
+      isPlaying = false;
+    } else if (info === "streamInformation") {
+    } else if (info === "screen_share_started") {
+    } else if (info === "roomInformation") {
+      //Lastly updates the current streamlist with the fetched one.
+    } else if (info === "data_channel_opened") {
+      // isDataChannelOpen = true;
+    } else if (info === "data_channel_closed") {
+      // isDataChannelOpen = false;
+    } else if (info === "data_received") {
+    } else if (info === "available_devices") {
+    } else if (info === "updated_stats") {
+    } else if (info == "debugInfo") {
+    }
+    else if (info == "ice_connection_state_changed") {
+      console.log("iceConnectionState Changed: ",JSON.stringify(obj))
+    }
+  },
+  callbackError: function (error, message) {
+    //some possible errors, NotFoundError, SecurityError,PermissionDeniedError
+    if (error.indexOf("publishTimeoutError") !== -1 && roomTimerId != null) {
+      clearInterval(roomTimerId);
+    }
+
+    var errorMessage = JSON.stringify(error);
+    if (typeof message != "undefined") {
+      errorMessage = message;
+    }
+    errorMessage = JSON.stringify(error);
+    if (error.indexOf("NotFoundError") !== -1) {
+      errorMessage =
+          "Camera or Mic are not found or not allowed in your device.";
+      alert(errorMessage);
+    } else if (
+        error.indexOf("NotReadableError") !== -1 ||
+        error.indexOf("TrackStartError") !== -1
+    ) {
+      errorMessage =
+          "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
+      alert(errorMessage);
+    } else if (
+        error.indexOf("OverconstrainedError") != -1 ||
+        error.indexOf("ConstraintNotSatisfiedError") != -1
+    ) {
+      errorMessage =
+          "There is no device found that fits your video and audio constraints. You may change video and audio constraints.";
+      alert(errorMessage);
+    } else if (
+        error.indexOf("NotAllowedError") != -1 ||
+        error.indexOf("PermissionDeniedError") != -1
+    ) {
+      errorMessage = "You are not allowed to access camera and mic.";
+    } else if (error.indexOf("TypeError") != -1) {
+      errorMessage = "Video/Audio is required.";
+    } else if (error.indexOf("UnsecureContext") != -1) {
+      errorMessage =
+          "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
+    } else if (error.indexOf("WebSocketNotSupported") != -1) {
+      errorMessage = "Fatal Error: WebSocket not supported in this browser";
+    } else if (error.indexOf("no_stream_exist") != -1) {
+      //TODO: removeRemoteVideo(error.streamId);
+      console.log("no_stream_exist");
+      isPlaying = false;
+      return;
+    } else if (error.indexOf("already_playing") != -1) {
+      console.log("already_playing");
+      isPlaying = false;
+      return;
+    } else if (error.indexOf("data_channel_error") != -1) {
+      errorMessage = "There was a error during data channel communication";
+    } else if (error.indexOf("ScreenSharePermissionDenied") != -1) {
+      errorMessage = "You are not allowed to access screen share";
+    } else if (error.indexOf("WebSocketNotConnected") != -1) {
+      errorMessage = "WebSocket Connection is disconnected.";
+    }
   },
 });
 
@@ -352,6 +529,7 @@ window.copyWindowLocation = copyWindowLocation;
 window.makeFullScreen = makeFullScreen;
 
 export const AntmediaContext = React.createContext(webRTCAdaptor);
+export const AntmediaAdminContext = React.createContext(webRTCAdaptorForAdmin);
 
 function App() {
   const handleFullScreen = (e) => {
@@ -386,9 +564,11 @@ function App() {
           <AntSnackBar id={key} notificationData={notificationData} />
         )}
       >
-        <AntmediaContext.Provider value={webRTCAdaptor}>
-          <CustomRoutes />
-        </AntmediaContext.Provider>
+        <AntmediaAdminContext.Provider value={webRTCAdaptorForAdmin}>
+          <AntmediaContext.Provider value={webRTCAdaptor}>
+            <CustomRoutes />
+          </AntmediaContext.Provider>
+        </AntmediaAdminContext.Provider>
       </SnackbarProvider>
     </ThemeProvider>
   );

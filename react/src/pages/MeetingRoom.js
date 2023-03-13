@@ -266,7 +266,7 @@ const MeetingRoom = React.memo((props) => {
                     </div>
                   </div>
               );
-            } else if (antmedia.isPlayMode === false) {
+            } else if (antmedia.onlyDataChannel === false) {
               return (
                   <div className="unpinned">
                     <div className="single-video-container " key={index}>
@@ -333,7 +333,7 @@ const MeetingRoom = React.memo((props) => {
           <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
             {!pinLayout && ( // if not pinned layout show me first as a regular video
                 <>
-                  { antmedia.isPlayMode === false ?
+                  { antmedia.onlyDataChannel === false ?
                   <div
                       className="single-video-container not-pinned"
                       style={{

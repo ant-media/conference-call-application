@@ -108,7 +108,7 @@ function InfoButton(props) {
               </ListItemIcon>
             </StyledMenuItem>
 
-              {antmedia.isPlayMode === false ?
+              {antmedia.onlyDataChannel === false ?
             <Typography variant="body2" sx={{px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700}} color="#fff">
               {t('Resolution')}
             </Typography>
@@ -117,7 +117,7 @@ function InfoButton(props) {
                       {t('You are in play only mode')}
                   </Typography>}
 
-              {antmedia.isPlayMode === false ?
+              {antmedia.onlyDataChannel === false ?
             <StyledMenuItem>
               <StyledListItemText>{getResolution()}</StyledListItemText>
             </StyledMenuItem>

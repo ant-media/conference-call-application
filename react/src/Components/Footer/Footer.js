@@ -55,19 +55,19 @@ function Footer(props) {
                     <OptionButton footer/>
                   </Grid>
 
-                  {antmedia.isPlayMode === false ?
+                  {antmedia.onlyDataChannel === false ?
                   <Grid item xs={0}>
                     <CameraButton {...props} footer/>
                   </Grid>
                     : null}
 
-                  {antmedia.isPlayMode === false ?
+                  {antmedia.onlyDataChannel === false ?
                   <Grid item xs={0}>
                     <MicButton footer/>
                   </Grid>
                       : null}
 
-                  {antmedia.isPlayMode === false ?
+                  {antmedia.onlyDataChannel === false ?
                   <Grid item xs={0}>
                     {" "}
                     <ShareScreenButton footer/>

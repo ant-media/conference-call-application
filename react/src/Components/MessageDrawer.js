@@ -94,7 +94,7 @@ return (
               </TabPanel>
             </Grid>
 
-            {antmedia.isPlayMode === false && value === 0 ?
+            {antmedia.onlyDataChannel === false && value === 0 ?
             <MessageInput />
                 : <Typography variant="body2" sx={{px: 1.5, py: 0.5, fontSize: 12, fontWeight: 700}} color="#fff">
                   {t('You cannot send message in play only mode')}

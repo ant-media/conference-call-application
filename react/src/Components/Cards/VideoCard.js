@@ -100,7 +100,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
   //mediaSettings?.isScreenShared means am i sharing my screen
   //mediaSettings?.screenSharedVideoId === props?.id means is someone else sharing their screen
   useEffect(() => {
-    if (isLocal && mediaSettings.isPublished && !antmedia.isPlayMode) {
+    if (isLocal && mediaSettings.isPublished && !antmedia.onlyDataChannel && antmedia.mediaManager.localStream !== null) {
       antmedia.enableAudioLevelForLocalStream((value) => {
         // sounds under 0.01 are probably background noise
         if (value >= 0.01) {

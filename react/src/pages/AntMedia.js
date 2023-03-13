@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Grid } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { AntmediaContext } from "App";
+import { AntmediaContext, AntmediaAdminContext } from "App";
 import _ from "lodash";
 import WaitingRoom from "./WaitingRoom";
 import MeetingRoom from "./MeetingRoom";
@@ -10,7 +10,7 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
-import {VideoEffect} from "../antmedia/webrtc_adaptor/dist/video-effect";
+import {VideoEffect} from "@antmedia/webrtc_adaptor/dist/video-effect";
 import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
@@ -33,6 +33,7 @@ function AntMedia() {
   const { id } = useParams();
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
+  const antmediaadmin = useContext(AntmediaAdminContext);
 
   // drawerOpen for message components.
   const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
@@ -284,6 +285,15 @@ function AntMedia() {
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
+        let commandList = message.split('*');
+        if (commandList.length > 1 && commandList[0] === "admin") {
+          antmediaadmin.sendData(myLocalData.streamId + "listener",
+              JSON.stringify({
+                streamId: commandList[0],
+                eventType: commandList[1]
+              }));
+          return;
+        }
         if(message === "debugme") {
           antmedia.getDebugInfo(myLocalData.streamId);
           return;
@@ -583,6 +593,7 @@ function AntMedia() {
     antmedia.play(obj.streamId, "", roomName);
   }
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
+    debugger;
     antmedia.publish(
       publishStreamId,
       token,
@@ -734,6 +745,14 @@ function AntMedia() {
     }
   }
 
+  function resetAllParticipants() {
+    setAllParticipants([]);
+  }
+
+  function resetPartipants() {
+    setParticipants([]);
+  }
+
   // START custom functions
   antmedia.handlePlayVideo = handlePlayVideo;
   antmedia.handleRoomEvents = handleRoomEvents;
@@ -763,6 +782,10 @@ function AntMedia() {
   antmedia.checkAndTurnOffLocalCamera = checkAndTurnOffLocalCamera;
   antmedia.getSelectedDevices = getSelectedDevices;
   antmedia.setSelectedDevices = setSelectedDevices;
+  antmedia.resetAllParticipants = resetAllParticipants;
+  antmedia.resetPartipants = resetPartipants;
+  antmedia.toggleSetCam = toggleSetCam;
+  antmedia.toggleSetMic = toggleSetMic;
   // END custom functions
   return (
     <Grid container className="App">

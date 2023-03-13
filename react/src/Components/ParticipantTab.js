@@ -68,10 +68,10 @@ function ParticipantTab(props) {
                   variant="body2"
                   style={{marginLeft: 4, fontWeight: 500}}
               >
-                {antmedia.isPlayMode === false ? allParticipants.length + 1 : allParticipants.length}
+                {antmedia.onlyDataChannel === false ? allParticipants.length + 1 : allParticipants.length}
               </ParticipantName>
             </Grid>
-            {antmedia.isPlayMode === false ? getParticipantItem("localVideo", "You") : ""}
+            {antmedia.onlyDataChannel === false ? getParticipantItem("localVideo", "You") : ""}
             {allParticipants.map(({streamId, streamName}, index) => {
               if (mediaSettings?.myLocalData?.streamId !== streamId) {
                 return getParticipantItem(streamId, streamName);

@@ -36,7 +36,7 @@ function WaitingRoom(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    if(!antmedia.isPlayMode) {
+    if(!antmedia.onlyDataChannel) {
       antmedia.mediaManager.localVideo = document.getElementById("localVideo");
       antmedia.mediaManager.localVideo.srcObject =
           antmedia.mediaManager.localStream;
@@ -56,7 +56,7 @@ function WaitingRoom(props) {
   }
 
   function joinRoom(e) {
-    if (antmedia.mediaManager.localStream === null && antmedia.isPlayMode === false) {
+    if (antmedia.mediaManager.localStream === null && antmedia.onlyDataChannel === false) {
       e.preventDefault();
       enqueueSnackbar(
         {
@@ -119,7 +119,7 @@ function WaitingRoom(props) {
               alignItems={"center"}
           >
 
-            { antmedia.isPlayMode === false ?
+            { antmedia.onlyDataChannel === false ?
             <Grid item md={7} alignSelf="stretch">
               <Grid
                   container
@@ -169,7 +169,7 @@ function WaitingRoom(props) {
             </Grid>
             : null}
 
-            <Grid item md={antmedia.isPlayMode === false ? 4 : 12}>
+            <Grid item md={antmedia.onlyDataChannel === false ? 4 : 12}>
               <Grid container justifyContent={"center"}>
                 <Grid container justifyContent={"center"}>
                   <Typography variant="h5" align="center">
