@@ -238,8 +238,6 @@ function AntMedia() {
   }
 
   function reconnect() {
-    
-    console.log("----------- reconnect 1");
     //webRTCAdaptor.mediaManager.localStreamSoundMeter.stop();
     webRTCAdaptor.closePeerConnection(publishStreamId);
     webRTCAdaptor.closeWebSocket();
@@ -256,8 +254,6 @@ function AntMedia() {
     
     setRecreateAdaptor(true);
     displayWarning("Connection lost. Trying reconnect...");
-    console.log("----------- reconnect 2");
-
   }
 
   function joinRoom(roomName, generatedStreamId, roomJoinMode) {
@@ -265,11 +261,7 @@ function AntMedia() {
   }
 
   useEffect(() => {
-    console.log("----------- use effect 1 "+recreateAdaptor+" "+webRTCAdaptor);
-
     if (recreateAdaptor && webRTCAdaptor == null) {
-      console.log("----------- use effect 2 "+recreateAdaptor+" "+webRTCAdaptor);
-
       setWebRTCAdaptor(new WebRTCAdaptor({
         websocket_url: websocketURL,
         mediaConstraints: mediaConstraints,
@@ -457,7 +449,10 @@ function AntMedia() {
       handleScreenshareNotFromPlatform();
     } else if (error.indexOf("WebSocketNotConnected") != -1) {
       errorMessage = "WebSocket Connection is disconnected.";
+    } else if (error.indexOf("highResourceUsage") != -1) {
+      reconnect();
     }
+
     if(!reconnecting) {
       alert(errorMessage);
     }
@@ -466,22 +461,11 @@ function AntMedia() {
   window.makeFullScreen = makeFullScreen;
 
 
-
-
-
-
-
-
-
-
-
   function setLocalVideo(localVideo) {
     setLocalVideoLocal(localVideo);
     webRTCAdaptor.mediaManager.localVideo = localVideo;
     webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
   }
-
-  
 
   function pinVideo(id, videoLabelProp = "") {
     // id is for pinning user.

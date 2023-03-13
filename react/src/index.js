@@ -14,11 +14,11 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 root.render(
-  //<React.StrictMode>
+  <React.StrictMode>
     <BrowserRouter basename={appName}>
       <App />
     </BrowserRouter>
-  //</React.StrictMode>
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
