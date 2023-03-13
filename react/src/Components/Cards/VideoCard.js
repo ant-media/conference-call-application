@@ -174,7 +174,59 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                     />
                   </Fab>
                 </Tooltip>
+
               </Grid>
+              { props.id !== 'localVideo' && antmedia.admin && antmedia.admin === true ?
+              <Grid item>
+                <Tooltip
+                    title={`Camera off ${
+                        props.name
+                    }`}
+                    placement="top"
+                >
+                  <Fab
+                      onClick={()=>{
+                        antmedia.handleSendMessage("admin*publisher_room*"+props.id+"*CLOSE_YOUR_CAMERA");
+                      }}
+                      color="primary"
+                      aria-label="add"
+                      size="small"
+                  >
+                    <SvgIcon
+                        size={36}
+                        name={"camera-off"}
+                        color={theme.palette.grey[80]}
+                    />
+                  </Fab>
+                </Tooltip>
+              </Grid>
+              : null }
+
+              { props.id !== 'localVideo' && antmedia.admin && antmedia.admin === true ?
+              <Grid item>
+                <Tooltip
+                    title={`Microphone off ${
+                        props.name
+                    }`}
+                    placement="top"
+                >
+                  <Fab
+                      onClick={()=>{
+                        antmedia.handleSendMessage("admin*publisher_room*"+props.id+"*CLOSE_YOUR_MICROPHONE");
+                      }}
+                      color="primary"
+                      aria-label="add"
+                      size="small"
+                  >
+                    <SvgIcon
+                        size={36}
+                        name={"muted-microphone"}
+                        color={theme.palette.grey[80]}
+                    />
+                  </Fab>
+                </Tooltip>
+              </Grid>
+              : null }
             </Grid>
           </Grid>
         )}

@@ -217,7 +217,9 @@ const webRTCAdaptor = new WebRTCAdaptor({
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") {
       //stream is being published
-      webRTCAdaptor.enableStats(publishStreamId);
+      if (!onlyDataChannel) {
+        webRTCAdaptor.enableStats(publishStreamId);
+      }
       webRTCAdaptor.handleRoomInfo(publishStreamId);
       if (webRTCAdaptor.mediaManager.localStream != null) {
         webRTCAdaptor.mediaManager.localVideo = document.getElementById("localVideo");
