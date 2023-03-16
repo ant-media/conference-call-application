@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Grid } from "@mui/material";
 import { useParams } from "react-router-dom";
 import _ from "lodash";
@@ -153,7 +153,7 @@ function AntMedia() {
       isCameraOn: true, //start with camera on
     },
   ]);
-  const [isPlayOnly, setPlayOnly] = React.useState(playOnly);
+  const [isPlayOnly] = React.useState(playOnly);
 
   const [localVideo, setLocalVideoLocal] = React.useState(null);
 
@@ -164,14 +164,14 @@ function AntMedia() {
 
 
   function makeFullScreen(divId) {
-    if (fullScreenId == divId) {
+    if (fullScreenId === divId) {
       document.getElementById(divId).classList.remove("selected");
       document.getElementById(divId).classList.add("unselected");
       fullScreenId = -1;
     } else {
       document.getElementsByClassName("publisher-content")[0].className =
         "publisher-content chat-active fullscreen-layout";
-        if (fullScreenId != -1) {
+        if (fullScreenId !== -1) {
           document.getElementById(fullScreenId).classList.remove("selected");
           document.getElementById(fullScreenId).classList.add("unselected");
         }
@@ -190,22 +190,22 @@ function AntMedia() {
 
     // check if the selected devices are still available
     for(let index = 0; index < devices.length; index++) {
-      if (devices[index].kind == "videoinput" && devices[index].deviceId == selectedDevices.videoDeviceId) {
+      if (devices[index].kind === "videoinput" && devices[index].deviceId === selectedDevices.videoDeviceId) {
         isVideoDeviceAvailable = true;
       }
-      if (devices[index].kind == "audioinput" && devices[index].deviceId == selectedDevices.audioDeviceId) {
+      if (devices[index].kind === "audioinput" && devices[index].deviceId === selectedDevices.audioDeviceId) {
         isAudioDeviceAvailable = true;
       }
     }
 
     // if the selected devices are not available, select the first available device
-    if (selectedDevices.videoDeviceId == '' || isVideoDeviceAvailable == false) {
+    if (selectedDevices.videoDeviceId === '' || isVideoDeviceAvailable === false) {
       const camera = devices.find(d => d.kind === 'videoinput');
       if (camera) {
         selectedDevices.videoDeviceId = camera.deviceId;
       }
     }
-    if (selectedDevices.audioDeviceId == '' || isAudioDeviceAvailable == false) {
+    if (selectedDevices.audioDeviceId === '' || isAudioDeviceAvailable === false) {
       const audio = devices.find(d => d.kind === 'audioinput');
       if (audio) {
         selectedDevices.audioDeviceId = audio.deviceId;
@@ -217,7 +217,7 @@ function AntMedia() {
     if (currentCameraDeviceId !== selectedDevices.videoDeviceId) {
       webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
     }
-    if (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId == 'default') {
+    if (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') {
       webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
     }
   }
@@ -232,7 +232,7 @@ function AntMedia() {
     var iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
     console.log("Ice state checked = " + iceState);
 
-    if (iceState == null || iceState == "failed" || iceState == "disconnected") {
+    if (iceState === null || iceState === "failed" || iceState === "disconnected") {
             reconnect();
     }
   }
@@ -273,7 +273,7 @@ function AntMedia() {
 
       setRecreateAdaptor(false);
     }
-  }, [recreateAdaptor]);
+  }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   if(webRTCAdaptor) {
     webRTCAdaptor.callback = infoCallback;
@@ -351,7 +351,7 @@ function AntMedia() {
         isPlaying = true;
       }
       //Lastly updates the current streamlist with the fetched one.
-    } else if (info == "data_channel_opened") {
+    } else if (info === "data_channel_opened") {
         statusUpdateIntervalJob = setInterval(() => {
 
         updateStatus(obj);
@@ -384,13 +384,13 @@ function AntMedia() {
         displayPoorNetworkConnectionWarning();
       }
 
-    } else if (info == "debugInfo") {
+    } else if (info === "debugInfo") {
       handleDebugInfo(obj.debugInfo);
     }
-    else if (info == "ice_connection_state_changed") {
+    else if (info === "ice_connection_state_changed") {
       console.log("iceConnectionState Changed: ",JSON.stringify(obj))
       var iceState = obj.state;
-      if (iceState == null || iceState == "failed" || iceState == "disconnected"){
+      if (iceState === null || iceState === "failed" || iceState === "disconnected"){
         console.log("!! Connection closed. Please rejoin the meeting");
       }	
     }
@@ -398,7 +398,7 @@ function AntMedia() {
 
   function errorCallback(error, message) {
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
-    if (error.indexOf("publishTimeoutError") != -1 && roomInfoHandleJob != null) {
+    if (error.indexOf("publishTimeoutError") !== -1 && roomInfoHandleJob !== null) {
       clearInterval(roomInfoHandleJob);
     }
     var errorMessage = JSON.stringify(error);
@@ -418,36 +418,36 @@ function AntMedia() {
         "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
       alert(errorMessage);
     } else if (
-      error.indexOf("OverconstrainedError") != -1 ||
-      error.indexOf("ConstraintNotSatisfiedError") != -1
+      error.indexOf("OverconstrainedError") !== -1 ||
+      error.indexOf("ConstraintNotSatisfiedError") !== -1
     ) {
       errorMessage =
         "There is no device found that fits your video and audio constraints. You may change video and audio constraints.";
       alert(errorMessage);
     } else if (
-      error.indexOf("NotAllowedError") != -1 ||
-      error.indexOf("PermissionDeniedError") != -1
+      error.indexOf("NotAllowedError") !== -1 ||
+      error.indexOf("PermissionDeniedError") !== -1
     ) {
       errorMessage = "You are not allowed to access camera and mic.";
       handleScreenshareNotFromPlatform();
-    } else if (error.indexOf("TypeError") != -1) {
+    } else if (error.indexOf("TypeError") !== -1) {
       errorMessage = "Video/Audio is required.";
       webRTCAdaptor.mediaManager.getDevices();
-    } else if (error.indexOf("UnsecureContext") != -1) {
+    } else if (error.indexOf("UnsecureContext") !== -1) {
       errorMessage =
         "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
-    } else if (error.indexOf("WebSocketNotSupported") != -1) {
+    } else if (error.indexOf("WebSocketNotSupported") !== -1) {
       errorMessage = "Fatal Error: WebSocket not supported in this browser";
-    } else if (error.indexOf("no_stream_exist") != -1) {
+    } else if (error.indexOf("no_stream_exist") !== -1) {
       //TODO: removeRemoteVideo(error.streamId);
-    } else if (error.indexOf("data_channel_error") != -1) {
+    } else if (error.indexOf("data_channel_error") !== -1) {
       errorMessage = "There was a error during data channel communication";
-    } else if (error.indexOf("ScreenSharePermissionDenied") != -1) {
+    } else if (error.indexOf("ScreenSharePermissionDenied") !== -1) {
       errorMessage = "You are not allowed to access screen share";
       handleScreenshareNotFromPlatform();
-    } else if (error.indexOf("WebSocketNotConnected") != -1) {
+    } else if (error.indexOf("WebSocketNotConnected") !== -1) {
       errorMessage = "WebSocket Connection is disconnected.";
-    } else if (error.indexOf("highResourceUsage") != -1) {
+    } else if (error.indexOf("highResourceUsage") !== -1) {
       reconnect();
     }
 
@@ -510,7 +510,6 @@ function AntMedia() {
   }
 
   function handleSetMaxVideoTrackCount(maxTrackCount) {
-    // I am changing maximum participant number on the screen. Default is 3.
     if (myLocalData?.streamId) {
       webRTCAdaptor.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
       globals.maxVideoTrackCount = maxTrackCount;
@@ -530,6 +529,7 @@ function AntMedia() {
       screenShareOnNotification();
     });
   }
+  
   function screenShareOffNotification() {
     webRTCAdaptor.handleSendNotificationEvent(
       "SCREEN_SHARED_OFF",
@@ -1211,7 +1211,10 @@ function AntMedia() {
             setStreamName,
             handleLeaveFromRoom,
             handleSendNotificationEvent,
-            reconnect
+            reconnect,
+            handleSetMaxVideoTrackCount,
+            screenShareOffNotification,
+            handleSendMessage
           }}
         >
           <SnackbarProvider
