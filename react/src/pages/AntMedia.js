@@ -271,8 +271,6 @@ function AntMedia() {
         callbackError: errorCallback
       }))
 
-      console.log("----------- use effect 3 "+recreateAdaptor+" "+webRTCAdaptor);
-
       setRecreateAdaptor(false);
     }
   }, [recreateAdaptor]);
