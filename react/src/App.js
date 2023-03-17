@@ -156,7 +156,7 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
-let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = null;//process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
   const appName = window.location.pathname.substring(

@@ -76,6 +76,7 @@ function AntMedia() {
   const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
   const [virtualBackground, setVirtualBackground] = React.useState(null);
   const timeoutRef = React.useRef(null);
+  const [presenters, setPresenters] = useState([]);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(false);
@@ -84,6 +85,58 @@ function AntMedia() {
   const [messages, setMessages] = useState([]);
 
 
+  function makeParticipantPresenter(id) {
+    if (id === 'localVideo') {
+      return;
+    }
+    console.log("makeParticipantPresenter", id);
+    const appName = window.location.pathname.substring(
+        0,
+        window.location.pathname.lastIndexOf("/") + 1
+    ).replaceAll('/','');
+    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
+    const requestOptions0 = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+    };
+    const requestOptions1 = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    };
+    fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/add?streamId=" + id, requestOptions0).then(
+        () => {
+          fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + id, requestOptions1).then(() => {
+            presenters.push(id);
+            setPresenters(presenters);
+          });
+        }
+    )
+  }
+  function makeParticipantUndoPresenter(id) {
+    if (id === 'localVideo') {
+      return;
+    }
+    console.log("makeParticipantUndoPresenter", id);
+    const appName = window.location.pathname.substring(
+        0,
+        window.location.pathname.lastIndexOf("/") + 1
+    ).replaceAll('/','');
+    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
+    const requestOptions0 = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+    };
+    const requestOptions1 = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    };
+    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "/subtrack?id=" + id, requestOptions1).then(() => {
+      fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + id, requestOptions0).then( () => {
+        presenters.splice(presenters.indexOf(id), 1);
+        setPresenters(presenters);
+      });
+    });
+  }
 
   const [cam, setCam] = useState([
     {
@@ -866,6 +919,8 @@ function AntMedia() {
                   handleMessageDrawerOpen,
                   participantListDrawerOpen,
                   handleParticipantListOpen,
+                  makeParticipantPresenter,
+                  makeParticipantUndoPresenter,
                   handleSetMessages,
                   messages,
                   toggleSetNumberOfUnreadMessages,
@@ -876,6 +931,7 @@ function AntMedia() {
                   roomJoinMode,
                   audioTracks,
                   allParticipants,
+                  presenters,
                   globals,
                 }}
               >

@@ -25,7 +25,7 @@ function ParticipantTab(props) {
   const mediaSettings = React.useContext(MediaSettingsContext);
   const settings = React.useContext(SettingsContext);
 
-  const { pinnedVideoId, pinVideo, allParticipants } = settings;
+  const { pinnedVideoId, pinVideo, allParticipants, makeParticipantUndoPresenter, makeParticipantPresenter, presenters } = settings;
   const getParticipantItem = (videoId, name) => {
     return (
       <Grid
@@ -55,6 +55,22 @@ function ParticipantTab(props) {
               <SvgIcon size={28} name="pin" color="#fff" />
             </PinBtn>
           )}
+          {presenters.includes(videoId) && antmedia.admin === true && videoId != 'localVideo' ? (
+              <PinBtn
+                  sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+                  onClick={() => makeParticipantUndoPresenter(videoId)}
+              >
+                <SvgIcon size={28} name="unpresenter" color="#fff" />
+              </PinBtn>
+          ) : null}
+          {!presenters.includes(videoId) && antmedia.admin === true  && videoId != 'localVideo' ?(
+              <PinBtn
+                  sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+                  onClick={() => makeParticipantPresenter(videoId)}
+              >
+                <SvgIcon size={28} name="presenter" color="#fff" />
+              </PinBtn>
+          ) : null}
         </Grid>
       </Grid>
     );
