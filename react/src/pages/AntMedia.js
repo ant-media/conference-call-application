@@ -96,7 +96,8 @@ var token = getUrlParameter("token");
 
   var statusUpdateIntervalJob = null;
   var room = null;
-  
+  var reconnecting =false;
+
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
@@ -160,7 +161,6 @@ function AntMedia() {
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
   const [initialized, setInitialized] = React.useState(false);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
-  const [reconnecting, setReconnecting] = React.useState(false);
 
 
   function makeFullScreen(divId) {
@@ -214,19 +214,19 @@ function AntMedia() {
 
     setSelectedDevices(selectedDevices);
 
-    if (currentCameraDeviceId !== selectedDevices.videoDeviceId) {
+    if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId) {
       webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
     }
-    if (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') {
+    if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default')) {
       webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
     }
   }
 
-  
-
   function checkAndRepublishIfRequired() {
+    console.log("check reconnection:"+reconnecting);
     if(reconnecting) {
       console.log("Reconnecting...");
+      webRTCAdaptor.checkWebSocketConnection();
       return;
     }
     var iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
@@ -238,21 +238,14 @@ function AntMedia() {
   }
 
   function reconnect() {
-    //webRTCAdaptor.mediaManager.localStreamSoundMeter.stop();
+    console.log("reconnect required");
     webRTCAdaptor.closePeerConnection(publishStreamId);
     webRTCAdaptor.closeWebSocket();
-    setWebRTCAdaptor(null);
-    
-    clearInterval(autoRepublishIntervalJob);
-    clearInterval(roomInfoHandleJob);
-    clearInterval(statusUpdateIntervalJob);
-
     setParticipants([]);
     
-    setReconnecting(true);
+    reconnecting = true;
     isPlaying = false;
     
-    setRecreateAdaptor(true);
     displayWarning("Connection lost. Trying reconnect...");
   }
 
@@ -261,6 +254,7 @@ function AntMedia() {
   }
 
   useEffect(() => {
+    console.log("reconnect:"+recreateAdaptor+" webRTCAdaptor:"+webRTCAdaptor);
     if (recreateAdaptor && webRTCAdaptor == null) {
       setWebRTCAdaptor(new WebRTCAdaptor({
         websocket_url: websocketURL,
@@ -278,6 +272,7 @@ function AntMedia() {
   if(webRTCAdaptor) {
     webRTCAdaptor.callback = infoCallback;
     webRTCAdaptor.callbackError = errorCallback;
+    webRTCAdaptor.localStream = localVideo;
   }
 
   function infoCallback(info, obj) {
@@ -287,6 +282,7 @@ function AntMedia() {
      
       if(reconnecting) {
         webRTCAdaptor.joinRoom(room, publishStreamId);
+        reconnecting = false;        
       }
     } else if (info === "joinedTheRoom") {
       room = obj.ATTR_ROOM_NAME;
@@ -306,24 +302,29 @@ function AntMedia() {
             subscriberCode
         );
       }
-
-      roomInfoHandleJob = setInterval(() => {
-        handleRoomInfo(publishStreamId);
-      }, 5000);
     } else if (info === "newStreamAvailable") {
       handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") {
+      console.log("publish started");
       //stream is being published
       webRTCAdaptor.enableStats(publishStreamId);
-      handleRoomInfo(publishStreamId);
+      if(roomInfoHandleJob == null) {
+        roomInfoHandleJob = setInterval(() => {
+          handleRoomInfo(publishStreamId);
+        }, 5000);
+      }
       if (autoRepublishIntervalJob == null) {
           autoRepublishIntervalJob = setInterval(() => {
                 checkAndRepublishIfRequired();
           }, 3000);
       }
-      if(reconnecting) {
-        setReconnecting(false);
+      if (statusUpdateIntervalJob == null) {
+        statusUpdateIntervalJob = setInterval(() => {
+          updateStatus(obj);
+        }, 2000);
       }
+
+      
     } else if (info === "publish_finished") {
       //stream is being finished
     } else if (info === "screen_share_stopped") {
@@ -336,12 +337,14 @@ function AntMedia() {
         clearInterval(statusUpdateIntervalJob);
       }
     } else if (info === "closed") {
-    } else if (info === "play_finished") {
+    
+    } 
+    else if (info === "play_finished") {
       isPlaying = false;
     } else if (info === "streamInformation") {
       handleStreamInformation(obj);
     } else if (info === "screen_share_started") {
-      webRTCAdaptor.screenShareOnNotification();
+      screenShareOnNotification();
     } else if (info === "roomInformation") {
       var tempList = [...obj.streams];
       tempList.push("!" + publishStreamId);
@@ -352,10 +355,6 @@ function AntMedia() {
       }
       //Lastly updates the current streamlist with the fetched one.
     } else if (info === "data_channel_opened") {
-        statusUpdateIntervalJob = setInterval(() => {
-
-        updateStatus(obj);
-      }, 2000);
       // isDataChannelOpen = true;
     } else if (info === "data_channel_closed") {
       // isDataChannelOpen = false;
@@ -450,7 +449,7 @@ function AntMedia() {
     } else if (error.indexOf("highResourceUsage") !== -1) {
       reconnect();
     }
-
+    
     if(!reconnecting) {
       alert(errorMessage);
     }
@@ -542,7 +541,6 @@ function AntMedia() {
   }
   function screenShareOnNotification() {
     setIsScreenShared(true);
-    webRTCAdaptor.screenShareOffNotification();
     let requestedMediaConstraints = {
       width: 1920,
       height: 1080,
@@ -554,8 +552,6 @@ function AntMedia() {
     );
 
     setPinnedVideoId("localVideo");
-    // send fake audio level to get screen sharing user on a videotrack
-    // TODO: webRTCAdaptor.updateAudioLevel(myLocalData.streamId, 10);
   }
 
   function displayPoorNetworkConnectionWarning() {
@@ -1088,6 +1084,13 @@ function AntMedia() {
       if (streams.length < participants.length) {
         return oldParts.filter((p) => streams.includes(p.id));
       }
+
+      //burak: this is a correction in case of lost of some participants 
+      if(streams.length > participants.length) {
+        console.log("missing player correction");
+        return oldParts.push(streams.filter((p) => !participants.includes(p.id)));
+      }
+
       // matching the names.
       return oldParts.map((p) => {
         const newName = streamList.find((s) => s.streamId === p.id)?.streamName;
