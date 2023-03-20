@@ -546,7 +546,7 @@ function AntMedia() {
       height: 1080,
     };
     webRTCAdaptor.applyConstraints(myLocalData.streamId, requestedMediaConstraints);
-    webRTCAdaptor.handleSendNotificationEvent(
+    handleSendNotificationEvent(
       "SCREEN_SHARED_ON",
       myLocalData.streamId
     );
@@ -1084,13 +1084,6 @@ function AntMedia() {
       if (streams.length < participants.length) {
         return oldParts.filter((p) => streams.includes(p.id));
       }
-
-      //burak: this is a correction in case of lost of some participants 
-      if(streams.length > participants.length) {
-        console.log("missing player correction");
-        return oldParts.push(streams.filter((p) => !participants.includes(p.id)));
-      }
-
       // matching the names.
       return oldParts.map((p) => {
         const newName = streamList.find((s) => s.streamId === p.id)?.streamName;
