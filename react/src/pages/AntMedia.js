@@ -357,6 +357,13 @@ function AntMedia() {
                 }));
           }
           return;
+        } else if (commandList.length > 2 && commandList[0] === "listener" && antmedia.onlyDataChannel && antmedia.onlyDataChannel === true) {
+          antmedia.sendData(myLocalData.streamId,
+              JSON.stringify({
+                streamId: commandList[1],
+                eventType: commandList[2]
+              }));
+          return;
         }
         if(message === "debugme") {
           antmedia.getDebugInfo(myLocalData.streamId);

@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import styled from "@mui/material/styles/styled";
 import InfoButton from "./Components/InfoButton";
 import MicButton from "./Components/MicButton";
+import RequestPublishButton from "./Components/RequestPublishButton";
 import CameraButton from "./Components/CameraButton";
 import OptionButton from "./Components/OptionButton";
 import ShareScreenButton from "./Components/ShareScreenButton";
@@ -77,9 +78,17 @@ function Footer(props) {
                   <Grid item xs={0}>
                     <MessageButton footer/>
                   </Grid>
+
                   <Grid item xs={0}>
                       <ParticipantListButton footer />
                   </Grid>
+
+                  {antmedia.onlyDataChannel !== false ?
+                      <Grid item xs={0}>
+                        <RequestPublishButton footer/>
+                      </Grid>
+                      : null}
+
                   <Grid item xs={0}>
                     <EndCallButton footer/>
                   </Grid>

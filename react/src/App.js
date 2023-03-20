@@ -156,7 +156,7 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
-let websocketURL = null;//process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
   const appName = window.location.pathname.substring(
@@ -198,6 +198,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
       if (admin) {
         webRTCAdaptor.admin = true;
         webRTCAdaptorForAdmin.joinRoom(room + "listener", publishStreamId+"listener", "legacy");
+      } else if (onlyDataChannel) {
+        webRTCAdaptor.onlyDataChannel = true;
       }
 
       webRTCAdaptor.handleSetMyObj(obj);
@@ -522,6 +524,16 @@ const webRTCAdaptorForAdmin = new WebRTCAdaptor({
     } else if (info === "data_channel_closed") {
       // isDataChannelOpen = false;
     } else if (info === "data_received") {
+      try {
+        let notificationEvent = JSON.parse(obj.data);
+        if (notificationEvent != null && typeof notificationEvent == "object") {
+          let eventStreamId = notificationEvent.streamId;
+          let eventType = notificationEvent.eventType;
+          if (eventType === "REQUEST_PUBLISH" && webRTCAdaptor.admin === true) {
+            webRTCAdaptor.handleSendMessage("admin*listener_room*"+eventStreamId+"*GRANT_BECOME_PUBLISHER");
+          }
+        }
+      } catch (e) {}
     } else if (info === "available_devices") {
     } else if (info === "updated_stats") {
     } else if (info == "debugInfo") {
