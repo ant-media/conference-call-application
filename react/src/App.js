@@ -46,6 +46,9 @@ if (i18n.language !== "en" || i18n.language !== "tr") {
   }
 }
 
+var tokenPublishAdmin = getUrlParameter("tokenPublishAdmin");
+var tokenPlay = getUrlParameter("tokenPlay");
+var tokenPublish = getUrlParameter("tokenPublish");
 var token = getUrlParameter("token");
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var publishStreamId = getUrlParameter("streamId");
@@ -54,6 +57,7 @@ var onlyDataChannel = getUrlParameter("onlyDataChannel");
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var admin = getUrlParameter("admin");
+var observerMode = getUrlParameter("observerMode");
 var isPlaying = false;
 var fullScreenId = -1;
 
@@ -71,6 +75,10 @@ if (onlyDataChannel == null) {
 
 if (admin == null) {
   admin = false;
+}
+
+if (observerMode == null) {
+  observerMode = false;
 }
 
 var roomOfStream = [];
@@ -156,7 +164,7 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
-let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = null; //process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
   const appName = window.location.pathname.substring(
@@ -188,6 +196,9 @@ const webRTCAdaptor = new WebRTCAdaptor({
   callback: (info, obj) => {
     if (info === "initialized") {
       webRTCAdaptor.enableDisableMCU(mcuEnabled);
+      if (observerMode) {
+        webRTCAdaptor.turnObserverModeOn();
+      }
     } else if (info === "joinedTheRoom") {
       roomName = obj.ATTR_ROOM_NAME;
       var room = obj.ATTR_ROOM_NAME;
@@ -197,7 +208,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
 
       if (admin) {
         webRTCAdaptor.admin = true;
-        webRTCAdaptorForAdmin.joinRoom(room + "listener", publishStreamId+"listener", "legacy");
+        webRTCAdaptorForAdmin.joinRoom(room + "listener", publishStreamId+"admin", "legacy");
       } else if (onlyDataChannel) {
         webRTCAdaptor.onlyDataChannel = true;
       }
@@ -207,7 +218,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
 
       webRTCAdaptor.handlePublish(
             obj.streamId,
-            token,
+            tokenPublish,
             subscriberId,
             subscriberCode
         );
@@ -242,6 +253,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
         makeOnlyDataChannelPublisher = false;
         webRTCAdaptor.resetAllParticipants();
         webRTCAdaptor.resetPartipants();
+        onlyDataChannel = false;
         webRTCAdaptor.onlyDataChannel = false;
         webRTCAdaptor.joinRoom(room, publishStreamId, "legacy");
       }
@@ -249,7 +261,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
     } else if (info === "play_finished") {
       isPlaying = false;
     } else if (info === "streamInformation") {
-      webRTCAdaptor.handleStreamInformation(obj);
+      webRTCAdaptor.handleStreamInformation(tokenPlay, obj);
     } else if (info === "screen_share_started") {
       webRTCAdaptor.screenShareOnNotification();
     } else if (info === "roomInformation") {
@@ -257,7 +269,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       tempList.push("!" + publishStreamId);
       webRTCAdaptor.handleRoomEvents(obj);
       if (!isPlaying) {
-        webRTCAdaptor.handlePlay(token, tempList);
+        webRTCAdaptor.handlePlay(tokenPlay, tempList);
         isPlaying = true;
       }
       //Lastly updates the current streamlist with the fetched one.
@@ -275,7 +287,12 @@ const webRTCAdaptor = new WebRTCAdaptor({
         if (notificationEvent != null && typeof notificationEvent == "object") {
           let eventStreamId = notificationEvent.streamId;
           let eventType = notificationEvent.eventType;
-          if (eventType === "GRANT_BECOME_PUBLISHER" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+          if (eventType === "REQUEST_PUBLISH") {
+            if (webRTCAdaptor.admin) {
+              webRTCAdaptor.askForBecomingPublisher(eventStreamId);
+            }
+            return;
+          } else if (eventType === "GRANT_BECOME_PUBLISHER" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
             makeOnlyDataChannelPublisher = true;
             webRTCAdaptor.leaveFromRoom(roomName);
           } else if (eventType === "CLOSE_YOUR_CAMERA" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
@@ -288,6 +305,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
                 "CAM_TURNED_OFF",
                 publishStreamId
             );
+          } else if (eventType === "STOP_PLAYING" && !webRTCAdaptor.onlyDataChannel) {
+            webRTCAdaptor.stop(eventStreamId);
           } else if (eventType === "CLOSE_YOUR_MICROPHONE" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
             webRTCAdaptor.toggleSetMic({
               eventStreamId: 'localVideo',
@@ -496,7 +515,7 @@ const webRTCAdaptorForAdmin = new WebRTCAdaptor({
 
       webRTCAdaptorForAdmin.publish(
           obj.streamId,
-          token,
+          tokenPublishAdmin,
           subscriberId,
           subscriberCode,
           obj.streamId,

@@ -38,14 +38,36 @@ function RequestPublishButton(props) {
 
   const handlePublisherRequest = (e) => {
     e.preventDefault();
-    antmedia.handleSendMessage("listener*"+antmedia.publishStreamId+"*REQUEST_PUBLISH");
+    const appName = window.location.pathname.substring(
+        0,
+        window.location.pathname.lastIndexOf("/") + 1
+    ).replaceAll('/','');
+    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
+    //const baseUrl = "http://localhost:5080/Conference";
+    let participant = "";
+    let participants = antmedia.getAllParticipants();
+    for (let i = 0; i < participants.length; i++) {
+      if (participants[i].streamId.endsWith("admin")) {
+        participant = participants[i].streamId.replace("admin", "");
+      }
+    }
+    let command = {
+        "eventType": "REQUEST_PUBLISH",
+        "streamId": antmedia.publishStreamId,
+    }
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command)
+    };
+    fetch( baseUrl+ "/rest/v2/broadcasts/" + participant + "/data", requestOptions).then(() => {});
   };
 
   return (
     <>
       <Tooltip title={t('Request becoming publisher')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e) => { handlePublisherRequest(e) }}>
-            <SvgIcon size={40} name={'microphone'} color="#fff" />
+            <SvgIcon size={40} name={'raise-hand'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
     </>

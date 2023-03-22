@@ -93,7 +93,7 @@ const MeetingRoom = React.memo((props) => {
   const antmedia = useContext(AntmediaContext);
 
   const settings = useContext(SettingsContext);
-  const { messageDrawerOpen, participantListDrawerOpen, pinnedVideoId, pinVideo, audioTracks, globals } =
+  const { messageDrawerOpen, participantListDrawerOpen, pinnedVideoId, pinVideo, audioTracks, globals, observerMode } =
     settings;
   const { participants, allParticipants, myLocalData } = props;
 
@@ -439,7 +439,8 @@ const MeetingRoom = React.memo((props) => {
                 </>
             )}
           </div>
-          <Footer {...props} />
+          { observerMode === false ?
+          <Footer {...props} /> : null }
         </>
     )
 });

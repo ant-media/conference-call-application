@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Grid } from "@mui/material";
+import {Button, DialogActions, DialogContentText, Grid, IconButton} from "@mui/material";
 import { useParams } from "react-router-dom";
 import { AntmediaContext, AntmediaAdminContext } from "App";
 import _ from "lodash";
@@ -13,6 +13,8 @@ import LeftTheRoom from "./LeftTheRoom";
 import {VideoEffect} from "@antmedia/webrtc_adaptor/dist/video-effect";
 import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
+import DialogContent from "@mui/material/DialogContent";
+import Dialog from "@mui/material/Dialog";
 
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
@@ -33,6 +35,7 @@ function AntMedia() {
   const { id } = useParams();
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
+  antmedia.roomName = roomName;
   const antmediaadmin = useContext(AntmediaAdminContext);
 
   // drawerOpen for message components.
@@ -79,10 +82,14 @@ function AntMedia() {
   const [presenters, setPresenters] = useState([]);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(false);
+  const [openRequestBecomeSpeakerDialog, setOpenRequestBecomeSpeakerDialog] = React.useState(false);
+  const [requestingSpeakerName, setRequestingSpeakerName] = React.useState("");
+
+  const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(true);
   const [speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal] = useState(false);
 
   const [messages, setMessages] = useState([]);
+  const [observerMode, setObserverMode] = useState(false);
 
 
   function makeParticipantPresenter(id) {
@@ -95,6 +102,7 @@ function AntMedia() {
         window.location.pathname.lastIndexOf("/") + 1
     ).replaceAll('/','');
     const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
+    //const baseUrl = "http://localhost:5080/Conference";
     const requestOptions0 = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -122,20 +130,37 @@ function AntMedia() {
         window.location.pathname.lastIndexOf("/") + 1
     ).replaceAll('/','');
     const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
+    //const baseUrl = "http://localhost:5080/Conference";
     const requestOptions0 = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
     };
-    const requestOptions1 = {
-      method: 'POST',
+    const requestOptions2 = {
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     };
-    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "/subtrack?id=" + id, requestOptions1).then(() => {
-      fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + id, requestOptions0).then( () => {
-        presenters.splice(presenters.indexOf(id), 1);
-        setPresenters(presenters);
+    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions2).then((response) => response.json()).then((broadcast) => {
+      const index = broadcast.subTrackStreamIds.indexOf(id);
+      if (index > -1) {
+        broadcast.subTrackStreamIds.splice(index, 1);
+      }
+      const requestOptions1 = {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(broadcast)
+      };
+      fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions1).then(() => {
+        fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + id, requestOptions0).then( () => {
+          presenters.splice(presenters.indexOf(id), 1);
+          setPresenters(presenters);
+          antmedia.handleSendMessage("admin*listener_room*"+id+"*STOP_PLAYING");
+        });
       });
     });
+  }
+
+  function turnObserverModeOn() {
+    setObserverMode(true);
   }
 
   const [cam, setCam] = useState([
@@ -235,6 +260,11 @@ function AntMedia() {
     setPinnedVideoId("localVideo");
     // send fake audio level to get screen sharing user on a videotrack
     // TODO: antmedia.updateAudioLevel(myLocalData.streamId, 10);
+  }
+
+  function askForBecomingPublisher(listenerName) {
+    setRequestingSpeakerName(listenerName);
+    setOpenRequestBecomeSpeakerDialog(true);
   }
 
   function displayPoorNetworkConnectionWarning() {
@@ -660,8 +690,8 @@ function AntMedia() {
   function handlePlay(token, tempList) {
     antmedia.play(roomName, token, roomName, tempList);
   }
-  function handleStreamInformation(obj) {
-    antmedia.play(obj.streamId, "", roomName);
+  function handleStreamInformation(tokenPlay, obj) {
+    antmedia.play(obj.streamId, tokenPlay, roomName);
   }
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
     antmedia.publish(
@@ -815,8 +845,32 @@ function AntMedia() {
     }
   }
 
+  function approveBecomeSpeakerRequest() {
+    setOpenRequestBecomeSpeakerDialog(false);
+    const appName = window.location.pathname.substring(
+        0,
+        window.location.pathname.lastIndexOf("/") + 1
+    ).replaceAll('/','');
+    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
+    //const baseUrl = "http://localhost:5080/Conference";
+    let command = {
+      "eventType": "GRANT_BECOME_PUBLISHER",
+      "streamId": requestingSpeakerName,
+    }
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command)
+    };
+    fetch( baseUrl+ "/rest/v2/broadcasts/" + requestingSpeakerName + "/data", requestOptions).then(() => {});
+  }
+
   function resetAllParticipants() {
     setAllParticipants([]);
+  }
+
+  function getAllParticipants() {
+    return allParticipants;
   }
 
   function resetPartipants() {
@@ -852,10 +906,13 @@ function AntMedia() {
   antmedia.checkAndTurnOffLocalCamera = checkAndTurnOffLocalCamera;
   antmedia.getSelectedDevices = getSelectedDevices;
   antmedia.setSelectedDevices = setSelectedDevices;
+  antmedia.getAllParticipants = getAllParticipants;
   antmedia.resetAllParticipants = resetAllParticipants;
   antmedia.resetPartipants = resetPartipants;
   antmedia.toggleSetCam = toggleSetCam;
   antmedia.toggleSetMic = toggleSetMic;
+  antmedia.turnObserverModeOn = turnObserverModeOn;
+  antmedia.askForBecomingPublisher = askForBecomingPublisher;
   // END custom functions
   return (
     <Grid container className="App">
@@ -894,8 +951,29 @@ function AntMedia() {
             setParticipants,
             participants,
             setLeftTheRoom,
+            observerMode,
           }}
         >
+          <Dialog
+              open={openRequestBecomeSpeakerDialog}
+              onClose={()=>{setOpenRequestBecomeSpeakerDialog(false)}}
+              aria-labelledby="scroll-dialog-title"
+              aria-describedby="scroll-dialog-description"
+          >
+            <DialogContent dividers={false}>
+              <DialogContentText
+                  id="scroll-dialog-description"
+                  ref={null}
+                  tabIndex={-1}
+              >
+                {requestingSpeakerName} wants to become a speaker. Do you want to approve?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={()=>{setOpenRequestBecomeSpeakerDialog(false)}}>Deny</Button>
+              <Button onClick={()=>{approveBecomeSpeakerRequest()}}>Approve</Button>
+            </DialogActions>
+          </Dialog>
           <SnackbarProvider
             anchorOrigin={{
               vertical: "top",
@@ -940,6 +1018,7 @@ function AntMedia() {
                   allParticipants,
                   presenters,
                   globals,
+                  observerMode,
                 }}
               >
                 <>
