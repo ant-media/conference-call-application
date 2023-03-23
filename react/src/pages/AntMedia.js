@@ -33,7 +33,7 @@ const JoinModes = {
 
 function AntMedia() {
   const { id } = useParams();
-  const roomName = id;
+  const [roomName, setRoomName] = useState(id);
   const antmedia = useContext(AntmediaContext);
   antmedia.roomName = roomName;
   const antmediaadmin = useContext(AntmediaAdminContext);
@@ -84,6 +84,8 @@ function AntMedia() {
 
   const [openRequestBecomeSpeakerDialog, setOpenRequestBecomeSpeakerDialog] = React.useState(false);
   const [requestingSpeakerName, setRequestingSpeakerName] = React.useState("");
+  const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
+  const [isBroadcasting, setIsBroadcasting] = React.useState(false);
 
   const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(true);
   const [speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal] = useState(false);
@@ -96,7 +98,6 @@ function AntMedia() {
     if (id === 'localVideo') {
       return;
     }
-    console.log("makeParticipantPresenter", id);
     const appName = window.location.pathname.substring(
         0,
         window.location.pathname.lastIndexOf("/") + 1
@@ -116,6 +117,16 @@ function AntMedia() {
           fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + id, requestOptions1).then(() => {
             presenters.push(id);
             setPresenters(presenters);
+            let command = {
+              "eventType": "BROADCAST_ON",
+              "streamId": id,
+            }
+            const requestOptions = {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(command)
+            };
+            fetch( baseUrl+ "/rest/v2/broadcasts/" + id + "/data", requestOptions).then(() => {});
           });
         }
     )
@@ -124,7 +135,6 @@ function AntMedia() {
     if (id === 'localVideo') {
       return;
     }
-    console.log("makeParticipantUndoPresenter", id);
     const appName = window.location.pathname.substring(
         0,
         window.location.pathname.lastIndexOf("/") + 1
@@ -154,6 +164,16 @@ function AntMedia() {
           presenters.splice(presenters.indexOf(id), 1);
           setPresenters(presenters);
           antmedia.handleSendMessage("admin*listener_room*"+id+"*STOP_PLAYING");
+          let command = {
+            "eventType": "BROADCAST_OFF",
+            "streamId": id,
+          }
+          const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(command)
+          };
+          fetch( baseUrl+ "/rest/v2/broadcasts/" + id + "/data", requestOptions).then(() => {});
         });
       });
     });
@@ -863,6 +883,33 @@ function AntMedia() {
       body: JSON.stringify(command)
     };
     fetch( baseUrl+ "/rest/v2/broadcasts/" + requestingSpeakerName + "/data", requestOptions).then(() => {});
+    approvedSpeakerRequestList.push(requestingSpeakerName);
+    setApprovedSpeakerRequestList(approvedSpeakerRequestList);
+  }
+
+  function makeListenerAgain(speakerName) {
+    const appName = window.location.pathname.substring(
+        0,
+        window.location.pathname.lastIndexOf("/") + 1
+    ).replaceAll('/','');
+    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
+    //const baseUrl = "http://localhost:5080/Conference";
+    let command = {
+      "eventType": "MAKE_LISTENER_AGAIN",
+      "streamId": speakerName,
+    }
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command)
+    };
+    fetch( baseUrl+ "/rest/v2/broadcasts/" + speakerName + "/data", requestOptions).then(() => {});
+    // remove speakerName from approvedSpeakerRequestList
+    let index = approvedSpeakerRequestList.indexOf(speakerName);
+    if (index > -1) {
+        approvedSpeakerRequestList.splice(index, 1);
+    }
+    setApprovedSpeakerRequestList(approvedSpeakerRequestList);
   }
 
   function resetAllParticipants() {
@@ -875,6 +922,11 @@ function AntMedia() {
 
   function resetPartipants() {
     setParticipants([]);
+  }
+
+  function changeRoomName(roomName) {
+    setRoomName(roomName);
+    antmedia.roomName = roomName;
   }
 
   // START custom functions
@@ -913,6 +965,9 @@ function AntMedia() {
   antmedia.toggleSetMic = toggleSetMic;
   antmedia.turnObserverModeOn = turnObserverModeOn;
   antmedia.askForBecomingPublisher = askForBecomingPublisher;
+  antmedia.changeRoomName = changeRoomName;
+  antmedia.isBroadcasting = isBroadcasting;
+  antmedia.setIsBroadcasting = setIsBroadcasting;
   // END custom functions
   return (
     <Grid container className="App">
@@ -1005,6 +1060,8 @@ function AntMedia() {
                   participantListDrawerOpen,
                   handleParticipantListOpen,
                   makeParticipantPresenter,
+                  makeListenerAgain,
+                  approvedSpeakerRequestList,
                   makeParticipantUndoPresenter,
                   handleSetMessages,
                   messages,

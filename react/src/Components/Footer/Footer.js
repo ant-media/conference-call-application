@@ -12,7 +12,6 @@ import MessageButton from "./Components/MessageButton";
 import ParticipantListButton from "./Components/ParticipantListButton";
 import EndCallButton from "./Components/EndCallButton";
 import TimeZone from "./Components/TimeZone";
-import { useParams } from "react-router-dom";
 import {AntmediaContext} from "../../App";
 
 const CustomizedGrid = styled(Grid)(({ theme }) => ({
@@ -26,7 +25,6 @@ const CustomizedGrid = styled(Grid)(({ theme }) => ({
   height: 80,
 }));
 function Footer(props) {
-  const { id } = useParams();
   const antmedia = React.useContext(AntmediaContext);
 
     return (
@@ -41,7 +39,7 @@ function Footer(props) {
                 <img src="./favicon-32x32.png" alt="portmeet logo" style={{width: '22px', marginRight: 4}}/>
               </a>
               <Typography color="#ffffff" variant="body1">
-                {id}
+                {antmedia.roomName}
               </Typography>
               <InfoButton/>
             </Grid>
@@ -96,7 +94,7 @@ function Footer(props) {
               </Grid>
 
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
-            <TimeZone/>
+            <TimeZone />
           </Grid>
         </CustomizedGrid>
     );

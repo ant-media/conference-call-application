@@ -186,6 +186,7 @@ if (!websocketURL) {
 }
 
 let makeOnlyDataChannelPublisher = false;
+let makePublisherOnlyDataChannel = false;
 let roomName;
 
 const webRTCAdaptor = new WebRTCAdaptor({
@@ -255,7 +256,18 @@ const webRTCAdaptor = new WebRTCAdaptor({
         webRTCAdaptor.resetPartipants();
         onlyDataChannel = false;
         webRTCAdaptor.onlyDataChannel = false;
-        webRTCAdaptor.joinRoom(room, publishStreamId, "legacy");
+        let newRoom = room.replace("listener", "");
+        webRTCAdaptor.changeRoomName(newRoom);
+        webRTCAdaptor.joinRoom(newRoom, publishStreamId, "legacy");
+      } else if (makePublisherOnlyDataChannel) {
+        makePublisherOnlyDataChannel = false;
+        webRTCAdaptor.resetAllParticipants();
+        webRTCAdaptor.resetPartipants();
+        onlyDataChannel = true;
+        webRTCAdaptor.onlyDataChannel = true;
+        let newRoom = room + "listener";
+        webRTCAdaptor.changeRoomName(newRoom);
+        webRTCAdaptor.joinRoom(newRoom, publishStreamId, "legacy");
       }
     } else if (info === "closed") {
     } else if (info === "play_finished") {
@@ -287,13 +299,25 @@ const webRTCAdaptor = new WebRTCAdaptor({
         if (notificationEvent != null && typeof notificationEvent == "object") {
           let eventStreamId = notificationEvent.streamId;
           let eventType = notificationEvent.eventType;
-          if (eventType === "REQUEST_PUBLISH") {
+
+          if (eventType === "BROADCAST_ON" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+            webRTCAdaptor.setIsBroadcasting(true);
+            console.log("BROADCAST_ON");
+          } else if (eventType === "BROADCAST_OFF" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+            webRTCAdaptor.setIsBroadcasting(false);
+          } else if (eventType === "REQUEST_PUBLISH") {
             if (webRTCAdaptor.admin) {
               webRTCAdaptor.askForBecomingPublisher(eventStreamId);
             }
             return;
           } else if (eventType === "GRANT_BECOME_PUBLISHER" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
             makeOnlyDataChannelPublisher = true;
+            makePublisherOnlyDataChannel = false;
+            webRTCAdaptor.leaveFromRoom(roomName);
+          } else if (eventType === "MAKE_LISTENER_AGAIN" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+            makePublisherOnlyDataChannel = true;
+            makeOnlyDataChannelPublisher = false;
+            webRTCAdaptor.setIsBroadcasting(false);
             webRTCAdaptor.leaveFromRoom(roomName);
           } else if (eventType === "CLOSE_YOUR_CAMERA" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
             webRTCAdaptor.toggleSetCam({
