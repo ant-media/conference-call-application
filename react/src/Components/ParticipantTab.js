@@ -69,7 +69,7 @@ function ParticipantTab(props) {
             </Grid>
             {conference.isPlayOnly === false ? getParticipantItem("localVideo", "You") : ""}
             {conference.allParticipants.map(({streamId, streamName}, index) => {
-              if (conference?.myLocalData?.streamId !== streamId) {
+              if (conference.publishStreamId !== streamId) {
                 return getParticipantItem(streamId, streamName);
               } else {
                 return "";

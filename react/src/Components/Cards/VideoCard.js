@@ -262,11 +262,11 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                 {process.env.NODE_ENV === "development"
                   ? `${
                       isLocal
-                        ? conference.myLocalData?.streamId +
+                        ? conference.publishStreamId +
                           " " +
                           props.id +
                           " " +
-                          conference.myLocalData?.streamName
+                          conference.streamName
                         : props.id + " " + props.track?.id
                     }`
                   : ""}

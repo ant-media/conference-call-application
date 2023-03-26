@@ -91,7 +91,7 @@ const MeetingRoom = React.memo((props) => {
   const conference = React.useContext(ConferenceContext);
 
   const allParticipantsExceptLocal = conference.allParticipants.filter(
-      (p) => p.streamId !== conference.myLocalData?.streamId
+      (p) => p.streamId !== conference.publishStreamId
   );
 
   const filterAndSortOthersTile = (all, showing) => {

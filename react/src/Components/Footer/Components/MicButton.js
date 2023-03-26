@@ -62,8 +62,8 @@ function MicButton(props) {
       isMicMuted: true,
     });
     conference.muteLocalMic();
-    if (conference?.myLocalData?.streamId) {
-      conference.handleSendNotificationEvent('MIC_MUTED', conference?.myLocalData?.streamId);
+    if (conference.publishStreamId) {
+      conference.handleSendNotificationEvent('MIC_MUTED', conference.publishStreamId);
       conference.updateAudioLevel(0);
     }
   };
@@ -82,8 +82,8 @@ function MicButton(props) {
       isMicMuted: false,
     });
     conference.unmuteLocalMic();
-    if (conference?.myLocalData?.streamId) {
-      conference.handleSendNotificationEvent('MIC_UNMUTED', conference?.myLocalData?.streamId);
+    if (conference.publishStreamId) {
+      conference.handleSendNotificationEvent('MIC_UNMUTED', conference.publishStreamId);
 
     }
   };

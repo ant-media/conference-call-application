@@ -32,7 +32,7 @@ const JoinModes = {
 
 var token = getUrlParameter("token");
   var mcuEnabled = getUrlParameter("mcuEnabled");
-  var publishStreamId = getUrlParameter("streamId");
+  var InitialStreamId = getUrlParameter("streamId");
   var playOnly = getUrlParameter("playOnly");
   var subscriberId = getUrlParameter("subscriberId");
   var subscriberCode = getUrlParameter("subscriberCode");
@@ -98,6 +98,11 @@ var token = getUrlParameter("token");
   var room = null;
   var reconnecting =false;
 
+  var reconnectionTimer = 1;
+
+  var publishStreamIdHack = InitialStreamId;
+
+
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
@@ -107,11 +112,8 @@ function AntMedia() {
   
   // drawerOpen for participant list components.
   const [participantListDrawerOpen, setParticipantListDrawerOpen] = useState(false);
-  
-  
-  // whenever i join the room, i will get my unique id and stream settings from webRTC.
-  // So that whenever i did something i will inform other participants that this action belongs to me by sending my streamId.
-  const [myLocalData, setMyLocalData] = useState(null);
+
+  const [publishStreamId, setPublishStreamId] = useState(InitialStreamId);
 
   // this is my own name when i enter the room.
   const [streamName, setStreamName] = useState("");
@@ -229,6 +231,9 @@ function AntMedia() {
       webRTCAdaptor.checkWebSocketConnection();
       return;
     }
+
+    console.log("check publishStreamId  " + publishStreamId);
+
     var iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
     console.log("Ice state checked = " + iceState);
 
@@ -241,7 +246,13 @@ function AntMedia() {
     console.log("reconnect required");
     webRTCAdaptor.closePeerConnection(publishStreamId);
     webRTCAdaptor.closeWebSocket();
+    
+    //reset UI releated states
     setParticipants([]);
+    setAllParticipants([]);
+
+    publishStreamIdHack = publishStreamId+"_"+(reconnectionTimer++);
+    setPublishStreamId(publishStreamIdHack)
     
     reconnecting = true;
     isPlaying = false;
@@ -254,7 +265,6 @@ function AntMedia() {
   }
 
   useEffect(() => {
-    console.log("reconnect:"+recreateAdaptor+" webRTCAdaptor:"+webRTCAdaptor);
     if (recreateAdaptor && webRTCAdaptor == null) {
       setWebRTCAdaptor(new WebRTCAdaptor({
         websocket_url: websocketURL,
@@ -275,26 +285,37 @@ function AntMedia() {
     webRTCAdaptor.localStream = localVideo;
   }
 
+  function startAutoRepublishTimer() {
+    if (autoRepublishIntervalJob == null) {
+      autoRepublishIntervalJob = setInterval(() => {
+            checkAndRepublishIfRequired();
+      }, 3000);
+    }
+  }
+
   function infoCallback(info, obj) {
     if (info === "initialized") {
       enableDisableMCU(mcuEnabled);
       setInitialized(true);
      
       if(reconnecting) {
-        webRTCAdaptor.joinRoom(room, publishStreamId);
-        reconnecting = false;        
+        webRTCAdaptor.leaveFromRoom(roomName);
       }
     } else if (info === "joinedTheRoom") {
       room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
-      publishStreamId = obj.streamId;
-      handleSetMyObj(obj);
+    
+      globals.maxVideoTrackCount = obj.maxTrackCount;
+      publishStreamIdHack = obj.streamId;
+      setPublishStreamId(publishStreamIdHack);
+
 
       let streamDetailsList = obj.streamList;
 
       if (playOnly)  {
         webRTCAdaptor.play(obj.ATTR_ROOM_NAME, token, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
-      } else {
+      } 
+      else {
         handlePublish(
             obj.streamId,
             token,
@@ -313,18 +334,14 @@ function AntMedia() {
           handleRoomInfo(publishStreamId);
         }, 5000);
       }
-      if (autoRepublishIntervalJob == null) {
-          autoRepublishIntervalJob = setInterval(() => {
-                checkAndRepublishIfRequired();
-          }, 3000);
-      }
+      startAutoRepublishTimer();
       if (statusUpdateIntervalJob == null) {
         statusUpdateIntervalJob = setInterval(() => {
           updateStatus(obj);
         }, 2000);
       }
 
-      
+      reconnecting = false;        
     } else if (info === "publish_finished") {
       //stream is being finished
     } else if (info === "screen_share_stopped") {
@@ -335,6 +352,15 @@ function AntMedia() {
       if (roomInfoHandleJob !== null) {
         clearInterval(roomInfoHandleJob);
         clearInterval(statusUpdateIntervalJob);
+        clearInterval(autoRepublishIntervalJob);
+
+        roomInfoHandleJob = null;
+        statusUpdateIntervalJob = null;
+        autoRepublishIntervalJob = null;
+      }
+
+      if(reconnecting) {
+        webRTCAdaptor.joinRoom(room, publishStreamId);
       }
     } else if (info === "closed") {
     
@@ -349,7 +375,7 @@ function AntMedia() {
       var tempList = [...obj.streams];
       tempList.push("!" + publishStreamId);
       handleRoomEvents(obj);
-      if (!isPlaying) {
+      if (!isPlaying && !reconnecting) {
         handlePlay(token, tempList);
         isPlaying = true;
       }
@@ -448,11 +474,12 @@ function AntMedia() {
       errorMessage = "WebSocket Connection is disconnected.";
     } else if (error.indexOf("highResourceUsage") !== -1) {
       reconnect();
+      startAutoRepublishTimer();
     }
-    
-    if(!reconnecting) {
-      alert(errorMessage);
-    }
+
+
+    console.log("***** "+error)
+
   };
 
   window.makeFullScreen = makeFullScreen;
@@ -490,7 +517,7 @@ function AntMedia() {
   function handleNotifyPinUser(id) {
     // If I PIN USER then i am going to inform pinned user.
     // Why? Because if i pin someone, pinned user's resolution has to change for better visibility.
-    handleSendNotificationEvent("PIN_USER", myLocalData.streamId, {
+    handleSendNotificationEvent("PIN_USER", publishStreamId, {
       streamId: id,
     });
   }
@@ -498,19 +525,14 @@ function AntMedia() {
   function handleNotifyUnpinUser(id) {
     // If I UNPIN USER then i am going to inform pinned user.
     // Why? We need to decrease resolution for pinned user's internet usage.
-    handleSendNotificationEvent("UNPIN_USER", myLocalData.streamId, {
+    handleSendNotificationEvent("UNPIN_USER", publishStreamId, {
       streamId: id,
     });
   }
 
-  function handleSetInitialMaxVideoTrackCount(maxTrackCount) {
-    globals.maxVideoTrackCount = maxTrackCount;
-    console.log("Initial max video track count:"+maxTrackCount);
-  }
-
   function handleSetMaxVideoTrackCount(maxTrackCount) {
-    if (myLocalData?.streamId) {
-      webRTCAdaptor.setMaxVideoTrackCount(myLocalData.streamId, maxTrackCount);
+    if (publishStreamId) {
+      webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, maxTrackCount);
       globals.maxVideoTrackCount = maxTrackCount;
     }
   }
@@ -523,7 +545,7 @@ function AntMedia() {
     }
   }
   function handleStartScreenShare() {
-    webRTCAdaptor.switchDesktopCapture(myLocalData.streamId)
+    webRTCAdaptor.switchDesktopCapture(publishStreamId)
     .then(()=>{
       screenShareOnNotification();
     });
@@ -532,7 +554,7 @@ function AntMedia() {
   function screenShareOffNotification() {
     webRTCAdaptor.handleSendNotificationEvent(
       "SCREEN_SHARED_OFF",
-      myLocalData.streamId
+      publishStreamId
     );
     //if i stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
     if (pinnedVideoId === "localVideo") {
@@ -545,10 +567,10 @@ function AntMedia() {
       width: 1920,
       height: 1080,
     };
-    webRTCAdaptor.applyConstraints(myLocalData.streamId, requestedMediaConstraints);
+    webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
     handleSendNotificationEvent(
       "SCREEN_SHARED_ON",
-      myLocalData.streamId
+      publishStreamId
     );
 
     setPinnedVideoId("localVideo");
@@ -582,16 +604,16 @@ function AntMedia() {
         (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
       )
     ) {
-      webRTCAdaptor.turnOffLocalCamera(myLocalData.streamId);
+      webRTCAdaptor.turnOffLocalCamera(publishStreamId);
     } else {
-      webRTCAdaptor.switchVideoCameraCapture(myLocalData.streamId);
+      webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
     }
     webRTCAdaptor.screenShareOffNotification();
     let requestedMediaConstraints = {
       width: 320,
       height: 240,
     };
-    webRTCAdaptor.applyConstraints(myLocalData.streamId, requestedMediaConstraints);
+    webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
   }
   function handleStopScreenShare() {
     setIsScreenShared(false);
@@ -600,9 +622,9 @@ function AntMedia() {
         (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
       )
     ) {
-      webRTCAdaptor.turnOffLocalCamera(myLocalData.streamId);
+      webRTCAdaptor.turnOffLocalCamera(publishStreamId);
     } else {
-      webRTCAdaptor.switchVideoCameraCapture(myLocalData.streamId);
+      webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
 
       // isCameraOff = true;
     }
@@ -656,20 +678,20 @@ function AntMedia() {
   }
 
   function handleSendMessage(message) {
-    if (myLocalData.streamId) {
-      let iceState = webRTCAdaptor.iceConnectionState(myLocalData.streamId);
+    if (publishStreamId) {
+      let iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
       if (
         iceState !== null &&
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
         if(message === "debugme") {
-          webRTCAdaptor.getDebugInfo(myLocalData.streamId);
+          webRTCAdaptor.getDebugInfo(publishStreamId);
           return;
         }
 
         webRTCAdaptor.sendData(
-          myLocalData.streamId,
+          publishStreamId,
           JSON.stringify({
             eventType: "MESSAGE_RECEIVED",
             message: message,
@@ -692,7 +714,7 @@ function AntMedia() {
 
     //fake message to add chat
     var obj = {
-      streamId: myLocalData.streamId,
+      streamId: publishStreamId,
       data: JSON.stringify({
         eventType: "MESSAGE_RECEIVED",
         name: "Debugger",
@@ -821,7 +843,7 @@ function AntMedia() {
         setUserStatus(notificationEvent, eventStreamId);
       } else if (eventType === "PIN_USER") {
         if (
-          notificationEvent.streamId === myLocalData.streamId &&
+          notificationEvent.streamId === publishStreamId &&
           !isScreenShared
         ) {
           let requestedMediaConstraints = {
@@ -829,13 +851,13 @@ function AntMedia() {
             height: 480,
           };
           webRTCAdaptor.applyConstraints(
-            myLocalData.streamId,
+            publishStreamId,
             requestedMediaConstraints
           );
         }
       } else if (eventType === "UNPIN_USER") {
         if (
-          notificationEvent.streamId === myLocalData.streamId &&
+          notificationEvent.streamId === publishStreamId &&
           !isScreenShared
         ) {
           let requestedMediaConstraints = {
@@ -843,7 +865,7 @@ function AntMedia() {
             height: 240,
           };
           webRTCAdaptor.applyConstraints(
-            myLocalData.streamId,
+            publishStreamId,
             requestedMediaConstraints
           );
         }
@@ -924,7 +946,7 @@ function AntMedia() {
     // we need to empty participant array. i f we are going to leave it in the first place.
     setParticipants([]);
     webRTCAdaptor.leaveFromRoom(roomName);
-    webRTCAdaptor.turnOffLocalCamera(myLocalData.streamId);
+    webRTCAdaptor.turnOffLocalCamera(publishStreamId);
     clearInterval(autoRepublishIntervalJob);
     setWaitingOrMeetingRoom("waiting");
   }
@@ -943,19 +965,16 @@ function AntMedia() {
 
   function updateStatus(obj) {
     if (roomName !== obj) {
-      handleSendNotificationEvent("UPDATE_STATUS", myLocalData.streamId, {
+      handleSendNotificationEvent("UPDATE_STATUS", publishStreamId, {
         mic: !!mic.find((c) => c.eventStreamId === "localVideo")?.isMicMuted,
         camera: !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn,
         isPinned:
-          pinnedVideoId === "localVideo" ? myLocalData.streamId : pinnedVideoId,
+          pinnedVideoId === "localVideo" ? publishStreamId : pinnedVideoId,
         isScreenShared: isScreenShared,
       });
     }
   }
-  function handleSetMyObj(obj) {
-    handleSetInitialMaxVideoTrackCount(obj.maxTrackCount);
-    setMyLocalData({ ...obj, streamName });
-  }
+
   function handlePlay(token, tempList) {
     webRTCAdaptor.play(roomName, token, roomName, tempList);
   }
@@ -1117,12 +1136,12 @@ function AntMedia() {
 
   function cameraSelected(value) {
     setSelectedCamera(value);
-    webRTCAdaptor.switchVideoCameraCapture(myLocalData?.streamId, value);
+    webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
   }
 
   function microphoneSelected(value) {
     setSelectedMicrophone(value);
-    webRTCAdaptor.switchAudioInputSource(myLocalData?.streamId, value);
+    webRTCAdaptor.switchAudioInputSource(publishStreamId, value);
   }
 
   function muteLocalMic() {
@@ -1134,7 +1153,7 @@ function AntMedia() {
   }
 
   function updateAudioLevel(level) {
-    webRTCAdaptor.updateAudioLevel(myLocalData?.streamId, level);
+    webRTCAdaptor.updateAudioLevel(publishStreamIdHack, level);
   }
 
   function setAudioLevelListener(listener, period) {
@@ -1155,7 +1174,6 @@ function AntMedia() {
             mic,
             cam,
             talkers,
-            myLocalData,
             screenSharedVideoId,
             roomJoinMode,
             audioTracks,
@@ -1176,6 +1194,7 @@ function AntMedia() {
             streamName,
             initialized,
             devices,
+            publishStreamId,
             
             setSelectedBackgroundMode,
             setIsVideoEffectRunning,

@@ -45,11 +45,11 @@ function MicButton(props) {
         eventStreamId: "localVideo",
         isCameraOn: false,
       });
-      if (props?.myLocalData?.streamId) {
-        conference.checkAndTurnOffLocalCamera(props.myLocalData.streamId);
+      if (conference.publishStreamId) {
+        conference.checkAndTurnOffLocalCamera(conference.publishStreamId);
         conference.handleSendNotificationEvent(
           "CAM_TURNED_OFF",
-          props.myLocalData.streamId
+          conference.publishStreamId
         );
       } else {
         // if local
@@ -64,11 +64,11 @@ function MicButton(props) {
       isCameraOn: true,
     });
 
-    if (props?.myLocalData?.streamId) {
-      conference.checkAndTurnOnLocalCamera(props.myLocalData.streamId);
+    if (conference.publishStreamId) {
+      conference.checkAndTurnOnLocalCamera(conference.publishStreamId);
       conference.handleSendNotificationEvent(
         "CAM_TURNED_ON",
-        props.myLocalData.streamId
+        conference.publishStreamId
       );
     } else {
       // if local
