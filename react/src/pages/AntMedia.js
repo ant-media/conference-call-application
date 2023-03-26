@@ -576,6 +576,16 @@ function AntMedia() {
     setPinnedVideoId("localVideo");
   }
 
+  function turnOffYourMicNotification(participantId) {
+    handleSendNotificationEvent(
+      "TURN_YOUR_MIC_OFF",
+      publishStreamId,
+      {
+        streamId: participantId,
+      }
+    );
+  }
+
   function displayPoorNetworkConnectionWarning() {
     displayWarning("Your connection is not stable. Please check your internet connection!");
   }
@@ -839,7 +849,20 @@ function AntMedia() {
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
-      } else if (eventType === "UPDATE_STATUS") {
+      } else if (eventType === "TURN_YOUR_MIC_OFF") {
+        if(publishStreamId === notificationEvent.streamId) {
+          toggleSetMic({
+            eventStreamId: 'localVideo',
+            isMicMuted: true,
+          });
+          webRTCAdaptor.muteLocalMic();
+          handleSendNotificationEvent(
+              "MIC_MUTED",
+              publishStreamId
+          );
+        }
+      } 
+      else if (eventType === "UPDATE_STATUS") {
         setUserStatus(notificationEvent, eventStreamId);
       } else if (eventType === "PIN_USER") {
         if (
@@ -1229,7 +1252,8 @@ function AntMedia() {
             reconnect,
             handleSetMaxVideoTrackCount,
             screenShareOffNotification,
-            handleSendMessage
+            handleSendMessage,
+            turnOffYourMicNotification
           }}
         >
           <SnackbarProvider
