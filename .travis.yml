@@ -26,3 +26,6 @@ script:
 - cd webapp
 # - mvn clean install -DskipTests -Dgpg.skip=true --quiet
 - mvn deploy -DskipTests --quiet --settings mvn-settings.xml
+# run tests
+- cd ../test
+- python .\test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD webapp/target/*.war
