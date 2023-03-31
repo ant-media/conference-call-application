@@ -13,6 +13,7 @@ import LeftTheRoom from "./LeftTheRoom";
 import {VideoEffect} from "@antmedia/webrtc_adaptor/dist/video-effect";
 import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
+import {getUrlParameter} from "@antmedia/webrtc_adaptor/dist/fetch.stream";
 
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
@@ -33,6 +34,7 @@ function AntMedia() {
   const { id } = useParams();
   const roomName = id;
   const antmedia = useContext(AntmediaContext);
+  const playToken = getUrlParameter("playToken") === null ? "" : getUrlParameter("playToken");
 
   // drawerOpen for message components.
   const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
@@ -580,7 +582,7 @@ function AntMedia() {
     antmedia.play(roomName, token, roomName, tempList);
   }
   function handleStreamInformation(obj) {
-    antmedia.play(obj.streamId, "", roomName);
+    antmedia.play(obj.streamId, playToken, roomName);
   }
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
     antmedia.publish(

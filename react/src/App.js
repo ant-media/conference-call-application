@@ -46,7 +46,8 @@ if (i18n.language !== "en" || i18n.language !== "tr") {
   }
 }
 
-var token = getUrlParameter("token");
+var playToken = getUrlParameter("playToken");
+var publishToken = getUrlParameter("publishToken");
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var publishStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
@@ -57,6 +58,14 @@ var fullScreenId = -1;
 
 if (mcuEnabled == null) {
     mcuEnabled = false;
+}
+
+if (playToken == null) {
+  playToken = "";
+}
+
+if (publishToken == null) {
+  publishToken = "";
 }
 
 if (playOnly == null) {
@@ -186,11 +195,11 @@ const webRTCAdaptor = new WebRTCAdaptor({
       let streamDetailsList = obj.streamList;
 
       if (playOnly)  {
-        webRTCAdaptor.play(obj.ATTR_ROOM_NAME, token, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
+        webRTCAdaptor.play(obj.ATTR_ROOM_NAME, playToken, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
       } else {
         webRTCAdaptor.handlePublish(
             obj.streamId,
-            token,
+            publishToken,
             subscriberId,
             subscriberCode
         );
@@ -227,7 +236,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       tempList.push("!" + publishStreamId);
       webRTCAdaptor.handleRoomEvents(obj);
       if (!isPlaying) {
-        webRTCAdaptor.handlePlay(token, tempList);
+        webRTCAdaptor.handlePlay(playToken, tempList);
         isPlaying = true;
       }
       //Lastly updates the current streamlist with the fetched one.
