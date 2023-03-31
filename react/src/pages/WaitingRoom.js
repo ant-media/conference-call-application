@@ -20,11 +20,13 @@ import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 import {MediaSettingsContext} from "./AntMedia";
+import {getUrlParameter} from "@antmedia/webrtc_adaptor/dist/fetch.stream";
 
 
 
 function WaitingRoom(props) {
   const { id } = useParams();
+  const publishStreamId = getUrlParameter("streamId");
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -72,11 +74,16 @@ function WaitingRoom(props) {
       );
       return;
     }
-    var generatedStreamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
+    let streamId;
+    if (publishStreamId === null) {
+      streamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
 
-    console.log("generatedStreamId:"+generatedStreamId);
+      console.log("generatedStreamId:" + streamId);
+    } else {
+      streamId = publishStreamId;
+    }
 
-    antmedia.joinRoom(roomName, generatedStreamId, roomJoinMode);
+    antmedia.joinRoom(roomName, streamId, roomJoinMode);
     props.handleChangeRoomStatus("meeting");
   }
   const handleDialogOpen = (focus) => {
