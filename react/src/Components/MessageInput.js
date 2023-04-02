@@ -45,6 +45,15 @@ const MessageInput = React.memo(() => {
       setText("");
     }
   };
+
+  const addEmojiIntoTextBox = (emojiData, event) => {
+      setText(text + " " + emojiData.emoji);
+  };
+
+  const handleEmojiPickerDrawer = () => {
+    setShowEmojiPicker(!showEmojiPicker);
+  };
+
   return (
     <MessageInputContainer container>
       <form
@@ -54,7 +63,7 @@ const MessageInput = React.memo(() => {
         }}
       >
         {showEmojiPicker ?
-            <EmojiPicker onEmojiClick={(emojiData, event)=> {setText(text + " " + emojiData.emoji)}} width="300px" height="610px"/>
+            <EmojiPicker onEmojiClick={addEmojiIntoTextBox} width="300px" height="610px"/>
             : null}
         <MessageTextField
           autoFocus
@@ -64,7 +73,7 @@ const MessageInput = React.memo(() => {
             endAdornment: (
               <InputAdornment position="start">
                 <IconButton
-                    onClick={() => {setShowEmojiPicker(!showEmojiPicker)}}
+                    onClick={handleEmojiPickerDrawer}
                     aria-label="toggle password visibility"
                     size={"medium"}
                     edge="end"
