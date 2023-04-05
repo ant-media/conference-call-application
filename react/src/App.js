@@ -3,8 +3,8 @@ import "./App.css";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./styles/theme";
 import React from "react";
-import { WebRTCAdaptor } from "./antmedia/webrtc_adaptor.js";
-import { getUrlParameter } from "./antmedia/fetch.stream";
+import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor/dist/webrtc_adaptor.js";
+import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/fetch.stream";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import { initReactI18next } from "react-i18next";
@@ -307,13 +307,34 @@ const webRTCAdaptor = new WebRTCAdaptor({
             webRTCAdaptor.setIsBroadcasting(false);
           } else if (eventType === "REQUEST_PUBLISH") {
             if (webRTCAdaptor.admin) {
-              webRTCAdaptor.askForBecomingPublisher(eventStreamId);
+              webRTCAdaptor.addBecomingPublisherRequest(eventStreamId);
             }
             return;
           } else if (eventType === "GRANT_BECOME_PUBLISHER" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
-            makeOnlyDataChannelPublisher = true;
-            makePublisherOnlyDataChannel = false;
-            webRTCAdaptor.leaveFromRoom(roomName);
+            navigator.mediaDevices
+                .enumerateDevices()
+                .then((devices) => {
+                  let audioInputDevices = [];
+                  let videoInputDevices = [];
+                  devices.forEach((device) => {
+                    if (device.kind === "audioinput") {
+                        audioInputDevices.push(device);
+                    } else if (device.kind === "videoinput") {
+                        videoInputDevices.push(device);
+                    }
+                    console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
+                  });
+                  if (audioInputDevices.length > 0 && videoInputDevices.length > 0) {
+                    makeOnlyDataChannelPublisher = true;
+                    makePublisherOnlyDataChannel = false;
+                    webRTCAdaptor.leaveFromRoom(roomName);
+                  } else {
+                    webRTCAdaptor.displayNoVideoAudioDeviceFoundWarning();
+                  }
+                })
+                .catch((err) => {
+                  console.error(`${err.name}: ${err.message}`);
+                });
           } else if (eventType === "MAKE_LISTENER_AGAIN" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
             makePublisherOnlyDataChannel = true;
             makeOnlyDataChannelPublisher = false;

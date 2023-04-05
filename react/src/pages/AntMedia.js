@@ -15,6 +15,7 @@ import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import DialogContent from "@mui/material/DialogContent";
 import Dialog from "@mui/material/Dialog";
+import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
@@ -43,6 +44,8 @@ function AntMedia() {
 
   // drawerOpen for participant list components.
   const [participantListDrawerOpen, setParticipantListDrawerOpen] = useState(false);
+
+  const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = useState(false);
 
 
   // whenever i join the room, i will get my unique id and stream settings from webRTC.
@@ -84,6 +87,7 @@ function AntMedia() {
 
   const [openRequestBecomeSpeakerDialog, setOpenRequestBecomeSpeakerDialog] = React.useState(false);
   const [requestingSpeakerName, setRequestingSpeakerName] = React.useState("");
+  const [requestSpeakerList, setRequestSpeakerList] = React.useState([]);
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [isBroadcasting, setIsBroadcasting] = React.useState(false);
 
@@ -282,9 +286,27 @@ function AntMedia() {
     // TODO: antmedia.updateAudioLevel(myLocalData.streamId, 10);
   }
 
-  function askForBecomingPublisher(listenerName) {
-    setRequestingSpeakerName(listenerName);
-    setOpenRequestBecomeSpeakerDialog(true);
+  function addBecomingPublisherRequest(listenerName) {
+    let listener = {"streamId": listenerName};
+    requestSpeakerList.add(listener);
+    setRequestSpeakerList(requestSpeakerList);
+  }
+
+  function displayNoVideoAudioDeviceFoundWarning() {
+    enqueueSnackbar(
+        {
+          message: "No video or audio device found. You cannot become publisher.",
+          variant: "warning",
+          icon: <SvgIcon size={24} name={'report'} color="red" />
+        },
+        {
+          autoHideDuration: 5000,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+        }
+    );
   }
 
   function displayPoorNetworkConnectionWarning() {
@@ -373,6 +395,7 @@ function AntMedia() {
     setMessageDrawerOpen(open);
     if (open) {
       setParticipantListDrawerOpen(false);
+      setPublisherRequestListDrawerOpen(false);
     }
   }
 
@@ -380,6 +403,15 @@ function AntMedia() {
     setParticipantListDrawerOpen(open);
     if (open) {
       setMessageDrawerOpen(false);
+      setPublisherRequestListDrawerOpen(false);
+    }
+  }
+
+  function handlePublisherRequestListOpen(open) {
+    setPublisherRequestListDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+      setParticipantListDrawerOpen(false);
     }
   }
 
@@ -948,6 +980,7 @@ function AntMedia() {
   antmedia.enableDisableMCU = enableDisableMCU;
   antmedia.handleStopScreenShare = handleStopScreenShare;
   antmedia.handleScreenshareNotFromPlatform = handleScreenshareNotFromPlatform;
+  antmedia.displayNoVideoAudioDeviceFoundWarning = displayNoVideoAudioDeviceFoundWarning;
   antmedia.displayPoorNetworkConnectionWarning = displayPoorNetworkConnectionWarning;
   antmedia.handleNotifyPinUser = handleNotifyPinUser;
   antmedia.handleNotifyUnpinUser = handleNotifyUnpinUser;
@@ -964,10 +997,11 @@ function AntMedia() {
   antmedia.toggleSetCam = toggleSetCam;
   antmedia.toggleSetMic = toggleSetMic;
   antmedia.turnObserverModeOn = turnObserverModeOn;
-  antmedia.askForBecomingPublisher = askForBecomingPublisher;
+  antmedia.addBecomingPublisherRequest = addBecomingPublisherRequest;
   antmedia.changeRoomName = changeRoomName;
   antmedia.isBroadcasting = isBroadcasting;
   antmedia.setIsBroadcasting = setIsBroadcasting;
+  antmedia.approveBecomeSpeakerRequest = approveBecomeSpeakerRequest;
   // END custom functions
   return (
     <Grid container className="App">
@@ -988,6 +1022,7 @@ function AntMedia() {
             myLocalData,
             handleMessageDrawerOpen,
             handleParticipantListOpen,
+            handlePublisherRequestListOpen,
             screenSharedVideoId,
             roomJoinMode,
             audioTracks,
@@ -1059,6 +1094,8 @@ function AntMedia() {
                   handleMessageDrawerOpen,
                   participantListDrawerOpen,
                   handleParticipantListOpen,
+                  publisherRequestListDrawerOpen,
+                  handlePublisherRequestListOpen,
                   makeParticipantPresenter,
                   makeListenerAgain,
                   approvedSpeakerRequestList,
@@ -1073,6 +1110,8 @@ function AntMedia() {
                   roomJoinMode,
                   audioTracks,
                   allParticipants,
+                  requestSpeakerList,
+                  setRequestSpeakerList,
                   presenters,
                   globals,
                   observerMode,
@@ -1086,6 +1125,7 @@ function AntMedia() {
                   />
                   <MessageDrawer messageDrawerOpen={messageDrawerOpen} messages={messages} />
                   <ParticipantListDrawer participantListDrawerOpen={participantListDrawerOpen} />
+                  <PublisherRequestListDrawer publisherRequestListDrawerOpen={publisherRequestListDrawerOpen} />
                 </>
               </SettingsContext.Provider>
             )}

@@ -13,6 +13,7 @@ import ParticipantListButton from "./Components/ParticipantListButton";
 import EndCallButton from "./Components/EndCallButton";
 import TimeZone from "./Components/TimeZone";
 import {AntmediaContext} from "../../App";
+import PublisherRequestListButton from "./Components/PublisherRequestListButton";
 
 const CustomizedGrid = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.green[80],
@@ -80,6 +81,12 @@ function Footer(props) {
                   <Grid item xs={0}>
                       <ParticipantListButton footer />
                   </Grid>
+
+                  {antmedia.admin === true ?
+                    <Grid item xs={0}>
+                      <PublisherRequestListButton footer />
+                    </Grid>
+                      : null}
 
                   {antmedia.onlyDataChannel !== false ?
                       <Grid item xs={0}>
