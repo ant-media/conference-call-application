@@ -185,6 +185,8 @@ if (!websocketURL) {
 
 }
 
+// websocketURL = "ws://localhost:5080/Conference/websocket";
+
 let makeOnlyDataChannelPublisher = false;
 let makePublisherOnlyDataChannel = false;
 let roomName;

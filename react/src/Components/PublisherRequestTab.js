@@ -42,7 +42,7 @@ function PublisherRequestTab(props) {
         <Grid item>
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => {antmedia.approveBecomeSpeakerRequest(); setRequestSpeakerList(requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+              onClick={() => {antmedia.approveBecomeSpeakerRequest(videoId); setRequestSpeakerList(requestSpeakerList.filter((item) => item.streamId !== videoId))}}
             >
               Allow
             </PinBtn>

@@ -288,7 +288,10 @@ function AntMedia() {
 
   function addBecomingPublisherRequest(listenerName) {
     let listener = {"streamId": listenerName};
-    requestSpeakerList.add(listener);
+    if (requestSpeakerList.find((l) => l.streamId === listenerName)) {
+        return;
+    }
+    requestSpeakerList.push(listener);
     setRequestSpeakerList(requestSpeakerList);
   }
 
@@ -897,7 +900,7 @@ function AntMedia() {
     }
   }
 
-  function approveBecomeSpeakerRequest() {
+  function approveBecomeSpeakerRequest(requestingSpeakerName) {
     setOpenRequestBecomeSpeakerDialog(false);
     const appName = window.location.pathname.substring(
         0,
