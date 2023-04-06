@@ -99,8 +99,9 @@ function AntMedia() {
 
 
   function makeParticipantPresenter(id) {
-    if (id === 'localVideo') {
-      return;
+    let streamId = id;
+    if (streamId === 'localVideo' && myLocalData !== null) {
+      streamId = myLocalData?.streamId;
     }
     const appName = window.location.pathname.substring(
         0,
@@ -116,27 +117,28 @@ function AntMedia() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     };
-    fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/add?streamId=" + id, requestOptions0).then(
+    fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/add?streamId=" + streamId, requestOptions0).then(
         () => {
-          fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + id, requestOptions1).then(() => {
-            presenters.push(id);
+          fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions1).then(() => {
+            presenters.push(streamId);
             setPresenters(presenters);
             let command = {
               "eventType": "BROADCAST_ON",
-              "streamId": id,
+              "streamId": streamId,
             }
             const requestOptions = {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(command)
             };
-            fetch( baseUrl+ "/rest/v2/broadcasts/" + id + "/data", requestOptions).then(() => {});
+            fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
           });
         }
     )
   }
   function makeParticipantUndoPresenter(id) {
-    if (id === 'localVideo') {
+    let streamId = id;
+    if (streamId === 'localVideo') {
       return;
     }
     const appName = window.location.pathname.substring(
@@ -154,7 +156,7 @@ function AntMedia() {
       headers: { 'Content-Type': 'application/json' },
     };
     fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions2).then((response) => response.json()).then((broadcast) => {
-      const index = broadcast.subTrackStreamIds.indexOf(id);
+      const index = broadcast.subTrackStreamIds.indexOf(streamId);
       if (index > -1) {
         broadcast.subTrackStreamIds.splice(index, 1);
       }
@@ -164,20 +166,20 @@ function AntMedia() {
         body: JSON.stringify(broadcast)
       };
       fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions1).then(() => {
-        fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + id, requestOptions0).then( () => {
-          presenters.splice(presenters.indexOf(id), 1);
+        fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + streamId, requestOptions0).then( () => {
+          presenters.splice(presenters.indexOf(streamId), 1);
           setPresenters(presenters);
-          antmedia.handleSendMessage("admin*listener_room*"+id+"*STOP_PLAYING");
+          antmedia.handleSendMessage("admin*listener_room*"+streamId+"*STOP_PLAYING");
           let command = {
             "eventType": "BROADCAST_OFF",
-            "streamId": id,
+            "streamId": streamId,
           }
           const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(command)
           };
-          fetch( baseUrl+ "/rest/v2/broadcasts/" + id + "/data", requestOptions).then(() => {});
+          fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
         });
       });
     });
