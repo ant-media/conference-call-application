@@ -139,7 +139,7 @@ function AntMedia() {
   function makeParticipantUndoPresenter(id) {
     let streamId = id;
     if (streamId === 'localVideo') {
-      return;
+      streamId = myLocalData?.streamId;
     }
     const appName = window.location.pathname.substring(
         0,

@@ -55,7 +55,7 @@ function ParticipantTab(props) {
               <SvgIcon size={28} name="pin" color="#fff" />
             </PinBtn>
           )}
-          {presenters.includes(videoId) && antmedia.admin === true ? (
+          {(videoId === "localVideo" ? presenters.includes(mediaSettings.myLocalData?.streamId) : presenters.includes(videoId) )&& antmedia.admin === true ? (
               <PinBtn
                   sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                   onClick={() => makeParticipantUndoPresenter(videoId)}
@@ -63,7 +63,7 @@ function ParticipantTab(props) {
                 <SvgIcon size={28} name="unpresenter" color="#fff" />
               </PinBtn>
           ) : null}
-          {!presenters.includes(videoId) && antmedia.admin === true ?(
+          {(videoId === "localVideo" ? !presenters.includes(mediaSettings.myLocalData?.streamId) : !presenters.includes(videoId) ) && antmedia.admin === true ?(
               <PinBtn
                   sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                   onClick={() => makeParticipantPresenter(videoId)}
