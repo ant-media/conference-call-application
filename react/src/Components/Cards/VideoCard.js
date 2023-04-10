@@ -99,6 +99,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
     mediaSettings?.screenSharedVideoId === props?.id;
   //mediaSettings?.isScreenShared means am i sharing my screen
   //mediaSettings?.screenSharedVideoId === props?.id means is someone else sharing their screen
+
   useEffect(() => {
     if (isLocal && mediaSettings.isPublished && !antmedia.onlyDataChannel && antmedia.mediaManager.localStream !== null) {
       antmedia.enableAudioLevelForLocalStream((value) => {
@@ -115,6 +116,9 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
           );
         }
       }, 100);
+    } else if (isLocal && antmedia.onlyDataChannel) {
+      setIsTalking(false);
+      antmedia.disableAudioLevelForLocalStream();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mediaSettings.isPublished]);
@@ -204,27 +208,49 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
 
               { props.id !== 'localVideo' && antmedia.admin && antmedia.admin === true ?
               <Grid item>
-                <Tooltip
-                    title={`Microphone off ${
-                        props.name
-                    }`}
-                    placement="top"
-                >
-                  <Fab
-                      onClick={()=>{
-                        antmedia.handleSendMessage("admin*publisher_room*"+props.id+"*CLOSE_YOUR_MICROPHONE");
-                      }}
-                      color="primary"
-                      aria-label="add"
-                      size="small"
+                {mic && !mic.isMicMuted ?
+                  <Tooltip
+                      title={`Microphone off ${
+                          props.name
+                      }`}
+                      placement="top"
                   >
-                    <SvgIcon
-                        size={36}
-                        name={"muted-microphone"}
-                        color={theme.palette.grey[80]}
-                    />
-                  </Fab>
-                </Tooltip>
+                    <Fab
+                        onClick={()=>{
+                          antmedia.handleSendMessage("admin*publisher_room*"+props.id+"*CLOSE_YOUR_MICROPHONE");
+                        }}
+                        color="primary"
+                        aria-label="add"
+                        size="small"
+                    >
+                      <SvgIcon
+                          size={36}
+                          name={"muted-microphone"}
+                          color={theme.palette.grey[80]}
+                      />
+                    </Fab>
+                  </Tooltip>
+                : <Tooltip
+                        title={`Microphone on ${
+                            props.name
+                        }`}
+                        placement="top"
+                    >
+                      <Fab
+                          onClick={()=>{
+                            antmedia.handleSendMessage("admin*publisher_room*"+props.id+"*OPEN_YOUR_MICROPHONE");
+                          }}
+                          color="primary"
+                          aria-label="add"
+                          size="small"
+                      >
+                        <SvgIcon
+                            size={36}
+                            name={"microphone"}
+                            color={theme.palette.grey[80]}
+                        />
+                      </Fab>
+                    </Tooltip> }
               </Grid>
               : null }
             </Grid>

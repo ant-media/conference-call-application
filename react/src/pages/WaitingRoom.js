@@ -82,6 +82,8 @@ function WaitingRoom(props) {
   }
 
   function joinRoom(e) {
+    var generatedStreamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
+    console.log("generatedStreamId:"+generatedStreamId);
     if (antmedia.mediaManager.localStream === null && antmedia.onlyDataChannel === false) {
       e.preventDefault();
       enqueueSnackbar(
@@ -97,15 +99,15 @@ function WaitingRoom(props) {
         }
       );
       return;
+    } else if (speedTestBeforeLogin && antmedia.onlyDataChannel !== true) {
+      antmediaSpeedTest.publish(generatedStreamId + "SpeedTest", "");
+      e.preventDefault();
+      setSpeedTestBeforeLoginModal(true);
     } else if (speedTestBeforeLogin) {
-      antmediaSpeedTest.publish(roomName + "SpeedTest", "");
+      antmediaSpeedTest.play(roomName + "SpeedTest", "");
       e.preventDefault();
       setSpeedTestBeforeLoginModal(true);
     } else {
-      var generatedStreamId = props.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
-
-      console.log("generatedStreamId:"+generatedStreamId);
-
       antmedia.joinRoom(roomName, generatedStreamId, roomJoinMode);
       props.handleChangeRoomStatus("meeting");
     }

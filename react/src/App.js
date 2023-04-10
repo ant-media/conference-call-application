@@ -3,8 +3,8 @@ import "./App.css";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./styles/theme";
 import React from "react";
-import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor/dist/webrtc_adaptor.js";
-import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/fetch.stream";
+import { WebRTCAdaptor } from "./antmedia/webrtc_adaptor.js";
+import { getUrlParameter } from "./antmedia/fetch.stream";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import { initReactI18next } from "react-i18next";
@@ -71,6 +71,8 @@ if (playOnly == null) {
 
 if (onlyDataChannel == null) {
     onlyDataChannel = false;
+} else if (onlyDataChannel === "true") {
+  onlyDataChannel = true;
 }
 
 if (admin == null) {
@@ -165,6 +167,7 @@ var mediaConstraints = {
 };
 
 let websocketURL = null; //process.env.REACT_APP_WEBSOCKET_URL;
+websocketURL = "ws://localhost:5080/Conference/websocket";
 
 if (!websocketURL) {
   const appName = window.location.pathname.substring(
@@ -185,7 +188,7 @@ if (!websocketURL) {
 
 }
 
-// websocketURL = "ws://localhost:5080/Conference/websocket";
+//websocketURL = "ws://localhost:5080/Conference/websocket";
 
 let makeOnlyDataChannelPublisher = false;
 let makePublisherOnlyDataChannel = false;
@@ -329,6 +332,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
                   if (audioInputDevices.length > 0 && videoInputDevices.length > 0) {
                     makeOnlyDataChannelPublisher = true;
                     makePublisherOnlyDataChannel = false;
+                    publishStreamId = publishStreamId + "tempPublisher";
                     webRTCAdaptor.leaveFromRoom(roomName);
                   } else {
                     webRTCAdaptor.displayNoVideoAudioDeviceFoundWarning();
@@ -341,6 +345,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
             makePublisherOnlyDataChannel = true;
             makeOnlyDataChannelPublisher = false;
             webRTCAdaptor.setIsBroadcasting(false);
+            publishStreamId = publishStreamId.replace('tempPublisher', '');
             webRTCAdaptor.leaveFromRoom(roomName);
           } else if (eventType === "CLOSE_YOUR_CAMERA" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
             webRTCAdaptor.toggleSetCam({
@@ -364,6 +369,13 @@ const webRTCAdaptor = new WebRTCAdaptor({
                 "MIC_MUTED",
                 publishStreamId
             );
+          } else if (eventType === "OPEN_YOUR_MICROPHONE" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+            webRTCAdaptor.toggleSetMic({
+              eventStreamId: 'localVideo',
+              isMicMuted: false,
+            });
+            webRTCAdaptor.unmuteLocalMic();
+            webRTCAdaptor.handleSendNotificationEvent('MIC_UNMUTED', publishStreamId);
           }
         }
         webRTCAdaptor.handleNotificationEvent(obj);
@@ -472,7 +484,7 @@ var speedTestObject = {
 let speedTestCounter = 0;
 const webRTCAdaptorSpeedTest = new WebRTCAdaptor({
   websocket_url: websocketURL,
-  mediaConstraints: mediaConstraints,
+  mediaConstraints: {video: !onlyDataChannel, audio: !onlyDataChannel},
   isPlayMode: true,
   debug: true,
   callback : (info, obj) => {
@@ -481,6 +493,16 @@ const webRTCAdaptorSpeedTest = new WebRTCAdaptor({
     }
     if (info == "initialized") {
       console.log("initialized");
+    } else if (info == "play_started") {
+      //joined the stream
+      console.log("play started", obj.streamId);
+
+      webRTCAdaptorSpeedTest.getStreamInfo(obj.streamId);
+      webRTCAdaptorSpeedTest.enableStats(obj.streamId);
+    } else if (info == "play_finished") {
+      //leaved the stream
+      console.log("play finished");
+      webRTCAdaptorSpeedTest.disableStats(obj.streamId);
     } else if (info == "publish_started") {
       //stream is being published
       console.log("publish started");
@@ -510,7 +532,34 @@ const webRTCAdaptorSpeedTest = new WebRTCAdaptor({
     }
     else if (info == "updated_stats") {
       speedTestCounter++;
-      if(speedTestCounter > 2) {
+      if(speedTestCounter > 2 && onlyDataChannel === true) {
+        webRTCAdaptorSpeedTest.stop(obj.streamId);
+
+        if(isNaN(obj.videoJitterAverageDelay)){
+          obj.videoJitterAverageDelay = 0;
+        }
+        if(isNaN(obj.audioJitterAverageDelay)){
+          obj.audioJitterAverageDelay = 0;
+        }
+
+        let packetLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+        let jitter = ((parseFloat(obj.videoJitterAverageDelay) + parseFloat(obj.audioJitterAverageDelay)) / 2).toPrecision(3);
+
+        console.log("* packetLost: " + packetLost);
+        console.log("* jitter: " + jitter);
+
+        if (packetLost >= 2.5 || jitter >= 80) {
+          console.log("-> Your Connection is bad");
+          speedTestObject.message = "Your Connection is bad";
+        } else if (packetLost >= 1 || jitter >= 30) {
+          console.log("-> Your connection is fair");
+          speedTestObject.message = "Your connection is fair";
+        } else {
+          console.log("-> Your connection is good");
+          speedTestObject.message = "Your connection is good";
+        }
+        speedTestObject.isfinished = true;
+      } else if (speedTestCounter > 2 && onlyDataChannel !== true) {
         webRTCAdaptorSpeedTest.stop(obj.streamId);
 
         let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
@@ -543,9 +592,10 @@ const webRTCAdaptorSpeedTest = new WebRTCAdaptor({
     }
   },
   callbackError : function(error) {
-    console.log("error callback: " +  JSON.stringify(error));
-    speedTestObject.message = "Your connection is fair";
-    speedTestObject.isfinished = true;
+    setTimeout(() => {
+      speedTestObject.message = "Your connection is fair";
+      speedTestObject.isfinished = true;
+    }, 3000);
   }
 });
 

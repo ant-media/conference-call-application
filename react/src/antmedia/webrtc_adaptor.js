@@ -1631,6 +1631,10 @@ export class WebRTCAdaptor {
         this.mediaManager.enableAudioLevelForLocalStream(levelCallback, period);
     }
 
+    disableAudioLevelForLocalStream() {
+        this.mediaManager.disableAudioLevelForLocalStream();
+    }
+
     applyConstraints(constraints) {
         this.mediaManager.applyConstraints(constraints)
     };

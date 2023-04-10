@@ -10,7 +10,7 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
-import {VideoEffect} from "@antmedia/webrtc_adaptor/dist/video-effect";
+import {VideoEffect} from "../antmedia/video-effect";
 import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import DialogContent from "@mui/material/DialogContent";
@@ -920,7 +920,7 @@ function AntMedia() {
       body: JSON.stringify(command)
     };
     fetch( baseUrl+ "/rest/v2/broadcasts/" + requestingSpeakerName + "/data", requestOptions).then(() => {});
-    approvedSpeakerRequestList.push(requestingSpeakerName);
+    approvedSpeakerRequestList.push(requestingSpeakerName+"tempPublisher");
     setApprovedSpeakerRequestList(approvedSpeakerRequestList);
   }
 

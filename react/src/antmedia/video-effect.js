@@ -1,4 +1,4 @@
-import "./external/selfie-segmentation/selfie_segmentation.js";
+import {SelfieSegmentation} from "./external/selfie-segmentation/selfie_segmentation.js";
 import {WebRTCAdaptor} from "./webrtc_adaptor.js";
 
 /**

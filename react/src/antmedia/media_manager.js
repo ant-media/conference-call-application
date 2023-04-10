@@ -1277,6 +1277,16 @@ export class MediaManager {
         }, period);
     }
 
+    disableAudioLevelForLocalStream() {
+        if (this.localStreamSoundMeter != null) {
+            this.localStreamSoundMeter.stop();
+        }
+        if (this.soundLevelProviderId !== -1) {
+            clearInterval(this.soundLevelProviderId);
+            this.soundLevelProviderId = -1;
+        }
+    }
+
     /**
      * Connects the local stream to Sound Meter
      * It should be called when local stream changes
