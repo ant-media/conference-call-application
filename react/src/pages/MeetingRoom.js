@@ -263,7 +263,7 @@ const MeetingRoom = React.memo((props) => {
                     <div className="single-video-container " key={index}>
                       <VideoCard
                           onHandlePin={() => {
-                            conference.pinVideo("localVideo");
+                            conference.pinVideo("localVideo", "localVideo");
                           }}
                           id="localVideo"
                           autoPlay
@@ -335,7 +335,7 @@ const MeetingRoom = React.memo((props) => {
                   >
                     <VideoCard
                         onHandlePin={() => {
-                          conference.pinVideo("localVideo");
+                          conference.pinVideo("localVideo", "localVideo");
                         }}
                         id="localVideo"
                         autoPlay
@@ -391,7 +391,7 @@ const MeetingRoom = React.memo((props) => {
                       <div className="single-video-container pinned keep-ratio">
                         <VideoCard
                             onHandlePin={() => {
-                              conference.pinVideo("localVideo");
+                              conference.pinVideo("localVideo", "localVideo");
                             }}
                             id="localVideo"
                             autoPlay

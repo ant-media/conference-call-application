@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Grid, IconButton, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { AntmediaContext } from "App";
-import { SettingsContext } from "pages/AntMedia";
 import EmojiPicker, {Emoji, EmojiStyle} from 'emoji-picker-react';
 import { useTranslation } from "react-i18next";
 import { ConferenceContext } from 'pages/AntMedia';
