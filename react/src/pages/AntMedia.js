@@ -198,7 +198,7 @@ function AntMedia() {
   function pinVideo(id, videoLabelProp = "") {
     // id is for pinning user.
     let videoLabel = videoLabelProp;
-    if (videoLabel === "") {
+    if (videoLabel === "") { // TODO: there is a bug here, if videoLabel is localVideo then it will not work.
       // if videoLabel is missing select the first videoLabel you find
       // 1 -2 -3 -4 -5 -6 -7 -8 -9
       videoLabel = participants.find((p) => p.videoLabel !== p.id).videoLabel;

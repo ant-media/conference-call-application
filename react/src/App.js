@@ -167,7 +167,6 @@ var mediaConstraints = {
 };
 
 let websocketURL = null; //process.env.REACT_APP_WEBSOCKET_URL;
-websocketURL = "ws://localhost:5080/Conference/websocket";
 
 if (!websocketURL) {
   const appName = window.location.pathname.substring(
