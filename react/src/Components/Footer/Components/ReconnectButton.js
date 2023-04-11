@@ -20,25 +20,24 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-function ParticipantListButton({ footer, ...props }) {
+function ReconnectButton({ footer, ...props }) {
     const conference = React.useContext(ConferenceContext);
     const {t} = useTranslation();
 
     return (
-            <Tooltip title={t('Participant List')} placement="top">
+            <Tooltip title={t('Reconnect')} placement="top">
                 <CustomizedBtn
                     onClick={() => {
-                        conference?.handleParticipantListOpen(!conference?.participantListDrawerOpen);
+                        conference?.reconnect();
                     }}
                     variant="contained"
                     className={footer ? 'footer-icon-button' : ''}
-                    color={conference?.participantListDrawerOpen ? 'primary' : 'secondary'}
+                    color='secondary'
                 >
-                    <SvgIcon size={32} color={conference?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
-                    {conference.isPlayOnly === false ? conference.allParticipants.length + 1 : conference.allParticipants.length}
+                    <SvgIcon size={28} color='white' name={'reconnect'} />
                 </CustomizedBtn>
             </Tooltip>
         );
 }
 
-export default ParticipantListButton;
+export default ReconnectButton;

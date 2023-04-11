@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from 'Components/SvgIcon';
 import { styled } from '@mui/material/styles';
@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import { ListItemIcon, ListItemText, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
-import {AntmediaContext} from "../../../App";
+import { ConferenceContext } from 'pages/AntMedia';
 
 const StyledListItemText = styled(ListItemText)(({ theme }) => ({
   '& .MuiListItemText-primary': {
@@ -26,7 +26,7 @@ function InfoButton(props) {
   const { enqueueSnackbar } = useSnackbar();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const antmedia = useContext(AntmediaContext);
+  const conference = React.useContext(ConferenceContext);
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget);
@@ -108,7 +108,7 @@ function InfoButton(props) {
               </ListItemIcon>
             </StyledMenuItem>
 
-              {antmedia.isPlayMode === false ?
+              {conference.isPlayOnly === false ?
             <Typography variant="body2" sx={{px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700}} color="#fff">
               {t('Resolution')}
             </Typography>
@@ -117,7 +117,7 @@ function InfoButton(props) {
                       {t('You are in play only mode')}
                   </Typography>}
 
-              {antmedia.isPlayMode === false ?
+              {conference.isPlayOnly === false ?
             <StyledMenuItem>
               <StyledListItemText>{getResolution()}</StyledListItemText>
             </StyledMenuItem>
