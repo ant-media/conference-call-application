@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Grid, IconButton, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { AntmediaContext } from "App";
+import { SettingsContext } from "pages/AntMedia";
+import EmojiPicker, {Emoji, EmojiStyle} from 'emoji-picker-react';
 import { useTranslation } from "react-i18next";
 import { ConferenceContext } from 'pages/AntMedia';
 
@@ -30,6 +33,7 @@ const MessageInput = React.memo(() => {
 
   const { t } = useTranslation();
   const [text, setText] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const sendMessage = () => {
     if (text) {
       conference.handleSendMessage(text);
@@ -38,9 +42,19 @@ const MessageInput = React.memo(() => {
         message: text,
         date: new Date().toString()
       });
+      setShowEmojiPicker(false);
       setText("");
     }
   };
+
+  const addEmojiIntoTextBox = (emojiData, event) => {
+      setText(text + " " + emojiData.emoji);
+  };
+
+  const handleEmojiPickerDrawer = () => {
+    setShowEmojiPicker(!showEmojiPicker);
+  };
+
   return (
     <MessageInputContainer container>
       <form
@@ -49,6 +63,9 @@ const MessageInput = React.memo(() => {
           sendMessage();
         }}
       >
+        {showEmojiPicker ?
+            <EmojiPicker onEmojiClick={addEmojiIntoTextBox} width="300px" height="610px"/>
+            : null}
         <MessageTextField
           autoFocus
           value={text}
@@ -56,6 +73,18 @@ const MessageInput = React.memo(() => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="start">
+                <IconButton
+                    onClick={handleEmojiPickerDrawer}
+                    aria-label="toggle password visibility"
+                    size={"medium"}
+                    edge="end"
+                >
+                  <Emoji
+                      unified={"1f600"}
+                      emojiStyle={EmojiStyle.APPLE}
+                      size={22}
+                  />
+                </IconButton>
                 <IconButton
                   onClick={sendMessage}
                   aria-label="toggle password visibility"
