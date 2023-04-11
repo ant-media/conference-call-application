@@ -6,7 +6,7 @@ import MessageInput from './MessageInput';
 import { useTranslation } from 'react-i18next';
 import MessagesTab from './MessagesTab';
 import CloseDrawerButton from './DrawerButton';
-import {AntmediaContext} from "../App";
+import { ConferenceContext } from 'pages/AntMedia';
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
   '& .MuiBackdrop-root': {
@@ -41,9 +41,8 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const MessageDrawer = React.memo(props => {
-  const { messageDrawerOpen, messages = [] } = props;
   const [value, setValue] = React.useState(0);
-  const antmedia = React.useContext(AntmediaContext);
+  const conference = React.useContext(ConferenceContext);
 
   const { t } = useTranslation();
 
@@ -69,7 +68,7 @@ const MessageDrawer = React.memo(props => {
   }
 
 return (
-        <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={messageDrawerOpen} variant="persistent">
+        <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={conference.messageDrawerOpen} variant="persistent">
           <MessageGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
             <Grid item container justifyContent="space-between" alignItems="center">
               <Tabs
@@ -89,12 +88,12 @@ return (
             <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
               <TabPanel value={value} index={0}>
                 <TabGrid container sx={{ pb: 0 }} direction={'column'}>
-                  <MessagesTab messages={messages}/>
+                  <MessagesTab messages={conference.messages}/>
                 </TabGrid>
               </TabPanel>
             </Grid>
 
-            {antmedia.isPlayMode === false && value === 0 ?
+            {conference.isPlayOnly === false && value === 0 ?
             <MessageInput />
                 : <Typography variant="body2" sx={{px: 1.5, py: 0.5, fontSize: 12, fontWeight: 700}} color="#fff">
                   {t('You cannot send message in play only mode')}

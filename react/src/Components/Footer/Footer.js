@@ -12,7 +12,9 @@ import ParticipantListButton from "./Components/ParticipantListButton";
 import EndCallButton from "./Components/EndCallButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
-import {AntmediaContext} from "../../App";
+import { ConferenceContext } from 'pages/AntMedia';
+import ReconnectButton from './Components/ReconnectButton';
+
 
 const CustomizedGrid = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.green[80],
@@ -26,7 +28,7 @@ const CustomizedGrid = styled(Grid)(({ theme }) => ({
 }));
 function Footer(props) {
   const { id } = useParams();
-  const antmedia = React.useContext(AntmediaContext);
+  const conference = React.useContext(ConferenceContext);
 
     return (
         <CustomizedGrid
@@ -55,19 +57,19 @@ function Footer(props) {
                     <OptionButton footer/>
                   </Grid>
 
-                  {antmedia.isPlayMode === false ?
+                  {conference.isPlayOnly === false ?
                   <Grid item xs={0}>
                     <CameraButton {...props} footer/>
                   </Grid>
                     : null}
 
-                  {antmedia.isPlayMode === false ?
+                  {conference.isPlayOnly === false ?
                   <Grid item xs={0}>
                     <MicButton footer/>
                   </Grid>
                       : null}
 
-                  {antmedia.isPlayMode === false ?
+                  {conference.isPlayOnly === false ?
                   <Grid item xs={0}>
                     {" "}
                     <ShareScreenButton footer/>
@@ -83,6 +85,13 @@ function Footer(props) {
                   <Grid item xs={0}>
                     <EndCallButton footer/>
                   </Grid>
+                  {process.env.NODE_ENV === "development"
+                    ?
+                    <Grid item xs={0}>
+                      <ReconnectButton footer/>
+                    </Grid>
+                    : null
+                  }
                 </Grid>
               </Grid>
 

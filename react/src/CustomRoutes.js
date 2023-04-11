@@ -8,6 +8,8 @@ import AntMedia from "pages/AntMedia";
 function CustomRoutes(props) {
   const theme = useTheme();
 
+  console.log("CustomRoutes");
+
   return (
     <Grid container style={{ background: theme.palette.background }}>
       <Routes>

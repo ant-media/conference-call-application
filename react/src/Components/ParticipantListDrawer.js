@@ -5,6 +5,7 @@ import {  Grid,  Tabs, Tab } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import ParticipantTab from './ParticipantTab';
 import CloseDrawerButton from './DrawerButton';
+import { ConferenceContext } from 'pages/AntMedia';
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
   '& .MuiBackdrop-root': {
@@ -39,9 +40,8 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 }));
 
 const ParticipantListDrawer = React.memo(props => {
-  const { participantListDrawerOpen = [] } = props;
   const [value, setValue] = React.useState(0);
-  const { allParticipants } = props;
+  const conference = React.useContext(ConferenceContext);
 
   const { t } = useTranslation();
 
@@ -67,7 +67,7 @@ const ParticipantListDrawer = React.memo(props => {
   }
 
   return (
-      <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={participantListDrawerOpen} variant="persistent">
+      <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={conference.participantListDrawerOpen} variant="persistent">
         <ParticipantListGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
           <Grid item container justifyContent="space-between" alignItems="center">
             <Tabs
@@ -87,7 +87,7 @@ const ParticipantListDrawer = React.memo(props => {
           <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
             <TabPanel value={value} index={0}>
               <TabGrid container>
-                <ParticipantTab allParticipants={allParticipants} />
+                <ParticipantTab allParticipants={conference.allParticipants} />
               </TabGrid>
             </TabPanel>
           </Grid>
