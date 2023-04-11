@@ -81,7 +81,7 @@ var token = getUrlParameter("token");
 
   var isPlaying = false;
   var fullScreenId = -1;
-  
+
   if (mcuEnabled == null) {
       mcuEnabled = false;
   }
@@ -89,7 +89,7 @@ var token = getUrlParameter("token");
   if (playOnly == null) {
     playOnly = false;
   }
-  
+
   var roomOfStream = [];
   var autoRepublishIntervalJob = null;
   var roomInfoHandleJob = null;
@@ -106,10 +106,10 @@ var token = getUrlParameter("token");
 function AntMedia() {
   const { id } = useParams();
   const roomName = id;
-  
+
   // drawerOpen for message components.
   const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
-  
+
   // drawerOpen for participant list components.
   const [participantListDrawerOpen, setParticipantListDrawerOpen] = useState(false);
 
@@ -120,15 +120,15 @@ function AntMedia() {
 
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
-  
+
   //we are going to store number of unread messages to display on screen if user has not opened message component.
   const [numberOfUnReadMessages, setNumberOfUnReadMessages] = useState(0);
 
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState(null);
-  
+
   const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
-  
+
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
@@ -146,9 +146,9 @@ function AntMedia() {
   const [virtualBackground, setVirtualBackground] = React.useState(null);
   const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  
+
   const [messages, setMessages] = React.useState([]);
-    
+
   const [devices, setDevices] = React.useState([]);
   const [cam, setCam] = useState([
     {
@@ -246,17 +246,17 @@ function AntMedia() {
     console.log("reconnect required");
     webRTCAdaptor.closePeerConnection(publishStreamId);
     webRTCAdaptor.closeWebSocket();
-    
+
     //reset UI releated states
     setParticipants([]);
     setAllParticipants([]);
 
     publishStreamIdHack = publishStreamId+"_"+(reconnectionTimer++);
     setPublishStreamId(publishStreamIdHack)
-    
+
     reconnecting = true;
     isPlaying = false;
-    
+
     displayWarning("Connection lost. Trying reconnect...");
   }
 
@@ -297,14 +297,14 @@ function AntMedia() {
     if (info === "initialized") {
       enableDisableMCU(mcuEnabled);
       setInitialized(true);
-     
+
       if(reconnecting) {
         webRTCAdaptor.leaveFromRoom(roomName);
       }
     } else if (info === "joinedTheRoom") {
       room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
-    
+
       globals.maxVideoTrackCount = obj.maxTrackCount;
       publishStreamIdHack = obj.streamId;
       setPublishStreamId(publishStreamIdHack);
@@ -314,7 +314,7 @@ function AntMedia() {
 
       if (playOnly)  {
         webRTCAdaptor.play(obj.ATTR_ROOM_NAME, token, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
-      } 
+      }
       else {
         handlePublish(
             obj.streamId,
@@ -341,7 +341,7 @@ function AntMedia() {
         }, 2000);
       }
 
-      reconnecting = false;        
+      reconnecting = false;
     } else if (info === "publish_finished") {
       //stream is being finished
     } else if (info === "screen_share_stopped") {
@@ -363,8 +363,8 @@ function AntMedia() {
         webRTCAdaptor.joinRoom(room, publishStreamId);
       }
     } else if (info === "closed") {
-    
-    } 
+
+    }
     else if (info === "play_finished") {
       isPlaying = false;
     } else if (info === "streamInformation") {
@@ -417,7 +417,7 @@ function AntMedia() {
       var iceState = obj.state;
       if (iceState === null || iceState === "failed" || iceState === "disconnected"){
         console.log("!! Connection closed. Please rejoin the meeting");
-      }	
+      }
     }
   };
 
@@ -492,12 +492,18 @@ function AntMedia() {
   }
 
   function pinVideo(id, videoLabelProp = "") {
+    if (id === "localVideo") {
+      videoLabelProp = "localVideo";
+    }
     // id is for pinning user.
     let videoLabel = videoLabelProp;
     if (videoLabel === "") {
-      // if videoLabel is missing select the first videoLabel you find
-      // 1 -2 -3 -4 -5 -6 -7 -8 -9
-      videoLabel = participants.find((p) => p.videoLabel !== p.id).videoLabel;
+      // if videoLabel is missing try to find it from participants.
+      videoLabel = participants.find((p) => id === p.id).videoLabel;
+    }
+    if (videoLabel === "") {
+      // if videoLabel is still missing then we are not going to pin/unpin anyone.
+      return;
     }
     // if we already pin the targeted user then we are going to remove it from pinned video.
     if (pinnedVideoId === id) {
@@ -515,6 +521,10 @@ function AntMedia() {
   }
 
   function handleNotifyPinUser(id) {
+    if (id === "localVideo") {
+        // if we pin local video then we are not going to inform anyone.
+        return;
+    }
     // If I PIN USER then i am going to inform pinned user.
     // Why? Because if i pin someone, pinned user's resolution has to change for better visibility.
     handleSendNotificationEvent("PIN_USER", publishStreamId, {
@@ -550,7 +560,7 @@ function AntMedia() {
       screenShareOnNotification();
     });
   }
-  
+
   function screenShareOffNotification() {
     webRTCAdaptor.handleSendNotificationEvent(
       "SCREEN_SHARED_OFF",
@@ -861,7 +871,7 @@ function AntMedia() {
               publishStreamId
           );
         }
-      } 
+      }
       else if (eventType === "UPDATE_STATUS") {
         setUserStatus(notificationEvent, eventStreamId);
       } else if (eventType === "PIN_USER") {
@@ -1159,12 +1169,24 @@ function AntMedia() {
 
   function cameraSelected(value) {
     setSelectedCamera(value);
-    webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
+    // When we first open home page, React will call this function and local stream is null at that time.
+    // So, we need to catch the error.
+    try {
+      webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
+    } catch (e) {
+      console.log("Local stream is not ready yet.");
+    }
   }
 
   function microphoneSelected(value) {
     setSelectedMicrophone(value);
-    webRTCAdaptor.switchAudioInputSource(publishStreamId, value);
+    // When we first open home page, React will call this function and local stream is null at that time.
+    // So, we need to catch the error.
+    try {
+      webRTCAdaptor.switchAudioInputSource(publishStreamId, value);
+    } catch (e) {
+      console.log("Local stream is not ready yet.");
+    }
   }
 
   function muteLocalMic() {
@@ -1182,7 +1204,7 @@ function AntMedia() {
   function setAudioLevelListener(listener, period) {
     webRTCAdaptor.enableAudioLevelForLocalStream(listener, period);
   }
-               
+
   return (!initialized ? <>hello</> :
     <Grid container className="App">
       <Grid
@@ -1218,7 +1240,7 @@ function AntMedia() {
             initialized,
             devices,
             publishStreamId,
-            
+
             setSelectedBackgroundMode,
             setIsVideoEffectRunning,
             setParticipants,
