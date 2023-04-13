@@ -592,6 +592,7 @@ function AntMedia() {
       publishStreamId,
       {
         streamId: participantId,
+        senderStreamId: publishStreamId
       }
     );
   }
@@ -860,6 +861,7 @@ function AntMedia() {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
       } else if (eventType === "TURN_YOUR_MIC_OFF") {
+        console.warn(notificationEvent.senderStreamId, "muted you");
         if(publishStreamId === notificationEvent.streamId) {
           toggleSetMic({
             eventStreamId: 'localVideo',
