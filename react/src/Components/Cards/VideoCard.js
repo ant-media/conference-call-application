@@ -197,7 +197,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
               </Grid>
               : null }
 
-              { props.id !== 'localVideo' ?
+              { (props.id !== 'localVideo' && mic && !mic.isMicMuted ) ?
               <Grid item>
                 <Tooltip
                     title={`Microphone off ${
