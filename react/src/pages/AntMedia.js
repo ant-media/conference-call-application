@@ -562,11 +562,11 @@ function AntMedia() {
   }
 
   function screenShareOffNotification() {
-    webRTCAdaptor.handleSendNotificationEvent(
+    handleSendNotificationEvent(
       "SCREEN_SHARED_OFF",
       publishStreamId
     );
-    //if i stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
+    //if I stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
     if (pinnedVideoId === "localVideo") {
       setPinnedVideoId(null);
     }
@@ -628,7 +628,7 @@ function AntMedia() {
     } else {
       webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
     }
-    webRTCAdaptor.screenShareOffNotification();
+    screenShareOffNotification();
     let requestedMediaConstraints = {
       width: 320,
       height: 240,
@@ -648,7 +648,7 @@ function AntMedia() {
 
       // isCameraOff = true;
     }
-    webRTCAdaptor.screenShareOffNotification();
+    screenShareOffNotification();
   }
   function handleSetMessages(newMessage) {
     setMessages((oldMessages) => {
