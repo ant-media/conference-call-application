@@ -50,16 +50,18 @@ const MessageDrawer = React.memo(props => {
     setValue(newValue);
   };
 
-  const TabPanel = props => {
-    const { children, value, index, ...other } = props;
-
-    return (
-      <div role="tabpanel" hidden={value !== index} id={`drawer-tabpanel-${index}`} aria-labelledby={`drawer-tab-${index}`} {...other} style={{ height: '100%', width: '100%' }}>
-        {value === index && children}
-      </div>
-    );
-  };
-
+  const TabPanel = React.useMemo(() => {
+    return (props) => {
+      const { children, value, index, ...other } = props;
+      return (
+        <div role="tabpanel" hidden={value !== index} id={`drawer-tabpanel-${index}`} aria-labelledby={`drawer-tab-${index}`} {...other} style={{ height: '100%', width: '100%', overflowY: 'auto' }}>
+          {value === index && children}
+        </div>
+      );
+    };
+  }, []);
+  
+  
   function a11yProps(index) {
     return {
       id: `drawer-tab-${index}`,
