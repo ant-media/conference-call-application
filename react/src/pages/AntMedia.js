@@ -59,7 +59,7 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
-let websocketURL = "ws://192.168.0.104:5080/LiveApp/websocket";
+let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
   const appName = window.location.pathname.substring(
