@@ -3,17 +3,20 @@ import Drawer from '@mui/material/Drawer';
 import { styled } from '@mui/material/styles';
 import {  Grid,  Tabs, Tab } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import ParticipantTab from './ParticipantTab';
 import CloseDrawerButton from './DrawerButton';
 import PublisherRequestTab from "./PublisherRequestTab";
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
+  '& .MuiDrawer-root': {
+    position: 'absolute'
+  },
   '& .MuiBackdrop-root': {
     backgroundColor: 'transparent',
   },
   '& .MuiPaper-root': {
     padding: 12,
     backgroundColor: 'transparent',
+    position: 'absolute',
     boxShadow: 'unset',
     width: 360,
     border: 'unset',

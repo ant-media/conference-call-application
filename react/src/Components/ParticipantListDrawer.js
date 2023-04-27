@@ -7,12 +7,16 @@ import ParticipantTab from './ParticipantTab';
 import CloseDrawerButton from './DrawerButton';
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
+  '& .MuiDrawer-root': {
+    position: 'absolute'
+  },
   '& .MuiBackdrop-root': {
     backgroundColor: 'transparent',
   },
   '& .MuiPaper-root': {
     padding: 12,
     backgroundColor: 'transparent',
+    position: 'absolute',
     boxShadow: 'unset',
     width: 360,
     border: 'unset',

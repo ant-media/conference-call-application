@@ -17,11 +17,11 @@ import PublisherRequestListButton from "./Components/PublisherRequestListButton"
 
 const CustomizedGrid = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.green[80],
-  position: "fixed",
+  position: "absolute",
   bottom: 0,
   left: 0,
   padding: 16,
-  width: "100vw",
+  width: "100%",
   zIndex: 2,
   height: 80,
 }));
@@ -36,9 +36,6 @@ function Footer(props) {
         >
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <Grid container alignItems={"center"}>
-              <a href="https://portmeet.com/" alt="portmeet website" target="_blank" rel="noreferrer">
-                <img src="./favicon-32x32.png" alt="portmeet logo" style={{width: '22px', marginRight: 4}}/>
-              </a>
               <Typography color="#ffffff" variant="body1">
                 {antmedia.roomName}
               </Typography>

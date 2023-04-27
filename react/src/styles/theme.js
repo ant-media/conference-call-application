@@ -311,9 +311,6 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
       },
     },
     palette: {
-      background: {
-        default: green80,
-      },
       primary: {
         main: green10,
       },
