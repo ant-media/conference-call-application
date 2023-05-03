@@ -563,11 +563,11 @@ function AntMedia() {
   }
 
   function screenShareOffNotification() {
-    webRTCAdaptor.handleSendNotificationEvent(
+    handleSendNotificationEvent(
       "SCREEN_SHARED_OFF",
       publishStreamId
     );
-    //if i stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
+    //if I stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
     if (pinnedVideoId === "localVideo") {
       setPinnedVideoId(null);
     }
@@ -593,6 +593,7 @@ function AntMedia() {
       publishStreamId,
       {
         streamId: participantId,
+        senderStreamId: publishStreamId
       }
     );
   }
@@ -629,7 +630,7 @@ function AntMedia() {
     } else {
       webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
     }
-    webRTCAdaptor.screenShareOffNotification();
+    screenShareOffNotification();
     let requestedMediaConstraints = {
       width: 320,
       height: 240,
@@ -649,7 +650,7 @@ function AntMedia() {
 
       // isCameraOff = true;
     }
-    webRTCAdaptor.screenShareOffNotification();
+    screenShareOffNotification();
   }
   function handleSetMessages(newMessage) {
     setMessages((oldMessages) => {
@@ -875,7 +876,8 @@ function AntMedia() {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
       } else if (eventType === "TURN_YOUR_MIC_OFF") {
-        if (publishStreamId === notificationEvent.streamId) {
+        console.warn(notificationEvent.senderStreamId, "muted you");
+        if(publishStreamId === notificationEvent.streamId) {
           toggleSetMic({
             eventStreamId: 'localVideo',
             isMicMuted: true,

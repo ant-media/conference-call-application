@@ -148,9 +148,15 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
               justifyContent={"center"}
               alignItems="center"
               style={{ height: "100%" }}
-              spacing={2}
+              wrap='nowrap'
             >
-              <Grid item>
+              <Grid
+                  item
+                  container
+                  justifyContent={"center"}
+                  alignItems="center"
+                  columnSpacing={0.5}
+              >
                 <Tooltip
                   title={`${props.pinned ? t("unpin") : t("pin")} ${
                     props.name
@@ -171,33 +177,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                   </Fab>
                 </Tooltip>
 
-                { props.id !== 'localVideo' && false?
-              <Grid item>
-                <Tooltip
-                    title={`Camera off ${
-                        props.name
-                    }`}
-                    placement="top"
-                >
-                  <Fab
-                      onClick={()=>{
-                        conference.handleSendMessage("admin*publisher_room*"+props.id+"*CLOSE_YOUR_CAMERA");
-                      }}
-                      color="primary"
-                      aria-label="add"
-                      size="small"
-                  >
-                    <SvgIcon
-                        size={36}
-                        name={"camera-off"}
-                        color={theme.palette.grey[80]}
-                    />
-                  </Fab>
-                </Tooltip>
-              </Grid>
-              : null }
-
-              { props.id !== 'localVideo' ?
+              { (props.id !== 'localVideo' && mic && !mic.isMicMuted ) ?
               <Grid item>
                 <Tooltip
                     title={`Microphone off ${
