@@ -49,7 +49,6 @@ if (i18n.language !== "en" || i18n.language !== "tr") {
 var tokenPublishAdmin = getUrlParameter("tokenPublishAdmin");
 var tokenPlay = getUrlParameter("tokenPlay");
 var tokenPublish = getUrlParameter("tokenPublish");
-var token = getUrlParameter("token");
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var publishStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
@@ -219,7 +218,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       }
 
       webRTCAdaptor.handleSetMyObj(obj);
-      let streamDetailsList = obj.streamList;
+      //let streamDetailsList = obj.streamList;
 
       webRTCAdaptor.handlePublish(
             obj.streamId,

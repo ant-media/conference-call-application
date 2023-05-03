@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import {Button, DialogActions, DialogContentText, Grid, IconButton} from "@mui/material";
+import {Button, DialogActions, DialogContentText, Grid} from "@mui/material";
 import { useParams } from "react-router-dom";
 import { AntmediaContext, AntmediaAdminContext } from "App";
 import _ from "lodash";
@@ -86,7 +86,7 @@ function AntMedia() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [openRequestBecomeSpeakerDialog, setOpenRequestBecomeSpeakerDialog] = React.useState(false);
-  const [requestingSpeakerName, setRequestingSpeakerName] = React.useState("");
+  const [requestingSpeakerName] = React.useState("");
   const [requestSpeakerList, setRequestSpeakerList] = React.useState([]);
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [isBroadcasting, setIsBroadcasting] = React.useState(false);

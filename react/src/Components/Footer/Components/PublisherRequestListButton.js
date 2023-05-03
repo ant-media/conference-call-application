@@ -25,7 +25,6 @@ function PublisherRequestListButton({ footer, ...props }) {
     const {t} = useTranslation();
     const settings = useContext(SettingsContext);
     const {requestSpeakerList } = settings;
-    const antmedia = useContext(AntmediaContext);
 
     return (
             <Tooltip title={t('Publisher Request List')} placement="top">

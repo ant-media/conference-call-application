@@ -71,7 +71,7 @@ function ParticipantTab(props) {
                 <SvgIcon size={28} name="presenter" color="#fff" />
               </PinBtn>
           ) : null}
-          {approvedSpeakerRequestList.includes(videoId) && antmedia.admin === true  && videoId != 'localVideo' ?(
+          {approvedSpeakerRequestList.includes(videoId) && antmedia.admin === true  && videoId !== 'localVideo' ?(
               <PinBtn
                   sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                   onClick={() => makeListenerAgain(videoId)}
