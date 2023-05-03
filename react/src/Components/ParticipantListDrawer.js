@@ -8,12 +8,16 @@ import CloseDrawerButton from './DrawerButton';
 import { ConferenceContext } from 'pages/AntMedia';
 
 const AntDrawer = styled(Drawer)(({ theme }) => ({
+  '& .MuiDrawer-root': {
+    position: 'absolute',
+  },
   '& .MuiBackdrop-root': {
     backgroundColor: 'transparent',
   },
   '& .MuiPaper-root': {
     padding: 12,
     backgroundColor: 'transparent',
+    position: 'absolute',
     boxShadow: 'unset',
     width: 360,
     border: 'unset',
