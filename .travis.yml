@@ -3,6 +3,8 @@ language: java
 jdk:
 - openjdk11
 before_install:
+- pip3 install selenium
+- pip3 install requests
 - openssl aes-256-cbc -K $encrypted_fb8a77c74dbd_key -iv $encrypted_fb8a77c74dbd_iv
   -in codesigning.asc.enc -out ./codesigning.asc -d
 - sudo apt-get update
@@ -26,3 +28,6 @@ script:
 - cd webapp
 # - mvn clean install -DskipTests -Dgpg.skip=true --quiet
 - mvn deploy -DskipTests --quiet --settings mvn-settings.xml
+# run tests
+- cd ../test
+- python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
