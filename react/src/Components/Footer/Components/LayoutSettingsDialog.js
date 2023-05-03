@@ -19,8 +19,7 @@ import {
 
 import { useTheme } from "@mui/material";
 
-import { SettingsContext } from "pages/AntMedia";
-import { AntmediaContext } from "App";
+import { ConferenceContext } from 'pages/AntMedia';
 import { useTranslation } from "react-i18next";
 import { SvgIcon } from "Components/SvgIcon";
 import debounce from "lodash/debounce";
@@ -66,23 +65,21 @@ const AntDialogTitle = (props) => {
 export function LayoutSettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open } = props;
-  const settings = React.useContext(SettingsContext);
-  const { pinnedVideoId, pinVideo, globals } = settings;
+  const conference = React.useContext(ConferenceContext);
 
   const [value, setValue] = React.useState(
-    globals.maxVideoTrackCount ? globals.maxVideoTrackCount + 1 : 3
+    conference.globals.maxVideoTrackCount ? conference.globals.maxVideoTrackCount + 1 : 3
   );
-  const antmedia = React.useContext(AntmediaContext);
   const [layout, setLayout] = React.useState(
-    pinnedVideoId !== null ? "sidebar" : "tiled"
+    conference.pinnedVideoId !== null ? "sidebar" : "tiled"
   ); //just for radioo buttons
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
   React.useEffect(() => {
-    setLayout(pinnedVideoId !== null ? "sidebar" : "tiled");
-  }, [pinnedVideoId]);
+    setLayout(conference.pinnedVideoId !== null ? "sidebar" : "tiled");
+  }, [conference.pinnedVideoId]);
   const handleClose = () => {
     onClose(selectedValue);
   };
@@ -93,7 +90,7 @@ export function LayoutSettingsDialog(props) {
 
     if (mode === "tiled") {
       //unpin the pinned video
-      pinVideo(pinnedVideoId);
+      conference.pinVideo(conference.pinnedVideoId);
     } else if (mode === "sidebar") {
       const participants = document.querySelectorAll(
         ".single-video-container.not-pinned video"
@@ -102,7 +99,7 @@ export function LayoutSettingsDialog(props) {
         participants.length > 1 ? participants[1] : participants[0];
 
       //pin the first participant
-      pinVideo(firstParticipant?.id ? firstParticipant.id : "localVideo");
+      conference.pinVideo(firstParticipant?.id ? firstParticipant.id : "localVideo");
     }
   };
   const radioLabel = (label, icon) => {
@@ -136,7 +133,7 @@ export function LayoutSettingsDialog(props) {
     //why the minus 1? because what user sees is (my local video + maxvideoTrackCount)
     //so if the user sets the tiles to 6 it means (1 + 5) respectively to the statement above.
     //what the count number actually is the second variable in that.
-    antmedia.handleSetMaxVideoTrackCount(count - 1);
+    conference.handleSetMaxVideoTrackCount(count - 1);
   };
   const debouncedHandleMaxVideoTrackCountChange = debounce(
     handleMaxVideoTrackCountChange,
@@ -163,7 +160,7 @@ export function LayoutSettingsDialog(props) {
             <FormControl sx={{ width: "100%" }}>
               <RadioGroup
                 aria-labelledby="layout-radio-buttons"
-                defaultValue={pinnedVideoId !== null ? "sidebar" : "tiled"}
+                defaultValue={conference.pinnedVideoId !== null ? "sidebar" : "tiled"}
                 value={layout}
                 onChange={changeLayout}
                 name="layout-radio-buttons-group"

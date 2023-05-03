@@ -1,11 +1,10 @@
 import React, { memo, useCallback, useContext, useEffect } from "react";
 import { alpha, styled } from "@mui/material/styles";
-import { MediaSettingsContext, SettingsContext } from "pages/AntMedia";
+import { ConferenceContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
 import { useTranslation } from "react-i18next";
-import { AntmediaContext } from "../../App";
 const CustomizedVideo = styled("video")({
   borderRadius: 4,
   width: "100%",
@@ -18,13 +17,11 @@ const CustomizedBox = styled(Box)(({ theme }) => ({
 }));
 
 const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
-  const mediaSettings = useContext(MediaSettingsContext);
-  const settings = useContext(SettingsContext);
-  const antmedia = useContext(AntmediaContext);
+  const conference = useContext(ConferenceContext);
+
   const { t } = useTranslation();
   const [displayHover, setDisplayHover] = React.useState(false);
   const theme = useTheme();
-  const { setParticipants, participants } = mediaSettings;
 
   const cardBtnStyle = {
     display: "flex",
@@ -48,15 +45,15 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
   React.useEffect(() => {
     if (props.track?.kind === "video" && !props.track.onended) {
       props.track.onended = (event) => {
-        settings?.globals?.trackEvents.push({track:props.track.id,event:"removed"});
-        if (participants.length > settings?.globals?.maxVideoTrackCount) {
-          console.log("video before:"+JSON.stringify(participants));
-          setParticipants((oldParts) => {
+        conference?.globals?.trackEvents.push({track:props.track.id,event:"removed"});
+        if (conference.participants.length > conference?.globals?.maxVideoTrackCount) {
+          console.log("video before:"+JSON.stringify(conference.participants));
+          conference.setParticipants((oldParts) => {
             return oldParts.filter(
               (p) => !(p.id === props.id || p.videoLabel === props.id)
             );
           });
-          console.log("video after:"+JSON.stringify(participants));
+          console.log("video after:"+JSON.stringify(conference.participants));
 
         }
       };
@@ -64,15 +61,15 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.track]);
 
-  let isOff = mediaSettings?.cam?.find(
+  let isOff = conference?.cam?.find(
     (c) => c.eventStreamId === props?.id && !c?.isCameraOn
   );
 
   // if i sharing my screen.
   if (
-    mediaSettings.isScreenShared === true &&
+    conference.isScreenShared === true &&
     props?.id === "localVideo" &&
-    mediaSettings?.cam.find(
+    conference?.cam.find(
       (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
     )
   ) {
@@ -80,28 +77,28 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
   }
   // screenSharedVideoId is the id of the screen share video.
   if (
-    mediaSettings.screenSharedVideoId === props?.id &&
-    mediaSettings?.cam.find(
+    conference.screenSharedVideoId === props?.id &&
+    conference?.cam.find(
       (c) => c.eventStreamId === props?.id && c.isCameraOn === false
     )
   ) {
     isOff = false;
   }
-  const mic = mediaSettings?.mic?.find((m) => m.eventStreamId === props?.id);
+  const mic = conference?.mic?.find((m) => m.eventStreamId === props?.id);
 
   const [isTalking, setIsTalking] = React.useState(false);
   const timeoutRef = React.useRef(null);
 
   const isLocal = props?.id === "localVideo";
-  const mirrorView = isLocal && !mediaSettings?.isScreenShared;
+  const mirrorView = isLocal && !conference?.isScreenShared;
   const isScreenSharing =
-    mediaSettings?.isScreenShared ||
-    mediaSettings?.screenSharedVideoId === props?.id;
-  //mediaSettings?.isScreenShared means am i sharing my screen
-  //mediaSettings?.screenSharedVideoId === props?.id means is someone else sharing their screen
+    conference?.isScreenShared ||
+    conference?.screenSharedVideoId === props?.id;
+  //conference?.isScreenShared means am i sharing my screen
+  //conference?.screenSharedVideoId === props?.id means is someone else sharing their screen
   useEffect(() => {
-    if (isLocal && mediaSettings.isPublished && !antmedia.isPlayMode) {
-      antmedia.enableAudioLevelForLocalStream((value) => {
+    if (isLocal && conference.isPublished && !conference.isPlayOnly) {
+      conference.setAudioLevelListener((value) => {
         // sounds under 0.01 are probably background noise
         if (value >= 0.01) {
           if (isTalking === false) setIsTalking(true);
@@ -109,15 +106,14 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
           timeoutRef.current = setTimeout(() => {
             setIsTalking(false);
           }, 1000);
-          antmedia.updateAudioLevel(
-            mediaSettings?.myLocalData?.streamId,
+          conference.updateAudioLevel(
             Math.floor(value * 100)
           );
         }
       }, 100);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mediaSettings.isPublished]);
+  }, [conference.isPublished]);
 
   return isLocal || props.track?.kind !== "audio" ? (
     <>
@@ -152,9 +148,15 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
               justifyContent={"center"}
               alignItems="center"
               style={{ height: "100%" }}
-              spacing={2}
+              wrap='nowrap'
             >
-              <Grid item>
+              <Grid
+                  item
+                  container
+                  justifyContent={"center"}
+                  alignItems="center"
+                  columnSpacing={0.5}
+              >
                 <Tooltip
                   title={`${props.pinned ? t("unpin") : t("pin")} ${
                     props.name
@@ -174,15 +176,45 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                     />
                   </Fab>
                 </Tooltip>
+
+              { (props.id !== 'localVideo' && mic && !mic.isMicMuted ) ?
+              <Grid item>
+                <Tooltip
+                    title={`Microphone off ${
+                        props.name
+                    }`}
+                    placement="top"
+                >
+                  <Fab
+                      onClick={()=>{
+                        conference.turnOffYourMicNotification(props.id);
+                      }}
+                      color="primary"
+                      aria-label="add"
+                      size="small"
+                  >
+                    <SvgIcon
+                        size={36}
+                        name={"muted-microphone"}
+                        color={theme.palette.grey[80]}
+                    />
+                  </Fab>
+                </Tooltip>
+              </Grid>
+              : null }
+
+
               </Grid>
             </Grid>
           </Grid>
         )}
 
+
+
         <div
           className={`single-video-card`}
           // style={{
-          //   ...(isTalking || mediaSettings.talkers.includes(props.id) ? {
+          //   ...(isTalking || conference.talkers.includes(props.id) ? {
           //     outline: `thick solid ${theme.palette.primary.main}`,
           //     borderRadius: '10px'
           //   } : {})
@@ -215,7 +247,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
           <div
             className="talking-indicator-light"
             style={{
-              ...(isTalking || mediaSettings.talkers.includes(props.id)
+              ...(isTalking || conference.talkers.includes(props.id)
                 ? {}
                 : { display: "none" }),
             }}
@@ -266,11 +298,11 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                 {process.env.NODE_ENV === "development"
                   ? `${
                       isLocal
-                        ? mediaSettings.myLocalData?.streamId +
+                        ? conference.publishStreamId +
                           " " +
                           props.id +
                           " " +
-                          mediaSettings.myLocalData?.streamName
+                          conference.streamName
                         : props.id + " " + props.track?.id
                     }`
                   : ""}

@@ -1,14 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import VideoCard from "Components/Cards/VideoCard";
-import React, { useContext, useEffect } from "react";
-import { AntmediaContext } from "App";
-import { SettingsContext } from "pages/AntMedia";
-
+import React, { useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import Footer from "Components/Footer/Footer";
 import { styled } from "@mui/material/styles";
+import { ConferenceContext } from "./AntMedia";
 
 const CustomizedAvatar = styled(Avatar)(({ theme }) => ({
   border: `3px solid ${theme.palette.green[85]} !important`,
@@ -90,15 +88,10 @@ function calculateLayout(
 }
 
 const MeetingRoom = React.memo((props) => {
-  const antmedia = useContext(AntmediaContext);
+  const conference = React.useContext(ConferenceContext);
 
-  const settings = useContext(SettingsContext);
-  const { messageDrawerOpen, participantListDrawerOpen, pinnedVideoId, pinVideo, audioTracks, globals } =
-    settings;
-  const { participants, allParticipants, myLocalData } = props;
-
-  const allParticipantsExceptLocal = allParticipants.filter(
-      (p) => p.streamId !== myLocalData?.streamId
+  const allParticipantsExceptLocal = conference.allParticipants.filter(
+      (p) => p.streamId !== conference.publishStreamId
   );
 
   const filterAndSortOthersTile = (all, showing) => {
@@ -110,17 +103,15 @@ const MeetingRoom = React.memo((props) => {
   useEffect(() => {
     let localVid = document.getElementById("localVideo");
     if (localVid) {
-      antmedia.mediaManager.localVideo = document.getElementById("localVideo");
-      antmedia.mediaManager.localVideo.srcObject =
-          antmedia.mediaManager.localStream;
+      conference.setLocalVideo(document.getElementById("localVideo"));
     }
-  }, [pinnedVideoId]);
+  }, [conference.pinnedVideoId]);
 
   function handleGalleryResize(calcDrawer) {
     const gallery = document.getElementById("meeting-gallery");
 
     if (calcDrawer) {
-      if (messageDrawerOpen || participantListDrawerOpen) {
+      if (conference.messageDrawerOpen || conference.participantListDrawerOpen) {
         gallery.classList.add("drawer-open");
       } else {
         gallery.classList.remove("drawer-open");
@@ -152,11 +143,11 @@ const MeetingRoom = React.memo((props) => {
 
   React.useEffect(() => {
     handleGalleryResize(false);
-  }, [participants, pinnedVideoId]);
+  }, [conference.participants, conference.pinnedVideoId]);
 
   React.useEffect(() => {
     handleGalleryResize(true);
-  }, [messageDrawerOpen, participantListDrawerOpen]);
+  }, [conference.messageDrawerOpen, conference.participantListDrawerOpen]);
 
   React.useEffect(() => {
     const debouncedHandleResize = debounce(handleGalleryResize, 500);
@@ -169,8 +160,8 @@ const MeetingRoom = React.memo((props) => {
 
   const getUnpinnedParticipants = () => {
     const array = [
-      pinnedVideoId !== "localVideo" && {id: "localVideo"},
-      ...participants.filter((v) => v.id !== pinnedVideoId),
+      conference.pinnedVideoId !== "localVideo" && {id: "localVideo"},
+      ...conference.participants.filter((v) => v.id !== conference.pinnedVideoId),
     ];
     const filtered = array.filter(Boolean);
     return filtered;
@@ -183,7 +174,7 @@ const MeetingRoom = React.memo((props) => {
     } else {
       others = filterAndSortOthersTile(
           allParticipantsExceptLocal,
-          participants
+          conference.participants
       );
     }
 
@@ -256,7 +247,7 @@ const MeetingRoom = React.memo((props) => {
                     <div className="single-video-container">
                       <VideoCard
                           onHandlePin={() => {
-                            pinVideo(id, videoLabel);
+                            conference.pinVideo(id, videoLabel);
                           }}
                           id={id}
                           track={track}
@@ -266,13 +257,13 @@ const MeetingRoom = React.memo((props) => {
                     </div>
                   </div>
               );
-            } else if (antmedia.isPlayMode === false) {
+            } else if (conference.isPlayOnly === false) {
               return (
                   <div className="unpinned">
                     <div className="single-video-container " key={index}>
                       <VideoCard
                           onHandlePin={() => {
-                            pinVideo("localVideo");
+                            conference.pinVideo("localVideo", "localVideo");
                           }}
                           id="localVideo"
                           autoPlay
@@ -310,15 +301,15 @@ const MeetingRoom = React.memo((props) => {
   };
 
   //main tile other limit set, max count
-  const showAsOthersLimit = globals.maxVideoTrackCount + 1; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
+  const showAsOthersLimit = conference.globals.maxVideoTrackCount + 1; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
   //with 2 active video participants + 1 me + 1 card
   const sliceTiles = allParticipantsExceptLocal.length + 1 > showAsOthersLimit; //plus 1 is me
 
-  const pinLayout = pinnedVideoId !== null ? true : false;
+  const pinLayout = conference.pinnedVideoId !== null ? true : false;
   // const testPart = [{ name: 'a' }, { name: 'a' }];
   return (
         <>
-          {audioTracks.map((audio, index) => (
+          {conference.audioTracks.map((audio, index) => (
               <VideoCard
                   key={index}
                   onHandlePin={() => {
@@ -333,7 +324,7 @@ const MeetingRoom = React.memo((props) => {
           <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
             {!pinLayout && ( // if not pinned layout show me first as a regular video
                 <>
-                  { antmedia.isPlayMode === false ?
+                  { conference.isPlayOnly === false ?
                   <div
                       className="single-video-container not-pinned"
                       style={{
@@ -344,16 +335,16 @@ const MeetingRoom = React.memo((props) => {
                   >
                     <VideoCard
                         onHandlePin={() => {
-                          pinVideo("localVideo");
+                          conference.pinVideo("localVideo", "localVideo");
                         }}
                         id="localVideo"
                         autoPlay
                         name="You"
                         muted
-                        hidePin={participants.length === 0}
+                        hidePin={conference.participants.length === 0}
                     />
                   </div> : null}
-                  {participants
+                  {conference.participants
                       .filter((p) => p.videoLabel !== p.id)
                       .map(({id, videoLabel, track, name}, index) => (
                           <>
@@ -368,7 +359,7 @@ const MeetingRoom = React.memo((props) => {
                             >
                               <VideoCard
                                   onHandlePin={() => {
-                                    pinVideo(id, videoLabel);
+                                    conference.pinVideo(id, videoLabel);
                                   }}
                                   id={id}
                                   track={track}
@@ -378,7 +369,7 @@ const MeetingRoom = React.memo((props) => {
                             </div>
                           </>
                       ))}
-                  {sliceTiles && participants.length > 0 && (
+                  {sliceTiles && conference.participants.length > 0 && (
                       <div
                           className="single-video-container not-pinned others-tile-wrapper"
                           style={{
@@ -394,13 +385,13 @@ const MeetingRoom = React.memo((props) => {
             )}
             {pinLayout && (
                 <>
-                  {pinnedVideoId === "localVideo" ? (
+                  {conference.pinnedVideoId === "localVideo" ? (
                       // pinned myself
                       // ${participants.length === 0 ? ' no-participants ' : ''}
                       <div className="single-video-container pinned keep-ratio">
                         <VideoCard
                             onHandlePin={() => {
-                              pinVideo("localVideo");
+                              conference.pinVideo("localVideo", "localVideo");
                             }}
                             id="localVideo"
                             autoPlay
@@ -412,22 +403,22 @@ const MeetingRoom = React.memo((props) => {
                   ) : (
                       //pinned participant
 
-                      participants.find((v) => v.id === pinnedVideoId) && (
+                      conference.participants.find((v) => v.id === conference.pinnedVideoId) && (
                           <div className="single-video-container pinned keep-ratio">
                             <VideoCard
-                                id={participants.find((v) => v.id === pinnedVideoId)?.id}
+                                id={conference.participants.find((v) => v.id === conference.pinnedVideoId)?.id}
                                 track={
-                                  participants.find((v) => v.id === pinnedVideoId)?.track
+                                  conference.participants.find((v) => v.id === conference.pinnedVideoId)?.track
                                 }
                                 autoPlay
                                 name={
-                                  participants.find((v) => v.id === pinnedVideoId)?.name
+                                  conference.participants.find((v) => v.id === conference.pinnedVideoId)?.name
                                 }
                                 pinned
                                 onHandlePin={() => {
-                                  pinVideo(
-                                      participants.find((v) => v.id === pinnedVideoId)?.id,
-                                      participants.find((v) => v.id === pinnedVideoId)
+                                  conference.pinVideo(
+                                    conference.participants.find((v) => v.id === conference.pinnedVideoId)?.id,
+                                    conference.participants.find((v) => v.id === conference.innedVideoId)
                                           ?.videoLabel
                                   );
                                 }}

@@ -7,8 +7,7 @@ import Button from '@mui/material/Button';
 import DialogContent from '@mui/material/DialogContent';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
-import { MediaSettingsContext } from '../../../pages/AntMedia';
-import { AntmediaContext } from '../../../App';
+import { ConferenceContext } from 'pages/AntMedia';
 import { Grid, Hidden, MenuItem, useMediaQuery } from '@mui/material';
 import { SvgIcon } from 'Components/SvgIcon';
 import { useTheme } from '@mui/material';
@@ -40,10 +39,7 @@ const AntDialogTitle = props => {
 export function SettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
-  const { myLocalData, setSelectedCamera, selectedCamera, setSelectedMicrophone, selectedMicrophone, setSelectedBackgroundMode, selectedBackgroundMode } = React.useContext(MediaSettingsContext);
-
-  const antmedia = React.useContext(AntmediaContext);
-  const { devices } = antmedia;
+  const conference = React.useContext(ConferenceContext);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
@@ -52,30 +48,28 @@ export function SettingsDialog(props) {
     onClose(selectedValue);
   };
   function switchVideoMode(value) {
-    setSelectedCamera(value);
-    antmedia.switchVideoCameraCapture(myLocalData?.streamId, value);
+    conference.cameraSelected(value);
   }
 
   function switchAudioMode(value) {
-    setSelectedMicrophone(value);
-    antmedia.switchAudioInputSource(myLocalData?.streamId, value);
+    conference.microphoneSelected(value);
   }
 
   function setBackground(value) {
-    setSelectedBackgroundMode(value);
-    antmedia.handleBackgroundReplacement(value);
+    conference.setSelectedBackgroundMode(value);
+    conference.handleBackgroundReplacement(value);
   }
 
   React.useEffect(() => {
-    if (devices) {
-      const camera = devices.find(d => d.kind === 'videoinput');
-      const audio = devices.find(d => d.kind === 'audioinput');
-      if (camera && selectedCamera === '') setSelectedCamera(camera.deviceId);
-      if (audio && selectedMicrophone === '') setSelectedMicrophone(audio.deviceId);
-      if (selectedBackgroundMode === '') setSelectedBackgroundMode('none');
+    if (conference.devices) {
+      const camera = conference.devices.find(d => d.kind === 'videoinput');
+      const audio = conference.devices.find(d => d.kind === 'audioinput');
+      if (camera && conference.selectedCamera === '') conference.cameraSelected(camera.deviceId);
+      if (audio && conference.selectedMicrophone === '') conference.microphoneSelected(audio.deviceId);
+      if (conference.selectedBackgroundMode === '') conference.setSelectedBackgroundMode('none');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [devices]);
+  }, [conference.devices]);
 
   return (
     <Dialog onClose={handleClose} open={open} fullScreen={fullScreen} maxWidth={'sm'}>
@@ -93,11 +87,11 @@ export function SettingsDialog(props) {
                   fullWidth
                   id="demo-dialog-native"
                   variant="outlined"
-                  value={selectedCamera}
+                  value={conference.selectedCamera}
                   onChange={e => switchVideoMode(e.target.value)}
                   sx={{ color: 'white' }}
                 >
-                  {devices && devices?.length > 0 && devices
+                  {conference.devices && conference.devices?.length > 0 && conference.devices
                     .filter(device => device.kind === 'videoinput')
                     .map(device => (
                       <MenuItem key={device.deviceId} value={device.deviceId}>
@@ -119,8 +113,8 @@ export function SettingsDialog(props) {
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
-                <Select autoFocus={selectFocus === 'audio'} variant="outlined" fullWidth value={selectedMicrophone} onChange={e => switchAudioMode(e.target.value)} sx={{ color: 'white' }}>
-                  {devices && devices?.length > 0 && devices
+                <Select autoFocus={selectFocus === 'audio'} variant="outlined" fullWidth value={conference.selectedMicrophone} onChange={e => switchAudioMode(e.target.value)} sx={{ color: 'white' }}>
+                  {conference.devices && conference.devices?.length > 0 && conference.devices
                     .filter(device => device.kind === 'audioinput')
                     .map(device => (
                       <MenuItem key={device.deviceId} value={device.deviceId}>
@@ -142,7 +136,7 @@ export function SettingsDialog(props) {
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
-                <Select variant="outlined" fullWidth value={selectedBackgroundMode} onChange={e => setBackground(e.target.value)} sx={{ color: 'white' }}>
+                <Select variant="outlined" fullWidth value={conference.selectedBackgroundMode} onChange={e => setBackground(e.target.value)} sx={{ color: 'white' }}>
                   <MenuItem key="none" value="none">
                     None
                   </MenuItem>
