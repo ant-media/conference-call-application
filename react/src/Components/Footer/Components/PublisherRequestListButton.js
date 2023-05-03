@@ -5,7 +5,6 @@ import { SvgIcon } from '../../SvgIcon';
 import { SettingsContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import {AntmediaContext} from "../../../App";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   '&.footer-icon-button':{
