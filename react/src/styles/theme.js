@@ -311,6 +311,7 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
       },
     },
     palette: {
+      // if you wanted to embed this application in another webapp, you should remove this background color cause it overrides page's body background color
       background: {
         default: green80,
       },

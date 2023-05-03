@@ -18,11 +18,11 @@ import ReconnectButton from './Components/ReconnectButton';
 
 const CustomizedGrid = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.green[80],
-  position: "fixed",
+  position: "absolute",
   bottom: 0,
   left: 0,
   padding: 16,
-  width: "100vw",
+  width: "100%",
   zIndex: 2,
   height: 80,
 }));
