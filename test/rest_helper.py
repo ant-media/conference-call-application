@@ -19,8 +19,10 @@ class RestHelper:
 
   def login(self):
     resp = self.session.post(self.rest_url + "/users/authenticate", json={"email":self.user,"password":self.password})
+    print ("status code " + str(resp.status_code))
+    print ("url: " + str(self.rest_url))
     json_data = json.loads(resp.text)
-    print("resp:"+str(resp)+" "+str(json_data))
+    print("resp:"+str(json_data))
     return json_data
 
   def get_broadcasts(self):
