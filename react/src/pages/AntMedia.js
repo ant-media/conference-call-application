@@ -9,10 +9,10 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
-import {VideoEffect} from "@antmedia/webrtc_adaptor/dist/video-effect";
+import { VideoEffect } from "@antmedia/webrtc_adaptor/dist/video-effect";
 import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor";
 import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/fetch.stream";
-import {SvgIcon} from "../Components/SvgIcon";
+import { SvgIcon } from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 export const ConferenceContext = React.createContext(null);
@@ -21,7 +21,7 @@ const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
   maxVideoTrackCount: 5,
-  trackEvents:[],
+  trackEvents: [],
 };
 
 const JoinModes = {
@@ -31,76 +31,77 @@ const JoinModes = {
 
 
 var token = getUrlParameter("token");
-  var mcuEnabled = getUrlParameter("mcuEnabled");
-  var InitialStreamId = getUrlParameter("streamId");
-  var playOnly = getUrlParameter("playOnly");
-  var subscriberId = getUrlParameter("subscriberId");
-  var subscriberCode = getUrlParameter("subscriberCode");
+var mcuEnabled = getUrlParameter("mcuEnabled");
+var InitialStreamId = getUrlParameter("streamId");
+var playOnly = getUrlParameter("playOnly");
+var subscriberId = getUrlParameter("subscriberId");
+var subscriberCode = getUrlParameter("subscriberCode");
+var scrollThreshold = -Infinity;
+var scroll_down=true;
 
+var videoQualityConstraints = {
+  video: {
+    width: { max: 320 },
+    height: { max: 240 },
+  }
+}
 
-  var videoQualityConstraints = {
-    video: {
-      width: { max: 320 },
-      height: { max: 240 },
-    }
+var audioQualityConstraints = {
+  audio: {
+    noiseSuppression: true,
+    echoCancellation: true
+  }
+}
+
+var mediaConstraints = {
+  // setting constraints here breaks source switching on firefox.
+  video: videoQualityConstraints.video,
+  audio: audioQualityConstraints.audio,
+};
+
+let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+
+if (!websocketURL) {
+  const appName = window.location.pathname.substring(
+    0,
+    window.location.pathname.lastIndexOf("/") + 1
+  );
+  const path =
+    window.location.hostname +
+    ":" +
+    window.location.port +
+    appName +
+    "websocket";
+  websocketURL = "ws://" + path;
+
+  if (window.location.protocol.startsWith("https")) {
+    websocketURL = "wss://" + path;
   }
 
-  var audioQualityConstraints = {
-    audio:{
-      noiseSuppression: true,
-      echoCancellation: true
-    }
-  }
+}
 
-  var mediaConstraints = {
-    // setting constraints here breaks source switching on firefox.
-    video: videoQualityConstraints.video,
-    audio: audioQualityConstraints.audio,
-  };
+var isPlaying = false;
+var fullScreenId = -1;
 
-  let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+if (mcuEnabled == null) {
+  mcuEnabled = false;
+}
 
-  if (!websocketURL) {
-    const appName = window.location.pathname.substring(
-      0,
-      window.location.pathname.lastIndexOf("/") + 1
-    );
-    const path =
-      window.location.hostname +
-      ":" +
-      window.location.port +
-      appName +
-      "websocket";
-    websocketURL = "ws://" + path;
+if (playOnly == null) {
+  playOnly = false;
+}
 
-    if (window.location.protocol.startsWith("https")) {
-      websocketURL = "wss://" + path;
-    }
+var roomOfStream = [];
+var autoRepublishIntervalJob = null;
+var roomInfoHandleJob = null;
 
-  }
+var statusUpdateIntervalJob = null;
+var room = null;
+var reconnecting = false;
 
-  var isPlaying = false;
-  var fullScreenId = -1;
+var reconnectionTimer = 1;
 
-  if (mcuEnabled == null) {
-      mcuEnabled = false;
-  }
-
-  if (playOnly == null) {
-    playOnly = false;
-  }
-
-  var roomOfStream = [];
-  var autoRepublishIntervalJob = null;
-  var roomInfoHandleJob = null;
-
-  var statusUpdateIntervalJob = null;
-  var room = null;
-  var reconnecting =false;
-
-  var reconnectionTimer = 1;
-
-  var publishStreamIdHack = InitialStreamId;
+var publishStreamIdHack = InitialStreamId;
 
 
 function AntMedia() {
@@ -173,12 +174,12 @@ function AntMedia() {
     } else {
       document.getElementsByClassName("publisher-content")[0].className =
         "publisher-content chat-active fullscreen-layout";
-        if (fullScreenId !== -1) {
-          document.getElementById(fullScreenId).classList.remove("selected");
-          document.getElementById(fullScreenId).classList.add("unselected");
-        }
-        document.getElementById(divId).classList.remove("unselected");
-        document.getElementById(divId).classList.add("selected");
+      if (fullScreenId !== -1) {
+        document.getElementById(fullScreenId).classList.remove("selected");
+        document.getElementById(fullScreenId).classList.add("unselected");
+      }
+      document.getElementById(divId).classList.remove("unselected");
+      document.getElementById(divId).classList.add("selected");
       fullScreenId = divId;
     }
   }
@@ -191,7 +192,7 @@ function AntMedia() {
     let currentAudioDeviceId = selectedDevices.audioDeviceId;
 
     // check if the selected devices are still available
-    for(let index = 0; index < devices.length; index++) {
+    for (let index = 0; index < devices.length; index++) {
       if (devices[index].kind === "videoinput" && devices[index].deviceId === selectedDevices.videoDeviceId) {
         isVideoDeviceAvailable = true;
       }
@@ -225,8 +226,8 @@ function AntMedia() {
   }
 
   function checkAndRepublishIfRequired() {
-    console.log("check reconnection:"+reconnecting);
-    if(reconnecting) {
+    console.log("check reconnection:" + reconnecting);
+    if (reconnecting) {
       console.log("Reconnecting...");
       webRTCAdaptor.checkWebSocketConnection();
       return;
@@ -238,7 +239,7 @@ function AntMedia() {
     console.log("Ice state checked = " + iceState);
 
     if (iceState === null || iceState === "failed" || iceState === "disconnected") {
-            reconnect();
+      reconnect();
     }
   }
 
@@ -251,7 +252,7 @@ function AntMedia() {
     setParticipants([]);
     setAllParticipants([]);
 
-    publishStreamIdHack = publishStreamId+"_"+(reconnectionTimer++);
+    publishStreamIdHack = publishStreamId + "_" + (reconnectionTimer++);
     setPublishStreamId(publishStreamIdHack)
 
     reconnecting = true;
@@ -279,7 +280,7 @@ function AntMedia() {
     }
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  if(webRTCAdaptor) {
+  if (webRTCAdaptor) {
     webRTCAdaptor.callback = infoCallback;
     webRTCAdaptor.callbackError = errorCallback;
     webRTCAdaptor.localStream = localVideo;
@@ -288,7 +289,7 @@ function AntMedia() {
   function startAutoRepublishTimer() {
     if (autoRepublishIntervalJob == null) {
       autoRepublishIntervalJob = setInterval(() => {
-            checkAndRepublishIfRequired();
+        checkAndRepublishIfRequired();
       }, 3000);
     }
   }
@@ -298,7 +299,7 @@ function AntMedia() {
       enableDisableMCU(mcuEnabled);
       setInitialized(true);
 
-      if(reconnecting) {
+      if (reconnecting) {
         webRTCAdaptor.leaveFromRoom(roomName);
       }
     } else if (info === "joinedTheRoom") {
@@ -312,15 +313,15 @@ function AntMedia() {
 
       let streamDetailsList = obj.streamList;
 
-      if (playOnly)  {
+      if (playOnly) {
         webRTCAdaptor.play(obj.ATTR_ROOM_NAME, token, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
       }
       else {
         handlePublish(
-            obj.streamId,
-            token,
-            subscriberId,
-            subscriberCode
+          obj.streamId,
+          token,
+          subscriberId,
+          subscriberCode
         );
       }
     } else if (info === "newStreamAvailable") {
@@ -329,7 +330,7 @@ function AntMedia() {
       console.log("publish started");
       //stream is being published
       webRTCAdaptor.enableStats(publishStreamId);
-      if(roomInfoHandleJob == null) {
+      if (roomInfoHandleJob == null) {
         roomInfoHandleJob = setInterval(() => {
           handleRoomInfo(publishStreamId);
         }, 5000);
@@ -359,7 +360,7 @@ function AntMedia() {
         autoRepublishIntervalJob = null;
       }
 
-      if(reconnecting) {
+      if (reconnecting) {
         webRTCAdaptor.joinRoom(room, publishStreamId);
       }
     } else if (info === "closed") {
@@ -387,7 +388,7 @@ function AntMedia() {
     } else if (info === "data_received") {
       try {
         handleNotificationEvent(obj);
-      } catch (e) {}
+      } catch (e) { }
     } else if (info === "available_devices") {
       setDevices(obj);
       checkAndUpdateVideoAudioSources();
@@ -405,7 +406,7 @@ function AntMedia() {
         packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
       }
 
-      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
+      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
         displayPoorNetworkConnectionWarning();
       }
 
@@ -413,9 +414,9 @@ function AntMedia() {
       handleDebugInfo(obj.debugInfo);
     }
     else if (info === "ice_connection_state_changed") {
-      console.log("iceConnectionState Changed: ",JSON.stringify(obj))
+      console.log("iceConnectionState Changed: ", JSON.stringify(obj))
       var iceState = obj.state;
-      if (iceState === null || iceState === "failed" || iceState === "disconnected"){
+      if (iceState === null || iceState === "failed" || iceState === "disconnected") {
         console.log("!! Connection closed. Please rejoin the meeting");
       }
     }
@@ -478,7 +479,7 @@ function AntMedia() {
     }
 
 
-    console.log("***** "+error)
+    console.log("***** " + error)
 
   };
 
@@ -522,8 +523,8 @@ function AntMedia() {
 
   function handleNotifyPinUser(id) {
     if (id === "localVideo") {
-        // if we pin local video then we are not going to inform anyone.
-        return;
+      // if we pin local video then we are not going to inform anyone.
+      return;
     }
     // If I PIN USER then i am going to inform pinned user.
     // Why? Because if i pin someone, pinned user's resolution has to change for better visibility.
@@ -556,9 +557,9 @@ function AntMedia() {
   }
   function handleStartScreenShare() {
     webRTCAdaptor.switchDesktopCapture(publishStreamId)
-    .then(()=>{
-      screenShareOnNotification();
-    });
+      .then(() => {
+        screenShareOnNotification();
+      });
   }
 
   function screenShareOffNotification() {
@@ -603,18 +604,18 @@ function AntMedia() {
 
   function displayWarning(message) {
     enqueueSnackbar(
-        {
-          message: message,
-          variant: "info",
-          icon: <SvgIcon size={24} name={'report'} color="red" />
+      {
+        message: message,
+        variant: "info",
+        icon: <SvgIcon size={24} name={'report'} color="red" />
+      },
+      {
+        autoHideDuration: 5000,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
         },
-        {
-          autoHideDuration: 5000,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-        }
+      }
     );
   }
 
@@ -658,7 +659,7 @@ function AntMedia() {
       const sentInSameTime = lastMessage?.date === newMessage?.date;
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       newMessage.date = new Date(newMessage?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
-
+      calculate_scroll_height();
       if (isSameUser && sentInSameTime) {
         //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
         lastMessage.message = lastMessage.message + "\n" + newMessage.message;
@@ -681,7 +682,12 @@ function AntMedia() {
 
   function scrollToBottom() {
     let objDiv = document.getElementById("paper-props");
-    if (objDiv) objDiv.scrollTop = objDiv?.scrollHeight;
+    if (objDiv  && scroll_down && objDiv.scrollHeight > objDiv.clientHeight) {
+      objDiv.scrollTo(0, objDiv.scrollHeight);
+      scrollThreshold = 0.95;
+      scroll_down = false;
+    }
+    
   }
   function handleMessageDrawerOpen(open) {
     closeSnackbar();
@@ -706,7 +712,7 @@ function AntMedia() {
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
-        if(message === "debugme") {
+        if (message === "debugme") {
           webRTCAdaptor.getDebugInfo(publishStreamId);
           return;
         }
@@ -727,9 +733,9 @@ function AntMedia() {
   function handleDebugInfo(debugInfo) {
     var infoText = "Client Debug Info\n";
     infoText += "Events:\n";
-    infoText += JSON.stringify(globals.trackEvents)+"\n";
-    infoText += "Participants ("+participants.length+"):\n";
-    infoText += JSON.stringify(participants)+"\n";
+    infoText += JSON.stringify(globals.trackEvents) + "\n";
+    infoText += "Participants (" + participants.length + "):\n";
+    infoText += JSON.stringify(participants) + "\n";
     infoText += "----------------------\n";
     infoText += debugInfo;
 
@@ -782,7 +788,15 @@ function AntMedia() {
   function toggleSetNumberOfUnreadMessages(numb) {
     setNumberOfUnReadMessages(numb);
   }
-
+  function calculate_scroll_height(){
+    let objDiv = document.getElementById("paper-props");
+    if (objDiv) {
+      let scrollPosition = objDiv.scrollTop / (objDiv.scrollHeight - objDiv.clientHeight);
+      if (scrollPosition > scrollThreshold) {
+        scroll_down = true;
+      }
+  }
+}
   function handleNotificationEvent(obj) {
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
@@ -810,6 +824,7 @@ function AntMedia() {
           isMicMuted: false,
         });
       } else if (eventType === "MESSAGE_RECEIVED") {
+        calculate_scroll_height();
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         notificationEvent.date = new Date(notificationEvent?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
         // if message arrives.
@@ -869,8 +884,8 @@ function AntMedia() {
           });
           webRTCAdaptor.muteLocalMic();
           handleSendNotificationEvent(
-              "MIC_MUTED",
-              publishStreamId
+            "MIC_MUTED",
+            publishStreamId
           );
         }
       }
@@ -1017,7 +1032,7 @@ function AntMedia() {
     webRTCAdaptor.play(obj.streamId, "", roomName);
   }
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
-      webRTCAdaptor.publish(
+    webRTCAdaptor.publish(
       publishStreamId,
       token,
       subscriberId,
@@ -1029,7 +1044,7 @@ function AntMedia() {
   }
   function handlePlayVideo(obj, publishStreamId) {
     let index = obj?.trackId?.substring("ARDAMSx".length);
-    globals.trackEvents.push({track:obj.track.id, event:"added"});
+    globals.trackEvents.push({ track: obj.track.id, event: "added" });
 
     if (obj.track.kind === "audio") {
       setAudioTracks((sat) => {
@@ -1075,7 +1090,7 @@ function AntMedia() {
     virtualBackgroundImage.alt = "virtual-background";
 
     if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
-        virtualBackgroundImage.src = imageUrl;
+      virtualBackgroundImage.src = imageUrl;
     } else {
       virtualBackgroundImage.src = "virtual-background.png";
     }
@@ -1087,15 +1102,15 @@ function AntMedia() {
   function handleBackgroundReplacement(option) {
     let effectName;
 
-    if(option === "none") {
+    if (option === "none") {
       effectName = VideoEffect.NO_EFFECT;
       setIsVideoEffectRunning(false);
     }
-    else if(option === "blur") {
+    else if (option === "blur") {
       effectName = VideoEffect.BLUR_BACKGROUND;
       setIsVideoEffectRunning(true);
     }
-    else if(option === "background") {
+    else if (option === "background") {
       if (virtualBackground === null) {
         setVirtualBackgroundImage(null);
       }
@@ -1103,14 +1118,14 @@ function AntMedia() {
       setIsVideoEffectRunning(true);
     }
     webRTCAdaptor.enableEffect(effectName).then(() => {
-      console.log("Effect: "+ effectName+" is enabled");
+      console.log("Effect: " + effectName + " is enabled");
     }).catch(err => {
-      console.error("Effect: "+ effectName+" is not enabled. Error is " + err);
+      console.error("Effect: " + effectName + " is not enabled. Error is " + err);
       setIsVideoEffectRunning(false);
     });
   }
   function checkAndTurnOnLocalCamera(streamId) {
-    if(isVideoEffectRunning) {
+    if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
     }
     else {
@@ -1119,7 +1134,7 @@ function AntMedia() {
   }
 
   function checkAndTurnOffLocalCamera(streamId) {
-    if(isVideoEffectRunning) {
+    if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
     }
     else {
@@ -1295,11 +1310,11 @@ function AntMedia() {
             ) : waitingOrMeetingRoom === "waiting" ? (
               <WaitingRoom />
             ) : (
-                <>
-                  <MeetingRoom />
-                  <MessageDrawer />
-                  <ParticipantListDrawer />
-                </>
+              <>
+                <MeetingRoom />
+                <MessageDrawer />
+                <ParticipantListDrawer />
+              </>
             )}
           </SnackbarProvider>
         </ConferenceContext.Provider>
