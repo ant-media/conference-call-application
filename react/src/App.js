@@ -41,7 +41,7 @@ const availableLangs = Object.keys(resources);
 if (!availableLangs.includes(i18n.language)) {
 
   const maybeLang = i18n.language.slice(0, 2);
-  if (availableLangs.contains(maybeLang)) {
+  if (availableLangs.includes(maybeLang)) {
     localStorage.setItem("i18nextLng", maybeLang);
     i18n.changeLanguage(maybeLang);
   } else {
