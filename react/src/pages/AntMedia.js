@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid } from "@mui/material";
+import { Grid, CircularProgress, Box } from "@mui/material";
 import { useParams } from "react-router-dom";
 import _ from "lodash";
 import WaitingRoom from "./WaitingRoom";
@@ -1222,7 +1222,22 @@ function AntMedia() {
     webRTCAdaptor.enableAudioLevelForLocalStream(listener, period);
   }
 
-  return (!initialized ? <>hello</> :
+  return (!initialized ? <> 
+    <Grid
+        container
+        spacing={0}
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        style={{ minHeight: '100vh' }}
+      >
+        <Grid item xs={3}>
+        <Box sx={{ display: 'flex' }}>
+          <CircularProgress size="4rem" />
+        </Box>
+        </Grid>   
+      </Grid> 
+    </> :
     <Grid container className="App">
       <Grid
         container
