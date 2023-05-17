@@ -9,9 +9,9 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
-import { VideoEffect } from "@antmedia/webrtc_adaptor/dist/video-effect";
-import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor";
-import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/fetch.stream";
+import { VideoEffect } from "@antmedia/webrtc_adaptor/dist/es/video-effect";
+import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor/dist/es/webrtc_adaptor";
+import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/es/fetch.stream";
 import { SvgIcon } from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
@@ -687,7 +687,7 @@ function AntMedia() {
       scrollThreshold = 0.95;
       scroll_down = false;
     }
-    
+
   }
   function handleMessageDrawerOpen(open) {
     closeSnackbar();
