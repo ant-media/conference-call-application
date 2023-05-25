@@ -689,7 +689,7 @@ function AntMedia() {
     if (closeScreenShare) {
       handleScreenshareNotFromPlatform();
     }
-  }, [closeScreenShare]);
+  }, [closeScreenShare]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   function scrollToBottom() {
     let objDiv = document.getElementById("paper-props");
