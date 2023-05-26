@@ -9,9 +9,9 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
-import { VideoEffect } from "@antmedia/webrtc_adaptor/dist/video-effect";
-import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor";
-import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/fetch.stream";
+import { VideoEffect } from "@antmedia/webrtc_adaptor/dist/es/video-effect";
+import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor/dist/es/webrtc_adaptor";
+import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/es/fetch.stream";
 import { SvgIcon } from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
@@ -92,16 +92,11 @@ if (playOnly == null) {
 }
 
 var roomOfStream = [];
-var autoRepublishIntervalJob = null;
 var roomInfoHandleJob = null;
 
 var statusUpdateIntervalJob = null;
 var room = null;
 var reconnecting = false;
-
-var reconnectionTimer = 1;
-
-var publishStreamIdHack = InitialStreamId;
 
 
 function AntMedia() {
@@ -225,38 +220,13 @@ function AntMedia() {
     }
   }
 
-  function checkAndRepublishIfRequired() {
-    console.log("check reconnection:" + reconnecting);
-    if (reconnecting) {
-      console.log("Reconnecting...");
-      webRTCAdaptor.checkWebSocketConnection();
-      return;
-    }
-
-    console.log("check publishStreamId  " + publishStreamId);
-
-    var iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
-    console.log("Ice state checked = " + iceState);
-
-    if (iceState === null || iceState === "failed" || iceState === "disconnected") {
-      reconnect();
-    }
-  }
-
-  function reconnect() {
-    console.log("reconnect required");
-    webRTCAdaptor.closePeerConnection(publishStreamId);
-    webRTCAdaptor.closeWebSocket();
-
+  function reconnectionInProgress() {
     //reset UI releated states
     setParticipants([]);
     setAllParticipants([]);
 
-    publishStreamIdHack = publishStreamId + "_" + (reconnectionTimer++);
-    setPublishStreamId(publishStreamIdHack)
-
     reconnecting = true;
-    isPlaying = false;
+    //isPlaying = false;
 
     displayWarning("Connection lost. Trying reconnect...");
   }
@@ -286,29 +256,24 @@ function AntMedia() {
     webRTCAdaptor.localStream = localVideo;
   }
 
-  function startAutoRepublishTimer() {
-    if (autoRepublishIntervalJob == null) {
-      autoRepublishIntervalJob = setInterval(() => {
-        checkAndRepublishIfRequired();
-      }, 3000);
-    }
-  }
-
   function infoCallback(info, obj) {
     if (info === "initialized") {
       enableDisableMCU(mcuEnabled);
       setInitialized(true);
 
       if (reconnecting) {
-        webRTCAdaptor.leaveFromRoom(roomName);
+        //webRTCAdaptor.leaveFromRoom(roomName);
       }
     } else if (info === "joinedTheRoom") {
       room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
 
       globals.maxVideoTrackCount = obj.maxTrackCount;
-      publishStreamIdHack = obj.streamId;
-      setPublishStreamId(publishStreamIdHack);
+      setPublishStreamId(obj.streamId);
+
+      if(reconnecting) {
+        return;
+      }
 
 
       let streamDetailsList = obj.streamList;
@@ -335,16 +300,17 @@ function AntMedia() {
           handleRoomInfo(publishStreamId);
         }, 5000);
       }
-      startAutoRepublishTimer();
       if (statusUpdateIntervalJob == null) {
         statusUpdateIntervalJob = setInterval(() => {
           updateStatus(obj);
         }, 2000);
       }
 
-      reconnecting = false;
     } else if (info === "publish_finished") {
       //stream is being finished
+    } 
+    else if (info === "play_finished") {
+      reconnecting = false;
     } else if (info === "screen_share_stopped") {
       handleScreenshareNotFromPlatform();
     } else if (info === "browser_screen_share_supported") {
@@ -353,16 +319,11 @@ function AntMedia() {
       if (roomInfoHandleJob !== null) {
         clearInterval(roomInfoHandleJob);
         clearInterval(statusUpdateIntervalJob);
-        clearInterval(autoRepublishIntervalJob);
 
         roomInfoHandleJob = null;
         statusUpdateIntervalJob = null;
-        autoRepublishIntervalJob = null;
       }
 
-      if (reconnecting) {
-        webRTCAdaptor.joinRoom(room, publishStreamId);
-      }
     } else if (info === "closed") {
 
     }
@@ -416,8 +377,16 @@ function AntMedia() {
     else if (info === "ice_connection_state_changed") {
       console.log("iceConnectionState Changed: ", JSON.stringify(obj))
       var iceState = obj.state;
-      if (iceState === null || iceState === "failed" || iceState === "disconnected") {
-        console.log("!! Connection closed. Please rejoin the meeting");
+      if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
+
+        setTimeout(() => {
+          if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" && 
+              webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" && 
+              webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
+              reconnectionInProgress();
+            }
+        }, 5000);
+              
       }
     }
   };
@@ -474,8 +443,8 @@ function AntMedia() {
     } else if (error.indexOf("WebSocketNotConnected") !== -1) {
       errorMessage = "WebSocket Connection is disconnected.";
     } else if (error.indexOf("highResourceUsage") !== -1) {
-      reconnect();
-      startAutoRepublishTimer();
+
+      //TODO: if you get highResourceUsage we should reconnect to be frowarded to another node
     }
 
 
@@ -997,7 +966,6 @@ function AntMedia() {
     setParticipants([]);
     webRTCAdaptor.leaveFromRoom(roomName);
     webRTCAdaptor.turnOffLocalCamera(publishStreamId);
-    clearInterval(autoRepublishIntervalJob);
     setWaitingOrMeetingRoom("waiting");
   }
   function handleSendNotificationEvent(eventType, publishStreamId, info) {
@@ -1215,7 +1183,7 @@ function AntMedia() {
   }
 
   function updateAudioLevel(level) {
-    webRTCAdaptor.updateAudioLevel(publishStreamIdHack, level);
+    webRTCAdaptor.updateAudioLevel(publishStreamId, level);
   }
 
   function setAudioLevelListener(listener, period) {
@@ -1288,7 +1256,6 @@ function AntMedia() {
             setStreamName,
             handleLeaveFromRoom,
             handleSendNotificationEvent,
-            reconnect,
             handleSetMaxVideoTrackCount,
             screenShareOffNotification,
             handleSendMessage,

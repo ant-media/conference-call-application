@@ -13,7 +13,6 @@ import EndCallButton from "./Components/EndCallButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
-import ReconnectButton from './Components/ReconnectButton';
 
 
 const CustomizedGrid = styled(Grid)(({ theme }) => ({
@@ -85,13 +84,6 @@ function Footer(props) {
                   <Grid item xs={0}>
                     <EndCallButton footer/>
                   </Grid>
-                  {process.env.NODE_ENV === "development"
-                    ?
-                    <Grid item xs={0}>
-                      <ReconnectButton footer/>
-                    </Grid>
-                    : null
-                  }
                 </Grid>
               </Grid>
 
