@@ -455,7 +455,9 @@ function AntMedia() {
       error.indexOf("PermissionDeniedError") !== -1
     ) {
       errorMessage = "You are not allowed to access camera and mic.";
-      handleScreenshareNotFromPlatform();
+      if(isScreenShared) {
+        handleScreenshareNotFromPlatform();
+      }
     } else if (error.indexOf("TypeError") !== -1) {
       errorMessage = "Video/Audio is required.";
       webRTCAdaptor.mediaManager.getDevices();
