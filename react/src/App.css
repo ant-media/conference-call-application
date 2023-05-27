@@ -13,6 +13,11 @@
 html,
 body {
   color: "#FFF";
+  overflow-y: auto;
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 /* colors */
 .App {
