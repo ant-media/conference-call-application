@@ -38,6 +38,7 @@ var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
 var scroll_down=true;
+var last_warning_time=null;
 
 var videoQualityConstraints = {
   video: {
@@ -599,7 +600,10 @@ function AntMedia() {
   }
 
   function displayPoorNetworkConnectionWarning() {
-    displayWarning("Your connection is not stable. Please check your internet connection!");
+    if(last_warning_time == null || Date.now() - last_warning_time >  1000 * 30){
+      last_warning_time = Date.now();
+      displayWarning("Your connection is not stable. Please check your internet connection!");
+    }
   }
 
   function displayWarning(message) {
