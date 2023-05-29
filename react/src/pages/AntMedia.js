@@ -402,11 +402,12 @@ function AntMedia() {
       let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
       let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
       let packageLostPercentage = 0;
-      if (packageLost !== 0) {
+      if (packageLost > 0) {
         packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
       }
 
       if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
+        console.log("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" outgoing data:"+((outgoingBitrate / 100) * 80));
         displayPoorNetworkConnectionWarning();
       }
 
@@ -442,7 +443,8 @@ function AntMedia() {
     ) {
       errorMessage =
         "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
-      alert(errorMessage);
+      displayWarning(errorMessage);
+
     } else if (
       error.indexOf("OverconstrainedError") !== -1 ||
       error.indexOf("ConstraintNotSatisfiedError") !== -1
@@ -460,6 +462,7 @@ function AntMedia() {
       }
     } else if (error.indexOf("TypeError") !== -1) {
       errorMessage = "Video/Audio is required.";
+      displayWarning(errorMessage);
       webRTCAdaptor.mediaManager.getDevices();
     } else if (error.indexOf("UnsecureContext") !== -1) {
       errorMessage =
@@ -1198,13 +1201,15 @@ function AntMedia() {
   }
 
   function cameraSelected(value) {
-    setSelectedCamera(value);
-    // When we first open home page, React will call this function and local stream is null at that time.
-    // So, we need to catch the error.
-    try {
-      webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
-    } catch (e) {
-      console.log("Local stream is not ready yet.");
+    if(selectedCamera !== value) {
+      setSelectedCamera(value);
+      // When we first open home page, React will call this function and local stream is null at that time.
+      // So, we need to catch the error.
+      try {
+        webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
+      } catch (e) {
+        console.log("Local stream is not ready yet.");
+      }
     }
   }
 
