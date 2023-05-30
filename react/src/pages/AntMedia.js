@@ -184,6 +184,7 @@ function AntMedia() {
     }
   }
 
+
   function checkAndUpdateVideoAudioSources() {
     let isVideoDeviceAvailable = false;
     let isAudioDeviceAvailable = false;
@@ -265,19 +266,48 @@ function AntMedia() {
     webRTCAdaptor.joinRoom(roomName, generatedStreamId, roomJoinMode);
   }
 
-  useEffect(() => {
-    if (recreateAdaptor && webRTCAdaptor == null) {
-      setWebRTCAdaptor(new WebRTCAdaptor({
-        websocket_url: websocketURL,
-        mediaConstraints: mediaConstraints,
-        isPlayMode: playOnly,
-        debug: true,
-        callback: infoCallback,
-        callbackError: errorCallback
-      }))
+  async function checkDevices() {
+      let devices = await navigator.mediaDevices.enumerateDevices();
+      let audioDeviceAvailable = false
+      let videoDeviceAvailable = false
+      devices.forEach(device => {	
+          if(device.kind==="audioinput"){
+            audioDeviceAvailable = true;
+          }
+          if(device.kind==="videoinput"){
+            videoDeviceAvailable = true;
+          }
+      });
 
-      setRecreateAdaptor(false);
+      if(!audioDeviceAvailable) {
+        mediaConstraints.audio = false;
+      }
+      if(!videoDeviceAvailable) {
+        mediaConstraints.video = false;
+      }
+  }
+
+  
+
+  useEffect(() => {
+    async function createWebRTCAdaptor() {
+      //here we check if audio or video device available and wait result
+      //according to the result we modify mediaConstraints
+      await checkDevices();
+      if (recreateAdaptor && webRTCAdaptor == null) {
+        setWebRTCAdaptor(new WebRTCAdaptor({
+          websocket_url: websocketURL,
+          mediaConstraints: mediaConstraints,
+          isPlayMode: playOnly,
+          debug: true,
+          callback: infoCallback,
+          callbackError: errorCallback
+        }))
+
+        setRecreateAdaptor(false);
+      }
     }
+    createWebRTCAdaptor();
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   if (webRTCAdaptor) {
