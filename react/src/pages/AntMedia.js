@@ -97,6 +97,8 @@ var roomInfoHandleJob = null;
 var statusUpdateIntervalJob = null;
 var room = null;
 var reconnecting = false;
+var publishReconnected;
+var playReconnected;
 
 
 function AntMedia() {
@@ -226,6 +228,8 @@ function AntMedia() {
     setAllParticipants([]);
 
     reconnecting = true;
+    publishReconnected = false;
+    playReconnected = false;
     //isPlaying = false;
 
     displayWarning("Connection lost. Trying reconnect...");
@@ -265,6 +269,8 @@ function AntMedia() {
         //webRTCAdaptor.leaveFromRoom(roomName);
       }
     } else if (info === "joinedTheRoom") {
+      console.log("**** joined the room:"+reconnecting);
+
       room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
 
@@ -292,6 +298,13 @@ function AntMedia() {
     } else if (info === "newStreamAvailable") {
       handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") {
+      console.log("**** publish started:"+reconnecting);
+      if(reconnecting) {
+        publishReconnected = true;
+        joinRoom(room, publishStreamId, roomJoinMode);
+        reconnecting = !(publishReconnected && playReconnected);
+        return;
+      }
       console.log("publish started");
       //stream is being published
       webRTCAdaptor.enableStats(publishStreamId);
@@ -309,8 +322,22 @@ function AntMedia() {
     } else if (info === "publish_finished") {
       //stream is being finished
     } 
-    else if (info === "play_finished") {
-      reconnecting = false;
+    else if (info === "session_restored") {
+      console.log("**** session_restored:"+reconnecting);
+      if(reconnecting) {
+        publishReconnected = true;
+        joinRoom(room, publishStreamId, roomJoinMode);
+        reconnecting = !(publishReconnected && playReconnected);
+        return;
+      }
+    }
+    else if (info === "play_started") {
+      console.log("**** play started:"+reconnecting);
+      if(reconnecting) {
+        playReconnected = true;
+        reconnecting = !(publishReconnected && playReconnected);
+        return;
+      }
     } else if (info === "screen_share_stopped") {
       handleScreenshareNotFromPlatform();
     } else if (info === "browser_screen_share_supported") {
@@ -442,9 +469,22 @@ function AntMedia() {
       handleScreenshareNotFromPlatform();
     } else if (error.indexOf("WebSocketNotConnected") !== -1) {
       errorMessage = "WebSocket Connection is disconnected.";
-    } else if (error.indexOf("highResourceUsage") !== -1) {
+    } 
+    else if (error.indexOf("already_publishing") !== -1) {
+      console.log("**** already publishing:"+reconnecting);
 
-      //TODO: if you get highResourceUsage we should reconnect to be frowarded to another node
+      if(reconnecting) {
+        webRTCAdaptor.stop(publishStreamId);
+          
+          setTimeout(() => {
+            handlePublish(
+              publishStreamId,
+              token,
+              subscriberId,
+              subscriberCode
+            );
+          }, 2000);
+      }
     }
 
 
