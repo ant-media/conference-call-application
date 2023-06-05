@@ -7,8 +7,9 @@ import { BrowserRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 let appName = undefined
+let roomName = document.getElementById("root").getAttribute("data-room-name");
 
-if (process.env.NODE_ENV !== 'development') {
+if (process.env.NODE_ENV !== 'development' && !roomName) {
   appName = "/" + window.location.pathname.split("/")[1];
   console.log = function () { };
 }
