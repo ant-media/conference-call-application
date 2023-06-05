@@ -81,8 +81,6 @@ if (!websocketURL) {
 
 }
 
-websocketURL = "ws://localhost:5080/Conference/websocket";
-
 var isPlaying = false;
 var fullScreenId = -1;
 
