@@ -307,6 +307,9 @@ const MeetingRoom = React.memo((props) => {
 
   const pinLayout = conference.pinnedVideoId !== null ? true : false;
   // const testPart = [{ name: 'a' }, { name: 'a' }];
+
+  const pinnedVideo = pinLayout && conference.participants.find((v) => v.id === conference.pinnedVideoId)
+
   return (
         <>
           {conference.audioTracks.map((audio, index) => (
@@ -402,24 +405,22 @@ const MeetingRoom = React.memo((props) => {
                       </div>
                   ) : (
                       //pinned participant
-
-                      conference.participants.find((v) => v.id === conference.pinnedVideoId) && (
+                      pinnedVideo && (
                           <div className="single-video-container pinned keep-ratio">
                             <VideoCard
-                                id={conference.participants.find((v) => v.id === conference.pinnedVideoId)?.id}
+                                id={pinnedVideo?.id}
                                 track={
-                                  conference.participants.find((v) => v.id === conference.pinnedVideoId)?.track
+                                  pinnedVideo?.track
                                 }
                                 autoPlay
                                 name={
-                                  conference.participants.find((v) => v.id === conference.pinnedVideoId)?.name
+                                  pinnedVideo?.name
                                 }
                                 pinned
                                 onHandlePin={() => {
                                   conference.pinVideo(
-                                    conference.participants.find((v) => v.id === conference.pinnedVideoId)?.id,
-                                    conference.participants.find((v) => v.id === conference.innedVideoId)
-                                          ?.videoLabel
+                                    pinnedVideo.id,
+                                    pinnedVideo.videoLabel
                                   );
                                 }}
                             />

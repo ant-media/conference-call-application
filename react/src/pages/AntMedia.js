@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid } from "@mui/material";
+import { Grid, CircularProgress, Box } from "@mui/material";
 import { useParams } from "react-router-dom";
 import _ from "lodash";
 import WaitingRoom from "./WaitingRoom";
@@ -38,6 +38,7 @@ var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
 var scroll_down=true;
+var last_warning_time=null;
 
 var videoQualityConstraints = {
   video: {
@@ -161,7 +162,7 @@ function AntMedia() {
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
   const [initialized, setInitialized] = React.useState(false);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
-
+  const [closeScreenShare, setCloseScreenShare] = React.useState(false);
 
   function makeFullScreen(divId) {
     if (fullScreenId === divId) {
@@ -180,6 +181,7 @@ function AntMedia() {
       fullScreenId = divId;
     }
   }
+
 
   function checkAndUpdateVideoAudioSources() {
     let isVideoDeviceAvailable = false;
@@ -239,19 +241,48 @@ function AntMedia() {
     webRTCAdaptor.joinRoom(roomName, generatedStreamId, roomJoinMode);
   }
 
-  useEffect(() => {
-    if (recreateAdaptor && webRTCAdaptor == null) {
-      setWebRTCAdaptor(new WebRTCAdaptor({
-        websocket_url: websocketURL,
-        mediaConstraints: mediaConstraints,
-        isPlayMode: playOnly,
-        debug: true,
-        callback: infoCallback,
-        callbackError: errorCallback
-      }))
+  async function checkDevices() {
+      let devices = await navigator.mediaDevices.enumerateDevices();
+      let audioDeviceAvailable = false
+      let videoDeviceAvailable = false
+      devices.forEach(device => {	
+          if(device.kind==="audioinput"){
+            audioDeviceAvailable = true;
+          }
+          if(device.kind==="videoinput"){
+            videoDeviceAvailable = true;
+          }
+      });
 
-      setRecreateAdaptor(false);
+      if(!audioDeviceAvailable) {
+        mediaConstraints.audio = false;
+      }
+      if(!videoDeviceAvailable) {
+        mediaConstraints.video = false;
+      }
+  }
+
+  
+
+  useEffect(() => {
+    async function createWebRTCAdaptor() {
+      //here we check if audio or video device available and wait result
+      //according to the result we modify mediaConstraints
+      await checkDevices();
+      if (recreateAdaptor && webRTCAdaptor == null) {
+        setWebRTCAdaptor(new WebRTCAdaptor({
+          websocket_url: websocketURL,
+          mediaConstraints: mediaConstraints,
+          isPlayMode: playOnly,
+          debug: true,
+          callback: infoCallback,
+          callbackError: errorCallback
+        }))
+
+        setRecreateAdaptor(false);
+      }
     }
+    createWebRTCAdaptor();
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   if (webRTCAdaptor) {
@@ -390,11 +421,12 @@ function AntMedia() {
       let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
       let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
       let packageLostPercentage = 0;
-      if (packageLost !== 0) {
+      if (packageLost > 0) {
         packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
       }
 
       if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
+        console.log("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" outgoing data:"+((outgoingBitrate / 100) * 80));
         displayPoorNetworkConnectionWarning();
       }
 
@@ -438,7 +470,8 @@ function AntMedia() {
     ) {
       errorMessage =
         "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
-      alert(errorMessage);
+      displayWarning(errorMessage);
+
     } else if (
       error.indexOf("OverconstrainedError") !== -1 ||
       error.indexOf("ConstraintNotSatisfiedError") !== -1
@@ -451,9 +484,12 @@ function AntMedia() {
       error.indexOf("PermissionDeniedError") !== -1
     ) {
       errorMessage = "You are not allowed to access camera and mic.";
-      handleScreenshareNotFromPlatform();
+      if(isScreenShared) {
+        handleScreenshareNotFromPlatform();
+      }
     } else if (error.indexOf("TypeError") !== -1) {
       errorMessage = "Video/Audio is required.";
+      displayWarning(errorMessage);
       webRTCAdaptor.mediaManager.getDevices();
     } else if (error.indexOf("UnsecureContext") !== -1) {
       errorMessage =
@@ -608,7 +644,10 @@ function AntMedia() {
   }
 
   function displayPoorNetworkConnectionWarning() {
-    displayWarning("Your connection is not stable. Please check your internet connection!");
+    if(last_warning_time == null || Date.now() - last_warning_time >  1000 * 30){
+      last_warning_time = Date.now();
+      displayWarning("Your connection is not stable. Please check your internet connection!");
+    }
   }
 
   function displayWarning(message) {
@@ -629,22 +668,27 @@ function AntMedia() {
   }
 
   function handleScreenshareNotFromPlatform() {
-    setIsScreenShared(false);
-    if (
-      cam.find(
-        (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
-      )
-    ) {
-      webRTCAdaptor.turnOffLocalCamera(publishStreamId);
+    if (typeof webRTCAdaptor !== "undefined") {
+      setIsScreenShared(false);
+      if (
+        cam.find(
+          (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
+        )
+      ) {
+        webRTCAdaptor.turnOffLocalCamera(publishStreamId);
+      } else {
+        webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
+      }
+      screenShareOffNotification();
+      let requestedMediaConstraints = {
+        width: 320,
+        height: 240,
+      };
+      webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
+      setCloseScreenShare(false);
     } else {
-      webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
+      setCloseScreenShare(true);
     }
-    screenShareOffNotification();
-    let requestedMediaConstraints = {
-      width: 320,
-      height: 240,
-    };
-    webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
   }
   function handleStopScreenShare() {
     setIsScreenShared(false);
@@ -689,6 +733,12 @@ function AntMedia() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (closeScreenShare) {
+      handleScreenshareNotFromPlatform();
+    }
+  }, [closeScreenShare]);  // eslint-disable-line react-hooks/exhaustive-deps
+
   function scrollToBottom() {
     let objDiv = document.getElementById("paper-props");
     if (objDiv  && scroll_down && objDiv.scrollHeight > objDiv.clientHeight) {
@@ -696,7 +746,7 @@ function AntMedia() {
       scrollThreshold = 0.95;
       scroll_down = false;
     }
-    
+
   }
   function handleMessageDrawerOpen(open) {
     closeSnackbar();
@@ -1193,13 +1243,15 @@ function AntMedia() {
   }
 
   function cameraSelected(value) {
-    setSelectedCamera(value);
-    // When we first open home page, React will call this function and local stream is null at that time.
-    // So, we need to catch the error.
-    try {
-      webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
-    } catch (e) {
-      console.log("Local stream is not ready yet.");
+    if(selectedCamera !== value) {
+      setSelectedCamera(value);
+      // When we first open home page, React will call this function and local stream is null at that time.
+      // So, we need to catch the error.
+      try {
+        webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
+      } catch (e) {
+        console.log("Local stream is not ready yet.");
+      }
     }
   }
 
@@ -1230,7 +1282,22 @@ function AntMedia() {
     webRTCAdaptor.enableAudioLevelForLocalStream(listener, period);
   }
 
-  return (!initialized ? <>hello</> :
+  return (!initialized ? <> 
+    <Grid
+        container
+        spacing={0}
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        style={{ minHeight: '100vh' }}
+      >
+        <Grid item xs={3}>
+        <Box sx={{ display: 'flex' }}>
+          <CircularProgress size="4rem" />
+        </Box>
+        </Grid>   
+      </Grid> 
+    </> :
     <Grid container className="App">
       <Grid
         container
