@@ -508,7 +508,6 @@ function AntMedia() {
     } 
     else if (error.indexOf("already_publishing") !== -1) {
       console.log("**** already publishing:"+reconnecting);
-
       if(reconnecting) {
         webRTCAdaptor.stop(publishStreamId);
           
