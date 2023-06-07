@@ -21,15 +21,19 @@ import { useSnackbar } from "notistack";
 import { ConferenceContext } from "./AntMedia";
 
 
+function getRoomName() {
+  return document.getElementById("root").getAttribute("data-room-name");
+}
 
 function WaitingRoom(props) {
-  const { id } = useParams();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const id = (getRoomName()) ? getRoomName() : useParams().id;
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectFocus, setSelectFocus] = React.useState(null);
 
   const roomName = id;
-  
+
   const conference = useContext(ConferenceContext);
   const { enqueueSnackbar } = useSnackbar();
 

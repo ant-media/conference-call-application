@@ -104,9 +104,13 @@ var reconnectionTimer = 1;
 
 var publishStreamIdHack = InitialStreamId;
 
+function getRoomName() {
+  return document.getElementById("root").getAttribute("data-room-name");
+}
 
 function AntMedia() {
-  const { id } = useParams();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const id = (getRoomName()) ? getRoomName() : useParams().id;
   const roomName = id;
 
   // drawerOpen for message components.
@@ -271,7 +275,7 @@ function AntMedia() {
       let devices = await navigator.mediaDevices.enumerateDevices();
       let audioDeviceAvailable = false
       let videoDeviceAvailable = false
-      devices.forEach(device => {	
+      devices.forEach(device => {
           if(device.kind==="audioinput"){
             audioDeviceAvailable = true;
           }
@@ -288,7 +292,7 @@ function AntMedia() {
       }
   }
 
-  
+
 
   useEffect(() => {
     async function createWebRTCAdaptor() {
@@ -1274,7 +1278,7 @@ function AntMedia() {
     webRTCAdaptor.enableAudioLevelForLocalStream(listener, period);
   }
 
-  return (!initialized ? <> 
+  return (!initialized ? <>
     <Grid
         container
         spacing={0}
@@ -1287,8 +1291,8 @@ function AntMedia() {
         <Box sx={{ display: 'flex' }}>
           <CircularProgress size="4rem" />
         </Box>
-        </Grid>   
-      </Grid> 
+        </Grid>
+      </Grid>
     </> :
     <Grid container className="App">
       <Grid
