@@ -8,7 +8,7 @@ npm run build
 volume_meter_unminified_js_path=$"./node_modules/@antmedia/webrtc_adaptor/dist/volume-meter-processor.js"
 volume_meter_js_path="$(find "./build/static/media" -name "volume-meter-processor*js" -type f -print -quit)"
 
-if [ -z "$volume_meter_js_path=" ]
+if [ -z "$volume_meter_js_path" ]
 then
       echo "\$volume_meter_js_path is empty passing.."
 else
