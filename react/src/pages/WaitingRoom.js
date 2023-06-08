@@ -25,10 +25,15 @@ function getRoomName() {
   return document.getElementById("root").getAttribute("data-room-name");
 }
 
+function getPublishStreamId() {
+  const dataRoomName =  document.getElementById("root").getAttribute("data-publish-stream-id");
+  return (dataRoomName) ? dataRoomName : getUrlParameter("streamId");
+}
+
 function WaitingRoom(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomName()) ? getRoomName() : useParams().id;
-  const publishStreamId = getUrlParameter("streamId");
+  const publishStreamId = getPublishStreamId()
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectFocus, setSelectFocus] = React.useState(null);

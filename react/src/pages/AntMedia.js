@@ -29,9 +29,18 @@ const JoinModes = {
   MCU: "mcu"
 }
 
+function getPlayToken() {
+  const dataPlayToken = document.getElementById("root").getAttribute("data-play-token");
+  return (dataPlayToken) ? dataPlayToken : getUrlParameter("playToken");
+}
 
-var playToken = getUrlParameter("playToken");
-var publishToken = getUrlParameter("publishToken");
+function getPublishToken() {
+  const dataPublishToken = document.getElementById("root").getAttribute("data-publish-token");
+  return (dataPublishToken) ? dataPublishToken : getUrlParameter("publishToken");
+}
+
+var playToken = getPlayToken();
+var publishToken = getPublishToken();
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var InitialStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
