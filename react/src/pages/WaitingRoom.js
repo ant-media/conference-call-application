@@ -19,15 +19,21 @@ import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 import { ConferenceContext } from "./AntMedia";
-
+import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/es/fetch.stream";
 
 function getRoomName() {
   return document.getElementById("root").getAttribute("data-room-name");
 }
 
+function getPublishStreamId() {
+  const dataRoomName =  document.getElementById("root").getAttribute("data-publish-stream-id");
+  return (dataRoomName) ? dataRoomName : getUrlParameter("streamId");
+}
+
 function WaitingRoom(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomName()) ? getRoomName() : useParams().id;
+  const publishStreamId = getPublishStreamId()
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -72,11 +78,15 @@ function WaitingRoom(props) {
       );
       return;
     }
-    var generatedStreamId = conference.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
+    let streamId;
+    if (publishStreamId === null || publishStreamId === undefined) {
+      streamId = conference.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
+      console.log("generatedStreamId:"+streamId);
+    } else {
+      streamId = publishStreamId;
+    }
 
-    console.log("generatedStreamId:"+generatedStreamId);
-
-    conference.joinRoom(roomName, generatedStreamId, conference.roomJoinMode);
+    conference.joinRoom(roomName, streamId, conference.roomJoinMode);
     conference.setWaitingOrMeetingRoom("meeting");
   }
   const handleDialogOpen = (focus) => {
