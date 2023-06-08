@@ -25,14 +25,13 @@ script:
 - npm run build
 - volume_meter_unminified_js_path=$"./node_modules/@antmedia/webrtc_adaptor/dist/volume-meter-processor.js"
 - volume_meter_js_path="$(find "./build/static/media" -name "volume-meter-processor*js" -type f -print -quit)"
-
-- (if [ -z "$volume_meter_js_path" ]
-  then
-      echo "\$volume_meter_js_path is empty passing.."
+- |
+  if [ -z "$volume_meter_js_path" ]; then
+    echo "\$volume_meter_js_path is empty, passing.."
   else
-      rm $volume_meter_js_path
-      cp $volume_meter_unminified_js_path $volume_meter_js_path
-  fi)
+    rm $volume_meter_js_path
+    cp $volume_meter_unminified_js_path $volume_meter_js_path
+  fi
 - cd ..
 - cp -a react/build/. webapp/src/main/webapp
 - cd webapp
