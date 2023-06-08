@@ -30,7 +30,8 @@ const JoinModes = {
 }
 
 
-var token = getUrlParameter("token");
+var playToken = getUrlParameter("playToken");
+var publishToken = getUrlParameter("publishToken");
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var InitialStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
@@ -90,6 +91,14 @@ if (mcuEnabled == null) {
 
 if (playOnly == null) {
   playOnly = false;
+}
+
+if (playToken == null) {
+    playToken = "";
+}
+
+if (publishToken == null) {
+    publishToken = "";
 }
 
 var roomOfStream = [];
@@ -320,12 +329,12 @@ function AntMedia() {
       let streamDetailsList = obj.streamList;
 
       if (playOnly) {
-        webRTCAdaptor.play(obj.ATTR_ROOM_NAME, token, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
+        webRTCAdaptor.play(obj.ATTR_ROOM_NAME, playToken, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
       }
       else {
         handlePublish(
           obj.streamId,
-          token,
+          publishToken,
           subscriberId,
           subscriberCode
         );
@@ -356,7 +365,7 @@ function AntMedia() {
 
     } else if (info === "publish_finished") {
       //stream is being finished
-    } 
+    }
     else if (info === "session_restored") {
       console.log("**** session_restored:"+reconnecting);
       if(reconnecting) {
@@ -400,7 +409,7 @@ function AntMedia() {
       tempList.push("!" + publishStreamId);
       handleRoomEvents(obj);
       if (!isPlaying && !reconnecting) {
-        handlePlay(token, tempList);
+        handlePlay(playToken, tempList);
         isPlaying = true;
       }
       //Lastly updates the current streamlist with the fetched one.
@@ -443,13 +452,13 @@ function AntMedia() {
       if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
 
         setTimeout(() => {
-          if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" && 
-              webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" && 
+          if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" &&
+              webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
               webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
               reconnectionInProgress();
             }
         }, 5000);
-              
+
       }
     }
   };
@@ -509,16 +518,16 @@ function AntMedia() {
       handleScreenshareNotFromPlatform();
     } else if (error.indexOf("WebSocketNotConnected") !== -1) {
       errorMessage = "WebSocket Connection is disconnected.";
-    } 
+    }
     else if (error.indexOf("already_publishing") !== -1) {
       console.log("**** already publishing:"+reconnecting);
       if(reconnecting) {
         webRTCAdaptor.stop(publishStreamId);
-          
+
           setTimeout(() => {
             handlePublish(
               publishStreamId,
-              token,
+              publishToken,
               subscriberId,
               subscriberCode
             );
@@ -1090,7 +1099,7 @@ function AntMedia() {
     webRTCAdaptor.play(roomName, token, roomName, tempList);
   }
   function handleStreamInformation(obj) {
-    webRTCAdaptor.play(obj.streamId, "", roomName);
+    webRTCAdaptor.play(obj.streamId, playToken, roomName);
   }
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
     webRTCAdaptor.publish(
