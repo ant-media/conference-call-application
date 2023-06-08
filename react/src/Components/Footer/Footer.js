@@ -13,7 +13,6 @@ import EndCallButton from "./Components/EndCallButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
-import ReconnectButton from './Components/ReconnectButton';
 
 
 const CustomizedGrid = styled(Grid)(({ theme }) => ({
@@ -43,8 +42,8 @@ function Footer(props) {
         >
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <Grid container alignItems={"center"}>
-              <a href="https://portmeet.com/" alt="portmeet website" target="_blank" rel="noreferrer">
-                <img src="./favicon-32x32.png" alt="portmeet logo" style={{width: '22px', marginRight: 4}}/>
+              <a href="https://antmedia.io/circle" alt="Circle" target="_blank" rel="noreferrer">
+                <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
               </a>
               <Typography color="#ffffff" variant="body1">
                 {id}
@@ -90,13 +89,6 @@ function Footer(props) {
                   <Grid item xs={0}>
                     <EndCallButton footer/>
                   </Grid>
-                  {process.env.NODE_ENV === "development"
-                    ?
-                    <Grid item xs={0}>
-                      <ReconnectButton footer/>
-                    </Grid>
-                    : null
-                  }
                 </Grid>
               </Grid>
 
