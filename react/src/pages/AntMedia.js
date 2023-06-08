@@ -102,11 +102,11 @@ if (playOnly == null) {
   playOnly = false;
 }
 
-if (playToken == null) {
+if (playToken == null || typeof playToken === "undefined") {
     playToken = "";
 }
 
-if (publishToken == null) {
+if (publishToken == null || typeof publishToken === "undefined") {
     publishToken = "";
 }
 
