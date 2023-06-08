@@ -25,8 +25,13 @@ const CustomizedGrid = styled(Grid)(({ theme }) => ({
   zIndex: 2,
   height: 80,
 }));
+
+function getRoomName() {
+  return document.getElementById("root").getAttribute("data-room-name");
+}
 function Footer(props) {
-  const { id } = useParams();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const id = (getRoomName()) ? getRoomName() : useParams().id;
   const conference = React.useContext(ConferenceContext);
 
     return (
