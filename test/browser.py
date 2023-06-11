@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.chrome.service import Service
 
 class Browser:
   def init(self, is_headless):
@@ -26,7 +27,9 @@ class Browser:
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
     #self.driver = webdriver.Chrome('drivers/chromedriver.exe', chrome_options=browser_options)
-    self.driver = webdriver.Chrome('./chromedriver', options=browser_options)
+
+  service = Service(executable_path='./chromedriver')
+  self.driver = webdriver.Chrome(service=service, options=browser_options)
 
   def open_in_new_tab(self, url, tab_id):
     self.driver.execute_script("window.open('about:blank', '"+tab_id+"');")
