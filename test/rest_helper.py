@@ -19,7 +19,7 @@ class RestHelper:
 
   def login(self):
     resp = self.session.post(self.rest_url + "/users/authenticate", json={"email":self.user,"password":self.password})
-    print("resp:"+str(resp))
+    print("login resp:"+str(resp))
 
   def get_broadcasts(self):
     resp = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/broadcasts/list/0/50")

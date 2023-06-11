@@ -7,25 +7,29 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.chrome.service import Service
 
 class Browser:
   def init(self, is_headless):
-    chrome_options = Options()
-    chrome_options.add_experimental_option("detach", True)
-    chrome_options.add_argument("--use-fake-ui-for-media-stream") 
-    chrome_options.add_argument("--use-fake-device-for-media-stream")
-    chrome_options.add_argument('--log-level=3')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-extensions')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--disable-dev-shm-usage')
-    chrome_options.add_argument('--disable-setuid-sandbox')
+    browser_options = Options()
+    browser_options.add_experimental_option("detach", True)
+    browser_options.add_argument("--use-fake-ui-for-media-stream") 
+    browser_options.add_argument("--use-fake-device-for-media-stream")
+    browser_options.add_argument('--log-level=3')
+    browser_options.add_argument('--no-sandbox')
+    browser_options.add_argument('--disable-extensions')
+    browser_options.add_argument('--disable-gpu')
+    browser_options.add_argument('--disable-dev-shm-usage')
+    browser_options.add_argument('--disable-setuid-sandbox')
     if is_headless:
-      chrome_options.add_argument("--headless")
+      browser_options.add_argument("--headless")
     
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
-    self.driver = webdriver.Chrome('drivers/chromedriver.exe', chrome_options=chrome_options)
+    #self.driver = webdriver.Chrome('drivers/chromedriver.exe', chrome_options=browser_options)
+
+    service = Service(executable_path='./chromedriver')
+    self.driver = webdriver.Chrome(service=service, options=browser_options)
 
   def open_in_new_tab(self, url, tab_id):
     self.driver.execute_script("window.open('about:blank', '"+tab_id+"');")
