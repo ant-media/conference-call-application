@@ -1232,6 +1232,19 @@ function AntMedia() {
       if (streams.length < participants.length) {
         return oldParts.filter((p) => streams.includes(p.id));
       }
+      else if(streams.length > participants.length && maxVideoTrackCount > participants.length) {
+        const updatedParts = [...oldParts];
+
+        streams.forEach((stream) => {
+          const participantExists = oldParts.some((p) => p.id === stream.id);
+
+          if (!participantExists) {
+            updatedParts.push(stream);
+          }
+        });
+
+        return updatedParts;
+      }
       // matching the names.
       return oldParts.map((p) => {
         const newName = streamList.find((s) => s.streamId === p.id)?.streamName;
