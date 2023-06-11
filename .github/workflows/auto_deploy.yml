@@ -1,0 +1,42 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Java CI with Maven
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download war File
+      run: |
+        mvn dependency:get -Dartifact=io.antmedia.webrtc:ConferenceCall:2.6.0-SNAPSHOT:war -DremoteRepositories=https://oss.sonatype.org/content/repositories/snapshots -quiet
+        cp ~/.m2/repository/io/antmedia/webrtc/ConferenceCall/2.6.0-SNAPSHOT/ConferenceCall*-SNAPSHOT.war .
+        ls -al
+        
+    - name: Login to server
+      run: |
+        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/authenticateUser -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
+        
+    - name: Delete Old App
+      run: |
+        curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+        sleep 10
+        
+    - name: Create New App
+      run: |
+        export WAR_FILE_NAME=`ls ConferenceCall*.war`
+        echo "War File:$WAR_FILE_NAME"
+        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt

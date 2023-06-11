@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid } from "@mui/material";
+import { Grid, CircularProgress, Box } from "@mui/material";
 import { useParams } from "react-router-dom";
 import _ from "lodash";
 import WaitingRoom from "./WaitingRoom";
@@ -9,10 +9,10 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
-import {VideoEffect} from "@antmedia/webrtc_adaptor/dist/video-effect";
-import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor";
-import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/fetch.stream";
-import {SvgIcon} from "../Components/SvgIcon";
+import { VideoEffect } from "@antmedia/webrtc_adaptor/dist/es/video-effect";
+import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor/dist/es/webrtc_adaptor";
+import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/es/fetch.stream";
+import { SvgIcon } from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 export const ConferenceContext = React.createContext(null);
@@ -21,7 +21,7 @@ const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
   maxVideoTrackCount: 5,
-  trackEvents:[],
+  trackEvents: [],
 };
 
 const JoinModes = {
@@ -29,82 +29,103 @@ const JoinModes = {
   MCU: "mcu"
 }
 
+function getPlayToken() {
+  const dataPlayToken = document.getElementById("root").getAttribute("data-play-token");
+  return (dataPlayToken) ? dataPlayToken : getUrlParameter("playToken");
+}
 
-var token = getUrlParameter("token");
-  var mcuEnabled = getUrlParameter("mcuEnabled");
-  var InitialStreamId = getUrlParameter("streamId");
-  var playOnly = getUrlParameter("playOnly");
-  var subscriberId = getUrlParameter("subscriberId");
-  var subscriberCode = getUrlParameter("subscriberCode");
+function getPublishToken() {
+  const dataPublishToken = document.getElementById("root").getAttribute("data-publish-token");
+  return (dataPublishToken) ? dataPublishToken : getUrlParameter("publishToken");
+}
 
+var playToken = getPlayToken();
+var publishToken = getPublishToken();
+var mcuEnabled = getUrlParameter("mcuEnabled");
+var InitialStreamId = getUrlParameter("streamId");
+var playOnly = getUrlParameter("playOnly");
+var subscriberId = getUrlParameter("subscriberId");
+var subscriberCode = getUrlParameter("subscriberCode");
+var scrollThreshold = -Infinity;
+var scroll_down=true;
+var last_warning_time=null;
 
-  var videoQualityConstraints = {
-    video: {
-      width: { max: 320 },
-      height: { max: 240 },
-    }
+var videoQualityConstraints = {
+  video: {
+    width: { max: 320 },
+    height: { max: 240 },
+  }
+}
+
+var audioQualityConstraints = {
+  audio: {
+    noiseSuppression: true,
+    echoCancellation: true
+  }
+}
+
+var mediaConstraints = {
+  // setting constraints here breaks source switching on firefox.
+  video: videoQualityConstraints.video,
+  audio: audioQualityConstraints.audio,
+};
+
+let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+
+if (!websocketURL) {
+  const appName = window.location.pathname.substring(
+    0,
+    window.location.pathname.lastIndexOf("/") + 1
+  );
+  const path =
+    window.location.hostname +
+    ":" +
+    window.location.port +
+    appName +
+    "websocket";
+  websocketURL = "ws://" + path;
+
+  if (window.location.protocol.startsWith("https")) {
+    websocketURL = "wss://" + path;
   }
 
-  var audioQualityConstraints = {
-    audio:{
-      noiseSuppression: true,
-      echoCancellation: true
-    }
-  }
+}
 
-  var mediaConstraints = {
-    // setting constraints here breaks source switching on firefox.
-    video: videoQualityConstraints.video,
-    audio: audioQualityConstraints.audio,
-  };
+var isPlaying = false;
+var fullScreenId = -1;
 
-  let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+if (mcuEnabled == null) {
+  mcuEnabled = false;
+}
 
-  if (!websocketURL) {
-    const appName = window.location.pathname.substring(
-      0,
-      window.location.pathname.lastIndexOf("/") + 1
-    );
-    const path =
-      window.location.hostname +
-      ":" +
-      window.location.port +
-      appName +
-      "websocket";
-    websocketURL = "ws://" + path;
+if (playOnly == null) {
+  playOnly = false;
+}
 
-    if (window.location.protocol.startsWith("https")) {
-      websocketURL = "wss://" + path;
-    }
+if (playToken == null || typeof playToken === "undefined") {
+    playToken = "";
+}
 
-  }
+if (publishToken == null || typeof publishToken === "undefined") {
+    publishToken = "";
+}
 
-  var isPlaying = false;
-  var fullScreenId = -1;
+var roomOfStream = [];
+var roomInfoHandleJob = null;
 
-  if (mcuEnabled == null) {
-      mcuEnabled = false;
-  }
+var statusUpdateIntervalJob = null;
+var room = null;
+var reconnecting = false;
+var publishReconnected;
+var playReconnected;
 
-  if (playOnly == null) {
-    playOnly = false;
-  }
-
-  var roomOfStream = [];
-  var autoRepublishIntervalJob = null;
-  var roomInfoHandleJob = null;
-
-  var statusUpdateIntervalJob = null;
-  var room = null;
-  var reconnecting =false;
-
-  var reconnectionTimer = 1;
-
-  var publishStreamIdHack = InitialStreamId;
-
+function getRoomName() {
+  return document.getElementById("root").getAttribute("data-room-name");
+}
 
 function AntMedia() {
-  const { id } = useParams();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const id = (getRoomName()) ? getRoomName() : useParams().id;
   const roomName = id;
 
   // drawerOpen for message components.
@@ -163,7 +184,7 @@ function AntMedia() {
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
   const [initialized, setInitialized] = React.useState(false);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
-
+  const [closeScreenShare, setCloseScreenShare] = React.useState(false);
 
   function makeFullScreen(divId) {
     if (fullScreenId === divId) {
@@ -173,15 +194,16 @@ function AntMedia() {
     } else {
       document.getElementsByClassName("publisher-content")[0].className =
         "publisher-content chat-active fullscreen-layout";
-        if (fullScreenId !== -1) {
-          document.getElementById(fullScreenId).classList.remove("selected");
-          document.getElementById(fullScreenId).classList.add("unselected");
-        }
-        document.getElementById(divId).classList.remove("unselected");
-        document.getElementById(divId).classList.add("selected");
+      if (fullScreenId !== -1) {
+        document.getElementById(fullScreenId).classList.remove("selected");
+        document.getElementById(fullScreenId).classList.add("unselected");
+      }
+      document.getElementById(divId).classList.remove("unselected");
+      document.getElementById(divId).classList.add("selected");
       fullScreenId = divId;
     }
   }
+
 
   function checkAndUpdateVideoAudioSources() {
     let isVideoDeviceAvailable = false;
@@ -191,7 +213,7 @@ function AntMedia() {
     let currentAudioDeviceId = selectedDevices.audioDeviceId;
 
     // check if the selected devices are still available
-    for(let index = 0; index < devices.length; index++) {
+    for (let index = 0; index < devices.length; index++) {
       if (devices[index].kind === "videoinput" && devices[index].deviceId === selectedDevices.videoDeviceId) {
         isVideoDeviceAvailable = true;
       }
@@ -224,38 +246,15 @@ function AntMedia() {
     }
   }
 
-  function checkAndRepublishIfRequired() {
-    console.log("check reconnection:"+reconnecting);
-    if(reconnecting) {
-      console.log("Reconnecting...");
-      webRTCAdaptor.checkWebSocketConnection();
-      return;
-    }
-
-    console.log("check publishStreamId  " + publishStreamId);
-
-    var iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
-    console.log("Ice state checked = " + iceState);
-
-    if (iceState === null || iceState === "failed" || iceState === "disconnected") {
-            reconnect();
-    }
-  }
-
-  function reconnect() {
-    console.log("reconnect required");
-    webRTCAdaptor.closePeerConnection(publishStreamId);
-    webRTCAdaptor.closeWebSocket();
-
+  function reconnectionInProgress() {
     //reset UI releated states
     setParticipants([]);
     setAllParticipants([]);
 
-    publishStreamIdHack = publishStreamId+"_"+(reconnectionTimer++);
-    setPublishStreamId(publishStreamIdHack)
-
     reconnecting = true;
-    isPlaying = false;
+    publishReconnected = false;
+    playReconnected = false;
+    //isPlaying = false;
 
     displayWarning("Connection lost. Trying reconnect...");
   }
@@ -264,33 +263,54 @@ function AntMedia() {
     webRTCAdaptor.joinRoom(roomName, generatedStreamId, roomJoinMode);
   }
 
-  useEffect(() => {
-    if (recreateAdaptor && webRTCAdaptor == null) {
-      setWebRTCAdaptor(new WebRTCAdaptor({
-        websocket_url: websocketURL,
-        mediaConstraints: mediaConstraints,
-        isPlayMode: playOnly,
-        debug: true,
-        callback: infoCallback,
-        callbackError: errorCallback
-      }))
+  async function checkDevices() {
+      let devices = await navigator.mediaDevices.enumerateDevices();
+      let audioDeviceAvailable = false
+      let videoDeviceAvailable = false
+      devices.forEach(device => {
+          if(device.kind==="audioinput"){
+            audioDeviceAvailable = true;
+          }
+          if(device.kind==="videoinput"){
+            videoDeviceAvailable = true;
+          }
+      });
 
-      setRecreateAdaptor(false);
+      if(!audioDeviceAvailable) {
+        mediaConstraints.audio = false;
+      }
+      if(!videoDeviceAvailable) {
+        mediaConstraints.video = false;
+      }
+  }
+
+
+
+  useEffect(() => {
+    async function createWebRTCAdaptor() {
+      //here we check if audio or video device available and wait result
+      //according to the result we modify mediaConstraints
+      await checkDevices();
+      if (recreateAdaptor && webRTCAdaptor == null) {
+        setWebRTCAdaptor(new WebRTCAdaptor({
+          websocket_url: websocketURL,
+          mediaConstraints: mediaConstraints,
+          isPlayMode: playOnly,
+          debug: true,
+          callback: infoCallback,
+          callbackError: errorCallback
+        }))
+
+        setRecreateAdaptor(false);
+      }
     }
+    createWebRTCAdaptor();
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  if(webRTCAdaptor) {
+  if (webRTCAdaptor) {
     webRTCAdaptor.callback = infoCallback;
     webRTCAdaptor.callbackError = errorCallback;
     webRTCAdaptor.localStream = localVideo;
-  }
-
-  function startAutoRepublishTimer() {
-    if (autoRepublishIntervalJob == null) {
-      autoRepublishIntervalJob = setInterval(() => {
-            checkAndRepublishIfRequired();
-      }, 3000);
-    }
   }
 
   function infoCallback(info, obj) {
@@ -298,52 +318,79 @@ function AntMedia() {
       enableDisableMCU(mcuEnabled);
       setInitialized(true);
 
-      if(reconnecting) {
-        webRTCAdaptor.leaveFromRoom(roomName);
+      if (reconnecting) {
+        //webRTCAdaptor.leaveFromRoom(roomName);
       }
     } else if (info === "joinedTheRoom") {
+      console.log("**** joined the room:"+reconnecting);
+
       room = obj.ATTR_ROOM_NAME;
       roomOfStream[obj.streamId] = room;
 
       globals.maxVideoTrackCount = obj.maxTrackCount;
-      publishStreamIdHack = obj.streamId;
-      setPublishStreamId(publishStreamIdHack);
+      setPublishStreamId(obj.streamId);
+
+      if(reconnecting) {
+        return;
+      }
 
 
       let streamDetailsList = obj.streamList;
 
-      if (playOnly)  {
-        webRTCAdaptor.play(obj.ATTR_ROOM_NAME, token, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
+      if (playOnly) {
+        webRTCAdaptor.play(obj.ATTR_ROOM_NAME, playToken, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
       }
       else {
         handlePublish(
-            obj.streamId,
-            token,
-            subscriberId,
-            subscriberCode
+          obj.streamId,
+          publishToken,
+          subscriberId,
+          subscriberCode
         );
       }
     } else if (info === "newStreamAvailable") {
       handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") {
+      console.log("**** publish started:"+reconnecting);
+      if(reconnecting) {
+        publishReconnected = true;
+        joinRoom(room, publishStreamId, roomJoinMode);
+        reconnecting = !(publishReconnected && playReconnected);
+        return;
+      }
       console.log("publish started");
       //stream is being published
       webRTCAdaptor.enableStats(publishStreamId);
-      if(roomInfoHandleJob == null) {
+      if (roomInfoHandleJob == null) {
         roomInfoHandleJob = setInterval(() => {
           handleRoomInfo(publishStreamId);
         }, 5000);
       }
-      startAutoRepublishTimer();
       if (statusUpdateIntervalJob == null) {
         statusUpdateIntervalJob = setInterval(() => {
           updateStatus(obj);
         }, 2000);
       }
 
-      reconnecting = false;
     } else if (info === "publish_finished") {
       //stream is being finished
+    }
+    else if (info === "session_restored") {
+      console.log("**** session_restored:"+reconnecting);
+      if(reconnecting) {
+        publishReconnected = true;
+        joinRoom(room, publishStreamId, roomJoinMode);
+        reconnecting = !(publishReconnected && playReconnected);
+        return;
+      }
+    }
+    else if (info === "play_started") {
+      console.log("**** play started:"+reconnecting);
+      if(reconnecting) {
+        playReconnected = true;
+        reconnecting = !(publishReconnected && playReconnected);
+        return;
+      }
     } else if (info === "screen_share_stopped") {
       handleScreenshareNotFromPlatform();
     } else if (info === "browser_screen_share_supported") {
@@ -352,16 +399,11 @@ function AntMedia() {
       if (roomInfoHandleJob !== null) {
         clearInterval(roomInfoHandleJob);
         clearInterval(statusUpdateIntervalJob);
-        clearInterval(autoRepublishIntervalJob);
 
         roomInfoHandleJob = null;
         statusUpdateIntervalJob = null;
-        autoRepublishIntervalJob = null;
       }
 
-      if(reconnecting) {
-        webRTCAdaptor.joinRoom(room, publishStreamId);
-      }
     } else if (info === "closed") {
 
     }
@@ -376,7 +418,7 @@ function AntMedia() {
       tempList.push("!" + publishStreamId);
       handleRoomEvents(obj);
       if (!isPlaying && !reconnecting) {
-        handlePlay(token, tempList);
+        handlePlay(playToken, tempList);
         isPlaying = true;
       }
       //Lastly updates the current streamlist with the fetched one.
@@ -387,7 +429,7 @@ function AntMedia() {
     } else if (info === "data_received") {
       try {
         handleNotificationEvent(obj);
-      } catch (e) {}
+      } catch (e) { }
     } else if (info === "available_devices") {
       setDevices(obj);
       checkAndUpdateVideoAudioSources();
@@ -401,11 +443,12 @@ function AntMedia() {
       let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
       let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
       let packageLostPercentage = 0;
-      if (packageLost !== 0) {
+      if (packageLost > 0) {
         packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
       }
 
-      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate/100) * 80) >= bandwidth) {
+      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
+        console.log("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" outgoing data:"+((outgoingBitrate / 100) * 80));
         displayPoorNetworkConnectionWarning();
       }
 
@@ -413,10 +456,18 @@ function AntMedia() {
       handleDebugInfo(obj.debugInfo);
     }
     else if (info === "ice_connection_state_changed") {
-      console.log("iceConnectionState Changed: ",JSON.stringify(obj))
+      console.log("iceConnectionState Changed: ", JSON.stringify(obj))
       var iceState = obj.state;
-      if (iceState === null || iceState === "failed" || iceState === "disconnected"){
-        console.log("!! Connection closed. Please rejoin the meeting");
+      if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
+
+        setTimeout(() => {
+          if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" &&
+              webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
+              webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
+              reconnectionInProgress();
+            }
+        }, 5000);
+
       }
     }
   };
@@ -441,7 +492,8 @@ function AntMedia() {
     ) {
       errorMessage =
         "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
-      alert(errorMessage);
+      displayWarning(errorMessage);
+
     } else if (
       error.indexOf("OverconstrainedError") !== -1 ||
       error.indexOf("ConstraintNotSatisfiedError") !== -1
@@ -454,9 +506,12 @@ function AntMedia() {
       error.indexOf("PermissionDeniedError") !== -1
     ) {
       errorMessage = "You are not allowed to access camera and mic.";
-      handleScreenshareNotFromPlatform();
+      if(isScreenShared) {
+        handleScreenshareNotFromPlatform();
+      }
     } else if (error.indexOf("TypeError") !== -1) {
       errorMessage = "Video/Audio is required.";
+      displayWarning(errorMessage);
       webRTCAdaptor.mediaManager.getDevices();
     } else if (error.indexOf("UnsecureContext") !== -1) {
       errorMessage =
@@ -472,13 +527,25 @@ function AntMedia() {
       handleScreenshareNotFromPlatform();
     } else if (error.indexOf("WebSocketNotConnected") !== -1) {
       errorMessage = "WebSocket Connection is disconnected.";
-    } else if (error.indexOf("highResourceUsage") !== -1) {
-      reconnect();
-      startAutoRepublishTimer();
+    }
+    else if (error.indexOf("already_publishing") !== -1) {
+      console.log("**** already publishing:"+reconnecting);
+      if(reconnecting) {
+        webRTCAdaptor.stop(publishStreamId);
+
+          setTimeout(() => {
+            handlePublish(
+              publishStreamId,
+              publishToken,
+              subscriberId,
+              subscriberCode
+            );
+          }, 2000);
+      }
     }
 
 
-    console.log("***** "+error)
+    console.log("***** " + error)
 
   };
 
@@ -522,8 +589,8 @@ function AntMedia() {
 
   function handleNotifyPinUser(id) {
     if (id === "localVideo") {
-        // if we pin local video then we are not going to inform anyone.
-        return;
+      // if we pin local video then we are not going to inform anyone.
+      return;
     }
     // If I PIN USER then i am going to inform pinned user.
     // Why? Because if i pin someone, pinned user's resolution has to change for better visibility.
@@ -556,9 +623,9 @@ function AntMedia() {
   }
   function handleStartScreenShare() {
     webRTCAdaptor.switchDesktopCapture(publishStreamId)
-    .then(()=>{
-      screenShareOnNotification();
-    });
+      .then(() => {
+        screenShareOnNotification();
+      });
   }
 
   function screenShareOffNotification() {
@@ -598,43 +665,51 @@ function AntMedia() {
   }
 
   function displayPoorNetworkConnectionWarning() {
-    displayWarning("Your connection is not stable. Please check your internet connection!");
+    if(last_warning_time == null || Date.now() - last_warning_time >  1000 * 30){
+      last_warning_time = Date.now();
+      displayWarning("Your connection is not stable. Please check your internet connection!");
+    }
   }
 
   function displayWarning(message) {
     enqueueSnackbar(
-        {
-          message: message,
-          variant: "info",
-          icon: <SvgIcon size={24} name={'report'} color="red" />
+      {
+        message: message,
+        variant: "info",
+        icon: <SvgIcon size={24} name={'report'} color="red" />
+      },
+      {
+        autoHideDuration: 5000,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
         },
-        {
-          autoHideDuration: 5000,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-        }
+      }
     );
   }
 
   function handleScreenshareNotFromPlatform() {
-    setIsScreenShared(false);
-    if (
-      cam.find(
-        (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
-      )
-    ) {
-      webRTCAdaptor.turnOffLocalCamera(publishStreamId);
+    if (typeof webRTCAdaptor !== "undefined") {
+      setIsScreenShared(false);
+      if (
+        cam.find(
+          (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
+        )
+      ) {
+        webRTCAdaptor.turnOffLocalCamera(publishStreamId);
+      } else {
+        webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
+      }
+      screenShareOffNotification();
+      let requestedMediaConstraints = {
+        width: 320,
+        height: 240,
+      };
+      webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
+      setCloseScreenShare(false);
     } else {
-      webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
+      setCloseScreenShare(true);
     }
-    screenShareOffNotification();
-    let requestedMediaConstraints = {
-      width: 320,
-      height: 240,
-    };
-    webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
   }
   function handleStopScreenShare() {
     setIsScreenShared(false);
@@ -658,7 +733,7 @@ function AntMedia() {
       const sentInSameTime = lastMessage?.date === newMessage?.date;
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       newMessage.date = new Date(newMessage?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
-
+      calculate_scroll_height();
       if (isSameUser && sentInSameTime) {
         //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
         lastMessage.message = lastMessage.message + "\n" + newMessage.message;
@@ -679,9 +754,20 @@ function AntMedia() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (closeScreenShare) {
+      handleScreenshareNotFromPlatform();
+    }
+  }, [closeScreenShare]);  // eslint-disable-line react-hooks/exhaustive-deps
+
   function scrollToBottom() {
     let objDiv = document.getElementById("paper-props");
-    if (objDiv) objDiv.scrollTop = objDiv?.scrollHeight;
+    if (objDiv  && scroll_down && objDiv.scrollHeight > objDiv.clientHeight) {
+      objDiv.scrollTo(0, objDiv.scrollHeight);
+      scrollThreshold = 0.95;
+      scroll_down = false;
+    }
+
   }
   function handleMessageDrawerOpen(open) {
     closeSnackbar();
@@ -706,7 +792,7 @@ function AntMedia() {
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
-        if(message === "debugme") {
+        if (message === "debugme") {
           webRTCAdaptor.getDebugInfo(publishStreamId);
           return;
         }
@@ -727,9 +813,9 @@ function AntMedia() {
   function handleDebugInfo(debugInfo) {
     var infoText = "Client Debug Info\n";
     infoText += "Events:\n";
-    infoText += JSON.stringify(globals.trackEvents)+"\n";
-    infoText += "Participants ("+participants.length+"):\n";
-    infoText += JSON.stringify(participants)+"\n";
+    infoText += JSON.stringify(globals.trackEvents) + "\n";
+    infoText += "Participants (" + participants.length + "):\n";
+    infoText += JSON.stringify(participants) + "\n";
     infoText += "----------------------\n";
     infoText += debugInfo;
 
@@ -782,7 +868,15 @@ function AntMedia() {
   function toggleSetNumberOfUnreadMessages(numb) {
     setNumberOfUnReadMessages(numb);
   }
-
+  function calculate_scroll_height(){
+    let objDiv = document.getElementById("paper-props");
+    if (objDiv) {
+      let scrollPosition = objDiv.scrollTop / (objDiv.scrollHeight - objDiv.clientHeight);
+      if (scrollPosition > scrollThreshold) {
+        scroll_down = true;
+      }
+  }
+}
   function handleNotificationEvent(obj) {
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
@@ -810,6 +904,7 @@ function AntMedia() {
           isMicMuted: false,
         });
       } else if (eventType === "MESSAGE_RECEIVED") {
+        calculate_scroll_height();
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         notificationEvent.date = new Date(notificationEvent?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
         // if message arrives.
@@ -869,8 +964,8 @@ function AntMedia() {
           });
           webRTCAdaptor.muteLocalMic();
           handleSendNotificationEvent(
-              "MIC_MUTED",
-              publishStreamId
+            "MIC_MUTED",
+            publishStreamId
           );
         }
       }
@@ -982,7 +1077,6 @@ function AntMedia() {
     setParticipants([]);
     webRTCAdaptor.leaveFromRoom(roomName);
     webRTCAdaptor.turnOffLocalCamera(publishStreamId);
-    clearInterval(autoRepublishIntervalJob);
     setWaitingOrMeetingRoom("waiting");
   }
   function handleSendNotificationEvent(eventType, publishStreamId, info) {
@@ -1014,10 +1108,10 @@ function AntMedia() {
     webRTCAdaptor.play(roomName, token, roomName, tempList);
   }
   function handleStreamInformation(obj) {
-    webRTCAdaptor.play(obj.streamId, "", roomName);
+    webRTCAdaptor.play(obj.streamId, playToken, roomName);
   }
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
-      webRTCAdaptor.publish(
+    webRTCAdaptor.publish(
       publishStreamId,
       token,
       subscriberId,
@@ -1029,7 +1123,7 @@ function AntMedia() {
   }
   function handlePlayVideo(obj, publishStreamId) {
     let index = obj?.trackId?.substring("ARDAMSx".length);
-    globals.trackEvents.push({track:obj.track.id, event:"added"});
+    globals.trackEvents.push({ track: obj.track.id, event: "added" });
 
     if (obj.track.kind === "audio") {
       setAudioTracks((sat) => {
@@ -1075,7 +1169,7 @@ function AntMedia() {
     virtualBackgroundImage.alt = "virtual-background";
 
     if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
-        virtualBackgroundImage.src = imageUrl;
+      virtualBackgroundImage.src = imageUrl;
     } else {
       virtualBackgroundImage.src = "virtual-background.png";
     }
@@ -1087,15 +1181,15 @@ function AntMedia() {
   function handleBackgroundReplacement(option) {
     let effectName;
 
-    if(option === "none") {
+    if (option === "none") {
       effectName = VideoEffect.NO_EFFECT;
       setIsVideoEffectRunning(false);
     }
-    else if(option === "blur") {
+    else if (option === "blur") {
       effectName = VideoEffect.BLUR_BACKGROUND;
       setIsVideoEffectRunning(true);
     }
-    else if(option === "background") {
+    else if (option === "background") {
       if (virtualBackground === null) {
         setVirtualBackgroundImage(null);
       }
@@ -1103,14 +1197,14 @@ function AntMedia() {
       setIsVideoEffectRunning(true);
     }
     webRTCAdaptor.enableEffect(effectName).then(() => {
-      console.log("Effect: "+ effectName+" is enabled");
+      console.log("Effect: " + effectName + " is enabled");
     }).catch(err => {
-      console.error("Effect: "+ effectName+" is not enabled. Error is " + err);
+      console.error("Effect: " + effectName + " is not enabled. Error is " + err);
       setIsVideoEffectRunning(false);
     });
   }
   function checkAndTurnOnLocalCamera(streamId) {
-    if(isVideoEffectRunning) {
+    if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
     }
     else {
@@ -1119,7 +1213,7 @@ function AntMedia() {
   }
 
   function checkAndTurnOffLocalCamera(streamId) {
-    if(isVideoEffectRunning) {
+    if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
     }
     else {
@@ -1170,13 +1264,15 @@ function AntMedia() {
   }
 
   function cameraSelected(value) {
-    setSelectedCamera(value);
-    // When we first open home page, React will call this function and local stream is null at that time.
-    // So, we need to catch the error.
-    try {
-      webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
-    } catch (e) {
-      console.log("Local stream is not ready yet.");
+    if(selectedCamera !== value) {
+      setSelectedCamera(value);
+      // When we first open home page, React will call this function and local stream is null at that time.
+      // So, we need to catch the error.
+      try {
+        webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
+      } catch (e) {
+        console.log("Local stream is not ready yet.");
+      }
     }
   }
 
@@ -1200,14 +1296,29 @@ function AntMedia() {
   }
 
   function updateAudioLevel(level) {
-    webRTCAdaptor.updateAudioLevel(publishStreamIdHack, level);
+    webRTCAdaptor.updateAudioLevel(publishStreamId, level);
   }
 
   function setAudioLevelListener(listener, period) {
     webRTCAdaptor.enableAudioLevelForLocalStream(listener, period);
   }
 
-  return (!initialized ? <>hello</> :
+  return (!initialized ? <>
+    <Grid
+        container
+        spacing={0}
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        style={{ minHeight: '100vh' }}
+      >
+        <Grid item xs={3}>
+        <Box sx={{ display: 'flex' }}>
+          <CircularProgress size="4rem" />
+        </Box>
+        </Grid>
+      </Grid>
+    </> :
     <Grid container className="App">
       <Grid
         container
@@ -1273,7 +1384,6 @@ function AntMedia() {
             setStreamName,
             handleLeaveFromRoom,
             handleSendNotificationEvent,
-            reconnect,
             handleSetMaxVideoTrackCount,
             screenShareOffNotification,
             handleSendMessage,
@@ -1295,11 +1405,11 @@ function AntMedia() {
             ) : waitingOrMeetingRoom === "waiting" ? (
               <WaitingRoom />
             ) : (
-                <>
-                  <MeetingRoom />
-                  <MessageDrawer />
-                  <ParticipantListDrawer />
-                </>
+              <>
+                <MeetingRoom />
+                <MessageDrawer />
+                <ParticipantListDrawer />
+              </>
             )}
           </SnackbarProvider>
         </ConferenceContext.Provider>

@@ -1,0 +1,46 @@
+name: Create Release on Tag
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+        
+    - name: Download war File
+      run: |
+        mvn dependency:get -Dartifact=io.antmedia.webrtc:ConferenceCall:2.6.0-SNAPSHOT:war -DremoteRepositories=https://oss.sonatype.org/content/repositories/snapshots -quiet
+        cp ~/.m2/repository/io/antmedia/webrtc/ConferenceCall/2.6.0-SNAPSHOT/ConferenceCall*-SNAPSHOT.war ConferenceCall-${{ github.ref_name }}.war
+        ls -al
+        pwd
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          Release ${{ github.ref }} is now available.
+          Add release notes here.
+
+    - name: Upload assets
+      id: upload_assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/ConferenceCall-${{ github.ref_name }}.war
+        asset_name: ConferenceCall-${{ github.ref_name }}.war
+        asset_content_type: application/zip

@@ -4,6 +4,10 @@ import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
 
+function getRoomName() {
+  return document.getElementById("root").getAttribute("data-room-name");
+}
+
 const getTheme = (primary, secondary, background, color70, textColor) => {
   const green0 = textColor ? textColor : "#AFF3EE";
   const green10 = primary ? primary : "#00E5D2";
@@ -22,7 +26,7 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
   const error = "#DF0515";
   const primaryColor = green10;
   const secondaryColor = green60;
-  const Theme = createTheme({
+  let themeObject = {
     typography: {
       allVariants: {
         color: textColor ? textColor : "#FFFFFF",
@@ -311,9 +315,6 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
       },
     },
     palette: {
-      background: {
-        default: green80,
-      },
       primary: {
         main: green10,
       },
@@ -346,7 +347,12 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
         secondary: chatText, // dark4
       },
     },
-  });
+  };
+  if (!getRoomName()) {
+    themeObject.palette.background = {};
+    themeObject.palette.background.default = green80;
+  }
+  const Theme = createTheme(themeObject);
   return responsiveFontSizes(Theme);
 };
 export default getTheme;
