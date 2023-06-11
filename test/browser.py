@@ -25,7 +25,8 @@ class Browser:
     
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
-    self.driver = webdriver.Chrome('drivers/chromedriver.exe', chrome_options=chrome_options)
+    #self.driver = webdriver.Chrome('drivers/chromedriver.exe', chrome_options=chrome_options)
+    self.driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
 
   def open_in_new_tab(self, url, tab_id):
     self.driver.execute_script("window.open('about:blank', '"+tab_id+"');")
