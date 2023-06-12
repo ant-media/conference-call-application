@@ -1232,7 +1232,7 @@ function AntMedia() {
       if (streams.length < participants.length) {
         return oldParts.filter((p) => streams.includes(p.id));
       }
-      else if(streams.length > participants.length && maxVideoTrackCount > participants.length) {
+      else if(streams.length > participants.length && globals.maxVideoTrackCount > participants.length) {
         const updatedParts = [...oldParts];
 
         streams.forEach((stream) => {
