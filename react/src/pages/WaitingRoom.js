@@ -19,7 +19,7 @@ import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 import { ConferenceContext } from "./AntMedia";
-import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/fetch.stream";
+import { getUrlParameter } from "@antmedia/webrtc_adaptor";
 
 function getRoomName() {
   return document.getElementById("root").getAttribute("data-room-name");
