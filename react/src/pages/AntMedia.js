@@ -447,8 +447,8 @@ function AntMedia() {
         packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
       }
 
-      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
-        console.log("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" outgoing data:"+((outgoingBitrate / 100) * 80));
+      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80)  >=  obj.availableOutgoingBitrate) {
+        console.warn("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" Avaialalbe Bandwidth kbps :",obj.availableOutgoingBitrate,"Outgoing Bandwdidth kbps:",outgoingBitrate);
         displayPoorNetworkConnectionWarning();
       }
 
