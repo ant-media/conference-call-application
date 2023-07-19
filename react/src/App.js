@@ -107,28 +107,28 @@ function makeFullScreen(divId) {
 function checkAndUpdateVideoAudioSources() {
   let isVideoDeviceAvailable = false;
   let isAudioDeviceAvailable = false;
-  let selectedDevices = webRTCAdaptor.getSelectedDevices();
-  let currentCameraDeviceId = selectedDevices.videoDeviceId;
-  let currentAudioDeviceId = selectedDevices.audioDeviceId;
+  let selectedDevices = {} //webRTCAdaptor.getSelectedDevices();
+  let currentCameraDeviceId = null; // selectedDevices.videoDeviceId;
+  let currentAudioDeviceId = null; //selectedDevices.audioDeviceId;
 
   // check if the selected devices are still available
   for(let index = 0; index < webRTCAdaptor.devices.length; index++) {
-    if (webRTCAdaptor.devices[index].kind == "videoinput" && webRTCAdaptor.devices[index].deviceId == selectedDevices.videoDeviceId) {
+    if (webRTCAdaptor.devices[index].kind == "videoinput" && webRTCAdaptor.devices[index].deviceId == currentCameraDeviceId) {
       isVideoDeviceAvailable = true;
     }
-    if (webRTCAdaptor.devices[index].kind == "audioinput" && webRTCAdaptor.devices[index].deviceId == selectedDevices.audioDeviceId) {
+    if (webRTCAdaptor.devices[index].kind == "audioinput" && webRTCAdaptor.devices[index].deviceId == currentAudioDeviceId) {
       isAudioDeviceAvailable = true;
     }
   }
 
   // if the selected devices are not available, select the first available device
-  if (selectedDevices.videoDeviceId == '' || isVideoDeviceAvailable == false) {
+  if (currentCameraDeviceId == '' || isVideoDeviceAvailable == false) {
     const camera = webRTCAdaptor.devices.find(d => d.kind === 'videoinput');
     if (camera) {
       selectedDevices.videoDeviceId = camera.deviceId;
     }
   }
-  if (selectedDevices.audioDeviceId == '' || isAudioDeviceAvailable == false) {
+  if (currentAudioDeviceId == '' || isAudioDeviceAvailable == false) {
     const audio = webRTCAdaptor.devices.find(d => d.kind === 'audioinput');
     if (audio) {
       selectedDevices.audioDeviceId = audio.deviceId;
@@ -165,7 +165,8 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
-let websocketURL = null; //process.env.REACT_APP_WEBSOCKET_URL;
+var websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+var restURL = process.env.REACT_APP_REST_BASE_URL;
 
 if (!websocketURL) {
   const appName = window.location.pathname.substring(
@@ -176,17 +177,19 @@ if (!websocketURL) {
     window.location.hostname +
     ":" +
     window.location.port +
-    appName +
-    "websocket";
-  websocketURL = "ws://" + path;
+    appName;
+   
+  websocketURL = "ws://" + path + "websocket";
 
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
 
+  restURL = window.location.protocol + "//" + path;
 }
+console.log("websocket url: " + websocketURL + " rest base url: " + restURL);
 
-//websocketURL = "ws://localhost:5080/Conference/websocket";
+export const restBaseUrl = restURL;
 
 let makeOnlyDataChannelPublisher = false;
 let makePublisherOnlyDataChannel = false;
@@ -199,7 +202,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
   debug: true,
   callback: (info, obj) => {
     if (info === "initialized") {
-      webRTCAdaptor.enableDisableMCU(mcuEnabled);
+      //webRTCAdaptor.enableDisableMCU(mcuEnabled);
       if (observerMode) {
         webRTCAdaptor.turnObserverModeOn();
       }
@@ -230,9 +233,12 @@ const webRTCAdaptor = new WebRTCAdaptor({
       roomTimerId = setInterval(() => {
         webRTCAdaptor.handleRoomInfo(publishStreamId);
       }, 5000);
-    } else if (info === "newStreamAvailable") {
+    } else if (info === "newStreamAvailable") 
+    {
+      console.log("--------- new stream available ----------");
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
-    } else if (info === "publish_started") {
+    } else if (info === "publish_started") 
+    {
       //stream is being published
       if (!onlyDataChannel) {
         webRTCAdaptor.enableStats(publishStreamId);
@@ -310,11 +316,14 @@ const webRTCAdaptor = new WebRTCAdaptor({
             webRTCAdaptor.setIsBroadcasting(false);
           } else if (eventType === "REQUEST_PUBLISH") {
             if (webRTCAdaptor.admin) {
+              console.log("REQUEST_PUBLISH: webrtc publish request is received from attendee with streamId: " + eventStreamId);
               webRTCAdaptor.addBecomingPublisherRequest(eventStreamId);
             }
             return;
-          } else if (eventType === "GRANT_BECOME_PUBLISHER" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
-            navigator.mediaDevices
+          } 
+          else if (eventType === "GRANT_BECOME_PUBLISHER" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) 
+          {
+              navigator.mediaDevices
                 .enumerateDevices()
                 .then((devices) => {
                   let audioInputDevices = [];
@@ -327,7 +336,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
                     }
                     console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
                   });
-                  if (audioInputDevices.length > 0 && videoInputDevices.length > 0) {
+                  if (audioInputDevices.length > 0 && videoInputDevices.length > 0) 
+                  {
                     makeOnlyDataChannelPublisher = true;
                     makePublisherOnlyDataChannel = false;
                     publishStreamId = publishStreamId + "tempPublisher";
@@ -644,6 +654,7 @@ const webRTCAdaptorForAdmin = new WebRTCAdaptor({
           let eventStreamId = notificationEvent.streamId;
           let eventType = notificationEvent.eventType;
           if (eventType === "REQUEST_PUBLISH" && webRTCAdaptor.admin === true) {
+            console.log("webrtc publish request is received from attendee with streamId: " + eventStreamId);
             webRTCAdaptor.handleSendMessage("admin*listener_room*"+eventStreamId+"*GRANT_BECOME_PUBLISHER");
           }
         }
@@ -742,6 +753,7 @@ export const SpeedTestObjectContext = React.createContext(speedTestObject);
 
 
 function App() {
+
   const handleFullScreen = (e) => {
     if (e.target?.id === "meeting-gallery") {
       if (!document.fullscreenElement) {
@@ -751,6 +763,8 @@ function App() {
       }
     }
   };
+
+ 
 
   React.useEffect(() => {
     window.addEventListener("dblclick", handleFullScreen);

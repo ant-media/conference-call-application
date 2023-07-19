@@ -311,6 +311,10 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
       },
     },
     palette: {
+      background: {
+        //this is background of the application
+        default: "#022824",
+      },
       primary: {
         main: green10,
       },

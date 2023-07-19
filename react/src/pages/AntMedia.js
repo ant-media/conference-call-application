@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import {Button, DialogActions, DialogContentText, Grid} from "@mui/material";
 import { useParams } from "react-router-dom";
-import { AntmediaContext, AntmediaAdminContext } from "App";
+import { AntmediaContext, AntmediaAdminContext, restBaseUrl } from "App";
 import _ from "lodash";
 import WaitingRoom from "./WaitingRoom";
 import MeetingRoom from "./MeetingRoom";
@@ -103,20 +103,18 @@ function AntMedia() {
     if (streamId === 'localVideo' && myLocalData !== null) {
       streamId = myLocalData?.streamId;
     }
-    const appName = window.location.pathname.substring(
-        0,
-        window.location.pathname.lastIndexOf("/") + 1
-    ).replaceAll('/','');
-    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
-    //const baseUrl = "http://localhost:5080/Conference";
+
+    const baseUrl = restBaseUrl;
     const requestOptions0 = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
     };
+
     const requestOptions1 = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     };
+
     fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/add?streamId=" + streamId, requestOptions0).then(
         () => {
           fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions1).then(() => {
@@ -136,37 +134,30 @@ function AntMedia() {
         }
     )
   }
+
   function makeParticipantUndoPresenter(id) {
     let streamId = id;
     if (streamId === 'localVideo') {
       streamId = myLocalData?.streamId;
     }
-    const appName = window.location.pathname.substring(
-        0,
-        window.location.pathname.lastIndexOf("/") + 1
-    ).replaceAll('/','');
-    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
-    //const baseUrl = "http://localhost:5080/Conference";
+   
+    const baseUrl = restBaseUrl;
     const requestOptions0 = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
     };
     const requestOptions2 = {
-      method: 'GET',
+      method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     };
-    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions2).then((response) => response.json()).then((broadcast) => {
-      const index = broadcast.subTrackStreamIds.indexOf(streamId);
-      if (index > -1) {
-        broadcast.subTrackStreamIds.splice(index, 1);
-      }
-      const requestOptions1 = {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(broadcast)
-      };
-      fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions1).then(() => {
-        fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + streamId, requestOptions0).then( () => {
+
+
+    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions2).then((response) => response.json()).then((result) => {
+     
+      console.log("make participant undo presenter result: " + result.success);
+
+
+      fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + streamId, requestOptions0).then( () => {
           presenters.splice(presenters.indexOf(streamId), 1);
           setPresenters(presenters);
           antmedia.handleSendMessage("admin*listener_room*"+streamId+"*STOP_PLAYING");
@@ -181,7 +172,7 @@ function AntMedia() {
           };
           fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
         });
-      });
+      
     });
   }
 
@@ -904,12 +895,9 @@ function AntMedia() {
 
   function approveBecomeSpeakerRequest(requestingSpeakerName) {
     setOpenRequestBecomeSpeakerDialog(false);
-    const appName = window.location.pathname.substring(
-        0,
-        window.location.pathname.lastIndexOf("/") + 1
-    ).replaceAll('/','');
-    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
-    //const baseUrl = "http://localhost:5080/Conference";
+    
+    const baseUrl = restBaseUrl;
+
     let command = {
       "eventType": "GRANT_BECOME_PUBLISHER",
       "streamId": requestingSpeakerName,
@@ -925,12 +913,8 @@ function AntMedia() {
   }
 
   function makeListenerAgain(speakerName) {
-    const appName = window.location.pathname.substring(
-        0,
-        window.location.pathname.lastIndexOf("/") + 1
-    ).replaceAll('/','');
-    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
-    //const baseUrl = "http://localhost:5080/Conference";
+   
+    const baseUrl = restBaseUrl;
     let command = {
       "eventType": "MAKE_LISTENER_AGAIN",
       "streamId": speakerName,

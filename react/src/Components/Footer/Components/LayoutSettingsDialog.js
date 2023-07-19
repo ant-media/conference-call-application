@@ -210,7 +210,7 @@ export function LayoutSettingsDialog(props) {
                 defaultValue={value}
                 step={null}
                 min={3}
-                max={30}
+                max={24}
                 marks={[
                   {
                     value: 3,
@@ -222,7 +222,10 @@ export function LayoutSettingsDialog(props) {
                     value: 12,
                   },
                   {
-                    value: 30,
+                    value: 18,
+                  },
+                  {
+                    value: 24,
                   },
                 ]}
                 onChange={(e) => {

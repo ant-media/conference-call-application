@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
-import { AntmediaContext } from 'App';
+import { AntmediaContext, restBaseUrl } from 'App';
 import { Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -38,12 +38,8 @@ function RequestPublishButton(props) {
 
   const handlePublisherRequest = (e) => {
     e.preventDefault();
-    const appName = window.location.pathname.substring(
-        0,
-        window.location.pathname.lastIndexOf("/") + 1
-    ).replaceAll('/','');
-    const baseUrl = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" + appName;
-    //const baseUrl = "http://localhost:5080/Conference";
+  
+    const baseUrl = restBaseUrl;
     let participant = "";
     let participants = antmedia.getAllParticipants();
     for (let i = 0; i < participants.length; i++) {
