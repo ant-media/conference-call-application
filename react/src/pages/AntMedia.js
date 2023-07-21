@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState , useRef} from "react";
 import { Grid, CircularProgress, Box } from "@mui/material";
 import { useParams } from "react-router-dom";
 import _ from "lodash";
@@ -142,6 +142,9 @@ function AntMedia() {
 
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
+  const refisScreenShared = useRef();
+
+  refisScreenShared.current = isScreenShared;
 
   //we are going to store number of unread messages to display on screen if user has not opened message component.
   const [numberOfUnReadMessages, setNumberOfUnReadMessages] = useState(0);
@@ -1100,7 +1103,7 @@ function AntMedia() {
         camera: !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn,
         isPinned:
           pinnedVideoId === "localVideo" ? publishStreamId : pinnedVideoId,
-        isScreenShared: isScreenShared,
+        isScreenShared: refisScreenShared.current,
       });
     }
   }
