@@ -143,7 +143,6 @@ function AntMedia() {
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
   const refisScreenShared = useRef();
-
   refisScreenShared.current = isScreenShared;
 
   //we are going to store number of unread messages to display on screen if user has not opened message component.
