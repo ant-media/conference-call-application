@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { SvgIcon } from '../../SvgIcon';
@@ -35,7 +35,7 @@ function PublisherRequestListButton({ footer, ...props }) {
                     className={footer ? 'footer-icon-button' : ''}
                     color={settings?.publisherRequestListDrawerOpen ? 'primary' : 'secondary'}
                 >
-                    <SvgIcon size={32} color={settings?.publisherRequestListDrawerOpen ? 'black' : 'white'} name={'publisherRequests'} />
+                    <SvgIcon size={32} color={settings?.publisherRequestListDrawerOpen ? 'black' : 'white'} name={'raise-hand'} />
                     {requestSpeakerList.length}
                 </CustomizedBtn>
             </Tooltip>

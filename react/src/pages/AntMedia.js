@@ -279,13 +279,18 @@ function AntMedia() {
     // TODO: antmedia.updateAudioLevel(myLocalData.streamId, 10);
   }
 
-  function addBecomingPublisherRequest(listenerName) {
+  function addBecomingPublisherRequest(listenerName) 
+  {
     let listener = {"streamId": listenerName};
     if (requestSpeakerList.find((l) => l.streamId === listenerName)) {
         return;
     }
+    
     requestSpeakerList.push(listener);
-    setRequestSpeakerList(requestSpeakerList);
+    //we just need to change the reference of the array to trigger the re-render.
+    var newRequestSpeakerList = [...requestSpeakerList];
+    setRequestSpeakerList(newRequestSpeakerList);
+    
   }
 
   function displayNoVideoAudioDeviceFoundWarning() {
@@ -893,6 +898,19 @@ function AntMedia() {
     }
   }
 
+  function rejectSpeakerRequest(streamId) {
+    let command = {
+      "eventType": "REJECT_SPEAKER_REQUEST",
+      "streamId": streamId,
+    }
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command)
+    };
+    fetch( restBaseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
+  }
+
   function approveBecomeSpeakerRequest(requestingSpeakerName) {
     setOpenRequestBecomeSpeakerDialog(false);
     
@@ -991,6 +1009,7 @@ function AntMedia() {
   antmedia.isBroadcasting = isBroadcasting;
   antmedia.setIsBroadcasting = setIsBroadcasting;
   antmedia.approveBecomeSpeakerRequest = approveBecomeSpeakerRequest;
+  antmedia.rejectSpeakerRequest = rejectSpeakerRequest;
   // END custom functions
   return (
     <Grid container className="App">

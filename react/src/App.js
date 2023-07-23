@@ -2,17 +2,21 @@ import "./App.css";
 /* eslint-disable eqeqeq */
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./styles/theme";
-import React from "react";
+import React, { useContext } from "react";
 import { WebRTCAdaptor } from "./antmedia/webrtc_adaptor.js";
 import { getUrlParameter } from "./antmedia/fetch.stream";
 import { SnackbarProvider } from "notistack";
-import AntSnackBar from "Components/AntSnackBar";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import i18n from "i18next";
 import translationEN from "i18n/en.json";
 import translationTR from "i18n/tr.json";
 import CustomRoutes from "CustomRoutes";
+import { useSnackbar } from "notistack";
+import { useTranslation } from "react-i18next";
+import AntMedia from "pages/AntMedia";
+import AntSnackBar from "Components/AntSnackBar";
+
 
 const resources = {
   en: {
@@ -179,13 +183,17 @@ if (!websocketURL) {
     window.location.port +
     appName;
    
-  websocketURL = "ws://" + path + "websocket";
+  websocketURL = "ws://" + path;
 
   if (window.location.protocol.startsWith("https")) {
     websocketURL = "wss://" + path;
   }
 
+  websocketURL += "websocket";
+
   restURL = window.location.protocol + "//" + path;
+  //remove last slash
+  restURL = restURL.substring(0, restURL.length - 1);
 }
 console.log("websocket url: " + websocketURL + " rest base url: " + restURL);
 
@@ -235,7 +243,6 @@ const webRTCAdaptor = new WebRTCAdaptor({
       }, 5000);
     } else if (info === "newStreamAvailable") 
     {
-      console.log("--------- new stream available ----------");
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
     } else if (info === "publish_started") 
     {
@@ -259,7 +266,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
       if (roomTimerId !== null) {
         clearInterval(roomTimerId);
       }
-      if (makeOnlyDataChannelPublisher) {
+      if (makeOnlyDataChannelPublisher) 
+      {
         makeOnlyDataChannelPublisher = false;
         webRTCAdaptor.resetAllParticipants();
         webRTCAdaptor.resetPartipants();
@@ -278,6 +286,11 @@ const webRTCAdaptor = new WebRTCAdaptor({
         webRTCAdaptor.changeRoomName(newRoom);
         webRTCAdaptor.joinRoom(newRoom, publishStreamId, "legacy");
       }
+      else if (admin) {
+        console.log("admin left the room");
+        webRTCAdaptorForAdmin.leaveFromRoom(room + "listener");
+      }
+
     } else if (info === "closed") {
     } else if (info === "play_finished") {
       isPlaying = false;
@@ -316,7 +329,6 @@ const webRTCAdaptor = new WebRTCAdaptor({
             webRTCAdaptor.setIsBroadcasting(false);
           } else if (eventType === "REQUEST_PUBLISH") {
             if (webRTCAdaptor.admin) {
-              console.log("REQUEST_PUBLISH: webrtc publish request is received from attendee with streamId: " + eventStreamId);
               webRTCAdaptor.addBecomingPublisherRequest(eventStreamId);
             }
             return;
@@ -349,7 +361,14 @@ const webRTCAdaptor = new WebRTCAdaptor({
                 .catch((err) => {
                   console.error(`${err.name}: ${err.message}`);
                 });
-          } else if (eventType === "MAKE_LISTENER_AGAIN" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+          } 
+          else if (eventType == "REJECT_SPEAKER_REQUEST" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) 
+          {
+            window.showNotification(
+              'Your request to join the room is rejected by the host'
+            );
+          }
+          else if (eventType === "MAKE_LISTENER_AGAIN" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
             makePublisherOnlyDataChannel = true;
             makeOnlyDataChannelPublisher = false;
             webRTCAdaptor.setIsBroadcasting(false);
@@ -426,10 +445,16 @@ const webRTCAdaptor = new WebRTCAdaptor({
     }
 
     var errorMessage = JSON.stringify(error);
+
     if (typeof message != "undefined") {
       errorMessage = message;
     }
     errorMessage = JSON.stringify(error);
+    if (error.indexOf("no_active_streams_in_room") !== -1) {
+      
+      webRTCAdaptor.handleRoomEvents({ streams:[], streamList: []});
+    }
+    else 
     if (error.indexOf("NotFoundError") !== -1) {
       errorMessage =
         "Camera or Mic are not found or not allowed in your device.";
@@ -623,7 +648,7 @@ const webRTCAdaptorForAdmin = new WebRTCAdaptor({
           tokenPublishAdmin,
           subscriberId,
           subscriberCode,
-          obj.streamId,
+          "Host",
           room,
           "{someKey:somveValue}"
       );
@@ -745,6 +770,8 @@ function copyWindowLocation() {
 window.getWindowLocation = getWindowLocation;
 window.copyWindowLocation = copyWindowLocation;
 window.makeFullScreen = makeFullScreen;
+window.showNotification = null;
+window.t = null; //translation
 
 export const AntmediaContext = React.createContext(webRTCAdaptor);
 export const AntmediaAdminContext = React.createContext(webRTCAdaptorForAdmin);
@@ -752,7 +779,10 @@ export const AntmediaSpeedTestContext = React.createContext(webRTCAdaptorSpeedTe
 export const SpeedTestObjectContext = React.createContext(speedTestObject);
 
 
+
 function App() {
+
+  const { t } = useTranslation();
 
   const handleFullScreen = (e) => {
     if (e.target?.id === "meeting-gallery") {
@@ -764,6 +794,13 @@ function App() {
     }
   };
 
+  window.showNotification = (message) => {
+    console.log("show notification for message: " + message);
+   
+  }
+  
+  
+  
  
 
   React.useEffect(() => {

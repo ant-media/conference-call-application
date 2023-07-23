@@ -49,7 +49,7 @@ function PublisherRequestTab(props) {
 
           <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => {setRequestSpeakerList(requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+              onClick={() => {antmedia.rejectSpeakerRequest(videoId); setRequestSpeakerList(requestSpeakerList.filter((item) => item.streamId !== videoId))}}
           >
             Deny
           </PinBtn>
