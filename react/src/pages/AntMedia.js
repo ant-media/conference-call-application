@@ -91,7 +91,7 @@ function AntMedia() {
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [isBroadcasting, setIsBroadcasting] = React.useState(false);
 
-  const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(true);
+  const [speedTestBeforeLogin, setSpeedTestBeforeLogin] = useState(false);
   const [speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal] = useState(false);
 
   const [messages, setMessages] = useState([]);
@@ -858,23 +858,34 @@ function AntMedia() {
   }
   function handleRoomEvents({ streams, streamList }) {
     // [allParticipant, setAllParticipants] => list of every user
+
     setAllParticipants(streamList);
     // [participants,setParticipants] => number of visible participants due to tile count. If tile count is 3
     // then number of participants will be 3.
     // We are basically, finding names and match the names with the particular videos.
     // We do this because we can't get names from other functions.
     setParticipants((oldParts) => {
+      //participants are always available in streams array.
+      //filter oldparts with streams array.
+
+      //mekya: some times room does not have the stream that is in the oldparts and it causes rendering problems so below code is added to fix it. 
+      var participantTemp = oldParts.filter((p) => streams.includes(p.id));
+
       if (streams.length < participants.length) {
-        return oldParts.filter((p) => streams.includes(p.id));
+        return participantTemp;
       }
       // matching the names.
-      return oldParts.map((p) => {
+      var finalParticipants = participantTemp.map((p) => {
         const newName = streamList.find((s) => s.streamId === p.id)?.streamName;
         if (p.name !== newName) {
           return { ...p, name: newName };
         }
         return p;
       });
+
+      //REFACTOR: mekya: video card rendering things
+
+      return finalParticipants;
     });
     if (pinnedVideoId !== "localVideo" && !streams.includes(pinnedVideoId)) {
       setPinnedVideoId(null);
