@@ -9,9 +9,10 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
-import { VideoEffect } from "@antmedia/webrtc_adaptor/dist/es/video-effect";
-import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor/dist/es/webrtc_adaptor";
-import { getUrlParameter } from "@antmedia/webrtc_adaptor/dist/es/fetch.stream";
+import { WebRTCAdaptor} from "@antmedia/webrtc_adaptor";
+import { VideoEffect} from "@antmedia/webrtc_adaptor";
+
+import { getUrlParameter } from "@antmedia/webrtc_adaptor";
 import { SvgIcon } from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
