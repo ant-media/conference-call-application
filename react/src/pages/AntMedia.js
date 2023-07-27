@@ -119,7 +119,8 @@ function AntMedia() {
         () => {
           fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions1).then(() => {
             presenters.push(streamId);
-            setPresenters(presenters);
+            var newPresenters = [...presenters];
+            setPresenters(newPresenters);
             let command = {
               "eventType": "BROADCAST_ON",
               "streamId": streamId,
@@ -156,22 +157,37 @@ function AntMedia() {
      
       console.log("make participant undo presenter result: " + result.success);
 
+       //update the mainTrack Id again because remove track cannot set the mainTrackId to old value
+       var options = {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+                  mainTrackStreamId: roomName
+              })
+       };
 
-      fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + streamId, requestOptions0).then( () => {
-          presenters.splice(presenters.indexOf(streamId), 1);
-          setPresenters(presenters);
-          antmedia.handleSendMessage("admin*listener_room*"+streamId+"*STOP_PLAYING");
-          let command = {
-            "eventType": "BROADCAST_OFF",
-            "streamId": streamId,
-          }
-          const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(command)
-          };
-          fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
+       fetch(baseUrl + "/rest/v2/broadcasts/" + streamId, options).then((response) => response.json()).then((result) => 
+       {
+          console.log("update subtrack result: " + result.success + " for stream: " + streamId);
+      
+          fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + streamId, requestOptions0).then(() => {
+              presenters.splice(presenters.indexOf(streamId), 1);
+              var newPresenters = [...presenters];
+              setPresenters(newPresenters);
+              antmedia.handleSendMessage("admin*listener_room*"+streamId+"*STOP_PLAYING");
+              let command = {
+                "eventType": "BROADCAST_OFF",
+                "streamId": streamId,
+              }
+              const requestOptions = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(command)
+              };
+              fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
         });
+      });     
+
       
     });
   }
@@ -938,7 +954,8 @@ function AntMedia() {
     };
     fetch( baseUrl+ "/rest/v2/broadcasts/" + requestingSpeakerName + "/data", requestOptions).then(() => {});
     approvedSpeakerRequestList.push(requestingSpeakerName+"tempPublisher");
-    setApprovedSpeakerRequestList(approvedSpeakerRequestList);
+    var newList = [...approvedSpeakerRequestList]
+    setApprovedSpeakerRequestList(newList);
   }
 
   function makeListenerAgain(speakerName) {
@@ -959,7 +976,8 @@ function AntMedia() {
     if (index > -1) {
         approvedSpeakerRequestList.splice(index, 1);
     }
-    setApprovedSpeakerRequestList(approvedSpeakerRequestList);
+    var newList = [...approvedSpeakerRequestList]
+    setApprovedSpeakerRequestList(newList);
   }
 
   function resetAllParticipants() {
@@ -1059,6 +1077,7 @@ function AntMedia() {
             setIsVideoEffectRunning,
             setParticipants,
             participants,
+            allParticipants,            
             setLeftTheRoom,
             observerMode,
           }}
@@ -1118,6 +1137,7 @@ function AntMedia() {
                   makeParticipantPresenter,
                   makeListenerAgain,
                   approvedSpeakerRequestList,
+                  setApprovedSpeakerRequestList,
                   makeParticipantUndoPresenter,
                   handleSetMessages,
                   messages,
@@ -1132,6 +1152,7 @@ function AntMedia() {
                   requestSpeakerList,
                   setRequestSpeakerList,
                   presenters,
+                  setPresenters,
                   globals,
                   observerMode,
                 }}
