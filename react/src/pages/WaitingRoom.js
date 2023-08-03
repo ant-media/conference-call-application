@@ -22,6 +22,7 @@ import { ConferenceContext } from "./AntMedia";
 import { getUrlParameter } from "@antmedia/webrtc_adaptor";
 
 function getRoomName() {
+  // if it returns data-room-name element, it means that we are using conference app in component mode
   return document.getElementById("root").getAttribute("data-room-name");
 }
 
