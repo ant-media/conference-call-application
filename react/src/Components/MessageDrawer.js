@@ -8,27 +8,56 @@ import MessagesTab from './MessagesTab';
 import CloseDrawerButton from './DrawerButton';
 import { ConferenceContext } from 'pages/AntMedia';
 
-const AntDrawer = styled(Drawer)(({ theme }) => ({
-  '& .MuiDrawer-root': {
-    position: 'absolute',
-  },
-  '& .MuiBackdrop-root': {
-    backgroundColor: 'transparent',
-  },
-  '& .MuiPaper-root': {
-    padding: 12,
-    backgroundColor: 'transparent',
-    position: 'absolute',
-    boxShadow: 'unset',
-    width: 360,
-    border: 'unset',
-    [theme.breakpoints.down('sm')]: {
-      width: '100%',
-      padding: 0,
-      backgroundColor: theme.palette.green70,
+function getRoomName() {
+  // if it returns data-room-name element, it means that we are using conference app in component mode
+  return document.getElementById("root").getAttribute("data-room-name");
+}
+
+const getAntDrawerStyle = (theme) => {
+  if (getRoomName()) {
+    return {
+      '& .MuiDrawer-root': {
+        position: 'absolute',
+      },
+      '& .MuiBackdrop-root': {
+        backgroundColor: 'transparent',
+      },
+      '& .MuiPaper-root': {
+        padding: 12,
+        backgroundColor: 'transparent',
+        position: 'absolute',
+        boxShadow: 'unset',
+        width: 360,
+        border: 'unset',
+        [theme.breakpoints.down('sm')]: {
+          width: '100%',
+          padding: 0,
+          backgroundColor: theme.palette.green70,
+        },
+      },
+    }
+  } else {
+    return {
+      '& .MuiBackdrop-root': {
+      backgroundColor: 'transparent',
     },
-  },
-}));
+      '& .MuiPaper-root': {
+      padding: 12,
+          backgroundColor: 'transparent',
+          boxShadow: 'unset',
+          width: 360,
+          border: 'unset',
+          [theme.breakpoints.down('sm')]: {
+        width: '100%',
+            padding: 0,
+            backgroundColor: theme.palette.green70,
+      },
+    },
+    };
+  }
+}
+
+const AntDrawer = styled(Drawer)(({ theme }) => (getAntDrawerStyle(theme)));
 
 const MessageGrid = styled(Grid)(({ theme }) => ({
   position: 'relative',
@@ -64,8 +93,8 @@ const MessageDrawer = React.memo(props => {
       );
     };
   }, []);
-  
-  
+
+
   function a11yProps(index) {
     return {
       id: `drawer-tab-${index}`,
