@@ -28,8 +28,10 @@ class Browser:
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
     #self.driver = webdriver.Chrome('drivers/chromedriver.exe', chrome_options=browser_options)
 
-    service = Service(executable_path='./chromedriver')
-    self.driver = webdriver.Chrome(service=service, options=browser_options)
+    #service = Service(executable_path='./chromedriver')
+    #self.driver = webdriver.Chrome(service=service, options=browser_options)
+
+    self.driver = webdriver.Chrome('./chromedriver', options=browser_options)
 
   def open_in_new_tab(self, url, tab_id):
     self.driver.execute_script("window.open('about:blank', '"+tab_id+"');")
