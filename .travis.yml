@@ -22,7 +22,7 @@ cache:
   - "$HOME/.m2/repository"
 script:
 - cd react
-- npm ci
+- npm install
 - npm run build
 - cd ..
 - cp -a react/build/. webapp/src/main/webapp
