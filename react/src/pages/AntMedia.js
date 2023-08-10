@@ -74,20 +74,25 @@ var mediaConstraints = {
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
-  const appName = window.location.pathname.substring(
-    0,
-    window.location.pathname.lastIndexOf("/") + 1
-  );
-  const path =
-    window.location.hostname +
-    ":" +
-    window.location.port +
-    appName +
-    "websocket";
-  websocketURL = "ws://" + path;
+  if (document.getElementById("root").getAttribute("data-websocket-url")) {
+    websocketURL = document.getElementById("root").getAttribute("data-websocket-url");
+  }
+  else {
+    const appName = window.location.pathname.substring(
+        0,
+        window.location.pathname.lastIndexOf("/") + 1
+    );
+    const path =
+        window.location.hostname +
+        ":" +
+        window.location.port +
+        appName +
+        "websocket";
+    websocketURL = "ws://" + path;
 
-  if (window.location.protocol.startsWith("https")) {
-    websocketURL = "wss://" + path;
+    if (window.location.protocol.startsWith("https")) {
+      websocketURL = "wss://" + path;
+    }
   }
 
 }
@@ -121,6 +126,7 @@ var publishReconnected;
 var playReconnected;
 
 function getRoomName() {
+  // if it returns data-room-name element, it means that we are using conference app in component mode
   return document.getElementById("root").getAttribute("data-room-name");
 }
 

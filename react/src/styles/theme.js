@@ -5,6 +5,7 @@ import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
 
 function getRoomName() {
+  // if it returns data-room-name element, it means that we are using conference app in component mode
   return document.getElementById("root").getAttribute("data-room-name");
 }
 
