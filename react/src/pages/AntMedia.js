@@ -445,7 +445,6 @@ function AntMedia() {
       let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
       let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
       let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
-      let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
 
       let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
       let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
@@ -454,8 +453,8 @@ function AntMedia() {
         packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
       }
 
-      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
-        console.log("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" outgoing data:"+((outgoingBitrate / 100) * 80));
+      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80)  >=  obj.availableOutgoingBitrate) {
+        console.warn("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" Avaialalbe Bandwidth kbps :",obj.availableOutgoingBitrate,"Outgoing Bandwdidth kbps:",outgoingBitrate);
         displayPoorNetworkConnectionWarning();
       }
 
