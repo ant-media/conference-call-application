@@ -454,7 +454,7 @@ function AntMedia() {
       }
 
       if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80)  >=  obj.availableOutgoingBitrate) {
-        console.warn("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" Avaialalbe Bandwidth kbps :",obj.availableOutgoingBitrate,"Outgoing Bandwdidth kbps:",outgoingBitrate);
+        console.warn("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" Available Bandwidth kbps :",obj.availableOutgoingBitrate,"Outgoing Bandwidth kbps:",outgoingBitrate);
         displayPoorNetworkConnectionWarning();
       }
 
