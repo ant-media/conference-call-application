@@ -16,6 +16,8 @@ import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import DialogContent from "@mui/material/DialogContent";
 import Dialog from "@mui/material/Dialog";
 import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
+import { useTranslation } from 'react-i18next';
+
 
 export const SettingsContext = React.createContext(null);
 export const MediaSettingsContext = React.createContext(null);
@@ -38,6 +40,8 @@ function AntMedia() {
   const antmedia = useContext(AntmediaContext);
   antmedia.roomName = roomName;
   const antmediaadmin = useContext(AntmediaAdminContext);
+  const { t } = useTranslation();
+
 
   // drawerOpen for message components.
   const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
@@ -117,10 +121,32 @@ function AntMedia() {
 
     fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/add?streamId=" + streamId, requestOptions0).then(
         () => {
-          fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions1).then(() => {
+          fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions1)
+          .then((response) => { return response.json(); })
+          .then((data) => {
             presenters.push(streamId);
             var newPresenters = [...presenters];
             setPresenters(newPresenters);
+            
+            if (data.success) {
+       
+              enqueueSnackbar({
+                message: t('Speaker has joined to the presenter room successfully'),
+                variant: 'info',
+              }, {
+                autoHideDuration: 1500,
+              });
+            }
+            else 
+            {
+              enqueueSnackbar({
+                message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
+                variant: 'info',
+              }, {
+                autoHideDuration: 1500,
+              });
+            }
+
             let command = {
               "eventType": "BROADCAST_ON",
               "streamId": streamId,
@@ -130,7 +156,15 @@ function AntMedia() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(command)
             };
-            fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
+
+            fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions)
+            .then((response) => { return response.json(); })
+            .then((data) => {
+              if (!data.success) {
+                console.error("Data: " , command , " cannot be sent. The error is " + data.message);
+              }
+
+            });
           });
         }
     )
@@ -648,18 +682,14 @@ function AntMedia() {
             requestedMediaConstraints
           );
         }
-      } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") {
-        console.log(JSON.stringify(obj));
+      } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") 
+      {
+        console.debug("VIDEO_TRACK_ASSIGNMENT_CHANGE -> ", obj);
         if (!notificationEvent.payload.trackId) {
           return;
         }
         setParticipants((oldParticipants) => {
           return oldParticipants
-            .filter(
-              (p) =>
-                p.videoLabel === notificationEvent.payload.videoLabel ||
-                p.id !== notificationEvent.payload.trackId
-            )
             .map((p) => {
               if (
                 p.videoLabel === notificationEvent.payload.videoLabel &&
@@ -795,8 +825,10 @@ function AntMedia() {
     }
     if (index === roomName) {
       return;
-    } else {
-      if (obj?.trackId && !participants.some((p) => p.id === index)) {
+    } 
+    else {
+      if (obj?.trackId && !participants.some((p) => p.id === index)) 
+      {
         setParticipants((spp) => {
           return [
             ...spp.filter((p) => p.id !== index),
@@ -810,6 +842,7 @@ function AntMedia() {
             },
           ];
         });
+
       }
     }
   }
@@ -884,15 +917,20 @@ function AntMedia() {
       //participants are always available in streams array.
       //filter oldparts with streams array.
 
-      //mekya: some times room does not have the stream that is in the oldparts and it causes rendering problems so below code is added to fix it. 
-      var participantTemp = oldParts.filter((p) => streams.includes(p.id));
-
+      //this is only for giving the name to the streams not thing else. 
+      //Track adding is handlePlayVideo
+      //Track removing is videocard.js track.onended method 
+     var participantTemp = oldParts;
+     
       if (streams.length < participants.length) {
         return participantTemp;
       }
       // matching the names.
-      var finalParticipants = participantTemp.map((p) => {
-        const newName = streamList.find((s) => s.streamId === p.id)?.streamName;
+      var finalParticipants = participantTemp.map((p) => 
+      {
+        const newName = streamList.find((s) => 
+        { 
+          return s.streamId === p.id; })?.streamName;
         if (p.name !== newName) {
           return { ...p, name: newName };
         }
@@ -900,7 +938,6 @@ function AntMedia() {
       });
 
       //REFACTOR: mekya: video card rendering things
-
       return finalParticipants;
     });
     if (pinnedVideoId !== "localVideo" && !streams.includes(pinnedVideoId)) {
