@@ -565,14 +565,7 @@ function AntMedia() {
     webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
   }
 
-  /*
-    * This function is called when user wanted to pin/unpin someone.
-    * If disableUnpin is true then we are not going to unpin anyone if id already pinned.
-   */
-  function pinVideo(id, videoLabelProp = "", disableUnpin = false) {
-    if (pinnedVideoId === id && disableUnpin) {
-      return;
-    }
+  function pinVideo(id, videoLabelProp = "") {
     if (id === "localVideo") {
       videoLabelProp = "localVideo";
     }
@@ -965,12 +958,17 @@ function AntMedia() {
           }
         });
       } else if (eventType === "SCREEN_SHARED_ON") {
-        let videoLab = participants.find((p) => p.id === eventStreamId)
-          ?.videoLabel
-          ? participants.find((p) => p.id === eventStreamId).videoLabel
-          : "";
-        pinVideo(eventStreamId, videoLab, true);
-        setScreenSharedVideoId(eventStreamId);
+        if (eventStreamId !== pinnedVideoId) {
+          if (screenShareOnNotificationJob !== null) {
+            clearInterval(screenShareOnNotificationJob);
+          }
+          let videoLab = participants.find((p) => p.id === eventStreamId)
+              ?.videoLabel
+              ? participants.find((p) => p.id === eventStreamId).videoLabel
+              : "";
+          pinVideo(eventStreamId, videoLab);
+          setScreenSharedVideoId(eventStreamId);
+        }
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
@@ -1067,7 +1065,7 @@ function AntMedia() {
           ?.videoLabel
           ? participants.find((p) => p.id === eventStreamId).videoLabel
           : "";
-        pinVideo(eventStreamId, videoLab, false);
+        pinVideo(eventStreamId, videoLab);
       }
     }
 
