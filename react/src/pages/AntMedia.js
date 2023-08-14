@@ -119,6 +119,7 @@ if (publishToken == null || typeof publishToken === "undefined") {
 var roomOfStream = [];
 var roomInfoHandleJob = null;
 
+var screenShareOnNotificationJob = null;
 var statusUpdateIntervalJob = null;
 var room = null;
 var reconnecting = false;
@@ -564,7 +565,14 @@ function AntMedia() {
     webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
   }
 
-  function pinVideo(id, videoLabelProp = "") {
+  /*
+    * This function is called when user wanted to pin/unpin someone.
+    * If disableUnpin is true then we are not going to unpin anyone if id already pinned.
+   */
+  function pinVideo(id, videoLabelProp = "", disableUnpin = false) {
+    if (pinnedVideoId === id && disableUnpin) {
+      return;
+    }
     if (id === "localVideo") {
       videoLabelProp = "localVideo";
     }
@@ -635,6 +643,7 @@ function AntMedia() {
   }
 
   function screenShareOffNotification() {
+    clearInterval(screenShareOnNotificationJob);
     handleSendNotificationEvent(
       "SCREEN_SHARED_OFF",
       publishStreamId
@@ -651,10 +660,14 @@ function AntMedia() {
       height: 1080,
     };
     webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
-    handleSendNotificationEvent(
-      "SCREEN_SHARED_ON",
-      publishStreamId
-    );
+    if (screenShareOnNotificationJob == null) {
+        screenShareOnNotificationJob = setInterval(() => {
+            handleSendNotificationEvent(
+            "SCREEN_SHARED_ON",
+            publishStreamId
+            );
+        }, 5000);
+    }
 
     setPinnedVideoId("localVideo");
   }
@@ -956,7 +969,7 @@ function AntMedia() {
           ?.videoLabel
           ? participants.find((p) => p.id === eventStreamId).videoLabel
           : "";
-        pinVideo(eventStreamId, videoLab);
+        pinVideo(eventStreamId, videoLab, true);
         setScreenSharedVideoId(eventStreamId);
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
@@ -1054,7 +1067,7 @@ function AntMedia() {
           ?.videoLabel
           ? participants.find((p) => p.id === eventStreamId).videoLabel
           : "";
-        pinVideo(eventStreamId, videoLab);
+        pinVideo(eventStreamId, videoLab, false);
       }
     }
 
