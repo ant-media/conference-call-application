@@ -959,6 +959,8 @@ function AntMedia() {
         });
       } else if (eventType === "SCREEN_SHARED_ON") {
         if (eventStreamId !== pinnedVideoId) {
+          // If someone else is sharing screen then we are going to pin it.
+          // And we are stopping our screen share on notification interval.
           if (screenShareOnNotificationJob !== null) {
             clearInterval(screenShareOnNotificationJob);
           }
