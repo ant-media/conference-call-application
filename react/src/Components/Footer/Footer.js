@@ -14,21 +14,33 @@ import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
 
-
-const CustomizedGrid = styled(Grid)(({ theme }) => ({
-  backgroundColor: theme.palette.green[80],
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  padding: 16,
-  width: "100%",
-  zIndex: 2,
-  height: 80,
-}));
-
 function getRoomName() {
+  // if it returns data-room-name element, it means that we are using conference app in component mode
   return document.getElementById("root").getAttribute("data-room-name");
 }
+
+const getCustomizedGridStyle = (theme) => {
+  let customizedGridStyle = {
+    backgroundColor: theme.palette.green[80],
+    position: "fixed",
+    bottom: 0,
+    left: 0,
+    padding: 16,
+    width: "100vw",
+    zIndex: 2,
+    height: 80,
+  };
+
+  if (getRoomName()) {
+    customizedGridStyle.position = "absolute";
+    customizedGridStyle.width = "100%";
+  }
+
+  return customizedGridStyle;
+}
+
+const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme)));
+
 function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomName()) ? getRoomName() : useParams().id;

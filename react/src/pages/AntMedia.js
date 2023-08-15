@@ -74,20 +74,25 @@ var mediaConstraints = {
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
-  const appName = window.location.pathname.substring(
-    0,
-    window.location.pathname.lastIndexOf("/") + 1
-  );
-  const path =
-    window.location.hostname +
-    ":" +
-    window.location.port +
-    appName +
-    "websocket";
-  websocketURL = "ws://" + path;
+  if (document.getElementById("root").getAttribute("data-websocket-url")) {
+    websocketURL = document.getElementById("root").getAttribute("data-websocket-url");
+  }
+  else {
+    const appName = window.location.pathname.substring(
+        0,
+        window.location.pathname.lastIndexOf("/") + 1
+    );
+    const path =
+        window.location.hostname +
+        ":" +
+        window.location.port +
+        appName +
+        "websocket";
+    websocketURL = "ws://" + path;
 
-  if (window.location.protocol.startsWith("https")) {
-    websocketURL = "wss://" + path;
+    if (window.location.protocol.startsWith("https")) {
+      websocketURL = "wss://" + path;
+    }
   }
 
 }
@@ -121,6 +126,7 @@ var publishReconnected;
 var playReconnected;
 
 function getRoomName() {
+  // if it returns data-room-name element, it means that we are using conference app in component mode
   return document.getElementById("root").getAttribute("data-room-name");
 }
 
@@ -441,7 +447,6 @@ function AntMedia() {
       let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
       let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
       let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
-      let bandwidth = parseInt(webRTCAdaptor.mediaManager.bandwidth);
 
       let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
       let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
@@ -450,8 +455,8 @@ function AntMedia() {
         packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
       }
 
-      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
-        console.log("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" outgoing data:"+((outgoingBitrate / 100) * 80));
+      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80)  >=  obj.availableOutgoingBitrate) {
+        console.warn("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" Available Bandwidth kbps :",obj.availableOutgoingBitrate,"Outgoing Bandwidth kbps:",outgoingBitrate);
         displayPoorNetworkConnectionWarning();
       }
 
@@ -1003,17 +1008,12 @@ function AntMedia() {
           );
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") {
-        console.log(JSON.stringify(obj));
+        console.debug("VIDEO_TRACK_ASSIGNMENT_CHANGE -> ", obj);
         if (!notificationEvent.payload.trackId) {
           return;
         }
         setParticipants((oldParticipants) => {
           return oldParticipants
-            .filter(
-              (p) =>
-                p.videoLabel === notificationEvent.payload.videoLabel ||
-                p.id !== notificationEvent.payload.trackId
-            )
             .map((p) => {
               if (
                 p.videoLabel === notificationEvent.payload.videoLabel &&
