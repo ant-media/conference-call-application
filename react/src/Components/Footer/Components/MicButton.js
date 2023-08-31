@@ -64,7 +64,6 @@ function MicButton(props) {
     conference.muteLocalMic();
     if (conference.publishStreamId) {
       conference.handleSendNotificationEvent('MIC_MUTED', conference.publishStreamId);
-      conference.updateAudioLevel(0);
     }
   };
 

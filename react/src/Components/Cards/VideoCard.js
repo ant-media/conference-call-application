@@ -124,12 +124,9 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
           clearInterval(timeoutRef.current);
           timeoutRef.current = setTimeout(() => {
             setIsTalking(false);
-          }, 1000);
-          conference.updateAudioLevel(
-            Math.floor(value * 100)
-          );
+          }, 1500);
         }
-      }, 100);
+      }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conference.isPublished]);
