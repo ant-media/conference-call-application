@@ -483,6 +483,11 @@ function AntMedia() {
     if (error.indexOf("publishTimeoutError") !== -1 && roomInfoHandleJob !== null) {
       clearInterval(roomInfoHandleJob);
     }
+    if (error.indexOf("no_active_streams_in_room") !== -1) {
+      // if there is no active stream in the room then we are going to clear the participant list.
+      setParticipants([]);
+      setAllParticipants([]);
+    }
     var errorMessage = JSON.stringify(error);
     if (typeof message != "undefined") {
       errorMessage = message;
