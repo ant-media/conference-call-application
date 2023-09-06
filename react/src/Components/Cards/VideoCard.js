@@ -59,7 +59,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
          * mekya
          */
         //if (conference.participants.length > conference?.globals?.maxVideoTrackCount)
-        {
+        //{
           console.log("video before:"+JSON.stringify(conference.participants));
           conference.setParticipants((oldParts) => {
             return oldParts.filter(
@@ -74,7 +74,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
           });
           console.log("video after:"+JSON.stringify(conference.participants));
 
-        }
+        //}
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
