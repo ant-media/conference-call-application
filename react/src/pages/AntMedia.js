@@ -365,6 +365,7 @@ function AntMedia() {
       if(reconnecting) {
         publishReconnected = true;
         joinRoom(room, publishStreamId, roomJoinMode);
+        webRTCAdaptor.getVideoTrackAssigments(publishStreamId);
         reconnecting = !(publishReconnected && playReconnected);
         return;
       }
@@ -465,8 +466,15 @@ function AntMedia() {
 
     } else if (info === "debugInfo") {
       handleDebugInfo(obj.debugInfo);
-    }
-    else if (info === "ice_connection_state_changed") {
+    } else if (info === "video_track_assignments") {
+      for (let i = 0; i < obj.videoTrackAssignments.length; i++) {
+        let videoTrackAssignment = obj.videoTrackAssignments[i];
+        let participant = participants.find((p) => p.id === videoTrackAssignment.participantId);
+        if (participant) {
+          participant.videoTrackId = videoTrackAssignment.videoTrackId;
+        }
+      }
+    } else if (info === "ice_connection_state_changed") {
       console.log("iceConnectionState Changed: ", JSON.stringify(obj))
       var iceState = obj.state;
       if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
@@ -1323,7 +1331,7 @@ function AntMedia() {
     if (audioListenerIntervalJob == null) {
       audioListenerIntervalJob = setInterval(() => {
         webRTCAdaptor.remotePeerConnection[publishStreamId].getStats(null).then(stats => {
-          for (const stat of stats.values()) 
+          for (const stat of stats.values())
           {
             if (stat.type === 'media-source' && stat.kind === 'audio') {
               listener(stat.audioLevel.toFixed(2));
