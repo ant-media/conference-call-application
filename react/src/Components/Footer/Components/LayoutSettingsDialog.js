@@ -70,9 +70,10 @@ export function LayoutSettingsDialog(props) {
   const [value, setValue] = React.useState(
     conference.globals.maxVideoTrackCount ? conference.globals.maxVideoTrackCount + 1 : 3
   );
+  const [isTileCountChanged, setTileCountChanged] = React.useState(false);
   const [layout, setLayout] = React.useState(
     conference.pinnedVideoId !== null ? "sidebar" : "tiled"
-  ); //just for radioo buttons
+  ); //just for radio buttons
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
@@ -80,6 +81,12 @@ export function LayoutSettingsDialog(props) {
   React.useEffect(() => {
     setLayout(conference.pinnedVideoId !== null ? "sidebar" : "tiled");
   }, [conference.pinnedVideoId]);
+
+  React.useEffect(() => {
+    if (!isTileCountChanged) {
+      setValue(conference.globals.maxVideoTrackCount);
+    }
+  }, [conference.globals.maxVideoTrackCount]);
   const handleClose = () => {
     onClose(selectedValue);
   };
@@ -87,6 +94,8 @@ export function LayoutSettingsDialog(props) {
   const changeLayout = (event) => {
     const mode = event.target.value;
     setLayout(mode);
+
+    setTileCountChanged(true);
 
     if (mode === "tiled") {
       //unpin the pinned video
