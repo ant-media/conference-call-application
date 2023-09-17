@@ -468,18 +468,8 @@ function AntMedia() {
     }
     else if (info === "ice_connection_state_changed") {
       console.log("iceConnectionState Changed: ", JSON.stringify(obj))
-      var iceState = obj.state;
-      if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
-
-        setTimeout(() => {
-          if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" &&
-              webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
-              webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
-              reconnectionInProgress();
-            }
-        }, 5000);
-
-      }
+    } else if (info === "reconnection_process_started") {
+      reconnectionInProgress();
     }
   };
 
@@ -1318,7 +1308,7 @@ function AntMedia() {
     if (audioListenerIntervalJob == null) {
       audioListenerIntervalJob = setInterval(() => {
         webRTCAdaptor.remotePeerConnection[publishStreamId].getStats(null).then(stats => {
-          for (const stat of stats.values()) 
+          for (const stat of stats.values())
           {
             if (stat.type === 'media-source' && stat.kind === 'audio') {
               listener(stat.audioLevel.toFixed(2));
