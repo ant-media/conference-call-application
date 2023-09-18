@@ -487,6 +487,9 @@ function AntMedia() {
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
     if (error.indexOf("publishTimeoutError") !== -1 && roomInfoHandleJob !== null) {
       clearInterval(roomInfoHandleJob);
+      clearInterval(statusUpdateIntervalJob);
+      roomInfoHandleJob = null;
+      statusUpdateIntervalJob = null;
     }
     var errorMessage = JSON.stringify(error);
     if (typeof message != "undefined") {
