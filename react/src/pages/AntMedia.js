@@ -1331,7 +1331,7 @@ function AntMedia() {
     if (audioListenerIntervalJob == null) {
       audioListenerIntervalJob = setInterval(() => {
         webRTCAdaptor.remotePeerConnection[publishStreamId].getStats(null).then(stats => {
-          for (const stat of stats.values())
+          for (const stat of stats.values()) 
           {
             if (stat.type === 'media-source' && stat.kind === 'audio') {
               listener(stat.audioLevel.toFixed(2));
