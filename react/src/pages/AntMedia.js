@@ -374,7 +374,7 @@ function AntMedia() {
       if (roomInfoHandleJob == null) {
         roomInfoHandleJob = setInterval(() => {
           handleRoomInfo(publishStreamId);
-        }, 2000);
+        }, 5000);
       }
       if (statusUpdateIntervalJob == null) {
         statusUpdateIntervalJob = setInterval(() => {
@@ -1022,7 +1022,7 @@ function AntMedia() {
             if (
                 participants[i] === notificationEvent.payload.videoLabel
             ) {
-                // when we decrease the period of the room info interval, we cannot assign video track assignments changes to the correct participant.
+                // when we directly update participant list inside joined room interval, we cannot assign video track assignments changes to the correct participant.
                 // so we need to check and remove if participant added before and add it again with correct tracks.
                 var tempParticipant = participants.slice(i, 1);
                 setParticipants(tempParticipant);
