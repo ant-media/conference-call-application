@@ -344,13 +344,14 @@ function AntMedia() {
         return;
       }
 
-
-      let streamDetailsList = obj.streamList;
-
-      if (playOnly) {
-        webRTCAdaptor.play(obj.ATTR_ROOM_NAME, playToken, obj.ATTR_ROOM_NAME, streamDetailsList, subscriberId, subscriberCode);
+      var temporaryList = [...obj.streams];
+      handleRoomEvents(obj);
+      if (!isPlaying && !reconnecting) {
+        handlePlay(playToken, temporaryList);
+        isPlaying = true;
       }
-      else {
+
+      if (!playOnly) {
         handlePublish(
           obj.streamId,
           publishToken,
