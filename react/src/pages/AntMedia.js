@@ -1019,17 +1019,6 @@ function AntMedia() {
         if (!notificationEvent.payload.trackId) {
           return;
         }
-        for (let i = 0; i < participants.length; i++) {
-            if (
-                participants[i] === notificationEvent.payload.videoLabel
-            ) {
-                // when we directly update participant list inside joined room interval, we cannot assign video track assignments changes to the correct participant.
-                // so we need to check and remove if participant added before and add it again with correct tracks.
-                var tempParticipant = participants.slice(i, 1);
-                setParticipants(tempParticipant);
-                break;
-            }
-        }
         setParticipants((oldParticipants) => {
           return oldParticipants
             .map((p) => {
