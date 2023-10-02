@@ -89,10 +89,10 @@ function calculateLayout(
 
 const MeetingRoom = React.memo((props) => {
   const conference = React.useContext(ConferenceContext);
+  
 
-  const allParticipantsExceptLocal = conference.allParticipants.filter(
-      (p) => p.streamId !== conference.publishStreamId
-  );
+  const allParticipantsExceptLocal = conference.allParticipants;
+  delete allParticipantsExceptLocal[conference.publishStreamId];
 
   const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({id}) => id);
@@ -143,7 +143,7 @@ const MeetingRoom = React.memo((props) => {
 
   React.useEffect(() => {
     handleGalleryResize(false);
-  }, [conference.participants, conference.pinnedVideoId]);
+  }, [conference.participants, conference.pinnedVideoId, conference.participantUpdated]);
 
   React.useEffect(() => {
     handleGalleryResize(true);
@@ -303,7 +303,7 @@ const MeetingRoom = React.memo((props) => {
   //main tile other limit set, max count
   const showAsOthersLimit = conference.globals.maxVideoTrackCount + 1; // the total video cards i want to see on screen including my local video card and excluding the others tile. if this is set to 2, user will see 3 people and 1 "others card" totaling to 4 cards and 2x2 grid.
   //with 2 active video participants + 1 me + 1 card
-  const sliceTiles = allParticipantsExceptLocal.length + 1 > showAsOthersLimit; //plus 1 is me
+  const sliceTiles = Object.keys(allParticipantsExceptLocal).length + 1 > showAsOthersLimit; //plus 1 is me
 
   const pinLayout = conference.pinnedVideoId !== null ? true : false;
   // const testPart = [{ name: 'a' }, { name: 'a' }];
@@ -348,7 +348,6 @@ const MeetingRoom = React.memo((props) => {
                     />
                   </div> : null}
                   {conference.participants
-                      .filter((p) => p.videoLabel !== p.id)
                       .map(({id, videoLabel, track, name}, index) => (
                           <>
                             <div

@@ -64,13 +64,13 @@ function ParticipantTab(props) {
                   variant="body2"
                   style={{marginLeft: 4, fontWeight: 500}}
               >
-                {conference.isPlayOnly === false ? conference.allParticipants.length + 1 : conference.allParticipants.length}
+                {conference.isPlayOnly === false ? Object.keys(conference.allParticipants).length + 1 : Object.keys(conference.allParticipants).length}
               </ParticipantName>
             </Grid>
             {conference.isPlayOnly === false ? getParticipantItem("localVideo", "You") : ""}
-            {conference.allParticipants.map(({streamId, streamName}, index) => {
+            {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
               if (conference.publishStreamId !== streamId) {
-                return getParticipantItem(streamId, streamName);
+                return getParticipantItem(streamId, broadcastObject.name);
               } else {
                 return "";
               }
