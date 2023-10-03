@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Grid, CircularProgress, Box } from "@mui/material";
 import { useParams } from "react-router-dom";
-import _, { forEach } from "lodash";
 import WaitingRoom from "./WaitingRoom";
+import _, { forEach } from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
 import { useSnackbar } from "notistack";
@@ -367,16 +367,28 @@ function AntMedia() {
               command: "getBroadcastObject",
               streamId: pid,
             }; //FIXME move to webrtcadaptor
-          
+
             webRTCAdaptor.webSocketAdaptor.send(JSON.stringify(jsCmd));
           }
         });
       } else { //subtrack object
+        if (broadcastObject.metaData !== undefined && broadcastObject.metaData !== null) {
+          let userStatusMetadata = JSON.parse(broadcastObject.metaData);
+
+          let micStatusArray = mic;
+          micStatusArray.push({eventStreamId: obj.streamId, isMicMuted: userStatusMetadata.isMicMuted});
+          setMic(micStatusArray);
+
+          let camStatusArray = cam;
+          camStatusArray.push({eventStreamId: obj.streamId, isCameraOn: userStatusMetadata.isCameraOn});
+          setCam(camStatusArray);
+        }
+
         let allParticipantsTemp = allParticipants;
         allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
         setAllParticipants(allParticipantsTemp);
       }
-     
+
       console.log(obj.broadcast);
     } else if (info === "newStreamAvailable") {
       handlePlayVideo(obj);
@@ -404,12 +416,12 @@ function AntMedia() {
     }
     else if (info === "play_started") {
       console.log("**** play started:"+reconnecting);
-      
+
       var jsCmd = {
         command: "getBroadcastObject",
         streamId: roomName,
       }; //FIXME move to webrtcadaptor
-    
+
       webRTCAdaptor.webSocketAdaptor.send(JSON.stringify(jsCmd));
 
       if(reconnecting) {
@@ -846,6 +858,10 @@ function AntMedia() {
         arr.push(data);
       }
 
+      if (data.eventStreamId === "localVideo") {
+        updateUserStatusMetadata(null, data.isCameraOn);
+      }
+
       return arr;
     });
   }
@@ -859,6 +875,10 @@ function AntMedia() {
         micObj.isMicMuted = data.isMicMuted;
       } else {
         arr.push(data);
+      }
+
+      if (data.eventStreamId === "localVideo") {
+        updateUserStatusMetadata(data.isMicMuted, null);
       }
 
       return arr;
@@ -1002,9 +1022,9 @@ function AntMedia() {
         console.debug("VIDEO_TRACK_ASSIGNMENT_LIST -> ", obj);
 
         let videoTrackAssignments = notificationEvent.payload;
-        
+
         let temp = participants;
-        
+
         //remove not available videotracks if exist
         temp.forEach((p) => {
           let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
@@ -1050,11 +1070,33 @@ function AntMedia() {
           command: "getBroadcastObject",
           streamId: roomName,
         }; //FIXME move to webrtcadaptor
-      
+
         webRTCAdaptor.webSocketAdaptor.send(JSON.stringify(jsCmd));
       }
     }
-  } 
+  }
+
+  function getUserStatusMetadata(isMicMuted, isCameraOn) {
+    let metadata = {
+      isMicMuted: isMicMuted,
+      isCameraOn: isCameraOn,
+    }
+
+    if (metadata.isMicMuted === null) {
+      metadata.isMicMuted = !!mic.find((c) => c.eventStreamId === "localVideo")?.isMicMuted;
+    }
+    if (metadata.isCameraOn === null) {
+      metadata.isCameraOn = !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn;
+    }
+
+    return metadata;
+  }
+
+  function updateUserStatusMetadata(micMuted, cameraOn) {
+    let metadata = getUserStatusMetadata(micMuted, cameraOn);
+
+    webRTCAdaptor.upateStreamMetaData(publishStreamId, JSON.stringify(metadata));
+  }
 
   function setUserStatus(notificationEvent, eventStreamId) {
     if (notificationEvent.isScreenShared) {
@@ -1103,9 +1145,10 @@ function AntMedia() {
       eventType: eventType,
       ...(info ? info : {}),
     };
+    console.error("send notification event", notEvent);
     webRTCAdaptor.sendData(publishStreamId, JSON.stringify(notEvent));
   }
-  
+
   function updateStatus(obj) {
     if (roomName !== obj) {
       handleSendNotificationEvent("UPDATE_STATUS", publishStreamId, {
@@ -1119,6 +1162,8 @@ function AntMedia() {
   }
 
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
+    let userStatusMetadata = getUserStatusMetadata(null, null);
+
     webRTCAdaptor.publish(
       publishStreamId,
       token,
@@ -1126,7 +1171,7 @@ function AntMedia() {
       subscriberCode,
       streamName,
       roomName,
-      "{someKey:somveValue}"
+      JSON.stringify(userStatusMetadata)
     );
   }
   function handlePlayVideo(obj) {
@@ -1135,7 +1180,7 @@ function AntMedia() {
 
     if (obj.track.kind === "audio") {
       var newAudioTrack = {
-        id: index, 
+        id: index,
         track: obj.track,
         streamId: obj.streamId
       };
@@ -1163,10 +1208,10 @@ function AntMedia() {
 
   function requestVideoTrackAssignments() {
     var jsCmd = {
-      command: "getVideoTrackAssignments",
+      command: "getVideoTrackAssignmentsCommand",
       streamId: roomName,
     }; //FIXME move to webrtcadaptor
-  
+
     webRTCAdaptor.webSocketAdaptor.send(JSON.stringify(jsCmd));
   }
 
@@ -1228,7 +1273,7 @@ function AntMedia() {
       webRTCAdaptor.turnOffLocalCamera(streamId);
     }
   }
-  
+
   function getSelectedDevices() {
     let devices = {
       videoDeviceId: selectedCamera,
@@ -1283,7 +1328,7 @@ function AntMedia() {
       audioListenerIntervalJob = setInterval(() => {
         /*
         webRTCAdaptor.remotePeerConnection[publishStreamId].getStats(null).then(stats => {
-          for (const stat of stats.values()) 
+          for (const stat of stats.values())
           {
             if (stat.type === 'media-source' && stat.kind === 'audio') {
               listener(stat.audioLevel.toFixed(2));

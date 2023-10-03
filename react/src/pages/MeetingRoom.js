@@ -89,7 +89,7 @@ function calculateLayout(
 
 const MeetingRoom = React.memo((props) => {
   const conference = React.useContext(ConferenceContext);
-  
+
 
   const allParticipantsExceptLocal = conference.allParticipants;
   delete allParticipantsExceptLocal[conference.publishStreamId];
@@ -240,16 +240,16 @@ const MeetingRoom = React.memo((props) => {
 
     return slicedParticipants.length > 0 ? (
         <>
-          {slicedParticipants.map(({id, videoLabel, track, name}, index) => {
+          {slicedParticipants.map(({id, videoLabel, track, name, streamId}, index) => {
             if (id !== "localVideo") {
               return (
                   <div className="unpinned" key={index}>
                     <div className="single-video-container">
                       <VideoCard
                           onHandlePin={() => {
-                            conference.pinVideo(id, videoLabel);
+                            conference.pinVideo(streamId, videoLabel);
                           }}
-                          id={id}
+                          id={streamId}
                           track={track}
                           autoPlay
                           name={name}
@@ -348,7 +348,7 @@ const MeetingRoom = React.memo((props) => {
                     />
                   </div> : null}
                   {conference.participants
-                      .map(({id, videoLabel, track, name}, index) => (
+                      .map(({id, videoLabel, track, name, streamId}, index) => (
                           <>
                             <div
                                 className="single-video-container not-pinned"
@@ -361,9 +361,9 @@ const MeetingRoom = React.memo((props) => {
                             >
                               <VideoCard
                                   onHandlePin={() => {
-                                    conference.pinVideo(id, videoLabel);
+                                    conference.pinVideo(streamId, videoLabel);
                                   }}
-                                  id={id}
+                                  id={streamId}
                                   track={track}
                                   autoPlay
                                   name={name}
