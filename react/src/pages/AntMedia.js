@@ -1094,8 +1094,7 @@ function AntMedia() {
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
     let metadata = getUserStatusMetadata(micMuted, cameraOn);
-
-    webRTCAdaptor.upateStreamMetaData(publishStreamId, JSON.stringify(metadata));
+    webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
   }
 
   function setUserStatus(notificationEvent, eventStreamId) {
