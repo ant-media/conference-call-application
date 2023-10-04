@@ -363,12 +363,7 @@ function AntMedia() {
         //request broadcast object for new tracks
         participantIds.forEach(pid => {
           if(allParticipants[pid] === undefined) {
-            var jsCmd = {
-              command: "getBroadcastObject",
-              streamId: pid,
-            }; //FIXME move to webrtcadaptor
-
-            webRTCAdaptor.webSocketAdaptor.send(JSON.stringify(jsCmd));
+            webRTCAdaptor.getBroadcastObject(pid);
           }
         });
       } else { //subtrack object
@@ -439,12 +434,7 @@ function AntMedia() {
     else if (info === "play_started") {
       console.log("**** play started:"+reconnecting);
 
-      var jsCmd = {
-        command: "getBroadcastObject",
-        streamId: roomName,
-      }; //FIXME move to webrtcadaptor
-
-      webRTCAdaptor.webSocketAdaptor.send(JSON.stringify(jsCmd));
+      webRTCAdaptor.getBroadcastObject(roomName);
 
       if(reconnecting) {
         playReconnected = true;
@@ -1088,12 +1078,7 @@ function AntMedia() {
       } else if (eventType === "TRACK_LIST_UPDATED") {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
-        var jsCmd = {
-          command: "getBroadcastObject",
-          streamId: roomName,
-        }; //FIXME move to webrtcadaptor
-
-        webRTCAdaptor.webSocketAdaptor.send(JSON.stringify(jsCmd));
+        webRTCAdaptor.getBroadcastObject(roomName);
       }
     }
   }
@@ -1226,15 +1211,6 @@ function AntMedia() {
         temp.push(newVideoTrack);
         setParticipants(temp);
     }
-  }
-
-  function requestVideoTrackAssignments() {
-    var jsCmd = {
-      command: "getVideoTrackAssignmentsCommand",
-      streamId: roomName,
-    }; //FIXME move to webrtcadaptor
-
-    webRTCAdaptor.webSocketAdaptor.send(JSON.stringify(jsCmd));
   }
 
   function setVirtualBackgroundImage(imageUrl) {
