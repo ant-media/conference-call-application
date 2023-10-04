@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Grid, CircularProgress, Box } from "@mui/material";
 import { useParams } from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
-import _, { forEach } from "lodash";
+import _ from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
 import { useSnackbar } from "notistack";
@@ -1156,6 +1156,7 @@ function AntMedia() {
     webRTCAdaptor.sendData(publishStreamId, JSON.stringify(notEvent));
   }
 
+  /*
   function updateStatus(obj) {
     if (roomName !== obj) {
       handleSendNotificationEvent("UPDATE_STATUS", publishStreamId, {
@@ -1167,6 +1168,8 @@ function AntMedia() {
       });
     }
   }
+
+   */
 
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
     let userStatusMetadata = getUserStatusMetadata(null, null);
