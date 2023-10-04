@@ -376,12 +376,34 @@ function AntMedia() {
           let userStatusMetadata = JSON.parse(broadcastObject.metaData);
 
           let micStatusArray = mic;
-          micStatusArray.push({eventStreamId: obj.streamId, isMicMuted: userStatusMetadata.isMicMuted});
+          let micStatusIndex = micStatusArray.findIndex(x => x.eventStreamId === obj.streamId);
+          if (micStatusIndex === -1) {
+            micStatusArray.push({eventStreamId: obj.streamId, isMicMuted: userStatusMetadata.isMicMuted});
+          } else {
+            micStatusArray[micStatusIndex].isMicMuted = userStatusMetadata.isMicMuted;
+          }
           setMic(micStatusArray);
 
           let camStatusArray = cam;
-          camStatusArray.push({eventStreamId: obj.streamId, isCameraOn: userStatusMetadata.isCameraOn});
+          let camStatusIndex = camStatusArray.findIndex(x => x.eventStreamId === obj.streamId);
+          if (camStatusIndex === -1) {
+            camStatusArray.push({eventStreamId: obj.streamId, isCameraOn: userStatusMetadata.isCameraOn});
+          } else {
+            camStatusArray[camStatusIndex].isCameraOn = userStatusMetadata.isCameraOn;
+          }
           setCam(camStatusArray);
+
+          if (userStatusMetadata.isScreenShared) {
+            // if the participant was already pin someone than we should not update it
+            if (!screenSharedVideoId) {
+              setScreenSharedVideoId(obj.streamId);
+              let videoLab = participants.find((p) => p.id === obj.streamId)
+                  ?.videoLabel
+                  ? participants.find((p) => p.id === obj.streamId).videoLabel
+                  : "";
+              pinVideo(obj.streamId, videoLab);
+            }
+          }
         }
 
         let allParticipantsTemp = allParticipants;
@@ -1080,6 +1102,7 @@ function AntMedia() {
     let metadata = {
       isMicMuted: isMicMuted,
       isCameraOn: isCameraOn,
+      isScreenShared: isScreenShared
     }
 
     if (metadata.isMicMuted === null) {
