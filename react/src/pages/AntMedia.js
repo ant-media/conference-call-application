@@ -17,6 +17,8 @@ import DialogContent from "@mui/material/DialogContent";
 import Dialog from "@mui/material/Dialog";
 import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 import { useTranslation } from 'react-i18next';
+import { getRoomNameAttribute } from "../utils";
+
 
 
 export const SettingsContext = React.createContext(null);
@@ -35,8 +37,14 @@ const JoinModes = {
 }
 
 function AntMedia() {
-  const { id } = useParams();
-  const [roomName, setRoomName] = useState(id);
+
+  var id = useParams().id;
+  var roomName = getRoomNameAttribute();
+  if (!roomName) {
+    roomName = id;
+  } 
+  
+  console.log("room name is " + roomName);
   const antmedia = useContext(AntmediaContext);
   antmedia.roomName = roomName;
   const antmediaadmin = useContext(AntmediaAdminContext);
@@ -1029,8 +1037,8 @@ function AntMedia() {
     setParticipants([]);
   }
 
-  function changeRoomName(roomName) {
-    setRoomName(roomName);
+  function changeRoomName(roomNameParam) {
+    roomName = roomNameParam;
     antmedia.roomName = roomName;
   }
 

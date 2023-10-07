@@ -16,6 +16,7 @@ import { useSnackbar } from "notistack";
 import { useTranslation } from "react-i18next";
 import AntMedia from "pages/AntMedia";
 import AntSnackBar from "Components/AntSnackBar";
+import { getRootAttribute, getWebSocketURLAttribute } from "utils";
 
 
 const resources = {
@@ -50,16 +51,46 @@ if (i18n.language !== "en" || i18n.language !== "tr") {
   }
 }
 
-var tokenPublishAdmin = getUrlParameter("tokenPublishAdmin");
-var tokenPlay = getUrlParameter("tokenPlay");
-var tokenPublish = getUrlParameter("tokenPublish");
+var tokenPublishAdmin = getRootAttribute("token-publish-admin");
+if (!tokenPublishAdmin) {
+  tokenPublishAdmin = getUrlParameter("tokenPublishAdmin");
+}
+
+var tokenPlay = getRootAttribute("token-play");
+if (!tokenPlay) {
+  tokenPlay = getUrlParameter("tokenPlay");
+}
+
+var tokenPublish = getRootAttribute("token-publish");
+if (!tokenPublish) {
+  tokenPublish = getUrlParameter("tokenPublish");
+}
+
 var mcuEnabled = getUrlParameter("mcuEnabled");
-var publishStreamId = getUrlParameter("streamId");
-var playOnly = getUrlParameter("playOnly");
-var onlyDataChannel = getUrlParameter("onlyDataChannel");
+
+var publishStreamId = getRootAttribute("publish-stream-id");
+if (!publishStreamId) {
+  publishStreamId = getUrlParameter("streamId");
+}
+
+var playOnly = getRootAttribute("play-only");
+if (!playOnly) {
+  playOnly = getUrlParameter("playOnly");
+}
+
+var onlyDataChannel = getRootAttribute("only-data-channel");
+if (!onlyDataChannel) {
+  onlyDataChannel = getUrlParameter("onlyDataChannel");
+}
+
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
-var admin = getUrlParameter("admin");
+
+var admin = getRootAttribute("admin");
+if (!admin) {
+  admin = getUrlParameter("admin");
+}
+
 var observerMode = getUrlParameter("observerMode");
 var isPlaying = false;
 var fullScreenId = -1;
@@ -173,27 +204,40 @@ var websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 var restURL = process.env.REACT_APP_REST_BASE_URL;
 
 if (!websocketURL) {
-  const appName = window.location.pathname.substring(
-    0,
-    window.location.pathname.lastIndexOf("/") + 1
-  );
-  const path =
-    window.location.hostname +
-    ":" +
-    window.location.port +
-    appName;
+
+  websocketURL = getWebSocketURLAttribute();
+  if (!websocketURL) 
+  {
+    const appName = window.location.pathname.substring(
+      0,
+      window.location.pathname.lastIndexOf("/") + 1
+    );
+    const path =
+      window.location.hostname +
+      ":" +
+      window.location.port +
+      appName;
+    
+    websocketURL = "ws://" + path;
+
+    if (window.location.protocol.startsWith("https")) {
+      websocketURL = "wss://" + path;
+    }
+
+    websocketURL += "websocket";
+    restURL = window.location.protocol + "//" + path;
    
-  websocketURL = "ws://" + path;
-
-  if (window.location.protocol.startsWith("https")) {
-    websocketURL = "wss://" + path;
   }
+  else {
 
-  websocketURL += "websocket";
+    restURL = websocketURL.replace("ws", "http");
+    //if it's wss, then it becomes https
+    restURL = restURL.replace("websocket", "");
+  }
+   //remove last slash
+   restURL = restURL.substring(0, restURL.length - 1);
 
-  restURL = window.location.protocol + "//" + path;
-  //remove last slash
-  restURL = restURL.substring(0, restURL.length - 1);
+ 
 }
 console.log("websocket url: " + websocketURL + " rest base url: " + restURL);
 
