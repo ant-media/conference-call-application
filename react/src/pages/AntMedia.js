@@ -124,6 +124,9 @@ var roomOfStream = [];
 var roomInfoHandleJob = null;
 
 var statusUpdateIntervalJob = null;
+var audioListenerIntervalJob = null;
+
+
 var room = null;
 var reconnecting = false;
 var publishReconnected;
@@ -405,9 +408,11 @@ function AntMedia() {
       if (roomInfoHandleJob !== null) {
         clearInterval(roomInfoHandleJob);
         clearInterval(statusUpdateIntervalJob);
+        clearInterval(audioListenerIntervalJob);
 
         roomInfoHandleJob = null;
         statusUpdateIntervalJob = null;
+        audioListenerIntervalJob = null;
       }
 
     } else if (info === "closed") {
@@ -1005,17 +1010,12 @@ function AntMedia() {
           );
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") {
-        console.log(JSON.stringify(obj));
+        console.debug("VIDEO_TRACK_ASSIGNMENT_CHANGE -> ", obj);
         if (!notificationEvent.payload.trackId) {
           return;
         }
         setParticipants((oldParticipants) => {
           return oldParticipants
-            .filter(
-              (p) =>
-                p.videoLabel === notificationEvent.payload.videoLabel ||
-                p.id !== notificationEvent.payload.trackId
-            )
             .map((p) => {
               if (
                 p.videoLabel === notificationEvent.payload.videoLabel &&
@@ -1313,12 +1313,19 @@ function AntMedia() {
     webRTCAdaptor.unmuteLocalMic();
   }
 
-  function updateAudioLevel(level) {
-    webRTCAdaptor.updateAudioLevel(publishStreamId, level);
-  }
-
   function setAudioLevelListener(listener, period) {
-    webRTCAdaptor.enableAudioLevelForLocalStream(listener, period);
+    if (audioListenerIntervalJob == null) {
+      audioListenerIntervalJob = setInterval(() => {
+        webRTCAdaptor.remotePeerConnection[publishStreamId].getStats(null).then(stats => {
+          for (const stat of stats.values()) 
+          {
+            if (stat.type === 'media-source' && stat.kind === 'audio') {
+              listener(stat.audioLevel.toFixed(2));
+            }
+          }
+        })
+      }, period);
+    }
   }
 
   return (!initialized ? <>
@@ -1390,7 +1397,6 @@ function AntMedia() {
             handleBackgroundReplacement,
             muteLocalMic,
             unmuteLocalMic,
-            updateAudioLevel,
             checkAndTurnOnLocalCamera,
             checkAndTurnOffLocalCamera,
             setAudioLevelListener,

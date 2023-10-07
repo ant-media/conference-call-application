@@ -46,16 +46,35 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
     if (props.track?.kind === "video" && !props.track.onended) {
       props.track.onended = (event) => {
         conference?.globals?.trackEvents.push({track:props.track.id,event:"removed"});
-        if (conference.participants.length > conference?.globals?.maxVideoTrackCount) {
+        /*
+         * I've commented out the following if statement because
+         * when there is less participants than the maxVideoTrackCount,
+         * so the video is not removed.
+         *
+         * Reproduce scenario
+         * - Publish 3 streams(participants) to the room
+         * - Remove one of the streams(participant) from the room. Make one participant left
+         * - The other participants in the room sees the video is black
+         *
+         * mekya
+         */
+        //if (conference.participants.length > conference?.globals?.maxVideoTrackCount)
+        //{
           console.log("video before:"+JSON.stringify(conference.participants));
           conference.setParticipants((oldParts) => {
             return oldParts.filter(
+                /*
+               * the meaning of the following line is that it does not render the video track that videolabel equals the id in the list
+               * because the video track is not assigned.
+               *
+               *
+               */
               (p) => !(p.id === props.id || p.videoLabel === props.id)
             );
           });
           console.log("video after:"+JSON.stringify(conference.participants));
 
-        }
+        //}
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,12 +124,9 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
           clearInterval(timeoutRef.current);
           timeoutRef.current = setTimeout(() => {
             setIsTalking(false);
-          }, 1000);
-          conference.updateAudioLevel(
-            Math.floor(value * 100)
-          );
+          }, 1500);
         }
-      }, 100);
+      }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conference.isPublished]);
