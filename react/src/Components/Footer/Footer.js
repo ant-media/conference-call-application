@@ -13,11 +13,7 @@ import EndCallButton from "./Components/EndCallButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
-
-function getRoomName() {
-  // if it returns data-room-name element, it means that we are using conference app in component mode
-  return document.getElementById("root").getAttribute("data-room-name");
-}
+import { getRoomNameAttribute } from 'utils';
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -31,7 +27,7 @@ const getCustomizedGridStyle = (theme) => {
     height: 80,
   };
 
-  if (getRoomName()) {
+  if (getRoomNameAttribute()) {
     customizedGridStyle.position = "absolute";
     customizedGridStyle.width = "100%";
   }
@@ -43,7 +39,7 @@ const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme
 
 function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomName()) ? getRoomName() : useParams().id;
+  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
 
     return (

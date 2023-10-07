@@ -16,6 +16,8 @@ import { getUrlParameter } from "@antmedia/webrtc_adaptor";
 import { SvgIcon } from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
+import { getRoomNameAttribute, getWebSocketURLAttribute } from "../utils";
+
 export const ConferenceContext = React.createContext(null);
 
 const globals = {
@@ -73,11 +75,13 @@ var mediaConstraints = {
 
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
-if (!websocketURL) {
-  if (document.getElementById("root").getAttribute("data-websocket-url")) {
-    websocketURL = document.getElementById("root").getAttribute("data-websocket-url");
-  }
-  else {
+if (!websocketURL) 
+{
+  
+  websocketURL = getWebSocketURLAttribute();
+  
+  if (!websocketURL) 
+  {
     const appName = window.location.pathname.substring(
         0,
         window.location.pathname.lastIndexOf("/") + 1
@@ -125,14 +129,9 @@ var reconnecting = false;
 var publishReconnected;
 var playReconnected;
 
-function getRoomName() {
-  // if it returns data-room-name element, it means that we are using conference app in component mode
-  return document.getElementById("root").getAttribute("data-room-name");
-}
-
 function AntMedia() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomName()) ? getRoomName() : useParams().id;
+  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const roomName = id;
 
   // drawerOpen for message components.
