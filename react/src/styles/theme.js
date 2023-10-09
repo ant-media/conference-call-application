@@ -3,11 +3,7 @@ import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
 import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
-
-function getRoomName() {
-  // if it returns data-room-name element, it means that we are using conference app in component mode
-  return document.getElementById("root").getAttribute("data-room-name");
-}
+import { getRoomNameAttribute } from "utils";
 
 const getTheme = (primary, secondary, background, color70, textColor) => {
   const green0 = textColor ? textColor : "#AFF3EE";
@@ -349,7 +345,7 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
       },
     },
   };
-  if (!getRoomName()) {
+  if (!getRoomNameAttribute()) {
     themeObject.palette.background = {};
     themeObject.palette.background.default = green80;
   }

@@ -4,10 +4,11 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
+import { getRoomNameAttribute } from "utils";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 let appName = undefined
-let roomName = document.getElementById("root").getAttribute("data-room-name");
+let roomName = getRoomNameAttribute();
 
 if (process.env.NODE_ENV !== 'development' && !roomName) {
   appName = "/" + window.location.pathname.split("/")[1];

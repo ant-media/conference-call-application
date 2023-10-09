@@ -20,11 +20,8 @@ import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 import { ConferenceContext } from "./AntMedia";
 import { getUrlParameter } from "@antmedia/webrtc_adaptor";
+import { getRoomNameAttribute } from "utils";
 
-function getRoomName() {
-  // if it returns data-room-name element, it means that we are using conference app in component mode
-  return document.getElementById("root").getAttribute("data-room-name");
-}
 
 function getPublishStreamId() {
   const dataRoomName =  document.getElementById("root").getAttribute("data-publish-stream-id");
@@ -33,7 +30,7 @@ function getPublishStreamId() {
 
 function WaitingRoom(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomName()) ? getRoomName() : useParams().id;
+  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const publishStreamId = getPublishStreamId()
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);

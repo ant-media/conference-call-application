@@ -6,14 +6,10 @@ import { useTranslation } from 'react-i18next';
 import ParticipantTab from './ParticipantTab';
 import CloseDrawerButton from './DrawerButton';
 import { ConferenceContext } from 'pages/AntMedia';
-
-function getRoomName() {
-  // if it returns data-room-name element, it means that we are using conference app in component mode
-  return document.getElementById("root").getAttribute("data-room-name");
-}
+import { getRoomNameAttribute } from 'utils';  
 
 const getAntDrawerStyle = (theme) => {
-  if (getRoomName()) {
+  if (getRoomNameAttribute()) {
     return {
       '& .MuiDrawer-root': {
         position: 'absolute',
