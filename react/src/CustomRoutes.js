@@ -4,9 +4,10 @@ import { Routes, Route } from "react-router-dom";
 import { Grid } from "@mui/material";
 import Home from "pages/Home";
 import AntMedia from "pages/AntMedia";
+import { getRoomNameAttribute } from "utils";
 
 function isComponent() {
-    return document.getElementById("root").getAttribute("data-room-name");
+    return getRoomNameAttribute();
 }
 
 function CustomRoutes(props) {
