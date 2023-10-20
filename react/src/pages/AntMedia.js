@@ -834,10 +834,13 @@ function AntMedia() {
     var infoText = "Client Debug Info\n";
     infoText += "Events:\n";
     infoText += JSON.stringify(globals.trackEvents) + "\n";
-    infoText += "Participants (" + participants.length + "):\n";
-    infoText += JSON.stringify(participants) + "\n";
+    infoText += "Participants (" + participants.length + "):\n\n";
+    infoText += JSON.stringify(participants) + "\n\n";
     infoText += "All Participants (" + Object.keys(allParticipants).length + "):\n";
-    infoText += JSON.stringify(allParticipants) + "\n";
+    Object.entries(allParticipants).forEach(([key, value]) => {
+      infoText += "- " + key + "\n";
+   });
+    //infoText += JSON.stringify(allParticipants) + "\n";
     infoText += "----------------------\n";
     infoText += debugInfo;
 
