@@ -23,7 +23,7 @@ export const ConferenceContext = React.createContext(null);
 const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
-  maxVideoTrackCount: 5,
+  maxVideoTrackCount: 30,
   trackEvents: [],
 };
 
@@ -271,7 +271,7 @@ function AntMedia() {
     room = roomName;
     roomOfStream[generatedStreamId] = room;
 
-    globals.maxVideoTrackCount = 6; //FIXME
+    globals.maxVideoTrackCount = 30; //FIXME
     setPublishStreamId(generatedStreamId);
 
     if (!playOnly) {
@@ -497,8 +497,8 @@ function AntMedia() {
     }
     if (error.indexOf("no_active_streams_in_room") !== -1) {
       // if there is no active stream in the room then we are going to clear the participant list.
-      setParticipants([]);
-      setAllParticipants([]);
+      //setParticipants([]);
+      //setAllParticipants([]);
     }
     errorMessage = JSON.stringify(error);
     if (error.indexOf("NotFoundError") !== -1) {
@@ -629,7 +629,7 @@ function AntMedia() {
   function handleSetMaxVideoTrackCount(maxTrackCount) {
     if (publishStreamId) {
       webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, maxTrackCount);
-      globals.maxVideoTrackCount = maxTrackCount;
+      //globals.maxVideoTrackCount = maxTrackCount;
     }
   }
 
@@ -814,7 +814,7 @@ function AntMedia() {
         if (message === "debugme") {
           webRTCAdaptor.getDebugInfo(publishStreamId);
           return;
-        } else if (message === "antclear") {
+        } else if (message === "clearme") {
           setMessages([]);
           return;
         }

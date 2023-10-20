@@ -96,7 +96,8 @@ const MeetingRoom = React.memo((props) => {
 
   const filterAndSortOthersTile = (all, showing) => {
     const participantIds = showing.map(({id}) => id);
-    const othersIds = all.filter((p) => !participantIds.includes(p.streamId));
+    //const othersIds2 = all.filter((p) => !participantIds.includes(p.streamId)); // FIXME: why is this not working?
+    const othersIds = Object.entries(all).filter(([k,v]) => !participantIds.includes(v.streamId));
     return othersIds.sort((a, b) => a.streamName.localeCompare(b.streamName));
   };
 
