@@ -814,6 +814,9 @@ function AntMedia() {
         if (message === "debugme") {
           webRTCAdaptor.getDebugInfo(publishStreamId);
           return;
+        } else if (message === "antclear") {
+          setMessages([]);
+          return;
         }
 
 
