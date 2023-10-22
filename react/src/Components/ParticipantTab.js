@@ -64,7 +64,7 @@ function ParticipantTab(props) {
                   variant="body2"
                   style={{marginLeft: 4, fontWeight: 500}}
               >
-                {conference.isPlayOnly === false ? Object.keys(conference.allParticipants).length + 1 : Object.keys(conference.allParticipants).length}
+                {Object.keys(conference.allParticipants).length}
               </ParticipantName>
             </Grid>
             {conference.isPlayOnly === false ? getParticipantItem("localVideo", "You") : ""}

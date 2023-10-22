@@ -22,7 +22,7 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-function MicButton(props) {
+function CameraButton(props) {
   const { rounded, footer } = props;
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
@@ -41,10 +41,6 @@ function MicButton(props) {
       return
     }
     if (!conference.isScreenShared) {
-      conference?.toggleSetCam({
-        eventStreamId: "localVideo",
-        isCameraOn: false,
-      });
       if (conference.publishStreamId) {
         conference.checkAndTurnOffLocalCamera(conference.publishStreamId);
         conference.handleSendNotificationEvent(
@@ -59,11 +55,6 @@ function MicButton(props) {
   };
   const handleOn = (e) => {
     e.stopPropagation();
-    conference?.toggleSetCam({
-      eventStreamId: "localVideo",
-      isCameraOn: true,
-    });
-
     if (conference.publishStreamId) {
       conference.checkAndTurnOnLocalCamera(conference.publishStreamId);
       conference.handleSendNotificationEvent(
@@ -85,20 +76,18 @@ function MicButton(props) {
     padding: "4px",
   };
 
-  const cam = conference?.cam?.find((m) => m.eventStreamId === "localVideo");
-
   return (
     <>
-      {cam && cam.isCameraOn ? (
-        <Tooltip title={conference.isScreenShared ? t('Camera is disabled while screensharing') : t('Turn off camera')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={conference.isScreenShared} onClick={(e) => handleOff(e)}>
-            <SvgIcon size={40} name={'camera'} color='inherit' />
-          </CustomizedBtn>
-        </Tooltip>
-      ) : (
+      {conference?.isMyCamTurnedOff ? (
         <Tooltip title={conference.isScreenShared ? t('Camera is disabled while screensharing') : t('Turn on camera')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={conference.isScreenShared} onClick={(e) => handleOn(e)}>
             <SvgIcon size={40} name={'camera-off'} color="#fff" />
+          </CustomizedBtn>
+        </Tooltip>
+      ) : (
+        <Tooltip title={conference.isScreenShared ? t('Camera is disabled while screensharing') : t('Turn off camera')} placement="top">
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={conference.isScreenShared} onClick={(e) => handleOff(e)}>
+            <SvgIcon size={40} name={'camera'} color='inherit' />
           </CustomizedBtn>
         </Tooltip>
       )}
@@ -106,4 +95,4 @@ function MicButton(props) {
   );
 }
 
-export default MicButton;
+export default CameraButton;

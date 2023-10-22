@@ -16,12 +16,13 @@ const CustomizedBox = styled(Box)(({ theme }) => ({
   backgroundColor: alpha(theme.palette.gray[90], 0.3),
 }));
 
-const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
+function VideoCard(props) {
   const conference = useContext(ConferenceContext);
 
   const { t } = useTranslation();
   const [displayHover, setDisplayHover] = React.useState(false);
   const theme = useTheme();
+  const isLocal = props?.id === "localVideo";
 
   const cardBtnStyle = {
     display: "flex",
@@ -45,7 +46,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
   React.useEffect(() => {
     if (props.track?.kind === "video" && !props.track.onended) {
       props.track.onended = (event) => {
-        conference?.globals?.trackEvents.push({track:props.track.id,event:"removed"});
+        conference?.globals?.trackEvents.push({ track: props.track.id, event: "removed" });
         /*
          * I've commented out the following if statement because
          * when there is less participants than the maxVideoTrackCount,
@@ -60,19 +61,19 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
          */
         //if (conference.participants.length > conference?.globals?.maxVideoTrackCount)
         //{
-          console.log("video before:"+JSON.stringify(conference.participants));
-          conference.setParticipants((oldParts) => {
-            return oldParts.filter(
-                /*
-               * the meaning of the following line is that it does not render the video track that videolabel equals the id in the list
-               * because the video track is not assigned.
-               *
-               *
-               */
-              (p) => !(p.id === props.id || p.videoLabel === props.id)
-            );
-          });
-          console.log("video after:"+JSON.stringify(conference.participants));
+        console.log("video before:" + JSON.stringify(conference.participants));
+        conference.setParticipants((oldParts) => {
+          return oldParts.filter(
+            /*
+           * the meaning of the following line is that it does not render the video track that videolabel equals the id in the list
+           * because the video track is not assigned.
+           *
+           *
+           */
+            (p) => !(p.id === props.id || p.videoLabel === props.id)
+          );
+        });
+        console.log("video after:" + JSON.stringify(conference.participants));
 
         //}
       };
@@ -80,35 +81,48 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.track]);
 
-  let isOff = conference?.cam?.find(
-    (c) => c.eventStreamId === props?.id && !c?.isCameraOn
-  );
+  let useAvatar = true;
+  if(isLocal) {
+    useAvatar = conference?.isMyCamTurnedOff;
+  }
+  else if (props.track?.kind === "video") {
+    let broadcastObject = conference?.allParticipants[props?.streamId];
+    let metaData = broadcastObject?.metaData;
+    useAvatar = !parseMetaDataAndGetIsCameraOn(metaData);
+  }
 
-  // if i sharing my screen.
-  if (
-    conference.isScreenShared === true &&
-    props?.id === "localVideo" &&
-    conference?.cam.find(
-      (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
-    )
-  ) {
-    isOff = false;
+  function isJsonString(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
   }
-  // screenSharedVideoId is the id of the screen share video.
-  if (
-    conference.screenSharedVideoId === props?.id &&
-    conference?.cam.find(
-      (c) => c.eventStreamId === props?.id && c.isCameraOn === false
-    )
-  ) {
-    isOff = false;
+
+  function parseMetaDataAndGetIsCameraOn(metaData) {
+    if (!metaData) return false;
+    return (isJsonString(metaData)) ? JSON.parse(metaData).isCameraOn : false;
   }
-  const mic = conference?.mic?.find((m) => m.eventStreamId === props?.id);
+
+  function parseMetaDataAndGetIsMicMuted(metaData) {
+    if (!metaData) return true;
+    return (isJsonString(metaData)) ? JSON.parse(metaData).isMicMuted : true;
+  }
+
+  // if I am sharing my screen, then don't use avatar (even if I turned off my cam)
+  if (conference.isScreenShared === true && isLocal) {
+    useAvatar = false;
+  }
+  // if someone shares his screen, then don't use avatar for him (even if he turned off his cam)
+  if (conference.screenSharedVideoId === props?.id) {
+    useAvatar = false;
+  }
+  const micMuted = (isLocal) ? conference?.isMyMicMuted : parseMetaDataAndGetIsMicMuted(conference?.allParticipants[props?.streamId]?.metaData);
 
   const [isTalking, setIsTalking] = React.useState(false);
   const timeoutRef = React.useRef(null);
 
-  const isLocal = props?.id === "localVideo";
   const mirrorView = isLocal && !conference?.isScreenShared;
   const isScreenSharing =
     conference?.isScreenShared ||
@@ -131,6 +145,198 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conference.isPublished]);
 
+
+  const overlayButtonsGroup = () => {
+    return (!props.hidePin && (
+      <Grid
+        container
+        justifyContent={"center"}
+        alignItems="center"
+        className="pin-overlay"
+        sx={{
+          opacity: displayHover ? 1 : 0,
+          transition: "opacity 0.3s ease",
+          position: "absolute",
+          left: 0,
+          top: 0,
+          height: "100%",
+          zIndex: 100,
+        }}
+      >
+        <Grid
+          container
+          justifyContent={"center"}
+          alignItems="center"
+          style={{ height: "100%" }}
+          wrap='nowrap'
+        >
+          <Grid
+            item
+            container
+            justifyContent={"center"}
+            alignItems="center"
+            columnSpacing={0.5}
+          >
+            <Tooltip
+              title={`${props.pinned ? t("unpin") : t("pin")} ${props.name
+                }`}
+              placement="top"
+            >
+              <Fab
+                onClick={props.onHandlePin}
+                color="primary"
+                aria-label="add"
+                size="small"
+              >
+                <SvgIcon
+                  size={36}
+                  name={props.pinned ? t("unpin") : t("pin")}
+                  color={theme.palette.grey[80]}
+                />
+              </Fab>
+            </Tooltip>
+
+            {(props.id !== 'localVideo' && micMuted) ?
+              <Grid item>
+                <Tooltip
+                  title={`Microphone off ${props.name
+                    }`}
+                  placement="top"
+                >
+                  <Fab
+                    onClick={() => {
+                      conference.turnOffYourMicNotification(props.id);
+                    }}
+                    color="primary"
+                    aria-label="add"
+                    size="small"
+                  >
+                    <SvgIcon
+                      size={36}
+                      name={"muted-microphone"}
+                      color={theme.palette.grey[80]}
+                    />
+                  </Fab>
+                </Tooltip>
+              </Grid>
+              : null}
+          </Grid>
+        </Grid>
+      </Grid>
+    ))
+  };
+
+  const avatarOrPlayer = () => {
+    return (
+      <>
+        <Grid
+          sx={useAvatar ? {} : { display: "none" }}
+          style={{ height: "100%" }}
+          container
+        >
+          <DummyCard />
+        </Grid>
+
+        <Grid
+          container
+          sx={useAvatar ? { display: "none" } : {}}
+          style={{
+            height: "100%",
+            transform: mirrorView ? "rotateY(180deg)" : "none",
+          }}
+        >
+          <CustomizedVideo
+            {...props}
+            style={{ objectFit: isScreenSharing ? "contain" : "cover" }}
+            ref={refVideo}
+            playsInline
+          />
+        </Grid>
+      </>
+    )
+  }
+
+
+  const overlayParticipantStatus = () => {
+    return (
+      <Grid
+        container
+        className="video-card-btn-group"
+        columnSpacing={1}
+        direction="row-reverse"
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          p: { xs: 1, md: 2 },
+          zIndex: 9,
+        }}
+      >
+        {micMuted && (
+          <Tooltip title={t("mic is muted")} placement="top">
+            <Grid item>
+              <CustomizedBox sx={cardBtnStyle}>
+                <SvgIcon size={32} name={"muted-microphone"} color="#fff" />
+              </CustomizedBox>
+            </Grid>
+          </Tooltip>
+        )}
+        {/* <Grid item>
+          <Box sx={cardBtnStyle}>
+            <SvgIcon size={36} name={'voice-indicator'} color={theme.palette.grey[80]} />
+          </Box>
+        </Grid>
+          */}
+        {props.pinned && (
+          <Tooltip title={t("pinned by you")} placement="top">
+            <Grid item>
+              <CustomizedBox sx={cardBtnStyle}>
+                <SvgIcon size={36} name={"unpin"} color="#fff" />
+              </CustomizedBox>
+            </Grid>
+          </Tooltip>
+        )}
+      </Grid>
+    );
+  }
+
+  const overlayVideoTitle = () => {
+    return (
+      props.name && (
+        <div className="name-indicator">
+          <Typography color="white" align="left" className="name">
+            {props.name}{" "}
+            {process.env.NODE_ENV === "development"
+              ? `${isLocal
+                ? conference.publishStreamId +
+                " " +
+                props.id +
+                " " +
+                conference.streamName
+                : props.id + " " + props.track?.id
+              }`
+              : ""}
+          </Typography>
+        </div>
+      )
+    );
+  }
+
+  const isTalkingFrame = () => {
+    return (
+      <div
+        className="talking-indicator-light"
+        style={{
+          ...(isTalking || conference.talkers.includes(props.id)
+            ? {}
+            : { display: "none" }),
+        }}
+      />
+    );
+  }
+
+  const doNothing = () => {};
+
   return isLocal || props.track?.kind !== "audio" ? (
     <>
       <Grid
@@ -143,192 +349,33 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
         onMouseEnter={() => setDisplayHover(true)}
         onMouseLeave={(e) => setDisplayHover(false)}
       >
-        {!hidePin && (
-          <Grid
-            container
-            justifyContent={"center"}
-            alignItems="center"
-            className="pin-overlay"
-            sx={{
-              opacity: displayHover ? 1 : 0,
-              transition: "opacity 0.3s ease",
-              position: "absolute",
-              left: 0,
-              top: 0,
-              height: "100%",
-              zIndex: 100,
-            }}
-          >
-            <Grid
-              container
-              justifyContent={"center"}
-              alignItems="center"
-              style={{ height: "100%" }}
-              wrap='nowrap'
-            >
-              <Grid
-                  item
-                  container
-                  justifyContent={"center"}
-                  alignItems="center"
-                  columnSpacing={0.5}
-              >
-                <Tooltip
-                  title={`${props.pinned ? t("unpin") : t("pin")} ${
-                    props.name
-                  }`}
-                  placement="top"
-                >
-                  <Fab
-                    onClick={onHandlePin}
-                    color="primary"
-                    aria-label="add"
-                    size="small"
-                  >
-                    <SvgIcon
-                      size={36}
-                      name={props.pinned ? t("unpin") : t("pin")}
-                      color={theme.palette.grey[80]}
-                    />
-                  </Fab>
-                </Tooltip>
 
-              { (props.id !== 'localVideo' && mic && !mic.isMicMuted ) ?
-              <Grid item>
-                <Tooltip
-                    title={`Microphone off ${
-                        props.name
-                    }`}
-                    placement="top"
-                >
-                  <Fab
-                      onClick={()=>{
-                        conference.turnOffYourMicNotification(props.id);
-                      }}
-                      color="primary"
-                      aria-label="add"
-                      size="small"
-                  >
-                    <SvgIcon
-                        size={36}
-                        name={"muted-microphone"}
-                        color={theme.palette.grey[80]}
-                    />
-                  </Fab>
-                </Tooltip>
-              </Grid>
-              : null }
-
-
-              </Grid>
-            </Grid>
-          </Grid>
-        )}
-
-
+        {overlayButtonsGroup()}
 
         <div
           className={`single-video-card`}
-          // style={{
-          //   ...(isTalking || conference.talkers.includes(props.id) ? {
-          //     outline: `thick solid ${theme.palette.primary.main}`,
-          //     borderRadius: '10px'
-          //   } : {})
-          // }}
+        // style={{
+        //   ...(isTalking || conference.talkers.includes(props.id) ? {
+        //     outline: `thick solid ${theme.palette.primary.main}`,
+        //     borderRadius: '10px'
+        //   } : {})
+        // }}
         >
-          <Grid
-            sx={isOff ? {} : { display: "none" }}
-            style={{ height: "100%" }}
-            container
-          >
-            <DummyCard />
-          </Grid>
+          {avatarOrPlayer()}
 
-          <Grid
-            container
-            sx={isOff ? { display: "none" } : {}}
-            style={{
-              height: "100%",
-              transform: mirrorView ? "rotateY(180deg)" : "none",
-            }}
-          >
-            <CustomizedVideo
-              {...props}
-              style={{ objectFit: isScreenSharing ? "contain" : "cover" }}
-              ref={refVideo}
-              playsInline
-            ></CustomizedVideo>
-          </Grid>
+          {isLocal ? conference.setLocalVideo() : doNothing()}
 
-          <div
-            className="talking-indicator-light"
-            style={{
-              ...(isTalking || conference.talkers.includes(props.id)
-                ? {}
-                : { display: "none" }),
-            }}
-          ></div>
+          {overlayParticipantStatus()}
 
-          <Grid
-            container
-            className="video-card-btn-group"
-            columnSpacing={1}
-            direction="row-reverse"
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              p: { xs: 1, md: 2 },
-              zIndex: 9,
-            }}
-          >
-            {mic && mic.isMicMuted && (
-              <Tooltip title={t("mic is muted")} placement="top">
-                <Grid item>
-                  <CustomizedBox sx={cardBtnStyle}>
-                    <SvgIcon size={32} name={"muted-microphone"} color="#fff" />
-                  </CustomizedBox>
-                </Grid>
-              </Tooltip>
-            )}
-            {/* <Grid item>
-              <Box sx={cardBtnStyle}>
-                <SvgIcon size={36} name={'voice-indicator'} color={theme.palette.grey[80]} />
-              </Box>
-            </Grid>
-             */}
-            {props.pinned && (
-              <Tooltip title={t("pinned by you")} placement="top">
-                <Grid item>
-                  <CustomizedBox sx={cardBtnStyle}>
-                    <SvgIcon size={36} name={"unpin"} color="#fff" />
-                  </CustomizedBox>
-                </Grid>
-              </Tooltip>
-            )}
-          </Grid>
-          {props.name && (
-            <div className="name-indicator">
-              <Typography color="white" align="left" className="name">
-                {props.name}{" "}
-                {process.env.NODE_ENV === "development"
-                  ? `${
-                      isLocal
-                        ? conference.publishStreamId +
-                          " " +
-                          props.id +
-                          " " +
-                          conference.streamName
-                        : props.id + " " + props.track?.id
-                    }`
-                  : ""}
-              </Typography>
-            </div>
-          )}
+          {isTalkingFrame()}
+
+          {overlayVideoTitle()}
+
         </div>
       </Grid>
     </>
   ) : (
+    //for audio tracks
     <>
       <video
         style={{ display: "none" }}
@@ -338,6 +385,6 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
       ></video>
     </>
   );
-});
+};
 
 export default VideoCard;

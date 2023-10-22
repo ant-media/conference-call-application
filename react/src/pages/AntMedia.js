@@ -9,8 +9,8 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
-import { WebRTCAdaptor} from "@antmedia/webrtc_adaptor";
-import { VideoEffect} from "@antmedia/webrtc_adaptor";
+import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor";
+import { VideoEffect } from "@antmedia/webrtc_adaptor";
 
 import { getUrlParameter } from "@antmedia/webrtc_adaptor";
 import { SvgIcon } from "../Components/SvgIcon";
@@ -23,7 +23,7 @@ export const ConferenceContext = React.createContext(null);
 const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
-  maxVideoTrackCount: 30,
+  maxVideoTrackCount: 6,
   trackEvents: [],
 };
 
@@ -50,8 +50,8 @@ var playOnly = getUrlParameter("playOnly");
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
-var scroll_down=true;
-var last_warning_time=null;
+var scroll_down = true;
+var last_warning_time = null;
 
 var videoQualityConstraints = {
   video: {
@@ -75,23 +75,21 @@ var mediaConstraints = {
 
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
-if (!websocketURL) 
-{
-  
+if (!websocketURL) {
+
   websocketURL = getWebSocketURLAttribute();
-  
-  if (!websocketURL) 
-  {
+
+  if (!websocketURL) {
     const appName = window.location.pathname.substring(
-        0,
-        window.location.pathname.lastIndexOf("/") + 1
+      0,
+      window.location.pathname.lastIndexOf("/") + 1
     );
     const path =
-        window.location.hostname +
-        ":" +
-        window.location.port +
-        appName +
-        "websocket";
+      window.location.hostname +
+      ":" +
+      window.location.port +
+      appName +
+      "websocket";
     websocketURL = "ws://" + path;
 
     if (window.location.protocol.startsWith("https")) {
@@ -112,11 +110,11 @@ if (playOnly == null) {
 }
 
 if (playToken == null || typeof playToken === "undefined") {
-    playToken = "";
+  playToken = "";
 }
 
 if (publishToken == null || typeof publishToken === "undefined") {
-    publishToken = "";
+  publishToken = "";
 }
 
 var roomOfStream = [];
@@ -148,6 +146,12 @@ function AntMedia() {
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
 
+  // this is for checking if my local camera is turned off.
+  const [isMyCamTurnedOff, setIsMyCamTurnedOff] = useState(false);
+
+  // this is for checking if my local mic is turned off.
+  const [isMyMicMuted, setIsMyMicMuted] = useState(false);
+
   //we are going to store number of unread messages to display on screen if user has not opened message component.
   const [numberOfUnReadMessages, setNumberOfUnReadMessages] = useState(0);
 
@@ -162,11 +166,31 @@ function AntMedia() {
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
-  // { id: "", track:{} },
+
+  /*
+   * participants: is a list of participant tracks to which videoTracks (video players on the screen)
+   * are assigned. This matches participants with the video players on the screen.
+   * 
+   * This list is set partially in 3 places:
+   * 1. in handlePlayVideo where a new track added to WebRTC. 
+   * Here a new participant structure is created and added the participants
+   * 2. broadcastObject callback (which is return of getBroadcastObject request) for a participant  
+   * Here we get the name of the participant and set it.
+   * 3. videoTrackAssignment (DC message): 
+   * Here we change the assigned participant video to video player according to the assginments we got.
+   */
   const [participants, setParticipants] = useState([]);
+
+  /*
+   * allParticipants: is a dictionary of (streamId, broadcastObject) for all participants in the room.
+   * It determines the participants list in the participants drawer.
+   * broadcastObject callback (which is return of getBroadcastObject request) for roomName has subtrackList and 
+   * we use it to fill this dictionary.   
+   */
   const [allParticipants, setAllParticipants] = useState({});
+
   const [audioTracks, setAudioTracks] = useState([]);
-  const [mic, setMic] = useState([]);
+
   const [talkers, setTalkers] = useState([]);
   const [isPublished, setIsPublished] = useState(false);
   const [selectedCamera, setSelectedCamera] = React.useState("");
@@ -176,16 +200,13 @@ function AntMedia() {
   const [virtualBackground, setVirtualBackground] = React.useState(null);
   const timeoutRef = React.useRef(null);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
+
 
   const [messages, setMessages] = React.useState([]);
 
   const [devices, setDevices] = React.useState([]);
-  const [cam, setCam] = useState([
-    {
-      eventStreamId: "localVideo",
-      isCameraOn: true, //start with camera on
-    },
-  ]);
+
   const [isPlayOnly] = React.useState(playOnly);
 
   const [localVideo, setLocalVideoLocal] = React.useState(null);
@@ -271,7 +292,7 @@ function AntMedia() {
     room = roomName;
     roomOfStream[generatedStreamId] = room;
 
-    globals.maxVideoTrackCount = 30; //FIXME
+    globals.maxVideoTrackCount = 6; //FIXME
     setPublishStreamId(generatedStreamId);
 
     if (!playOnly) {
@@ -287,27 +308,73 @@ function AntMedia() {
   }
 
   async function checkDevices() {
-      let devices = await navigator.mediaDevices.enumerateDevices();
-      let audioDeviceAvailable = false
-      let videoDeviceAvailable = false
-      devices.forEach(device => {
-          if(device.kind==="audioinput"){
-            audioDeviceAvailable = true;
-          }
-          if(device.kind==="videoinput"){
-            videoDeviceAvailable = true;
-          }
-      });
+    let devices = await navigator.mediaDevices.enumerateDevices();
+    let audioDeviceAvailable = false
+    let videoDeviceAvailable = false
+    devices.forEach(device => {
+      if (device.kind === "audioinput") {
+        audioDeviceAvailable = true;
+      }
+      if (device.kind === "videoinput") {
+        videoDeviceAvailable = true;
+      }
+    });
 
-      if(!audioDeviceAvailable) {
-        mediaConstraints.audio = false;
-      }
-      if(!videoDeviceAvailable) {
-        mediaConstraints.video = false;
-      }
+    if (!audioDeviceAvailable) {
+      mediaConstraints.audio = false;
+    }
+    if (!videoDeviceAvailable) {
+      mediaConstraints.video = false;
+    }
   }
 
+  function addFakeParticipant() {
+    let suffix = "fake" + fakeParticipantCounter;
+    let tempCount = fakeParticipantCounter + 1;
+    setFakeParticipantCounter(tempCount);
 
+    let allParticipantsTemp = allParticipants;
+    let broadcastObject = { name: "name_" + suffix, 
+      streamId: "streamId_" + suffix, 
+      metaData: JSON.stringify({isCameraOn: false}), 
+      isFake: true
+    };
+    allParticipantsTemp["streamId_" + suffix] = broadcastObject;
+    setAllParticipants(allParticipantsTemp);
+
+    if(Object.keys(allParticipantsTemp).length <= globals.maxVideoTrackCount) {
+      let newVideoTrack = {
+        id: "id_" + suffix,
+        videoLabel: "label_" + suffix,
+        track: null,
+        isCameraOn: false,
+        streamId: "streamId_" + suffix,
+        name: "name_" + suffix,
+      };
+      let temp = participants;
+      temp.push(newVideoTrack);
+      setParticipants(temp);
+    }
+
+    console.log("fake participant added");
+    setParticipantUpdated(!participantUpdated);
+  }
+
+  function removeFakeParticipant() {
+    let tempCount = fakeParticipantCounter - 1;
+    let suffix = "fake" + tempCount;
+    setFakeParticipantCounter(tempCount);
+
+    let temp = participants.filter(el => el.streamId !== "streamId_" + suffix)
+    setParticipants(temp);
+
+    let allParticipantsTemp = allParticipants;
+    delete allParticipantsTemp["streamId_" + suffix];
+    setAllParticipants(allParticipantsTemp);
+
+    console.log("fake participant removed");
+    setParticipantUpdated(!participantUpdated);
+  }
 
   useEffect(() => {
     async function createWebRTCAdaptor() {
@@ -345,15 +412,15 @@ function AntMedia() {
 
       let broadcastObject = JSON.parse(obj.broadcast);
 
-      if(obj.streamId === roomName) { //maintrack object
+      if (obj.streamId === roomName) { //maintrack object
         let participantIds = broadcastObject.subTrackStreamIds;
 
         //find and remove not available tracks
         const temp = allParticipants;
         let currentTracks = Object.keys(temp);
         currentTracks.forEach(trackId => {
-          if(!participantIds.includes(trackId)) {
-            console.log("stream removed:"+trackId);
+          if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
+            console.log("stream removed:" + trackId);
             delete temp[trackId];
           }
         });
@@ -361,7 +428,7 @@ function AntMedia() {
 
         //request broadcast object for new tracks
         participantIds.forEach(pid => {
-          if(allParticipants[pid] === undefined) {
+          if (allParticipants[pid] === undefined) {
             webRTCAdaptor.getBroadcastObject(pid);
           }
         });
@@ -369,32 +436,14 @@ function AntMedia() {
         if (broadcastObject.metaData !== undefined && broadcastObject.metaData !== null) {
           let userStatusMetadata = JSON.parse(broadcastObject.metaData);
 
-          let micStatusArray = mic;
-          let micStatusIndex = micStatusArray.findIndex(x => x.eventStreamId === obj.streamId);
-          if (micStatusIndex === -1) {
-            micStatusArray.push({eventStreamId: obj.streamId, isMicMuted: userStatusMetadata.isMicMuted});
-          } else {
-            micStatusArray[micStatusIndex].isMicMuted = userStatusMetadata.isMicMuted;
-          }
-          setMic(micStatusArray);
-
-          let camStatusArray = cam;
-          let camStatusIndex = camStatusArray.findIndex(x => x.eventStreamId === obj.streamId);
-          if (camStatusIndex === -1) {
-            camStatusArray.push({eventStreamId: obj.streamId, isCameraOn: userStatusMetadata.isCameraOn});
-          } else {
-            camStatusArray[camStatusIndex].isCameraOn = userStatusMetadata.isCameraOn;
-          }
-          setCam(camStatusArray);
-
           if (userStatusMetadata.isScreenShared) {
             // if the participant was already pin someone than we should not update it
             if (!screenSharedVideoId) {
               setScreenSharedVideoId(obj.streamId);
               let videoLab = participants.find((p) => p.id === obj.streamId)
-                  ?.videoLabel
-                  ? participants.find((p) => p.id === obj.streamId).videoLabel
-                  : "";
+                ?.videoLabel
+                ? participants.find((p) => p.id === obj.streamId).videoLabel
+                : "";
               pinVideo(obj.streamId, videoLab);
             }
           }
@@ -410,8 +459,8 @@ function AntMedia() {
       handlePlayVideo(obj);
     } else if (info === "publish_started") {
       setIsPublished(true);
-      console.log("**** publish started:"+reconnecting);
-      if(reconnecting) {
+      console.log("**** publish started:" + reconnecting);
+      if (reconnecting) {
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
@@ -423,19 +472,19 @@ function AntMedia() {
       //stream is being finished
     }
     else if (info === "session_restored") {
-      console.log("**** session_restored:"+reconnecting);
-      if(reconnecting) {
+      console.log("**** session_restored:" + reconnecting);
+      if (reconnecting) {
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
       }
     }
     else if (info === "play_started") {
-      console.log("**** play started:"+reconnecting);
+      console.log("**** play started:" + reconnecting);
 
       webRTCAdaptor.getBroadcastObject(roomName);
 
-      if(reconnecting) {
+      if (reconnecting) {
         playReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
@@ -464,8 +513,8 @@ function AntMedia() {
         packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
       }
 
-      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80)  >=  obj.availableOutgoingBitrate) {
-        console.warn("rtt:"+rtt+" packageLostPercentage:"+packageLostPercentage+" jitter:"+jitter+" Available Bandwidth kbps :",obj.availableOutgoingBitrate,"Outgoing Bandwidth kbps:",outgoingBitrate);
+      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate) {
+        console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
         displayPoorNetworkConnectionWarning();
       }
 
@@ -479,10 +528,10 @@ function AntMedia() {
 
         setTimeout(() => {
           if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" &&
-              webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
-              webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
-              reconnectionInProgress();
-            }
+            webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
+            webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
+            reconnectionInProgress();
+          }
         }, 5000);
 
       }
@@ -497,6 +546,8 @@ function AntMedia() {
     }
     if (error.indexOf("no_active_streams_in_room") !== -1) {
       // if there is no active stream in the room then we are going to clear the participant list.
+
+      //FIXME: check the following 2 lines
       //setParticipants([]);
       //setAllParticipants([]);
     }
@@ -525,7 +576,7 @@ function AntMedia() {
       error.indexOf("PermissionDeniedError") !== -1
     ) {
       errorMessage = "You are not allowed to access camera and mic.";
-      if(isScreenShared) {
+      if (isScreenShared) {
         handleScreenshareNotFromPlatform();
       }
     } else if (error.indexOf("TypeError") !== -1) {
@@ -548,18 +599,18 @@ function AntMedia() {
       errorMessage = "WebSocket Connection is disconnected.";
     }
     else if (error.indexOf("already_publishing") !== -1) {
-      console.log("**** already publishing:"+reconnecting);
-      if(reconnecting) {
+      console.log("**** already publishing:" + reconnecting);
+      if (reconnecting) {
         webRTCAdaptor.stop(publishStreamId);
 
-          setTimeout(() => {
-            handlePublish(
-              publishStreamId,
-              publishToken,
-              subscriberId,
-              subscriberCode
-            );
-          }, 2000);
+        setTimeout(() => {
+          handlePublish(
+            publishStreamId,
+            publishToken,
+            subscriberId,
+            subscriberCode
+          );
+        }, 2000);
       }
     }
 
@@ -571,10 +622,14 @@ function AntMedia() {
   window.makeFullScreen = makeFullScreen;
 
 
-  function setLocalVideo(localVideo) {
-    setLocalVideoLocal(localVideo);
-    webRTCAdaptor.mediaManager.localVideo = localVideo;
-    webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
+  function setLocalVideo() {
+
+    let tempLocalVideo = document.getElementById("localVideo");
+    if (tempLocalVideo) {
+      setLocalVideoLocal(tempLocalVideo);
+      webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
+      webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
+    }
   }
 
   function pinVideo(id, videoLabelProp = "") {
@@ -684,7 +739,7 @@ function AntMedia() {
   }
 
   function displayPoorNetworkConnectionWarning() {
-    if(last_warning_time == null || Date.now() - last_warning_time >  1000 * 30){
+    if (last_warning_time == null || Date.now() - last_warning_time > 1000 * 30) {
       last_warning_time = Date.now();
       displayWarning("Your connection is not stable. Please check your internet connection!");
     }
@@ -710,11 +765,7 @@ function AntMedia() {
   function handleScreenshareNotFromPlatform() {
     if (typeof webRTCAdaptor !== "undefined") {
       setIsScreenShared(false);
-      if (
-        cam.find(
-          (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
-        )
-      ) {
+      if (isMyCamTurnedOff) {
         webRTCAdaptor.turnOffLocalCamera(publishStreamId);
       } else {
         webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
@@ -732,11 +783,7 @@ function AntMedia() {
   }
   function handleStopScreenShare() {
     setIsScreenShared(false);
-    if (
-      cam.find(
-        (c) => c.eventStreamId === "localVideo" && c.isCameraOn === false
-      )
-    ) {
+    if (isMyCamTurnedOff) {
       webRTCAdaptor.turnOffLocalCamera(publishStreamId);
     } else {
       webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
@@ -781,7 +828,7 @@ function AntMedia() {
 
   function scrollToBottom() {
     let objDiv = document.getElementById("paper-props");
-    if (objDiv  && scroll_down && objDiv.scrollHeight > objDiv.clientHeight) {
+    if (objDiv && scroll_down && objDiv.scrollHeight > objDiv.clientHeight) {
       objDiv.scrollTo(0, objDiv.scrollHeight);
       scrollThreshold = 0.95;
       scroll_down = false;
@@ -842,7 +889,7 @@ function AntMedia() {
     infoText += "All Participants (" + Object.keys(allParticipants).length + "):\n";
     Object.entries(allParticipants).forEach(([key, value]) => {
       infoText += "- " + key + "\n";
-   });
+    });
     //infoText += JSON.stringify(allParticipants) + "\n";
     infoText += "----------------------\n";
     infoText += debugInfo;
@@ -864,82 +911,31 @@ function AntMedia() {
     handleNotificationEvent(obj);
   }
 
-  function toggleSetCam(data) {
-    setCam((camList) => {
-      let arr = _.cloneDeep(camList);
-      let camObj = arr.find((c) => c.eventStreamId === data.eventStreamId);
-
-      if (camObj) {
-        camObj.isCameraOn = data.isCameraOn;
-      } else {
-        arr.push(data);
-      }
-
-      if (data.eventStreamId === "localVideo") {
-        updateUserStatusMetadata(null, data.isCameraOn);
-      }
-
-      return arr;
-    });
-  }
-
-  function toggleSetMic(data) {
-    setMic((micList) => {
-      let arr = _.cloneDeep(micList);
-      let micObj = arr.find((c) => c.eventStreamId === data.eventStreamId);
-
-      if (micObj) {
-        micObj.isMicMuted = data.isMicMuted;
-      } else {
-        arr.push(data);
-      }
-
-      if (data.eventStreamId === "localVideo") {
-        updateUserStatusMetadata(data.isMicMuted, null);
-      }
-
-      return arr;
-    });
-  }
   function toggleSetNumberOfUnreadMessages(numb) {
     setNumberOfUnReadMessages(numb);
   }
-  function calculate_scroll_height(){
+  function calculate_scroll_height() {
     let objDiv = document.getElementById("paper-props");
     if (objDiv) {
       let scrollPosition = objDiv.scrollTop / (objDiv.scrollHeight - objDiv.clientHeight);
       if (scrollPosition > scrollThreshold) {
         scroll_down = true;
       }
+    }
   }
-}
   function handleNotificationEvent(obj) {
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
       var eventStreamId = notificationEvent.streamId;
       var eventType = notificationEvent.eventType;
 
-      if (eventType === "CAM_TURNED_OFF") {
-        toggleSetCam({
-          eventStreamId: eventStreamId,
-          isCameraOn: false,
-        });
-      } else if (eventType === "CAM_TURNED_ON") {
-        toggleSetCam({
-          eventStreamId: eventStreamId,
-          isCameraOn: true,
-        });
-      } else if (eventType === "MIC_MUTED") {
-        toggleSetMic({
-          eventStreamId: eventStreamId,
-          isMicMuted: true,
-        });
-      } else if (eventType === "MIC_UNMUTED") {
-        toggleSetMic({
-          eventStreamId: eventStreamId,
-          isMicMuted: false,
-        });
-      } else if (eventType === "MESSAGE_RECEIVED") {
+      if (eventType === "CAM_TURNED_OFF" ||
+        eventType === "CAM_TURNED_ON" ||
+        eventType === "MIC_MUTED" ||
+        eventType === "MIC_UNMUTED") {
+        webRTCAdaptor.getBroadcastObject(eventStreamId);
+      } 
+      else if (eventType === "MESSAGE_RECEIVED") {
         calculate_scroll_height();
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         notificationEvent.date = new Date(notificationEvent?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
@@ -981,33 +977,26 @@ function AntMedia() {
             return [...oldMessages, notificationEvent];
           }
         });
-      } else if (eventType === "SCREEN_SHARED_ON") {
+      } 
+      else if (eventType === "SCREEN_SHARED_ON") {
         let videoLab = participants.find((p) => p.id === eventStreamId)
           ?.videoLabel
           ? participants.find((p) => p.id === eventStreamId).videoLabel
           : "";
         pinVideo(eventStreamId, videoLab);
         setScreenSharedVideoId(eventStreamId);
-      } else if (eventType === "SCREEN_SHARED_OFF") {
+      } 
+      else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
-      } else if (eventType === "TURN_YOUR_MIC_OFF") {
+      } 
+      else if (eventType === "TURN_YOUR_MIC_OFF") {
         console.warn(notificationEvent.senderStreamId, "muted you");
-        if(publishStreamId === notificationEvent.streamId) {
-          toggleSetMic({
-            eventStreamId: 'localVideo',
-            isMicMuted: true,
-          });
-          webRTCAdaptor.muteLocalMic();
-          handleSendNotificationEvent(
-            "MIC_MUTED",
-            publishStreamId
-          );
+        if (publishStreamId === notificationEvent.streamId) {
+          muteLocalMic();
         }
       }
-      else if (eventType === "UPDATE_STATUS") {
-        setUserStatus(notificationEvent, eventStreamId);
-      } else if (eventType === "PIN_USER") {
+      else if (eventType === "PIN_USER") {
         if (
           notificationEvent.streamId === publishStreamId &&
           !isScreenShared
@@ -1021,7 +1010,8 @@ function AntMedia() {
             requestedMediaConstraints
           );
         }
-      } else if (eventType === "UNPIN_USER") {
+      } 
+      else if (eventType === "UNPIN_USER") {
         if (
           notificationEvent.streamId === publishStreamId &&
           !isScreenShared
@@ -1035,7 +1025,8 @@ function AntMedia() {
             requestedMediaConstraints
           );
         }
-      } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
+      } 
+      else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
         console.debug("VIDEO_TRACK_ASSIGNMENT_LIST -> ", obj);
 
         let videoTrackAssignments = notificationEvent.payload;
@@ -1045,7 +1036,7 @@ function AntMedia() {
         //remove not available videotracks if exist
         temp.forEach((p) => {
           let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
-          if(assignment === undefined) {
+          if (!p.isMine && assignment === undefined) {
             temp = temp.slice(temp.findIndex(p), 1);
           }
         });
@@ -1053,10 +1044,10 @@ function AntMedia() {
         //add and/or update participants according to current assignments
         videoTrackAssignments.forEach((vta) => {
           temp.forEach((p) => {
-            if(p.videoLabel === vta.videoLabel) {
+            if (p.videoLabel === vta.videoLabel) {
               p.streamId = vta.trackId;
               let broadcastObject = allParticipants[p.streamId];
-              if(broadcastObject) {
+              if (broadcastObject) {
                 p.name = broadcastObject.name;
               }
             }
@@ -1064,7 +1055,8 @@ function AntMedia() {
         });
         setParticipants(temp);
         setParticipantUpdated(!participantUpdated);
-      } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
+      } 
+      else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
           setTalkers([]);
@@ -1080,7 +1072,8 @@ function AntMedia() {
             .map((p) => p.trackId);
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
-      } else if (eventType === "TRACK_LIST_UPDATED") {
+      } 
+      else if (eventType === "TRACK_LIST_UPDATED") {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
         webRTCAdaptor.getBroadcastObject(roomName);
@@ -1090,16 +1083,9 @@ function AntMedia() {
 
   function getUserStatusMetadata(isMicMuted, isCameraOn) {
     let metadata = {
-      isMicMuted: isMicMuted,
+      isMicMuted: isMicMuted === null ? null : isMicMuted,
       isCameraOn: isCameraOn,
       isScreenShared: isScreenShared
-    }
-
-    if (metadata.isMicMuted === null) {
-      metadata.isMicMuted = !!mic.find((c) => c.eventStreamId === "localVideo")?.isMicMuted;
-    }
-    if (metadata.isCameraOn === null) {
-      metadata.isCameraOn = !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn;
     }
 
     return metadata;
@@ -1110,34 +1096,6 @@ function AntMedia() {
     webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
   }
 
-  function setUserStatus(notificationEvent, eventStreamId) {
-    if (notificationEvent.isScreenShared) {
-      // if the participant was already pin someone than we should not update it
-      if (!screenSharedVideoId) {
-        setScreenSharedVideoId(eventStreamId);
-        let videoLab = participants.find((p) => p.id === eventStreamId)
-          ?.videoLabel
-          ? participants.find((p) => p.id === eventStreamId).videoLabel
-          : "";
-        pinVideo(eventStreamId, videoLab);
-      }
-    }
-
-    if (!isScreenShared && participants.find((p) => p.id === eventStreamId)) {
-      if (!mic.find((m) => m.eventStreamId === eventStreamId)) {
-        toggleSetMic({
-          eventStreamId: eventStreamId,
-          isMicMuted: notificationEvent.mic,
-        });
-      }
-      if (!cam.find((m) => m.eventStreamId === eventStreamId)) {
-        toggleSetCam({
-          eventStreamId: eventStreamId,
-          isCameraOn: notificationEvent.camera,
-        });
-      }
-    }
-  }
   function handleLeaveFromRoom() {
     // we need to empty participant array. i f we are going to leave it in the first place.
     setParticipants([]);
@@ -1157,7 +1115,7 @@ function AntMedia() {
       eventType: eventType,
       ...(info ? info : {}),
     };
-    console.error("send notification event", notEvent);
+    console.info("send notification event", notEvent);
     webRTCAdaptor.sendData(publishStreamId, JSON.stringify(notEvent));
   }
 
@@ -1176,8 +1134,29 @@ function AntMedia() {
 
    */
 
+  function addMeAsParticipant() {
+    let newVideoTrack = {
+      id: "localVideo",
+      videoLabel: "myVideo",
+      track: null,
+      isCameraOn: false,
+      streamId: publishStreamId,
+      name: "You",
+      isMine: true
+    };
+    let tempParticipants = participants;
+    tempParticipants.push(newVideoTrack);
+    setParticipants(tempParticipants);
+  }
+
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
-    let userStatusMetadata = getUserStatusMetadata(null, null);
+    let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
+    
+    let allParticipantsTemp = allParticipants;
+    allParticipantsTemp[publishStreamId] = {name:"You"};
+    setAllParticipants(allParticipantsTemp);
+
+    addMeAsParticipant();
 
     webRTCAdaptor.publish(
       publishStreamId,
@@ -1205,19 +1184,19 @@ function AntMedia() {
       temp.push(newAudioTrack);
       setAudioTracks(temp);
     }
-    else if (obj.track.kind === "video"){
-        let newVideoTrack = {
-          id: index,
-          videoLabel: index,
-          track: obj.track,
-          isCameraOn: true,
-          streamId: obj.streamId,
-          name: ""
-        };
-        //append new video track, track id should be unique because of video traack limitation
-        let temp = participants;
-        temp.push(newVideoTrack);
-        setParticipants(temp);
+    else if (obj.track.kind === "video") {
+      let newVideoTrack = {
+        id: index,
+        videoLabel: index,
+        track: obj.track,
+        isCameraOn: true,
+        streamId: obj.streamId,
+        name: ""
+      };
+      //append new video track, track id should be unique because of video traack limitation
+      let temp = participants;
+      temp.push(newVideoTrack);
+      setParticipants(temp);
     }
   }
 
@@ -1269,6 +1248,14 @@ function AntMedia() {
     else {
       webRTCAdaptor.turnOnLocalCamera(streamId);
     }
+
+    updateUserStatusMetadata(isMyMicMuted, true);
+    setIsMyCamTurnedOff(false);
+
+    handleSendNotificationEvent(
+      "CAM_TURNED_ON",
+      publishStreamId
+    );
   }
 
   function checkAndTurnOffLocalCamera(streamId) {
@@ -1278,6 +1265,14 @@ function AntMedia() {
     else {
       webRTCAdaptor.turnOffLocalCamera(streamId);
     }
+
+    updateUserStatusMetadata(isMyMicMuted, false);
+      setIsMyCamTurnedOff(true);
+
+    handleSendNotificationEvent(
+      "CAM_TURNED_OFF",
+      publishStreamId
+    );
   }
 
   function getSelectedDevices() {
@@ -1298,7 +1293,7 @@ function AntMedia() {
   }
 
   function cameraSelected(value) {
-    if(selectedCamera !== value) {
+    if (selectedCamera !== value) {
       setSelectedCamera(value);
       // When we first open home page, React will call this function and local stream is null at that time.
       // So, we need to catch the error.
@@ -1323,10 +1318,24 @@ function AntMedia() {
 
   function muteLocalMic() {
     webRTCAdaptor.muteLocalMic();
+    updateUserStatusMetadata(true, !isMyCamTurnedOff);
+    setIsMyMicMuted(true);
+
+    handleSendNotificationEvent(
+      "MIC_MUTED",
+      publishStreamId
+    );
   }
 
   function unmuteLocalMic() {
     webRTCAdaptor.unmuteLocalMic();
+    updateUserStatusMetadata(false, !isMyCamTurnedOff);
+    setIsMyMicMuted(false);
+
+    handleSendNotificationEvent(
+      "MIC_UNMUTED",
+      publishStreamId
+    );
   }
 
   function setAudioLevelListener(listener, period) {
@@ -1348,20 +1357,20 @@ function AntMedia() {
 
   return (!initialized ? <>
     <Grid
-        container
-        spacing={0}
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        style={{ minHeight: '100vh' }}
-      >
-        <Grid item xs={3}>
+      container
+      spacing={0}
+      direction="column"
+      alignItems="center"
+      justifyContent="center"
+      style={{ minHeight: '100vh' }}
+    >
+      <Grid item xs={3}>
         <Box sx={{ display: 'flex' }}>
           <CircularProgress size="4rem" />
         </Box>
-        </Grid>
       </Grid>
-    </> :
+    </Grid>
+  </> :
     <Grid container className="App">
       <Grid
         container
@@ -1372,8 +1381,6 @@ function AntMedia() {
         <ConferenceContext.Provider
           value={{
             isScreenShared,
-            mic,
-            cam,
             talkers,
             screenSharedVideoId,
             roomJoinMode,
@@ -1397,12 +1404,12 @@ function AntMedia() {
             initialized,
             devices,
             publishStreamId,
+            isMyMicMuted,
+            isMyCamTurnedOff,
 
             setSelectedBackgroundMode,
             setIsVideoEffectRunning,
             setParticipants,
-            toggleSetMic,
-            toggleSetCam,
             handleMessageDrawerOpen,
             handleParticipantListOpen,
             setSelectedCamera,
@@ -1430,7 +1437,9 @@ function AntMedia() {
             handleSetMaxVideoTrackCount,
             screenShareOffNotification,
             handleSendMessage,
-            turnOffYourMicNotification
+            turnOffYourMicNotification,
+            addFakeParticipant,
+            removeFakeParticipant
           }}
         >
           <SnackbarProvider

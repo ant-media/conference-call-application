@@ -10,6 +10,7 @@ import ShareScreenButton from "./Components/ShareScreenButton";
 import MessageButton from "./Components/MessageButton";
 import ParticipantListButton from "./Components/ParticipantListButton";
 import EndCallButton from "./Components/EndCallButton";
+import FakeParticipantButton from "./Components/FakeParticipantButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
@@ -97,6 +98,24 @@ function Footer(props) {
                   <Grid item xs={0}>
                     <EndCallButton footer/>
                   </Grid>
+                  {process.env.NODE_ENV === "development" ?
+                  <Grid item xs={0}>
+                    <FakeParticipantButton 
+                      footer
+                      increment={true}
+                    />
+                  </Grid>
+                  : null}
+
+                  {process.env.NODE_ENV === "development" ?
+                  <Grid item xs={0}>
+                    <FakeParticipantButton 
+                      footer
+                      increment={false}
+                    />
+                  </Grid>
+                  : null}
+                  
                 </Grid>
               </Grid>
 
