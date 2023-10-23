@@ -763,6 +763,7 @@ function AntMedia() {
           senderStreamName: allParticipants[publishStreamId]?.name
         }
     );
+    showReactions(allParticipants[publishStreamId]?.name, reaction);
   }
 
   function displayPoorNetworkConnectionWarning() {
