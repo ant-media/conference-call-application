@@ -17,6 +17,7 @@ import { SvgIcon } from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 import { getRoomNameAttribute, getWebSocketURLAttribute } from "../utils";
+import floating from "floating.js";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -167,16 +168,26 @@ function AntMedia() {
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
 
+  const [reactions, setReactions] = useState({
+    'smile': '😊',
+    'like': '👍',
+    'dislike': '👎',
+    'sad': '😔',
+    'loveit': '😍',
+    'love': '❤️',
+    'haha': '😂'
+  });
+
   /*
    * participants: is a list of participant tracks to which videoTracks (video players on the screen)
    * are assigned. This matches participants with the video players on the screen.
-   * 
+   *
    * This list is set partially in 3 places:
-   * 1. in handlePlayVideo where a new track added to WebRTC. 
+   * 1. in handlePlayVideo where a new track added to WebRTC.
    * Here a new participant structure is created and added the participants
-   * 2. broadcastObject callback (which is return of getBroadcastObject request) for a participant  
+   * 2. broadcastObject callback (which is return of getBroadcastObject request) for a participant
    * Here we get the name of the participant and set it.
-   * 3. videoTrackAssignment (DC message): 
+   * 3. videoTrackAssignment (DC message):
    * Here we change the assigned participant video to video player according to the assginments we got.
    */
   const [participants, setParticipants] = useState([]);
@@ -184,8 +195,8 @@ function AntMedia() {
   /*
    * allParticipants: is a dictionary of (streamId, broadcastObject) for all participants in the room.
    * It determines the participants list in the participants drawer.
-   * broadcastObject callback (which is return of getBroadcastObject request) for roomName has subtrackList and 
-   * we use it to fill this dictionary.   
+   * broadcastObject callback (which is return of getBroadcastObject request) for roomName has subtrackList and
+   * we use it to fill this dictionary.
    */
   const [allParticipants, setAllParticipants] = useState({});
 
@@ -336,9 +347,9 @@ function AntMedia() {
     setFakeParticipantCounter(tempCount);
 
     let allParticipantsTemp = allParticipants;
-    let broadcastObject = { name: "name_" + suffix, 
-      streamId: "streamId_" + suffix, 
-      metaData: JSON.stringify({isCameraOn: false}), 
+    let broadcastObject = { name: "name_" + suffix,
+      streamId: "streamId_" + suffix,
+      metaData: JSON.stringify({isCameraOn: false}),
       isFake: true
     };
     allParticipantsTemp["streamId_" + suffix] = broadcastObject;
@@ -742,6 +753,18 @@ function AntMedia() {
     );
   }
 
+  function sendReactions(reaction) {
+    handleSendNotificationEvent(
+        "REACTIONS",
+        publishStreamId,
+        {
+          reaction: reaction,
+          senderStreamName: publishStreamId
+        }
+    );
+    showReactions(publishStreamId, reaction);
+  }
+
   function displayPoorNetworkConnectionWarning() {
     if (last_warning_time == null || Date.now() - last_warning_time > 1000 * 30) {
       last_warning_time = Date.now();
@@ -938,7 +961,7 @@ function AntMedia() {
         eventType === "MIC_MUTED" ||
         eventType === "MIC_UNMUTED") {
         webRTCAdaptor.getBroadcastObject(eventStreamId);
-      } 
+      }
       else if (eventType === "MESSAGE_RECEIVED") {
         calculate_scroll_height();
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -981,7 +1004,7 @@ function AntMedia() {
             return [...oldMessages, notificationEvent];
           }
         });
-      } 
+      }
       else if (eventType === "SCREEN_SHARED_ON") {
         let videoLab = participants.find((p) => p.id === eventStreamId)
           ?.videoLabel
@@ -989,11 +1012,14 @@ function AntMedia() {
           : "";
         pinVideo(eventStreamId, videoLab);
         setScreenSharedVideoId(eventStreamId);
-      } 
+      }
       else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(null);
-      } 
+      }
+      else if (eventType === "REACTIONS") {
+        showReactions(notificationEvent.streamName, notificationEvent.reaction);
+      }
       else if (eventType === "TURN_YOUR_MIC_OFF") {
         console.warn(notificationEvent.senderStreamId, "muted you");
         if (publishStreamId === notificationEvent.streamId) {
@@ -1014,7 +1040,7 @@ function AntMedia() {
             requestedMediaConstraints
           );
         }
-      } 
+      }
       else if (eventType === "UNPIN_USER") {
         if (
           notificationEvent.streamId === publishStreamId &&
@@ -1029,7 +1055,7 @@ function AntMedia() {
             requestedMediaConstraints
           );
         }
-      } 
+      }
       else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
         console.debug("VIDEO_TRACK_ASSIGNMENT_LIST -> ", obj);
 
@@ -1059,7 +1085,7 @@ function AntMedia() {
         });
         setParticipants(temp);
         setParticipantUpdated(!participantUpdated);
-      } 
+      }
       else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
@@ -1076,7 +1102,7 @@ function AntMedia() {
             .map((p) => p.trackId);
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
-      } 
+      }
       else if (eventType === "TRACK_LIST_UPDATED") {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
@@ -1156,7 +1182,7 @@ function AntMedia() {
     allParticipantsTemp[publishStreamId] = {name:"You"};
     setAllParticipants(allParticipantsTemp);
   }
-  
+
 
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
     let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
@@ -1321,6 +1347,23 @@ function AntMedia() {
     }
   }
 
+  function showReactions(streamName, reactionRequest) {
+    let reaction = '😀';
+
+    if (reactions[reactionRequest] !== undefined) {
+      reaction = reactions[reactionRequest];
+    }
+
+    floating({
+      content: reaction + ' ' + streamName,
+      number: 1,
+      duration: 5,
+      repeat: 1,
+      direction: 'normal',
+      size: 4
+    });
+  }
+
   function muteLocalMic() {
     webRTCAdaptor.muteLocalMic();
     updateUserStatusMetadata(true, !isMyCamTurnedOff);
@@ -1411,7 +1454,7 @@ function AntMedia() {
             publishStreamId,
             isMyMicMuted,
             isMyCamTurnedOff,
-
+            sendReactions,
             setSelectedBackgroundMode,
             setIsVideoEffectRunning,
             setParticipants,
