@@ -183,7 +183,7 @@ function VideoCard(props) {
               placement="top"
             >
               <Fab
-                onClick={props.onHandlePin}
+                onClick={() => conference.pinVideo(props.id, props.videoLabel)}
                 color="primary"
                 aria-label="add"
                 size="small"

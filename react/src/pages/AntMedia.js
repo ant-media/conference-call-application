@@ -281,6 +281,8 @@ function AntMedia() {
     setParticipants([]);
     setAllParticipants([]);
 
+    addMeAsParticipant();
+
     reconnecting = true;
     publishReconnected = false;
     playReconnected = false;
@@ -1147,14 +1149,15 @@ function AntMedia() {
     let tempParticipants = participants;
     tempParticipants.push(newVideoTrack);
     setParticipants(tempParticipants);
-  }
 
-  function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
-    let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
-    
     let allParticipantsTemp = allParticipants;
     allParticipantsTemp[publishStreamId] = {name:"You"};
     setAllParticipants(allParticipantsTemp);
+  }
+  
+
+  function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
+    let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
 
     addMeAsParticipant();
 

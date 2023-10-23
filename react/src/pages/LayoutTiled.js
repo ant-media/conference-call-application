@@ -91,12 +91,10 @@ function LayoutTiled(props) {
                   }}
               >
                 <VideoCard
-                    onHandlePin={() => {
-                      conference.pinVideo(element.id, element.videoLabel);
-                    }}
                     id={element.id}
                     streamId={element.streamId}
                     track={element.track}
+                    label={element.label}
                     autoPlay
                     name={element.name}
                 />
