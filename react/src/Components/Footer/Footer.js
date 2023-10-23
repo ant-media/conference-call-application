@@ -15,6 +15,7 @@ import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
 import { getRoomNameAttribute } from 'utils';
+import ReactionsButton from "./Components/ReactionsButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -90,6 +91,10 @@ function Footer(props) {
                       : null}
 
                   <Grid item xs={0}>
+                    <ReactionsButton footer/>
+                  </Grid>
+
+                  <Grid item xs={0}>
                     <MessageButton footer/>
                   </Grid>
                   <Grid item xs={0}>
@@ -100,7 +105,7 @@ function Footer(props) {
                   </Grid>
                   {process.env.NODE_ENV === "development" ?
                   <Grid item xs={0}>
-                    <FakeParticipantButton 
+                    <FakeParticipantButton
                       footer
                       increment={true}
                     />
@@ -109,13 +114,13 @@ function Footer(props) {
 
                   {process.env.NODE_ENV === "development" ?
                   <Grid item xs={0}>
-                    <FakeParticipantButton 
+                    <FakeParticipantButton
                       footer
                       increment={false}
                     />
                   </Grid>
                   : null}
-                  
+
                 </Grid>
               </Grid>
 

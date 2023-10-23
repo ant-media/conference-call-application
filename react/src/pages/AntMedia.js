@@ -172,10 +172,11 @@ function AntMedia() {
     'smile': '😊',
     'like': '👍',
     'dislike': '👎',
-    'sad': '😔',
-    'loveit': '😍',
     'love': '❤️',
-    'haha': '😂'
+    'haha': '😆',
+    'wow': '😮',
+    'sad': '😢',
+    'angry': '😡',
   });
 
   /*
@@ -759,10 +760,9 @@ function AntMedia() {
         publishStreamId,
         {
           reaction: reaction,
-          senderStreamName: publishStreamId
+          senderStreamName: allParticipants[publishStreamId]?.name
         }
     );
-    showReactions(publishStreamId, reaction);
   }
 
   function displayPoorNetworkConnectionWarning() {
@@ -1018,7 +1018,7 @@ function AntMedia() {
         setPinnedVideoId(null);
       }
       else if (eventType === "REACTIONS") {
-        showReactions(notificationEvent.streamName, notificationEvent.reaction);
+        showReactions(notificationEvent.senderStreamName, notificationEvent.reaction);
       }
       else if (eventType === "TURN_YOUR_MIC_OFF") {
         console.warn(notificationEvent.senderStreamId, "muted you");
@@ -1359,7 +1359,7 @@ function AntMedia() {
       number: 1,
       duration: 5,
       repeat: 1,
-      direction: 'normal',
+      direction: 'reverse',
       size: 4
     });
   }
