@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect } from "react";
 import { alpha, styled } from "@mui/material/styles";
 import { ConferenceContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";

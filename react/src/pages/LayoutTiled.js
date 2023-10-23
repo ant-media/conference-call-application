@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ConferenceContext } from "./AntMedia";
 
 function calculateLayout(

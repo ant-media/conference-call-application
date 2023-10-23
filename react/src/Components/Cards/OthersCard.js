@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import AvatarGroup from "@mui/material/AvatarGroup";
@@ -39,7 +39,7 @@ function OthersCard(props) {
 
   const othersNames = [];
   for(const [streamId, broadcastObject] of Object.entries(conference.allParticipants)) {
-    if(streamId != conference.publishStreamId && !props.playingParticipants.find(e => e.streamId == streamId)) {
+    if(streamId !== conference.publishStreamId && !props.playingParticipants.find(e => e.streamId === streamId)) {
       othersNames.push(broadcastObject.name);
     }
   }

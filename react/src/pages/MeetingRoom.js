@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import VideoCard from "Components/Cards/VideoCard";
-import React, { useEffect } from "react";
+import React from "react";
 import Footer from "Components/Footer/Footer";
 import { ConferenceContext } from "./AntMedia";
 import LayoutPinned from "./LayoutPinned";

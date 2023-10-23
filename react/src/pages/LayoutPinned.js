@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ConferenceContext } from "./AntMedia";
 
 
@@ -47,8 +47,10 @@ function LayoutPinned (props) {
   const videoCards = () => {
     return (
       <>
-      {conference.participants.map((element, index) => {
-        if(element != pinnedParticipant && playingParticipantsCount < maxPlayingParticipantsCount) { 
+      {
+      // eslint-disable-next-line
+      conference.participants.map((element, index) => {
+        if(element !== pinnedParticipant && playingParticipantsCount < maxPlayingParticipantsCount) { 
           playingParticipantsCount ++;
           playingParticipants.push(element);
           return (
@@ -72,7 +74,7 @@ function LayoutPinned (props) {
   }
 
   const othersCard = () => {
-    playingParticipants.push(conference.participants.find(e => e.id == conference.pinnedVideoId));
+    playingParticipants.push(conference.participants.find(e => e.id === conference.pinnedVideoId));
     return (
       <>
         <div className="unpinned">
