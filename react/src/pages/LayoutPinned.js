@@ -24,6 +24,7 @@ function LayoutPinned (props) {
         <div className="single-video-container pinned keep-ratio">
           <VideoCard
               id={pinnedParticipant?.id}
+              streamId={pinnedParticipant.streamId}
               track={
                 pinnedParticipant?.track
               }

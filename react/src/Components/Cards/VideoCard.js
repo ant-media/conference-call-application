@@ -250,6 +250,7 @@ function VideoCard(props) {
             style={{ objectFit: isScreenSharing ? "contain" : "cover" }}
             ref={refVideo}
             playsInline
+            muted={isLocal}
           />
         </Grid>
       </>

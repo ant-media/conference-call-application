@@ -442,9 +442,9 @@ function AntMedia() {
             // if the participant was already pin someone than we should not update it
             if (!screenSharedVideoId) {
               setScreenSharedVideoId(obj.streamId);
-              let videoLab = participants.find((p) => p.id === obj.streamId)
+              let videoLab = participants.find((p) => p.streamId === obj.streamId)
                 ?.videoLabel
-                ? participants.find((p) => p.id === obj.streamId).videoLabel
+                ? participants.find((p) => p.streamId === obj.streamId).videoLabel
                 : "";
               pinVideo(obj.streamId, videoLab);
             }
@@ -648,18 +648,20 @@ function AntMedia() {
       // if videoLabel is still missing then we are not going to pin/unpin anyone.
       return;
     }
+
+    var streamId = participants.find((p) => id === p.id).streamId;
     // if we already pin the targeted user then we are going to remove it from pinned video.
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
       handleNotifyUnpinUser(id);
-      webRTCAdaptor.assignVideoTrack(videoLabel, id, false);
+      webRTCAdaptor.assignVideoTrack(videoLabel, streamId, false);
     }
     // if there is no pinned video we are gonna pin the targeted user.
     // and we need to inform pinned user.
     else {
       setPinnedVideoId(id);
       handleNotifyPinUser(id);
-      webRTCAdaptor.assignVideoTrack(videoLabel, id, true);
+      webRTCAdaptor.assignVideoTrack(videoLabel, streamId, true);
     }
   }
 
