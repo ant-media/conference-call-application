@@ -1355,6 +1355,10 @@ function AntMedia() {
       reaction = reactions[reactionRequest];
     }
 
+    if (streamName === undefined || streamName === null || streamName === publishStreamId) {
+        streamName = 'You';
+    }
+
     floating({
       content: reaction + ' ' + streamName,
       number: 1,
