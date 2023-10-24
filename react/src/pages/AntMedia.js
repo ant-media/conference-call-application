@@ -760,10 +760,10 @@ function AntMedia() {
         publishStreamId,
         {
           reaction: reaction,
-          senderStreamName: allParticipants[publishStreamId]?.name
+          senderStreamId: publishStreamId
         }
     );
-    showReactions(allParticipants[publishStreamId]?.name, reaction);
+    showReactions(publishStreamId, reaction);
   }
 
   function displayPoorNetworkConnectionWarning() {
@@ -1019,7 +1019,7 @@ function AntMedia() {
         setPinnedVideoId(null);
       }
       else if (eventType === "REACTIONS") {
-        showReactions(notificationEvent.senderStreamName, notificationEvent.reaction);
+        showReactions(notificationEvent.senderStreamId, notificationEvent.reaction);
       }
       else if (eventType === "TURN_YOUR_MIC_OFF") {
         console.warn(notificationEvent.senderStreamId, "muted you");
@@ -1348,15 +1348,18 @@ function AntMedia() {
     }
   }
 
-  function showReactions(streamName, reactionRequest) {
+  function showReactions(streamId, reactionRequest) {
     let reaction = '😀';
+    let streamName = '';
 
     if (reactions[reactionRequest] !== undefined) {
       reaction = reactions[reactionRequest];
     }
 
-    if (streamName === undefined || streamName === null || streamName === publishStreamId) {
+    if (streamId === publishStreamId) {
         streamName = 'You';
+    } else if (allParticipants[streamId]?.name !== undefined) {
+        streamName = allParticipants[streamId].name;
     }
 
     floating({
