@@ -58,7 +58,7 @@ function InfoButton(props) {
                 onClick={handleClick}
                 sx={{ml: 0.5, px: 1, py: 1.5, minWidth: 'unset'}}
             >
-              <SvgIcon size={20} name={'info'} viewBox="0 0 500 500" color="#fff"/>
+              <SvgIcon size={20} name={'info'} viewBox="0 0 500 500" color="black"/>
             </Button>
           </Tooltip>
           <Menu

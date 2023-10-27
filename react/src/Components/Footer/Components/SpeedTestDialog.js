@@ -71,7 +71,7 @@ export function SpeedTestDialog(props) {
     }, [devices]);
 
     return (
-        <Dialog onClose={handleClose} open={open} fullScreen={fullScreen} maxWidth={'sm'}>
+        <Dialog onClose={handleClose}  open={open} fullScreen={fullScreen} maxWidth={'sm'}>
             <AntDialogTitle onClose={handleClose}>{t('Set Camera and Microphone')}</AntDialogTitle>
             <DialogContent>
                 <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>

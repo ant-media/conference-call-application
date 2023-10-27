@@ -36,7 +36,7 @@ function Footer(props) {
         >
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <Grid container alignItems={"center"}>
-              <Typography color="#ffffff" variant="body1">
+              <Typography color="black" variant="body1">
                 {antmedia.roomName}
               </Typography>
               <InfoButton/>
@@ -71,9 +71,6 @@ function Footer(props) {
                   </Grid>
                       : null}
 
-                  <Grid item xs={0}>
-                    <MessageButton footer/>
-                  </Grid>
 
                   <Grid item xs={0}>
                       <ParticipantListButton footer />

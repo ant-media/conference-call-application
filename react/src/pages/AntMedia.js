@@ -17,7 +17,7 @@ import DialogContent from "@mui/material/DialogContent";
 import Dialog from "@mui/material/Dialog";
 import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 import { useTranslation } from 'react-i18next';
-import { getRoomNameAttribute } from "../utils";
+import { getRoomNameAttribute ,getRootAttribute } from "../utils";
 
 
 
@@ -65,7 +65,7 @@ function AntMedia() {
   const [myLocalData, setMyLocalData] = useState(null);
 
   // this is my own name when i enter the room.
-  const [streamName, setStreamName] = useState("");
+  const [streamName, setStreamName] = useState(getRootAttribute("stream-name"));
 
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);

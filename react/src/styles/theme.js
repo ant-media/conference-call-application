@@ -5,16 +5,22 @@ import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
 
 const getTheme = (primary, secondary, background, color70, textColor) => {
-  const green0 = textColor ? textColor : "#AFF3EE";
-  const green10 = primary ? primary : "#00E5D2";
+  // const green0 = textColor ? textColor : "#AFF3EE";
+  const green0 = textColor ? textColor : "#ffffff";
+  //camera mic color
+  const green10 = primary ? primary : "#3D7AB1";
   const green20 = "#00C8B8";
   const green30 = "#00AC9E";
   const green40 = "#008F83";
-  const green50 = "#007269";
-  const green60 = secondary ? secondary : "#00564F";
-  const green70 = color70 ? color70 : "#003935";
-  const green80 = background ? background : "#001D1A";
-  const green85 = "#024B46";
+  //hover button 
+  const green50 = "#2B6197";
+  //button 
+  const green60 = secondary ? secondary : "#2B6197";
+  //partiint list background
+  const green70 = color70 ? color70 : "white";
+  //fotter bacckground
+  const green80 = background ? background : "white";
+  const green85 = "#3D7AB1";
   const green90 = textColor ? textColor : "#6BCBC3";
   const chatText = "#DDFFFC";
   const darkGray = "#222B2A";
@@ -120,7 +126,8 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
         styleOverrides: {
           root: {
             borderRadius: 6,
-            background: "#022824",
+            //sitting background color
+            background: "#00679a",
           },
         },
       },
@@ -202,7 +209,7 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
         styleOverrides: {
           outlinedSecondary: {
             border: `1px solid ${green60}`,
-            color: "white",
+            color: "bkack",
           },
 
           root: {
@@ -313,7 +320,7 @@ const getTheme = (primary, secondary, background, color70, textColor) => {
     palette: {
       background: {
         //this is background of the application
-        default: "#022824",
+        default: "#f1f5f9",
       },
       primary: {
         main: green10,

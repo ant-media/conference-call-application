@@ -19,7 +19,7 @@ const MessageTextField = styled(TextField)(({ theme }) => ({
     backgroundColor: theme.palette.green[60],
   },
   "& .MuiOutlinedInput-input::placeholder": {
-    color: theme.palette.green[90],
+    color: "white",
     fontWeight: 400,
   },
   "& .MuiOutlinedInput-notchedOutline": {
