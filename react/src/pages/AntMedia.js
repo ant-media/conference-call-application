@@ -646,10 +646,15 @@ function AntMedia() {
     }
   }
 
+  function assignVideoToStream(videoTrackId, streamId) {
+    webRTCAdaptor.assignVideoTrack(videoTrackId, streamId, true);
+  }
+
   function pinVideo(id, videoLabelProp = "") {
     if (id === "localVideo") {
       videoLabelProp = "localVideo";
     }
+
     // id is for pinning user.
     let videoLabel = videoLabelProp;
     if (videoLabel === "") {
@@ -700,7 +705,7 @@ function AntMedia() {
   function handleSetMaxVideoTrackCount(maxTrackCount) {
     if (publishStreamId) {
       webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, maxTrackCount);
-      //globals.maxVideoTrackCount = maxTrackCount;
+      globals.maxVideoTrackCount = maxTrackCount;
     }
   }
 
@@ -1495,7 +1500,8 @@ function AntMedia() {
             handleSendMessage,
             turnOffYourMicNotification,
             addFakeParticipant,
-            removeFakeParticipant
+            removeFakeParticipant,
+            assignVideoToStream
           }}
         >
           <SnackbarProvider

@@ -121,6 +121,8 @@ function VideoCard(props) {
   const micMuted = (isLocal) ? conference?.isMyMicMuted : parseMetaDataAndGetIsMicMuted(conference?.allParticipants[props?.streamId]?.metaData);
 
   const [isTalking, setIsTalking] = React.useState(false);
+
+  
   const timeoutRef = React.useRef(null);
 
   const mirrorView = isLocal && !conference?.isScreenShared;
@@ -336,7 +338,12 @@ function VideoCard(props) {
     );
   }
 
-  const doNothing = () => {};
+  const setLocalVideo = () => {
+    let tempLocalVideo = document.getElementById("localVideo");
+    if(isLocal && conference.localVideo != tempLocalVideo) {
+      conference.setLocalVideo();
+    } 
+  };
 
   return isLocal || props.track?.kind !== "audio" ? (
     <>
@@ -364,7 +371,7 @@ function VideoCard(props) {
         >
           {avatarOrPlayer()}
 
-          {isLocal ? conference.setLocalVideo() : doNothing()}
+          {setLocalVideo()}
 
           {overlayParticipantStatus()}
 

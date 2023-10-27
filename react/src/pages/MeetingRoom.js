@@ -57,7 +57,7 @@ const MeetingRoom = React.memo((props) => {
   
       setGallerySize({"w":screenWidth, "h":screenHeight});
 
-      console.log("***** gallerySize:"+gallerySize.w+"-"+gallerySize.h);
+      //console.log("***** gallerySize:"+gallerySize.w+"-"+gallerySize.h);
     }
   }
 

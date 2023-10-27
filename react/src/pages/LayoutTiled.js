@@ -66,8 +66,8 @@ function LayoutTiled(props) {
     setCardWidth(width - 8);
     setCardHeight(height - 8);
 
-    console.log("***** W:"+cardWidth+" H:"+cardHeight+" props.width:"+props.width+" width:"+width+" cols:"+cols+" vc:"+videoCount);
-  }, [conference.participants, props.width, props.height]);
+    //console.log("***** W:"+cardWidth+" H:"+cardHeight+" props.width:"+props.width+" width:"+width+" cols:"+cols+" vc:"+videoCount);
+  }, [conference.participants, props.width, props.height, conference.participantUpdated]);
 
   const showOthers = Object.keys(conference.allParticipants).length > conference.globals.maxVideoTrackCount; 
 
@@ -80,6 +80,7 @@ function LayoutTiled(props) {
       <>
         {
           playingParticipants.map((element, index) => {
+            console.log("cw:"+cardWidth+" ch:"+cardHeight);
             return (
               <div
                   className="single-video-container not-pinned"
@@ -87,7 +88,6 @@ function LayoutTiled(props) {
                   style={{
                     width: cardWidth + "px",
                     height: cardHeight + "px",
-                    maxWidth: cardWidth + "px",
                   }}
               >
                 <VideoCard
