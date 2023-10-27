@@ -51,7 +51,7 @@ function ParticipantTab(props) {
                   //then we will assign the 1st player in the screen to that user
 
                   conference.assignVideoToStream(conference.participants[1].id, streamId);
-                  conference.pinVideo(conference.participants[1].id);
+                  //conference.pinVideo(conference.participants[1].id);
                 }
                 else {
                   conference.pinVideo(assignedVideoCardId);

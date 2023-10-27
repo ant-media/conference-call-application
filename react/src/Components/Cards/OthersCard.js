@@ -38,13 +38,15 @@ function OthersCard(props) {
   const conference = React.useContext(ConferenceContext)
 
   const othersNames = [];
+  /*
   for(const [streamId, broadcastObject] of Object.entries(conference.allParticipants)) {
     if(streamId !== conference.publishStreamId && !props.playingParticipants.find(e => e.streamId === streamId)) {
       othersNames.push(broadcastObject.name);
     }
   }
-    
-  const others = othersNames.sort();
+   */
+
+  const others = othersNames;//.sort();
  
   return (
       <div className="others-tile-inner">
