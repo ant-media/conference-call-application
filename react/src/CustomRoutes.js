@@ -9,13 +9,16 @@ function CustomRoutes(props) {
   const theme = useTheme();
 
   return (
-    <Grid container style={{ background: theme.palette.background }}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/:id" element={<AntMedia />} />
-      </Routes>
+    <Grid container style={{ background: theme.palette.background }}>   
+    <AntMedia />   
+   
     </Grid>
   );
 }
-
+/*
+  <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/" element={} />
+      </Routes>
+      */
 export default CustomRoutes;

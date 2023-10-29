@@ -430,18 +430,27 @@ export class MediaManager {
             }
             return stream;
         }).catch(error => {
-            if (catch_error == true) {
-                if (error.name == "NotFoundError") {
-                    this.getDevices()
-                } else {
-                    this.callbackError(error.name, error.message);
-                }
-            } else {
-                console.warn(error);
 
-            }
-            //throw error if there is a promise
-            throw error;
+            //try audio only
+            return navigator.mediaDevices.getUserMedia({audio: mediaConstraints.audio, video: false}).then((stream) => {
+                if (typeof func != "undefined" || func != null) {
+                    func(stream);
+                }
+                return stream;
+            }).catch(error => {
+                if (catch_error == true) {
+                    if (error.name == "NotFoundError") {
+                        this.getDevices()
+                    } else {
+                        this.callbackError(error.name, error.message);
+                    }
+                } else {
+                    console.warn(error);
+
+                }
+                //throw error if there is a promise
+                throw error;
+            });
         });
     }
 

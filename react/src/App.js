@@ -169,12 +169,12 @@ function checkAndUpdateVideoAudioSources() {
       selectedDevices.audioDeviceId = audio.deviceId;
     }
   }
+  console.log("webRTCAdaptor:", webRTCAdaptor);
+  //webRTCAdaptor.setSelectedDevices(selectedDevices);
 
-  webRTCAdaptor.setSelectedDevices(selectedDevices);
-
-  if (currentCameraDeviceId !== selectedDevices.videoDeviceId) {
-    webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
-  }
+  //if (currentCameraDeviceId !== selectedDevices.videoDeviceId) {
+  //  webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+  //}
   if (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId == 'default') {
     webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
   }
@@ -522,7 +522,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
       error.indexOf("PermissionDeniedError") != -1
     ) {
       errorMessage = "You are not allowed to access camera and mic.";
-      webRTCAdaptor.handleScreenshareNotFromPlatform();
+      console.log(errorMessage);
+      //webRTCAdaptor.handleScreenshareNotFromPlatform();
     } else if (error.indexOf("TypeError") != -1) {
       errorMessage = "Video/Audio is required.";
       webRTCAdaptor.mediaManager.getDevices();
@@ -842,10 +843,6 @@ function App() {
     console.log("show notification for message: " + message);
    
   }
-  
-  
-  
- 
 
   React.useEffect(() => {
     window.addEventListener("dblclick", handleFullScreen);

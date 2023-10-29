@@ -22,6 +22,8 @@ import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 import {MediaSettingsContext} from "./AntMedia";
 import {Box} from "@mui/system";
+import { getRoomNameAttribute ,getRootAttribute } from "../utils";
+
 
 
 function WaitingRoom(props) {
@@ -34,7 +36,8 @@ function WaitingRoom(props) {
   const [count, setCount] = React.useState(0);
   const [buttonVisibility, setButtonVisibility] = React.useState({visibility: "hidden"});
 
-  const roomName = id;
+  //const roomName = id;
+  const roomName =  getRootAttribute("data-room-name");
   const antmedia = useContext(AntmediaContext);
   const mediaSettings = useContext(MediaSettingsContext);
   const { roomJoinMode } = mediaSettings;
@@ -43,7 +46,8 @@ function WaitingRoom(props) {
   const { enqueueSnackbar } = useSnackbar();
   const { speedTestBeforeLogin, speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal, setLeftTheRoom } = React.useContext(MediaSettingsContext);
 
-  React.useEffect(() => {
+  React.useEffect(() => 
+  {
     if(!antmedia.onlyDataChannel) {
       antmedia.mediaManager.localVideo = document.getElementById("localVideo");
       antmedia.mediaManager.localVideo.srcObject =

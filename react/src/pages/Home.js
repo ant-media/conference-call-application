@@ -12,6 +12,7 @@ function Home(props) {
   //change the path to ba the room name same as the attribute 
   const roomName = getRootAttribute("data-room-name");
 
+  console.log("roomName ->>",roomName);
   return (
     <>
       <Grid container justifyContent={"center"} >
