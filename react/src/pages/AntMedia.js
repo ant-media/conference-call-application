@@ -157,7 +157,7 @@ function AntMedia() {
   const [numberOfUnReadMessages, setNumberOfUnReadMessages] = useState(0);
 
   // pinned screen this could be by you or by shared screen.
-  const [pinnedVideoId, setPinnedVideoId] = useState(null);
+  const [pinnedVideoId, setPinnedVideoId] = useState();
 
   // this one just triggers the re-rendering of the component.
   const [participantUpdated, setParticipantUpdated] = useState(false);
@@ -168,7 +168,7 @@ function AntMedia() {
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
 
-  const [reactions, setReactions] = useState({
+  const [reactions] = useState({
     'smile': '😊',
     'like': '👍',
     'dislike': '👎',
@@ -390,6 +390,58 @@ function AntMedia() {
     setParticipantUpdated(!participantUpdated);
   }
 
+  function handleMainTrackBroadcastObject(broadcastObject) {
+    let participantIds = broadcastObject.subTrackStreamIds;
+
+    //find and remove not available tracks
+    const temp = allParticipants;
+    let currentTracks = Object.keys(temp);
+    currentTracks.forEach(trackId => {
+      if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
+        console.log("stream removed:" + trackId);
+        
+        //check if pinned participant left the room. If this is the case, set pinnedVideoId to undefined
+        let pinnedParticipant = participants.find(e => e.id === pinnedVideoId);
+        if(pinnedParticipant?.streamId === trackId) {
+          setPinnedVideoId(undefined);
+        }
+
+        delete temp[trackId];
+      }
+    });
+    setAllParticipants(temp);
+
+    //request broadcast object for new tracks
+    participantIds.forEach(pid => {
+      if (allParticipants[pid] === undefined) {
+        webRTCAdaptor.getBroadcastObject(pid);
+      }
+    });
+  }
+
+
+  function handleSubtrackBroadcastObject(broadcastObject) {
+    if (broadcastObject.metaData !== undefined && broadcastObject.metaData !== null) {
+      let userStatusMetadata = JSON.parse(broadcastObject.metaData);
+
+      if (userStatusMetadata.isScreenShared) {
+        // if the participant was already pin someone than we should not update it
+        if (!screenSharedVideoId) {
+          setScreenSharedVideoId(broadcastObject.streamId);
+          let videoLab = participants.find((p) => p.streamId === broadcastObject.streamId)
+            ?.videoLabel
+            ? participants.find((p) => p.streamId === broadcastObject.streamId).videoLabel
+            : "";
+          pinVideo(broadcastObject.streamId, videoLab);
+        }
+      }
+    }
+
+    let allParticipantsTemp = allParticipants;
+    allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
+    setAllParticipants(allParticipantsTemp);
+  }
+
   useEffect(() => {
     async function createWebRTCAdaptor() {
       //here we check if audio or video device available and wait result
@@ -427,45 +479,9 @@ function AntMedia() {
       let broadcastObject = JSON.parse(obj.broadcast);
 
       if (obj.streamId === roomName) { //maintrack object
-        let participantIds = broadcastObject.subTrackStreamIds;
-
-        //find and remove not available tracks
-        const temp = allParticipants;
-        let currentTracks = Object.keys(temp);
-        currentTracks.forEach(trackId => {
-          if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
-            console.log("stream removed:" + trackId);
-            delete temp[trackId];
-          }
-        });
-        setAllParticipants(temp);
-
-        //request broadcast object for new tracks
-        participantIds.forEach(pid => {
-          if (allParticipants[pid] === undefined) {
-            webRTCAdaptor.getBroadcastObject(pid);
-          }
-        });
+        handleMainTrackBroadcastObject(broadcastObject);
       } else { //subtrack object
-        if (broadcastObject.metaData !== undefined && broadcastObject.metaData !== null) {
-          let userStatusMetadata = JSON.parse(broadcastObject.metaData);
-
-          if (userStatusMetadata.isScreenShared) {
-            // if the participant was already pin someone than we should not update it
-            if (!screenSharedVideoId) {
-              setScreenSharedVideoId(obj.streamId);
-              let videoLab = participants.find((p) => p.streamId === obj.streamId)
-                ?.videoLabel
-                ? participants.find((p) => p.streamId === obj.streamId).videoLabel
-                : "";
-              pinVideo(obj.streamId, videoLab);
-            }
-          }
-        }
-
-        let allParticipantsTemp = allParticipants;
-        allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
-        setAllParticipants(allParticipantsTemp);
+        handleSubtrackBroadcastObject(broadcastObject);
       }
 
       console.log(obj.broadcast);
@@ -666,10 +682,10 @@ function AntMedia() {
       return;
     }
 
-    var streamId = participants.find((p) => id === p.id).streamId;
+    var streamId = participants.find((p) => id === p.id)?.streamId;
     // if we already pin the targeted user then we are going to remove it from pinned video.
     if (pinnedVideoId === id) {
-      setPinnedVideoId(null);
+      setPinnedVideoId(undefined);
       handleNotifyUnpinUser(id);
       webRTCAdaptor.assignVideoTrack(videoLabel, streamId, false);
     }
@@ -730,8 +746,11 @@ function AntMedia() {
     );
     //if I stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
     if (pinnedVideoId === "localVideo") {
-      setPinnedVideoId(null);
+      setPinnedVideoId(undefined);
     }
+
+    let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff, false);
+    webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(userStatusMetadata));
   }
   function screenShareOnNotification() {
     setIsScreenShared(true);
@@ -744,6 +763,9 @@ function AntMedia() {
       "SCREEN_SHARED_ON",
       publishStreamId
     );
+
+    let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff, true);
+    webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(userStatusMetadata));
 
     setPinnedVideoId("localVideo");
   }
@@ -765,7 +787,7 @@ function AntMedia() {
         publishStreamId,
         {
           reaction: reaction,
-          senderStreamId: publishStreamId
+          senderStreamId: publishStreamId,
         }
     );
     showReactions(publishStreamId, reaction);
@@ -906,6 +928,7 @@ function AntMedia() {
             eventType: "MESSAGE_RECEIVED",
             message: message,
             name: streamName,
+            senderId: publishStreamId,
             date: new Date().toString()
           })
         );
@@ -969,6 +992,9 @@ function AntMedia() {
         webRTCAdaptor.getBroadcastObject(eventStreamId);
       }
       else if (eventType === "MESSAGE_RECEIVED") {
+        if(notificationEvent.senderId === publishStreamId) {
+          return;
+        }
         calculate_scroll_height();
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         notificationEvent.date = new Date(notificationEvent?.date).toLocaleString(getLang(), { timeZone: timezone, hour: "2-digit", minute: "2-digit" });
@@ -1012,18 +1038,24 @@ function AntMedia() {
         });
       }
       else if (eventType === "SCREEN_SHARED_ON") {
-        let videoLab = participants.find((p) => p.id === eventStreamId)
-          ?.videoLabel
-          ? participants.find((p) => p.id === eventStreamId).videoLabel
-          : "";
-        pinVideo(eventStreamId, videoLab);
+        let videoLab = participants.find((p) => p.streamId === eventStreamId)?.videoLabel;
+
+        if(videoLab === undefined) {
+          //no video player assigned to that participant, assign first player to screen sharer
+          videoLab = participants[1].id;
+          assignVideoToStream(videoLab, eventStreamId);
+        }
+
+        pinVideo(videoLab, videoLab);
         setScreenSharedVideoId(eventStreamId);
+        webRTCAdaptor.getBroadcastObject(eventStreamId);
       }
       else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
-        setPinnedVideoId(null);
+        setPinnedVideoId(undefined);
+        webRTCAdaptor.getBroadcastObject(eventStreamId);
       }
-      else if (eventType === "REACTIONS") {
+      else if (eventType === "REACTIONS" && notificationEvent.senderStreamId !== publishStreamId) {
         showReactions(notificationEvent.senderStreamId, notificationEvent.reaction);
       }
       else if (eventType === "TURN_YOUR_MIC_OFF") {
@@ -1097,13 +1129,14 @@ function AntMedia() {
         timeoutRef.current = setTimeout(() => {
           setTalkers([]);
         }, 1000);
+        //console.log(JSON.stringify(notificationEvent.payload));
         setTalkers((oldTalkers) => {
           const newTalkers = notificationEvent.payload
             .filter(
               (p) =>
                 p.trackId !== "" &&
                 screenSharedVideoId !== p.trackId &&
-                p.audioLevel !== 0
+                p.audioLevel < 60
             )
             .map((p) => p.trackId);
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
@@ -1117,18 +1150,18 @@ function AntMedia() {
     }
   }
 
-  function getUserStatusMetadata(isMicMuted, isCameraOn) {
+  function getUserStatusMetadata(isMicMuted, isCameraOn, isScreenShareActive) {
     let metadata = {
       isMicMuted: isMicMuted === null ? null : isMicMuted,
       isCameraOn: isCameraOn,
-      isScreenShared: isScreenShared
+      isScreenShared: isScreenShareActive
     }
 
     return metadata;
   }
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
-    let metadata = getUserStatusMetadata(micMuted, cameraOn);
+    let metadata = getUserStatusMetadata(micMuted, cameraOn, isScreenShared);
     webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
   }
 
@@ -1191,7 +1224,7 @@ function AntMedia() {
 
 
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
-    let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
+    let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff, isScreenShared);
 
     addMeAsParticipant();
 
@@ -1402,7 +1435,6 @@ function AntMedia() {
   function setAudioLevelListener(listener, period) {
     if (audioListenerIntervalJob == null) {
       audioListenerIntervalJob = setInterval(() => {
-        /*
         webRTCAdaptor.remotePeerConnection[publishStreamId].getStats(null).then(stats => {
           for (const stat of stats.values())
           {
@@ -1411,7 +1443,6 @@ function AntMedia() {
             }
           }
         })
-        */ //FIXME
       }, period);
     }
   }

@@ -88,7 +88,7 @@ function VideoCard(props) {
   else if (props.track?.kind === "video") {
     let broadcastObject = conference?.allParticipants[props?.streamId];
     let metaData = broadcastObject?.metaData;
-    useAvatar = !parseMetaDataAndGetIsCameraOn(metaData);
+    useAvatar = !parseMetaDataAndGetIsCameraOn(metaData) && !parseMetaDataAndGetIsScreenShared(metaData);
   }
 
   function isJsonString(str) {
@@ -103,6 +103,11 @@ function VideoCard(props) {
   function parseMetaDataAndGetIsCameraOn(metaData) {
     if (!metaData) return false;
     return (isJsonString(metaData)) ? JSON.parse(metaData).isCameraOn : false;
+  }
+
+  function parseMetaDataAndGetIsScreenShared(metaData) {
+    if (!metaData) return false;
+    return (isJsonString(metaData)) ? JSON.parse(metaData).isScreenShared : false;
   }
 
   function parseMetaDataAndGetIsMicMuted(metaData) {
@@ -198,7 +203,7 @@ function VideoCard(props) {
               </Fab>
             </Tooltip>
 
-            {(props.id !== 'localVideo' && micMuted) ?
+            {(props.id !== 'localVideo' && !micMuted) ?
               <Grid item>
                 <Tooltip
                   title={`Microphone off ${props.name
@@ -207,7 +212,7 @@ function VideoCard(props) {
                 >
                   <Fab
                     onClick={() => {
-                      conference.turnOffYourMicNotification(props.id);
+                      conference.turnOffYourMicNotification(props.streamId);
                     }}
                     color="primary"
                     aria-label="add"
@@ -330,7 +335,7 @@ function VideoCard(props) {
       <div
         className="talking-indicator-light"
         style={{
-          ...(isTalking || conference.talkers.includes(props.id)
+          ...(isTalking || conference.talkers.includes(props.streamId)
             ? {}
             : { display: "none" }),
         }}
@@ -340,7 +345,7 @@ function VideoCard(props) {
 
   const setLocalVideo = () => {
     let tempLocalVideo = document.getElementById("localVideo");
-    if(isLocal && conference.localVideo != tempLocalVideo) {
+    if(isLocal && conference.localVideo !== tempLocalVideo) {
       conference.setLocalVideo();
     } 
   };

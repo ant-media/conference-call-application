@@ -19,6 +19,9 @@ function LayoutPinned (props) {
   const playingParticipants = [];
 
   const pinnedVideo = () => {
+    if(pinnedParticipant !== undefined) {
+      playingParticipants.push(conference.participants.find(e => e.id === pinnedParticipant.id));
+    }
     return (
       pinnedParticipant ? (
         <div className="single-video-container pinned keep-ratio">
@@ -75,7 +78,6 @@ function LayoutPinned (props) {
   }
 
   const othersCard = () => {
-    playingParticipants.push(conference.participants.find(e => e.id === conference.pinnedVideoId));
     return (
       <>
         <div className="unpinned">

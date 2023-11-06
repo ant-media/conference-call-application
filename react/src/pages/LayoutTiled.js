@@ -56,7 +56,7 @@ function LayoutTiled(props) {
     const videoCount = Object.keys(conference.participants).length+1
 
     
-    const {width, height, cols} = calculateLayout(
+    const {width, height} = calculateLayout(
         props.width,
         props.height,
         videoCount,
@@ -80,7 +80,7 @@ function LayoutTiled(props) {
       <>
         {
           playingParticipants.map((element, index) => {
-            console.log("cw:"+cardWidth+" ch:"+cardHeight);
+            //console.log("cw:"+cardWidth+" ch:"+cardHeight);
             return (
               <div
                   className="single-video-container not-pinned"
