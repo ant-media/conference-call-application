@@ -402,7 +402,8 @@ function AntMedia() {
         
         //check if pinned participant left the room. If this is the case, set pinnedVideoId to undefined
         let pinnedParticipant = participants.find(e => e.id === pinnedVideoId);
-        if(pinnedParticipant?.streamId === trackId) {
+        if((pinnedVideoId !== undefined && pinnedParticipant === undefined)  //because participantVideo may be remeoved
+            || pinnedParticipant?.streamId === trackId) {
           setPinnedVideoId(undefined);
         }
 
@@ -1168,12 +1169,11 @@ function AntMedia() {
   function handleLeaveFromRoom() {
     // we need to empty participant array. i f we are going to leave it in the first place.
     setParticipants([]);
+    
+    clearInterval(audioListenerIntervalJob);
 
     webRTCAdaptor.stop(publishStreamId);
     webRTCAdaptor.stop(roomName);
-
-    clearInterval(audioListenerIntervalJob);
-
 
     webRTCAdaptor.turnOffLocalCamera(publishStreamId);
     setWaitingOrMeetingRoom("waiting");
@@ -1439,7 +1439,7 @@ function AntMedia() {
           for (const stat of stats.values())
           {
             if (stat.type === 'media-source' && stat.kind === 'audio') {
-              listener(stat.audioLevel.toFixed(2));
+              listener(stat?.audioLevel?.toFixed(2));
             }
           }
         })
