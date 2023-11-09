@@ -127,7 +127,7 @@ function VideoCard(props) {
 
   const [isTalking, setIsTalking] = React.useState(false);
 
-  
+
   const timeoutRef = React.useRef(null);
 
   const mirrorView = isLocal && !conference?.isScreenShared;
@@ -254,7 +254,7 @@ function VideoCard(props) {
         >
           <CustomizedVideo
             {...props}
-            style={{ objectFit: isScreenSharing ? "contain" : "cover" }}
+            style={{ objectFit: props.pinned ? "contain" : "cover" }}
             ref={refVideo}
             playsInline
             muted={isLocal}
@@ -347,7 +347,7 @@ function VideoCard(props) {
     let tempLocalVideo = document.getElementById("localVideo");
     if(isLocal && conference.localVideo !== tempLocalVideo) {
       conference.setLocalVideo();
-    } 
+    }
   };
 
   return isLocal || props.track?.kind !== "audio" ? (
