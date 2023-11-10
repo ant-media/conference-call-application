@@ -131,9 +131,9 @@ function VideoCard(props) {
   const timeoutRef = React.useRef(null);
 
   const mirrorView = isLocal && !conference?.isScreenShared;
-  const isScreenSharing =
-    conference?.isScreenShared ||
-    conference?.screenSharedVideoId === props?.id;
+  //const isScreenSharing =
+  //  conference?.isScreenShared ||
+  //  conference?.screenSharedVideoId === props?.id;
   //conference?.isScreenShared means am i sharing my screen
   //conference?.screenSharedVideoId === props?.id means is someone else sharing their screen
   useEffect(() => {
