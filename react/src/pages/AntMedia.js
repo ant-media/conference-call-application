@@ -399,7 +399,7 @@ function AntMedia() {
     currentTracks.forEach(trackId => {
       if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
         console.log("stream removed:" + trackId);
-        
+
         //check if pinned participant left the room. If this is the case, set pinnedVideoId to undefined
         let pinnedParticipant = participants.find(e => e.id === pinnedVideoId);
         if((pinnedVideoId !== undefined && pinnedParticipant === undefined)  //because participantVideo may be remeoved
@@ -411,6 +411,7 @@ function AntMedia() {
       }
     });
     setAllParticipants(temp);
+    setParticipantUpdated(!participantUpdated);
 
     //request broadcast object for new tracks
     participantIds.forEach(pid => {
@@ -441,6 +442,7 @@ function AntMedia() {
     let allParticipantsTemp = allParticipants;
     allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
     setAllParticipants(allParticipantsTemp);
+    setParticipantUpdated(!participantUpdated);
   }
 
   useEffect(() => {
@@ -1169,7 +1171,7 @@ function AntMedia() {
   function handleLeaveFromRoom() {
     // we need to empty participant array. i f we are going to leave it in the first place.
     setParticipants([]);
-    
+
     clearInterval(audioListenerIntervalJob);
 
     webRTCAdaptor.stop(publishStreamId);
