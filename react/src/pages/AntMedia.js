@@ -1169,10 +1169,11 @@ function AntMedia() {
   }
 
   function handleLeaveFromRoom() {
-    // we need to empty participant array. i f we are going to leave it in the first place.
+    // we need to empty participant array. if we are going to leave it in the first place.
     setParticipants([]);
 
     clearInterval(audioListenerIntervalJob);
+    audioListenerIntervalJob = null;
 
     webRTCAdaptor.stop(publishStreamId);
     webRTCAdaptor.stop(roomName);
@@ -1437,8 +1438,8 @@ function AntMedia() {
   function setAudioLevelListener(listener, period) {
     if (audioListenerIntervalJob == null) {
       audioListenerIntervalJob = setInterval(() => {
-        if (webRTCAdaptor.remotePeerConnection[publishStreamId] !== undefined && webRTCAdaptor.remotePeerConnection[publishStreamId] !== null) {
-          webRTCAdaptor.remotePeerConnection[publishStreamId].getStats(null).then(stats => {
+        if (webRTCAdaptor?.remotePeerConnection[publishStreamId] !== undefined && webRTCAdaptor?.remotePeerConnection[publishStreamId] !== null) {
+          webRTCAdaptor?.remotePeerConnection[publishStreamId].getStats(null).then(stats => {
             for (const stat of stats.values()) {
               if (stat.type === 'media-source' && stat.kind === 'audio') {
                 listener(stat?.audioLevel?.toFixed(2));
