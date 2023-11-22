@@ -57,6 +57,7 @@ var videoQualityConstraints = {
   video: {
     width: { max: 320 },
     height: { max: 240 },
+    frameRate: 20
   }
 }
 
@@ -82,14 +83,11 @@ if (!websocketURL)
   
   if (!websocketURL) 
   {
-    const appName = window.location.pathname.substring(
-        0,
-        window.location.pathname.lastIndexOf("/") + 1
-    );
+    const appName = "/LiveApp/";
     const path =
         window.location.hostname +
         ":" +
-        window.location.port +
+        "5080" +
         appName +
         "websocket";
     websocketURL = "ws://" + path;
@@ -654,7 +652,7 @@ function AntMedia() {
       width: 1920,
       height: 1080,
     };
-    webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
+    webRTCAdaptor.applyConstraints(requestedMediaConstraints);
     handleSendNotificationEvent(
       "SCREEN_SHARED_ON",
       publishStreamId
@@ -715,7 +713,7 @@ function AntMedia() {
         width: 320,
         height: 240,
       };
-      webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
+      webRTCAdaptor.applyConstraints(requestedMediaConstraints);
       setCloseScreenShare(false);
     } else {
       setCloseScreenShare(true);
@@ -989,9 +987,9 @@ function AntMedia() {
           let requestedMediaConstraints = {
             width: 640,
             height: 480,
+            frameRate: 30
           };
           webRTCAdaptor.applyConstraints(
-            publishStreamId,
             requestedMediaConstraints
           );
         }
@@ -1003,9 +1001,9 @@ function AntMedia() {
           let requestedMediaConstraints = {
             width: 320,
             height: 240,
+            frameRate: 20
           };
           webRTCAdaptor.applyConstraints(
-            publishStreamId,
             requestedMediaConstraints
           );
         }
