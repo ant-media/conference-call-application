@@ -58,7 +58,7 @@ var videoQualityConstraints = {
   video: {
     width: { max: 320 },
     height: { max: 240 },
-    frameRate: 20
+    frameRate: 15
   }
 }
 
@@ -1091,7 +1091,7 @@ function AntMedia() {
           let requestedMediaConstraints = {
             width: 320,
             height: 240,
-            frameRate: 20
+            frameRate: 15
           };
           webRTCAdaptor.applyConstraints(
             requestedMediaConstraints
