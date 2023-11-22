@@ -57,6 +57,7 @@ var videoQualityConstraints = {
   video: {
     width: { max: 320 },
     height: { max: 240 },
+    frameRate: 20
   }
 }
 
@@ -654,7 +655,7 @@ function AntMedia() {
       width: 1920,
       height: 1080,
     };
-    webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
+    webRTCAdaptor.applyConstraints(requestedMediaConstraints);
     handleSendNotificationEvent(
       "SCREEN_SHARED_ON",
       publishStreamId
@@ -715,7 +716,7 @@ function AntMedia() {
         width: 320,
         height: 240,
       };
-      webRTCAdaptor.applyConstraints(publishStreamId, requestedMediaConstraints);
+      webRTCAdaptor.applyConstraints(requestedMediaConstraints);
       setCloseScreenShare(false);
     } else {
       setCloseScreenShare(true);
@@ -989,9 +990,9 @@ function AntMedia() {
           let requestedMediaConstraints = {
             width: 640,
             height: 480,
+            frameRate: 30
           };
           webRTCAdaptor.applyConstraints(
-            publishStreamId,
             requestedMediaConstraints
           );
         }
@@ -1003,9 +1004,9 @@ function AntMedia() {
           let requestedMediaConstraints = {
             width: 320,
             height: 240,
+            frameRate: 20
           };
           webRTCAdaptor.applyConstraints(
-            publishStreamId,
             requestedMediaConstraints
           );
         }
