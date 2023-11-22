@@ -83,11 +83,14 @@ if (!websocketURL)
   
   if (!websocketURL) 
   {
-    const appName = "/LiveApp/";
+    const appName = window.location.pathname.substring(
+        0,
+        window.location.pathname.lastIndexOf("/") + 1
+    );
     const path =
         window.location.hostname +
         ":" +
-        "5080" +
+        window.location.port +
         appName +
         "websocket";
     websocketURL = "ws://" + path;
