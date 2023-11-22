@@ -194,7 +194,7 @@ function WaitingRoom(props) {
                   </Grid>
                 </Grid>
               </Grid>
-              <Typography align="center" color="#DDFFFC" sx={{mt: 2}}>
+              <Typography align="center" color="black" sx={{mt: 2}}>
                 {t(
                     "You can choose whether to open your camera and microphone before you get into room"
                 )}
@@ -208,6 +208,7 @@ function WaitingRoom(props) {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
+              {/* spead text MSG */}
               <Box sx = {{
                 position: 'absolute',
                 top: '50%',
@@ -221,10 +222,10 @@ function WaitingRoom(props) {
                 px: 4,
                 pb: 3,
               }}>
-                <Typography id="modal-modal-title" variant="h6" component="h2" sx={{position: "center"}}>
+                <Typography id="modal-modal-title" variant="h6" component="h2"   sx={{position: "center"}}>
                   Connection Test
                 </Typography>
-                <Typography id="modal-modal-description" sx={{ mt: 2, color: "white" }}>
+                <Typography id="modal-modal-description" sx={{ mt: 2, color: "black" }}>
                   {speedTestObject.message}
                 </Typography>
                 <Button sx={buttonVisibility} onClick={()=>{
@@ -244,9 +245,9 @@ function WaitingRoom(props) {
 
             <Grid item md={antmedia.onlyDataChannel === false ? 4 : 12}>
               <Grid container justifyContent={"center"}>
-                <Grid container justifyContent={"center"}>
-                  <Typography variant="h5" align="center">
-                    {t("What's your name?")}
+              <Grid container justifyContent={"center"}>
+                  <Typography variant="h5"  color="black" align="center">
+                    {t("Welcome")}
                   </Typography>
                 </Grid>
                 <Grid
@@ -260,12 +261,9 @@ function WaitingRoom(props) {
                       fontWeight={"400"}
                       style={{fontSize: 18}}
                   >
-                    {t(
-                        "Please enter your name. This will be visible to the host and other participants."
-                    )}{" "}
+                    {" "}
                   </Typography>
                 </Grid>
-
                 <form
                     onSubmit={(e) => {
                       joinRoom(e);
@@ -276,12 +274,13 @@ function WaitingRoom(props) {
                         autoFocus
                         required
                         fullWidth
-                        color="primary"
                         value={props.streamName}
                         variant="outlined"
-                        onChange={(e) => props.handleStreamName(e.target.value)}
+                        // onChange={(e) => props.handleStreamName(e.target.value)}
                         placeholder={t("Your name")}
+                        readOnly={true}
                         id="participant_name"
+                        inputProps={{ style: { color: "black" } }}
                     />
                   </Grid>
                   <Grid container justifyContent={"center"}>

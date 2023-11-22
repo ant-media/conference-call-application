@@ -9,14 +9,15 @@ import { SettingsContext, MediaSettingsContext } from "pages/AntMedia";
 import { AntmediaContext } from "App";
 
 const PublisherRequestName = styled(Typography)(({ theme }) => ({
-  color: "#ffffff",
+  color: "black",
   fontWeight: 500,
   fontSize: 14,
 }));
-
+//hover color of allow or denay
 const PinBtn = styled(Button)(({ theme }) => ({
   "&:hover": {
     backgroundColor: theme.palette.green[50],
+    color: "white",
   },
 }));
 
@@ -62,10 +63,10 @@ function PublisherRequestTab(props) {
         <div style={{width: "100%", overflowY: "auto"}}>
           <Stack sx={{width: "100%",}} spacing={2}>
             <Grid container>
-              <SvgIcon size={28} name="participants" color="#fff"/>
+              <SvgIcon size={28} name="participants" color="black"/>
               <PublisherRequestName
                   variant="body2"
-                  style={{marginLeft: 4, fontWeight: 500}}
+                  style={{marginLeft: 8, fontWeight: 500}}
               >
                 {requestSpeakerList.length}
               </PublisherRequestName>

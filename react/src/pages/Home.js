@@ -5,27 +5,26 @@ import Link from '@mui/material/Link';
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink } from 'react-router-dom';
 import { nanoid } from 'nanoid';
+import { getRoomNameAttribute ,getRootAttribute } from "../utils";
 
 function Home(props) {
   const { t } = useTranslation();
+  //change the path to ba the room name same as the attribute 
+  const roomName = getRootAttribute("data-room-name");
+
   return (
     <>
-      <Grid container justifyContent={"center"} sx={{ mt: 8 }}>
-        <Box py={8}>
-          <Typography variant="h1" align="center">
-            Join our meeting room
-          </Typography>
-          <Box sx={{ pt: 4, pb: 0 }}>
-            <Typography variant="h4" align="center">
-              Real-time meetings by Ant Media
-            </Typography>
-          </Box>
-        </Box>
-        <Grid container justifyContent={'center'}>
-          <Link component={RouterLink} to={`/${nanoid(8)}`} size="large" variant="contained" color="primary">
-            {t('Create Meeting')}
+      <Grid container justifyContent={"center"} >
+        <Box py={5}>
+          <Typography variant="h3" align="center">
+          {/* <Link component={RouterLink} to={`/${nanoid(8)}`} size="large" variant="contained" color="primary"> */}
+          <Link component={RouterLink} to={`/${roomName}`} size="large" variant="contained" color="primary">
+            {t('Start')}
           </Link>
-        </Grid>
+          </Typography>
+
+        </Box>
+     
       </Grid>
     </>
   );

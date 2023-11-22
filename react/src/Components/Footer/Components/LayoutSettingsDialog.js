@@ -158,28 +158,33 @@ export function LayoutSettingsDialog(props) {
         {t("You can choose either tiled or sidebar view.")}
       </Typography>
       <DialogContent sx={{ px: 1 }}>
-        <Box component="form" sx={{ display: "flex", flexWrap: "wrap" }}>
+        <Box component="form" sx={{ display: "flex", flexWrap: "wrap" }} >
           <Grid container>
-            <FormControl sx={{ width: "100%" }}>
+            <FormControl sx={{ width: "100%" }} >
               <RadioGroup
                 aria-labelledby="layout-radio-buttons"
+                
                 defaultValue={pinnedVideoId !== null ? "sidebar" : "tiled"}
                 value={layout}
                 onChange={changeLayout}
                 name="layout-radio-buttons-group"
+                style={{ color: 'white' }}
               >
                 <FormControlLabel
                   classes={{ label: "layout-radio-label" }}
                   sx={{ width: "100%", pb: 1 }}
                   value="tiled"
-                  control={<Radio />}
+                  // change the color if radio button
+                  control={<Radio style={{ color: 'white' }} />}
                   label={radioLabel("Tiled", "tiled")}
                 />
                 <FormControlLabel
                   classes={{ label: "layout-radio-label" }}
                   sx={{ width: "100%" }}
                   value="sidebar"
-                  control={<Radio />}
+                  // change the color if radio button
+                  control={<Radio style={{ color: 'white' }} />}
+                  
                   label={radioLabel("Sidebar", "sidebar")}
                 />
               </RadioGroup>
@@ -207,6 +212,7 @@ export function LayoutSettingsDialog(props) {
                 value={value}
                 aria-label="video track count"
                 valueLabelDisplay="auto"
+                style={{ color: 'white' }}
                 defaultValue={value}
                 step={null}
                 min={3}

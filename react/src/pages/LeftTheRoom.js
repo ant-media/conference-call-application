@@ -31,11 +31,11 @@ function LeftTheRoom(props) {
         <>
             <Grid container justifyContent={"center"} sx={{ mt: layouts[width] }}>
                 <Box >
-                    <Typography variant="h5" align="center">
+                    <Typography variant="h5" align="center" color="black">
                         {t('You have left the meeting')}
                     </Typography>
                     <Box py={2}>
-                        <Typography variant="h6" align="center">
+                        <Typography variant="h6" align="center" color="black">
                             {t('You can rejoin the meeting, or return to the home page.')}
                         </Typography>
                     </Box>

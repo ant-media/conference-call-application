@@ -7,9 +7,9 @@ import { styled } from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { SettingsContext, MediaSettingsContext } from "pages/AntMedia";
 import { AntmediaContext } from "App";
-
+//text color
 const ParticipantName = styled(Typography)(({ theme }) => ({
-  color: "#ffffff",
+  color: "black",
   fontWeight: 500,
   fontSize: 14,
 }));
@@ -45,14 +45,14 @@ function ParticipantTab(props) {
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
               onClick={() => pinVideo(videoId)}
             >
-              <SvgIcon size={28} name="unpin" color="#fff" />
+              <SvgIcon size={28} name="unpin" color="black" />
             </PinBtn>
           ) : (
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
               onClick={() => pinVideo(videoId)}
             >
-              <SvgIcon size={28} name="pin" color="#fff" />
+              <SvgIcon size={28} name="pin" color="black" />
             </PinBtn>
           )}
           {(videoId === "localVideo" ? presenters.includes(mediaSettings.myLocalData?.streamId) : presenters.includes(videoId) )&& antmedia.admin === true ? (
@@ -60,7 +60,7 @@ function ParticipantTab(props) {
                   sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                   onClick={() => makeParticipantUndoPresenter(videoId)}
               >
-                <SvgIcon size={28} name="unpresenter" color="#fff" />
+                <SvgIcon size={28} name="unpresenter" color="black" />
               </PinBtn>
           ) : null}
           {(videoId === "localVideo" ? !presenters.includes(mediaSettings.myLocalData?.streamId) : !presenters.includes(videoId) ) && ( !approvedSpeakerRequestList.includes(videoId) ) && antmedia.admin === true ?(
@@ -68,7 +68,8 @@ function ParticipantTab(props) {
                   sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                   onClick={() => makeParticipantPresenter(videoId)}
               >
-                <SvgIcon size={28} name="presenter" color="#fff" />
+                {/* this icon for publish speaker */}
+                <SvgIcon size={28} name="presenter" color="black" />
               </PinBtn>
           ) : null}
           {approvedSpeakerRequestList.includes(videoId) && antmedia.admin === true  && videoId !== 'localVideo' ?(
@@ -76,7 +77,7 @@ function ParticipantTab(props) {
                   sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                   onClick={() => makeListenerAgain(videoId)}
               >
-                <SvgIcon size={28} name="close" color="#fff" />
+                <SvgIcon size={28} name="close" color="black" />
               </PinBtn>
           ) : null}
         </Grid>
@@ -87,7 +88,8 @@ function ParticipantTab(props) {
         <div style={{width: "100%", overflowY: "auto"}}>
           <Stack sx={{width: "100%",}} spacing={2}>
             <Grid container>
-              <SvgIcon size={28} name="participants" color="#fff"/>
+              <SvgIcon size={28} name="participants" color="black"/>
+              {/* this the icon of how many speakers */}
               <ParticipantName
                   variant="body2"
                   style={{marginLeft: 4, fontWeight: 500}}

@@ -167,6 +167,7 @@ export function SettingsDialog(props) {
                   checked={speedTestBeforeLogin}
                   onChange={e => {setSpeedTestBeforeLogin(e.target.checked)}}
                   inputProps={{ 'aria-label': 'controlled' }}
+                  style={{ color: 'white' }}
               />
               Speed Test Before Join
             </Grid>
