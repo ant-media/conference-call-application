@@ -1063,8 +1063,8 @@ function AntMedia() {
         showReactions(notificationEvent.senderStreamId, notificationEvent.reaction);
       }
       else if (eventType === "TURN_YOUR_MIC_OFF") {
-        console.warn(notificationEvent.senderStreamId, "muted you");
         if (publishStreamId === notificationEvent.streamId) {
+          console.warn(notificationEvent.senderStreamId, "muted you");
           muteLocalMic();
         }
       }
