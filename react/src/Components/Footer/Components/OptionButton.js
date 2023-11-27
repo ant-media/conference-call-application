@@ -60,6 +60,15 @@ function OptionButton({ footer, ...props }) {
     setLayoutDialogOpen(false);
   };
 
+  /* I've removed this change layout button from the menu because there are some errors in the backend
+  <MenuItem onClick={() => handleLayoutDialogOpen()}>
+  <ListItemIcon>
+    <SvgIcon size={36} name={"layout"} color={"white"} />
+  </ListItemIcon>
+  <ListItemText>{t("Change Layout dfd")}</ListItemText>
+</MenuItem>
+*/
+
     return (
         <>
           <SettingsDialog
@@ -103,12 +112,8 @@ function OptionButton({ footer, ...props }) {
                 horizontal: "left",
               }}
           >
-            <MenuItem onClick={() => handleLayoutDialogOpen()}>
-              <ListItemIcon>
-                <SvgIcon size={36} name={"layout"} color={"white"} />
-              </ListItemIcon>
-              <ListItemText>{t("Change Layout")}</ListItemText>
-            </MenuItem>
+            
+   
 
               {antmedia.onlyDataChannel === false ?
             <MenuItem onClick={() => handleDialogOpen()}>
