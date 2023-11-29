@@ -74,7 +74,7 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
-let websocketURL = "ws://ovh36.antmedia.io:5080/LiveApp/websocket";
+let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) 
 {
