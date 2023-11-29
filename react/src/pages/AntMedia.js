@@ -57,7 +57,7 @@ var videoQualityConstraints = {
   video: {
     width: { max: 320 },
     height: { max: 240 },
-    frameRate: 20
+    frameRate: 5
   }
 }
 
@@ -74,7 +74,7 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
-let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = "ws://ovh36.antmedia.io:5080/LiveApp/websocket";
 
 if (!websocketURL) 
 {
@@ -988,9 +988,7 @@ function AntMedia() {
           !isScreenShared
         ) {
           let requestedMediaConstraints = {
-            width: 640,
-            height: 480,
-            frameRate: 30
+            video: { width: 640, height: 480, frameRate: { ideal: 25, max: 30 } }
           };
           webRTCAdaptor.applyConstraints(
             requestedMediaConstraints
@@ -1002,9 +1000,7 @@ function AntMedia() {
           !isScreenShared
         ) {
           let requestedMediaConstraints = {
-            width: 320,
-            height: 240,
-            frameRate: 20
+            video: { width: 320, height: 240, frameRate: { ideal: 5, max: 10 } }
           };
           webRTCAdaptor.applyConstraints(
             requestedMediaConstraints
