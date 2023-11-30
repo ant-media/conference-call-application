@@ -5,6 +5,7 @@ import Footer from "Components/Footer/Footer";
 import { ConferenceContext } from "./AntMedia";
 import LayoutPinned from "./LayoutPinned";
 import LayoutTiled from "./LayoutTiled";
+import {ReactionBarSelector} from "@charkour/react-reactions";
 
 
 function debounce(fn, ms) {
@@ -39,6 +40,23 @@ const MeetingRoom = React.memo((props) => {
       window.removeEventListener("resize", debouncedHandleResize);
     };
   });
+
+  function sendEmoji(emoji) {
+    conference?.sendReactions(emoji);
+    conference.setShowEmojis(!conference.showEmojis);
+  }
+
+    const reactionList = [
+      {label: "Love It", node: <div>💖</div>, key: "sparkling_heart"},
+      {label: "Like", node: <div>👍🏼</div>, key: "thumbs_up"},
+      {label: "Tada", node: <div>🎉</div>, key: "party_popper"},
+      {label: "Applause", node: <div>👏🏼</div>, key: "clapping_hands"},
+      {label: "Haha", node: <div>😂</div>, key: "face_with_tears_of_joy"},
+      {label: "Surprised", node: <div>😮</div>, key: "open_mouth"},
+      {label: "Sad", node: <div>😢</div>, key: "sad_face"},
+      {label: "Thinking", node: <div>🤔</div>, key: "thinking_face"},
+      {label: "Dislike", node: <div>👎🏼</div>, key: "thumbs_down"}
+    ];
 
   function handleGalleryResize(calcDrawer) {
     
@@ -86,9 +104,23 @@ const MeetingRoom = React.memo((props) => {
                 width = {gallerySize.w}
                 height = {gallerySize.h}
               />)  
-            }
+            }ß
             </>
           </div>
+
+          {conference.showEmojis && (
+            <div id="meeting-reactions" style={{
+              position: "fixed",
+              bottom: 80,
+              display: "flex",
+              alignItems: "center",
+              padding: 16,
+              zIndex: 2,
+              height: 46,
+              }}>
+              <ReactionBarSelector reactions={reactionList} iconSize={32} style={{backgroundColor: "#003935"}} onSelect={sendEmoji} />
+            </div>)
+          }
           <Footer {...props} />
         </>
     )

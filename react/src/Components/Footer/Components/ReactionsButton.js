@@ -5,7 +5,6 @@ import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { FacebookSelector } from '@charkour/react-reactions';
 
 export const roundStyle = {
   width: { xs: 36, md: 46 },
@@ -37,20 +36,11 @@ function ReactionsButton(props) {
   const conference = useContext(ConferenceContext);
   const { t } = useTranslation();
 
-  const [showEmojis, setShowEmojis] = React.useState(false);
-  function sendEmoji(emoji) {
-    conference?.sendReactions(emoji);
-    setShowEmojis(!showEmojis);
-  }
-
   return (
     <>
-        {showEmojis && (
-            <FacebookSelector onSelect={sendEmoji} />
-        )}
         <Tooltip title={t('Emoji')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color={showEmojis ? 'primary' :'secondary'} sx={rounded ? roundStyle : {}} onClick={(e) => { setShowEmojis(!showEmojis) }}>
-            <SvgIcon size={40} name={'smiley-face'} color={showEmojis ? "#000" : "#fff"} />
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color={conference.showEmojis ? 'primary' :'secondary'} sx={rounded ? roundStyle : {}} onClick={(e) => { conference.setShowEmojis(!conference.showEmojis) }}>
+            <SvgIcon size={40} name={'smiley-face'} color={conference.showEmojis ? "#000" : "#fff"} />
           </CustomizedBtn>
         </Tooltip>
     </>

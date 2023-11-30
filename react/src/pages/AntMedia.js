@@ -160,6 +160,9 @@ function AntMedia() {
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState();
 
+  // hide or show the emoji reaction component.
+  const [showEmojis, setShowEmojis] = React.useState(false);
+
   // this one just triggers the re-rendering of the component.
   const [participantUpdated, setParticipantUpdated] = useState(false);
 
@@ -170,14 +173,15 @@ function AntMedia() {
   const [leftTheRoom, setLeftTheRoom] = useState(false);
 
   const [reactions] = useState({
-    'smile': '😊',
-    'like': '👍',
-    'dislike': '👎',
-    'love': '❤️',
-    'haha': '😆',
-    'wow': '😮',
-    'sad': '😢',
-    'angry': '😡',
+    'sparkling_heart': '💖',
+    'thumbs_up': '👍🏼',
+    'party_popper': '🎉',
+    'clapping_hands': '👏🏼',
+    'face_with_tears_of_joy': '😂',
+    'open_mouth': '😮',
+    'sad_face': '😢',
+    'thinking_face': '🤔',
+    'thumbs_down': '👎🏼'
   });
 
   /*
@@ -1537,7 +1541,9 @@ function AntMedia() {
             turnOffYourMicNotification,
             addFakeParticipant,
             removeFakeParticipant,
-            assignVideoToStream
+            assignVideoToStream,
+            showEmojis,
+            setShowEmojis
           }}
         >
           <SnackbarProvider
