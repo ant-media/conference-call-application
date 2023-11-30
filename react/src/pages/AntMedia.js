@@ -17,7 +17,7 @@ import { SvgIcon } from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 import { getRoomNameAttribute, getWebSocketURLAttribute } from "../utils";
-import floating from "floating.js";
+import floating from "../external/floating.js";
 
 export const ConferenceContext = React.createContext(null);
 
