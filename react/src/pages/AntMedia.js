@@ -1413,8 +1413,8 @@ function AntMedia() {
       number: 1,
       duration: 5,
       repeat: 1,
-      direction: 'reverse',
-      size: 4
+      direction: 'normal',
+      size: 2
     });
   }
 

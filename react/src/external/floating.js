@@ -65,7 +65,7 @@ export default function floating(
         ({ percent, width, height }) =>
           `${percent}% {
           transform: translate(
-            ${width}vw,
+            21vw,
             ${height}vh
           )
         }`
