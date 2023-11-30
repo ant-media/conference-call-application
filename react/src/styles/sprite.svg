@@ -8,7 +8,7 @@
     <path d="M34.5958 7.6297L28.9496 10.8796C28.5084 10.58 28.049 10.3084 27.5742 10.0663L32.3603 6.69055C33.1022 6.96721 33.849 7.29804 34.5958 7.6297Z" fill="inherit"></path>
   </symbol>
 
-  <symbol fill="#fff" id="smiley-face" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+  <symbol id="smiley-face" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
        viewBox="0 0 485 485" xml:space="preserve">
     <g>
             <path d="M413.974,71.026C368.171,25.225,307.274,0,242.5,0S116.829,25.225,71.026,71.026C25.225,116.829,0,177.726,0,242.5

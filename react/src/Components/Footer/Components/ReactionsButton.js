@@ -49,8 +49,8 @@ function ReactionsButton(props) {
             <FacebookSelector onSelect={sendEmoji} />
         )}
         <Tooltip title={t('Emoji')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color={'secondary'} sx={rounded ? roundStyle : {}} onClick={(e) => { setShowEmojis(!showEmojis) }}>
-            <SvgIcon size={40} name={'smiley-face'} color="#fff" />
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color={showEmojis ? 'primary' :'secondary'} sx={rounded ? roundStyle : {}} onClick={(e) => { setShowEmojis(!showEmojis) }}>
+            <SvgIcon size={40} name={'smiley-face'} color={showEmojis ? "#000" : "#fff"} />
           </CustomizedBtn>
         </Tooltip>
     </>

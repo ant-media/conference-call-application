@@ -90,7 +90,7 @@ function Footer(props) {
                   </Grid>
                       : null}
 
-                  <Grid item xs={0}>
+                  <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
                     <ReactionsButton footer/>
                   </Grid>
 
