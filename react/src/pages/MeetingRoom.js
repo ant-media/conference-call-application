@@ -104,7 +104,7 @@ const MeetingRoom = React.memo((props) => {
                 width = {gallerySize.w}
                 height = {gallerySize.h}
               />)  
-            }ß
+            }
             </>
           </div>
 
