@@ -65,7 +65,7 @@ export default function floating(
         ({ percent, width, height }) =>
           `${percent}% {
           transform: translate(
-            21vw,
+            2vw,
             ${height}vh
           )
         }`
@@ -99,7 +99,7 @@ export default function floating(
        ${i * Math.random()}s
        ${repeat}
        ${direction};
-    margin-left: ${Math.random() * 100}vw;`;
+    margin-left: ${(Math.random() * 100) }px;`;
 
     floater.addEventListener('animationend', e => {
       if (e.animationName === 'float') {
