@@ -212,7 +212,10 @@ function VideoCard(props) {
                 >
                   <Fab
                     onClick={() => {
-                      conference?.setParticipantNameMuted(props.streamId);
+                        let participant = {};
+                        participant.streamId=props.streamId;
+                        participant.streamName=props.name;
+                      conference?.setParticipantIdMuted(participant);
                         conference?.setMuteParticipantDialogOpen(true);
                     }}
                     color="primary"

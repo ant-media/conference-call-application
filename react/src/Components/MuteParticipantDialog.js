@@ -19,13 +19,13 @@ export default function MuteParticipantDialog() {
 
     const handleClose = () => {
         conference?.setMuteParticipantDialogOpen(false);
-        conference?.setParticipantNameMuted("-");
+        conference?.setParticipantIdMuted({streamName: "", streamId: ""});
     };
 
     const handleMute = () => {
         conference?.setMuteParticipantDialogOpen(false);
-        conference?.turnOffYourMicNotification(conference?.participantNameMuted);
-        conference?.setParticipantNameMuted("-");
+        conference?.turnOffYourMicNotification(conference?.participantIdMuted?.streamId);
+        conference?.setParticipantIdMuted({streamName: "", streamId: ""});
     }
 
     return (
@@ -37,7 +37,7 @@ export default function MuteParticipantDialog() {
             >
                 <DialogContent>
                     <DialogContentText>
-                        Mute {conference?.participantNameMuted} for everyone in the call? Only {conference?.participantNameMuted} can unmute themselves.
+                        Mute {conference?.participantIdMuted?.streamName} for everyone in the call? Only {conference?.participantIdMuted?.streamName} can unmute themselves.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

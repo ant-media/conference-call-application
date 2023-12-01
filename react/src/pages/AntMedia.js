@@ -166,8 +166,8 @@ function AntMedia() {
   // open or close the mute participant dialog.
   const [isMuteParticipantDialogOpen, setMuteParticipantDialogOpen] = React.useState(false);
 
-  // set participant name you wanted to mute.
-  const [participantNameMuted, setParticipantNameMuted] = React.useState("-");
+  // set participant id you wanted to mute.
+  const [participantIdMuted, setParticipantIdMuted] = React.useState({streamName: "", streamId: ""});
 
   // this one just triggers the re-rendering of the component.
   const [participantUpdated, setParticipantUpdated] = useState(false);
@@ -1552,8 +1552,8 @@ function AntMedia() {
             setShowEmojis,
             isMuteParticipantDialogOpen,
             setMuteParticipantDialogOpen,
-            participantNameMuted,
-            setParticipantNameMuted
+            participantIdMuted,
+            setParticipantIdMuted
           }}
         >
           <SnackbarProvider
