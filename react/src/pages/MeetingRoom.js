@@ -80,7 +80,7 @@ const MeetingRoom = React.memo((props) => {
     }
   }
 
-  const pinLayout = conference.pinnedVideoId !== undefined ? true : false;
+  const pinLayout = conference.pinnedVideoId !== undefined;
   return (
         <>
           <MuteParticipantDialog />
