@@ -115,7 +115,7 @@ const MeetingRoom = React.memo((props) => {
               display: "flex",
               alignItems: "center",
               padding: 16,
-              zIndex: 2,
+              zIndex: 666,
               height: 46,
               }}>
               <ReactionBarSelector reactions={reactionList} iconSize={32} style={{backgroundColor: "#003935"}} onSelect={sendEmoji} />
