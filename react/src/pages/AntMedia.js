@@ -1409,7 +1409,8 @@ function AntMedia() {
     }
 
     floating({
-      content: '<div>' + reaction + '<br>' + '<a style="color: #FFF7FF;font-size: 0.675em;">' + streamName + '</a></div>',
+      content: '<div>' + reaction + '<br>' + '<span style="background-color: #00564F;color: white;padding: 1px 2px;text-align: center;border-radius: 5px;font-size: 0.675em;">' + streamName + '</span></div>',
+//      content: '<div>' + reaction + '<br>' + '<a style="color: #FFF7FF;font-size: 0.675em;">' + streamName + '</a></div>',
       number: 1,
       duration: 5,
       repeat: 1,
