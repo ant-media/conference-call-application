@@ -62,7 +62,7 @@ const MessageInput = React.memo(() => {
         }}
       >
         {showEmojiPicker ?
-            <EmojiPicker onEmojiClick={addEmojiIntoTextBox} width="300px" height="610px"/>
+            <EmojiPicker onEmojiClick={addEmojiIntoTextBox} width="100%" height="70vh"/>
             : null}
         <MessageTextField
           autoFocus
