@@ -6,6 +6,7 @@ import { ConferenceContext } from "./AntMedia";
 import LayoutPinned from "./LayoutPinned";
 import LayoutTiled from "./LayoutTiled";
 import {ReactionBarSelector} from "@charkour/react-reactions";
+import MuteParticipantDialog from "../Components/MuteParticipantDialog";
 
 
 function debounce(fn, ms) {
@@ -82,6 +83,7 @@ const MeetingRoom = React.memo((props) => {
   const pinLayout = conference.pinnedVideoId !== undefined ? true : false;
   return (
         <>
+          <MuteParticipantDialog />
           {conference.audioTracks.map((audio, index) => (
               <VideoCard
                   key={index}

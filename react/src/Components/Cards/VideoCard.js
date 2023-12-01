@@ -212,7 +212,8 @@ function VideoCard(props) {
                 >
                   <Fab
                     onClick={() => {
-                      conference.turnOffYourMicNotification(props.streamId);
+                      conference?.setParticipantNameMuted(props.streamId);
+                        conference?.setMuteParticipantDialogOpen(true);
                     }}
                     color="primary"
                     aria-label="add"

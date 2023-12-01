@@ -163,6 +163,12 @@ function AntMedia() {
   // hide or show the emoji reaction component.
   const [showEmojis, setShowEmojis] = React.useState(false);
 
+  // open or close the mute participant dialog.
+  const [isMuteParticipantDialogOpen, setMuteParticipantDialogOpen] = React.useState(false);
+
+  // set participant name you wanted to mute.
+  const [participantNameMuted, setParticipantNameMuted] = React.useState("-");
+
   // this one just triggers the re-rendering of the component.
   const [participantUpdated, setParticipantUpdated] = useState(false);
 
@@ -1543,7 +1549,11 @@ function AntMedia() {
             removeFakeParticipant,
             assignVideoToStream,
             showEmojis,
-            setShowEmojis
+            setShowEmojis,
+            isMuteParticipantDialogOpen,
+            setMuteParticipantDialogOpen,
+            participantNameMuted,
+            setParticipantNameMuted
           }}
         >
           <SnackbarProvider
