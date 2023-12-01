@@ -59,7 +59,7 @@
 		</repository>
 	</distributionManagement>
 	<build>
-		<finalName>StreamApp</finalName>
+		<finalName>ConferenceCall</finalName>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
 		<plugins>
 			<plugin>
