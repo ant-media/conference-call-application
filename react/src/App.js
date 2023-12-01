@@ -12,7 +12,6 @@ import translationEN from "i18n/en.json";
 import translationTR from "i18n/tr.json";
 import translationES from "i18n/es.json";
 import CustomRoutes from "CustomRoutes";
-import MuteParticipantDialog from "./Components/MuteParticipantDialog";
 
 const resources = {
   en: {
