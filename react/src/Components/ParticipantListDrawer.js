@@ -116,7 +116,7 @@ const ParticipantListDrawer = React.memo(props => {
           <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
             <TabPanel value={value} index={0}>
               <TabGrid container>
-                <ParticipantTab allParticipants={conference.allParticipants} />
+                <ParticipantTab />
               </TabGrid>
             </TabPanel>
           </Grid>

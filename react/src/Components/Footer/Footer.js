@@ -10,10 +10,12 @@ import ShareScreenButton from "./Components/ShareScreenButton";
 import MessageButton from "./Components/MessageButton";
 import ParticipantListButton from "./Components/ParticipantListButton";
 import EndCallButton from "./Components/EndCallButton";
+import FakeParticipantButton from "./Components/FakeParticipantButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
 import { getRoomNameAttribute } from 'utils';
+import ReactionsButton from "./Components/ReactionsButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -88,6 +90,10 @@ function Footer(props) {
                   </Grid>
                       : null}
 
+                  <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
+                    <ReactionsButton footer/>
+                  </Grid>
+
                   <Grid item xs={0}>
                     <MessageButton footer/>
                   </Grid>
@@ -97,6 +103,24 @@ function Footer(props) {
                   <Grid item xs={0}>
                     <EndCallButton footer/>
                   </Grid>
+                  {process.env.NODE_ENV === "development" ?
+                  <Grid item xs={0}>
+                    <FakeParticipantButton
+                      footer
+                      increment={true}
+                    />
+                  </Grid>
+                  : null}
+
+                  {process.env.NODE_ENV === "development" ?
+                  <Grid item xs={0}>
+                    <FakeParticipantButton
+                      footer
+                      increment={false}
+                    />
+                  </Grid>
+                  : null}
+
                 </Grid>
               </Grid>
 

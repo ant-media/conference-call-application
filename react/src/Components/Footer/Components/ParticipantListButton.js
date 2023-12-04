@@ -35,7 +35,7 @@ function ParticipantListButton({ footer, ...props }) {
                     color={conference?.participantListDrawerOpen ? 'primary' : 'secondary'}
                 >
                     <SvgIcon size={32} color={conference?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
-                    {conference.isPlayOnly === false ? conference.allParticipants.length + 1 : conference.allParticipants.length}
+                    {Object.keys(conference.allParticipants).length}
                 </CustomizedBtn>
             </Tooltip>
         );

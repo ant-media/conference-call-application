@@ -68,7 +68,7 @@ export function LayoutSettingsDialog(props) {
   const conference = React.useContext(ConferenceContext);
 
   const [value, setValue] = React.useState(
-    conference.globals.maxVideoTrackCount ? conference.globals.maxVideoTrackCount + 1 : 3
+    conference.globals.maxVideoTrackCount ? conference.globals.maxVideoTrackCount : 4
   );
   const [layout, setLayout] = React.useState(
     conference.pinnedVideoId !== null ? "sidebar" : "tiled"
@@ -210,7 +210,7 @@ export function LayoutSettingsDialog(props) {
                 max={30}
                 marks={[
                   {
-                    value: 3,
+                    value: 4,
                   },
                   {
                     value: 6,

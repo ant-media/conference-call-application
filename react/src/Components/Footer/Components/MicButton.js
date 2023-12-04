@@ -57,14 +57,7 @@ function MicButton(props) {
     }, {
       autoHideDuration: 1500,
     });
-    conference?.toggleSetMic({
-      eventStreamId: 'localVideo',
-      isMicMuted: true,
-    });
-    conference.muteLocalMic();
-    if (conference.publishStreamId) {
-      conference.handleSendNotificationEvent('MIC_MUTED', conference.publishStreamId);
-    }
+    conference?.muteLocalMic();
   };
 
   const handleUnmute = (e) => {
@@ -76,22 +69,12 @@ function MicButton(props) {
     }, {
       autoHideDuration: 1500,
     });
-    conference?.toggleSetMic({
-      eventStreamId: 'localVideo',
-      isMicMuted: false,
-    });
-    conference.unmuteLocalMic();
-    if (conference.publishStreamId) {
-      conference.handleSendNotificationEvent('MIC_UNMUTED', conference.publishStreamId);
-
-    }
+    conference?.unmuteLocalMic();
   };
-
-  const mic = conference?.mic?.find(m => m.eventStreamId === 'localVideo');
 
   return (
     <>
-      {mic && mic.isMicMuted ? (
+      {conference?.isMyMicMuted ? (
         <Tooltip title={t('Turn on microphone')} placement="top">
           <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="error" onClick={(e) => { handleUnmute(e) }}>
             <SvgIcon size={40} name={'muted-microphone'} color="#fff" />
