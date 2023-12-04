@@ -5,7 +5,7 @@ jdk:
 before_install:
 - wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/119.0.6045.105/linux64/chromedriver-linux64.zip
 - unzip chromedriver-linux64.zip
-- cp chromedriver-linux64/chromedriver /home/ubuntu
+- sudo cp chromedriver-linux64/chromedriver /home/ubuntu
 - pip3 install selenium==4.14
 - pip3 install requests
 - pip3 show selenium 
