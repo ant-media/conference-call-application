@@ -33,6 +33,22 @@ const JoinModes = {
   MCU: "mcu"
 }
 
+const qvgaConstraints = {
+  video: {width: {exact: 320}, height: {exact: 240}}
+};
+
+const vgaConstraints = {
+  video: {width: {exact: 640}, height: {exact: 480}}
+};
+
+const hdConstraints = {
+  video: {width: {exact: 1280}, height: {exact: 720}}
+};
+
+const fullHdConstraints = {
+  video: {width: {exact: 1920}, height: {exact: 1080}}
+};
+
 function getPlayToken() {
   const dataPlayToken = document.getElementById("root").getAttribute("data-play-token");
   return (dataPlayToken) ? dataPlayToken : getUrlParameter("playToken");
@@ -54,14 +70,6 @@ var scrollThreshold = -Infinity;
 var scroll_down = true;
 var last_warning_time = null;
 
-var videoQualityConstraints = {
-  video: {
-    width: { max: 320 },
-    height: { max: 240 },
-    frameRate: 15
-  }
-}
-
 var audioQualityConstraints = {
   audio: {
     noiseSuppression: true,
@@ -71,7 +79,7 @@ var audioQualityConstraints = {
 
 var mediaConstraints = {
   // setting constraints here breaks source switching on firefox.
-  video: videoQualityConstraints.video,
+  video: vgaConstraints.video,
   audio: audioQualityConstraints.audio,
 };
 
@@ -225,6 +233,9 @@ function AntMedia() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
 
+  // camera resolution for publishing
+  // possible values: "auto", "highDefinition", "standartDefinition", "lowDefinition"
+  const [cameraResolution, setCameraResolution] = React.useState("auto");
 
   const [messages, setMessages] = React.useState([]);
 
@@ -476,6 +487,10 @@ function AntMedia() {
     }
     createWebRTCAdaptor();
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    updateCameraResolution(false);
+  }, [cameraResolution]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   if (webRTCAdaptor) {
     webRTCAdaptor.callback = infoCallback;
@@ -768,11 +783,7 @@ function AntMedia() {
   }
   function screenShareOnNotification() {
     setIsScreenShared(true);
-    let requestedMediaConstraints = {
-      width: 1920,
-      height: 1080,
-    };
-    webRTCAdaptor.applyConstraints(requestedMediaConstraints);
+    updateCameraResolution(false)
     handleSendNotificationEvent(
       "SCREEN_SHARED_ON",
       publishStreamId
@@ -840,11 +851,7 @@ function AntMedia() {
         webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
       }
       screenShareOffNotification();
-      let requestedMediaConstraints = {
-        width: 320,
-        height: 240,
-      };
-      webRTCAdaptor.applyConstraints(requestedMediaConstraints);
+      updateCameraResolution(false);
       setCloseScreenShare(false);
     } else {
       setCloseScreenShare(true);
@@ -1083,14 +1090,7 @@ function AntMedia() {
           notificationEvent.streamId === publishStreamId &&
           !isScreenShared
         ) {
-          let requestedMediaConstraints = {
-            width: 640,
-            height: 480,
-            frameRate: 30
-          };
-          webRTCAdaptor.applyConstraints(
-            requestedMediaConstraints
-          );
+          updateCameraResolution(true);
         }
       }
       else if (eventType === "UNPIN_USER") {
@@ -1098,14 +1098,7 @@ function AntMedia() {
           notificationEvent.streamId === publishStreamId &&
           !isScreenShared
         ) {
-          let requestedMediaConstraints = {
-            width: 320,
-            height: 240,
-            frameRate: 15
-          };
-          webRTCAdaptor.applyConstraints(
-            requestedMediaConstraints
-          );
+          updateCameraResolution(false);
         }
       }
       else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
@@ -1216,6 +1209,51 @@ function AntMedia() {
   }
 
    */
+
+  function updateCameraResolution(isPinned) {
+    let promise = null;
+    let mediaConstraints = {video: true};
+
+    if (isScreenShared) {
+      mediaConstraints = fullHdConstraints;
+      mediaConstraints.frameRate = 25;
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+    } else if (cameraResolution === "auto" && !isPinned) {
+      mediaConstraints = qvgaConstraints;
+      mediaConstraints.frameRate = 15;
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+    } else if (cameraResolution === "auto" && isPinned) {
+      mediaConstraints = vgaConstraints;
+      mediaConstraints.frameRate = 25;
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+    } else if (cameraResolution === "highDefinition") {
+      mediaConstraints = hdConstraints;
+      mediaConstraints.frameRate = 15;
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+    } else if (cameraResolution === "standardDefinition") {
+      mediaConstraints = vgaConstraints;
+      mediaConstraints.frameRate = 15;
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+    } else if (cameraResolution === "lowDefinition") {
+      mediaConstraints = qvgaConstraints;
+      mediaConstraints.frameRate = 15;
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+    } else {
+      console.error("Unknown camera resolution: " + cameraResolution);
+    }
+
+    if (promise !== null) {
+      promise?.then(() => {
+        console.log("Camera resolution is updated to " + cameraResolution);
+        console.log("Video track settings: ", webRTCAdaptor?.mediaManager?.localStream?.getVideoTracks()[0]?.getSettings());
+      }).catch(err => {
+        setCameraResolution("auto");
+        console.error("Camera resolution is not updated to " + cameraResolution + ". Error is " + err);
+        console.info("Trying to update camera resolution to auto");
+      });
+    }
+
+  }
 
   function addMeAsParticipant() {
     let newVideoTrack = {
@@ -1553,7 +1591,9 @@ function AntMedia() {
             isMuteParticipantDialogOpen,
             setMuteParticipantDialogOpen,
             participantIdMuted,
-            setParticipantIdMuted
+            setParticipantIdMuted,
+            cameraResolution,
+            setCameraResolution
           }}
         >
           <SnackbarProvider

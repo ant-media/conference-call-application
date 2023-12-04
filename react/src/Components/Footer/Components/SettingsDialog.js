@@ -132,6 +132,34 @@ export function SettingsDialog(props) {
           </Grid>
           <Grid container sx={{ mt: 4 }}>
             <Grid container>
+              <InputLabel>{t('Camera Resolution')}</InputLabel>
+            </Grid>
+            <Grid container alignItems={'center'} spacing={2}>
+              <Grid item xs={10}>
+                <Select variant="outlined" fullWidth value={conference.cameraResolution} onChange={e => conference.setCameraResolution(e.target.value)} sx={{ color: 'white' }}>
+                  <MenuItem key="auto" value="auto">
+                    Auto
+                  </MenuItem>
+                  <MenuItem key="high-definition" value="highDefinition">
+                    High definition (720p)
+                  </MenuItem>
+                  <MenuItem key="standart-definition" value="standardDefinition">
+                    Standard definition (360p)
+                  </MenuItem>
+                  <MenuItem key="low-definition" value="lowDefinition">
+                    Low definition (180p)
+                  </MenuItem>
+                </Select>
+              </Grid>
+              <Hidden xsDown>
+                <Grid item>
+                  <SvgIcon size={36} name={'resolution'} color={'white'} />
+                </Grid>
+              </Hidden>
+            </Grid>
+          </Grid>
+          <Grid container sx={{ mt: 4 }}>
+            <Grid container>
               <InputLabel>{t('Background')}</InputLabel>
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
