@@ -28,7 +28,7 @@ class Browser:
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
     #self.driver = webdriver.Chrome('drivers/chromedriver.exe', chrome_options=browser_options)
 
-    service = Service(executable_path='./chromedriver')
+    service = Service(executable_path='/home/ubuntu/chromedriver')
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
   def open_in_new_tab(self, url, tab_id):
