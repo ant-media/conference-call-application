@@ -57,7 +57,7 @@ var videoQualityConstraints = {
   video: {
     width: { max: 320 },
     height: { max: 240 },
-    frameRate: { ideal: 15, max: 20 }
+    frameRate: 5
   }
 }
 
@@ -988,7 +988,7 @@ function AntMedia() {
           !isScreenShared
         ) {
           let requestedMediaConstraints = {
-            video: { width: 640, height: 480, frameRate: { ideal: 25, max: 30 } }
+            video: { width: 640, height: 480, frameRate: { exact: 25 } }
           };
           webRTCAdaptor.applyConstraints(
             requestedMediaConstraints
@@ -1000,7 +1000,7 @@ function AntMedia() {
           !isScreenShared
         ) {
           let requestedMediaConstraints = {
-            video: { width: 320, height: 240, frameRate: { ideal: 15, max: 20 } }
+            video: { width: 320, height: 240, frameRate: { exact: 10 } }
           };
           webRTCAdaptor.applyConstraints(
             requestedMediaConstraints
