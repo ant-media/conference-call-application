@@ -33,29 +33,56 @@ const JoinModes = {
   MCU: "mcu"
 }
 
-const qvgaConstraints = {
-  video: {
-    advanced: [{ width: 320, height: 240 }, { aspectRatio: 1.333 }]
-  }
-};
+function getMediaConstraints(cameraResolution, frameRate) {
+  let constraint = null;
 
-const vgaConstraints = {
-  video: {
-    advanced: [{ width: 640, height: 480 }, { aspectRatio: 1.333 }],
-  }
-};
+  switch (cameraResolution) {
+    case "qvgaConstraints":
+      constraint = {
+        video: {
+          width: {ideal: 320}, height: {ideal: 180},
+          advanced: [
+            {frameRate: {min: frameRate}}, {height: {min: 180}}, {width: {min: 320}}, {frameRate: {max: frameRate}}, {width: {max: 320}}, {height: {max: 180}}, {aspectRatio: {exact: 1.77778}}
+          ]
+        }
+      };
+      break;
+    case "vgaConstraints":
+      constraint = {
+        video: {
+          width: {ideal: 640}, height: {ideal: 360},
+          advanced: [
+            {frameRate: {min: frameRate}}, {height: {min: 360}}, {width: {min: 640}}, {frameRate: {max: frameRate}}, {width: {max: 640}}, {height: {max: 360}}, {aspectRatio: {exact: 1.77778}}
+          ]
+        }
+      };
+      break;
+    case "hdConstraints":
+      constraint = {
+        video: {
+          width: {ideal: 1280}, height: {ideal: 720},
+          advanced: [
+            {frameRate: {min: frameRate}}, {height: {min: 720}}, {width: {min: 1280}}, {frameRate: {max: frameRate}}, {width: {max: 1280}}, {height: {max: 720}}, {aspectRatio: {exact: 1.77778}}
+          ]
+        }
+      };
+      break;
+    case "fullHdConstraints":
+      constraint = {
+        video: {
+          width: {ideal: 1920}, height: {ideal: 1080},
+          advanced: [
+            {frameRate: {min: frameRate}}, {height: {min: 1080}}, {width: {min: 1920}}, {frameRate: {max: frameRate}}, {width: {max: 1920}}, {height: {max: 1080}}, {aspectRatio: {exact: 1.77778}}
+          ]
+        }
+      };
+      break;
+    default:
+      break;
+    }
 
-const hdConstraints = {
-  video: {
-    advanced: [{ width: 1280, height: 720 }, { aspectRatio: 1.333 }]
-  }
-};
-
-const fullHdConstraints = {
-  video: {
-    advanced: [{ width: 1920, height: 1280 }, { aspectRatio: 1.333 }]
-  }
-};
+    return constraint;
+}
 
 function getPlayToken() {
   const dataPlayToken = document.getElementById("root").getAttribute("data-play-token");
@@ -1223,29 +1250,23 @@ function AntMedia() {
     let mediaConstraints = {video: true};
 
     if (isScreenShared) {
-      mediaConstraints = fullHdConstraints;
-      mediaConstraints.frameRate = 25;
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+      mediaConstraints = getMediaConstraints("fullHdConstraints");
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 25);
     } else if (cameraResolution === "auto" && !isPinned) {
-      mediaConstraints = qvgaConstraints;
-      mediaConstraints.frameRate = 15;
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+      mediaConstraints = getMediaConstraints("qvgaConstraints");
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 15);
     } else if (cameraResolution === "auto" && isPinned) {
-      mediaConstraints = vgaConstraints;
-      mediaConstraints.frameRate = 25;
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+      mediaConstraints = getMediaConstraints("qvgaConstraints");
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 25);
     } else if (cameraResolution === "highDefinition") {
-      mediaConstraints = hdConstraints;
-      mediaConstraints.frameRate = 15;
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+      mediaConstraints = getMediaConstraints("hdConstraints");
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 15);
     } else if (cameraResolution === "standardDefinition") {
-      mediaConstraints = vgaConstraints;
-      mediaConstraints.frameRate = 15;
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+      mediaConstraints = getMediaConstraints("vgaConstraints");
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 15);
     } else if (cameraResolution === "lowDefinition") {
-      mediaConstraints = qvgaConstraints;
-      mediaConstraints.frameRate = 15;
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
+      mediaConstraints = getMediaConstraints("qvgaConstraints");
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 15);
     } else {
       console.error("Unknown camera resolution: " + cameraResolution);
     }
