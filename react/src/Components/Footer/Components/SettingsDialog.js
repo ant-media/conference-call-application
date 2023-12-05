@@ -109,30 +109,7 @@ export function SettingsDialog(props) {
           </Grid>
           <Grid container sx={{ mt: 4 }}>
             <Grid container>
-              <InputLabel>{t('Microphone')}</InputLabel>
-            </Grid>
-            <Grid container alignItems={'center'} spacing={2}>
-              <Grid item xs={10}>
-                <Select autoFocus={selectFocus === 'audio'} variant="outlined" fullWidth value={conference.selectedMicrophone} onChange={e => switchAudioMode(e.target.value)} sx={{ color: 'white' }}>
-                  {conference.devices && conference.devices?.length > 0 && conference.devices
-                    .filter(device => device.kind === 'audioinput')
-                    .map(device => (
-                      <MenuItem key={device.deviceId} value={device.deviceId}>
-                        {device.label}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </Grid>
-              <Hidden xsDown>
-                <Grid item>
-                  <SvgIcon size={36} name={'microphone'} color={'white'} />
-                </Grid>
-              </Hidden>
-            </Grid>
-          </Grid>
-          <Grid container sx={{ mt: 4 }}>
-            <Grid container>
-              <InputLabel>{t('Camera Resolution')}</InputLabel>
+              <InputLabel>{t('Video Send resolution (maximum)')}</InputLabel>
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
@@ -154,6 +131,29 @@ export function SettingsDialog(props) {
               <Hidden xsDown>
                 <Grid item>
                   <SvgIcon size={36} name={'resolution'} color={'white'} />
+                </Grid>
+              </Hidden>
+            </Grid>
+          </Grid>
+          <Grid container sx={{ mt: 4 }}>
+            <Grid container>
+              <InputLabel>{t('Microphone')}</InputLabel>
+            </Grid>
+            <Grid container alignItems={'center'} spacing={2}>
+              <Grid item xs={10}>
+                <Select autoFocus={selectFocus === 'audio'} variant="outlined" fullWidth value={conference.selectedMicrophone} onChange={e => switchAudioMode(e.target.value)} sx={{ color: 'white' }}>
+                  {conference.devices && conference.devices?.length > 0 && conference.devices
+                    .filter(device => device.kind === 'audioinput')
+                    .map(device => (
+                      <MenuItem key={device.deviceId} value={device.deviceId}>
+                        {device.label}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </Grid>
+              <Hidden xsDown>
+                <Grid item>
+                  <SvgIcon size={36} name={'microphone'} color={'white'} />
                 </Grid>
               </Hidden>
             </Grid>
