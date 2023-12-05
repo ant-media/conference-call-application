@@ -1218,6 +1218,12 @@ function AntMedia() {
    */
 
   function addMeAsParticipant() {
+    let isParticipantExist = participants.find((p) => p.id === "localVideo");
+
+    if(isParticipantExist) {
+        return;
+    }
+
     let newVideoTrack = {
       id: "localVideo",
       videoLabel: "myVideo",
