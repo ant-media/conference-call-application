@@ -34,19 +34,27 @@ const JoinModes = {
 }
 
 const qvgaConstraints = {
-  video: {width: {exact: 320}, height: {exact: 240}}
+  video: {
+    advanced: [{ width: 320, height: 240 }, { aspectRatio: 1.333 }]
+  }
 };
 
 const vgaConstraints = {
-  video: {width: {exact: 640}, height: {exact: 480}}
+  video: {
+    advanced: [{ width: 640, height: 480 }, { aspectRatio: 1.333 }],
+  }
 };
 
 const hdConstraints = {
-  video: {width: {exact: 1280}, height: {exact: 720}}
+  video: {
+    advanced: [{ width: 1280, height: 720 }, { aspectRatio: 1.333 }]
+  }
 };
 
 const fullHdConstraints = {
-  video: {width: {exact: 1920}, height: {exact: 1080}}
+  video: {
+    advanced: [{ width: 1920, height: 1280 }, { aspectRatio: 1.333 }]
+  }
 };
 
 function getPlayToken() {
@@ -1244,11 +1252,12 @@ function AntMedia() {
 
     if (promise !== null) {
       promise?.then(() => {
-        console.log("Camera resolution is updated to " + cameraResolution);
-        console.log("Video track settings: ", webRTCAdaptor?.mediaManager?.localStream?.getVideoTracks()[0]?.getSettings());
+        console.info("Camera resolution is updated to " + cameraResolution + " mode");
+        let videoTrackSettings = webRTCAdaptor?.mediaManager?.localStream?.getVideoTracks()[0]?.getSettings();
+        console.info("Video track resolution: ", videoTrackSettings?.width, "x", videoTrackSettings?.height, " frame rate: ", videoTrackSettings?.frameRate);
       }).catch(err => {
         setCameraResolution("auto");
-        console.error("Camera resolution is not updated to " + cameraResolution + ". Error is " + err);
+        console.error("Camera resolution is not updated to " + cameraResolution + " mode. Error is " + err);
         console.info("Trying to update camera resolution to auto");
       });
     }
