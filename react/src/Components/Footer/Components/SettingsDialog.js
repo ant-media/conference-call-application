@@ -113,7 +113,7 @@ export function SettingsDialog(props) {
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
-                <Select variant="outlined" fullWidth value={conference.videoSendResolution} onChange={e => conference.videoSendResolution(e.target.value)} sx={{ color: 'white' }}>
+                <Select variant="outlined" fullWidth value={conference.videoSendResolution} onChange={e => conference.setVideoSendResolution(e.target.value)} sx={{ color: 'white' }}>
                   <MenuItem key="auto" value="auto">
                     Auto
                   </MenuItem>
