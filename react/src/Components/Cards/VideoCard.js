@@ -116,6 +116,8 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
     isOff = false;
   }
   const mic = mediaSettings?.mic?.find((m) => m.eventStreamId === props?.id);
+  const cam = mediaSettings?.cam?.find((c) => c.eventStreamId === props?.id);
+
 
   const [isTalking, setIsTalking] = React.useState(false);
   const timeoutRef = React.useRef(null);
@@ -210,8 +212,9 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
               </Grid>
               { props.id !== 'localVideo' && antmedia.admin && antmedia.admin === true ?
               <Grid item>
+               {cam && cam.isCameraOn ?
                 <Tooltip
-                    title={`Camera off ${
+                    title={`Camera on ${
                         props.name
                     }`}
                     placement="top"
@@ -226,19 +229,39 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                   >
                     <SvgIcon
                         size={36}
+                        name={"camera"}
+                        color={theme.palette.grey[80]}
+                    />
+                  </Fab>
+                </Tooltip>
+                 :
+                <Tooltip
+                    title={`Camera off ${
+                        props.name
+                    }`}
+                    placement="top"
+                >
+                  <Fab
+                      color="error"
+                      aria-label="add"
+                      size="small"
+                  >
+                    <SvgIcon
+                        size={36}
                         name={"camera-off"}
                         color={theme.palette.grey[80]}
                     />
                   </Fab>
                 </Tooltip>
+                 }
               </Grid>
               : null }
-
+              {/* this for the icon of mice in admin control of speaker mic */}
               { props.id !== 'localVideo' && antmedia.admin && antmedia.admin === true ?
               <Grid item>
                 {mic && !mic.isMicMuted ?
                   <Tooltip
-                      title={`Microphone off ${
+                      title={`Microphone on ${
                           props.name
                       }`}
                       placement="top"
@@ -253,13 +276,13 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                     >
                       <SvgIcon
                           size={36}
-                          name={"muted-microphone"}
+                          name={"microphone"}
                           color={theme.palette.grey[80]}
                       />
                     </Fab>
                   </Tooltip>
                 : <Tooltip
-                        title={`Microphone on ${
+                        title={`Microphone off ${
                             props.name
                         }`}
                         placement="top"
@@ -268,13 +291,13 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                           onClick={()=>{
                             antmedia.handleSendMessage("admin*publisher_room*"+props.id+"*OPEN_YOUR_MICROPHONE");
                           }}
-                          color="primary"
+                          color="error"
                           aria-label="add"
                           size="small"
                       >
                         <SvgIcon
                             size={36}
-                            name={"microphone"}
+                            name={"muted-microphone"}
                             color={theme.palette.grey[80]}
                         />
                       </Fab>

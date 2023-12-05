@@ -94,14 +94,14 @@ function MicButton(props) {
     <>
       {cam && cam.isCameraOn ? (
         <Tooltip title={isScreenShared ? t('Camera is disabled while screensharing') : t('Turn off camera')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={isScreenShared} onClick={(e) => handleOff(e)}>
-            <SvgIcon size={40} name={'camera-off'} color='inherit' />
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={isScreenShared} onClick={(e) => handleOff(e)}>
+            <SvgIcon size={40} name={'camera'} color='inherit' />
           </CustomizedBtn>
         </Tooltip>
       ) : (
         <Tooltip title={isScreenShared ? t('Camera is disabled while screensharing') : t('Turn on camera')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={isScreenShared} onClick={(e) => handleOn(e)}>
-            <SvgIcon size={40} name={'camera'} color="#fff" />
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={isScreenShared} onClick={(e) => handleOn(e)}>
+            <SvgIcon size={40} name={'camera-off'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
       )}

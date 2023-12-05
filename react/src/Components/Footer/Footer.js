@@ -71,10 +71,11 @@ function Footer(props) {
                   </Grid>
                       : null}
 
-
+                  {antmedia.onlyDataChannel === false ?
                   <Grid item xs={0}>
                       <ParticipantListButton footer />
                   </Grid>
+                 : null}
 
                   {antmedia.admin === true ?
                     <Grid item xs={0}>
