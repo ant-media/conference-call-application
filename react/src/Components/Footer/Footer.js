@@ -1,7 +1,7 @@
 import React from "react";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import styled from "@mui/material/styles/styled";
+import { styled } from "@mui/material";
 import InfoButton from "./Components/InfoButton";
 import MicButton from "./Components/MicButton";
 import CameraButton from "./Components/CameraButton";

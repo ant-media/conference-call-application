@@ -85,12 +85,12 @@ function getMediaConstraints(videoSendResolution, frameRate) {
 }
 
 function getPlayToken() {
-  const dataPlayToken = document.getElementById("root").getAttribute("data-play-token");
+  const dataPlayToken = document.getElementById("root")?.getAttribute("data-play-token");
   return (dataPlayToken) ? dataPlayToken : getUrlParameter("playToken");
 }
 
 function getPublishToken() {
-  const dataPublishToken = document.getElementById("root").getAttribute("data-publish-token");
+  const dataPublishToken = document.getElementById("root")?.getAttribute("data-publish-token");
   return (dataPublishToken) ? dataPublishToken : getUrlParameter("publishToken");
 }
 
