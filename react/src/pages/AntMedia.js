@@ -33,10 +33,10 @@ const JoinModes = {
   MCU: "mcu"
 }
 
-function getMediaConstraints(cameraResolution, frameRate) {
+function getMediaConstraints(videoSendResolution, frameRate) {
   let constraint = null;
 
-  switch (cameraResolution) {
+  switch (videoSendResolution) {
     case "qvgaConstraints":
       constraint = {
         video: {
@@ -123,6 +123,13 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
+if (localStorage.getItem('selectedCamera')) {
+    mediaConstraints.video.deviceId = localStorage.getItem('selectedCamera');
+}
+
+if (localStorage.getItem('selectedMicrophone')) {
+    mediaConstraints.audio.deviceId = localStorage.getItem('selectedMicrophone');
+}
 
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
@@ -265,8 +272,8 @@ function AntMedia() {
 
   const [talkers, setTalkers] = useState([]);
   const [isPublished, setIsPublished] = useState(false);
-  const [selectedCamera, setSelectedCamera] = React.useState("");
-  const [selectedMicrophone, setSelectedMicrophone] = React.useState("");
+  const [selectedCamera, setSelectedCamera] = React.useState(localStorage.getItem('selectedCamera'));
+  const [selectedMicrophone, setSelectedMicrophone] = React.useState(localStorage.getItem('selectedMicrophone'));
   const [selectedBackgroundMode, setSelectedBackgroundMode] = React.useState("");
   const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
   const [virtualBackground, setVirtualBackground] = React.useState(null);
@@ -274,9 +281,9 @@ function AntMedia() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
 
-  // camera resolution for publishing
+  // video send resolution for publishing
   // possible values: "auto", "highDefinition", "standartDefinition", "lowDefinition"
-  const [cameraResolution, setCameraResolution] = React.useState("auto");
+  const [videoSendResolution, setVideoSendResolution] = React.useState(localStorage.getItem("videoSendResolution") ? localStorage.getItem("videoSendResolution") : "auto");
 
   const [messages, setMessages] = React.useState([]);
 
@@ -327,6 +334,8 @@ function AntMedia() {
       }
     }
 
+    //debugger;
+
     // if the selected devices are not available, select the first available device
     if (selectedDevices.videoDeviceId === '' || isVideoDeviceAvailable === false) {
       const camera = devices.find(d => d.kind === 'videoinput');
@@ -343,10 +352,10 @@ function AntMedia() {
 
     setSelectedDevices(selectedDevices);
 
-    if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId) {
+    if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
       webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
     }
-    if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default')) {
+    if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
       webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
     }
   }
@@ -530,8 +539,13 @@ function AntMedia() {
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    updateCameraResolution(pinnedVideoId === "localVideo");
-  }, [cameraResolution, isScreenShared, pinnedVideoId]);  // eslint-disable-line react-hooks/exhaustive-deps
+    checkAndUpdateVideoAudioSources();
+  }, [devices]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    updateVideoSendResolution(pinnedVideoId === "localVideo");
+    localStorage.setItem('videoSendResolution', videoSendResolution);
+  }, [videoSendResolution, isScreenShared, pinnedVideoId]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   if (webRTCAdaptor) {
     webRTCAdaptor.callback = infoCallback;
@@ -599,7 +613,6 @@ function AntMedia() {
       } catch (e) { }
     } else if (info === "available_devices") {
       setDevices(obj);
-      checkAndUpdateVideoAudioSources();
 
     } else if (info === "updated_stats") {
       let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
@@ -891,7 +904,7 @@ function AntMedia() {
         webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
       }
       screenShareOffNotification();
-      updateCameraResolution(false);
+      updateVideoSendResolution(false);
       setCloseScreenShare(false);
     } else {
       setCloseScreenShare(true);
@@ -1130,7 +1143,7 @@ function AntMedia() {
           notificationEvent.streamId === publishStreamId &&
           !isScreenShared
         ) {
-          updateCameraResolution(true);
+          updateVideoSendResolution(true);
         }
       }
       else if (eventType === "UNPIN_USER") {
@@ -1138,7 +1151,7 @@ function AntMedia() {
           notificationEvent.streamId === publishStreamId &&
           !isScreenShared
         ) {
-          updateCameraResolution(false);
+          updateVideoSendResolution(false);
         }
       }
       else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
@@ -1250,40 +1263,40 @@ function AntMedia() {
 
    */
 
-  function updateCameraResolution(isPinned) {
+  function updateVideoSendResolution(isPinned) {
     let promise = null;
     let mediaConstraints = {video: true};
 
     if (isScreenShared) {
       mediaConstraints = getMediaConstraints("fullHdConstraints", 25);
       promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
-    } else if (cameraResolution === "auto" && !isPinned) {
+    } else if (videoSendResolution === "auto" && !isPinned) {
       mediaConstraints = getMediaConstraints("qvgaConstraints", 15);
       promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
-    } else if (cameraResolution === "auto" && isPinned) {
+    } else if (videoSendResolution === "auto" && isPinned) {
       mediaConstraints = getMediaConstraints("qvgaConstraints", 25);
       promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
-    } else if (cameraResolution === "highDefinition") {
+    } else if (videoSendResolution === "highDefinition") {
       mediaConstraints = getMediaConstraints("hdConstraints", 15);
       promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
-    } else if (cameraResolution === "standardDefinition") {
+    } else if (videoSendResolution === "standardDefinition") {
       mediaConstraints = getMediaConstraints("vgaConstraints", 15);
       promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
-    } else if (cameraResolution === "lowDefinition") {
+    } else if (videoSendResolution === "lowDefinition") {
       mediaConstraints = getMediaConstraints("qvgaConstraints", 15);
       promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
     } else {
-      console.error("Unknown camera resolution: " + cameraResolution);
+      console.error("Unknown camera resolution: " + videoSendResolution);
     }
 
     if (promise !== null) {
       promise?.then(() => {
-        console.info("Camera resolution is updated to " + cameraResolution + " mode");
+        console.info("Camera resolution is updated to " + videoSendResolution + " mode");
         let videoTrackSettings = webRTCAdaptor?.mediaManager?.localStream?.getVideoTracks()[0]?.getSettings();
         console.info("Video track resolution: ", videoTrackSettings?.width, "x", videoTrackSettings?.height, " frame rate: ", videoTrackSettings?.frameRate);
       }).catch(err => {
-        setCameraResolution("auto");
-        console.error("Camera resolution is not updated to " + cameraResolution + " mode. Error is " + err);
+        setVideoSendResolution("auto");
+        console.error("Camera resolution is not updated to " + videoSendResolution + " mode. Error is " + err);
         console.info("Trying to update camera resolution to auto");
       });
     }
@@ -1443,15 +1456,17 @@ function AntMedia() {
   function setSelectedDevices(devices) {
     if (devices.videoDeviceId !== null && devices.videoDeviceId !== undefined) {
       setSelectedCamera(devices.videoDeviceId);
+      localStorage.setItem("selectedCamera", devices.videoDeviceId);
     }
     if (devices.audioDeviceId !== null && devices.audioDeviceId !== undefined) {
       setSelectedMicrophone(devices.audioDeviceId);
+      localStorage.setItem("selectedMicrophone", devices.audioDeviceId);
     }
   }
 
   function cameraSelected(value) {
     if (selectedCamera !== value) {
-      setSelectedCamera(value);
+      setSelectedDevices({ videoDeviceId: value });
       // When we first open home page, React will call this function and local stream is null at that time.
       // So, we need to catch the error.
       try {
@@ -1463,13 +1478,15 @@ function AntMedia() {
   }
 
   function microphoneSelected(value) {
-    setSelectedMicrophone(value);
-    // When we first open home page, React will call this function and local stream is null at that time.
-    // So, we need to catch the error.
-    try {
-      webRTCAdaptor.switchAudioInputSource(publishStreamId, value);
-    } catch (e) {
-      console.log("Local stream is not ready yet.");
+    if (selectedMicrophone !== value) {
+      setSelectedDevices({audioDeviceId: value});
+      // When we first open home page, React will call this function and local stream is null at that time.
+      // So, we need to catch the error.
+      try {
+        webRTCAdaptor.switchAudioInputSource(publishStreamId, value);
+      } catch (e) {
+        console.log("Local stream is not ready yet.");
+      }
     }
   }
 
@@ -1627,8 +1644,8 @@ function AntMedia() {
             setMuteParticipantDialogOpen,
             participantIdMuted,
             setParticipantIdMuted,
-            cameraResolution,
-            setCameraResolution
+            videoSendResolution,
+            setVideoSendResolution
           }}
         >
           <SnackbarProvider

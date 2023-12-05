@@ -64,8 +64,8 @@ export function SettingsDialog(props) {
     if (conference.devices) {
       const camera = conference.devices.find(d => d.kind === 'videoinput');
       const audio = conference.devices.find(d => d.kind === 'audioinput');
-      if (camera && conference.selectedCamera === '') conference.cameraSelected(camera.deviceId);
-      if (audio && conference.selectedMicrophone === '') conference.microphoneSelected(audio.deviceId);
+      if (camera && (conference.selectedCamera === '' || conference.selectedCamera === null)) conference.cameraSelected(camera.deviceId);
+      if (audio && (conference.selectedMicrophone === '' || conference.selectedMicrophone === null)) conference.microphoneSelected(audio.deviceId);
       if (conference.selectedBackgroundMode === '') conference.setSelectedBackgroundMode('none');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -113,7 +113,7 @@ export function SettingsDialog(props) {
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
-                <Select variant="outlined" fullWidth value={conference.cameraResolution} onChange={e => conference.setCameraResolution(e.target.value)} sx={{ color: 'white' }}>
+                <Select variant="outlined" fullWidth value={conference.videoSendResolution} onChange={e => conference.videoSendResolution(e.target.value)} sx={{ color: 'white' }}>
                   <MenuItem key="auto" value="auto">
                     Auto
                   </MenuItem>
