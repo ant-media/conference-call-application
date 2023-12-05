@@ -9,6 +9,7 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
+import { useBeforeUnload } from "react-router-dom";
 import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor";
 import { VideoEffect } from "@antmedia/webrtc_adaptor";
 
@@ -1176,16 +1177,24 @@ function AntMedia() {
   function handleLeaveFromRoom() {
     // we need to empty participant array. if we are going to leave it in the first place.
     setParticipants([]);
+    setAllParticipants({});
 
     clearInterval(audioListenerIntervalJob);
     audioListenerIntervalJob = null;
 
-    webRTCAdaptor.stop(publishStreamId);
-    webRTCAdaptor.stop(roomName);
+    webRTCAdaptor?.stop(publishStreamId);
+    webRTCAdaptor?.stop(roomName);
 
-    webRTCAdaptor.turnOffLocalCamera(publishStreamId);
+    webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
     setWaitingOrMeetingRoom("waiting");
   }
+
+  // when user closes the tab or refreshes the page
+  // we need to leave the room
+  useBeforeUnload((ev) => {
+    handleLeaveFromRoom();
+  });
+
   function handleSendNotificationEvent(eventType, publishStreamId, info) {
     let notEvent = {
       streamId: publishStreamId,
