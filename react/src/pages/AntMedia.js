@@ -301,10 +301,7 @@ function AntMedia() {
 
   function reconnectionInProgress() {
     //reset UI releated states
-    setParticipants([]);
-    setAllParticipants([]);
-
-    addMeAsParticipant();
+    removeAllRemoteParticipants();
 
     reconnecting = true;
     publishReconnected = false;
@@ -589,11 +586,7 @@ function AntMedia() {
       errorMessage = message;
     }
     if (error.indexOf("no_active_streams_in_room") !== -1) {
-      // if there is no active stream in the room then we are going to clear the participant list.
-
-      //FIXME: check the following 2 lines
-      //setParticipants([]);
-      //setAllParticipants([]);
+      errorMessage = "No active stream in the room.";
     }
     errorMessage = JSON.stringify(error);
     if (error.indexOf("NotFoundError") !== -1) {
@@ -641,6 +634,7 @@ function AntMedia() {
       handleScreenshareNotFromPlatform();
     } else if (error.indexOf("WebSocketNotConnected") !== -1) {
       errorMessage = "WebSocket Connection is disconnected.";
+      removeAllRemoteParticipants();
     }
     else if (error.indexOf("already_publishing") !== -1) {
       console.log("**** already publishing:" + reconnecting);
@@ -1216,6 +1210,26 @@ function AntMedia() {
   }
 
    */
+
+  function removeAllRemoteParticipants() {
+    let newVideoTrack = {
+      id: "localVideo",
+      videoLabel: "myVideo",
+      track: null,
+      isCameraOn: false,
+      streamId: publishStreamId,
+      name: "You",
+      isMine: true
+    };
+
+    let tempParticipants = [];
+    tempParticipants.push(newVideoTrack);
+    setParticipants(tempParticipants);
+
+    let allParticipantsTemp = {};
+    allParticipantsTemp[publishStreamId] = {name:"You"};
+    setAllParticipants(allParticipantsTemp);
+  }
 
   function addMeAsParticipant() {
     let isParticipantExist = participants.find((p) => p.id === "localVideo");
