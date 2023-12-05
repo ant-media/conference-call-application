@@ -530,8 +530,8 @@ function AntMedia() {
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    updateCameraResolution(false);
-  }, [cameraResolution]);  // eslint-disable-line react-hooks/exhaustive-deps
+    updateCameraResolution(pinnedVideoId === "localVideo");
+  }, [cameraResolution, isScreenShared, pinnedVideoId]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   if (webRTCAdaptor) {
     webRTCAdaptor.callback = infoCallback;
@@ -824,7 +824,6 @@ function AntMedia() {
   }
   function screenShareOnNotification() {
     setIsScreenShared(true);
-    updateCameraResolution(false)
     handleSendNotificationEvent(
       "SCREEN_SHARED_ON",
       publishStreamId
