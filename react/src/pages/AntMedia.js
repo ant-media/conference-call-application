@@ -114,9 +114,15 @@ var audioQualityConstraints = {
 
 var mediaConstraints = {
   // setting constraints here breaks source switching on firefox.
-  video: vgaConstraints.video,
+  video: {
+        width: {ideal: 640}, height: {ideal: 360},
+        advanced: [
+          {frameRate: {min: 15}}, {height: {min: 360}}, {width: {min: 640}}, {frameRate: {max: 15}}, {width: {max: 640}}, {height: {max: 360}}, {aspectRatio: {exact: 1.77778}}
+        ]
+      },
   audio: audioQualityConstraints.audio,
 };
+
 
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
@@ -1250,23 +1256,23 @@ function AntMedia() {
     let mediaConstraints = {video: true};
 
     if (isScreenShared) {
-      mediaConstraints = getMediaConstraints("fullHdConstraints");
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 25);
+      mediaConstraints = getMediaConstraints("fullHdConstraints", 25);
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
     } else if (cameraResolution === "auto" && !isPinned) {
-      mediaConstraints = getMediaConstraints("qvgaConstraints");
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 15);
+      mediaConstraints = getMediaConstraints("qvgaConstraints", 15);
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
     } else if (cameraResolution === "auto" && isPinned) {
-      mediaConstraints = getMediaConstraints("qvgaConstraints");
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 25);
+      mediaConstraints = getMediaConstraints("qvgaConstraints", 25);
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
     } else if (cameraResolution === "highDefinition") {
-      mediaConstraints = getMediaConstraints("hdConstraints");
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 15);
+      mediaConstraints = getMediaConstraints("hdConstraints", 15);
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
     } else if (cameraResolution === "standardDefinition") {
-      mediaConstraints = getMediaConstraints("vgaConstraints");
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 15);
+      mediaConstraints = getMediaConstraints("vgaConstraints", 15);
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
     } else if (cameraResolution === "lowDefinition") {
-      mediaConstraints = getMediaConstraints("qvgaConstraints");
-      promise = webRTCAdaptor?.applyConstraints(mediaConstraints, 15);
+      mediaConstraints = getMediaConstraints("qvgaConstraints", 15);
+      promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
     } else {
       console.error("Unknown camera resolution: " + cameraResolution);
     }
