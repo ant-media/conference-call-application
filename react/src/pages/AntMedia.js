@@ -105,6 +105,15 @@ var scrollThreshold = -Infinity;
 var scroll_down = true;
 var last_warning_time = null;
 
+var videoQualityConstraints = {
+  video: {
+    width: {ideal: 640}, height: {ideal: 360},
+    advanced: [
+      {frameRate: {min: 15}}, {height: {min: 360}}, {width: {min: 640}}, {frameRate: {max: 15}}, {width: {max: 640}}, {height: {max: 360}}, {aspectRatio: {exact: 1.77778}}
+    ]
+  },
+}
+
 var audioQualityConstraints = {
   audio: {
     noiseSuppression: true,
@@ -114,12 +123,7 @@ var audioQualityConstraints = {
 
 var mediaConstraints = {
   // setting constraints here breaks source switching on firefox.
-  video: {
-        width: {ideal: 640}, height: {ideal: 360},
-        advanced: [
-          {frameRate: {min: 15}}, {height: {min: 360}}, {width: {min: 640}}, {frameRate: {max: 15}}, {width: {max: 640}}, {height: {max: 360}}, {aspectRatio: {exact: 1.77778}}
-        ]
-      },
+  video: videoQualityConstraints.video,
   audio: audioQualityConstraints.audio,
 };
 
@@ -333,8 +337,6 @@ function AntMedia() {
         isAudioDeviceAvailable = true;
       }
     }
-
-    //debugger;
 
     // if the selected devices are not available, select the first available device
     if (selectedDevices.videoDeviceId === '' || isVideoDeviceAvailable === false) {
