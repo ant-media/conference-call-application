@@ -1122,7 +1122,9 @@ function AntMedia() {
           assignVideoToStream(videoLab, eventStreamId);
         }
 
-        pinVideo(videoLab, videoLab);
+        if (videoLab !== "localVideo") {
+          pinVideo(videoLab, videoLab);
+        }
         setScreenSharedVideoId(eventStreamId);
         webRTCAdaptor.getBroadcastObject(eventStreamId);
       }
