@@ -635,7 +635,6 @@ function AntMedia() {
       handleScreenshareNotFromPlatform();
     } else if (error.indexOf("WebSocketNotConnected") !== -1) {
       errorMessage = "WebSocket Connection is disconnected.";
-      removeAllRemoteParticipants();
     }
     else if (error.indexOf("already_publishing") !== -1) {
       console.log("**** already publishing:" + reconnecting);
