@@ -353,15 +353,19 @@ function VideoCard(props) {
       conference.setLocalVideo();
     }
   };
-
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+  
   return isLocal || props.track?.kind !== "audio" ? (
     <>
       <Grid
         container
         style={{
           height: "100%",
-          width: "100%",
+          width: isLocal && isMobileDevice ? "50%" : "100%", 
           position: "relative",
+          margin: "auto"
         }}
         onMouseEnter={() => setDisplayHover(true)}
         onMouseLeave={(e) => setDisplayHover(false)}
