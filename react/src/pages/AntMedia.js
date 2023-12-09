@@ -9,6 +9,7 @@ import { useSnackbar } from "notistack";
 import { SnackbarProvider } from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
 import LeftTheRoom from "./LeftTheRoom";
+import { useBeforeUnload } from "react-router-dom";
 import { WebRTCAdaptor } from "@antmedia/webrtc_adaptor";
 import { VideoEffect } from "@antmedia/webrtc_adaptor";
 
@@ -364,10 +365,7 @@ function AntMedia() {
 
   function reconnectionInProgress() {
     //reset UI releated states
-    setParticipants([]);
-    setAllParticipants([]);
-
-    addMeAsParticipant();
+    removeAllRemoteParticipants();
 
     reconnecting = true;
     publishReconnected = false;
@@ -660,11 +658,7 @@ function AntMedia() {
       errorMessage = message;
     }
     if (error.indexOf("no_active_streams_in_room") !== -1) {
-      // if there is no active stream in the room then we are going to clear the participant list.
-
-      //FIXME: check the following 2 lines
-      //setParticipants([]);
-      //setAllParticipants([]);
+      errorMessage = "No active stream in the room.";
     }
     errorMessage = JSON.stringify(error);
     if (error.indexOf("NotFoundError") !== -1) {
@@ -1232,16 +1226,24 @@ function AntMedia() {
   function handleLeaveFromRoom() {
     // we need to empty participant array. if we are going to leave it in the first place.
     setParticipants([]);
+    setAllParticipants({});
 
     clearInterval(audioListenerIntervalJob);
     audioListenerIntervalJob = null;
 
-    webRTCAdaptor.stop(publishStreamId);
-    webRTCAdaptor.stop(roomName);
+    webRTCAdaptor?.stop(publishStreamId);
+    webRTCAdaptor?.stop(roomName);
 
-    webRTCAdaptor.turnOffLocalCamera(publishStreamId);
+    webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
     setWaitingOrMeetingRoom("waiting");
   }
+
+  // when user closes the tab or refreshes the page
+  // we need to leave the room
+  useBeforeUnload((ev) => {
+    handleLeaveFromRoom();
+  });
+
   function handleSendNotificationEvent(eventType, publishStreamId, info) {
     let notEvent = {
       streamId: publishStreamId,
@@ -1251,21 +1253,6 @@ function AntMedia() {
     console.info("send notification event", notEvent);
     webRTCAdaptor.sendData(publishStreamId, JSON.stringify(notEvent));
   }
-
-  /*
-  function updateStatus(obj) {
-    if (roomName !== obj) {
-      handleSendNotificationEvent("UPDATE_STATUS", publishStreamId, {
-        mic: !!mic.find((c) => c.eventStreamId === "localVideo")?.isMicMuted,
-        camera: !!cam.find((c) => c.eventStreamId === "localVideo")?.isCameraOn,
-        isPinned:
-          pinnedVideoId === "localVideo" ? publishStreamId : pinnedVideoId,
-        isScreenShared: isScreenShared,
-      });
-    }
-  }
-
-   */
 
   function updateVideoSendResolution(isPinned) {
     let promise = null;
@@ -1305,9 +1292,33 @@ function AntMedia() {
       });
     }
 
+  function removeAllRemoteParticipants() {
+    let newVideoTrack = {
+      id: "localVideo",
+      videoLabel: "myVideo",
+      track: null,
+      isCameraOn: false,
+      streamId: publishStreamId,
+      name: "You",
+      isMine: true
+    };
+
+    let tempParticipants = [];
+    tempParticipants.push(newVideoTrack);
+    setParticipants(tempParticipants);
+
+    let allParticipantsTemp = {};
+    allParticipantsTemp[publishStreamId] = {name:"You"};
+    setAllParticipants(allParticipantsTemp);
   }
 
   function addMeAsParticipant() {
+    let isParticipantExist = participants.find((p) => p.id === "localVideo");
+
+    if(isParticipantExist) {
+        return;
+    }
+
     let newVideoTrack = {
       id: "localVideo",
       videoLabel: "myVideo",
