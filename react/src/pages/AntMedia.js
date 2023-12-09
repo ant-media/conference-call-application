@@ -1291,6 +1291,7 @@ function AntMedia() {
         console.info("Trying to update camera resolution to auto");
       });
     }
+  }
 
   function removeAllRemoteParticipants() {
     let newVideoTrack = {
