@@ -61,6 +61,7 @@ function Footer(props) {
               <InfoButton/>
             </Grid>
           </Grid>
+          {conference.isPlayOnly === false || conference.isEnterDirectly === false ?
               <Grid item>
                 <Grid
                     container
@@ -123,6 +124,7 @@ function Footer(props) {
 
                 </Grid>
               </Grid>
+        : null}
 
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <TimeZone/>

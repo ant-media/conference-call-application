@@ -49,6 +49,7 @@ var publishToken = getPublishToken();
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var InitialStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
+var enterDirectly = getUrlParameter("enterDirectly");
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
@@ -76,6 +77,14 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
+if (playOnly) {
+    mediaConstraints = {
+        video: false,
+        audio: false,
+    };
+
+}
+
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
@@ -100,6 +109,32 @@ if (!websocketURL) {
     }
   }
 
+}
+
+let restApiBaseUrl = process.env.REACT_APP_REST_BASE_URL;
+
+if (!restApiBaseUrl) {
+  const appName = window.location.pathname.substring(
+      0,
+      window.location.pathname.lastIndexOf("/") + 1
+  );
+  if (window.location.port === "") {
+    restApiBaseUrl =
+        window.location.protocol +
+        "//" +
+        window.location.hostname +
+        "/" +
+        appName;
+  } else {
+    restApiBaseUrl =
+        window.location.protocol +
+        "//" +
+        window.location.hostname +
+        ":" +
+        window.location.port +
+        "/" +
+        appName;
+  }
 }
 
 var fullScreenId = -1;
@@ -173,6 +208,10 @@ function AntMedia() {
   // this one just triggers the re-rendering of the component.
   const [participantUpdated, setParticipantUpdated] = useState(false);
 
+  const [isRecordPluginInstalled, setIsRecordPluginInstalled] = useState(false);
+
+  const [isRecordPluginActive, setIsRecordPluginActive] = useState(false);
+
   const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
@@ -232,6 +271,8 @@ function AntMedia() {
   const [devices, setDevices] = React.useState([]);
 
   const [isPlayOnly] = React.useState(playOnly);
+
+  const [isEnterDirectly] = React.useState(enterDirectly);
 
   const [localVideo, setLocalVideoLocal] = React.useState(null);
 
@@ -480,6 +521,18 @@ function AntMedia() {
     webRTCAdaptor.callbackError = errorCallback;
     webRTCAdaptor.localStream = localVideo;
   }
+
+  React.useEffect(() => {
+    if(playOnly && enterDirectly && initialized) {
+      joinRoom(roomName, "", roomJoinMode);
+      // if play only mode and enter directly flags are true, then we will enter the meeting room directly
+      setWaitingOrMeetingRoom("meeting");
+    } else if (initialized) {
+      checkRecordPlugin();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialized]);
 
   function infoCallback(info, obj) {
     if (info === "initialized") {
@@ -787,6 +840,71 @@ function AntMedia() {
         senderStreamId: publishStreamId
       }
     );
+  }
+
+  function checkRecordPlugin() {
+    const requestOptions = {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    };
+
+      fetch(restApiBaseUrl + "/media-push/check", requestOptions)
+          .then((response) => {
+            return response;
+          })
+          .then((data) => {
+            try {
+              data = JSON.parse(data);
+              console.log("startRecord: " + JSON.stringify(data));
+              if (data.success === true) {
+                setIsRecordPluginInstalled(true);
+              }
+            } catch (e) {
+              console.log("Record Plugin is not installed.");
+              setIsRecordPluginInstalled(false);
+            }
+          });
+
+  }
+
+  function startRecord() {
+    let body = {
+      "url": restApiBaseUrl + "/" + roomName + "?playOnly=true&enterDirectly=true",
+      "width": 1280,
+      "height": 720,
+      "token": getPlayToken()
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    };
+
+    fetch(restApiBaseUrl + "/media-push/start?streamId=" + roomName + "Recording", requestOptions)
+        .then((response) => { return response.json(); })
+        .then((data) => {
+          console.log("startRecord: " + JSON.stringify(data));
+          if (data.success === true) {
+            setIsRecordPluginActive(true);
+          }
+        });
+  }
+
+  function stopRecord() {
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    };
+
+    fetch(restApiBaseUrl + "/rest/v2/media-push/stop/" + roomName + "Recording", requestOptions)
+        .then((response) => { return response.json(); })
+        .then((data) => {
+          console.log("stopRecord: " + JSON.stringify(data));
+          if (data.success === true) {
+            setIsRecordPluginActive(false);
+          }
+        });
   }
 
   function sendReactions(reaction) {
@@ -1181,10 +1299,16 @@ function AntMedia() {
     clearInterval(audioListenerIntervalJob);
     audioListenerIntervalJob = null;
 
-    webRTCAdaptor?.stop(publishStreamId);
+    if (!playOnly) {
+      webRTCAdaptor?.stop(publishStreamId);
+    }
+
     webRTCAdaptor?.stop(roomName);
 
-    webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
+    if (!playOnly) {
+      webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
+    }
+
     setWaitingOrMeetingRoom("waiting");
   }
 
@@ -1231,18 +1355,22 @@ function AntMedia() {
     };
 
     let tempParticipants = [];
-    tempParticipants.push(newVideoTrack);
+    if (!playOnly) {
+      tempParticipants.push(newVideoTrack);
+    }
     setParticipants(tempParticipants);
 
     let allParticipantsTemp = {};
-    allParticipantsTemp[publishStreamId] = {name:"You"};
+    if (!playOnly) {
+      allParticipantsTemp[publishStreamId] = {name: "You"};
+    }
     setAllParticipants(allParticipantsTemp);
   }
 
   function addMeAsParticipant() {
     let isParticipantExist = participants.find((p) => p.id === "localVideo");
 
-    if(isParticipantExist) {
+    if(isParticipantExist || playOnly) {
         return;
     }
 
@@ -1531,9 +1659,14 @@ function AntMedia() {
             numberOfUnReadMessages,
             pinnedVideoId,
             participantUpdated,
+            isRecordPluginInstalled,
+            setIsRecordPluginInstalled,
+            isRecordPluginActive,
+            setIsRecordPluginActive,
             allParticipants,
             globals,
             isPlayOnly,
+            isEnterDirectly,
             localVideo,
             streamName,
             initialized,
@@ -1581,7 +1714,9 @@ function AntMedia() {
             isMuteParticipantDialogOpen,
             setMuteParticipantDialogOpen,
             participantIdMuted,
-            setParticipantIdMuted
+            setParticipantIdMuted,
+            startRecord,
+            stopRecord
           }}
         >
           <SnackbarProvider

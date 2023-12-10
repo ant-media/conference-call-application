@@ -119,6 +119,26 @@ function OptionButton({ footer, ...props }) {
             </MenuItem>
                     : null}
 
+            {conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true ?
+            <MenuItem onClick={() => conference.startRecord()}>
+            >
+              <ListItemIcon>
+                <SvgIcon size={36} name={"report"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Start Record")}</ListItemText>
+            </MenuItem>
+                : null}
+
+            {conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true ?
+            <MenuItem onClick={() => conference.stopRecord()}
+            >
+              <ListItemIcon>
+                <SvgIcon size={36} name={"report"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Stop Record")}</ListItemText>
+            </MenuItem>
+                : null}
+
             <MenuItem
                 component={"a"}
                 href="https://github.com/ant-media/conference-call-application/issues"
