@@ -18,7 +18,7 @@ import Dialog from "@mui/material/Dialog";
 import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 import { useTranslation } from 'react-i18next';
 import { getRoomNameAttribute ,getRootAttribute } from "../utils";
-
+import { useBeforeUnload } from "react-router-dom";
 
 
 export const SettingsContext = React.createContext(null);
@@ -42,8 +42,8 @@ function AntMedia() {
   var roomName = getRoomNameAttribute();
   if (!roomName) {
     roomName = id;
-  } 
-  
+  }
+
   console.log("room name is " + roomName);
   const antmedia = useContext(AntmediaContext);
   antmedia.roomName = roomName;
@@ -135,9 +135,9 @@ function AntMedia() {
             presenters.push(streamId);
             var newPresenters = [...presenters];
             setPresenters(newPresenters);
-            
+
             if (data.success) {
-       
+
               enqueueSnackbar({
                 message: t('Speaker has joined to the presenter room successfully'),
                 variant: 'info',
@@ -145,7 +145,7 @@ function AntMedia() {
                 autoHideDuration: 1500,
               });
             }
-            else 
+            else
             {
               enqueueSnackbar({
                 message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
@@ -183,7 +183,7 @@ function AntMedia() {
     if (streamId === 'localVideo') {
       streamId = myLocalData?.streamId;
     }
-   
+
     const baseUrl = restBaseUrl;
     const requestOptions0 = {
       method: 'PUT',
@@ -196,7 +196,7 @@ function AntMedia() {
 
 
     fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions2).then((response) => response.json()).then((result) => {
-     
+
       console.log("make participant undo presenter result: " + result.success);
 
        //update the mainTrack Id again because remove track cannot set the mainTrackId to old value
@@ -208,10 +208,10 @@ function AntMedia() {
               })
        };
 
-       fetch(baseUrl + "/rest/v2/broadcasts/" + streamId, options).then((response) => response.json()).then((result) => 
+       fetch(baseUrl + "/rest/v2/broadcasts/" + streamId, options).then((response) => response.json()).then((result) =>
        {
           console.log("update subtrack result: " + result.success + " for stream: " + streamId);
-      
+
           fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + streamId, requestOptions0).then(() => {
               presenters.splice(presenters.indexOf(streamId), 1);
               var newPresenters = [...presenters];
@@ -228,9 +228,9 @@ function AntMedia() {
               };
               fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
         });
-      });     
+      });
 
-      
+
     });
   }
 
@@ -337,18 +337,18 @@ function AntMedia() {
     // TODO: antmedia.updateAudioLevel(myLocalData.streamId, 10);
   }
 
-  function addBecomingPublisherRequest(listenerName) 
+  function addBecomingPublisherRequest(listenerName)
   {
     let listener = {"streamId": listenerName};
     if (requestSpeakerList.find((l) => l.streamId === listenerName)) {
         return;
     }
-    
+
     requestSpeakerList.push(listener);
     //we just need to change the reference of the array to trigger the re-render.
     var newRequestSpeakerList = [...requestSpeakerList];
     setRequestSpeakerList(newRequestSpeakerList);
-    
+
   }
 
   function displayNoVideoAudioDeviceFoundWarning() {
@@ -690,7 +690,7 @@ function AntMedia() {
             requestedMediaConstraints
           );
         }
-      } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE") 
+      } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE")
       {
         console.debug("VIDEO_TRACK_ASSIGNMENT_CHANGE -> ", obj);
         if (!notificationEvent.payload.trackId) {
@@ -766,6 +766,11 @@ function AntMedia() {
     antmedia.turnOffLocalCamera(myLocalData.streamId);
     setWaitingOrMeetingRoom("waiting");
   }
+
+  useBeforeUnload((ev) => {
+    handleLeaveFromRoom();
+  });
+
   function handleSendNotificationEvent(eventType, publishStreamId, info) {
     let notEvent = {
       streamId: publishStreamId,
@@ -833,9 +838,9 @@ function AntMedia() {
     }
     if (index === roomName) {
       return;
-    } 
+    }
     else {
-      if (obj?.trackId && !participants.some((p) => p.id === index)) 
+      if (obj?.trackId && !participants.some((p) => p.id === index))
       {
         setParticipants((spp) => {
           return [
@@ -925,19 +930,19 @@ function AntMedia() {
       //participants are always available in streams array.
       //filter oldparts with streams array.
 
-      //this is only for giving the name to the streams not thing else. 
+      //this is only for giving the name to the streams not thing else.
       //Track adding is handlePlayVideo
-      //Track removing is videocard.js track.onended method 
+      //Track removing is videocard.js track.onended method
      var participantTemp = oldParts;
-     
+
       if (streams.length < participants.length) {
         return participantTemp;
       }
       // matching the names.
-      var finalParticipants = participantTemp.map((p) => 
+      var finalParticipants = participantTemp.map((p) =>
       {
-        const newName = streamList.find((s) => 
-        { 
+        const newName = streamList.find((s) =>
+        {
           return s.streamId === p.id; })?.streamName;
         if (p.name !== newName) {
           return { ...p, name: newName };
@@ -985,7 +990,7 @@ function AntMedia() {
 
   function approveBecomeSpeakerRequest(requestingSpeakerName) {
     setOpenRequestBecomeSpeakerDialog(false);
-    
+
     const baseUrl = restBaseUrl;
 
     let command = {
@@ -1004,7 +1009,7 @@ function AntMedia() {
   }
 
   function makeListenerAgain(speakerName) {
-   
+
     const baseUrl = restBaseUrl;
     let command = {
       "eventType": "MAKE_LISTENER_AGAIN",
@@ -1122,7 +1127,7 @@ function AntMedia() {
             setIsVideoEffectRunning,
             setParticipants,
             participants,
-            allParticipants,            
+            allParticipants,
             setLeftTheRoom,
             observerMode,
           }}

@@ -18,7 +18,6 @@ import AntMedia from "pages/AntMedia";
 import AntSnackBar from "Components/AntSnackBar";
 import { getRootAttribute, getWebSocketURLAttribute } from "utils";
 
-
 const resources = {
   en: {
     translation: translationEN,
@@ -206,7 +205,7 @@ var restURL = process.env.REACT_APP_REST_BASE_URL;
 if (!websocketURL) {
 
   websocketURL = getWebSocketURLAttribute();
-  if (!websocketURL) 
+  if (!websocketURL)
   {
     const appName = window.location.pathname.substring(
       0,
@@ -217,7 +216,7 @@ if (!websocketURL) {
       ":" +
       window.location.port +
       appName;
-    
+
     websocketURL = "ws://" + path;
 
     if (window.location.protocol.startsWith("https")) {
@@ -226,7 +225,7 @@ if (!websocketURL) {
 
     websocketURL += "websocket";
     restURL = window.location.protocol + "//" + path;
-   
+
   }
   else {
 
@@ -237,7 +236,7 @@ if (!websocketURL) {
    //remove last slash
    restURL = restURL.substring(0, restURL.length - 1);
 
- 
+
 }
 console.log("websocket url: " + websocketURL + " rest base url: " + restURL);
 
@@ -285,10 +284,10 @@ const webRTCAdaptor = new WebRTCAdaptor({
       roomTimerId = setInterval(() => {
         webRTCAdaptor.handleRoomInfo(publishStreamId);
       }, 5000);
-    } else if (info === "newStreamAvailable") 
+    } else if (info === "newStreamAvailable")
     {
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
-    } else if (info === "publish_started") 
+    } else if (info === "publish_started")
     {
       //stream is being published
       if (!onlyDataChannel) {
@@ -310,7 +309,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
       if (roomTimerId !== null) {
         clearInterval(roomTimerId);
       }
-      if (makeOnlyDataChannelPublisher) 
+      if (makeOnlyDataChannelPublisher)
       {
         makeOnlyDataChannelPublisher = false;
         webRTCAdaptor.resetAllParticipants();
@@ -376,8 +375,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
               webRTCAdaptor.addBecomingPublisherRequest(eventStreamId);
             }
             return;
-          } 
-          else if (eventType === "GRANT_BECOME_PUBLISHER" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) 
+          }
+          else if (eventType === "GRANT_BECOME_PUBLISHER" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId)
           {
               navigator.mediaDevices
                 .enumerateDevices()
@@ -392,7 +391,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
                     }
                     console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
                   });
-                  if (audioInputDevices.length > 0 && videoInputDevices.length > 0) 
+                  if (audioInputDevices.length > 0 && videoInputDevices.length > 0)
                   {
                     makeOnlyDataChannelPublisher = true;
                     makePublisherOnlyDataChannel = false;
@@ -405,8 +404,8 @@ const webRTCAdaptor = new WebRTCAdaptor({
                 .catch((err) => {
                   console.error(`${err.name}: ${err.message}`);
                 });
-          } 
-          else if (eventType == "REJECT_SPEAKER_REQUEST" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) 
+          }
+          else if (eventType == "REJECT_SPEAKER_REQUEST" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId)
           {
             window.showNotification(
               'Your request to join the room is rejected by the host'
@@ -495,10 +494,10 @@ const webRTCAdaptor = new WebRTCAdaptor({
     }
     errorMessage = JSON.stringify(error);
     if (error.indexOf("no_active_streams_in_room") !== -1) {
-      
+
       webRTCAdaptor.handleRoomEvents({ streams:[], streamList: []});
     }
-    else 
+    else
     if (error.indexOf("NotFoundError") !== -1) {
       errorMessage =
         "Camera or Mic are not found or not allowed in your device.";
@@ -841,7 +840,7 @@ function App() {
 
   window.showNotification = (message) => {
     console.log("show notification for message: " + message);
-   
+
   }
 
   React.useEffect(() => {
