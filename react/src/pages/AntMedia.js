@@ -80,9 +80,9 @@ function getMediaConstraints(videoSendResolution, frameRate) {
       break;
     default:
       break;
-    }
+  }
 
-    return constraint;
+  return constraint;
 }
 
 function getPlayToken() {
@@ -129,11 +129,11 @@ var mediaConstraints = {
 };
 
 if (localStorage.getItem('selectedCamera')) {
-    mediaConstraints.video.deviceId = localStorage.getItem('selectedCamera');
+  mediaConstraints.video.deviceId = localStorage.getItem('selectedCamera');
 }
 
 if (localStorage.getItem('selectedMicrophone')) {
-    mediaConstraints.audio.deviceId = localStorage.getItem('selectedMicrophone');
+  mediaConstraints.audio.deviceId = localStorage.getItem('selectedMicrophone');
 }
 
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
@@ -144,15 +144,15 @@ if (!websocketURL) {
 
   if (!websocketURL) {
     const appName = window.location.pathname.substring(
-      0,
-      window.location.pathname.lastIndexOf("/") + 1
+        0,
+        window.location.pathname.lastIndexOf("/") + 1
     );
     const path =
-      window.location.hostname +
-      ":" +
-      window.location.port +
-      appName +
-      "websocket";
+        window.location.hostname +
+        ":" +
+        window.location.port +
+        appName +
+        "websocket";
     websocketURL = "ws://" + path;
 
     if (window.location.protocol.startsWith("https")) {
@@ -310,7 +310,7 @@ function AntMedia() {
       fullScreenId = -1;
     } else {
       document.getElementsByClassName("publisher-content")[0].className =
-        "publisher-content chat-active fullscreen-layout";
+          "publisher-content chat-active fullscreen-layout";
       if (fullScreenId !== -1) {
         document.getElementById(fullScreenId).classList.remove("selected");
         document.getElementById(fullScreenId).classList.add("unselected");
@@ -383,10 +383,10 @@ function AntMedia() {
 
     if (!playOnly) {
       handlePublish(
-        generatedStreamId,
-        publishToken,
-        subscriberId,
-        subscriberCode
+          generatedStreamId,
+          publishToken,
+          subscriberId,
+          subscriberCode
       );
     }
 
@@ -503,9 +503,10 @@ function AntMedia() {
         if (!screenSharedVideoId) {
           setScreenSharedVideoId(broadcastObject.streamId);
           let videoLab = participants.find((p) => p.streamId === broadcastObject.streamId)
-            ?.videoLabel
-            ? participants.find((p) => p.streamId === broadcastObject.streamId).videoLabel
-            : "";
+              ?.videoLabel
+              ? participants.find((p) => p.streamId === broadcastObject.streamId).videoLabel
+              : "";
+
           pinVideo(broadcastObject.streamId, videoLab);
         }
       }
@@ -641,8 +642,8 @@ function AntMedia() {
 
         setTimeout(() => {
           if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" &&
-            webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
-            webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
+              webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
+              webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
             reconnectionInProgress();
           }
         }, 5000);
@@ -663,26 +664,26 @@ function AntMedia() {
     errorMessage = JSON.stringify(error);
     if (error.indexOf("NotFoundError") !== -1) {
       errorMessage =
-        "Camera or Mic are not found or not allowed in your device.";
+          "Camera or Mic are not found or not allowed in your device.";
       alert(errorMessage);
     } else if (
-      error.indexOf("NotReadableError") !== -1 ||
-      error.indexOf("TrackStartError") !== -1
+        error.indexOf("NotReadableError") !== -1 ||
+        error.indexOf("TrackStartError") !== -1
     ) {
       errorMessage =
-        "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
+          "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
       displayWarning(errorMessage);
 
     } else if (
-      error.indexOf("OverconstrainedError") !== -1 ||
-      error.indexOf("ConstraintNotSatisfiedError") !== -1
+        error.indexOf("OverconstrainedError") !== -1 ||
+        error.indexOf("ConstraintNotSatisfiedError") !== -1
     ) {
       errorMessage =
-        "There is no device found that fits your video and audio constraints. You may change video and audio constraints.";
+          "There is no device found that fits your video and audio constraints. You may change video and audio constraints.";
       alert(errorMessage);
     } else if (
-      error.indexOf("NotAllowedError") !== -1 ||
-      error.indexOf("PermissionDeniedError") !== -1
+        error.indexOf("NotAllowedError") !== -1 ||
+        error.indexOf("PermissionDeniedError") !== -1
     ) {
       errorMessage = "You are not allowed to access camera and mic.";
       if (isScreenShared) {
@@ -694,7 +695,7 @@ function AntMedia() {
       webRTCAdaptor.mediaManager.getDevices();
     } else if (error.indexOf("UnsecureContext") !== -1) {
       errorMessage =
-        "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
+          "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
     } else if (error.indexOf("WebSocketNotSupported") !== -1) {
       errorMessage = "Fatal Error: WebSocket not supported in this browser";
     } else if (error.indexOf("no_stream_exist") !== -1) {
@@ -714,10 +715,10 @@ function AntMedia() {
 
         setTimeout(() => {
           handlePublish(
-            publishStreamId,
-            publishToken,
-            subscriberId,
-            subscriberCode
+              publishStreamId,
+              publishToken,
+              subscriberId,
+              subscriberCode
           );
         }, 2000);
       }
@@ -752,13 +753,13 @@ function AntMedia() {
 
     // id is for pinning user.
     let videoLabel = videoLabelProp;
-    if (videoLabel === "") {
+    if (videoLabel === undefined || videoLabel === "") {
       // if videoLabel is missing try to find it from participants.
-      videoLabel = participants.find((p) => id === p.id).videoLabel;
+      videoLabel = participants.find((p) => id === p.id)?.videoLabel;
     }
-    if (videoLabel === "") {
-      // if videoLabel is still missing then we are not going to pin/unpin anyone.
-      return;
+    if (videoLabel === undefined || videoLabel === "") {
+      // if videoLabel is still missing get the firs one if it exist, this may happen when one join while someone is sharing screen
+      videoLabel = participants[1]?.videoLabel;
     }
 
     var streamId = participants.find((p) => id === p.id)?.streamId;
@@ -768,10 +769,10 @@ function AntMedia() {
       handleNotifyUnpinUser(id);
       webRTCAdaptor.assignVideoTrack(videoLabel, streamId, false);
     }
-    // if there is no pinned video we are gonna pin the targeted user.
+        // if there is no pinned video we are gonna pin the targeted user.
     // and we need to inform pinned user.
     else {
-      setPinnedVideoId(id);
+      setPinnedVideoId(videoLabel);
       handleNotifyPinUser(id);
       webRTCAdaptor.assignVideoTrack(videoLabel, streamId, true);
     }
@@ -813,15 +814,15 @@ function AntMedia() {
   }
   function handleStartScreenShare() {
     webRTCAdaptor.switchDesktopCapture(publishStreamId)
-      .then(() => {
-        screenShareOnNotification();
-      });
+        .then(() => {
+          screenShareOnNotification();
+        });
   }
 
   function screenShareOffNotification() {
     handleSendNotificationEvent(
-      "SCREEN_SHARED_OFF",
-      publishStreamId
+        "SCREEN_SHARED_OFF",
+        publishStreamId
     );
     //if I stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
     if (pinnedVideoId === "localVideo") {
@@ -834,24 +835,22 @@ function AntMedia() {
   function screenShareOnNotification() {
     setIsScreenShared(true);
     handleSendNotificationEvent(
-      "SCREEN_SHARED_ON",
-      publishStreamId
+        "SCREEN_SHARED_ON",
+        publishStreamId
     );
 
     let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff, true);
     webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(userStatusMetadata));
-
-    setPinnedVideoId("localVideo");
   }
 
   function turnOffYourMicNotification(participantId) {
     handleSendNotificationEvent(
-      "TURN_YOUR_MIC_OFF",
-      publishStreamId,
-      {
-        streamId: participantId,
-        senderStreamId: publishStreamId
-      }
+        "TURN_YOUR_MIC_OFF",
+        publishStreamId,
+        {
+          streamId: participantId,
+          senderStreamId: publishStreamId
+        }
     );
   }
 
@@ -876,18 +875,18 @@ function AntMedia() {
 
   function displayWarning(message) {
     enqueueSnackbar(
-      {
-        message: message,
-        variant: "info",
-        icon: <SvgIcon size={24} name={'report'} color="red" />
-      },
-      {
-        autoHideDuration: 5000,
-        anchorOrigin: {
-          vertical: "top",
-          horizontal: "right",
+        {
+          message: message,
+          variant: "info",
+          icon: <SvgIcon size={24} name={'report'} color="red" />
         },
-      }
+        {
+          autoHideDuration: 5000,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+        }
     );
   }
 
@@ -979,9 +978,9 @@ function AntMedia() {
     if (publishStreamId) {
       let iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
       if (
-        iceState !== null &&
-        iceState !== "failed" &&
-        iceState !== "disconnected"
+          iceState !== null &&
+          iceState !== "failed" &&
+          iceState !== "disconnected"
       ) {
         if (message === "debugme") {
           webRTCAdaptor.getDebugInfo(publishStreamId);
@@ -993,14 +992,14 @@ function AntMedia() {
 
 
         webRTCAdaptor.sendData(
-          publishStreamId,
-          JSON.stringify({
-            eventType: "MESSAGE_RECEIVED",
-            message: message,
-            name: streamName,
-            senderId: publishStreamId,
-            date: new Date().toString()
-          })
+            publishStreamId,
+            JSON.stringify({
+              eventType: "MESSAGE_RECEIVED",
+              message: message,
+              name: streamName,
+              senderId: publishStreamId,
+              date: new Date().toString()
+            })
         );
       }
     }
@@ -1056,9 +1055,9 @@ function AntMedia() {
       var eventType = notificationEvent.eventType;
 
       if (eventType === "CAM_TURNED_OFF" ||
-        eventType === "CAM_TURNED_ON" ||
-        eventType === "MIC_MUTED" ||
-        eventType === "MIC_UNMUTED") {
+          eventType === "CAM_TURNED_ON" ||
+          eventType === "MIC_MUTED" ||
+          eventType === "MIC_UNMUTED") {
         webRTCAdaptor.getBroadcastObject(eventStreamId);
       }
       else if (eventType === "MESSAGE_RECEIVED") {
@@ -1073,22 +1072,22 @@ function AntMedia() {
         // we are gonna also send snackbar.
         if (!messageDrawerOpen) {
           enqueueSnackbar(
-            {
-              sender: notificationEvent.name,
-              message: notificationEvent.message,
-              variant: "message",
-              onClick: () => {
-                handleMessageDrawerOpen(true);
-                setNumberOfUnReadMessages(0);
+              {
+                sender: notificationEvent.name,
+                message: notificationEvent.message,
+                variant: "message",
+                onClick: () => {
+                  handleMessageDrawerOpen(true);
+                  setNumberOfUnReadMessages(0);
+                },
               },
-            },
-            {
-              autoHideDuration: 5000,
-              anchorOrigin: {
-                vertical: "top",
-                horizontal: "right",
-              },
-            }
+              {
+                autoHideDuration: 5000,
+                anchorOrigin: {
+                  vertical: "top",
+                  horizontal: "right",
+                },
+              }
           );
           setNumberOfUnReadMessages((numb) => numb + 1);
         }
@@ -1100,7 +1099,7 @@ function AntMedia() {
           if (isSameUser && sentInSameTime) {
             //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
             lastMessage.message =
-              lastMessage.message + "\n" + notificationEvent.message;
+                lastMessage.message + "\n" + notificationEvent.message;
             return [...oldMessages]; // dont make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
           } else {
             return [...oldMessages, notificationEvent];
@@ -1116,9 +1115,9 @@ function AntMedia() {
           assignVideoToStream(videoLab, eventStreamId);
         }
 
-        if (videoLab !== "localVideo") {
-          pinVideo(videoLab, videoLab);
-        }
+        //if (videoLab !== "localVideo") {
+        pinVideo(videoLab, videoLab);
+        //}
         setScreenSharedVideoId(eventStreamId);
         webRTCAdaptor.getBroadcastObject(eventStreamId);
       }
@@ -1138,16 +1137,16 @@ function AntMedia() {
       }
       else if (eventType === "PIN_USER") {
         if (
-          notificationEvent.streamId === publishStreamId &&
-          !isScreenShared
+            notificationEvent.streamId === publishStreamId &&
+            !isScreenShared
         ) {
           updateVideoSendResolution(true);
         }
       }
       else if (eventType === "UNPIN_USER") {
         if (
-          notificationEvent.streamId === publishStreamId &&
-          !isScreenShared
+            notificationEvent.streamId === publishStreamId &&
+            !isScreenShared
         ) {
           updateVideoSendResolution(false);
         }
@@ -1190,13 +1189,13 @@ function AntMedia() {
         //console.log(JSON.stringify(notificationEvent.payload));
         setTalkers((oldTalkers) => {
           const newTalkers = notificationEvent.payload
-            .filter(
-              (p) =>
-                p.trackId !== "" &&
-                screenSharedVideoId !== p.trackId &&
-                p.audioLevel < 60
-            )
-            .map((p) => p.trackId);
+              .filter(
+                  (p) =>
+                      p.trackId !== "" &&
+                      screenSharedVideoId !== p.trackId &&
+                      p.audioLevel < 60
+              )
+              .map((p) => p.trackId);
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
       }
@@ -1296,7 +1295,7 @@ function AntMedia() {
   function removeAllRemoteParticipants() {
     let newVideoTrack = {
       id: "localVideo",
-      videoLabel: "myVideo",
+      videoLabel: "localVideo",
       track: null,
       isCameraOn: false,
       streamId: publishStreamId,
@@ -1313,16 +1312,16 @@ function AntMedia() {
     setAllParticipants(allParticipantsTemp);
   }
 
-  function addMeAsParticipant() {
+  function addMeAsParticipant(publishStreamId) {
     let isParticipantExist = participants.find((p) => p.id === "localVideo");
 
     if(isParticipantExist) {
-        return;
+      return;
     }
 
     let newVideoTrack = {
       id: "localVideo",
-      videoLabel: "myVideo",
+      videoLabel: "localVideo",
       track: null,
       isCameraOn: false,
       streamId: publishStreamId,
@@ -1342,16 +1341,16 @@ function AntMedia() {
   function handlePublish(publishStreamId, token, subscriberId, subscriberCode) {
     let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff, isScreenShared);
 
-    addMeAsParticipant();
+    addMeAsParticipant(publishStreamId);
 
     webRTCAdaptor.publish(
-      publishStreamId,
-      token,
-      subscriberId,
-      subscriberCode,
-      streamName,
-      roomName,
-      JSON.stringify(userStatusMetadata)
+        publishStreamId,
+        token,
+        subscriberId,
+        subscriberCode,
+        streamName,
+        roomName,
+        JSON.stringify(userStatusMetadata)
     );
   }
   function handlePlayVideo(obj) {
@@ -1439,8 +1438,8 @@ function AntMedia() {
     setIsMyCamTurnedOff(false);
 
     handleSendNotificationEvent(
-      "CAM_TURNED_ON",
-      publishStreamId
+        "CAM_TURNED_ON",
+        publishStreamId
     );
   }
 
@@ -1453,11 +1452,11 @@ function AntMedia() {
     }
 
     updateUserStatusMetadata(isMyMicMuted, false);
-      setIsMyCamTurnedOff(true);
+    setIsMyCamTurnedOff(true);
 
     handleSendNotificationEvent(
-      "CAM_TURNED_OFF",
-      publishStreamId
+        "CAM_TURNED_OFF",
+        publishStreamId
     );
   }
 
@@ -1515,9 +1514,9 @@ function AntMedia() {
     }
 
     if (streamId === publishStreamId) {
-        streamName = 'You';
+      streamName = 'You';
     } else if (allParticipants[streamId]?.name !== undefined) {
-        streamName = allParticipants[streamId].name;
+      streamName = allParticipants[streamId].name;
     }
 
     floating({
@@ -1536,8 +1535,8 @@ function AntMedia() {
     setIsMyMicMuted(true);
 
     handleSendNotificationEvent(
-      "MIC_MUTED",
-      publishStreamId
+        "MIC_MUTED",
+        publishStreamId
     );
   }
 
@@ -1547,8 +1546,8 @@ function AntMedia() {
     setIsMyMicMuted(false);
 
     handleSendNotificationEvent(
-      "MIC_UNMUTED",
-      publishStreamId
+        "MIC_UNMUTED",
+        publishStreamId
     );
   }
 
@@ -1569,126 +1568,126 @@ function AntMedia() {
   }
 
   return (!initialized ? <>
-    <Grid
-      container
-      spacing={0}
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
-      style={{ minHeight: '100vh' }}
-    >
-      <Grid item xs={3}>
-        <Box sx={{ display: 'flex' }}>
-          <CircularProgress size="4rem" />
-        </Box>
-      </Grid>
-    </Grid>
-  </> :
-    <Grid container className="App">
-      <Grid
-        container
-        className="App-header"
-        justifyContent="center"
-        alignItems={"center"}
-      >
-        <ConferenceContext.Provider
-          value={{
-            isScreenShared,
-            talkers,
-            screenSharedVideoId,
-            roomJoinMode,
-            audioTracks,
-            isPublished,
-            selectedCamera,
-            selectedMicrophone,
-            selectedBackgroundMode,
-            participants,
-            messageDrawerOpen,
-            participantListDrawerOpen,
-            messages,
-            numberOfUnReadMessages,
-            pinnedVideoId,
-            participantUpdated,
-            allParticipants,
-            globals,
-            isPlayOnly,
-            localVideo,
-            streamName,
-            initialized,
-            devices,
-            publishStreamId,
-            isMyMicMuted,
-            isMyCamTurnedOff,
-            sendReactions,
-            setSelectedBackgroundMode,
-            setIsVideoEffectRunning,
-            setParticipants,
-            handleMessageDrawerOpen,
-            handleParticipantListOpen,
-            setSelectedCamera,
-            setSelectedMicrophone,
-            setLeftTheRoom,
-            joinRoom,
-            handleStopScreenShare,
-            handleStartScreenShare,
-            cameraSelected,
-            microphoneSelected,
-            handleBackgroundReplacement,
-            muteLocalMic,
-            unmuteLocalMic,
-            checkAndTurnOnLocalCamera,
-            checkAndTurnOffLocalCamera,
-            setAudioLevelListener,
-            handleSetMessages,
-            toggleSetNumberOfUnreadMessages,
-            pinVideo,
-            setLocalVideo,
-            setWaitingOrMeetingRoom,
-            setStreamName,
-            handleLeaveFromRoom,
-            handleSendNotificationEvent,
-            handleSetMaxVideoTrackCount,
-            screenShareOffNotification,
-            handleSendMessage,
-            turnOffYourMicNotification,
-            addFakeParticipant,
-            removeFakeParticipant,
-            assignVideoToStream,
-            showEmojis,
-            setShowEmojis,
-            isMuteParticipantDialogOpen,
-            setMuteParticipantDialogOpen,
-            participantIdMuted,
-            setParticipantIdMuted,
-            videoSendResolution,
-            setVideoSendResolution
-          }}
-        >
-          <SnackbarProvider
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
-            maxSnack={3}
-            content={(key, notificationData) => (
-              <AntSnackBar id={key} notificationData={notificationData} />
-            )}
-          >
-            {leftTheRoom ? (
-              <LeftTheRoom />
-            ) : waitingOrMeetingRoom === "waiting" ? (
-              <WaitingRoom />
-            ) : (
-              <>
-                <MeetingRoom />
-                <MessageDrawer />
-                <ParticipantListDrawer />
-              </>
-            )}
-          </SnackbarProvider>
-        </ConferenceContext.Provider>
-      </Grid>
-    </Grid>
+            <Grid
+                container
+                spacing={0}
+                direction="column"
+                alignItems="center"
+                justifyContent="center"
+                style={{ minHeight: '100vh' }}
+            >
+              <Grid item xs={3}>
+                <Box sx={{ display: 'flex' }}>
+                  <CircularProgress size="4rem" />
+                </Box>
+              </Grid>
+            </Grid>
+          </> :
+          <Grid container className="App">
+            <Grid
+                container
+                className="App-header"
+                justifyContent="center"
+                alignItems={"center"}
+            >
+              <ConferenceContext.Provider
+                  value={{
+                    isScreenShared,
+                    talkers,
+                    screenSharedVideoId,
+                    roomJoinMode,
+                    audioTracks,
+                    isPublished,
+                    selectedCamera,
+                    selectedMicrophone,
+                    selectedBackgroundMode,
+                    participants,
+                    messageDrawerOpen,
+                    participantListDrawerOpen,
+                    messages,
+                    numberOfUnReadMessages,
+                    pinnedVideoId,
+                    participantUpdated,
+                    allParticipants,
+                    globals,
+                    isPlayOnly,
+                    localVideo,
+                    streamName,
+                    initialized,
+                    devices,
+                    publishStreamId,
+                    isMyMicMuted,
+                    isMyCamTurnedOff,
+                    sendReactions,
+                    setSelectedBackgroundMode,
+                    setIsVideoEffectRunning,
+                    setParticipants,
+                    handleMessageDrawerOpen,
+                    handleParticipantListOpen,
+                    setSelectedCamera,
+                    setSelectedMicrophone,
+                    setLeftTheRoom,
+                    joinRoom,
+                    handleStopScreenShare,
+                    handleStartScreenShare,
+                    cameraSelected,
+                    microphoneSelected,
+                    handleBackgroundReplacement,
+                    muteLocalMic,
+                    unmuteLocalMic,
+                    checkAndTurnOnLocalCamera,
+                    checkAndTurnOffLocalCamera,
+                    setAudioLevelListener,
+                    handleSetMessages,
+                    toggleSetNumberOfUnreadMessages,
+                    pinVideo,
+                    setLocalVideo,
+                    setWaitingOrMeetingRoom,
+                    setStreamName,
+                    handleLeaveFromRoom,
+                    handleSendNotificationEvent,
+                    handleSetMaxVideoTrackCount,
+                    screenShareOffNotification,
+                    handleSendMessage,
+                    turnOffYourMicNotification,
+                    addFakeParticipant,
+                    removeFakeParticipant,
+                    assignVideoToStream,
+                    showEmojis,
+                    setShowEmojis,
+                    isMuteParticipantDialogOpen,
+                    setMuteParticipantDialogOpen,
+                    participantIdMuted,
+                    setParticipantIdMuted,
+                    videoSendResolution,
+                    setVideoSendResolution
+                  }}
+              >
+                <SnackbarProvider
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "center",
+                    }}
+                    maxSnack={3}
+                    content={(key, notificationData) => (
+                        <AntSnackBar id={key} notificationData={notificationData} />
+                    )}
+                >
+                  {leftTheRoom ? (
+                      <LeftTheRoom />
+                  ) : waitingOrMeetingRoom === "waiting" ? (
+                      <WaitingRoom />
+                  ) : (
+                      <>
+                        <MeetingRoom />
+                        <MessageDrawer />
+                        <ParticipantListDrawer />
+                      </>
+                  )}
+                </SnackbarProvider>
+              </ConferenceContext.Provider>
+            </Grid>
+          </Grid>
   );
 }
 
