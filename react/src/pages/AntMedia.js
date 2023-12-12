@@ -1162,7 +1162,7 @@ function AntMedia() {
         temp.forEach((p) => {
           let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
           if (!p.isMine && assignment === undefined) {
-            temp = temp.slice(temp.findIndex(p), 1);
+            temp.splice(temp.findIndex(p), 1);
           }
         });
 
