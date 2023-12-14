@@ -575,7 +575,9 @@ function AntMedia() {
     } else if (info === "publish_started") {
       setIsPublished(true);
       console.log("**** publish started:" + reconnecting);
+
       if (reconnecting) {
+        webRTCAdaptor.getBroadcastObject(roomName);
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
