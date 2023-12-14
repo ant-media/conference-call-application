@@ -577,7 +577,7 @@ function AntMedia() {
       console.log("**** publish started:" + reconnecting);
 
       if (reconnecting) {
-        webRTCAdaptor.getBroadcastObject(roomName);
+        webRTCAdaptor.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
