@@ -363,7 +363,7 @@ function VideoCard(props) {
         container
         style={{
           height: "100%",
-          width: isLocal && isMobileDevice ? "50%" : "100%", 
+          width: isLocal && isMobileDevice() ? "50%" : "100%", 
           position: "relative",
           margin: "auto"
         }}
