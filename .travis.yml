@@ -35,12 +35,11 @@ script:
 # run tests
 - cd ../test
 - python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
+- cd ../webapp
 
 deploy:
   - provider: script
-    script: 
-    - cd ../webapp
-    - mvn deploy -DskipTests --quiet --settings mvn-settings.xml
+    script: "mvn deploy -DskipTests --quiet --settings mvn-settings.xml"
     skip_cleanup: true
     on:
       tags: false
