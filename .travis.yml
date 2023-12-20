@@ -39,9 +39,11 @@ script:
 deploy:
   - provider: script
     script: 
+    - pwd
     - cd ../webapp
+    - ls
     - mvn deploy -DskipTests --quiet --settings mvn-settings.xml
     skip_cleanup: true
     on:
       tags: false
-      branch: main
+      branch: fix/deploymentScript
