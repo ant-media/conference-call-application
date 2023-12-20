@@ -39,7 +39,7 @@ script:
 deploy:
   - provider: script
     script: 
-    - cd webapp
+    - cd ../webapp
     - mvn deploy -DskipTests --quiet --settings mvn-settings.xml
     skip_cleanup: true
     on:
