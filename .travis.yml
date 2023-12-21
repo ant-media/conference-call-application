@@ -31,8 +31,16 @@ script:
 - cd ..
 - cp -a react/build/. webapp/src/main/webapp
 - cd webapp
-# - mvn clean install -DskipTests -Dgpg.skip=true --quiet
-- mvn deploy -DskipTests --quiet --settings mvn-settings.xml
+- mvn clean install -DskipTests -Dgpg.skip=true --quiet
 # run tests
 - cd ../test
 - python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
+- cd ../webapp
+
+deploy:
+  - provider: script
+    script: "mvn deploy -DskipTests --quiet --settings mvn-settings.xml"
+    skip_cleanup: true
+    on:
+      tags: false
+      branch: main
