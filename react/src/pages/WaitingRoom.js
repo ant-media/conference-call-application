@@ -49,16 +49,6 @@ function WaitingRoom(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conference.initialized]);
 
-  function makeid(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-  }
-
   function joinRoom(e) {
     if (conference.localVideo === null && conference.isPlayOnly === false) {
       e.preventDefault();
@@ -78,7 +68,7 @@ function WaitingRoom(props) {
     }
     let streamId;
     if (publishStreamId === null || publishStreamId === undefined) {
-      streamId = conference.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
+      streamId = conference.streamName.replace(/[\W_]/g, "") + "_" + conference.makeid(10);
       console.log("generatedStreamId:"+streamId);
     } else {
       streamId = publishStreamId;

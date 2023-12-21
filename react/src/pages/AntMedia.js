@@ -421,14 +421,12 @@ function AntMedia() {
     globals.maxVideoTrackCount = 6; //FIXME
     setPublishStreamId(generatedStreamId);
 
-    if (!playOnly) {
       handlePublish(
           generatedStreamId,
           publishToken,
           subscriberId,
           subscriberCode
       );
-    }
 
     webRTCAdaptor.play(roomName, playToken, roomName, null, subscriberId, subscriberCode);
   }
@@ -567,7 +565,7 @@ function AntMedia() {
         setWebRTCAdaptor(new WebRTCAdaptor({
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
-          isPlayMode: playOnly,
+          onlyDataChannel: playOnly,
           debug: true,
           callback: infoCallback,
           callbackError: errorCallback
@@ -594,9 +592,20 @@ function AntMedia() {
     webRTCAdaptor.localStream = localVideo;
   }
 
+  function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
   React.useEffect(() => {
     if(playOnly && enterDirectly && initialized) {
-      joinRoom(roomName, "", roomJoinMode);
+      let streamId = makeid(10);
+      joinRoom(roomName, streamId, roomJoinMode);
       // if play only mode and enter directly flags are true, then we will enter the meeting room directly
       setWaitingOrMeetingRoom("meeting");
     } else if (initialized) {
@@ -1483,6 +1492,7 @@ function AntMedia() {
     );
   }
   function handlePlayVideo(obj) {
+    console.log("handlePlayVideo: " + JSON.stringify(obj));
     let index = obj?.trackId?.substring("ARDAMSx".length);
     globals.trackEvents.push({ track: obj.track.id, event: "added" });
 
@@ -1790,6 +1800,7 @@ function AntMedia() {
                     setParticipantIdMuted,
                     videoSendResolution,
                     setVideoSendResolution,
+                    makeid,
                     startRecord,
                     stopRecord
                   }}
