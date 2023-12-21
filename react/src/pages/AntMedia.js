@@ -129,19 +129,19 @@ var mediaConstraints = {
   audio: audioQualityConstraints.audio,
 };
 
-if (playOnly) {
-  mediaConstraints = {
-    video: false,
-    audio: false,
-  };
-}
-
 if (localStorage.getItem('selectedCamera')) {
   mediaConstraints.video.deviceId = localStorage.getItem('selectedCamera');
 }
 
 if (localStorage.getItem('selectedMicrophone')) {
   mediaConstraints.audio.deviceId = localStorage.getItem('selectedMicrophone');
+}
+
+if (playOnly) {
+  mediaConstraints = {
+    video: false,
+    audio: false,
+  };
 }
 
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
