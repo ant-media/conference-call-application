@@ -2,7 +2,7 @@ import {Button, Grid, TextField, Typography} from '@mui/material';
 import {Box} from '@mui/system';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
-import {Link as RouterLink, useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {nanoid} from 'nanoid';
 import Stack from "@mui/material/Stack";
 
@@ -15,13 +15,12 @@ function Home(props) {
     let navigate = useNavigate();
 
     const roomNameRef = React.useRef(); // Create a ref to store roomName
+    const applicationWebSocketUrlRef = React.useRef(); // Store applicationWebSocketUrl in a useRef
 
     const [applicationWebSocket, setApplicationWebSocket] = React.useState();
     const [createRoomPassword, setCreateRoomPassword] = React.useState();
     const [createRoomPasswordDialogOpen, setCreateRoomPasswordDialogOpen] = React.useState(false);
     const [roomName, setRoomName] = React.useState();
-
-    var applicationWebSocketUrl;
 
     const handleCreateRoomPasswordChange = (newPassword) => {
         setCreateRoomPassword(newPassword);
@@ -41,15 +40,15 @@ function Home(props) {
 
       };
 
-      const goToLobby = (roomId) => {
-        var newMeetingPath = ""
-        if(roomId == undefined){
-             newMeetingPath = `/${nanoid(8)}`;
-        }else{
-             newMeetingPath = '/'+roomId;
+      const goToLobby = React.useCallback((roomId) => {
+        var newMeetingPath = "";
+        if (roomId === undefined) {
+          newMeetingPath = `/${nanoid(8)}`;
+        } else {
+          newMeetingPath = `/${roomId}`;
         }
         navigate(newMeetingPath); // Navigate to the new path programmatically
-      };
+      }, [navigate]);
 
       const handleCreateRoomPasswordDialogClose = (value) => {
         setCreateRoomPasswordDialogOpen(false);
@@ -71,9 +70,9 @@ function Home(props) {
 
 
     React.useEffect(() => {
-        if (!applicationWebSocketUrl) {
+        if (!applicationWebSocketUrlRef.current) {
 
-            applicationWebSocketUrl = getWebSocketURLAttribute();
+            var applicationWebSocketUrl = getWebSocketURLAttribute();
           
             if (!applicationWebSocketUrl) {
               const appName = window.location.pathname.substring(
@@ -93,9 +92,8 @@ function Home(props) {
               }
          
             }
-            applicationWebSocketUrl = applicationWebSocketUrl + "/application"
-            console.log(applicationWebSocketUrl)
-            setApplicationWebSocket(new WebSocket(applicationWebSocketUrl) )
+            applicationWebSocketUrlRef.current = applicationWebSocketUrl + "/application"
+            setApplicationWebSocket(new WebSocket(applicationWebSocketUrlRef.current) )
           }
 
       }, []);
@@ -110,7 +108,7 @@ function Home(props) {
             applicationWebSocket.onmessage = (event) => {
                 var obj = JSON.parse(event.data);
     
-                if(obj.command == "isRoomCreationPasswordRequired"){
+                if(obj.command === "isRoomCreationPasswordRequired"){
                     
                     if(obj.required){
                         setCreateRoomPasswordDialogOpen(obj.required)
@@ -119,7 +117,7 @@ function Home(props) {
 
                     }
                     
-                }else if(obj.command == "createRoomWithPassword"){
+                }else if(obj.command === "createRoomWithPassword"){
 
                     if(obj.authenticated){
 
@@ -134,7 +132,7 @@ function Home(props) {
                 }
             }
         }
-      }, [applicationWebSocket]);
+      }, [applicationWebSocket, goToLobby]);
 
 
 

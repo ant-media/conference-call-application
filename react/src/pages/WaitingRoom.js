@@ -16,6 +16,7 @@ import CameraButton from "Components/Footer/Components/CameraButton";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
+
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 import { ConferenceContext } from "./AntMedia";
@@ -34,12 +35,15 @@ function WaitingRoom(props) {
   const publishStreamId = getPublishStreamId()
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
+
   const [selectFocus, setSelectFocus] = React.useState(null);
 
   const roomName = id;
 
-  const conference = useContext(ConferenceContext);
+
+  const conference = useContext(ConferenceContext);  
   const { enqueueSnackbar } = useSnackbar();
+
 
   React.useEffect(() => {
     if(!conference.isPlayOnly &&conference.initialized) {
@@ -109,6 +113,7 @@ function WaitingRoom(props) {
   const handleDialogClose = (value) => {
     setDialogOpen(false);
   };
+  
 
   return (
         <Container>
@@ -203,7 +208,9 @@ function WaitingRoom(props) {
 
                 <form
                     onSubmit={(e) => {
-                      joinRoom(e);
+
+                     joinRoom(e)
+                      
                     }}
                 >
                   <Grid item xs={12} sx={{mt: 3, mb: 4}}>

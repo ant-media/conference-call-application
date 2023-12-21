@@ -2,17 +2,10 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import DialogContent from '@mui/material/DialogContent';
-import InputLabel from '@mui/material/InputLabel';
 import Input from '@mui/material/Input';
-
-import Select from '@mui/material/Select';
-import { ConferenceContext } from 'pages/AntMedia';
-import { Grid, Hidden, MenuItem, useMediaQuery } from '@mui/material';
 import { SvgIcon } from 'Components/SvgIcon';
-import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 const AntDialogTitle = props => {
@@ -41,8 +34,6 @@ const AntDialogTitle = props => {
 export function RoomCreationPassword(props) {
   const { t } = useTranslation();
   const { onClose, password, onPasswordChange, open, onCreateRoomClicked, roomName, onRoomNameChange } = props;
-  const conference = React.useContext(ConferenceContext);
-
 
   const handleClose = (event, reason) => {
     onClose();
@@ -61,10 +52,6 @@ export function RoomCreationPassword(props) {
     onCreateRoomClicked()
 
   }
-
-  
-  
-
 
   return (
     <Dialog onClose={handleClose} open={open}  maxWidth={'sm'}>
