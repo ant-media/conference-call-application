@@ -19,6 +19,8 @@
 	
 	<bean id="app.settings" class="io.antmedia.AppSettings" />
 
+	<bean id="ant.media.server.settings" class="io.antmedia.settings.ServerSettings"/>
+
 	<!-- Defines the web context -->
 	<bean id="web.context" class="org.red5.server.Context" autowire="byType" />
 
@@ -54,6 +56,7 @@
     </bean>
     
     <bean id="streamAcceptFilter" class="io.antmedia.filter.StreamAcceptFilter"/>
+	<bean id="conferenceRoomSettings" class="io.antmedia.enterprise.streamapp.ConferenceRoomSettings"/>
 
 	<!-- Defines the web handler which acts as an applications endpoint -->
 	<bean id="web.handler" class="#{ T(io.antmedia.rest.RestServiceBase).isEnterprise() ? 'io.antmedia.enterprise.webrtc.WebRTCApplication' : 'io.antmedia.AntMediaApplicationAdapter' }">
