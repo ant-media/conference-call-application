@@ -1,7 +1,7 @@
 dist: jammy
 language: java
 jdk:
-- openjdk17
+- openjdk11
 before_install:
 - wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/119.0.6045.105/linux64/chromedriver-linux64.zip
 - unzip chromedriver-linux64.zip
