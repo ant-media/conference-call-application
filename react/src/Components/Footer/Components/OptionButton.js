@@ -120,10 +120,10 @@ function OptionButton({ footer, ...props }) {
                     : null}
 
             {conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true ?
-            <MenuItem onClick={() => conference.startRecord()}>
+            <MenuItem onClick={() => conference.startRecord()}
             >
               <ListItemIcon>
-                <SvgIcon size={36} name={"report"} color={"white"} />
+                <SvgIcon size={36} name={"camera"} color={"white"} />
               </ListItemIcon>
               <ListItemText>{t("Start Record")}</ListItemText>
             </MenuItem>
@@ -133,7 +133,7 @@ function OptionButton({ footer, ...props }) {
             <MenuItem onClick={() => conference.stopRecord()}
             >
               <ListItemIcon>
-                <SvgIcon size={36} name={"report"} color={"white"} />
+                <SvgIcon size={36} name={"camera"} color={"white"} />
               </ListItemIcon>
               <ListItemText>{t("Stop Record")}</ListItemText>
             </MenuItem>

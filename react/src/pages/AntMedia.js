@@ -101,6 +101,9 @@ var mcuEnabled = getUrlParameter("mcuEnabled");
 var InitialStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
 var enterDirectly = getUrlParameter("enterDirectly");
+if (enterDirectly == null || typeof enterDirectly === "undefined") {
+  enterDirectly = false;
+}
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
@@ -501,6 +504,14 @@ function AntMedia() {
   }
 
   function handleMainTrackBroadcastObject(broadcastObject) {
+    if (broadcastObject.metaData !== undefined && broadcastObject.metaData !== null) {
+      let brodcastStatusMetadata = JSON.parse(broadcastObject.metaData);
+
+      if (brodcastStatusMetadata.isRecording !== undefined && brodcastStatusMetadata.isRecording !== null) {
+        setIsRecordPluginActive(brodcastStatusMetadata.isRecording);
+      }
+    }
+
     let participantIds = broadcastObject.subTrackStreamIds;
 
     //find and remove not available tracks
@@ -605,11 +616,13 @@ function AntMedia() {
   React.useEffect(() => {
     if(playOnly && enterDirectly && initialized) {
       let streamId = makeid(10);
+      setStreamName("Anonymous");
       joinRoom(roomName, streamId, roomJoinMode);
       // if play only mode and enter directly flags are true, then we will enter the meeting room directly
       setWaitingOrMeetingRoom("meeting");
     } else if (initialized) {
-      checkRecordPlugin();
+      setIsRecordPluginInstalled(true);
+      //checkRecordPlugin();
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -962,6 +975,11 @@ function AntMedia() {
           console.log("startRecord: " + JSON.stringify(data));
           if (data.success === true) {
             setIsRecordPluginActive(true);
+            updateRoomRecordingStatus(true);
+            handleSendNotificationEvent(
+              "RECORDING_TURNED_ON",
+              publishStreamId
+            );
           }
         });
   }
@@ -978,6 +996,11 @@ function AntMedia() {
           console.log("stopRecord: " + JSON.stringify(data));
           if (data.success === true) {
             setIsRecordPluginActive(false);
+            updateRoomRecordingStatus(false);
+            handleSendNotificationEvent(
+              "RECORDING_TURNED_OFF",
+              publishStreamId
+            );
           }
         });
   }
@@ -1188,6 +1211,12 @@ function AntMedia() {
           eventType === "MIC_UNMUTED") {
         webRTCAdaptor.getBroadcastObject(eventStreamId);
       }
+      else if (eventType === "RECORDING_TURNED_ON") {
+        setIsRecordPluginActive(true);
+      }
+      else if (eventType === "RECORDING_TURNED_OFF") {
+        setIsRecordPluginActive(false);
+      }
       else if (eventType === "MESSAGE_RECEIVED") {
         if(notificationEvent.senderId === publishStreamId) {
           return;
@@ -1339,10 +1368,21 @@ function AntMedia() {
     let metadata = {
       isMicMuted: isMicMuted === null ? null : isMicMuted,
       isCameraOn: isCameraOn,
-      isScreenShared: isScreenShareActive
+      isScreenShared: isScreenShareActive,
+      playOnly: playOnly
     }
 
     return metadata;
+  }
+
+  function updateRoomRecordingStatus(isRecording) {
+    let metadata = {};
+    if (isRecording) {
+      metadata.isRecording = true;
+    } else {
+      metadata.isRecording = false;
+    }
+    webRTCAdaptor.updateStreamMetaData(roomName, JSON.stringify(metadata));
   }
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
@@ -1481,12 +1521,17 @@ function AntMedia() {
 
     addMeAsParticipant(publishStreamId);
 
+    let currentStreamName = streamName;
+    if (streamName === "" || streamName === undefined || streamName === null) {
+      currentStreamName = "Anonymous"
+    }
+
     webRTCAdaptor.publish(
         publishStreamId,
         token,
         subscriberId,
         subscriberCode,
-        streamName,
+        currentStreamName,
         roomName,
         JSON.stringify(userStatusMetadata)
     );
@@ -1802,7 +1847,10 @@ function AntMedia() {
                     setVideoSendResolution,
                     makeid,
                     startRecord,
-                    stopRecord
+                    stopRecord,
+                    isRecordPluginInstalled,
+                    isRecordPluginActive,
+                    isEnterDirectly
                   }}
               >
                 <SnackbarProvider
