@@ -13,6 +13,8 @@
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.build.timestamp.format>yyyyMMdd_HHmm</maven.build.timestamp.format>
+		<buildNumber>${maven.build.timestamp}</buildNumber>
 	</properties>
 	<developers>
     		<developer>
@@ -90,6 +92,14 @@
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>${maven-war-plugin.version}</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Build>${project.parent.version}</Implementation-Build>
+							<Build-Number>${buildNumber}</Build-Number>
+						</manifestEntries>
+					</archive>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
