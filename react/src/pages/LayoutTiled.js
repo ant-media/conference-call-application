@@ -49,8 +49,13 @@ function LayoutTiled(props) {
   const conference = React.useContext(ConferenceContext);
 
   const aspectRatio = 16 / 9;
+  const mobileRatio = 9 / 16;
+
   const [cardWidth, setCardWidth] = React.useState(500*aspectRatio);
   const [cardHeight, setCardHeight] = React.useState(500);
+
+  const [mcardWidth, msetCardWidth] = React.useState(140*aspectRatio);
+  const [mcardHeight, msetCardHeight] = React.useState(300);
 
   React.useEffect(() => {
     const videoCount = Object.keys(conference.participants).length+1
@@ -62,6 +67,14 @@ function LayoutTiled(props) {
         videoCount,
         aspectRatio
     );
+    const {mwidth, mheight} = calculateLayout(
+      props.width,
+      props.height,
+      videoCount,
+      mobileRatio
+    );
+    msetCardWidth(mwidth);
+    msetCardHeight(mheight);
 
     setCardWidth(width - 8);
     setCardHeight(height - 8);
@@ -80,14 +93,15 @@ function LayoutTiled(props) {
       <>
         {
           playingParticipants.map((element, index) => {
+            var ismobilAndLocalvideo = element.id==="localVideo" && conference.globals.isMobileDevice;
             //console.log("cw:"+cardWidth+" ch:"+cardHeight);
             return (
               <div
                   className="single-video-container not-pinned"
                   key={index}
                   style={{
-                    width: cardWidth + "px",
-                    height: cardHeight + "px",
+                    width: ismobilAndLocalvideo ? mcardWidth + "px" : cardWidth + "px",
+                    height: ismobilAndLocalvideo ? mcardHeight  +"px" : cardHeight + "px",
                   }}
               >
                 <VideoCard

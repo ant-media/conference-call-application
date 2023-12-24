@@ -119,6 +119,10 @@ form {
   aspect-ratio: 16 / 9;
   width: auto !important;
 }
+.waiting-room-video-mobile {
+  aspect-ratio: 10 / 9;
+  width: auto !important;
+}
 /*-------- end attendee video style --------*/
 
 /*-------- start meeting video gallery style --------*/

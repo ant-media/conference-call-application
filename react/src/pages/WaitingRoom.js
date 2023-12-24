@@ -131,7 +131,7 @@ function WaitingRoom(props) {
             <Grid item md={7} alignSelf="stretch">
               <Grid
                   container
-                  className="waiting-room-video"
+                  className={conference.globals.isMobileDevice ? "waiting-room-video-mobile":"waiting-room-video"}
                   sx={{position: "relative"}}
               >
                 <VideoCard id="localVideo" autoPlay muted hidePin={true}/>

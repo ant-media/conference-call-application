@@ -258,7 +258,7 @@ function VideoCard(props) {
         >
           <CustomizedVideo
             {...props}
-            style={{ objectFit: props.pinned ? "contain" : "cover" }}
+            style= {{ objectFit: props.pinned || conference.globals.isMobileDevice ? "contain" : "cover" }}
             ref={refVideo}
             playsInline
             muted={isLocal}
@@ -353,9 +353,6 @@ function VideoCard(props) {
       conference.setLocalVideo();
     }
   };
-  const isMobileDevice = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  };
   
   return isLocal || props.track?.kind !== "audio" ? (
     <>
@@ -363,7 +360,7 @@ function VideoCard(props) {
         container
         style={{
           height: "100%",
-          width: isLocal && isMobileDevice() ? "50%" : "100%", 
+          width:  "100%", 
           position: "relative",
           margin: "auto"
         }}
