@@ -85,7 +85,7 @@ function LayoutTiled(props) {
           playingParticipants.map((element, index) => {
             var ismobilAndLocalvideo = element.id==="localVideo" && conference.globals.isMobileDevice;
             if(ismobilAndLocalvideo)
-              var mcardHeight = cardHeight +200 
+              var mcardHeight = cardHeight +100;
             //console.log("cw:"+cardWidth+" ch:"+cardHeight);
             return (
               <div
