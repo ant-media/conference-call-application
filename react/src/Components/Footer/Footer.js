@@ -25,7 +25,7 @@ const getCustomizedGridStyle = (theme) => {
     left: 0,
     padding: 16,
     width: "100vw",
-    zIndex: 2,
+    zIndex: 101,
   };
 
   if (getRoomNameAttribute()) {
