@@ -139,7 +139,7 @@ if (localStorage.getItem('selectedMicrophone')) {
   mediaConstraints.audio.deviceId = localStorage.getItem('selectedMicrophone');
 }
 
-let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = "ws://192.168.0.108:5080/LiveApp/websocket";
 
 if (!websocketURL) {
 
