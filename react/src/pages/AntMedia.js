@@ -33,6 +33,9 @@ const JoinModes = {
   MULTITRACK: "multitrack",
   MCU: "mcu"
 }
+globals.isMobileDevice = (()=>{
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+})();
 
 function getMediaConstraints(videoSendResolution, frameRate) {
   let constraint = null;
