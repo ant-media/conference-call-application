@@ -127,11 +127,35 @@ function AntMedia() {
       headers: { 'Content-Type': 'application/json' },
     };
 
-    fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/add?streamId=" + streamId, requestOptions0).then(
-        () => {
+    const requestOptions2 = {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    console.log("Burak Add as subtrack worked!: ");
+
+    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions2)
+      .then((response) => { return response.json(); })
+      .then((data) => {
+        let broadcastObject = data;
+        if (broadcastObject.subTrackStreamIds.length > 0) {
+          for (let i = 0; i < broadcastObject.subTrackStreamIds.length; i++) {
+            if (broadcastObject.subTrackStreamIds[i] === streamId) {
+
+              presenters.push(streamId);
+              var newPresenters = [...presenters];
+              setPresenters(newPresenters);
+              return;
+            }
+          }
+        }
+
+    fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/add?streamId=" + streamId, requestOptions0)
+  .then( () => {
           fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions1)
           .then((response) => { return response.json(); })
           .then((data) => {
+
             presenters.push(streamId);
             var newPresenters = [...presenters];
             setPresenters(newPresenters);
@@ -173,9 +197,11 @@ function AntMedia() {
               }
 
             });
+
           });
         }
     )
+      });
   }
 
   function makeParticipantUndoPresenter(id) {
