@@ -31,7 +31,7 @@ const AntDialogTitle = props => {
   );
 };
 
-export function RoomCreationPassword(props) {
+export function RoomCreationPasswordDialog(props) {
   const { t } = useTranslation();
   const { onClose, password, onPasswordChange, open, onCreateRoomClicked, roomName, onRoomNameChange } = props;
 
@@ -55,7 +55,10 @@ export function RoomCreationPassword(props) {
 
   return (
     <Dialog onClose={handleClose} open={open}  maxWidth={'sm'}>
-      <AntDialogTitle onClose={handleClose}>{t('Room creation requires password. Type room name and room creation password')}</AntDialogTitle>
+      <AntDialogTitle onClose={handleClose}>{t('Room creation requires password.')}</AntDialogTitle>
+      <span>
+      Enter room name and room creation password
+      </span>
       <DialogContent>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <Input
@@ -94,7 +97,7 @@ export function RoomCreationPassword(props) {
   );
 }
 
-RoomCreationPassword.propTypes = {
+RoomCreationPasswordDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
 };

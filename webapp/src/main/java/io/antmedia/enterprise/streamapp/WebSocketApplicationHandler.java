@@ -7,6 +7,8 @@ import io.antmedia.datastore.db.DataStore;
 import io.antmedia.datastore.db.DataStoreFactory;
 import io.antmedia.datastore.db.IDataStoreFactory;
 import io.antmedia.datastore.db.types.Broadcast;
+import io.antmedia.datastore.db.types.Token;
+import io.antmedia.security.ITokenService;
 import io.antmedia.settings.ServerSettings;
 import org.apache.catalina.core.ApplicationContextFacade;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -16,11 +18,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import io.antmedia.websocket.WebSocketCommunityHandler;
 import io.antmedia.websocket.WebSocketConstants;
 
 import jakarta.websocket.EndpointConfig;
@@ -42,12 +42,8 @@ public class WebSocketApplicationHandler {
 
     protected static Logger logger = LoggerFactory.getLogger(WebSocketLocalHandler.class);
 
-    ConfigurableWebApplicationContext ctxt = null;
-
-    public WebSocketApplicationHandler(){
-
-
-    }
+    ConfigurableWebApplicationContext context;
+    ConferenceRoomSettings conferenceRoomSettings;
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
@@ -74,37 +70,36 @@ public class WebSocketApplicationHandler {
 
     @OnMessage
     public void onMessage(Session session, String message) {
-        if(ctxt == null) {
+        if (context == null) {
+            setApplicationContext(session);
+            setConferenceRoomSettings();
+        }
+
+        if (context != null && context.isRunning()) {
             try {
-                ApplicationContextFacade servletContext = (ApplicationContextFacade) FieldUtils.readField(session.getContainer(), "servletContext", true);
-                ctxt = (ConfigurableWebApplicationContext) WebApplicationContextUtils.getWebApplicationContext(servletContext);
+                processApplicationMessage(session, message);
             } catch (Exception e) {
-                logger.error("Application context can not be set to WebSocket handler");
                 logger.error(ExceptionUtils.getMessage(e));
             }
-
-            if(ctxt != null && ctxt.isRunning()) {
-                try{
-                    checkRoomCreation(session, message);
-
-                }catch (Exception e){
-                    return;
-
-                }
-            }
-            else {
-                sendNotInitializedError(session);
-            }
+        } else {
+            sendNotInitializedError(session);
         }
-        else {
-            try{
+    }
 
-               checkRoomCreation(session, message);
+    private void setConferenceRoomSettings(){
+        if(context!= null){
+            conferenceRoomSettings = (ConferenceRoomSettings) context.getBean("conferenceRoomSettings");
+        }
+    }
 
-            }catch (Exception e){
 
-            }
-
+    private void setApplicationContext(Session session) {
+        try {
+            ApplicationContextFacade servletContext = (ApplicationContextFacade) FieldUtils.readField(session.getContainer(), "servletContext", true);
+            context = (ConfigurableWebApplicationContext) WebApplicationContextUtils.getWebApplicationContext(servletContext);
+        } catch (Exception e) {
+            logger.error("Application context can not be set to WebSocket handler");
+            logger.error(ExceptionUtils.getMessage(e));
         }
     }
 
@@ -120,53 +115,45 @@ public class WebSocketApplicationHandler {
     }
 
 
-    public void checkRoomCreation(Session session, String message) throws ParseException {
-
+    public void processApplicationMessage(Session session, String message) throws ParseException {
         JSONObject jsonObject = (JSONObject) jsonParser.parse(message);
-
         String cmd = (String) jsonObject.get(WebSocketConstants.COMMAND);
 
-        AppSettings appSettings = (AppSettings) ctxt.getBean("app.settings");
+        AppSettings appSettings = (AppSettings) context.getBean("app.settings");
         DataStore dataStore = getDataStore();
 
-        ConferenceRoomSettings conferenceRoomSettings = (ConferenceRoomSettings) ctxt.getBean("conferenceRoomSettings");
-
-
-        if(cmd.equals("isRoomCreationPasswordRequired")){
-            sendRoomPasswordRequiredMessage(session, conferenceRoomSettings.isCreateRoomWithPassword());
-
-
-
-        }else if(cmd.equals("createRoomWithPassword")){
-            String roomCreationPassword = null;
-            String roomName = null;
-            boolean roomCreationAllowed = false;
-            if(jsonObject.containsKey("roomCreationPassword") &&  !((String) jsonObject.get("roomCreationPassword")).isEmpty()) {
-                roomCreationPassword = (String) jsonObject.get("roomCreationPassword");
-            }
-            if(jsonObject.containsKey("roomName") &&  !((String) jsonObject.get("roomName")).isEmpty()) {
-                roomName = (String) jsonObject.get("roomName");
-            }
-
-            if(roomName != null && roomCreationPassword != null && roomCreationPassword.equals(conferenceRoomSettings.getPasswordForCreatingRoom())){
-
-                roomCreationAllowed = true;
-
-            }
-            if(roomCreationAllowed){ // create  the room.
-
-                createMainRoomBroadcast(roomName);
-
-
-            }
-
-
-            sendCreateRoomWithPassword(session, roomCreationAllowed);
-
+        if (cmd.equals(WebSocketApplicationConstants.IS_ROOM_CREATION_PASSWORD_REQUIRED_COMMAND)) {
+            handlePasswordRequiredCommand(session, conferenceRoomSettings);
+        } else if (cmd.equals(WebSocketApplicationConstants.CREATE_ROOM_WITH_PASSWORD_COMMAND)) {
+            handleRoomCreationWithPassword(session, jsonObject, conferenceRoomSettings);
         }
-
-
     }
+
+    private void handlePasswordRequiredCommand(Session session, ConferenceRoomSettings conferenceRoomSettings) {
+        sendRoomPasswordRequiredMessage(session, conferenceRoomSettings.isRoomCreationPasswordEnabled());
+    }
+
+    private void handleRoomCreationWithPassword(Session session, JSONObject jsonObject, ConferenceRoomSettings conferenceRoomSettings) {
+        String roomCreationPassword = getStringValue(jsonObject, WebSocketApplicationConstants.ROOM_CREATION_PASSWORD);
+        String roomName = getStringValue(jsonObject, WebSocketApplicationConstants.ROOM_NAME);
+
+        if (roomName != null && roomCreationPassword != null && roomCreationPassword.equals(conferenceRoomSettings.getRoomCreationPassword())) {
+            createMainRoomBroadcast(roomName);
+            String joinToken = createJoinTokenForRoom(roomName);
+            sendCreateRoomWithPassword(session, true, joinToken);
+        } else {
+            sendCreateRoomWithPassword(session, false, null);
+        }
+    }
+
+    private String getStringValue(JSONObject jsonObject, String key) {
+        if (jsonObject.containsKey(key)) {
+            String value = (String) jsonObject.get(key);
+            return value.isEmpty() ? null : value;
+        }
+        return null;
+    }
+
 
     public void createMainRoomBroadcast(String roomName){
 
@@ -184,12 +171,32 @@ public class WebSocketApplicationHandler {
 
     }
 
+    //room creation with password generates a permanent publish jwt which should be passed to publish and play on conference client.
+    private String createJoinTokenForRoom(String roomStreamId){
+        ITokenService tokenService = getTokenService();
+        Token token = tokenService.createJwtToken(roomStreamId, 9703597137L, Token.PUBLISH_TOKEN, null);
+        if(token == null){
+            return null;
+        }
+        return token.getTokenId();
+
+    }
+
+    private ITokenService getTokenService()
+    {
+        if(context != null && context.containsBean(ITokenService.BeanName.TOKEN_SERVICE.toString())) {
+            return (ITokenService)context.getBean(ITokenService.BeanName.TOKEN_SERVICE.toString());
+        }
+
+        return null;
+    }
+
     public ServerSettings getServerSettings(){
-        return (ServerSettings)ctxt.getBean(ServerSettings.BEAN_NAME);
+        return (ServerSettings) context.getBean(ServerSettings.BEAN_NAME);
 
     }
     public DataStore getDataStore(){
-        DataStoreFactory dataStoreFactory = (DataStoreFactory) ctxt.getBean(IDataStoreFactory.BEAN_NAME);
+        DataStoreFactory dataStoreFactory = (DataStoreFactory) context.getBean(IDataStoreFactory.BEAN_NAME);
 
         return dataStoreFactory.getDataStore();
     }
@@ -208,11 +215,14 @@ public class WebSocketApplicationHandler {
 
 
     }
-    public void sendCreateRoomWithPassword(Session session, boolean authenticated){
+    public void sendCreateRoomWithPassword(Session session, boolean authenticated, String joinToken){
 
         JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put(WebSocketConstants.COMMAND, "createRoomWithPassword");
-        jsonResponse.put("authenticated", authenticated);
+        jsonResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.CREATE_ROOM_WITH_PASSWORD_COMMAND);
+        jsonResponse.put(WebSocketApplicationConstants.AUTHENTICATED, authenticated);
+        if(joinToken != null){
+            jsonResponse.put(WebSocketApplicationConstants.JOIN_TOKEN, joinToken);
+        }
         try {
             session.getBasicRemote().sendText(jsonResponse.toJSONString());
         } catch (IOException e) {

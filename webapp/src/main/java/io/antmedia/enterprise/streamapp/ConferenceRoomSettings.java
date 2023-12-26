@@ -7,32 +7,32 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("/WEB-INF/red5-web.properties")
 public class ConferenceRoomSettings {
 
-    private final static String SETTINGS_CREATE_ROOM_WITH_PASSWORD = "settings.createRoomWithPassword";
-    private final static String SETTINGS_PASSWORD_FOR_CREATING_ROOM = "settings.passwordForCreatingRoom";
+    private final static String SETTINGS_ROOM_CREATION_PASSWORD_ENABLED = "settings.roomCreationPasswordEnabled";
+    private final static String SETTINGS_ROOM_CREATION_PASSWORD = "settings.roomCreationPassword";
 
 
-    @Value("${createRoomWithPassword:${"+SETTINGS_PASSWORD_FOR_CREATING_ROOM+":null}}")
-    private String passwordForCreatingRoom;
+    @Value("${roomCreationPassword:${"+ SETTINGS_ROOM_CREATION_PASSWORD +":null}}")
+    private String roomCreationPassword;
 
 
-    @Value("${createRoomWithPassword:${"+SETTINGS_CREATE_ROOM_WITH_PASSWORD+":false}}")
-    private boolean createRoomWithPassword = false;
+    @Value("${roomCreationPasswordEnabled:${"+ SETTINGS_ROOM_CREATION_PASSWORD_ENABLED +":false}}")
+    private boolean roomCreationPasswordEnabled = false;
 
 
-    public String getPasswordForCreatingRoom() {
-        return passwordForCreatingRoom;
+    public String getRoomCreationPassword() {
+        return roomCreationPassword;
     }
 
-    public void setPasswordForCreatingRoom(String passwordForCreatingRoom) {
-        this.passwordForCreatingRoom = passwordForCreatingRoom;
+    public void setRoomCreationPassword(String roomCreationPassword) {
+        this.roomCreationPassword = roomCreationPassword;
     }
 
-    public boolean isCreateRoomWithPassword() {
-        return createRoomWithPassword;
+    public boolean isRoomCreationPasswordEnabled() {
+        return roomCreationPasswordEnabled;
     }
 
-    public void setCreateRoomWithPassword(boolean createRoomWithPassword) {
-        this.createRoomWithPassword = createRoomWithPassword;
+    public void setRoomCreationPasswordEnabled(boolean roomCreationPasswordEnabled) {
+        this.roomCreationPasswordEnabled = roomCreationPasswordEnabled;
     }
 
 

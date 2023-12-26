@@ -6,9 +6,10 @@ import {useNavigate} from 'react-router-dom';
 import {nanoid} from 'nanoid';
 import Stack from "@mui/material/Stack";
 
-import { getWebSocketURLAttribute } from "../utils";
-import { RoomCreationPassword } from "Components/Footer/Components/RoomCreationPassword";
 
+import { getWebSocketURLAttribute } from "../utils";
+import { RoomCreationPasswordDialog } from "Components/Footer/Components/RoomCreationPasswordDialog";
+import { GoToLobbyDialog } from 'Components/Footer/Components/GoToLobbyDialog';
 
 function Home(props) {
     const {t} = useTranslation();
@@ -16,10 +17,14 @@ function Home(props) {
 
     const roomNameRef = React.useRef(); // Create a ref to store roomName
     const applicationWebSocketUrlRef = React.useRef(); // Store applicationWebSocketUrl in a useRef
+    const joinToken = React.useRef();
+    const joinRoomUrl = React.useRef();
 
     const [applicationWebSocket, setApplicationWebSocket] = React.useState();
     const [createRoomPassword, setCreateRoomPassword] = React.useState();
     const [createRoomPasswordDialogOpen, setCreateRoomPasswordDialogOpen] = React.useState(false);
+    const [goToLobbyDialogOpen, setGoToLobbyDialogOpen] = React.useState(false);
+
     const [roomName, setRoomName] = React.useState();
 
     const handleCreateRoomPasswordChange = (newPassword) => {
@@ -40,19 +45,27 @@ function Home(props) {
 
       };
 
-      const goToLobby = React.useCallback((roomId) => {
-        var newMeetingPath = "";
-        if (roomId === undefined) {
-          newMeetingPath = `/${nanoid(8)}`;
-        } else {
-          newMeetingPath = `/${roomId}`;
-        }
+      const goToLobby = React.useCallback((roomId, joinToken) => {
+        const newMeetingPath = roomId === undefined
+          ? `/${nanoid(8)}`
+          : `/${roomId}${joinToken ? `?token=${joinToken}` : ''}`;
+        
         navigate(newMeetingPath); // Navigate to the new path programmatically
       }, [navigate]);
 
       const handleCreateRoomPasswordDialogClose = (value) => {
         setCreateRoomPasswordDialogOpen(false);
       };
+
+      const handleGoToLobbyDialogClose = (value) =>{
+        setGoToLobbyDialogOpen(false);
+
+      }
+
+      const handleGoToLobbyClicked = (value) =>{
+        goToLobby(roomNameRef.current, joinToken.current)
+      
+    }
     
     
       const handleCreateRoomWithPassword = (e) =>{
@@ -119,12 +132,16 @@ function Home(props) {
                     
                 }else if(obj.command === "createRoomWithPassword"){
 
-                    if(obj.authenticated){
+                    if(obj.authenticated && obj.joinToken){
+                          const currentURL = window.location.href;
+                          joinToken.current = obj.joinToken
+                          joinRoomUrl.current = currentURL + roomNameRef.current +"?token="+ obj.joinToken
+                         setGoToLobbyDialogOpen(true)
 
-                        goToLobby(roomNameRef.current)
+                        
 
                     }else{
-                        alert("Room creation password is wrong!")
+                        alert("Room creation password is wrong")
                     }
 
 
@@ -139,7 +156,13 @@ function Home(props) {
 
     return (
         <>
-     <RoomCreationPassword
+          <GoToLobbyDialog
+                 onClose={handleGoToLobbyDialogClose}
+                url={joinRoomUrl.current}
+                open={goToLobbyDialogOpen}
+                onGoToLobbyClicked={handleGoToLobbyClicked} 
+        />
+     <RoomCreationPasswordDialog
                  onClose={handleCreateRoomPasswordDialogClose}
                 password={createRoomPassword}
                 onPasswordChange={handleCreateRoomPasswordChange}
@@ -148,6 +171,7 @@ function Home(props) {
                 roomName = {roomName}
                 onRoomNameChange = {handleCreateRoomNameChange}
         />
+      
 
 
             <Grid container justifyContent={"center"} sx={{mt: 8}}>

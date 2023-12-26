@@ -95,8 +95,10 @@ function getPublishToken() {
   return (dataPublishToken) ? dataPublishToken : getUrlParameter("publishToken");
 }
 
+
 var playToken = getPlayToken();
 var publishToken = getPublishToken();
+var token =  getUrlParameter("token")
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var InitialStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
@@ -178,6 +180,10 @@ if (playToken == null || typeof playToken === "undefined") {
 
 if (publishToken == null || typeof publishToken === "undefined") {
   publishToken = "";
+}
+
+if (token == null || typeof token === "undefined") {
+  token = "";
 }
 
 var roomOfStream = [];
@@ -377,20 +383,24 @@ function AntMedia() {
   function joinRoom(roomName, generatedStreamId, roomJoinMode) {
     room = roomName;
     roomOfStream[generatedStreamId] = room;
-
+  
     globals.maxVideoTrackCount = 6; //FIXME
     setPublishStreamId(generatedStreamId);
-
-    if (!playOnly) {
-      handlePublish(
-          generatedStreamId,
-          publishToken,
-          subscriberId,
-          subscriberCode
-      );
+    token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
+  
+    if (!playOnly && token === undefined) {
+      token = publishToken;
     }
-
-    webRTCAdaptor.play(roomName, playToken, roomName, null, subscriberId, subscriberCode);
+  
+    if (!playOnly) {
+      handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
+    }
+  
+    if (token === undefined) {
+      token = playToken;
+    }
+  
+    webRTCAdaptor.play(roomName, token, roomName, null, subscriberId, subscriberCode);
   }
 
   async function checkDevices() {
@@ -413,6 +423,8 @@ function AntMedia() {
       mediaConstraints.video = false;
     }
   }
+
+
 
   function addFakeParticipant() {
     let suffix = "fake" + fakeParticipantCounter;
@@ -553,6 +565,7 @@ function AntMedia() {
     webRTCAdaptor.callbackError = errorCallback;
     webRTCAdaptor.localStream = localVideo;
   }
+
 
   function infoCallback(info, obj) {
     if (info === "initialized") {
@@ -1663,6 +1676,7 @@ function AntMedia() {
                     setParticipantIdMuted,
                     videoSendResolution,
                     setVideoSendResolution
+                    
                   }}
               >
                 <SnackbarProvider
