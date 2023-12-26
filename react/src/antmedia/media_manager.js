@@ -1141,8 +1141,8 @@ export class MediaManager {
         } else {
 
             return new Promise((resolve, reject) => {
-                this.callbackError("NoActiveConnection");
-                reject("NoActiveStream");
+                //this.callbackError("NoActiveConnection");
+                //reject("NoActiveStream");
             });
         }
 
