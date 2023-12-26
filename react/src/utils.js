@@ -1,4 +1,5 @@
 import { func } from "prop-types";
+import {getUrlParameter} from "./antmedia/fetch.stream";
 
 export function urlify(text) {
     if (!text) {
@@ -30,14 +31,17 @@ export function urlify(text) {
 
 export function getRoomNameAttribute() {
     // if it returns data-room-name element, it means that we are using conference app in component mode
-   return document.getElementById("root").getAttribute("data-room-name");
+   return getUrlParameter("roomName");//document.getElementById("root").getAttribute("data-room-name");
  }
- 
+
  export function getWebSocketURLAttribute() {
      //if it exists, it means it is in component mode
      return document.getElementById("root").getAttribute("data-websocket-url")
  }
 
  export function getRootAttribute(attribute) {
+  if (attribute == "data-room-name") {
+    return getUrlParameter("roomName")
+  }
    return document.getElementById("root").getAttribute(attribute);
  }

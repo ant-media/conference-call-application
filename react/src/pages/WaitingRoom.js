@@ -46,7 +46,7 @@ function WaitingRoom(props) {
   const { enqueueSnackbar } = useSnackbar();
   const { speedTestBeforeLogin, speedTestBeforeLoginModal, setSpeedTestBeforeLoginModal, setLeftTheRoom } = React.useContext(MediaSettingsContext);
 
-  React.useEffect(() => 
+  React.useEffect(() =>
   {
     if(!antmedia.onlyDataChannel) {
       antmedia.mediaManager.localVideo = document.getElementById("localVideo");
@@ -280,9 +280,9 @@ function WaitingRoom(props) {
                         fullWidth
                         value={props.streamName}
                         variant="outlined"
-                        // onChange={(e) => props.handleStreamName(e.target.value)}
+                        onChange={(e) => props.handleStreamName(e.target.value)}
                         placeholder={t("Your name")}
-                        readOnly={true}
+                        //readOnly={true}
                         id="participant_name"
                         inputProps={{ style: { color: "black" } }}
                     />

@@ -1,20 +1,20 @@
 {
   "files": {
-    "main.css": "./static/css/main.82b0e0db.css",
-    "main.js": "./static/js/main.1e4fa181.js",
+    "main.css": "./static/css/main.7fa1d61d.css",
+    "main.js": "./static/js/main.1e7d13a3.js",
     "static/js/787.c67f95a2.chunk.js": "./static/js/787.c67f95a2.chunk.js",
     "static/media/OpenSans-Medium.ttf": "./static/media/OpenSans-Medium.65529e6c75fe516f596a.ttf",
     "static/media/OpenSans-Regular.ttf": "./static/media/OpenSans-Regular.57cd57a648021fa1c396.ttf",
     "static/media/OpenSans-Bold.ttf": "./static/media/OpenSans-Bold.a0fe34bea92d4e1a84d6.ttf",
     "static/media/OpenSans-SemiBold.ttf": "./static/media/OpenSans-SemiBold.2b370b191e5562dadc78.ttf",
-    "static/media/sprite.svg": "./static/media/sprite.ddbb88821a852d9f6a9a86b89aa29ecc.svg",
     "index.html": "./index.html",
-    "main.82b0e0db.css.map": "./static/css/main.82b0e0db.css.map",
-    "main.1e4fa181.js.map": "./static/js/main.1e4fa181.js.map",
+    "static/media/sprite.svg": "./static/media/sprite.b9f872f0304b1aad55ac2480ffb25bba.svg",
+    "main.7fa1d61d.css.map": "./static/css/main.7fa1d61d.css.map",
+    "main.1e7d13a3.js.map": "./static/js/main.1e7d13a3.js.map",
     "787.c67f95a2.chunk.js.map": "./static/js/787.c67f95a2.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.82b0e0db.css",
-    "static/js/main.1e4fa181.js"
+    "static/css/main.7fa1d61d.css",
+    "static/js/main.1e7d13a3.js"
   ]
 }

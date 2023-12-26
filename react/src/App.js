@@ -76,11 +76,19 @@ var playOnly = getRootAttribute("play-only");
 if (!playOnly) {
   playOnly = getUrlParameter("playOnly");
 }
+if (playOnly == "true") {
+  playOnly = true;
+}
 
 var onlyDataChannel = getRootAttribute("only-data-channel");
 if (!onlyDataChannel) {
   onlyDataChannel = getUrlParameter("onlyDataChannel");
 }
+if (onlyDataChannel == "true") {
+  onlyDataChannel = true;
+}
+
+
 
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
