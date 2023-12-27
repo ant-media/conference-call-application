@@ -238,6 +238,7 @@ function VideoCard(props) {
   };
 
   const avatarOrPlayer = () => {
+    const isScreenSharedVideo = conference?.screenSharedVideoId === props?.id || conference?.isScreenShared;
     return (
       <>
         <Grid
@@ -258,7 +259,7 @@ function VideoCard(props) {
         >
           <CustomizedVideo
             {...props}
-            style={{ objectFit: props.pinned ? "contain" : "cover" }}
+            style={{ objectFit: props.pinned || isScreenSharedVideo ? "contain" : "cover" }}
             ref={refVideo}
             playsInline
             muted={isLocal}
