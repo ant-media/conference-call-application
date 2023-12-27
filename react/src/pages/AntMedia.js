@@ -109,8 +109,11 @@ function AntMedia() {
   const [messages, setMessages] = useState([]);
   const [observerMode, setObserverMode] = useState(false);
 
+  const [presenterButtonDisabled, setPresenterButtonDisabled] = useState(false);
+
 
   function makeParticipantPresenter(id) {
+    setPresenterButtonDisabled(true);
     let streamId = id;
     if (streamId === 'localVideo' && myLocalData !== null) {
       streamId = myLocalData?.streamId;
@@ -131,8 +134,6 @@ function AntMedia() {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     };
-
-    console.log("Burak Add as subtrack worked!: ");
 
     fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions2)
       .then((response) => { return response.json(); })
@@ -155,6 +156,7 @@ function AntMedia() {
           fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions1)
           .then((response) => { return response.json(); })
           .then((data) => {
+            setPresenterButtonDisabled(false);
 
             presenters.push(streamId);
             var newPresenters = [...presenters];
@@ -205,6 +207,7 @@ function AntMedia() {
   }
 
   function makeParticipantUndoPresenter(id) {
+    setPresenterButtonDisabled(true);
     let streamId = id;
     if (streamId === 'localVideo') {
       streamId = myLocalData?.streamId;
@@ -239,6 +242,7 @@ function AntMedia() {
           console.log("update subtrack result: " + result.success + " for stream: " + streamId);
 
           fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + streamId, requestOptions0).then(() => {
+              setPresenterButtonDisabled(false);
               presenters.splice(presenters.indexOf(streamId), 1);
               var newPresenters = [...presenters];
               setPresenters(newPresenters);
@@ -556,6 +560,10 @@ function AntMedia() {
     infoText += JSON.stringify(globals.trackEvents)+"\n";
     infoText += "Participants ("+participants.length+"):\n";
     infoText += JSON.stringify(participants)+"\n";
+    infoText += "All Participants ("+allParticipants.length+"):\n";
+    allParticipants.forEach((p) => {
+      infoText += "  "+p.id+" "+p.videoLabel+"\n";
+    });
     infoText += "----------------------\n";
     infoText += debugInfo;
 
@@ -1156,6 +1164,8 @@ function AntMedia() {
             allParticipants,
             setLeftTheRoom,
             observerMode,
+            presenterButtonDisabled,
+            setPresenterButtonDisabled
           }}
         >
           <Dialog
@@ -1231,6 +1241,8 @@ function AntMedia() {
                   setPresenters,
                   globals,
                   observerMode,
+                  presenterButtonDisabled,
+                  setPresenterButtonDisabled
                 }}
               >
                 <>

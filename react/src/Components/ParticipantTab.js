@@ -26,6 +26,7 @@ function ParticipantTab(props) {
   const settings = React.useContext(SettingsContext);
 
   const { pinnedVideoId, pinVideo, allParticipants, makeParticipantUndoPresenter, makeParticipantPresenter, presenters, approvedSpeakerRequestList, makeListenerAgain } = settings;
+  const {presenterButtonDisabled, setPresenterButtonDisabled} = mediaSettings;
   const getParticipantItem = (videoId, name) => {
     return (
       <Grid
@@ -57,6 +58,7 @@ function ParticipantTab(props) {
           )}
           {(videoId === "localVideo" ? presenters.includes(mediaSettings.myLocalData?.streamId) : presenters.includes(videoId) )&& antmedia.admin === true ? (
               <PinBtn
+                  disabled={presenterButtonDisabled}
                   sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                   onClick={() => makeParticipantUndoPresenter(videoId)}
               >
@@ -65,6 +67,7 @@ function ParticipantTab(props) {
           ) : null}
           {(videoId === "localVideo" ? !presenters.includes(mediaSettings.myLocalData?.streamId) : !presenters.includes(videoId) ) && ( !approvedSpeakerRequestList.includes(videoId) ) && antmedia.admin === true ?(
               <PinBtn
+                  disabled={presenterButtonDisabled}
                   sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                   onClick={() => makeParticipantPresenter(videoId)}
               >
