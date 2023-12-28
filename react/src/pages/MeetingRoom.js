@@ -250,7 +250,7 @@ const MeetingRoom = React.memo((props) => {
     return slicedParticipants.length > 0 ? (
         <>
           {slicedParticipants.map(({id, videoLabel, track, name}, index) => {
-            if (id !== "localVideo") {
+            if (id !== "localVideo" && typeof id !== "undefined" && typeof name !== "undefined") {
               return (
                   <div className="unpinned" key={index}>
                     <div className="single-video-container">
