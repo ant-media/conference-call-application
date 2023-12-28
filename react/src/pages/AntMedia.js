@@ -71,12 +71,12 @@ function getMediaConstraints(videoSendResolution, frameRate) {
     case "fullHdConstraints":
       constraint = {
         video: {
-          width: {ideal: 1920}, height: {ideal: 1080},
+          width: {max: 1920}, height: {max: 1080},
           advanced: [
-            {frameRate: {min: frameRate}}, {height: {min: 1080}}, {width: {min: 1920}}, {frameRate: {max: frameRate}}, {width: {max: 1920}}, {height: {max: 1080}}, {aspectRatio: {exact: 1.77778}}
+            {frameRate: {min: frameRate}}
           ]
         }
-      };
+      }; 
       break;
     default:
       break;
