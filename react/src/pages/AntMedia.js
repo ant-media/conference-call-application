@@ -475,6 +475,18 @@ function AntMedia() {
     scrollToBottom();
   }, [messages]);
 
+  /*
+      Problem: When we double-clicked "make presenter" button, sub-track of the presenter adds twice.
+      Solution: We add mechanism to disable "make presenter" button for one seconds to be sure there will be no unintended duplicate.
+   */
+  useEffect(() => {
+    if (presenterButtonDisabled === true) {
+      setTimeout(() => {
+        setPresenterButtonDisabled(false);
+      }, 500);
+    }
+  }, [presenterButtonDisabled]);
+
   function scrollToBottom() {
     let objDiv = document.getElementById("paper-props");
     if (objDiv) objDiv.scrollTop = objDiv?.scrollHeight;
@@ -539,6 +551,9 @@ function AntMedia() {
         if(message === "debugme") {
           antmedia.getDebugInfo(myLocalData.streamId);
           return;
+        } else if (message === "clearme") {
+          setMessages([]);
+          return;
         }
 
         antmedia.sendData(
@@ -561,8 +576,8 @@ function AntMedia() {
     infoText += "Participants ("+participants.length+"):\n";
     infoText += JSON.stringify(participants)+"\n";
     infoText += "All Participants ("+allParticipants.length+"):\n";
-    allParticipants.forEach((p) => {
-      infoText += "  "+p.id+" "+p.videoLabel+"\n";
+    Object.keys(allParticipants).forEach(function(key) {
+      infoText += "-> "+allParticipants[key].streamId+" - "+allParticipants[key].streamName+"\n";
     });
     infoText += "----------------------\n";
     infoText += debugInfo;
@@ -794,13 +809,23 @@ function AntMedia() {
     }
   }
   function handleLeaveFromRoom() {
-    // we need to empty participant array. i f we are going to leave it in the first place.
+    // we need to empty participant array. if we are going to leave it in the first place.
     setParticipants([]);
+
     antmedia?.leaveFromRoom(roomName);
     antmedia?.turnOffLocalCamera(myLocalData.streamId);
+
+    if (antmedia?.admin === true) {
+      antmediaadmin?.leaveFromRoom(roomName + "listener");
+    }
+
     setWaitingOrMeetingRoom("waiting");
   }
 
+  /*
+      Problem 2: If someone doesn't click the "leave the room" button and directly closes the tab or refresh the page, sub-track is stuck in the room.
+      Solution: We add useBeforeUnload function to close all resources properly.
+   */
   useBeforeUnload((ev) => {
     handleLeaveFromRoom();
   });

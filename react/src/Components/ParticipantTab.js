@@ -26,7 +26,7 @@ function ParticipantTab(props) {
   const settings = React.useContext(SettingsContext);
 
   const { pinnedVideoId, pinVideo, allParticipants, makeParticipantUndoPresenter, makeParticipantPresenter, presenters, approvedSpeakerRequestList, makeListenerAgain } = settings;
-  const {presenterButtonDisabled, setPresenterButtonDisabled} = mediaSettings;
+  const {presenterButtonDisabled} = mediaSettings;
   const getParticipantItem = (videoId, name) => {
     return (
       <Grid

@@ -250,6 +250,10 @@ const MeetingRoom = React.memo((props) => {
     return slicedParticipants.length > 0 ? (
         <>
           {slicedParticipants.map(({id, videoLabel, track, name}, index) => {
+            /*
+              Problem 3: When we pin someone in the listener room, there are lots of blank tile with undefined id or name and they broke the layout and ux.
+              Solution: Add type check into video card and meeting room.
+           */
             if (id !== "localVideo" && typeof id !== "undefined" && typeof name !== "undefined") {
               return (
                   <div className="unpinned" key={index}>
