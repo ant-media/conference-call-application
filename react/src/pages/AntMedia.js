@@ -19,6 +19,7 @@ import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 import { getRoomNameAttribute, getWebSocketURLAttribute } from "../utils";
 import floating from "../external/floating.js";
+import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -244,6 +245,7 @@ function AntMedia() {
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
+  const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
   const [reactions] = useState({
     'sparkling_heart': '💖',
@@ -327,6 +329,13 @@ function AntMedia() {
     }
   }
 
+  
+  function handleUnauthorizedDialogExitClicked(){
+
+    setUnAuthorizedDialogOpen(false)
+    setWaitingOrMeetingRoom("waiting")    
+
+  }
 
   function checkAndUpdateVideoAudioSources() {
     let isVideoDeviceAvailable = false;
@@ -737,6 +746,11 @@ function AntMedia() {
           );
         }, 2000);
       }
+    }else if(error.indexOf("unauthorized_access") !== -1){
+      webRTCAdaptor.stop(publishStreamId);
+
+      setUnAuthorizedDialogOpen(true)
+      
     }
 
 
@@ -1679,6 +1693,12 @@ function AntMedia() {
                     
                   }}
               >
+                <UnauthrorizedDialog
+                    onClose={handleUnauthorizedDialogExitClicked}
+                    open={unAuthorizedDialogOpen}
+                    onExitClicked ={handleUnauthorizedDialogExitClicked}
+                   
+                />
                 <SnackbarProvider
                     anchorOrigin={{
                       vertical: "top",
