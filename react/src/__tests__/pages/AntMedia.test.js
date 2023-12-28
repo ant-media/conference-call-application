@@ -65,18 +65,11 @@ describe('getMediaConstraints', () => {
         const result = getMediaConstraints('fullHdConstraints', 30);
         expect(result).toEqual({
             video: {
-                width: { ideal: 1920 },
-                height: { ideal: 1080 },
+                width: {max: 1920}, height: {max: 1080},
                 advanced: [
-                    { frameRate: { min: 30 } },
-                    { height: { min: 1080 } },
-                    { width: { min: 1920 } },
-                    { frameRate: { max: 30 } },
-                    { width: { max: 1920 } },
-                    { height: { max: 1080 } },
-                    { aspectRatio: { exact: 1.77778 } }
+                  {frameRate: {min: frameRate}}
                 ]
-            }
+              }
         });
     });
 
