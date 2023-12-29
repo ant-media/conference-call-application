@@ -53,8 +53,6 @@ function LayoutTiled(props) {
   const [cardWidth, setCardWidth] = React.useState(500*aspectRatio);
   const [cardHeight, setCardHeight] = React.useState(500);
 
-  const [mcardHeight, msetCardHeight] = React.useState(300);
-
   React.useEffect(() => {
     const videoCount = Object.keys(conference.participants).length+1
 
