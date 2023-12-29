@@ -73,7 +73,7 @@ function LayoutTiled(props) {
   const showOthers = Object.keys(conference.allParticipants).length > conference.globals.maxVideoTrackCount; 
 
   //if we need to show others card, then we don't show the last video to hold place for the others card
-  const playingParticipantsCount = showOthers ? conference.globals.maxVideoTrackCount - 1 : conference.participants.length;
+  const playingParticipantsCount = showOthers ? conference.participants.length - 1 : conference.participants.length;
   const playingParticipants = conference.participants.slice(0, playingParticipantsCount);
   
   const videoCards = () => {
