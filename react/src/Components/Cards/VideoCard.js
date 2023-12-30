@@ -145,8 +145,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
             mediaSettings?.myLocalData?.streamId,
             Math.floor(value * 100)
           );
-          
-           */
+
         }
       }, 100);
     } else if (isLocal && antmedia.onlyDataChannel) {
