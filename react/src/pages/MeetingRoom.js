@@ -228,29 +228,10 @@ const MeetingRoom = React.memo((props) => {
     //pinned tile
     let unpinnedParticipants = getUnpinnedParticipants();
 
-    const showAsOthersLimitPinned = 5;
-    const showAsOthersSliceIndexPinned = showAsOthersLimitPinned - 2;
-
-    const slicePinnedTiles =
-        unpinnedParticipants.length + 1 > showAsOthersLimitPinned;
-
-    let slicedParticipants = [];
-    if (slicePinnedTiles) {
-      slicedParticipants = unpinnedParticipants.slice(
-          0,
-          showAsOthersSliceIndexPinned
-      );
-      unpinnedParticipants = unpinnedParticipants.slice(
-          showAsOthersSliceIndexPinned
-      );
-    } else {
-      slicedParticipants = unpinnedParticipants;
-    }
-
-    return slicedParticipants.length > 0 ? (
+    return unpinnedParticipants.length > 0 ? (
         <>
-          {slicedParticipants.map(({id, videoLabel, track, name}, index) => {
-            if (id !== "localVideo") {
+          {unpinnedParticipants.map(({id, videoLabel, track, name, streamId}, index) => {
+            if (id !== "localVideo" && streamId !== antmedia?.roomName) {
               return (
                   <div className="unpinned" key={index}>
                     <div className="single-video-container">
@@ -286,21 +267,6 @@ const MeetingRoom = React.memo((props) => {
               return null;
             }
           })}
-          {sliceTiles ? (
-              <div className="unpinned">
-                <div className="single-video-container  others-tile-wrapper">
-                  {OthersTile(2)}
-                </div>
-              </div>
-          ) : (
-              slicePinnedTiles && (
-                  <div className="unpinned">
-                    <div className="single-video-container  others-tile-wrapper">
-                      {OthersTile(2, unpinnedParticipants)}
-                    </div>
-                  </div>
-              )
-          )}
         </>
     ) : (
         <Typography variant="body2" sx={{color: "green.50", mt: 3}}>
@@ -314,7 +280,9 @@ const MeetingRoom = React.memo((props) => {
   //with 2 active video participants + 1 me + 1 card
   const sliceTiles = allParticipantsExceptLocal.length + 1 > showAsOthersLimit; //plus 1 is me
 
-  const pinLayout = pinnedVideoId !== null ? true : false;
+  const pinLayout = pinnedVideoId !== null;
+
+  const pinnedParticipant = participants.find((v) => v.id === pinnedVideoId);
   // const testPart = [{ name: 'a' }, { name: 'a' }];
   return (
         <>
@@ -354,7 +322,7 @@ const MeetingRoom = React.memo((props) => {
                     />
                   </div> : null}
                   {participants
-                      .filter((p) => p.videoLabel !== p.id)
+                      .filter((p) => p.streamId !== antmedia?.roomName)
                       .map(({id, videoLabel, track, name}, index) => (
                           <>
                             <div
@@ -412,23 +380,18 @@ const MeetingRoom = React.memo((props) => {
                   ) : (
                       //pinned participant
 
-                      participants.find((v) => v.id === pinnedVideoId) && (
+                    pinnedParticipant && (
                           <div className="single-video-container pinned keep-ratio">
                             <VideoCard
-                                id={participants.find((v) => v.id === pinnedVideoId)?.id}
-                                track={
-                                  participants.find((v) => v.id === pinnedVideoId)?.track
-                                }
+                                id={pinnedParticipant?.id}
+                                track={pinnedParticipant?.track}
                                 autoPlay
-                                name={
-                                  participants.find((v) => v.id === pinnedVideoId)?.name
-                                }
+                                name={pinnedParticipant?.name}
                                 pinned
                                 onHandlePin={() => {
                                   pinVideo(
-                                      participants.find((v) => v.id === pinnedVideoId)?.id,
-                                      participants.find((v) => v.id === pinnedVideoId)
-                                          ?.videoLabel
+                                    pinnedParticipant?.id,
+                                    pinnedParticipant?.videoLabel
                                   );
                                 }}
                             />
