@@ -294,7 +294,11 @@ const webRTCAdaptor = new WebRTCAdaptor({
       }, 5000);
     } else if (info === "newStreamAvailable")
     {
+      console.log("newStreamAvailable at " + new Date().getTime().toString());
+      //setTimeout(() => {
       webRTCAdaptor.handlePlayVideo(obj, publishStreamId);
+        //console.error("Now playing: " + obj.streamId);
+      //}, 10000);
     } else if (info === "publish_started")
     {
       //stream is being published
@@ -436,7 +440,7 @@ const webRTCAdaptor = new WebRTCAdaptor({
                 publishStreamId
             );
           } else if (eventType === "STOP_PLAYING" && !webRTCAdaptor.onlyDataChannel) {
-            webRTCAdaptor.stop(eventStreamId);
+            //webRTCAdaptor.stop(eventStreamId);
           } else if (eventType === "CLOSE_YOUR_MICROPHONE" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
             webRTCAdaptor.toggleSetMic({
               eventStreamId: 'localVideo',
