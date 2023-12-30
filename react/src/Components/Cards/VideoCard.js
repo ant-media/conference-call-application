@@ -223,7 +223,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                 >
                   <Fab
                       onClick={()=>{
-                        antmedia.handleSendMessage("admin*publisher_room*"+props.id+"*CLOSE_YOUR_CAMERA");
+                        antmedia.handleSendMessage("admin*publisher_room*"+props.streamId+"*CLOSE_YOUR_CAMERA");
                       }}
                       color="primary"
                       aria-label="add"
@@ -270,7 +270,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                   >
                     <Fab
                         onClick={()=>{
-                          antmedia.handleSendMessage("admin*publisher_room*"+props.id+"*CLOSE_YOUR_MICROPHONE");
+                          antmedia.handleSendMessage("admin*publisher_room*"+props.streamId+"*CLOSE_YOUR_MICROPHONE");
                         }}
                         color="primary"
                         aria-label="add"
@@ -291,7 +291,8 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
                     >
                       <Fab
                           onClick={()=>{
-                            antmedia.handleSendMessage("admin*publisher_room*"+props.id+"*OPEN_YOUR_MICROPHONE");
+                            debugger;
+                            antmedia.handleSendMessage("admin*publisher_room*"+props.streamId+"*OPEN_YOUR_MICROPHONE");
                           }}
                           color="error"
                           aria-label="add"
@@ -313,7 +314,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
         <div
           className={`single-video-card`}
           // style={{
-          //   ...(isTalking || mediaSettings.talkers.includes(props.id) ? {
+          //   ...(isTalking || mediaSettings.talkers.includes(props.streamId) ? {
           //     outline: `thick solid ${theme.palette.primary.main}`,
           //     borderRadius: '10px'
           //   } : {})
@@ -346,7 +347,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
           <div
             className="talking-indicator-light"
             style={{
-              ...(isTalking || mediaSettings.talkers.includes(props.id)
+              ...(isTalking || mediaSettings.talkers.includes(props.streamId)
                 ? {}
                 : { display: "none" }),
             }}

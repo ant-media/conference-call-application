@@ -240,6 +240,7 @@ const MeetingRoom = React.memo((props) => {
                             pinVideo(id, videoLabel);
                           }}
                           id={id}
+                          streamId={streamId}
                           track={track}
                           autoPlay
                           name={name}
@@ -323,7 +324,7 @@ const MeetingRoom = React.memo((props) => {
                   </div> : null}
                   {participants
                       .filter((p) => p.streamId !== antmedia?.roomName)
-                      .map(({id, videoLabel, track, name}, index) => (
+                      .map(({id, videoLabel, track, name, streamId}, index) => (
                           <>
                             <div
                                 className="single-video-container not-pinned"
@@ -339,6 +340,7 @@ const MeetingRoom = React.memo((props) => {
                                     pinVideo(id, videoLabel);
                                   }}
                                   id={id}
+                                  streamId={streamId}
                                   track={track}
                                   autoPlay
                                   name={name}
@@ -384,6 +386,7 @@ const MeetingRoom = React.memo((props) => {
                           <div className="single-video-container pinned keep-ratio">
                             <VideoCard
                                 id={pinnedParticipant?.id}
+                                streamId={pinnedParticipant?.streamId}
                                 track={pinnedParticipant?.track}
                                 autoPlay
                                 name={pinnedParticipant?.name}
