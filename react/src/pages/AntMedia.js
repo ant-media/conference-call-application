@@ -76,6 +76,8 @@ function AntMedia() {
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState(null);
 
+  const [pinnedStreamId, setPinnedStreamId] = useState(null);
+
   const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
@@ -110,7 +112,6 @@ function AntMedia() {
   const [observerMode, setObserverMode] = useState(false);
 
   const [presenterButtonDisabled, setPresenterButtonDisabled] = useState(false);
-
 
   function makeParticipantPresenter(id) {
     setPresenterButtonDisabled(true);
@@ -274,26 +275,37 @@ function AntMedia() {
       isCameraOn: true, //start with camera on
     },
   ]);
+
+  /*
+    Problem 12:When we pin ourselves, we get videoLabel undefined error.
+	  Root Cause: After we solved problem 6, if we mute ourselves pinVideo tries to find localVideo inside participants and it causes this issue
+	  Solution: We refactored the pinVideo function to handle the case id is localVideo
+   */
   function pinVideo(id, videoLabelProp = "") {
+    if (id === "localVideo") {
+      videoLabelProp = "localVideo";
+    }
     // id is for pinning user.
     let videoLabel = videoLabelProp;
-    if (videoLabel === "") { // TODO: there is a bug here, if videoLabel is localVideo then it will not work.
-      // if videoLabel is missing select the first videoLabel you find
-      // 1 -2 -3 -4 -5 -6 -7 -8 -9
-      videoLabel = participants.find((p) => p.videoLabel !== p.id).videoLabel;
+    if (videoLabel === "") {
+      // if videoLabel is still missing then we are not going to pin/unpin anyone.
     }
+    let pinnedParticipant = participants.find((p) => p.id === id);
+    let pinnedStreamId = (id === "localVideo") ? "localVideo" : pinnedParticipant?.streamId;
     // if we already pin the targeted user then we are going to remove it from pinned video.
     if (pinnedVideoId === id) {
       setPinnedVideoId(null);
-      handleNotifyUnpinUser(id);
-      antmedia.assignVideoTrack(videoLabel, id, false);
+      setPinnedStreamId(null);
+      handleNotifyUnpinUser(pinnedStreamId);
+      //antmedia.assignVideoTrack(videoLabel, pinnedParticipant.streamId, false);
     }
     // if there is no pinned video we are gonna pin the targeted user.
     // and we need to inform pinned user.
     else {
       setPinnedVideoId(id);
-      handleNotifyPinUser(id);
-      antmedia.assignVideoTrack(videoLabel, id, true);
+      setPinnedStreamId(pinnedStreamId);
+      handleNotifyPinUser(pinnedStreamId);
+      antmedia.assignVideoTrack(videoLabel, pinnedStreamId, true);
     }
   }
 
@@ -576,8 +588,8 @@ function AntMedia() {
     infoText += "Participants ("+participants.length+"):\n";
     infoText += JSON.stringify(participants)+"\n";
     infoText += "All Participants ("+allParticipants.length+"):\n";
-    Object.keys(allParticipants).forEach(function(key) {
-      infoText += "-> "+allParticipants[key].streamId+" - "+allParticipants[key].streamName+"\n";
+    Object.keys(allParticipants).forEach((key) => {
+      infoText += "  "+key+" "+allParticipants[key].streamId+" "+allParticipants[key].streamName+"\n";
     });
     infoText += "----------------------\n";
     infoText += debugInfo;
@@ -741,26 +753,35 @@ function AntMedia() {
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_CHANGE")
       {
-        console.debug("VIDEO_TRACK_ASSIGNMENT_CHANGE -> ", obj);
-        if (!notificationEvent.payload.trackId) {
-          return;
-        }
-        setParticipants((oldParticipants) => {
-          return oldParticipants
-            .map((p) => {
-              if (
-                p.videoLabel === notificationEvent.payload.videoLabel &&
-                p.id !== notificationEvent.payload.trackId
-              ) {
-                return {
-                  ...p,
-                  id: notificationEvent.payload.trackId,
-                  oldId: p.id,
-                };
-              }
-              return p;
-            });
-        });
+        //setTimeout(() => {
+          console.debug("VIDEO_TRACK_ASSIGNMENT_CHANGE -> ", obj);
+          if (!notificationEvent.payload.trackId) {
+            return;
+          }
+          /*
+            Problem 11: After solution of the problem 6 implemented, first participant in the publisher room cannot get video track assignment of the second participants
+            Solution: Inside the VIDEO_TRACK_ASSIGNMENT_CHANGE notification, if the participant list is empty, and we get participants video track assignment, we reserve it.
+           */
+          if (participants.length === 0 && notificationEvent.payload.trackId !== roomName) {
+            antmedia.assignVideoTrack(notificationEvent.payload.videoLabel, notificationEvent.payload.trackId, true);
+          }
+          setParticipants((oldParticipants) => {
+            return oldParticipants
+              .map((p) => {
+                if (
+                  p.videoLabel === notificationEvent.payload.videoLabel &&
+                  p.streamId !== notificationEvent.payload.trackId
+                ) {
+                  antmedia.assignVideoTrack(notificationEvent.payload.videoLabel, notificationEvent.payload.trackId, true);
+                  return {
+                    ...p,
+                    streamId: notificationEvent.payload.trackId,
+                  };
+                }
+                return p;
+              });
+          });
+       //}, 10000);
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
@@ -978,6 +999,26 @@ function AntMedia() {
     }
   }
   function handleRoomEvents({ streams, streamList }) {
+    /*
+      Problem 14:Sometimes first participants cannot play second participants and the rest of them plays each other without any issue
+      Root Cause: If we try to send video_track_assignment_change message before data channel connection established, we loose some participants in the room.
+	    Solution: We compare participants and allParticipants lists and if there is a difference, we will call updateVideoTrackAssignments function.
+     */
+
+    //We add publishers into listener room as a sub-track and we shouldn't call updateVideoTrackAssignments function for onlyDataChannel users.
+    // Otherwise, participants will be duplicated in the room.
+    if (antmedia?.onlyDataChannel !== true) {
+      streams.forEach((stream) => {
+        if (!participants.some((p) => p.streamId === stream)) {
+          console.log("There is a difference between participants and streams lists. We call updateVideoTrackAssignments function to sync.");
+          // We need to wait 5 seconds to make sure that data channel connection is established and websocket connection is ready.
+          // Otherwise, our websocket connection will be closed.
+          setTimeout(() => {
+            antmedia?.updateVideoTrackAssignments(antmedia?.roomName, 0, 20);
+          }, 5000);
+        }
+      });
+    }
     // [allParticipant, setAllParticipants] => list of every user
 
     setAllParticipants(streamList);
@@ -995,14 +1036,15 @@ function AntMedia() {
      var participantTemp = oldParts;
 
       if (streams.length < participants.length) {
-        return participantTemp;
+        console.log("WWW streams.length < participants.length", streams.length, participants.length);
+        //return participantTemp;
       }
       // matching the names.
       var finalParticipants = participantTemp.map((p) =>
       {
         const newName = streamList.find((s) =>
         {
-          return s.streamId === p.id; })?.streamName;
+          return s.streamId === p.streamId; })?.streamName;
         if (p.name !== newName) {
           return { ...p, name: newName };
         }
@@ -1012,8 +1054,9 @@ function AntMedia() {
       //REFACTOR: mekya: video card rendering things
       return finalParticipants;
     });
-    if (pinnedVideoId !== "localVideo" && !streams.includes(pinnedVideoId)) {
+    if (pinnedVideoId !== "localVideo" && !streams.includes(pinnedStreamId)) {
       setPinnedVideoId(null);
+      setPinnedStreamId(null);
     }
   }
 
