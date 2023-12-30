@@ -67,7 +67,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
         * mekya
         */
         //if (participants.length > settings?.globals?.maxVideoTrackCount)
-        //{
+        {
 
           console.log("video before: " + JSON.stringify(participants));
 
@@ -83,7 +83,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
             );
           });
           console.log("video after: " + JSON.stringify(participants));
-        //}
+        }
 
 
 
@@ -140,10 +140,13 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
           timeoutRef.current = setTimeout(() => {
             setIsTalking(false);
           }, 1000);
+          /*
           antmedia.updateAudioLevel(
             mediaSettings?.myLocalData?.streamId,
             Math.floor(value * 100)
           );
+          
+           */
         }
       }, 100);
     } else if (isLocal && antmedia.onlyDataChannel) {
@@ -153,11 +156,7 @@ const VideoCard = memo(({ srcObject, hidePin, onHandlePin, ...props }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mediaSettings.isPublished]);
 
-  /*
-      Problem 3: When we pin someone in the listener room, there are lots of blank tile with undefined id or name and they broke the layout and ux.
-	    Solution: Add type check into video card and meeting room.
-   */
-  return isLocal || props.track?.kind !== "audio" || typeof props?.id !== "undefined" || typeof props?.name !== "undefined" ? (
+  return isLocal || props.track?.kind !== "audio" ? (
     <>
       <Grid
         container
