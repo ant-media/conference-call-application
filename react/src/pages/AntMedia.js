@@ -943,6 +943,17 @@ function AntMedia() {
   }
 
   useEffect(() => {
+    if(pinnedVideoId === undefined || pinnedVideoId === null){
+      globals.maxVideoTrackCount = 6;
+      handleSetMaxVideoTrackCount(globals.maxVideoTrackCount);
+    }
+    else{
+      globals.maxVideoTrackCount = 3;
+      handleSetMaxVideoTrackCount(globals.maxVideoTrackCount);
+    }
+  }, [pinnedVideoId]);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
