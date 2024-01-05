@@ -15,7 +15,6 @@ function Home(props) {
     const {t} = useTranslation();
     let navigate = useNavigate();
 
-    const roomNameRef = React.useRef(); // Create a ref to store roomName
     const applicationWebSocketUrlRef = React.useRef(); // Store applicationWebSocketUrl in a useRef
     const joinToken = React.useRef();
     const joinRoomUrl = React.useRef();
