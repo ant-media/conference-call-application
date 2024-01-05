@@ -31,10 +31,9 @@ function Home(props) {
         setCreateRoomPassword(newPassword);
       };
 
-      const handleCreateRoomNameChange = (newRoomName) => {
-        setRoomName(newRoomName);
-        roomNameRef.current = newRoomName
-      };
+       const handleRoomNameChange = (event) => {
+        setRoomName(event.target.value);
+      }; 
 
       const handleCreateMeeting = () => {
        var jsCmd = {
@@ -63,20 +62,25 @@ function Home(props) {
       }
 
       const handleGoToLobbyClicked = (value) =>{
-        goToLobby(roomNameRef.current, joinToken.current)
+        goToLobby(roomName, joinToken.current)
       
     }
     
     
       const handleCreateRoomWithPassword = (e) =>{
-       
+     
         var jsCmd = {
             command: "createRoomWithPassword",
             roomCreationPassword: createRoomPassword,
-            roomName:roomName
+            
     
             };
-            applicationWebSocket.send(JSON.stringify(jsCmd));
+
+          if(roomName){
+            jsCmd.roomName = roomName
+          }
+
+          applicationWebSocket.send(JSON.stringify(jsCmd));
         
       }
 
@@ -132,11 +136,11 @@ function Home(props) {
                     
                 }else if(obj.command === "createRoomWithPassword"){
 
-                    if(obj.authenticated && obj.joinToken){
+                    if(obj.authenticated && obj.joinToken && obj.roomName){
                           const currentURL = window.location.href;
                           joinToken.current = obj.joinToken
-                          joinRoomUrl.current = currentURL + roomNameRef.current +"?token="+ obj.joinToken
-                         setGoToLobbyDialogOpen(true)
+                          joinRoomUrl.current = currentURL + obj.roomName +"?token="+ obj.joinToken
+                          setGoToLobbyDialogOpen(true)
 
                         
 
@@ -163,13 +167,13 @@ function Home(props) {
                 onGoToLobbyClicked={handleGoToLobbyClicked} 
         />
      <RoomCreationPasswordDialog
-                 onClose={handleCreateRoomPasswordDialogClose}
+                onClose={handleCreateRoomPasswordDialogClose}
                 password={createRoomPassword}
                 onPasswordChange={handleCreateRoomPasswordChange}
                 open={createRoomPasswordDialogOpen}
                 onCreateRoomClicked={handleCreateRoomWithPassword} 
-                roomName = {roomName}
-                onRoomNameChange = {handleCreateRoomNameChange}
+                //roomName = {roomName}
+               // onRoomNameChange = {handleCreateRoomNameChange}
         />
       
 
@@ -194,6 +198,7 @@ function Home(props) {
                                 autoFocus
                                 required
                                 fullWidth
+                                onChange={handleRoomNameChange}
                                 color="primary"
                                 variant="outlined"
                                 placeholder={t("Room name")}

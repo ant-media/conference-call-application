@@ -747,7 +747,7 @@ function AntMedia() {
         }, 2000);
       }
     }else if(error.indexOf("unauthorized_access") !== -1){
-      webRTCAdaptor.stop(publishStreamId);
+      handleLeaveFromRoom()
 
       setUnAuthorizedDialogOpen(true)
       

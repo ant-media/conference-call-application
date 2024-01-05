@@ -11,6 +11,7 @@ import io.antmedia.datastore.db.types.Token;
 import io.antmedia.security.ITokenService;
 import io.antmedia.settings.ServerSettings;
 import org.apache.catalina.core.ApplicationContextFacade;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.json.simple.JSONObject;
@@ -136,13 +137,19 @@ public class WebSocketApplicationHandler {
     private void handleRoomCreationWithPassword(Session session, JSONObject jsonObject, ConferenceRoomSettings conferenceRoomSettings) {
         String roomCreationPassword = getStringValue(jsonObject, WebSocketApplicationConstants.ROOM_CREATION_PASSWORD);
         String roomName = getStringValue(jsonObject, WebSocketApplicationConstants.ROOM_NAME);
-
-        if (roomName != null && roomCreationPassword != null && roomCreationPassword.equals(conferenceRoomSettings.getRoomCreationPassword())) {
+        String joinToken;
+        boolean passwordCorrect = roomCreationPassword != null && roomCreationPassword.equals(conferenceRoomSettings.getRoomCreationPassword());
+        if (roomName != null && passwordCorrect) {
             createMainRoomBroadcast(roomName);
-            String joinToken = createJoinTokenForRoom(roomName);
-            sendCreateRoomWithPassword(session, true, joinToken);
-        } else {
-            sendCreateRoomWithPassword(session, false, null);
+            joinToken = createJoinTokenForRoom(roomName);
+            sendCreateRoomWithPassword(session, true, joinToken, roomName);
+        }else if(roomName == null && passwordCorrect){
+            roomName = RandomStringUtils.randomAlphanumeric(6);
+            joinToken = createJoinTokenForRoom(roomName);
+            sendCreateRoomWithPassword(session, true, joinToken, roomName);
+        }
+        else {
+            sendCreateRoomWithPassword(session, false, null, null);
         }
     }
 
@@ -215,13 +222,16 @@ public class WebSocketApplicationHandler {
 
 
     }
-    public void sendCreateRoomWithPassword(Session session, boolean authenticated, String joinToken){
+    public void sendCreateRoomWithPassword(Session session, boolean authenticated, String joinToken, String roomName){
 
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.CREATE_ROOM_WITH_PASSWORD_COMMAND);
         jsonResponse.put(WebSocketApplicationConstants.AUTHENTICATED, authenticated);
         if(joinToken != null){
             jsonResponse.put(WebSocketApplicationConstants.JOIN_TOKEN, joinToken);
+        }
+        if(roomName != null){
+            jsonResponse.put(WebSocketApplicationConstants.ROOM_NAME, roomName);
         }
         try {
             session.getBasicRemote().sendText(jsonResponse.toJSONString());
