@@ -58,8 +58,8 @@ jobs:
     - name: Deploy Conference app if not exists
       if: steps.check-conference-app.outputs.app_exists == 'false'
       run: |
-        curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
-        sleep 10
+ #       curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+ #       sleep 10
         export WAR_FILE_NAME="ConferenceCall.war"
         curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
   
