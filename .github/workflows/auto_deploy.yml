@@ -22,7 +22,8 @@ jobs:
 
     - name: Get versions data from repo
       run: wget -O maven-metadata.xml https://oss.sonatype.org/service/local/repositories/snapshots/content/io/antmedia/ant-media-server/maven-metadata.xml       
-    
+    - name: Install jq
+      run: sudo apt-get install jq -y
     - name: Download war File
       run: |
         export LATEST_SNAPSHOT=$(cat maven-metadata.xml | grep "<version>" | tail -n 1 |  xargs | cut -c 10-23)
@@ -43,3 +44,22 @@ jobs:
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
         curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+  
+    - name: Check if Conference app exists
+      id: check-conference-app
+      run: |
+        response=$(curl -s "${{ secrets.SERVER_URL }}/rest/v2/applications")
+        if [[ $(echo "$response" | jq '.[].name' | grep -c 'Conference') -eq 0 ]]; then
+          echo "::set-output name=app_exists::false"
+        else
+          echo "::set-output name=app_exists::true"
+        fi
+        
+    - name: Deploy Conference app if not exists
+      if: steps.check-conference-app.outputs.app_exists == 'false'
+      run: |
+        curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+        sleep 10
+        export WAR_FILE_NAME="ConferenceCall.war"
+        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+  
