@@ -54,10 +54,17 @@ jobs:
         else
           echo "::set-output name=app_exists::true"
         fi
+    - name: Setup kubectl
+      uses: azure/k8s-set-context@v1
+      with:
+        kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
         
     - name: Deploy Conference app if not exists
       if: steps.check-conference-app.outputs.app_exists == 'false'
       run: |
+        POD_NAME=$(kubectl get pods -l app=ant-media-origin -n antmedia -o jsonpath='{.items[0].metadata.name}')
+        kubectl delete pod $POD_NAME -n antmedia
+        sleep 5
         export WAR_FILE_NAME="ConferenceCall.war"
         curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
   
