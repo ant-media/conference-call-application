@@ -19,8 +19,6 @@
 	
 	<bean id="app.settings" class="io.antmedia.AppSettings" />
 
-	<bean id="ant.media.server.settings" class="io.antmedia.settings.ServerSettings"/>
-
 	<!-- Defines the web context -->
 	<bean id="web.context" class="org.red5.server.Context" autowire="byType" />
 

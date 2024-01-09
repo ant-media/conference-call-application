@@ -72,8 +72,6 @@ function Home(props) {
         var jsCmd = {
             command: "createRoomWithPassword",
             roomCreationPassword: createRoomPassword,
-            
-    
             };
 
           if(roomName){

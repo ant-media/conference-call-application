@@ -41,7 +41,7 @@ public class WebSocketApplicationHandler {
 
     private String userAgent = "N/A";
 
-    protected static Logger logger = LoggerFactory.getLogger(WebSocketLocalHandler.class);
+    protected static Logger logger = LoggerFactory.getLogger(WebSocketApplicationHandler.class);
 
     ConfigurableWebApplicationContext context;
     ConferenceRoomSettings conferenceRoomSettings;
@@ -120,12 +120,12 @@ public class WebSocketApplicationHandler {
         JSONObject jsonObject = (JSONObject) jsonParser.parse(message);
         String cmd = (String) jsonObject.get(WebSocketConstants.COMMAND);
 
-        AppSettings appSettings = (AppSettings) context.getBean("app.settings");
-        DataStore dataStore = getDataStore();
-
-        if (cmd.equals(WebSocketApplicationConstants.IS_ROOM_CREATION_PASSWORD_REQUIRED_COMMAND)) {
+        if (cmd.equals(WebSocketApplicationConstants.IS_ROOM_CREATION_PASSWORD_REQUIRED_COMMAND)) 
+        {
             handlePasswordRequiredCommand(session, conferenceRoomSettings);
-        } else if (cmd.equals(WebSocketApplicationConstants.CREATE_ROOM_WITH_PASSWORD_COMMAND)) {
+        } 
+        else if (cmd.equals(WebSocketApplicationConstants.CREATE_ROOM_WITH_PASSWORD_COMMAND)) 
+        {
             handleRoomCreationWithPassword(session, jsonObject, conferenceRoomSettings);
         }
     }
@@ -134,7 +134,8 @@ public class WebSocketApplicationHandler {
         sendRoomPasswordRequiredMessage(session, conferenceRoomSettings.isRoomCreationPasswordEnabled());
     }
 
-    private void handleRoomCreationWithPassword(Session session, JSONObject jsonObject, ConferenceRoomSettings conferenceRoomSettings) {
+    private void handleRoomCreationWithPassword(Session session, JSONObject jsonObject, ConferenceRoomSettings conferenceRoomSettings) 
+    {
         String roomCreationPassword = getStringValue(jsonObject, WebSocketApplicationConstants.ROOM_CREATION_PASSWORD);
         String roomName = getStringValue(jsonObject, WebSocketApplicationConstants.ROOM_NAME);
         String joinToken;

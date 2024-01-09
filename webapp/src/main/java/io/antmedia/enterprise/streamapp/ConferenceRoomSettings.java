@@ -7,15 +7,13 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("/WEB-INF/red5-web.properties")
 public class ConferenceRoomSettings {
 
-    private final static String SETTINGS_ROOM_CREATION_PASSWORD_ENABLED = "settings.roomCreationPasswordEnabled";
-    private final static String SETTINGS_ROOM_CREATION_PASSWORD = "settings.roomCreationPassword";
 
 
-    @Value("${roomCreationPassword:${"+ SETTINGS_ROOM_CREATION_PASSWORD +":null}}")
+    @Value("${roomCreationPassword:#{null}}")
     private String roomCreationPassword;
 
 
-    @Value("${roomCreationPasswordEnabled:${"+ SETTINGS_ROOM_CREATION_PASSWORD_ENABLED +":false}}")
+    @Value("${roomCreationPasswordEnabled:false}")
     private boolean roomCreationPasswordEnabled = false;
 
 

@@ -40,14 +40,6 @@ export function GoToLobbyDialog(props) {
     navigator.clipboard.writeText(url);
     setCopied(true);
   };
-  
-  
-  
-  
-
-
-
-
 
   const handleClose = (event, reason) => {
     onClose();
@@ -89,8 +81,6 @@ export function GoToLobbyDialog(props) {
         {copied ? 'Copied!' : 'Copy'}
       </span>
     </div>
-      
-   
 
         <Button
                   style={{marginTop:'35px'}}
