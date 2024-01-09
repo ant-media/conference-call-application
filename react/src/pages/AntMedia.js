@@ -20,6 +20,8 @@ import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import { getRoomNameAttribute, getWebSocketURLAttribute } from "../utils";
 import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
+import  { WebSocketComponent, sendWebSocketMessage }  from 'Components/WebSocketComponent';
+
 
 export const ConferenceContext = React.createContext(null);
 
@@ -103,6 +105,10 @@ var token =  getUrlParameter("token")
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var InitialStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
+var enterDirectly = getUrlParameter("enterDirectly");
+if (enterDirectly == null || typeof enterDirectly === "undefined") {
+  enterDirectly = false;
+}
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
@@ -139,6 +145,13 @@ if (localStorage.getItem('selectedMicrophone')) {
   mediaConstraints.audio.deviceId = localStorage.getItem('selectedMicrophone');
 }
 
+if (playOnly) {
+  mediaConstraints = {
+    video: false,
+    audio: false,
+  };
+}
+
 let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
@@ -164,6 +177,8 @@ if (!websocketURL) {
   }
 
 }
+
+
 
 var fullScreenId = -1;
 
@@ -240,6 +255,10 @@ function AntMedia() {
   // this one just triggers the re-rendering of the component.
   const [participantUpdated, setParticipantUpdated] = useState(false);
 
+  const [isRecordPluginInstalled, setIsRecordPluginInstalled] = useState(false);
+
+  const [isRecordPluginActive, setIsRecordPluginActive] = useState(false);
+
   const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
@@ -304,12 +323,68 @@ function AntMedia() {
 
   const [isPlayOnly] = React.useState(playOnly);
 
+  const [isEnterDirectly] = React.useState(enterDirectly);
+
   const [localVideo, setLocalVideoLocal] = React.useState(null);
 
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
   const [initialized, setInitialized] = React.useState(false);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
+  
+
+  const onWebSocketOpen =  React.useCallback(() => {
+      var jsCmd = {
+        command: "getSettings",
+      };
+      sendWebSocketMessage(JSON.stringify(jsCmd));
+  });
+
+  const handleWebSocketMessage =  React.useCallback((message) => {
+    var obj = JSON.parse(message);
+    if (obj.command == "setSettings") {
+        var localSettings =  JSON.parse(obj.settings);
+        console.log("--isRecordingActive: ", localSettings.isRecordingFeatureAvailable);
+        setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
+    }
+    else if (obj.command == "startRecordingResponse") 
+    {
+      console.log("Incoming startRecordingResponse:", obj);
+      var definition = JSON.parse(obj.definition);
+      if (definition.success) 
+      {
+        setIsRecordPluginActive(true);
+        updateRoomRecordingStatus(true);
+        handleSendNotificationEvent(
+          "RECORDING_TURNED_ON",
+          publishStreamId
+        );
+        displayMessage("Recording is started successfully", "white")
+      }
+      else {
+        console.log("Start Recording is failed");
+        displayMessage("Recording cannot be started. Error is " + definition.message, "white")
+      }
+    }
+    else if (obj.command == "stopRecordingResponse") {
+      console.log("Incoming stopRecordingResponse:", obj);
+      var definition = JSON.parse(obj.definition);
+      if (definition.success) 
+      {
+        setIsRecordPluginActive(false);
+        updateRoomRecordingStatus(false);
+        handleSendNotificationEvent(
+          "RECORDING_TURNED_OFF",
+          publishStreamId
+        );
+        displayMessage("Recording is stopped successfully", "white")
+      }
+      else {
+        console.log("Stop Recording is failed");
+        displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
+      }
+    }
+  });
 
   function makeFullScreen(divId) {
     if (fullScreenId === divId) {
@@ -484,6 +559,14 @@ function AntMedia() {
   }
 
   function handleMainTrackBroadcastObject(broadcastObject) {
+    if (broadcastObject.metaData !== undefined && broadcastObject.metaData !== null) {
+      let brodcastStatusMetadata = JSON.parse(broadcastObject.metaData);
+
+      if (brodcastStatusMetadata.isRecording !== undefined && brodcastStatusMetadata.isRecording !== null) {
+        setIsRecordPluginActive(brodcastStatusMetadata.isRecording);
+      }
+    }
+
     let participantIds = broadcastObject.subTrackStreamIds;
 
     //find and remove not available tracks
@@ -549,6 +632,7 @@ function AntMedia() {
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
           isPlayMode: playOnly,
+         // onlyDataChannel: playOnly,
           debug: true,
           callback: infoCallback,
           callbackError: errorCallback
@@ -575,6 +659,30 @@ function AntMedia() {
     webRTCAdaptor.localStream = localVideo;
   }
 
+  function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
+  React.useEffect(() => {
+    if(playOnly && enterDirectly && initialized) {
+      let streamId = makeid(10);
+      setStreamName("Anonymous");
+    
+      // if play only mode and enter directly flags are true, then we will enter the meeting room directly
+      setWaitingOrMeetingRoom("meeting");
+
+      joinRoom(roomName, streamId, roomJoinMode);
+    } 
+    
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialized]);
 
   function infoCallback(info, obj) {
     if (info === "initialized") {
@@ -594,6 +702,7 @@ function AntMedia() {
       console.log(obj.broadcast);
     } else if (info === "newStreamAvailable") {
       handlePlayVideo(obj);
+      console.log("newStreamAvailable:", obj);
     } else if (info === "publish_started") {
       setIsPublished(true);
       console.log("**** publish started:" + reconnecting);
@@ -883,6 +992,31 @@ function AntMedia() {
     );
   }
 
+
+  function startRecord() 
+  {
+
+    displayMessage("Recording is about to start...", "white")
+    var jsCmd = {
+      command: "startRecording",
+      streamId: roomName,
+      websocketURL: websocketURL
+    };
+
+    sendWebSocketMessage(JSON.stringify(jsCmd));
+  }
+
+  function stopRecord() 
+  {
+    displayMessage("Recording is about to stop...", "white")
+    var jsCmd = {
+      command: "stopRecording",
+      streamId: roomName,
+    };
+
+    sendWebSocketMessage(JSON.stringify(jsCmd));
+  }
+
   function sendReactions(reaction) {
     handleSendNotificationEvent(
         "REACTIONS",
@@ -891,7 +1025,7 @@ function AntMedia() {
           reaction: reaction,
           senderStreamId: publishStreamId,
         }
-    );
+    );f
     showReactions(publishStreamId, reaction);
   }
 
@@ -902,21 +1036,26 @@ function AntMedia() {
     }
   }
 
-  function displayWarning(message) {
+  function displayMessage(message, color) {
+    closeSnackbar();
     enqueueSnackbar(
-        {
-          message: message,
-          variant: "info",
-          icon: <SvgIcon size={24} name={'report'} color="red" />
+      {
+        message: message,
+        variant: "info",
+        icon: <SvgIcon size={24} name={'report'} color={color} />
+      },
+      {
+        autoHideDuration: 5000,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
         },
-        {
-          autoHideDuration: 5000,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-        }
-    );
+      }
+  );
+  }
+
+  function displayWarning(message) {
+    displayMessage(message, "red");
   }
 
   function handleScreenshareNotFromPlatform() {
@@ -1089,6 +1228,12 @@ function AntMedia() {
           eventType === "MIC_UNMUTED") {
         webRTCAdaptor.getBroadcastObject(eventStreamId);
       }
+      else if (eventType === "RECORDING_TURNED_ON") {
+        setIsRecordPluginActive(true);
+      }
+      else if (eventType === "RECORDING_TURNED_OFF") {
+        setIsRecordPluginActive(false);
+      }
       else if (eventType === "MESSAGE_RECEIVED") {
         if(notificationEvent.senderId === publishStreamId) {
           return;
@@ -1240,10 +1385,21 @@ function AntMedia() {
     let metadata = {
       isMicMuted: isMicMuted === null ? null : isMicMuted,
       isCameraOn: isCameraOn,
-      isScreenShared: isScreenShareActive
+      isScreenShared: isScreenShareActive,
+      playOnly: playOnly
     }
 
     return metadata;
+  }
+
+  function updateRoomRecordingStatus(isRecording) {
+    let metadata = {};
+    if (isRecording) {
+      metadata.isRecording = true;
+    } else {
+      metadata.isRecording = false;
+    }
+    webRTCAdaptor.updateStreamMetaData(roomName, JSON.stringify(metadata));
   }
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
@@ -1259,10 +1415,16 @@ function AntMedia() {
     clearInterval(audioListenerIntervalJob);
     audioListenerIntervalJob = null;
 
-    webRTCAdaptor?.stop(publishStreamId);
+    if (!playOnly) {
+      webRTCAdaptor?.stop(publishStreamId);
+    }
+
     webRTCAdaptor?.stop(roomName);
 
-    webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
+    if (!playOnly) {
+      webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
+    }
+
     setWaitingOrMeetingRoom("waiting");
   }
 
@@ -1333,19 +1495,23 @@ function AntMedia() {
     };
 
     let tempParticipants = [];
-    tempParticipants.push(newVideoTrack);
+    if (!playOnly) {
+      tempParticipants.push(newVideoTrack);
+    }
     setParticipants(tempParticipants);
 
     let allParticipantsTemp = {};
-    allParticipantsTemp[publishStreamId] = {name:"You"};
+    if (!playOnly) {
+      allParticipantsTemp[publishStreamId] = {name: "You"};
+    }
     setAllParticipants(allParticipantsTemp);
   }
 
   function addMeAsParticipant(publishStreamId) {
     let isParticipantExist = participants.find((p) => p.id === "localVideo");
 
-    if(isParticipantExist) {
-      return;
+    if(isParticipantExist || playOnly) {
+        return;
     }
 
     let newVideoTrack = {
@@ -1372,17 +1538,23 @@ function AntMedia() {
 
     addMeAsParticipant(publishStreamId);
 
+    let currentStreamName = streamName;
+    if (streamName === "" || streamName === undefined || streamName === null) {
+      currentStreamName = "Anonymous"
+    }
+
     webRTCAdaptor.publish(
         publishStreamId,
         token,
         subscriberId,
         subscriberCode,
-        streamName,
+        currentStreamName,
         roomName,
         JSON.stringify(userStatusMetadata)
     );
   }
   function handlePlayVideo(obj) {
+    console.log("handlePlayVideo: " + JSON.stringify(obj));
     let index = obj?.trackId?.substring("ARDAMSx".length);
     globals.trackEvents.push({ track: obj.track.id, event: "added" });
 
@@ -1407,7 +1579,7 @@ function AntMedia() {
         streamId: obj.streamId,
         name: ""
       };
-      //append new video track, track id should be unique because of video traack limitation
+      //append new video track, track id should be unique because of video track limitation
       let temp = participants;
       temp.push(newVideoTrack);
       setParticipants(temp);
@@ -1597,6 +1769,7 @@ function AntMedia() {
   }
 
   return (!initialized ? <>
+            
             <Grid
                 container
                 spacing={0}
@@ -1619,6 +1792,7 @@ function AntMedia() {
                 justifyContent="center"
                 alignItems={"center"}
             >
+              <WebSocketComponent onOpen={onWebSocketOpen} onMessage={handleWebSocketMessage} />
               <ConferenceContext.Provider
                   value={{
                     isScreenShared,
@@ -1689,8 +1863,13 @@ function AntMedia() {
                     participantIdMuted,
                     setParticipantIdMuted,
                     videoSendResolution,
-                    setVideoSendResolution
-                    
+                    setVideoSendResolution,
+                    makeid,
+                    startRecord,
+                    stopRecord,
+                    isRecordPluginInstalled,
+                    isRecordPluginActive,
+                    isEnterDirectly
                   }}
               >
                 <UnauthrorizedDialog

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material";
@@ -16,6 +16,7 @@ import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
 import { getRoomNameAttribute } from 'utils';
 import ReactionsButton from "./Components/ReactionsButton";
+import {SvgIcon} from "../SvgIcon";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -44,6 +45,17 @@ function Footer(props) {
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
 
+  const [isRecordingTextVisible, setIsRecordingTextVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    debugger;
+    if (conference.isRecordPluginActive === true && conference.isEnterDirectly === false && conference.isPlayOnly === false) {
+      setIsRecordingTextVisible(true);
+    } else {
+      setIsRecordingTextVisible(false);
+    }
+  }, [conference.isRecordPluginActive, conference.isEnterDirectly, conference.isPlayOnly]);
+
     return (
         <CustomizedGrid
             container
@@ -61,6 +73,7 @@ function Footer(props) {
               <InfoButton/>
             </Grid>
           </Grid>
+          {conference.isPlayOnly === false || conference.isEnterDirectly === false ?
               <Grid item>
                 <Grid
                     container
@@ -123,8 +136,14 @@ function Footer(props) {
 
                 </Grid>
               </Grid>
+        : null}
 
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
+            <>
+              { isRecordingTextVisible === true ?
+              <p style={{color: 'red'}}>This room is recording</p>
+              : null}
+            </>
             <TimeZone/>
           </Grid>
         </CustomizedGrid>

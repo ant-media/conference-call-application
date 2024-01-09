@@ -2,6 +2,9 @@ package io.antmedia.enterprise.streamapp;
 
 public class WebSocketApplicationConstants {
 
+	private WebSocketApplicationConstants() {
+		
+	}
     /**
      * Command to check if room creation password is enabled.
      */
@@ -34,4 +37,32 @@ public class WebSocketApplicationConstants {
      * If room creation password is enabled it should be passed to both play and publish on conference call client.
      */
     public static final String JOIN_TOKEN = "joinToken";
+    
+    /**
+     * Return the settings or configuration of the backend. It returns 
+     * {@link ConferenceRoomSettings}
+     */
+    public static final String GET_SETTINGS_COMMAND = "getSettings";
+    
+    
+    /**
+     * Return the settings or configuration of the backend. It returns 
+     * {@link ConferenceRoomSettings}
+     */
+    public static final String SET_SETTINGS_COMMAND = "setSettings";
+
+    /**
+     * Field to send settings to frontend
+     */
+	public static final String SETTINGS = "settings";
+
+	public static final String START_RECORDING_COMMAND = "startRecording";
+
+	public static final String STOP_RECORDING_COMMAND = "stopRecording";
+	
+	public static final String WEBSOCKET_URL_FIELD = "websocketURL";
+	
+	public static final String START_RECORDING_RESPONSE = "startRecordingResponse";
+
+	public static final String STOP_RECORDING_RESPONSE = "stopRecordingResponse";
 }
