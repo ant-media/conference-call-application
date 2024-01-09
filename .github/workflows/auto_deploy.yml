@@ -66,9 +66,13 @@ jobs:
         kubectl delete pod $POD_NAME -n antmedia
         sleep 5
         
-    - name: Recreate Conference App
+    - name: Login to server
+      if: steps.check-conference-app.outputs.app_exists == 'false'
       run: |
         curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
+                
+    - name: Recreate Conference App
+      run: |
         export WAR_FILE_NAME="ConferenceCall.war"
         curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
   
