@@ -34,10 +34,10 @@ function VideoCard(props) {
     position: "relative",
   };
 
-  const refVideo = useCallback(
-    (node) => {
+  const refVideo = useCallback( (node) => {
       if (node && props.track) {
         node.srcObject = new MediaStream([props.track]);
+        node.play().then(()=> {}).catch((e) => { console.log("play failed because ", e)});
       }
     },
     [props.track]

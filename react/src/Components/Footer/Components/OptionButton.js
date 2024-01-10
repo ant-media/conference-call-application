@@ -120,7 +120,7 @@ function OptionButton({ footer, ...props }) {
                     : null}
 
             {conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true ?
-            <MenuItem onClick={() => conference.startRecord()}
+            <MenuItem onClick={() => { conference.startRecord(); handleClose(); } }
             >
               <ListItemIcon>
                 <SvgIcon size={36} name={"camera"} color={"white"} />
@@ -130,7 +130,7 @@ function OptionButton({ footer, ...props }) {
                 : null}
 
             {conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true ?
-            <MenuItem onClick={() => conference.stopRecord()}
+            <MenuItem onClick={() => { conference.stopRecord(); handleClose(); }}
             >
               <ListItemIcon>
                 <SvgIcon size={36} name={"camera"} color={"white"} />

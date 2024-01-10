@@ -48,7 +48,7 @@ function Footer(props) {
   const [isRecordingTextVisible, setIsRecordingTextVisible] = React.useState(false);
 
   React.useEffect(() => {
-    debugger;
+    //debugger;
     if (conference.isRecordPluginActive === true && conference.isEnterDirectly === false && conference.isPlayOnly === false) {
       setIsRecordingTextVisible(true);
     } else {
@@ -141,8 +141,8 @@ function Footer(props) {
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <>
               { isRecordingTextVisible === true ?
-              <p style={{color: 'red'}}>This room is recording</p>
-              : null}
+              <p style={{color: 'red'}}>Recording</p>
+              : ""}
             </>
             <TimeZone/>
           </Grid>

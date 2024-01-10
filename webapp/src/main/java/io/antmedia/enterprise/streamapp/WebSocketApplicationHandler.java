@@ -7,9 +7,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 
 import org.apache.catalina.core.ApplicationContextFacade;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.json.simple.JSONObject;
@@ -20,14 +22,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import io.antmedia.AppSettings;
 import io.antmedia.datastore.db.DataStore;
 import io.antmedia.datastore.db.DataStoreFactory;
 import io.antmedia.datastore.db.IDataStoreFactory;
 import io.antmedia.datastore.db.types.Broadcast;
 import io.antmedia.datastore.db.types.Token;
+import io.antmedia.filter.JWTFilter;
 import io.antmedia.rest.model.Result;
 import io.antmedia.security.ITokenService;
 import io.antmedia.settings.ServerSettings;
@@ -63,6 +69,8 @@ public class WebSocketApplicationHandler
 
 	private Object mediaPushPlugin;
 
+	private AppSettings appSettings;
+
 	@OnOpen
 	public void onOpen(Session session, EndpointConfig config) {
 		if(config.getUserProperties().containsKey(AMSEndpointConfigurator.USER_AGENT)) {
@@ -76,6 +84,7 @@ public class WebSocketApplicationHandler
 
 		setApplicationContext(session);
 		setConferenceRoomSettings();
+		setAppSettings();
 	}
 
 
@@ -103,10 +112,18 @@ public class WebSocketApplicationHandler
 			sendNotInitializedError(session);
 		}
 	}
+	
+	
 
 	private void setConferenceRoomSettings(){
 		if(context != null){
 			conferenceRoomSettings = (ConferenceRoomSettings) context.getBean("conferenceRoomSettings");
+		}
+	}
+	
+	private void setAppSettings() {
+		if (context != null) {
+			appSettings = (AppSettings)context.getBean(AppSettings.BEAN_NAME);
 		}
 	}
 
@@ -129,16 +146,16 @@ public class WebSocketApplicationHandler
 	}
 
 
-	public Result startRecording(String streamId, String websocketUrl, String publisherJSUrl, int width, int height, String url, String token) {
+	public Result startRecording(String streamId, String websocketUrl, int width, int height, String url, String token) {
 
 		Result result = new Result(false);
 
 		// Get the startBroadcasting method
-		Method startBroadcastingMethod;
+		Method startMediaPush;
 		try {
-			startBroadcastingMethod = getMediaPushPlugin().getClass().getMethod("startBroadcasting", String.class, String.class, String.class, int.class, int.class, String.class, String.class, String.class);
+			startMediaPush = getMediaPushPlugin().getClass().getMethod("startMediaPush", String.class, String.class, int.class, int.class, String.class, String.class, String.class);
 			// Invoke startBroadcasting
-			result = (Result) startBroadcastingMethod.invoke(getMediaPushPlugin(), streamId, websocketUrl, publisherJSUrl, width, height, url, token, "mp4");
+			result = (Result) startMediaPush.invoke(getMediaPushPlugin(), streamId, websocketUrl, width, height, url, token, "mp4");
 
 		} 
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) 
@@ -153,7 +170,7 @@ public class WebSocketApplicationHandler
 	public Result stopRecording(String streamId) {
 		Result result = new Result(false);
 		try {
-			Method stopBroadcastingMethod = getMediaPushPlugin().getClass().getMethod("stopBroadcasting", String.class);
+			Method stopBroadcastingMethod = getMediaPushPlugin().getClass().getMethod("stopMediaPush", String.class);
 
 			// Invoke stopBroadcasting
 			result = (Result) stopBroadcastingMethod.invoke(getMediaPushPlugin(), streamId);
@@ -166,6 +183,26 @@ public class WebSocketApplicationHandler
 
 		return result;
 
+	}
+	
+	public static String generateJwtToken(String jwtSecretKey, String streamId, long expireDateUnixTimeStampMs, String type) 
+	{
+		Date expireDateType = new Date(expireDateUnixTimeStampMs);
+		String jwtTokenId = null;
+		try {
+			Algorithm algorithm = Algorithm.HMAC256(jwtSecretKey);
+
+			jwtTokenId = JWT.create().
+					withClaim("streamId", streamId).
+					withClaim("type", type).
+					withExpiresAt(expireDateType).
+					sign(algorithm);
+
+		} catch (Exception e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+		}
+
+		return jwtTokenId;
 	}
 
 	public void processApplicationMessage(Session session, String message) throws ParseException {
@@ -189,6 +226,7 @@ public class WebSocketApplicationHandler
 			//start recording
 			String streamId = (String)jsonObject.get(WebSocketConstants.STREAM_ID);
 			String websocketUrl = (String) jsonObject.get(WebSocketApplicationConstants.WEBSOCKET_URL_FIELD);
+			String token =  (String) jsonObject.get(WebSocketConstants.TOKEN);
 
 			Result result = new Result(false);
 			try {
@@ -204,22 +242,17 @@ public class WebSocketApplicationHandler
 				//url to publish is in this format
 
 				//http://127.0.0.1:5080/ConferenceCall/roomId+"?playOnly=true&enterDirectly=true"
-				String urlToPublish = url + streamId + "?playOnly=true&enterDirectly=true";
+				String urlToPublish = url + streamId + "?playOnly=true&enterDirectly=true&token="+token;
 
+				logger.info("start recording for {} and websocket url {} url to publish:{}", streamId, websocketUrl, urlToPublish);
 
-				//publisherJS url is in this format
-				//http://127.0.0.1:5080/ConferenceCall/rest/v1/media-push/publisher.js
-				String publisherJSUrl = url + "rest/v1/media-push/publisher.js";
-
-
-				logger.info("start recording for {} and websocket url {} publisherJS url: {} url to publish:{}", streamId, websocketUrl, publisherJSUrl, urlToPublish);
-
-
-				String token = null;
-				
 				String streamIdRecording = streamId + SUFFIX;
-				result = startRecording(streamIdRecording, websocketUrl, publisherJSUrl, 1280, 720, urlToPublish, token);
-				//String streamId, String websocketUrl, String publisherJSUrl, int width, int height, String url, String toke
+				String publishToken = "";
+				if (StringUtils.isNotBlank(appSettings.getJwtStreamSecretKey())) {
+					publishToken = generateJwtToken(appSettings.getJwtStreamSecretKey(), streamIdRecording, System.currentTimeMillis()+60000,  Token.PUBLISH_TOKEN);
+				}
+							
+				result = startRecording(streamIdRecording, websocketUrl, 1280, 720, urlToPublish, publishToken);
 
 
 			} 

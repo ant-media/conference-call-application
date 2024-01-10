@@ -50,15 +50,12 @@ export function RoomCreationPasswordDialog(props) {
 
   const createRoomClicked = (e) =>{
     onCreateRoomClicked()
-
   }
 
   return (
     <Dialog onClose={handleClose} open={open}  maxWidth={'sm'}>
-      <AntDialogTitle onClose={handleClose}>{t('Room creation requires password.')}</AntDialogTitle>
-      <span>
-      Enter room creation password
-      </span>
+      <AntDialogTitle onClose={handleClose}>{t('Enter Password to Create Room')}</AntDialogTitle>
+
       <DialogContent>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/*   <Input
@@ -79,8 +76,7 @@ export function RoomCreationPasswordDialog(props) {
    
 
         <Button
-                  style={{marginTop:'35px'}}
-
+            style={{marginTop:'35px'}}
             onClick={createRoomClicked}
             size='medium'
             color="secondary"

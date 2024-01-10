@@ -54,7 +54,7 @@ export function GoToLobbyDialog(props) {
 
   return (
     <Dialog onClose={handleClose} open={open}  maxWidth={'sm'}>
-      <AntDialogTitle onClose={handleClose}>{t('Share this url with the conference participants')}</AntDialogTitle>
+      <AntDialogTitle onClose={handleClose}>{t('Share this Url with Your Attendees')}</AntDialogTitle>
       <DialogContent>
        
       <div style={{ display: 'flex', flexDirection: 'column' }}>

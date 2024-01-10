@@ -1000,7 +1000,8 @@ function AntMedia() {
     var jsCmd = {
       command: "startRecording",
       streamId: roomName,
-      websocketURL: websocketURL
+      websocketURL: websocketURL,
+      token: token
     };
 
     sendWebSocketMessage(JSON.stringify(jsCmd));
@@ -1025,7 +1026,7 @@ function AntMedia() {
           reaction: reaction,
           senderStreamId: publishStreamId,
         }
-    );f
+    );
     showReactions(publishStreamId, reaction);
   }
 
