@@ -20,7 +20,7 @@ import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import { getRoomNameAttribute, getWebSocketURLAttribute } from "../utils";
 import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
-import  { WebSocketComponent, sendWebSocketMessage }  from 'Components/WebSocketComponent';
+import { useWebSocket } from 'Components/WebSocketProvider';
 
 
 export const ConferenceContext = React.createContext(null);
@@ -278,6 +278,9 @@ function AntMedia() {
     'thumbs_down': '👎🏼'
   });
 
+  const { sendMessage, latestMessage, isWebSocketConnected } = useWebSocket();
+
+
   /*
    * participants: is a list of participant tracks to which videoTracks (video players on the screen)
    * are assigned. This matches participants with the video players on the screen.
@@ -332,77 +335,6 @@ function AntMedia() {
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
   
-
-  const onWebSocketOpen =  React.useCallback(() => {
-      var jsCmd = {
-        command: "getSettings",
-      };
-      sendWebSocketMessage(JSON.stringify(jsCmd));
-  });
-
-  const handleWebSocketMessage =  React.useCallback((message) => {
-    var obj = JSON.parse(message);
-    if (obj.command == "setSettings") {
-        var localSettings =  JSON.parse(obj.settings);
-        console.log("--isRecordingActive: ", localSettings.isRecordingFeatureAvailable);
-        setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
-    }
-    else if (obj.command == "startRecordingResponse") 
-    {
-      console.log("Incoming startRecordingResponse:", obj);
-      var definition = JSON.parse(obj.definition);
-      if (definition.success) 
-      {
-        setIsRecordPluginActive(true);
-        updateRoomRecordingStatus(true);
-        handleSendNotificationEvent(
-          "RECORDING_TURNED_ON",
-          publishStreamId
-        );
-        displayMessage("Recording is started successfully", "white")
-      }
-      else {
-        console.log("Start Recording is failed");
-        displayMessage("Recording cannot be started. Error is " + definition.message, "white")
-      }
-    }
-    else if (obj.command == "stopRecordingResponse") {
-      console.log("Incoming stopRecordingResponse:", obj);
-      var definition = JSON.parse(obj.definition);
-      if (definition.success) 
-      {
-        setIsRecordPluginActive(false);
-        updateRoomRecordingStatus(false);
-        handleSendNotificationEvent(
-          "RECORDING_TURNED_OFF",
-          publishStreamId
-        );
-        displayMessage("Recording is stopped successfully", "white")
-      }
-      else {
-        console.log("Stop Recording is failed");
-        displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
-      }
-    }
-  });
-
-  function makeFullScreen(divId) {
-    if (fullScreenId === divId) {
-      document.getElementById(divId).classList.remove("selected");
-      document.getElementById(divId).classList.add("unselected");
-      fullScreenId = -1;
-    } else {
-      document.getElementsByClassName("publisher-content")[0].className =
-          "publisher-content chat-active fullscreen-layout";
-      if (fullScreenId !== -1) {
-        document.getElementById(fullScreenId).classList.remove("selected");
-        document.getElementById(fullScreenId).classList.add("unselected");
-      }
-      document.getElementById(divId).classList.remove("unselected");
-      document.getElementById(divId).classList.add("selected");
-      fullScreenId = divId;
-    }
-  }
 
   
   function handleUnauthorizedDialogExitClicked(){
@@ -867,17 +799,20 @@ function AntMedia() {
 
   };
 
-  window.makeFullScreen = makeFullScreen;
 
 
   function setLocalVideo() {
 
-    let tempLocalVideo = document.getElementById("localVideo");
-    if (tempLocalVideo) {
-      setLocalVideoLocal(tempLocalVideo);
-      webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
-      webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
-    }
+    //workaround solution because it can update one component while rendering another component
+    //VideoCard setLocalVideo triggers this problem
+    setTimeout(()=> {
+      let tempLocalVideo = document.getElementById("localVideo");
+      if (tempLocalVideo) {
+        setLocalVideoLocal(tempLocalVideo);
+        webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
+        webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
+      }
+    }, 300);
   }
 
   function assignVideoToStream(videoTrackId, streamId) {
@@ -1004,7 +939,7 @@ function AntMedia() {
       token: token
     };
 
-    sendWebSocketMessage(JSON.stringify(jsCmd));
+    sendMessage(JSON.stringify(jsCmd));
   }
 
   function stopRecord() 
@@ -1015,7 +950,7 @@ function AntMedia() {
       streamId: roomName,
     };
 
-    sendWebSocketMessage(JSON.stringify(jsCmd));
+    sendMessage(JSON.stringify(jsCmd));
   }
 
   function sendReactions(reaction) {
@@ -1037,7 +972,7 @@ function AntMedia() {
     }
   }
 
-  function displayMessage(message, color) {
+  const displayMessage = React.useCallback((message, color) => {
     closeSnackbar();
     enqueueSnackbar(
       {
@@ -1053,9 +988,9 @@ function AntMedia() {
         },
       }
   );
-  }
+  },[closeSnackbar, enqueueSnackbar]);
 
-  function displayWarning(message) {
+  const displayWarning = (message) => {
     displayMessage(message, "red");
   }
 
@@ -1393,7 +1328,7 @@ function AntMedia() {
     return metadata;
   }
 
-  function updateRoomRecordingStatus(isRecording) {
+  const updateRoomRecordingStatus = React.useCallback((isRecording) => {
     let metadata = {};
     if (isRecording) {
       metadata.isRecording = true;
@@ -1401,7 +1336,7 @@ function AntMedia() {
       metadata.isRecording = false;
     }
     webRTCAdaptor.updateStreamMetaData(roomName, JSON.stringify(metadata));
-  }
+  },[webRTCAdaptor, roomName]);
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
     let metadata = getUserStatusMetadata(micMuted, cameraOn, isScreenShared);
@@ -1435,7 +1370,7 @@ function AntMedia() {
     handleLeaveFromRoom();
   });
 
-  function handleSendNotificationEvent(eventType, publishStreamId, info) {
+  const handleSendNotificationEvent = React.useCallback((eventType, publishStreamId, info) => {
     let notEvent = {
       streamId: publishStreamId,
       eventType: eventType,
@@ -1443,7 +1378,7 @@ function AntMedia() {
     };
     console.info("send notification event", notEvent);
     webRTCAdaptor.sendData(publishStreamId, JSON.stringify(notEvent));
-  }
+  },[webRTCAdaptor]);
 
   function updateVideoSendResolution(isPinned) {
     let promise = null;
@@ -1753,7 +1688,7 @@ function AntMedia() {
     );
   }
 
-  function setAudioLevelListener(listener, period) {
+  const setAudioLevelListener = (listener, period) => {
     if (audioListenerIntervalJob == null) {
       audioListenerIntervalJob = setInterval(() => {
         if (webRTCAdaptor?.remotePeerConnection[publishStreamId] !== undefined && webRTCAdaptor?.remotePeerConnection[publishStreamId] !== null) {
@@ -1769,8 +1704,87 @@ function AntMedia() {
     }
   }
 
+  React.useEffect(() => {
+    //gets the setting from the server through websocket
+    if (isWebSocketConnected) {
+      var jsCmd = {
+        command: "getSettings",
+      };
+      sendMessage(JSON.stringify(jsCmd));
+    }
+},[isWebSocketConnected, sendMessage]);
+
+React.useEffect(() => {
+  if (!latestMessage) {
+    return;
+  }
+  var obj = JSON.parse(latestMessage);
+  var definition;
+  if (obj.command === "setSettings") {
+      var localSettings =  JSON.parse(obj.settings);
+      console.log("--isRecordingFeatureAvailable: ", localSettings.isRecordingFeatureAvailable);
+      setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
+  }
+  else if (obj.command === "startRecordingResponse") 
+  {
+    console.log("Incoming startRecordingResponse:", obj);
+    definition = JSON.parse(obj.definition);
+    if (definition.success) 
+    {
+      setIsRecordPluginActive(true);
+      updateRoomRecordingStatus(true);
+      handleSendNotificationEvent(
+        "RECORDING_TURNED_ON",
+        publishStreamId
+      );
+      displayMessage("Recording is started successfully", "white")
+    }
+    else {
+      console.log("Start Recording is failed");
+      displayMessage("Recording cannot be started. Error is " + definition.message, "white")
+    }
+  }
+  else if (obj.command === "stopRecordingResponse") {
+    console.log("Incoming stopRecordingResponse:", obj);
+    definition = JSON.parse(obj.definition);
+    if (definition.success) 
+    {
+      setIsRecordPluginActive(false);
+      updateRoomRecordingStatus(false);
+      handleSendNotificationEvent(
+        "RECORDING_TURNED_OFF",
+        publishStreamId
+      );
+      displayMessage("Recording is stopped successfully", "white")
+    }
+    else {
+      console.log("Stop Recording is failed");
+      displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
+    }
+  }
+},[latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);
+
+const makeFullScreen = (divId) => {
+  if (fullScreenId === divId) {
+    document.getElementById(divId).classList.remove("selected");
+    document.getElementById(divId).classList.add("unselected");
+    fullScreenId = -1;
+  } else {
+    document.getElementsByClassName("publisher-content")[0].className =
+        "publisher-content chat-active fullscreen-layout";
+    if (fullScreenId !== -1) {
+      document.getElementById(fullScreenId).classList.remove("selected");
+      document.getElementById(fullScreenId).classList.add("unselected");
+    }
+    document.getElementById(divId).classList.remove("unselected");
+    document.getElementById(divId).classList.add("selected");
+    fullScreenId = divId;
+  }
+}
+window.makeFullScreen = makeFullScreen;
+
+
   return (!initialized ? <>
-            
             <Grid
                 container
                 spacing={0}
@@ -1793,7 +1807,7 @@ function AntMedia() {
                 justifyContent="center"
                 alignItems={"center"}
             >
-              <WebSocketComponent onOpen={onWebSocketOpen} onMessage={handleWebSocketMessage} />
+             
               <ConferenceContext.Provider
                   value={{
                     isScreenShared,

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material";
@@ -16,7 +16,6 @@ import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
 import { getRoomNameAttribute } from 'utils';
 import ReactionsButton from "./Components/ReactionsButton";
-import {SvgIcon} from "../SvgIcon";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {

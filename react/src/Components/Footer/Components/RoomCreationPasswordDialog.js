@@ -70,8 +70,8 @@ export function RoomCreationPasswordDialog(props) {
           value={password}
           onChange={handlePasswordChange}
           placeholder="Enter password"
+          autoComplete="off"
         />
-
         </div>
    
 

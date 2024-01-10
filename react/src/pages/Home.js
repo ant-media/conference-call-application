@@ -5,12 +5,9 @@ import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
 import {nanoid} from 'nanoid';
 import Stack from "@mui/material/Stack";
-
-
-import { getWebSocketURLAttribute } from "../utils";
 import { RoomCreationPasswordDialog } from "Components/Footer/Components/RoomCreationPasswordDialog";
 import { GoToLobbyDialog } from 'Components/Footer/Components/GoToLobbyDialog';
-import  { WebSocketComponent, sendWebSocketMessage }  from 'Components/WebSocketComponent';
+import { useWebSocket } from 'Components/WebSocketProvider';
 
 
 
@@ -18,18 +15,18 @@ function Home(props) {
     const {t} = useTranslation();
     let navigate = useNavigate();
 
-    const roomNameRef = React.useRef(); // Create a ref to store roomName
-    const applicationWebSocketUrlRef = React.useRef(); // Store applicationWebSocketUrl in a useRef
     const joinToken = React.useRef();
     const joinRoomUrl = React.useRef();
     
     const [settings, setSettings] = React.useState();
-    const [applicationWebSocket, setApplicationWebSocket] = React.useState();
     const [createRoomPassword, setCreateRoomPassword] = React.useState();
     const [createRoomPasswordDialogOpen, setCreateRoomPasswordDialogOpen] = React.useState(false);
     const [goToLobbyDialogOpen, setGoToLobbyDialogOpen] = React.useState(false);
 
     const [roomName, setRoomName] = React.useState();
+
+    const { sendMessage, latestMessage, isWebSocketConnected } = useWebSocket();
+
 
     const handleCreateRoomPasswordChange = (newPassword) => {
         setCreateRoomPassword(newPassword);
@@ -85,42 +82,45 @@ function Home(props) {
             jsCmd.roomName = roomName
           }
 
-          sendWebSocketMessage(JSON.stringify(jsCmd));
+          sendMessage(JSON.stringify(jsCmd));
       }
 
-      const handleWebSocketMessage = React.useCallback((message) => {
+      React.useEffect(() => {
         //setMessages((prevMessages) => [...prevMessages, message]);
-        var obj = JSON.parse(message);
-        if (obj.command == "setSettings") {
-            var localSettings =  JSON.parse(obj.settings);
-            console.log("roomCreationPasswordEnabled: ", localSettings.roomCreationPasswordEnabled);
-            setSettings(localSettings);
-        }
-        else if(obj.command === "createRoomWithPassword")
-        {
-          if(obj.authenticated && obj.joinToken && obj.roomName)
-          {
-                const currentURL = window.location.href;
-                joinToken.current = obj.joinToken
-                joinRoomUrl.current = currentURL + obj.roomName +"?token="+ obj.joinToken
-                setRoomName(obj.roomName);
-                setGoToLobbyDialogOpen(true)
-          }else{
-              alert("Room creation password is wrong")
+        if (latestMessage) {
+          var obj = JSON.parse(latestMessage);
+          if (obj.command === "setSettings") {
+              var localSettings =  JSON.parse(obj.settings);
+              console.log("roomCreationPasswordEnabled: ", localSettings.roomCreationPasswordEnabled);
+              setSettings(localSettings);
           }
-      }
-    }, []);
+          else if(obj.command === "createRoomWithPassword")
+          {
+            if(obj.authenticated && obj.joinToken && obj.roomName)
+            {
+                  const currentURL = window.location.href;
+                  joinToken.current = obj.joinToken
+                  joinRoomUrl.current = currentURL + obj.roomName +"?token="+ obj.joinToken
+                  setRoomName(obj.roomName);
+                  setGoToLobbyDialogOpen(true)
+            }else{
+                alert("Room creation password is wrong")
+            }
+        }
+       }
+    },[latestMessage]);
 
-    const onWebSocketOpen = React.useCallback(() => {
-        var jsCmd = {
-          command: "getSettings",
-        };
-        sendWebSocketMessage(JSON.stringify(jsCmd));
-    },[]);
+    React.useEffect(() => {
+        if (isWebSocketConnected) {
+          var jsCmd = {
+            command: "getSettings",
+          };
+          sendMessage(JSON.stringify(jsCmd));
+        }
+    }, [isWebSocketConnected, sendMessage]);
 
     return (
         <>
-       <WebSocketComponent onOpen={onWebSocketOpen} onMessage={handleWebSocketMessage} />
        <GoToLobbyDialog
                 onClose={handleGoToLobbyDialogClose}
                 url={joinRoomUrl.current}
@@ -162,7 +162,7 @@ function Home(props) {
                                 onChange={handleRoomNameChange}
                                 color="primary"
                                 variant="outlined"
-                                autocomplete="off"
+                                autoComplete="off"
                                 placeholder={t("Room name")}
                                 id="room_name"
                             />

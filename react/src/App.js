@@ -13,6 +13,8 @@ import translationTR from "i18n/tr.json";
 import translationES from "i18n/es.json";
 import CustomRoutes from "CustomRoutes";
 
+
+
 const resources = {
   en: {
     translation: translationEN,
@@ -70,18 +72,18 @@ function copyWindowLocation() {
 window.getWindowLocation = getWindowLocation;
 window.copyWindowLocation = copyWindowLocation;
 
-function App() {
-  const handleFullScreen = (e) => {
-    if (e.target?.id === "meeting-gallery") {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-      } else {
-        document.exitFullscreen();
+function App() 
+{
+  React.useEffect(() => {
+    const handleFullScreen = (e) => {
+      if (e.target?.id === "meeting-gallery") {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
       }
     }
-  };
-
-  React.useEffect(() => {
     window.addEventListener("dblclick", handleFullScreen);
 
     // cleanup this component
@@ -89,23 +91,24 @@ function App() {
       window.removeEventListener("dblclick", handleFullScreen);
     };
   }, []);
+
   // "#d2c8f1", "#323135", "#000", "#1b1b1b", "white"
   return (
-    <ThemeProvider theme={theme()}>
-      <CssBaseline />
-      <SnackbarProvider
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-        maxSnack={3}
-        content={(key, notificationData) => (
-          <AntSnackBar id={key} notificationData={notificationData} />
-        )}
-      >
-        <CustomRoutes />
-      </SnackbarProvider>
-    </ThemeProvider>
+      <ThemeProvider theme={theme()}>
+        <CssBaseline />
+        <SnackbarProvider
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+          maxSnack={3}
+          content={(key, notificationData) => (
+            <AntSnackBar id={key} notificationData={notificationData} />
+          )}
+        >
+          <CustomRoutes />
+        </SnackbarProvider>
+      </ThemeProvider>
   );
 }
 
