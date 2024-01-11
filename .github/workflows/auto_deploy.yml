@@ -65,7 +65,7 @@ jobs:
       run: |
         POD_NAME=$(kubectl get pods -l app=ant-media-origin -n antmedia -o jsonpath='{.items[0].metadata.name}')
         kubectl delete pod $POD_NAME -n antmedia
-        sleep 5
+        sleep 20
         
     - name: Login to server
       if: steps.check-conference-app.outputs.app_exists == 'false'
