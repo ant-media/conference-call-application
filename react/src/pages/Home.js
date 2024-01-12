@@ -104,7 +104,7 @@ function Home(props) {
                   setRoomName(obj.roomName);
                   setGoToLobbyDialogOpen(true)
             }else{
-                alert("Room creation password is wrong")
+                alert("Room creation password is not correct. Please set password on app configuration file and enable JWT token stream security from settings.")
             }
         }
        }
