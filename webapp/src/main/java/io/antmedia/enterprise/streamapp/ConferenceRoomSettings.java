@@ -29,7 +29,7 @@ public class ConferenceRoomSettings {
     @PostConstruct
     public void init() {
         roomCreationPasswordEnabled = StringUtils.isNotBlank(roomCreationPassword);
-    	logger.info("roomCreationPasswordEnabled is {}", roomCreationPassword);
+    	logger.info("roomCreationPasswordEnabled is {}", StringUtils.isNotBlank(roomCreationPassword));
     	
     	try {
 			Class.forName("io.antmedia.plugin.IMediaPushPlugin");
