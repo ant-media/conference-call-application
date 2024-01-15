@@ -13,7 +13,7 @@ class TestJoinLeave(unittest.TestCase):
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.chrome = Browser()
-    self.chrome.init(False)
+    self.chrome.init(True)
 
   def join_room_in_new_tab(self, participant, room):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
