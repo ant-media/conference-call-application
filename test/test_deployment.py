@@ -26,7 +26,7 @@ class TestDeployment(unittest.TestCase):
     response = temp_rest_helper.call_install_app(os.environ.get('WAR_FILE'), self.test_app_name)
     print(response)
     assert(response["success"])
-    time.sleep(10)
+    time.sleep(20)
 
   def test_delete_app(self):
     response = self.rest_helper.call_delete_app(self.test_app_name)
