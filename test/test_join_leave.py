@@ -7,7 +7,6 @@ import os
 import random
 import json
 import time
-from busypie import wait, SECOND
 
 class TestJoinLeave(unittest.TestCase):
   def setUp(self):

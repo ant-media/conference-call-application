@@ -31,8 +31,8 @@ class Browser:
     
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
-    service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
-    #service = Service(executable_path='/tmp/chromedriver')
+    #service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
+    service = Service(executable_path='/tmp/chromedriver')
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
   def open_in_new_tab(self, url):
