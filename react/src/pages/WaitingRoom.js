@@ -39,6 +39,7 @@ function WaitingRoom(props) {
   const roomName = id;
 
   const conference = useContext(ConferenceContext);
+  window.conference = conference;
   const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
