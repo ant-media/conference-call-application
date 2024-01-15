@@ -10,10 +10,14 @@ import time
 
 class TestJoinLeave(unittest.TestCase):
   def setUp(self):
+    print(self._testMethodName, " starting...")
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.chrome = Browser()
     self.chrome.init(True)
+
+  def tearDown(self):
+    print(self._testMethodName, " ending...")
 
   def join_room_in_new_tab(self, participant, room):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
@@ -32,7 +36,6 @@ class TestJoinLeave(unittest.TestCase):
 
     assert(meeting_gallery.is_displayed())
 
-    
     return handle
     
   def get_participants(self):
@@ -85,6 +88,7 @@ class TestJoinLeave(unittest.TestCase):
   def test_join_room(self):
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)   
+    self.chrome.close_all()
 
   def set_and_test_track_limit(self, limit):
       self.change_video_track_count(limit)
@@ -101,6 +105,9 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
+  def leave_room(self):
+    leave_button = self.chrome.get_element_by_id("leave-room-button")
+    self.chrome.click_element(leave_button)
   
 
   def test_join_room_2_participants(self):
@@ -122,7 +129,9 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_participants()) == 2)
 
-    self.chrome.close_tab(handle_2)
+    self.chrome.switch_to_tab(handle_2)
+
+    self.leave_room()
 
     self.chrome.switch_to_tab(handle_1)
 
