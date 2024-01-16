@@ -1063,7 +1063,9 @@ function AntMedia() {
         webRTCAdaptor.getBroadcastObject(eventStreamId);
       }
       else if (eventType === "MESSAGE_RECEIVED") {
-        if(notificationEvent.senderId === publishStreamId) {
+        // if message arrives from myself or footer message button is disabled then we are not going to show it.
+        if(notificationEvent.senderId === publishStreamId
+            || process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'false') {
           return;
         }
         calculate_scroll_height();
