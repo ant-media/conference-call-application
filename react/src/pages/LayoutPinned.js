@@ -11,9 +11,9 @@ function LayoutPinned (props) {
   const pinnedParticipant = conference.participants.find((v) => v.id === conference.pinnedVideoId)
 
   let MAX_VIDEO_AT_SIDE = 4;
-  const showOthers = Object.keys(conference.allParticipants).length > MAX_VIDEO_AT_SIDE; 
+  const showOthers = Object.keys(conference.allParticipants).length > MAX_VIDEO_AT_SIDE;
   let playingParticipantsCount = 0;
-  
+
   //if we need to show others card, then we don't show the last video to hold place for the others card
   const maxPlayingParticipantsCount = showOthers ? MAX_VIDEO_AT_SIDE - 1 : Math.min(conference.participants.length, MAX_VIDEO_AT_SIDE);
   const playingParticipants = [];
@@ -54,7 +54,7 @@ function LayoutPinned (props) {
       {
       // eslint-disable-next-line
       conference.participants.map((element, index) => {
-        if(element !== pinnedParticipant && playingParticipantsCount < maxPlayingParticipantsCount) { 
+        if(element !== pinnedParticipant && playingParticipantsCount < maxPlayingParticipantsCount) {
           playingParticipantsCount ++;
           playingParticipants.push(element);
           return (
@@ -82,7 +82,7 @@ function LayoutPinned (props) {
       <>
         <div className="unpinned">
         <div className="single-video-container  others-tile-wrapper">
-        <OthersCard 
+        <OthersCard
           playingParticipants = {playingParticipants}
         />
         </div>
@@ -96,7 +96,7 @@ function LayoutPinned (props) {
       {pinnedVideo()}
       <div id="unpinned-gallery">
         {videoCards()}
-        {othersCard()}
+        {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
       </div>
     </>
   );
