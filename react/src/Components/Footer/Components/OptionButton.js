@@ -75,7 +75,7 @@ function OptionButton({ footer, ...props }) {
           <Tooltip title={t("More options")} placement="top">
             <CustomizedBtn
                 className={footer ? "footer-icon-button" : ""}
-                id="demo-positioned-button"
+                id="settings-button"
                 variant="contained"
                 color={open ? "primary" : "secondary"}
                 aria-controls={open ? "demo-positioned-menu" : undefined}
@@ -107,7 +107,11 @@ function OptionButton({ footer, ...props }) {
               <ListItemIcon>
                 <SvgIcon size={36} name={"layout"} color={"white"} />
               </ListItemIcon>
-              <ListItemText>{t("Change Layout")}</ListItemText>
+              <ListItemText
+                id="change-layout-button"
+              >
+                {t("Change Layout")}
+              </ListItemText>
             </MenuItem>
 
               {conference.isPlayOnly === false ?
