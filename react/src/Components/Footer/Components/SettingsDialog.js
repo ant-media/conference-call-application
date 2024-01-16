@@ -158,7 +158,8 @@ export function SettingsDialog(props) {
               </Hidden>
             </Grid>
           </Grid>
-          <Grid container sx={{ mt: 4 }}>
+          {process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true' ?
+            <Grid container sx={{ mt: 4 }}>
             <Grid container>
               <InputLabel>{t('Background')}</InputLabel>
             </Grid>
@@ -183,6 +184,7 @@ export function SettingsDialog(props) {
               </Hidden>
             </Grid>
           </Grid>
+            : null}
         </Box>
       </DialogContent>
     </Dialog>

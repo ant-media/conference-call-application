@@ -103,37 +103,42 @@ function OptionButton({ footer, ...props }) {
                 horizontal: "left",
               }}
           >
-            <MenuItem onClick={() => handleLayoutDialogOpen()}>
-              <ListItemIcon>
-                <SvgIcon size={36} name={"layout"} color={"white"} />
-              </ListItemIcon>
-              <ListItemText
-                id="change-layout-button"
-              >
-                {t("Change Layout")}
-              </ListItemText>
-            </MenuItem>
+            {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
+              <MenuItem onClick={() => handleLayoutDialogOpen()}>
+                <ListItemIcon>
+                  <SvgIcon size={36} name={"layout"} color={"white"} />
+                </ListItemIcon>
+                <ListItemText
+                  id="change-layout-button"
+                >
+                  {t("Change Layout")}
+                </ListItemText>
+              </MenuItem>
+              : null}
 
-              {conference.isPlayOnly === false ?
-            <MenuItem onClick={() => handleDialogOpen()}>
-              <ListItemIcon>
-                <SvgIcon size={36} name={"call-settings"} color={"white"} />
-              </ListItemIcon>
-              <ListItemText>{t("Call Settings")}</ListItemText>
-            </MenuItem>
+              {conference.isPlayOnly === false
+                && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
+                  <MenuItem onClick={() => handleDialogOpen()}>
+                    <ListItemIcon>
+                      <SvgIcon size={36} name={"call-settings"} color={"white"} />
+                    </ListItemIcon>
+                    <ListItemText>{t("Call Settings")}</ListItemText>
+                  </MenuItem>
                     : null}
 
-            <MenuItem
-                component={"a"}
-                href="https://github.com/ant-media/conference-call-application/issues"
-                target={"_blank"}
-                rel="noopener noreferrer"
-            >
-              <ListItemIcon>
-                <SvgIcon size={36} name={"report"} color={"white"} />
-              </ListItemIcon>
-              <ListItemText>{t("Report Problem")}</ListItemText>
-            </MenuItem>
+            {process.env.REACT_APP_OPTION_MENU_REPORT_PROBLEM_BUTTON_VISIBILITY === 'true' ?
+              <MenuItem
+                  component={"a"}
+                  href={process.env.REACT_APP_REPORT_PROBLEM_URL}
+                  target={"_blank"}
+                  rel="noopener noreferrer"
+              >
+                <ListItemIcon>
+                  <SvgIcon size={36} name={"report"} color={"white"} />
+                </ListItemIcon>
+                <ListItemText>{t("Report Problem")}</ListItemText>
+              </MenuItem>
+              : null}
           </Menu>
         </>
     );
