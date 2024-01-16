@@ -49,6 +49,7 @@ const AntDialogTitle = (props) => {
         <Button
           aria-label="close"
           onClick={onClose}
+          id="layout-dialog-close-button"
           sx={{
             position: "absolute",
             right: 26,
@@ -204,6 +205,7 @@ export function LayoutSettingsDialog(props) {
                 value={value}
                 aria-label="video track count"
                 valueLabelDisplay="auto"
+                id="tile-count-slider"
                 defaultValue={value}
                 step={null}
                 min={3}

@@ -287,7 +287,9 @@ function VideoCard(props) {
         {micMuted && (
           <Tooltip title={t("mic is muted")} placement="top">
             <Grid item>
-              <CustomizedBox sx={cardBtnStyle}>
+              <CustomizedBox 
+                id={"mic-muted-"+props.id}
+                sx={cardBtnStyle}>
                 <SvgIcon size={32} name={"muted-microphone"} color="#fff" />
               </CustomizedBox>
             </Grid>
@@ -371,12 +373,7 @@ function VideoCard(props) {
 
         <div
           className={`single-video-card`}
-        // style={{
-        //   ...(isTalking || conference.talkers.includes(props.id) ? {
-        //     outline: `thick solid ${theme.palette.primary.main}`,
-        //     borderRadius: '10px'
-        //   } : {})
-        // }}
+          id={'card-'+(props.id !== undefined ? props?.id : "")}
         >
           {avatarOrPlayer()}
 
