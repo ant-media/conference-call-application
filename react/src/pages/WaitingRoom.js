@@ -217,6 +217,7 @@ function WaitingRoom(props) {
                         variant="outlined"
                         onChange={(e) => conference.setStreamName(e.target.value)}
                         placeholder={t("Your name")}
+                        readOnly={process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true'}
                         id="participant_name"
                     />
                   </Grid>
