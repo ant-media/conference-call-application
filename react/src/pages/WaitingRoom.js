@@ -208,7 +208,19 @@ function WaitingRoom(props) {
                     }}
                 >
                   <Grid item xs={12} sx={{mt: 3, mb: 4}}>
-                    <TextField
+                    { process.env.REACT_APP_WAITING_ROOM_PARTICIPANT_NAME_READONLY === 'true' ?
+                      <TextField
+                          autoFocus
+                          required
+                          fullWidth
+                          color="primary"
+                          value={conference.streamName}
+                          variant="outlined"
+                          placeholder={t("Your name")}
+                          readOnly={true}
+                          id="participant_name"
+                      />
+                      : <TextField
                         autoFocus
                         required
                         fullWidth
@@ -217,9 +229,8 @@ function WaitingRoom(props) {
                         variant="outlined"
                         onChange={(e) => conference.setStreamName(e.target.value)}
                         placeholder={t("Your name")}
-                        readOnly={process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true'}
                         id="participant_name"
-                    />
+                      /> }
                   </Grid>
                   <Grid container justifyContent={"center"}>
                     <Grid item sm={6} xs={12}>
