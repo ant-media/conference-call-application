@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useContext} from 'react';
 import PropTypes from 'prop-types';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
@@ -7,18 +8,16 @@ import Button from '@mui/material/Button';
 import DialogContent from '@mui/material/DialogContent';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
-import { Grid, MenuItem, useMediaQuery } from '@mui/material';
-import { SvgIcon } from 'Components/SvgIcon';
-import { useTheme } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import {Grid, MenuItem, useMediaQuery, useTheme} from '@mui/material';
+import {SvgIcon} from 'Components/SvgIcon';
+import {useTranslation} from 'react-i18next';
 import {ThemeList} from "../../../styles/themeList";
-import {useContext} from "react";
 import {ThemeContext} from "../../../App";
 import {AvailableLanguages} from "../../../i18n/AvailableLanguages";
 import i18n from "i18next";
 
 const AntDialogTitle = props => {
-  const { children, onClose, ...other } = props;
+  const {children, onClose, ...other} = props;
 
   return (
     <DialogTitle {...other}>
@@ -33,7 +32,7 @@ const AntDialogTitle = props => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={'close'} color={'white'} />
+          <SvgIcon size={30} name={'close'} color={'white'}/>
         </Button>
       ) : null}
     </DialogTitle>
@@ -41,8 +40,8 @@ const AntDialogTitle = props => {
 };
 
 export function GeneralSettingsDialog(props) {
-  const { t } = useTranslation();
-  const { onClose, selectedValue, open } = props;
+  const {t} = useTranslation();
+  const {onClose, selectedValue, open} = props;
 
   const themeContext = useContext(ThemeContext);
   const themeList = Object.keys(ThemeList);
@@ -56,12 +55,14 @@ export function GeneralSettingsDialog(props) {
   const handleClose = (event, reason) => {
     onClose(selectedValue);
   };
+
   function switchLanguage(value) {
 
     localStorage.setItem("i18nextLng", value);
     i18n.changeLanguage(value).then(
       () => {
         setCurrentLanguage(value);
+        console.log("Language is set to", value);
       }
     );
   }
@@ -74,7 +75,7 @@ export function GeneralSettingsDialog(props) {
     <Dialog onClose={handleClose} open={open} fullScreen={fullScreen} maxWidth={'sm'}>
       <AntDialogTitle onClose={handleClose}>{t('General Settings')}</AntDialogTitle>
       <DialogContent>
-        <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
+        <Box component="form" sx={{display: 'flex', flexWrap: 'wrap'}}>
           <Grid container>
             <Grid container>
               <InputLabel>{t('Language')}</InputLabel>
@@ -87,7 +88,7 @@ export function GeneralSettingsDialog(props) {
                   variant="outlined"
                   value={currentLanguage}
                   onChange={e => switchLanguage(e.target.value)}
-                  sx={{ color: 'white' }}
+                  sx={{color: 'white'}}
                 >
                   {languageList
                     .map(currentLanguage => (
@@ -99,7 +100,7 @@ export function GeneralSettingsDialog(props) {
               </Grid>
             </Grid>
           </Grid>
-          <Grid container sx={{ mt: 4 }}>
+          <Grid container sx={{mt: 4}}>
             <Grid container>
               <InputLabel>{t('Theme')}</InputLabel>
             </Grid>
@@ -111,7 +112,7 @@ export function GeneralSettingsDialog(props) {
                   variant="outlined"
                   value={themeContext.currentTheme}
                   onChange={e => switchTheme(e.target.value)}
-                  sx={{ color: 'white' }}
+                  sx={{color: 'white'}}
                 >
                   {themeList
                     .map(theme => (

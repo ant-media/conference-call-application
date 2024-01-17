@@ -1,12 +1,11 @@
 import "./App.css";
 /* eslint-disable eqeqeq */
-import { ThemeProvider, CssBaseline } from "@mui/material";
+import {CssBaseline, ThemeProvider} from "@mui/material";
 import theme from "./styles/theme";
 import React from "react";
-import { SnackbarProvider } from "notistack";
+import {SnackbarProvider} from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
-import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
+import {initReactI18next} from "react-i18next";
 import i18n from "i18next";
 import CustomRoutes from "CustomRoutes";
 import {ThemeList} from "./styles/themeList";
@@ -14,21 +13,7 @@ import {AvailableLanguages} from "./i18n/AvailableLanguages";
 
 i18n.use(initReactI18next).init({
   resources: AvailableLanguages,
-});
-/*
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    fallbackLng: "en",
-    interpolation: {
-      escapeValue: false,
-    },
-    keySeperator: false,
-    AvailableLanguages,
-  });
-
- */
+}).then(r => console.log("i18n is initialized"));
 
 const availableLanguagesList = Object.keys(AvailableLanguages);
 let preferredLanguage = localStorage.getItem("i18nextLng");
@@ -37,12 +22,13 @@ if (!preferredLanguage) {
 }
 if (availableLanguagesList.includes(preferredLanguage)) {
   localStorage.setItem("i18nextLng", preferredLanguage);
-  i18n.changeLanguage(preferredLanguage);
 } else {
   // Falling back to english.
   localStorage.setItem("i18nextLng", "en");
-  i18n.changeLanguage("en");
+  preferredLanguage = "en";
 }
+
+i18n.changeLanguage(preferredLanguage).then(r => console.log("Language is set to", preferredLanguage));
 
 function getWindowLocation() {
   document.getElementById("locationHref").value = window.location.href;
@@ -70,9 +56,9 @@ function App() {
   const handleFullScreen = (e) => {
     if (e.target?.id === "meeting-gallery") {
       if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
+        document.documentElement.requestFullscreen().then(r => console.log("Fullscreen is requested", r));
       } else {
-        document.exitFullscreen();
+        document.exitFullscreen().then(r => console.log("Fullscreen is exited", r));
       }
     }
   };
@@ -87,7 +73,7 @@ function App() {
   }, []);
   return (
     <ThemeProvider theme={theme(currentTheme)}>
-      <CssBaseline />
+      <CssBaseline/>
       <SnackbarProvider
         anchorOrigin={{
           vertical: "top",
@@ -95,7 +81,7 @@ function App() {
         }}
         maxSnack={3}
         content={(key, notificationData) => (
-          <AntSnackBar id={key} notificationData={notificationData} />
+          <AntSnackBar id={key} notificationData={notificationData}/>
         )}
       >
         <ThemeContext.Provider
@@ -103,7 +89,7 @@ function App() {
             currentTheme,
             setCurrentTheme,
           }}>
-          <CustomRoutes />
+          <CustomRoutes/>
         </ThemeContext.Provider>
       </SnackbarProvider>
     </ThemeProvider>
