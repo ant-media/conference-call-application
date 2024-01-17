@@ -5,6 +5,7 @@ import { Grid } from "@mui/material";
 import Home from "pages/Home";
 import AntMedia from "pages/AntMedia";
 import { getRoomNameAttribute } from "utils";
+import {ThemeList} from "./styles/themeList";
 
 function isComponent() {
     return getRoomNameAttribute();

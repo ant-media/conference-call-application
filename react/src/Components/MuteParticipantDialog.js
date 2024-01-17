@@ -8,6 +8,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import {useContext} from "react";
 import {ConferenceContext} from "../pages/AntMedia";
+import {ThemeList} from "../styles/themeList";
 
 export default function MuteParticipantDialog() {
     const theme = useTheme();

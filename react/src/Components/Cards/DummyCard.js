@@ -1,12 +1,17 @@
 import React from "react";
 import { Avatar, Grid } from "@mui/material";
 import defaultAvatar from "../../static/images/defaultAvatar.png";
+import {useTheme} from "@mui/material/styles";
+import {ThemeList} from "../../styles/themeList";
+
 function DummyCard() {
+  const theme = useTheme();
+
   return (
     <Grid
       container
       style={{
-        background: "var(--green-70)",
+        background: theme.palette.themeColor[70],
         borderRadius: 4,
         height: "100%",
       }}

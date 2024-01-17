@@ -21,6 +21,8 @@ import { useSnackbar } from "notistack";
 import { ConferenceContext } from "./AntMedia";
 import { getUrlParameter } from "@antmedia/webrtc_adaptor";
 import { getRoomNameAttribute } from "utils";
+import {useTheme} from "@mui/material/styles";
+import {ThemeList} from "../styles/themeList";
 
 
 function getPublishStreamId() {
@@ -35,6 +37,8 @@ function WaitingRoom(props) {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectFocus, setSelectFocus] = React.useState(null);
+
+  const theme = useTheme();
 
   const roomName = id;
 
@@ -170,7 +174,7 @@ function WaitingRoom(props) {
                   </Grid>
                 </Grid>
               </Grid>
-              <Typography align="center" color="#DDFFFC" sx={{mt: 2}}>
+              <Typography align="center" color={theme.palette.chatText} sx={{mt: 2}}>
                 {t(
                     "You can choose whether to open your camera and microphone before you get into room"
                 )}

@@ -8,23 +8,14 @@ import AntSnackBar from "Components/AntSnackBar";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import i18n from "i18next";
-import translationEN from "i18n/en.json";
-import translationTR from "i18n/tr.json";
-import translationES from "i18n/es.json";
 import CustomRoutes from "CustomRoutes";
+import {ThemeList} from "./styles/themeList";
+import {AvailableLanguages} from "./i18n/AvailableLanguages";
 
-const resources = {
-  en: {
-    translation: translationEN,
-  },
-  tr: {
-    translation: translationTR,
-  },
-  es: {
-    translation: translationES,
-  },
-};
-
+i18n.use(initReactI18next).init({
+  resources: AvailableLanguages,
+});
+/*
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -34,22 +25,23 @@ i18n
       escapeValue: false,
     },
     keySeperator: false,
-    resources,
+    AvailableLanguages,
   });
 
-const availableLangs = Object.keys(resources);
-if (!availableLangs.includes(i18n.language)) {
+ */
 
-  const maybeLang = i18n.language.slice(0, 2);
-  if (availableLangs.includes(maybeLang)) {
-    localStorage.setItem("i18nextLng", maybeLang);
-    i18n.changeLanguage(maybeLang);
-  } else {
-    // Falling back to english.
-    localStorage.setItem("i18nextLng", "en");
-    i18n.changeLanguage("en");
-  }
-
+const availableLanguagesList = Object.keys(AvailableLanguages);
+let preferredLanguage = localStorage.getItem("i18nextLng");
+if (!preferredLanguage) {
+  preferredLanguage = window.navigator.language.slice(0, 2);
+}
+if (availableLanguagesList.includes(preferredLanguage)) {
+  localStorage.setItem("i18nextLng", preferredLanguage);
+  i18n.changeLanguage(preferredLanguage);
+} else {
+  // Falling back to english.
+  localStorage.setItem("i18nextLng", "en");
+  i18n.changeLanguage("en");
 }
 
 function getWindowLocation() {
@@ -70,7 +62,11 @@ function copyWindowLocation() {
 window.getWindowLocation = getWindowLocation;
 window.copyWindowLocation = copyWindowLocation;
 
+export const ThemeContext = React.createContext(null);
+
 function App() {
+  const [currentTheme, setCurrentTheme] = React.useState(ThemeList.Green);
+
   const handleFullScreen = (e) => {
     if (e.target?.id === "meeting-gallery") {
       if (!document.fullscreenElement) {
@@ -89,9 +85,8 @@ function App() {
       window.removeEventListener("dblclick", handleFullScreen);
     };
   }, []);
-  // "#d2c8f1", "#323135", "#000", "#1b1b1b", "white"
   return (
-    <ThemeProvider theme={theme()}>
+    <ThemeProvider theme={theme(currentTheme)}>
       <CssBaseline />
       <SnackbarProvider
         anchorOrigin={{
@@ -103,7 +98,13 @@ function App() {
           <AntSnackBar id={key} notificationData={notificationData} />
         )}
       >
-        <CustomRoutes />
+        <ThemeContext.Provider
+          value={{
+            currentTheme,
+            setCurrentTheme,
+          }}>
+          <CustomRoutes />
+        </ThemeContext.Provider>
       </SnackbarProvider>
     </ThemeProvider>
   );

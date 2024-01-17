@@ -23,6 +23,7 @@ import { ConferenceContext } from 'pages/AntMedia';
 import { useTranslation } from "react-i18next";
 import { SvgIcon } from "Components/SvgIcon";
 import debounce from "lodash/debounce";
+import {ThemeList} from "../../../styles/themeList";
 
 const CustomizedSlider = styled(Slider)(({ theme }) => ({
   marginBottom: 0,
@@ -171,20 +172,20 @@ export function LayoutSettingsDialog(props) {
                   sx={{ width: "100%", pb: 1 }}
                   value="tiled"
                   control={<Radio />}
-                  label={radioLabel("Tiled", "tiled")}
+                  label={radioLabel(t("Tiled view"), "tiled")}
                 />
                 <FormControlLabel
                   classes={{ label: "layout-radio-label" }}
                   sx={{ width: "100%" }}
                   value="sidebar"
                   control={<Radio />}
-                  label={radioLabel("Sidebar", "sidebar")}
+                  label={radioLabel(t("Sidebar view"), "sidebar")}
                 />
               </RadioGroup>
             </FormControl>
           </Grid>
           <Typography color="#fff" sx={{ fontWeight: 600, mt: 2.5, mb: 2 }}>
-            Change tile count
+            {t("Change tile count")}
           </Typography>
           <Grid
             container

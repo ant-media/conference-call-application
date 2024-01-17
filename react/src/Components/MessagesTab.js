@@ -3,12 +3,13 @@ import { styled } from '@mui/material/styles';
 import { Grid, Typography, useTheme } from '@mui/material';
 import MessageCard from './Cards/MessageCard';
 import { useTranslation } from 'react-i18next';
+import {ThemeList} from "../styles/themeList";
 
 const TextContainer = styled(Grid)(({ theme }) => ({
   padding: '10px 18px 8px 18px',
-  background: theme.palette.green[60],
+  background: theme.palette.themeColor[60],
   borderRadius: 6,
-  color: theme.palette.green[0],
+  color: theme.palette.themeColor[0],
 }));
 
 function MessagesTab(props) {
@@ -18,8 +19,8 @@ function MessagesTab(props) {
   return (
     <>
       <TextContainer item container>
-        <Typography color={theme.palette.green[0]} style={{ fontSize: 12 }} variant="body2" align="center">
-          {t('Messages can only be seen by people in the call and are deleted when the call ends')}
+        <Typography color={theme.palette.themeColor[0]} style={{ fontSize: 12 }} variant="body2" align="center">
+          {t('Messages can only be seen by people in the call and are deleted when the call ends.')}
         </Typography>
       </TextContainer>
       <Grid item container sx={{ mt: 1 }} id="paper-props" style={{ flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto' }}>

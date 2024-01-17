@@ -9,6 +9,7 @@ import { LayoutSettingsDialog } from "./LayoutSettingsDialog";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ConferenceContext } from 'pages/AntMedia';
+import {GeneralSettingsDialog} from "./GeneralSettingsDialog";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -31,6 +32,7 @@ function OptionButton({ footer, ...props }) {
   const open = Boolean(anchorEl);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
+  const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
 
   // if you select camera then we are going to focus on camera button.
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -60,6 +62,16 @@ function OptionButton({ footer, ...props }) {
     setLayoutDialogOpen(false);
   };
 
+  const handleGeneralSettingsDialogOpen = (focus) => {
+    setSelectFocus(focus);
+    setGeneralSettingsDialogOpen(true);
+    handleClose();
+  }
+
+  const handleGeneralSettingsDialogClose = (value) => {
+    setGeneralSettingsDialogOpen(false);
+  }
+
     return (
         <>
           <SettingsDialog
@@ -71,6 +83,11 @@ function OptionButton({ footer, ...props }) {
               open={layoutDialogOpen}
               onClose={handleLayoutDialogClose}
               selectFocus={selectFocus}
+          />
+          <GeneralSettingsDialog
+            open={generalSettingsDialogOpen}
+            onClose={handleGeneralSettingsDialogClose}
+            selectFocus={selectFocus}
           />
           <Tooltip title={t("More options")} placement="top">
             <CustomizedBtn
@@ -103,6 +120,17 @@ function OptionButton({ footer, ...props }) {
                 horizontal: "left",
               }}
           >
+            <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
+              <ListItemIcon>
+                <SvgIcon size={36} name={"settings"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText
+                id="general-button"
+              >
+                {t("General")}
+              </ListItemText>
+            </MenuItem>
+
             <MenuItem onClick={() => handleLayoutDialogOpen()}>
               <ListItemIcon>
                 <SvgIcon size={36} name={"layout"} color={"white"} />
