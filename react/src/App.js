@@ -30,6 +30,12 @@ if (availableLanguagesList.includes(preferredLanguage)) {
 
 i18n.changeLanguage(preferredLanguage).then(r => console.log("Language is set to", preferredLanguage));
 
+let selectedTheme = localStorage.getItem('selectedTheme');
+if (!selectedTheme) {
+  selectedTheme = ThemeList.Green;
+  localStorage.setItem('selectedTheme', selectedTheme);
+}
+
 function getWindowLocation() {
   document.getElementById("locationHref").value = window.location.href;
 }
@@ -51,7 +57,7 @@ window.copyWindowLocation = copyWindowLocation;
 export const ThemeContext = React.createContext(null);
 
 function App() {
-  const [currentTheme, setCurrentTheme] = React.useState(ThemeList.Green);
+  const [currentTheme, setCurrentTheme] = React.useState(selectedTheme);
 
   const handleFullScreen = (e) => {
     if (e.target?.id === "meeting-gallery") {

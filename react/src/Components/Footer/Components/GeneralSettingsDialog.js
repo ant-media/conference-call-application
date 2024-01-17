@@ -68,6 +68,7 @@ export function GeneralSettingsDialog(props) {
   }
 
   function switchTheme(value) {
+    localStorage.setItem('selectedTheme', value);
     themeContext.setCurrentTheme(value);
   }
 
