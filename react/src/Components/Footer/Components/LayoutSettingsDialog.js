@@ -1,31 +1,29 @@
 import * as React from "react";
-import { styled, alpha } from "@mui/material/styles";
+import {alpha, styled} from "@mui/material/styles";
 
 import {
-  Grid,
-  Typography,
-  useMediaQuery,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Button,
   Box,
-  Slider,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  Grid,
   Radio,
   RadioGroup,
-  FormControlLabel,
-  FormControl,
+  Slider,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
-import { useTheme } from "@mui/material";
-
-import { ConferenceContext } from 'pages/AntMedia';
-import { useTranslation } from "react-i18next";
-import { SvgIcon } from "Components/SvgIcon";
+import {ConferenceContext} from 'pages/AntMedia';
+import {useTranslation} from "react-i18next";
+import {SvgIcon} from "Components/SvgIcon";
 import debounce from "lodash/debounce";
-import {ThemeList} from "../../../styles/themeList";
 
-const CustomizedSlider = styled(Slider)(({ theme }) => ({
+const CustomizedSlider = styled(Slider)(({theme}) => ({
   marginBottom: 0,
 
   "&.MuiSlider-dragging .MuiSlider-thumb": {
@@ -41,7 +39,7 @@ const CustomizedSlider = styled(Slider)(({ theme }) => ({
 }));
 
 const AntDialogTitle = (props) => {
-  const { children, onClose, ...other } = props;
+  const {children, onClose, ...other} = props;
 
   return (
     <DialogTitle {...other}>
@@ -57,7 +55,7 @@ const AntDialogTitle = (props) => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={"close"} color={"white"} />
+          <SvgIcon size={30} name={"close"} color={"white"}/>
         </Button>
       ) : null}
     </DialogTitle>
@@ -65,8 +63,8 @@ const AntDialogTitle = (props) => {
 };
 
 export function LayoutSettingsDialog(props) {
-  const { t } = useTranslation();
-  const { onClose, selectedValue, open } = props;
+  const {t} = useTranslation();
+  const {onClose, selectedValue, open} = props;
   const conference = React.useContext(ConferenceContext);
 
   const [value, setValue] = React.useState(
@@ -108,7 +106,7 @@ export function LayoutSettingsDialog(props) {
     return (
       <Grid
         container
-        style={{ width: "100%" }}
+        style={{width: "100%"}}
         alignItems="center"
         justifyContent="space-between"
       >
@@ -126,7 +124,7 @@ export function LayoutSettingsDialog(props) {
             borderRadius: 4,
           }}
         >
-          <SvgIcon size={42} name={icon} color={"white"} />
+          <SvgIcon size={42} name={icon} color={"white"}/>
         </Grid>
       </Grid>
     );
@@ -156,10 +154,10 @@ export function LayoutSettingsDialog(props) {
       <Typography variant="body2" color="#fff">
         {t("You can choose either tiled or sidebar view.")}
       </Typography>
-      <DialogContent sx={{ px: 1 }}>
-        <Box component="form" sx={{ display: "flex", flexWrap: "wrap" }}>
+      <DialogContent sx={{px: 1}}>
+        <Box component="form" sx={{display: "flex", flexWrap: "wrap"}}>
           <Grid container>
-            <FormControl sx={{ width: "100%" }}>
+            <FormControl sx={{width: "100%"}}>
               <RadioGroup
                 aria-labelledby="layout-radio-buttons"
                 defaultValue={conference.pinnedVideoId !== null ? "sidebar" : "tiled"}
@@ -168,23 +166,23 @@ export function LayoutSettingsDialog(props) {
                 name="layout-radio-buttons-group"
               >
                 <FormControlLabel
-                  classes={{ label: "layout-radio-label" }}
-                  sx={{ width: "100%", pb: 1 }}
+                  classes={{label: "layout-radio-label"}}
+                  sx={{width: "100%", pb: 1}}
                   value="tiled"
-                  control={<Radio />}
+                  control={<Radio/>}
                   label={radioLabel(t("Tiled view"), "tiled")}
                 />
                 <FormControlLabel
-                  classes={{ label: "layout-radio-label" }}
-                  sx={{ width: "100%" }}
+                  classes={{label: "layout-radio-label"}}
+                  sx={{width: "100%"}}
                   value="sidebar"
-                  control={<Radio />}
+                  control={<Radio/>}
                   label={radioLabel(t("Sidebar view"), "sidebar")}
                 />
               </RadioGroup>
             </FormControl>
           </Grid>
-          <Typography color="#fff" sx={{ fontWeight: 600, mt: 2.5, mb: 2 }}>
+          <Typography color="#fff" sx={{fontWeight: 600, mt: 2.5, mb: 2}}>
             {t("Change tile count")}
           </Typography>
           <Grid

@@ -1,8 +1,7 @@
 import React from "react";
-import { Avatar, Grid } from "@mui/material";
+import {Avatar, Grid} from "@mui/material";
 import defaultAvatar from "../../static/images/defaultAvatar.png";
 import {useTheme} from "@mui/material/styles";
-import {ThemeList} from "../../styles/themeList";
 
 function DummyCard() {
   const theme = useTheme();
@@ -18,7 +17,8 @@ function DummyCard() {
       justifyContent="center"
       alignItems={"center"}
     >
-      <Avatar src={defaultAvatar} style={{ width: '20%',height:'auto',aspectRatio: '1 / 1',maxWidth: 128, maxHeight: 128 }} />{" "}
+      <Avatar src={defaultAvatar}
+              style={{width: '20%', height: 'auto', aspectRatio: '1 / 1', maxWidth: 128, maxHeight: 128}}/>{" "}
     </Grid>
   );
 }

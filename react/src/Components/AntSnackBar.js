@@ -1,26 +1,25 @@
-import React, { forwardRef, useCallback } from 'react';
-import { SnackbarContent, useSnackbar } from 'notistack';
-import { styled } from '@mui/material/styles';
-import { Grid, Typography, useTheme } from '@mui/material';
-import { SvgIcon } from './SvgIcon';
-import {ThemeList} from "../styles/themeList";
+import React, {forwardRef, useCallback} from 'react';
+import {SnackbarContent, useSnackbar} from 'notistack';
+import {styled} from '@mui/material/styles';
+import {Grid, Typography, useTheme} from '@mui/material';
+import {SvgIcon} from './SvgIcon';
 
-const AntSnackInfo = styled(Grid)(({ theme }) => ({
+const AntSnackInfo = styled(Grid)(({theme}) => ({
   backgroundColor: theme.palette.themeColor[60],
   borderRadius: 6,
   padding: 8,
 }));
-const AntSnackMessage = styled(Grid)(({ theme }) => ({
+const AntSnackMessage = styled(Grid)(({theme}) => ({
   backgroundColor: theme.palette.themeColor[60],
   borderRadius: 6,
   padding: '16px 16px 12px 16px',
   cursor: 'pointer',
   width: 320
 }));
-const AntSnackContent = styled(SnackbarContent)(({ theme }) => ({}));
+const AntSnackContent = styled(SnackbarContent)(({theme}) => ({}));
 const SnackMessage = forwardRef((props, ref) => {
-  const { notificationData } = props;
-  const { closeSnackbar } = useSnackbar();
+  const {notificationData} = props;
+  const {closeSnackbar} = useSnackbar();
 
   const theme = useTheme();
 
@@ -33,7 +32,7 @@ const SnackMessage = forwardRef((props, ref) => {
       {notificationData.variant === 'info' && (
         <AntSnackInfo container justifyContent={'center'} alignItems={'center'}>
           {notificationData.icon && (
-            <Grid item sx={{ mr: 0.5 }}>
+            <Grid item sx={{mr: 0.5}}>
               {notificationData.icon}
             </Grid>
           )}
@@ -51,10 +50,11 @@ const SnackMessage = forwardRef((props, ref) => {
           }}
         >
           <Grid container alignItems="center">
-            <SvgIcon size={32} color={'white'} name={'message-off'} />
-            <Typography sx={{ ml: 0.5 }} variant="subtitle2" color={theme.palette.themeColor[0]}>{`${notificationData.sender}`}</Typography>
+            <SvgIcon size={32} color={'white'} name={'message-off'}/>
+            <Typography sx={{ml: 0.5}} variant="subtitle2"
+                        color={theme.palette.themeColor[0]}>{`${notificationData.sender}`}</Typography>
           </Grid>
-          <Grid container sx={{ mt: 1 }} style={{ marginLeft: 6 }}>
+          <Grid container sx={{mt: 1}} style={{marginLeft: 6}}>
             <Typography
               variant="subtitle2"
               sx={{
@@ -63,7 +63,7 @@ const SnackMessage = forwardRef((props, ref) => {
                 display: '-webkit-box',
                 WebkitLineClamp: '2',
                 WebkitBoxOrient: 'vertical',
-                overflowWrap:'anywhere'
+                overflowWrap: 'anywhere'
               }}
               color={theme.palette.themeColor[0]}
             >
