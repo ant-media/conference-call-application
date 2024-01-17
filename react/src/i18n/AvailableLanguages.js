@@ -1,6 +1,7 @@
 import translationEN from "./en.json";
 import translationTR from "./tr.json";
 import translationES from "./es.json";
+import translationFR from "./fr.json";
 
 export const AvailableLanguages = {
   en: {
@@ -14,5 +15,9 @@ export const AvailableLanguages = {
   es: {
     name: "Español",
     translation: translationES,
+  },
+  fr: {
+    name: "Français",
+    translation: translationFR,
   }
 };
