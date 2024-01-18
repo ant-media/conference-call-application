@@ -95,6 +95,7 @@ function LayoutPinned (props) {
     <>
       {pinnedVideo()}
       <div id="unpinned-gallery">
+        {conference?.participants.length === 0 ? <p>There is no active publisher right now.</p> : null}
         {videoCards()}
         {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
       </div>
