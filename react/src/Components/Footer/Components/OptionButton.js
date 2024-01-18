@@ -120,6 +120,7 @@ function OptionButton({footer, ...props}) {
           horizontal: "left",
         }}
       >
+        {process.env.REACT_APP_OPTION_MENU_GENERAL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
         <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
           <ListItemIcon>
             <SvgIcon size={36} name={"settings"} color={"white"}/>
@@ -130,7 +131,9 @@ function OptionButton({footer, ...props}) {
             {t("General")}
           </ListItemText>
         </MenuItem>
+            : null}
 
+        {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
         <MenuItem onClick={() => handleLayoutDialogOpen()}>
           <ListItemIcon>
             <SvgIcon size={36} name={"layout"} color={"white"}/>
@@ -141,6 +144,7 @@ function OptionButton({footer, ...props}) {
             {t("Change Layout")}
           </ListItemText>
         </MenuItem>
+            : null}
 
         {conference.isPlayOnly === false
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
