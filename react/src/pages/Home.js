@@ -15,11 +15,11 @@ function Home(props) {
             <Grid container justifyContent={"center"} sx={{mt: 8}}>
                 <Box py={8}>
                     <Typography variant="h1" align="center">
-                        Join our meeting room
+                        {t("Join our meeting room")}
                     </Typography>
                     <Box sx={{pt: 4, pb: 0}}>
                         <Typography variant="h4" align="center">
-                            Real-time meetings by Ant Media
+                            {t("Real-time meetings by Ant Media")}
                         </Typography>
                     </Box>
                 </Box>

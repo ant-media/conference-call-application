@@ -19,7 +19,7 @@ import ReactionsButton from "./Components/ReactionsButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
-    backgroundColor: theme.palette.green[80],
+    backgroundColor: theme.palette.themeColor[80],
     position: "fixed",
     bottom: 0,
     left: 0,

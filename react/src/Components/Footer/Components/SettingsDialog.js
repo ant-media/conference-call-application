@@ -115,16 +115,16 @@ export function SettingsDialog(props) {
               <Grid item xs={10}>
                 <Select variant="outlined" fullWidth value={conference.videoSendResolution} onChange={e => conference.setVideoSendResolution(e.target.value)} sx={{ color: 'white' }}>
                   <MenuItem key="auto" value="auto">
-                    Auto
+                    {t('Auto')}
                   </MenuItem>
                   <MenuItem key="high-definition" value="highDefinition">
-                    High definition (720p)
+                    {t('High definition (720p)')}
                   </MenuItem>
                   <MenuItem key="standart-definition" value="standardDefinition">
-                    Standard definition (360p)
+                    {t('Standard definition (360p)')}
                   </MenuItem>
                   <MenuItem key="low-definition" value="lowDefinition">
-                    Low definition (180p)
+                    {t('Low definition (180p)')}
                   </MenuItem>
                 </Select>
               </Grid>
@@ -167,13 +167,13 @@ export function SettingsDialog(props) {
               <Grid item xs={10}>
                 <Select variant="outlined" fullWidth value={conference.selectedBackgroundMode} onChange={e => setBackground(e.target.value)} sx={{ color: 'white' }}>
                   <MenuItem key="none" value="none">
-                    None
+                    {t('No Effect')}
                   </MenuItem>
                   <MenuItem key="blur" value="blur">
-                    Blur
+                    {t('Blur Background')}
                   </MenuItem>
                   <MenuItem key="background" value="background">
-                    Virtual Background
+                    {t('Virtual Background')}
                   </MenuItem>
                 </Select>
               </Grid>
