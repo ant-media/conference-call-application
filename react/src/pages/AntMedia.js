@@ -33,6 +33,13 @@ function getMediaConstraints(videoSendResolution, frameRate) {
   let constraint = null;
 
   switch (videoSendResolution) {
+    case "screenConstraints":
+      constraint = {
+        video: {
+          width: {max: window.screen.width}, height: {max: window.screen.height}, frameRate: {ideal: frameRate}
+        }
+      };
+      break;
     case "qvgaConstraints":
       constraint = {
         video: {
@@ -1261,7 +1268,7 @@ function AntMedia() {
     let mediaConstraints = {video: true};
 
     if (isScreenShared) {
-      mediaConstraints = getMediaConstraints("fullHdConstraints", 25);
+      mediaConstraints = getMediaConstraints("screenConstraints", 20);
       promise = webRTCAdaptor?.applyConstraints(mediaConstraints);
     } else if (videoSendResolution === "auto" && !isPinned) {
       mediaConstraints = getMediaConstraints("qvgaConstraints", 15);

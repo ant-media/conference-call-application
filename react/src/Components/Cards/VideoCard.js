@@ -131,6 +131,8 @@ function VideoCard(props) {
 
   const timeoutRef = React.useRef(null);
 
+  const isScreenSharedVideo = (conference?.screenSharedVideoId === props?.id) || (conference?.isScreenShared === true && isLocal);
+
   const mirrorView = isLocal && !conference?.isScreenShared;
   //const isScreenSharing =
   //  conference?.isScreenShared ||
@@ -259,7 +261,7 @@ function VideoCard(props) {
         >
           <CustomizedVideo
             {...props}
-            style={{ objectFit: props.pinned ? "contain" : "cover" }}
+            style={{ objectFit: props.pinned || isScreenSharedVideo ? "contain" : "cover" }}
             ref={refVideo}
             playsInline
             muted={isLocal}
