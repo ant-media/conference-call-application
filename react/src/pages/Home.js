@@ -1,6 +1,6 @@
 import {Button, Grid, TextField, Typography} from '@mui/material';
 import {Box} from '@mui/system';
-import React from 'react';
+import React,{useCallback} from 'react';
 import Link from '@mui/material/Link';
 import {useTranslation} from 'react-i18next';
 import {Link as RouterLink, useNavigate} from 'react-router-dom';
@@ -10,6 +10,13 @@ import Stack from "@mui/material/Stack";
 function Home(props) {
     const {t} = useTranslation();
     let navigate = useNavigate();
+
+    const [roomName, setRoomName] = React.useState('');
+
+    const handleJoinButtonClick = useCallback(() => {
+        navigate(`/${roomName}`);
+    }, [navigate, roomName]);
+
     return (
         <>
             <Grid container justifyContent={"center"} sx={{mt: 8}}>
@@ -36,6 +43,8 @@ function Home(props) {
                                 variant="outlined"
                                 placeholder={t("Room name")}
                                 id="room_name"
+                                value={roomName}
+                                onChange={(e) => setRoomName(e.target.value)}
                             />
 
                             <Button
@@ -43,10 +52,7 @@ function Home(props) {
                                 color="secondary"
                                 variant="contained"
                                 type="submit"
-                                onClick={() => {
-                                    let roomName = document.getElementById("room_name").value;
-                                    navigate(`/${roomName}`);
-                                }}
+                                onClick={handleJoinButtonClick}
                                 id="room_join_button"
                             >
                                 {t("Join the room")}

@@ -63,7 +63,7 @@ const AntDialogTitle = (props) => {
   );
 };
 
-export function LayoutSettingsDialog(props) {
+function LayoutSettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open } = props;
   const conference = React.useContext(ConferenceContext);
@@ -81,16 +81,16 @@ export function LayoutSettingsDialog(props) {
   React.useEffect(() => {
     setLayout(conference.pinnedVideoId !== null ? "sidebar" : "tiled");
   }, [conference.pinnedVideoId]);
+
   const handleClose = () => {
     onClose(selectedValue);
   };
 
-  const changeLayout = (event) => {
+  const changeLayout = React.useCallback((event) => {
     const mode = event.target.value;
     setLayout(mode);
 
     if (mode === "tiled") {
-      //unpin the pinned video
       conference.pinVideo(conference.pinnedVideoId);
     } else if (mode === "sidebar") {
       const participants = document.querySelectorAll(
@@ -99,10 +99,11 @@ export function LayoutSettingsDialog(props) {
       const firstParticipant =
         participants.length > 1 ? participants[1] : participants[0];
 
-      //pin the first participant
       conference.pinVideo(firstParticipant?.id ? firstParticipant.id : "localVideo");
     }
-  };
+
+  }, [conference]);
+
   const radioLabel = (label, icon) => {
     return (
       <Grid
@@ -130,12 +131,15 @@ export function LayoutSettingsDialog(props) {
       </Grid>
     );
   };
-  const handleMaxVideoTrackCountChange = (count) => {
+ 
+  const handleMaxVideoTrackCountChange = React.useCallback((count) => {
     //why the minus 1? because what user sees is (my local video + maxvideoTrackCount)
     //so if the user sets the tiles to 6 it means (1 + 5) respectively to the statement above.
     //what the count number actually is the second variable in that.
     conference.handleSetMaxVideoTrackCount(count - 1);
-  };
+  }, [conference]);
+
+
   const debouncedHandleMaxVideoTrackCountChange = debounce(
     handleMaxVideoTrackCountChange,
     500
@@ -246,3 +250,5 @@ export function LayoutSettingsDialog(props) {
     </Dialog>
   );
 }
+export default React.memo(LayoutSettingsDialog);
+

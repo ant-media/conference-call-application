@@ -20,9 +20,18 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-function MessageButton({ footer, ...props }) {
+const MessageButton = React.memo(({ footer }) => {
   const {t} = useTranslation();
   const conference = useContext(ConferenceContext);
+
+  const toggleMessageDrawerOpen = React.useCallback(() => {
+    if (!conference?.messageDrawerOpen) {
+      conference?.toggleSetNumberOfUnreadMessages(0);
+    }
+    conference?.handleMessageDrawerOpen(!conference?.messageDrawerOpen);
+  }, [conference]);
+
+
   return (
     <Badge
       badgeContent={conference?.numberOfUnReadMessages}
@@ -35,12 +44,7 @@ function MessageButton({ footer, ...props }) {
     >
       <Tooltip title={t('Chat with everyone')} placement="top">
         <CustomizedBtn
-          onClick={() => {
-            if (!conference?.messageDrawerOpen) {
-              conference?.toggleSetNumberOfUnreadMessages(0);
-            }
-            conference?.handleMessageDrawerOpen(!conference?.messageDrawerOpen);
-          }}
+          onClick={toggleMessageDrawerOpen}
           variant="contained"
           className={footer ? 'footer-icon-button' : ''}
           color={conference?.messageDrawerOpen ? 'primary' : 'secondary'}
@@ -50,6 +54,6 @@ function MessageButton({ footer, ...props }) {
       </Tooltip>
     </Badge>
   );
-}
+})
 
 export default MessageButton;

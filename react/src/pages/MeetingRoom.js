@@ -38,11 +38,11 @@ const MeetingRoom = React.memo((props) => {
   React.useEffect(() => {
     const debouncedHandleResize = debounce(handleGalleryResize, 500);
     window.addEventListener("resize", debouncedHandleResize);
-
-    return (_) => {
+  
+    return () => {
       window.removeEventListener("resize", debouncedHandleResize);
     };
-  });
+  }, [debounce, handleGalleryResize]);
 
   function sendEmoji(emoji) {
     conference?.sendReactions(emoji);
@@ -66,12 +66,10 @@ const MeetingRoom = React.memo((props) => {
     const gallery = document.getElementById("meeting-gallery");
 
     if(gallery) {
-      if (calcDrawer) {
-        if (conference.messageDrawerOpen || conference.participantListDrawerOpen) {
-          gallery.classList.add("drawer-open");
-        } else {
-          gallery.classList.remove("drawer-open");
-        }
+      if (calcDrawer || conference.messageDrawerOpen || conference.participantListDrawerOpen) {
+        gallery.classList.add("drawer-open");
+      } else {
+        gallery.classList.remove("drawer-open");
       }
       const screenWidth = gallery.getBoundingClientRect().width;
       const screenHeight = gallery.getBoundingClientRect().height;

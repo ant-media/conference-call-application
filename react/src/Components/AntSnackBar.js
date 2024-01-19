@@ -27,6 +27,12 @@ const SnackMessage = forwardRef((props, ref) => {
     closeSnackbar();
   }, [closeSnackbar]);
 
+  const handleItemClick = useCallback(() => {
+    notificationData.onClick();
+    handleDismiss();
+  }, [notificationData, handleDismiss]);
+
+
   return (
     <AntSnackContent ref={ref}>
       {notificationData.variant === 'info' && (
@@ -44,10 +50,7 @@ const SnackMessage = forwardRef((props, ref) => {
       {notificationData.variant === 'message' && (
         <AntSnackMessage
           container
-          onClick={() => {
-            notificationData.onClick();
-            handleDismiss();
-          }}
+          onClick={handleItemClick}
         >
           <Grid container alignItems="center">
             <SvgIcon size={32} color={'white'} name={'message-off'} />

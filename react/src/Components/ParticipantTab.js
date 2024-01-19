@@ -19,77 +19,86 @@ const PinBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-function ParticipantTab(props) {
-  const conference = React.useContext(ConferenceContext);
-  const getParticipantItem = (streamId, name, assignedVideoCardId) => {
-    return (
-      <Grid
-        key={streamId}
-        container
-        alignItems="center"
-        justifyContent="space-between"
-        style={{ borderBottomWidth: 1 }}
-        sx={{ borderColor: "primary.main" }}
-      >
-        <Grid item sx={{ pr: 1 }}>
-          <ParticipantName variant="body1">{name}</ParticipantName>
-        </Grid>
-        <Grid item>
-          {conference.pinnedVideoId === assignedVideoCardId ? (
-            <PinBtn
-              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => conference.pinVideo(assignedVideoCardId)}
-            >
-              <SvgIcon size={28} name="unpin" color="#fff" />
-            </PinBtn>
-          ) : (
-            <PinBtn
-              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => {
-                if(assignedVideoCardId === undefined) {
-                  //if videoTrackId is undefined, then it means that we try to pin someone who has no video player on the screen
-                  //then we will assign the 1st player in the screen to that user
+const getParticipantItem = (conference, streamId, name, assignedVideoCardId) => {
+  const isPinned = conference.pinnedVideoId === assignedVideoCardId;
 
-                  conference.assignVideoToStream(conference.participants[1].id, streamId);
-                  //conference.pinVideo(conference.participants[1].id);
-                }
-                else {
-                  conference.pinVideo(assignedVideoCardId);
-                }
-              }}
-            >
-              <SvgIcon size={28} name="pin" color="#fff" />
-            </PinBtn>
-          )}
-        </Grid>
-      </Grid>
-    );
+  const pinVideoHandler = () => {
+    if (isPinned) {
+      conference.pinVideo(assignedVideoCardId);
+    } else {
+      if (assignedVideoCardId === undefined) {
+        const participantToAssign = conference.participants[1];
+        conference.assignVideoToStream(participantToAssign.id, streamId);
+      } else {
+        conference.pinVideo(assignedVideoCardId);
+      }
+    }
   };
-  return (
-        <div style={{width: "100%", overflowY: "auto"}}>
-          <Stack sx={{width: "100%",}} spacing={2}>
-            <Grid container>
-              <SvgIcon size={28} name="participants" color="#fff"/>
-              <ParticipantName
-                  variant="body2"
-                  style={{marginLeft: 4, fontWeight: 500}}
-              >
-                {Object.keys(conference.allParticipants).length}
-              </ParticipantName>
-            </Grid>
-            {conference.isPlayOnly === false ? getParticipantItem("localVideo", "You") : ""}
-            {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
-              if (conference.publishStreamId !== streamId) {
-                var assignedVideoCardId = conference.participants.find(p => p.streamId === streamId)?.id;
-                return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
-              } else {
-                return "";
-              }
-            })}
-          </Stack>
-        </div>
-    );
 
-}
+  return (
+    <Grid
+      key={streamId}
+      container
+      alignItems="center"
+      justifyContent="space-between"
+      style={{ borderBottomWidth: 1 }}
+      sx={{ borderColor: "primary.main" }}
+    >
+      <Grid item sx={{ pr: 1 }}>
+        <ParticipantName variant="body1">{name}</ParticipantName>
+      </Grid>
+      <Grid item>
+        <PinBtn
+          sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+          onClick={pinVideoHandler}
+        >
+          <SvgIcon
+            size={28}
+            name={isPinned ? "unpin" : "pin"}
+            color="#fff"
+          />
+        </PinBtn>
+      </Grid>
+    </Grid>
+  );
+};
+
+const ParticipantTab = React.memo(() => {
+  const conference = React.useContext(ConferenceContext);
+
+  return (
+    <div style={{ width: "100%", overflowY: "auto" }}>
+      <Stack sx={{ width: "100%" }} spacing={2}>
+        <Grid container>
+          <SvgIcon size={28} name="participants" color="#fff" />
+          <ParticipantName
+            variant="body2"
+            style={{ marginLeft: 4, fontWeight: 500 }}
+          >
+            {Object.keys(conference.allParticipants).length}
+          </ParticipantName>
+        </Grid>
+        {!conference.isPlayOnly && getParticipantItem(conference, "localVideo", "You")}
+        {Object.entries(conference.allParticipants).map(
+          ([streamId, broadcastObject]) => {
+            if (conference.publishStreamId !== streamId) {
+              const assignedVideoCardId = conference.participants.find(
+                (p) => p.streamId === streamId
+              )?.id;
+              return getParticipantItem(
+                conference,
+                streamId,
+                broadcastObject.name,
+                assignedVideoCardId
+              );
+            } else {
+              return null;
+            }
+          }
+        )}
+      </Stack>
+    </div>
+  );
+});
 
 export default ParticipantTab;

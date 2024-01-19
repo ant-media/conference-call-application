@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
 import { ConferenceContext } from 'pages/AntMedia';
@@ -31,16 +31,14 @@ export const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-
-function MicButton(props) {
-  const { rounded, footer } = props;
+const MicButton = React.memo(({ rounded, footer }) => {
   const conference = useContext(ConferenceContext);
   const { enqueueSnackbar } = useSnackbar();
   const { t } = useTranslation();
 
-  const handleMute = (e) => {
+  const handleMute = useCallback((e) => {
     e.stopPropagation();
-    if (conference.localVideo === null) {
+    if (!conference.localVideo) {
       enqueueSnackbar({
         message: t('You need to allow camera and microphone permissions before muting yourself'),
         variant: 'info',
@@ -48,7 +46,7 @@ function MicButton(props) {
       }, {
         autoHideDuration: 1500,
       });
-      return
+      return;
     }
     enqueueSnackbar({
       message: t('Microphone off'),
@@ -58,9 +56,9 @@ function MicButton(props) {
       autoHideDuration: 1500,
     });
     conference?.muteLocalMic();
-  };
+  }, [conference, enqueueSnackbar, t]);
 
-  const handleUnmute = (e) => {
+  const handleUnmute = useCallback((e) => {
     e.stopPropagation();
     enqueueSnackbar({
       message: t('Microphone on'),
@@ -70,29 +68,39 @@ function MicButton(props) {
       autoHideDuration: 1500,
     });
     conference?.unmuteLocalMic();
-  };
+  }, [conference, enqueueSnackbar, t]);
 
   return (
     <>
-      {conference?.isMyMicMuted ? (
+      {conference.isMyMicMuted ? (
         <Tooltip title={t('Turn on microphone')} placement="top">
-          <CustomizedBtn 
+          <CustomizedBtn
             id="mic-button"
-            className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="error" onClick={(e) => { handleUnmute(e) }}>
+            className={footer ? 'footer-icon-button' : ''}
+            variant="contained"
+            sx={rounded ? roundStyle : {}}
+            color="error"
+            onClick={handleUnmute}
+          >
             <SvgIcon size={40} name={'muted-microphone'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
       ) : (
         <Tooltip title={t('Turn off microphone')} placement="top">
-          <CustomizedBtn 
+          <CustomizedBtn
             id="mic-button"
-            className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => { handleMute(e) }}>
+            className={footer ? 'footer-icon-button' : ''}
+            variant="contained"
+            color="primary"
+            sx={rounded ? roundStyle : {}}
+            onClick={handleMute}
+          >
             <SvgIcon size={40} name={'microphone'} color='inherit' />
           </CustomizedBtn>
         </Tooltip>
       )}
     </>
   );
-}
+});
 
 export default MicButton;

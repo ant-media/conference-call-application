@@ -4,7 +4,6 @@ import {
   Typography,
   Button,
   TextField,
-  Container,
   Tooltip,
 } from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
@@ -15,7 +14,7 @@ import MicButton, {
 import CameraButton from "Components/Footer/Components/CameraButton";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { SettingsDialog } from "Components/Footer/Components/SettingsDialog";
+import { SettingsDialog }  from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 import { ConferenceContext } from "./AntMedia";
@@ -23,15 +22,17 @@ import { getUrlParameter } from "@antmedia/webrtc_adaptor";
 import { getRoomNameAttribute } from "utils";
 
 
-function getPublishStreamId() {
-  const dataRoomName =  document.getElementById("root").getAttribute("data-publish-stream-id");
-  return (dataRoomName) ? dataRoomName : getUrlParameter("streamId");
-}
 
-function WaitingRoom(props) {
+function WaitingRoom() {
+
+  const publishStreamId = React.useMemo(() => {
+    const dataRoomName = document.getElementById("root").getAttribute("data-publish-stream-id");
+    return dataRoomName || getUrlParameter("streamId");
+  }, []);
+
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
-  const publishStreamId = getPublishStreamId()
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -48,7 +49,29 @@ function WaitingRoom(props) {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conference.initialized]);
+  }, [conference.isPlayOnly, conference.initialized]);
+
+  const handleDialogOpen = (focus) => {
+    setSelectFocus(focus);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = (value) => {
+    setDialogOpen(false);
+  };
+
+  const settingsDialog = React.useMemo(
+    () => (
+      <SettingsDialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        selectFocus={selectFocus}
+        handleBackgroundReplacement={conference.handleBackgroundReplacement}
+      />
+    ),
+    [dialogOpen, selectFocus, conference.handleBackgroundReplacement]
+  );
+
 
   function makeid(length) {
     var result           = '';
@@ -60,7 +83,7 @@ function WaitingRoom(props) {
     return result;
   }
 
-  function joinRoom(e) {
+  const handleJoinRoom = React.useCallback((e) => {
     if (conference.localVideo === null && conference.isPlayOnly === false) {
       e.preventDefault();
       enqueueSnackbar(
@@ -87,39 +110,14 @@ function WaitingRoom(props) {
 
     conference.joinRoom(roomName, streamId, conference.roomJoinMode);
     conference.setWaitingOrMeetingRoom("meeting");
-  }
-  const handleDialogOpen = (focus) => {
-    if (false && conference.localVideo === null) {
-      enqueueSnackbar(
-        {
-          message: t(
-            "You need to allow microphone and camera permissions before changing settings"
-          ),
-          variant: "info",
-          icon: <SvgIcon size={24} name={"muted-microphone"} color="#fff" />,
-        },
-        {
-          autoHideDuration: 1500,
-        }
-      );
-      return;
-    }
-    setSelectFocus(focus);
-    setDialogOpen(true);
-  };
-  const handleDialogClose = (value) => {
-    setDialogOpen(false);
-  };
+  }, [conference, enqueueSnackbar, t, publishStreamId, roomName]);
 
+
+
+ 
   return (
-        <Container>
-          <SettingsDialog
-              open={dialogOpen}
-              onClose={handleDialogClose}
-              selectFocus={selectFocus}
-              handleBackgroundReplacement={conference.handleBackgroundReplacement}
-          />
-
+    <>
+          {settingsDialog}
 
           <Grid
               container
@@ -203,9 +201,7 @@ function WaitingRoom(props) {
                 </Grid>
 
                 <form
-                    onSubmit={(e) => {
-                      joinRoom(e);
-                    }}
+                    onSubmit={handleJoinRoom}
                 >
                   <Grid item xs={12} sx={{mt: 3, mb: 4}}>
                     <TextField
@@ -237,7 +233,7 @@ function WaitingRoom(props) {
               </Grid>
             </Grid>
           </Grid>
-        </Container>
+        </>
     );
 }
 

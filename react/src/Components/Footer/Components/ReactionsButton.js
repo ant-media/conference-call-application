@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
 import { ConferenceContext } from 'pages/AntMedia';
@@ -16,7 +16,7 @@ export const roundStyle = {
   padding: '4px',
 };
 
-export const CustomizedBtn = styled(Button)(({ theme }) => ({
+const CustomizedBtn = styled(Button)(({ theme }) => ({
   '&.footer-icon-button': {
     height: '100%',
     [theme.breakpoints.down('sm')]: {
@@ -25,26 +25,33 @@ export const CustomizedBtn = styled(Button)(({ theme }) => ({
       width: '100%',
     },
     '& > svg': {
-      width: 36
+      width: 36,
     },
-  }
+  },
 }));
 
-
-function ReactionsButton(props) {
+const ReactionsButton = React.memo((props) => {
   const { rounded, footer } = props;
   const conference = useContext(ConferenceContext);
   const { t } = useTranslation();
 
+  const handleButtonClick = useCallback(() => {
+    conference.setShowEmojis(!conference.showEmojis);
+  }, [conference]);
+
   return (
-    <>
-        <Tooltip title={t('Emoji')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color={conference.showEmojis ? 'primary' :'secondary'} sx={rounded ? roundStyle : {}} onClick={(e) => { conference.setShowEmojis(!conference.showEmojis) }}>
-            <SvgIcon size={40} name={'smiley-face'} color={conference.showEmojis ? "#000" : "#fff"} />
-          </CustomizedBtn>
-        </Tooltip>
-    </>
+    <Tooltip title={t('Emoji')} placement="top">
+      <CustomizedBtn
+        className={footer ? 'footer-icon-button' : ''}
+        variant="contained"
+        color={conference.showEmojis ? 'primary' :'secondary'}
+        sx={rounded ? roundStyle : {}}
+        onClick={handleButtonClick}
+      >
+        <SvgIcon size={40} name={'smiley-face'} color={conference.showEmojis ? '#000' : '#fff'} />
+      </CustomizedBtn>
+    </Tooltip>
   );
-}
+});
 
 export default ReactionsButton;

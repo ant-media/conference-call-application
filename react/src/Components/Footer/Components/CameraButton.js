@@ -28,7 +28,7 @@ function CameraButton(props) {
   const { enqueueSnackbar } = useSnackbar();
   const conference = useContext(ConferenceContext);
 
-  const handleOff = (e) => {
+  const handleOff = React.useCallback((e) => {
     e.stopPropagation();
     if (conference.isPlayOnly === null) {
       enqueueSnackbar({
@@ -52,8 +52,9 @@ function CameraButton(props) {
         conference.checkAndTurnOffLocalCamera("localVideo");
       }
     }
-  };
-  const handleOn = (e) => {
+  }, [conference, enqueueSnackbar, t]);
+
+  const handleOn = React.useCallback((e) => {
     e.stopPropagation();
     if (conference.publishStreamId) {
       conference.checkAndTurnOnLocalCamera(conference.publishStreamId);
@@ -65,7 +66,8 @@ function CameraButton(props) {
       // if local
       conference.checkAndTurnOnLocalCamera("localVideo");
     }
-  };
+  },[conference]);
+  
   const roundStyle = {
     width: { xs: 36, md: 46 },
     height: { xs: 36, md: 46 },
@@ -82,7 +84,7 @@ function CameraButton(props) {
         <Tooltip title={conference.isScreenShared ? t('Camera is disabled while screensharing') : t('Turn on camera')} placement="top">
           <CustomizedBtn 
             id="camera-button"
-            className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={conference.isScreenShared} onClick={(e) => handleOn(e)}>
+            className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={conference.isScreenShared} onClick={handleOn}>
             <SvgIcon size={40} name={'camera-off'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
@@ -90,7 +92,7 @@ function CameraButton(props) {
         <Tooltip title={conference.isScreenShared ? t('Camera is disabled while screensharing') : t('Turn off camera')} placement="top">
           <CustomizedBtn 
             id="camera-button"
-            className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={conference.isScreenShared} onClick={(e) => handleOff(e)}>
+            className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={conference.isScreenShared} onClick={handleOff}>
             <SvgIcon size={40} name={'camera'} color='inherit' />
           </CustomizedBtn>
         </Tooltip>

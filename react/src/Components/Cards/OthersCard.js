@@ -33,6 +33,12 @@ const CustomizedAvatarGroup = styled(AvatarGroup)(({ theme }) => ({
   },
 }));
 
+const MemoizedAvatarGroup = React.memo(({ children }) => (
+  <CustomizedAvatarGroup sx={{ justifyContent: "center" }}>
+    {children}
+  </CustomizedAvatarGroup>
+));
+
 
 function OthersCard(props) {
   const conference = React.useContext(ConferenceContext)
@@ -49,7 +55,7 @@ function OthersCard(props) {
  
   return (
       <div className="others-tile-inner">
-        <CustomizedAvatarGroup sx={{justifyContent: "center"}}>
+        <MemoizedAvatarGroup sx={{justifyContent: "center"}}>
           {others.map(({username}, index) => {
             if (username?.length > 0) {
               const nameArr = username.split(" ");
@@ -75,7 +81,7 @@ function OthersCard(props) {
               return null;
             }
           })}
-        </CustomizedAvatarGroup>
+        </MemoizedAvatarGroup>
         <Typography sx={{mt: 2, color: "#ffffff"}}>
           {others.length} other{others.length > 1 ? "s" : ""}
         </Typography>
