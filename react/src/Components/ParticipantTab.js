@@ -35,7 +35,7 @@ function ParticipantTab(props) {
           <ParticipantName variant="body1">{name}</ParticipantName>
         </Grid>
         <Grid item>
-          {conference.pinnedVideoId === assignedVideoCardId ? (
+          {conference.pinnedVideoId === assignedVideoCardId || conference.pinnedVideoId === streamId ? (
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
               onClick={() => conference.pinVideo(assignedVideoCardId)}
@@ -61,6 +61,53 @@ function ParticipantTab(props) {
               <SvgIcon size={28} name="pin" color="#fff" />
             </PinBtn>
           )}
+          {
+          /*
+          {(streamId === "localVideo" ? conference.presenters.includes(conference.publishStreamId) : conference.presenters.includes(streamId) )&& conference.isAdmin == "true" ? (
+              <PinBtn
+                  disabled={conference?.presenterButtonDisabled}
+                  sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+                  onClick={() => {
+                      let tempStreamId = streamId;
+                      if (assignedVideoCardId === "localVideo") {
+                        tempStreamId = conference.publishStreamId;
+                      }
+                      conference.makeParticipantUndoPresenter(tempStreamId)
+                    }
+                  }
+              >
+                { conference?.presenterButtonStreamIdInProcess === streamId ? <CircularProgress size={28} /> :
+                <SvgIcon size={28} name="unpresenter" color="black" />}
+              </PinBtn>
+          ) : null}
+          {(streamId === "localVideo" ? !conference.presenters.includes(conference.publishStreamId) : !conference.presenters.includes(streamId) ) && ( !conference.approvedSpeakerRequestList.includes(streamId) ) && conference.isAdmin == "true" ?(
+              <PinBtn
+                  disabled={conference?.presenterButtonDisabled}
+                  sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+                  onClick={() => {
+                    let tempStreamId = streamId;
+                    if (assignedVideoCardId === "localVideo") {
+                      tempStreamId = conference.publishStreamId;
+                    }
+                    conference.makeParticipantPresenter(tempStreamId)
+                    }
+                  }
+              >
+                {/* this icon for publish speaker /}
+          { conference?.presenterButtonStreamIdInProcess === streamId ? <CircularProgress size={28} /> :
+              <SvgIcon size={28} name="presenter" color="black" />}
+        </PinBtn>
+        ) : null}
+        {conference.approvedSpeakerRequestList.includes(streamId) && conference.isAdmin == "true"  && assignedVideoCardId !== 'localVideo' ?(
+            <PinBtn
+                sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+                onClick={() => conference.makeListenerAgain(streamId)}
+            >
+              <SvgIcon size={28} name="close" color="black" />
+            </PinBtn>
+        ) : null}
+          */
+          }
         </Grid>
       </Grid>
     );

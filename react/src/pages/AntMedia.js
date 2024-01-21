@@ -237,6 +237,8 @@ function AntMedia() {
 
   const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
@@ -1669,7 +1671,8 @@ function AntMedia() {
               participantIdMuted,
               setParticipantIdMuted,
               videoSendResolution,
-              setVideoSendResolution
+              setVideoSendResolution,
+              isAdmin
             }}
           >
             <SnackbarProvider
