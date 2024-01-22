@@ -1,13 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+// @ts-ignore
 import App from "./App";
+// @ts-ignore
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+// @ts-ignore
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
+// @ts-ignore
 import { getRoomNameAttribute } from "utils";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById("root")!!);
 let appName = undefined
 let roomName = getRoomNameAttribute();
 

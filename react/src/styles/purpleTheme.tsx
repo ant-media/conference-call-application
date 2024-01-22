@@ -1,26 +1,29 @@
-import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
-import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
-import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
-import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
+// @ts-ignore
 import {getRoomNameAttribute} from "../utils";
 
-export function getGreenTheme() {
-  const themeColor0 = "#AFF3EE";
-  const themeColor10 = "#00E5D2";
-  const themeColor20 = "#00C8B8";
-  const themeColor30 = "#00AC9E";
-  const themeColor40 = "#008F83";
-  const themeColor50 = "#007269";
-  const themeColor60 = "#00564F";
-  const themeColor70 = "#003935";
-  const themeColor75 = "#002D2D";
-  const themeColor80 = "#001D1A";
-  const themeColor85 = "#024B46";
-  const themeColor90 = "#6BCBC3";
-  const chatText = "#DDFFFC";
-  const darkGray = "#222B2A";
+const OpenSansRegular = require("../static/Fonts/OpenSans/OpenSans-Regular.ttf") as string;
+const OpenSansMedium = require("../static/Fonts/OpenSans/OpenSans-Medium.ttf") as string;
+const OpenSansSemiBold = require("../static/Fonts/OpenSans/OpenSans-SemiBold.ttf") as string;
+const OpenSansBold = require("../static/Fonts/OpenSans/OpenSans-Bold.ttf") as string;
 
-  const error = "#DF0515";
+
+export function getPurpleTheme() {
+  const themeColor0 = "#F3E5F5";
+  const themeColor10 = "#E1BEE7";
+  const themeColor20 = "#CE93D8";
+  const themeColor30 = "#BA68C8";
+  const themeColor40 = "#AB47BC";
+  const themeColor50 = "#9C27B0";
+  const themeColor60 = "#8E24AA";
+  const themeColor70 = "#7B1FA2";
+  const themeColor75 = "#6A1B9A";
+  const themeColor80 = "#6A1B9A";
+  const themeColor85 = "#4A148C";
+  const themeColor90 = "#EA80FC";
+  const chatText = "#F3E5F5";
+  const darkGray = "#37474F";
+
+  const error = "#D50000";
   const primaryColor = themeColor10;
   const secondaryColor = themeColor60;
   let themeObject = {
@@ -314,11 +317,11 @@ export function getGreenTheme() {
     },
     palette: {
       primary: {
-        main: themeColor10,
+        main: primaryColor,
       },
 
       secondary: {
-        main: themeColor60,
+        main: secondaryColor,
       },
       error: {
         main: error,
@@ -347,8 +350,8 @@ export function getGreenTheme() {
     },
   };
   if (!getRoomNameAttribute()) {
-    themeObject.palette.background = {};
-    themeObject.palette.background.default = themeColor80;
+    //themeObject.palette.background = {};
+    //themeObject.palette.background.default = themeColor80;
   }
   return themeObject;
 }

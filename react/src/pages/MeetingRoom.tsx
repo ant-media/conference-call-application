@@ -11,8 +11,8 @@ import {useTheme} from "@mui/material/styles";
 import {t} from "i18next";
 
 
-function debounce(fn, ms) {
-  let timer;
+function debounce(fn: { (calcDrawer: any): void; apply?: any; }, ms: number | undefined) {
+  let timer: string | number | NodeJS.Timeout | null | undefined;
   return (_) => {
     clearTimeout(timer);
     timer = setTimeout((_) => {

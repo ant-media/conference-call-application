@@ -7,7 +7,7 @@ import {Link as RouterLink, useNavigate} from 'react-router-dom';
 import {nanoid} from 'nanoid';
 import Stack from "@mui/material/Stack";
 
-function Home(props) {
+function Home() {
     const {t} = useTranslation();
     let navigate = useNavigate();
     return (
@@ -44,7 +44,7 @@ function Home(props) {
                                 variant="contained"
                                 type="submit"
                                 onClick={() => {
-                                    let roomName = document.getElementById("room_name").value;
+                                    let roomName = document.getElementById("room_name")!!.value;
                                     navigate(`/${roomName}`);
                                 }}
                                 id="room_join_button"

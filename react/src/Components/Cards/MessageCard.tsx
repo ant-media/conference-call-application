@@ -2,6 +2,7 @@ import React from 'react';
 import {Grid, Typography} from '@mui/material';
 import {urlify} from 'utils';
 import {styled, useTheme} from '@mui/material/styles';
+import {Theme} from "@mui/system";
 
 const HyperTypography = styled(Typography)(({theme}) => ({
   '& a': {
@@ -9,9 +10,9 @@ const HyperTypography = styled(Typography)(({theme}) => ({
   },
 }));
 
-function MessageCard(props) {
+function MessageCard(props: { date: any; name: any; message: any; isMe: any; }) {
   const {date, name, message, isMe} = props;
-  const theme = useTheme();
+  const theme: Theme = useTheme();
 
   return (
     <Grid container sx={{mb: 3}} justifyContent={isMe ? 'flex-end' : 'flex-start'}>

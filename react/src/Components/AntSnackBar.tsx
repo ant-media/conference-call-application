@@ -9,6 +9,7 @@ const AntSnackInfo = styled(Grid)(({theme}) => ({
   borderRadius: 6,
   padding: 8,
 }));
+
 const AntSnackMessage = styled(Grid)(({theme}) => ({
   backgroundColor: theme.palette.themeColor[60],
   borderRadius: 6,
@@ -16,8 +17,19 @@ const AntSnackMessage = styled(Grid)(({theme}) => ({
   cursor: 'pointer',
   width: 320
 }));
+
+interface SnackMessageProps {
+    notificationData: {
+        variant: string;
+        message: string;
+        sender: string;
+        icon: React.ReactNode;
+        onClick: () => void;
+    };
+}
+
 const AntSnackContent = styled(SnackbarContent)(({theme}) => ({}));
-const SnackMessage = forwardRef((props, ref) => {
+const SnackMessage = forwardRef((props: SnackMessageProps, ref) => {
   const {notificationData} = props;
   const {closeSnackbar} = useSnackbar();
 
@@ -28,7 +40,7 @@ const SnackMessage = forwardRef((props, ref) => {
   }, [closeSnackbar]);
 
   return (
-    <AntSnackContent ref={ref}>
+    <AntSnackContent>
       {notificationData.variant === 'info' && (
         <AntSnackInfo container justifyContent={'center'} alignItems={'center'}>
           {notificationData.icon && (

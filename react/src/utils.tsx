@@ -1,10 +1,12 @@
-export function urlify(text) {
+import React from "react";
+
+export function urlify(text: string) : any[] | null {
     if (!text) {
         return null;
     }
     var urlRegex =
         /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
-    const parts = text.split(urlRegex);
+    const parts: any[] = text.split(urlRegex);
     for (var i = 1; i < parts.length; i += 2) {
         let hasExternalLink = parts[i].startsWith('https://') || parts[i].startsWith('http://');
 
@@ -26,12 +28,12 @@ export function urlify(text) {
     return parts;
 }
 
-export function getRoomNameAttribute() {
+export function getRoomNameAttribute(): string | null {
    // if it returns data-room-name element, it means that we are using conference app in component mode
-  return document.getElementById("root").getAttribute("data-room-name");
+  return document.getElementById("root")!!.getAttribute("data-room-name");
 }
 
-export function getWebSocketURLAttribute() {
+export function getWebSocketURLAttribute(): string | null {
     //if it exists, it means it is in component mode
-    return document.getElementById("root").getAttribute("data-websocket-url")
+    return document.getElementById("root")!!.getAttribute("data-websocket-url")
 }

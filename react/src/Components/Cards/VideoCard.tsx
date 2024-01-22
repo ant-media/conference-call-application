@@ -5,6 +5,8 @@ import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
 import { useTranslation } from "react-i18next";
+import {Theme} from "@mui/system";
+import {ConferenceContextType} from "../../@types/ConferenceContextType";
 
 const CustomizedVideo = styled("video")({
   borderRadius: 4,
@@ -13,12 +15,12 @@ const CustomizedVideo = styled("video")({
   objectPosition: "center",
   backgroundColor: "transparent",
 });
-const CustomizedBox = styled(Box)(({ theme }) => ({
+const CustomizedBox = styled(Box)((theme: Theme ) => ({
   backgroundColor: alpha(theme.palette.gray[90], 0.3),
 }));
 
-function VideoCard(props) {
-  const conference = useContext(ConferenceContext);
+function VideoCard(props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLVideoElement> & React.VideoHTMLAttributes<HTMLVideoElement>) {
+  const conference = React.useContext(ConferenceContext);
 
   const { t } = useTranslation();
   const [displayHover, setDisplayHover] = React.useState(false);

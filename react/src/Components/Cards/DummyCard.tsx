@@ -1,10 +1,12 @@
 import React from "react";
 import {Avatar, Grid} from "@mui/material";
-import defaultAvatar from "../../static/images/defaultAvatar.png";
 import {useTheme} from "@mui/material/styles";
+import {Theme} from "@mui/system";
+
+const defaultAvatar = require("../../static/images/defaultAvatar.png") as string;
 
 function DummyCard() {
-  const theme = useTheme();
+  const theme: Theme = useTheme();
 
   return (
     <Grid

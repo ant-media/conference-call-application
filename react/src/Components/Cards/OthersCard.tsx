@@ -5,9 +5,10 @@ import Avatar from "@mui/material/Avatar";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import {styled, useTheme} from "@mui/material/styles";
 import {ConferenceContext} from "pages/AntMedia";
+import {Theme} from "@mui/system";
 import {t} from "i18next";
 
-const CustomizedAvatar = styled(Avatar)(({theme}) => ({
+const CustomizedAvatar = styled(Avatar)((theme: Theme) => ({
   border: `3px solid ${theme.palette.themeColor[85]} !important`,
   color: "#fff",
   width: 44,
@@ -19,7 +20,7 @@ const CustomizedAvatar = styled(Avatar)(({theme}) => ({
   },
 }));
 
-const CustomizedAvatarGroup = styled(AvatarGroup)(({theme}) => ({
+const CustomizedAvatarGroup = styled(AvatarGroup)((theme: Theme) => ({
   "& div:not(.regular-avatar)": {
     border: `3px solid ${theme.palette.themeColor[85]} !important`,
     backgroundColor: theme.palette.themeColor[80],
@@ -35,9 +36,9 @@ const CustomizedAvatarGroup = styled(AvatarGroup)(({theme}) => ({
 }));
 
 
-function OthersCard(props) {
+function OthersCard(props: { playingParticipants: any[]; }) {
   const conference = React.useContext(ConferenceContext)
-  const theme = useTheme();
+  const theme: Theme = useTheme();
 
   const othersNames = [];
 

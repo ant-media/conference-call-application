@@ -21,14 +21,14 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
   paddingTop: 4
 }));
 
-function InfoButton(props) {
+function InfoButton() {
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const conference = React.useContext(ConferenceContext);
 
-  const handleClick = event => {
+  const handleClick = (event: { currentTarget: React.SetStateAction<null>; }) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
@@ -39,7 +39,7 @@ function InfoButton(props) {
   const getResolution = () => {
       // Sometimes, it takes some time to get the video track. So, we have to try catch it.
     try {
-        const {width, height} = document.getElementById('localVideo').srcObject.getVideoTracks()[0].getSettings();
+        const {width, height} = document.getElementById('localVideo')!!.srcObject.getVideoTracks()[0].getSettings();
         return width + ' x ' + height;
     } catch (e) {
         return "";

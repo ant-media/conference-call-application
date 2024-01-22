@@ -24,6 +24,8 @@ i18n
 
     keySeperator: false,
     resources
+  }).then(r => {
+    console.log('i18n initialized', r);
   });
 
 if (i18n.language !== 'en' || i18n.language !== 'tr') {

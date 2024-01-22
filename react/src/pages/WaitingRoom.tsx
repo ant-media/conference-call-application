@@ -15,11 +15,11 @@ import {useTheme} from "@mui/material/styles";
 
 
 function getPublishStreamId() {
-  const dataRoomName = document.getElementById("root").getAttribute("data-publish-stream-id");
+  const dataRoomName = document.getElementById("root")!!.getAttribute("data-publish-stream-id");
   return (dataRoomName) ? dataRoomName : getUrlParameter("streamId");
 }
 
-function WaitingRoom(props) {
+function WaitingRoom() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const publishStreamId = getPublishStreamId()

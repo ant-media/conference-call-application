@@ -5,18 +5,18 @@ import React from "react";
 import { ConferenceContext } from "./AntMedia";
 
 
-function LayoutPinned (props) {
+function LayoutPinned () {
   const conference = React.useContext(ConferenceContext);
 
   const pinnedParticipant = conference.participants.find((v) => v.id === conference.pinnedVideoId)
 
   let MAX_VIDEO_AT_SIDE = 4;
-  const showOthers = Object.keys(conference.allParticipants).length > MAX_VIDEO_AT_SIDE; 
+  const showOthers = Object.keys(conference.allParticipants).length > MAX_VIDEO_AT_SIDE;
   let playingParticipantsCount = 0;
-  
+
   //if we need to show others card, then we don't show the last video to hold place for the others card
   const maxPlayingParticipantsCount = showOthers ? MAX_VIDEO_AT_SIDE - 1 : Math.min(conference.participants.length, MAX_VIDEO_AT_SIDE);
-  const playingParticipants = [];
+  const playingParticipants: any[] = [];
 
   const pinnedVideo = () => {
     if(pinnedParticipant !== undefined) {
@@ -53,8 +53,8 @@ function LayoutPinned (props) {
       <>
       {
       // eslint-disable-next-line
-      conference.participants.map((element, index) => {
-        if(element !== pinnedParticipant && playingParticipantsCount < maxPlayingParticipantsCount) { 
+      conference.participants.map((element: { id: string | undefined; streamId: any; track: any; label: any; name: any; }, index: React.Key | null | undefined) => {
+        if(element !== pinnedParticipant && playingParticipantsCount < maxPlayingParticipantsCount) {
           playingParticipantsCount ++;
           playingParticipants.push(element);
           return (
@@ -82,7 +82,7 @@ function LayoutPinned (props) {
       <>
         <div className="unpinned">
         <div className="single-video-container  others-tile-wrapper">
-        <OthersCard 
+        <OthersCard
           playingParticipants = {playingParticipants}
         />
         </div>

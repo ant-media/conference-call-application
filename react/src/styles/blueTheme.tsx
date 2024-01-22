@@ -1,23 +1,26 @@
-import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
-import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
-import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
-import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
+// @ts-ignore
 import {getRoomNameAttribute} from "../utils";
 
-export function getOrangeTheme() {
-  const themeColor0 = "#FFF3E0";
-  const themeColor10 = "#FFE0B2";
-  const themeColor20 = "#FFCC80";
-  const themeColor30 = "#FFB74D";
-  const themeColor40 = "#FFA726";
-  const themeColor50 = "#FF9800";
-  const themeColor60 = "#FB8C00";
-  const themeColor70 = "#F57C00";
-  const themeColor75 = "#EF6C00";
-  const themeColor80 = "#EF6C00";
-  const themeColor85 = "#E65100";
-  const themeColor90 = "#FFD180";
-  const chatText = "#FFF3E0";
+const OpenSansRegular = require("../static/Fonts/OpenSans/OpenSans-Regular.ttf") as string;
+const OpenSansMedium = require("../static/Fonts/OpenSans/OpenSans-Medium.ttf") as string;
+const OpenSansSemiBold = require("../static/Fonts/OpenSans/OpenSans-SemiBold.ttf") as string;
+const OpenSansBold = require("../static/Fonts/OpenSans/OpenSans-Bold.ttf") as string;
+
+
+export function getBlueTheme() {
+  const themeColor0 = "#E0F7FA";
+  const themeColor10 = "#B2EBF2";
+  const themeColor20 = "#80DEEA";
+  const themeColor30 = "#4DD0E1";
+  const themeColor40 = "#26C6DA";
+  const themeColor50 = "#00BCD4";
+  const themeColor60 = "#00ACC1";
+  const themeColor70 = "#0097A7";
+  const themeColor75 = "#00838F";
+  const themeColor80 = "#00838F";
+  const themeColor85 = "#006064";
+  const themeColor90 = "#84FFFF";
+  const chatText = "#E0F7FA";
   const darkGray = "#37474F";
 
   const error = "#D50000";
@@ -347,8 +350,8 @@ export function getOrangeTheme() {
     },
   };
   if (!getRoomNameAttribute()) {
-    themeObject.palette.background = {};
-    themeObject.palette.background.default = themeColor80;
+    //themeObject.palette.background = {};
+    //themeObject.palette.background.default = themeColor80;
   }
   return themeObject;
 }
