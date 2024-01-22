@@ -156,6 +156,7 @@ function VideoCard(props) {
   }, [conference.isPublished]);
 
     const overlayButtonsGroup = () => {
+        if (process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true") {
         return (!props.hidePin && (
             <Grid
                 container
@@ -207,7 +208,7 @@ function VideoCard(props) {
 
                         { props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin == "true" ?
                             <Grid item>
-                                {isCamOpen ?
+                                {!useAvatar ?
                                     <Tooltip
                                         title={`Camera on ${
                                             props.name
@@ -314,10 +315,7 @@ function VideoCard(props) {
                 </Grid>
             </Grid>
         ))
-    };
-    // TODO: Refactor this function BOLA!!!
-  /*
-  const overlayButtonsGroup = () => {
+    } else {
     return (!props.hidePin && (
       <Grid
         container
@@ -401,8 +399,7 @@ function VideoCard(props) {
         </Grid>
       </Grid>
     ))
-  };
-  */
+  };}
 
   const avatarOrPlayer = () => {
     return (
