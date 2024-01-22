@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useContext} from "react";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -7,6 +7,7 @@ import { styled } from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import {CircularProgress} from "@mui/material";
+import {CustomContext} from "../pages/CustomContext";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: "#ffffff",
@@ -22,13 +23,14 @@ const PinBtn = styled(Button)(({ theme }) => ({
 
 function ParticipantTab(props) {
   const conference = React.useContext(ConferenceContext);
+  const customContext = useContext(CustomContext);
 
   const getAdminButtons = (streamId, assignedVideoCardId) => {
     return (
       <div>
-      {(streamId === "localVideo" ? conference?.presenters.includes(conference.publishStreamId) : conference?.presenters.includes(streamId) )&& conference?.isAdmin === true ? (
+      {(streamId === "localVideo" ? customContext?.presenters.includes(conference.publishStreamId) : conference?.presenters.includes(streamId) )&& customContext?.isAdmin === true ? (
       <PinBtn
-        disabled={conference?.presenterButtonDisabled}
+        disabled={customContext?.presenterButtonDisabled}
         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
         onClick={() => {
           let tempStreamId = streamId;
@@ -43,9 +45,9 @@ function ParticipantTab(props) {
           <SvgIcon size={28} name="unpresenter" color="black" />}
       </PinBtn>
     ) : null}
-  {(streamId === "localVideo" ? !conference?.presenters.includes(conference.publishStreamId) : !conference?.presenters.includes(streamId) ) && ( !conference?.approvedSpeakerRequestList.includes(streamId) ) && conference?.isAdmin === true ?(
+  {(streamId === "localVideo" ? !customContext?.presenters.includes(conference.publishStreamId) : !conference?.presenters.includes(streamId) ) && ( !customContext?.approvedSpeakerRequestList.includes(streamId) ) && customContext?.isAdmin === true ?(
     <PinBtn
-      disabled={conference?.presenterButtonDisabled}
+      disabled={customContext?.presenterButtonDisabled}
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => {
         let tempStreamId = streamId;
@@ -61,10 +63,10 @@ function ParticipantTab(props) {
         <SvgIcon size={28} name="presenter" color="black" />}
     </PinBtn>
   ) : null}
-  {conference?.approvedSpeakerRequestList.includes(streamId) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ?(
+  {customContext?.approvedSpeakerRequestList.includes(streamId) && customContext?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ?(
     <PinBtn
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-      onClick={() => conference.makeListenerAgain(streamId)}
+      onClick={() => conference?.makeListenerAgain(streamId)}
     >
       <SvgIcon size={28} name="close" color="black" />
     </PinBtn>
@@ -113,7 +115,7 @@ function ParticipantTab(props) {
             </PinBtn>
           )}
           <div>
-          {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
+          {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && customContext?.isAdmin === true ? (
             getAdminButtons(streamId, assignedVideoCardId)
         ) : null}
         </div>

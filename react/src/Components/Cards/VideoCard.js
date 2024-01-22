@@ -5,6 +5,7 @@ import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
 import { useTranslation } from "react-i18next";
+import {CustomContext} from "../../pages/CustomContext";
 
 const CustomizedVideo = styled("video")({
   borderRadius: 4,
@@ -19,6 +20,7 @@ const CustomizedBox = styled(Box)(({ theme }) => ({
 
 function VideoCard(props) {
   const conference = useContext(ConferenceContext);
+  const customContext = useContext(CustomContext);
 
   const { t } = useTranslation();
   const [displayHover, setDisplayHover] = React.useState(false);
@@ -206,7 +208,7 @@ function VideoCard(props) {
                             </Fab>
                         </Tooltip>
 
-                        { props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin === true ?
+                        { props.id !== 'localVideo' && customContext.isAdmin && customContext.isAdmin === true ?
                             <Grid item>
                                 {!useAvatar ?
                                     <Tooltip
@@ -257,7 +259,7 @@ function VideoCard(props) {
                             </Grid>
                             : null }
 
-                        {(props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin === true) ?
+                        {(props.id !== 'localVideo' && customContext.isAdmin && customContext.isAdmin === true) ?
                             <Grid item>
                                 {!micMuted ?
                                     <Tooltip

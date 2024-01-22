@@ -14,6 +14,7 @@ import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 
 import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
 import floating from "../external/floating.js";
+import {CustomContext, CustomContextProvider} from "./CustomContext";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -237,8 +238,6 @@ function AntMedia() {
 
   const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
 
-  const [isAdmin/*, setIsAdmin*/] = useState(false);
-
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
@@ -307,6 +306,8 @@ function AntMedia() {
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
+
+  const customContext = React.useContext(CustomContext);
 
   function makeFullScreen(divId) {
     if (fullScreenId === divId) {
@@ -1673,33 +1674,34 @@ function AntMedia() {
               setParticipantIdMuted,
               videoSendResolution,
               setVideoSendResolution,
-              isAdmin,
               publisherRequestListDrawerOpen,
               setPublisherRequestListDrawerOpen
             }}
           >
-            <SnackbarProvider
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "center",
-              }}
-              maxSnack={3}
-              content={(key, notificationData) => (
-                <AntSnackBar id={key} notificationData={notificationData}/>
-              )}
-            >
-              {leftTheRoom ? (
-                <LeftTheRoom/>
-              ) : waitingOrMeetingRoom === "waiting" ? (
-                <WaitingRoom/>
-              ) : (
-                <>
-                  <MeetingRoom/>
-                  <MessageDrawer/>
-                  <ParticipantListDrawer/>
-                </>
-              )}
-            </SnackbarProvider>
+            <CustomContextProvider>
+              <SnackbarProvider
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "center",
+                }}
+                maxSnack={3}
+                content={(key, notificationData) => (
+                  <AntSnackBar id={key} notificationData={notificationData}/>
+                )}
+              >
+                {leftTheRoom ? (
+                  <LeftTheRoom/>
+                ) : waitingOrMeetingRoom === "waiting" ? (
+                  <WaitingRoom/>
+                ) : (
+                  <>
+                    <MeetingRoom/>
+                    <MessageDrawer/>
+                    <ParticipantListDrawer/>
+                  </>
+                )}
+              </SnackbarProvider>
+            </CustomContextProvider>
           </ConferenceContext.Provider>
         </Grid>
       </Grid>
