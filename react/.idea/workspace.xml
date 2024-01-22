@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1b2e1d4-7dc6-4a8a-981c-4c344fbcd0c9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Components/Footer/Components/TimeZone.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/Footer/Components/TimeZone.js" afterDir="false" />
-    </list>
+    <list default="true" id="a1b2e1d4-7dc6-4a8a-981c-4c344fbcd0c9" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -73,7 +70,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1705906935682</updated>
-      <workItem from="1705906938435" duration="1390000" />
+      <workItem from="1705906938435" duration="1777000" />
     </task>
     <servers />
   </component>

@@ -306,6 +306,7 @@ function AntMedia() {
   const [initialized, setInitialized] = React.useState(false);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
+  const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
   function makeFullScreen(divId) {
     if (fullScreenId === divId) {
@@ -1672,7 +1673,9 @@ function AntMedia() {
               setParticipantIdMuted,
               videoSendResolution,
               setVideoSendResolution,
-              isAdmin
+              isAdmin,
+              publisherRequestListDrawerOpen,
+              setPublisherRequestListDrawerOpen
             }}
           >
             <SnackbarProvider
