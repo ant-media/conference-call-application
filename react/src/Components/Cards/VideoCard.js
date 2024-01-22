@@ -432,7 +432,6 @@ function VideoCard(props) {
     )
   }
 
-
   const overlayParticipantStatus = () => {
     return (
       <Grid
