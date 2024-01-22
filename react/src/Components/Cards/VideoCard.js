@@ -206,7 +206,7 @@ function VideoCard(props) {
                             </Fab>
                         </Tooltip>
 
-                        { props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin == "true" ?
+                        { props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin === true ?
                             <Grid item>
                                 {!useAvatar ?
                                     <Tooltip
@@ -257,7 +257,7 @@ function VideoCard(props) {
                             </Grid>
                             : null }
 
-                        {(props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin == "true") ?
+                        {(props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin === true) ?
                             <Grid item>
                                 {!micMuted ?
                                     <Tooltip

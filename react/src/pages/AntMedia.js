@@ -237,7 +237,7 @@ function AntMedia() {
 
   const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin/*, setIsAdmin*/] = useState(false);
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
