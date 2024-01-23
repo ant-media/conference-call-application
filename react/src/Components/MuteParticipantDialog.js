@@ -27,7 +27,7 @@ export default function MuteParticipantDialog() {
   return (
     <Dialog
       fullScreen={fullScreen}
-      open={!!conference?.isMuteParticipantDialogOpen}
+      open={conference?.isMuteParticipantDialogOpen}
       onClose={handleClose}
       aria-labelledby="responsive-dialog-title"
     >

@@ -38,7 +38,7 @@ const getAntDrawerStyle = (theme) => {
       [theme.breakpoints.down('sm')]: {
         width: '100%',
         padding: 0,
-        backgroundColor: roomNameAttribute ? theme.palette.green70 : theme.palette.green[70],
+        backgroundColor: roomNameAttribute ? theme.palette.themeColor[70] : theme.palette.themeColor[70],
       },
     },
   };
@@ -49,7 +49,7 @@ const AntDrawer = styled(Drawer)(({ theme }) => getAntDrawerStyle(theme));
 const ParticipantListGrid = styled(Grid)(({ theme }) => ({
   position: 'relative',
   padding: 16,
-  background: theme.palette.green[70],
+  background: theme.palette.themeColor[70],
   borderRadius: 10,
 }));
 
