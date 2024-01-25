@@ -14,7 +14,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-        
+
+    - name: Get versions data from repo
+      run: wget -O maven-metadata.xml https://oss.sonatype.org/service/local/repositories/snapshots/content/io/antmedia/ant-media-server/maven-metadata.xml       
+
     - name: Download war File
       run: |
         export LATEST_SNAPSHOT=$(cat maven-metadata.xml | grep "<version>" | tail -n 1 |  xargs | cut -c 10-23)
