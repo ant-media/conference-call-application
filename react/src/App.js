@@ -56,7 +56,9 @@ window.copyWindowLocation = copyWindowLocation;
 
 export const ThemeContext = React.createContext(null);
 
-function App() {
+function App()
+{
+  React.useEffect(() => {
   const [currentTheme, setCurrentTheme] = React.useState(selectedTheme);
 
   const handleFullScreen = (e) => {
@@ -67,9 +69,8 @@ function App() {
         document.exitFullscreen().then(r => console.log("Fullscreen is exited", r));
       }
     }
-  };
-
-  React.useEffect(() => {
+  }
+  
     window.addEventListener("dblclick", handleFullScreen);
 
     // cleanup this component
