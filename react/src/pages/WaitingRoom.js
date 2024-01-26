@@ -6,6 +6,7 @@ import CameraButton from "Components/Footer/Components/CameraButton";
 import {useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {SettingsDialog} from "Components/Footer/Components/SettingsDialog";
+
 import {SvgIcon} from "Components/SvgIcon";
 import {useSnackbar} from "notistack";
 import {ConferenceContext} from "./AntMedia";
@@ -25,6 +26,7 @@ function WaitingRoom(props) {
   const publishStreamId = getPublishStreamId()
   const {t} = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
+
   const [selectFocus, setSelectFocus] = React.useState(null);
 
   const theme = useTheme();
@@ -35,6 +37,7 @@ function WaitingRoom(props) {
   window.conference = conference;
   const {enqueueSnackbar} = useSnackbar();
 
+
   React.useEffect(() => {
     if (!conference.isPlayOnly && conference.initialized) {
       conference.setLocalVideo(document.getElementById("localVideo"));
@@ -42,16 +45,6 @@ function WaitingRoom(props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conference.initialized]);
-
-  function makeid(length) {
-    var result = '';
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-  }
 
   function joinRoom(e) {
     if (conference.localVideo === null && conference.isPlayOnly === false) {
@@ -72,8 +65,8 @@ function WaitingRoom(props) {
     }
     let streamId;
     if (publishStreamId === null || publishStreamId === undefined) {
-      streamId = conference.streamName.replace(/[\W_]/g, "") + "_" + makeid(10);
-      console.log("generatedStreamId:" + streamId);
+      streamId = conference.streamName.replace(/[\W_]/g, "") + "_" + conference.makeid(10);
+      console.log("generatedStreamId:"+streamId);
     } else {
       streamId = publishStreamId;
     }
@@ -104,6 +97,7 @@ function WaitingRoom(props) {
   const handleDialogClose = (value) => {
     setDialogOpen(false);
   };
+
 
   return (
     <Container>
