@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import Button from "@mui/material/Button";
 import { SvgIcon } from "../../SvgIcon";
-// import { AntmediaContext } from "App";
 import { Tooltip } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -23,13 +22,10 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 }));
 
 
-function EndCallButton({ footer, ...props }) {
+const EndCallButton = React.memo(({ footer, ...props }) => {
   const conference = useContext(ConferenceContext);
   const { t } = useTranslation();
-  // const exit = () => {
-  //   ahndleLeaveFromRoom();
-
-  // }
+ 
   return (
     <Tooltip title={t('Leave call')} placement="top">
       <CustomizedBtn 
@@ -39,6 +35,6 @@ function EndCallButton({ footer, ...props }) {
       </CustomizedBtn>
     </Tooltip>
   );
-}
+})
 
 export default EndCallButton;

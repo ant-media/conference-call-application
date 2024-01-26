@@ -44,21 +44,22 @@ export function SettingsDialog(props) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
-  const handleClose = (event, reason) => {
+  const handleClose = React.useCallback(() => {
     onClose(selectedValue);
-  };
-  function switchVideoMode(value) {
+  }, [onClose, selectedValue]);
+
+  const switchVideoMode = React.useCallback((value) => {
     conference.cameraSelected(value);
-  }
+  }, [conference]);
 
-  function switchAudioMode(value) {
+  const switchAudioMode = React.useCallback((value) => {
     conference.microphoneSelected(value);
-  }
+  }, [conference]);
 
-  function setBackground(value) {
+  const setBackground = React.useCallback((value) => {
     conference.setSelectedBackgroundMode(value);
     conference.handleBackgroundReplacement(value);
-  }
+  }, [conference]);
 
   React.useEffect(() => {
     if (conference.devices) {

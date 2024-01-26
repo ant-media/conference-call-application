@@ -34,6 +34,12 @@ const CustomizedAvatarGroup = styled(AvatarGroup)(({theme}) => ({
   },
 }));
 
+const MemoizedAvatarGroup = React.memo(({ children }) => (
+  <CustomizedAvatarGroup sx={{ justifyContent: "center" }}>
+    {children}
+  </CustomizedAvatarGroup>
+));
+
 
 function OthersCard(props) {
   const conference = React.useContext(ConferenceContext)
@@ -48,40 +54,40 @@ function OthersCard(props) {
   }
 
   const others = othersNames;//.sort();
-
+ 
   return (
-    <div className="others-tile-inner" style={{background: theme.palette.themeColor[70]}}>
-      <CustomizedAvatarGroup sx={{justifyContent: "center"}}>
-        {others.map(({username}, index) => {
-          if (username?.length > 0) {
-            const nameArr = username.split(" ");
-            const secondLetter = nameArr.length > 1 ? nameArr[1][0] : "";
-            const initials =
-              `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
+      <div className="others-tile-inner">
+        <MemoizedAvatarGroup sx={{justifyContent: "center"}}>
+          {others.map(({username}, index) => {
+            if (username?.length > 0) {
+              const nameArr = username.split(" ");
+              const secondLetter = nameArr.length > 1 ? nameArr[1][0] : "";
+              const initials =
+                  `${nameArr[0][0]}${secondLetter}`.toLocaleUpperCase();
 
-            return (
-              <CustomizedAvatar
-                key={index}
-                alt={username}
-                className="regular-avatar"
-                sx={{
-                  bgcolor: "green.50",
-                  color: "#fff",
-                  fontSize: {xs: 16, md: 22},
-                }}
-              >
-                {initials}
-              </CustomizedAvatar>
-            );
-          } else {
-            return null;
-          }
-        })}
-      </CustomizedAvatarGroup>
-      <Typography sx={{mt: 2, color: "#ffffff"}}>
-        {others.length} {others.length > 1 ? t("Others") : t("Other")}
-      </Typography>
-    </div>
+              return (
+                  <CustomizedAvatar
+                      key={index}
+                      alt={username}
+                      className="regular-avatar"
+                      sx={{
+                        bgcolor: "green.50",
+                        color: "#fff",
+                        fontSize: {xs: 16, md: 22},
+                      }}
+                  >
+                    {initials}
+                  </CustomizedAvatar>
+              );
+            } else {
+              return null;
+            }
+          })}
+        </MemoizedAvatarGroup>
+        <Typography sx={{mt: 2, color: "#ffffff"}}>
+          {others.length} other{others.length > 1 ? "s" : ""}
+        </Typography>
+      </div>
   );
 };
 

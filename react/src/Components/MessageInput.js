@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Grid, IconButton, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import EmojiPicker, {Emoji, EmojiStyle} from 'emoji-picker-react';
+import EmojiPicker, { Emoji, EmojiStyle } from 'emoji-picker-react';
 import { useTranslation } from "react-i18next";
 import { ConferenceContext } from 'pages/AntMedia';
 
@@ -13,6 +13,7 @@ const MessageInputContainer = styled(Grid)(({ theme }) => ({
     padding: "16px 0px 8px 0px",
   },
 }));
+
 const MessageTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: 30,
@@ -26,13 +27,15 @@ const MessageTextField = styled(TextField)(({ theme }) => ({
     borderRadius: 30,
   },
 }));
+
 const MessageInput = React.memo(() => {
   const conference = React.useContext(ConferenceContext);
 
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const sendMessage = () => {
+
+  const sendMessage = useCallback(() => {
     if (text) {
       conference.handleSendMessage(text);
       conference?.handleSetMessages({
@@ -43,27 +46,29 @@ const MessageInput = React.memo(() => {
       setShowEmojiPicker(false);
       setText("");
     }
-  };
+  }, [conference, text]);
 
-  const addEmojiIntoTextBox = (emojiData, event) => {
-      setText(text + " " + emojiData.emoji);
-  };
+  const addEmojiIntoTextBox = useCallback((emojiData, event) => {
+    setText(text + " " + emojiData.emoji);
+  }, [text]);
 
-  const handleEmojiPickerDrawer = () => {
+  const handleEmojiPickerDrawer = useCallback(() => {
     setShowEmojiPicker(!showEmojiPicker);
-  };
+  }, [showEmojiPicker]);
+
+  const EmojiPickerComponent = useMemo(() => (
+    <EmojiPicker onEmojiClick={addEmojiIntoTextBox} width="100%" height="70vh" />
+  ), [addEmojiIntoTextBox]);
 
   return (
     <MessageInputContainer container>
+      {showEmojiPicker && EmojiPickerComponent}
       <form
         onSubmit={(event) => {
           event.preventDefault();
           sendMessage();
         }}
       >
-        {showEmojiPicker ?
-            <EmojiPicker onEmojiClick={addEmojiIntoTextBox} width="100%" height="70vh"/>
-            : null}
         <MessageTextField
           autoFocus
           value={text}
@@ -72,15 +77,15 @@ const MessageInput = React.memo(() => {
             endAdornment: (
               <InputAdornment position="start">
                 <IconButton
-                    onClick={handleEmojiPickerDrawer}
-                    aria-label="toggle password visibility"
-                    size={"medium"}
-                    edge="end"
+                  onClick={handleEmojiPickerDrawer}
+                  aria-label="toggle password visibility"
+                  size={"medium"}
+                  edge="end"
                 >
                   <Emoji
-                      unified={"1f600"}
-                      emojiStyle={EmojiStyle.APPLE}
-                      size={22}
+                    unified={"1f600"}
+                    emojiStyle={EmojiStyle.APPLE}
+                    size={22}
                   />
                 </IconButton>
                 <IconButton
