@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ConferenceContext } from 'pages/AntMedia';
-import { SettingsDialog }  from "./SettingsDialog";
+import  SettingsDialog   from "./SettingsDialog";
 import LayoutSettingsDialog from "./LayoutSettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 

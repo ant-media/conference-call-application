@@ -39,96 +39,96 @@ const getCustomizedGridStyle = (theme) => {
 
 const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme)));
 
-function Footer(props) {
+const Footer = React.memo((props) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
 
-    return (
-        <CustomizedGrid
-            container
-            alignItems={"center"}
-            justifyContent={{xs: "center", sm: "space-between"}}
+  return (
+    <CustomizedGrid
+      container
+      alignItems={"center"}
+      justifyContent={{ xs: "center", sm: "space-between" }}
+    >
+      <Grid item sx={{ display: { xs: "none", sm: "block" } }}>
+        <Grid container alignItems={"center"}>
+          <a href="https://antmedia.io/circle" alt="Circle" target="_blank" rel="noreferrer">
+            <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{ width: '22px', marginRight: 4 }} />
+          </a>
+          <Typography color="#ffffff" variant="body1">
+            {id}
+          </Typography>
+          <InfoButton />
+        </Grid>
+      </Grid>
+      <Grid item>
+        <Grid
+          container
+          justifyContent="center"
+          columnSpacing={{ xs: 1, sm: 2 }}
         >
-          <Grid item sx={{display: {xs: "none", sm: "block"}}}>
-            <Grid container alignItems={"center"}>
-              <a href="https://antmedia.io/circle" alt="Circle" target="_blank" rel="noreferrer">
-                <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
-              </a>
-              <Typography color="#ffffff" variant="body1">
-                {id}
-              </Typography>
-              <InfoButton/>
+          <Grid item xs={0}>
+            <OptionButton footer />
+          </Grid>
+
+          {conference.isPlayOnly === false ?
+            <Grid item xs={0}>
+              <CameraButton {...props} footer />
             </Grid>
+            : null}
+
+          {conference.isPlayOnly === false ?
+            <Grid item xs={0}>
+              <MicButton footer />
+            </Grid>
+            : null}
+
+          {conference.isPlayOnly === false ?
+            <Grid item xs={0}>
+              {" "}
+              <ShareScreenButton footer />
+            </Grid>
+            : null}
+
+          <Grid item xs={0} style={{ display: '-webkit-inline-box' }}>
+            <ReactionsButton footer />
           </Grid>
-              <Grid item>
-                <Grid
-                    container
-                    justifyContent="center"
-                    columnSpacing={{xs: 1, sm: 2}}
-                >
-                  <Grid item xs={0}>
-                    <OptionButton footer/>
-                  </Grid>
 
-                  {conference.isPlayOnly === false ?
-                  <Grid item xs={0}>
-                    <CameraButton {...props} footer/>
-                  </Grid>
-                    : null}
-
-                  {conference.isPlayOnly === false ?
-                  <Grid item xs={0}>
-                    <MicButton footer/>
-                  </Grid>
-                      : null}
-
-                  {conference.isPlayOnly === false ?
-                  <Grid item xs={0}>
-                    {" "}
-                    <ShareScreenButton footer/>
-                  </Grid>
-                      : null}
-
-                  <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
-                    <ReactionsButton footer/>
-                  </Grid>
-
-                  <Grid item xs={0}>
-                    <MessageButton footer/>
-                  </Grid>
-                  <Grid item xs={0}>
-                      <ParticipantListButton footer />
-                  </Grid>
-                  <Grid item xs={0}>
-                    <EndCallButton footer/>
-                  </Grid>
-                  {process.env.NODE_ENV === "development" ?
-                  <Grid item xs={0}>
-                    <FakeParticipantButton
-                      footer
-                      increment={true}
-                    />
-                  </Grid>
-                  : null}
-
-                  {process.env.NODE_ENV === "development" ?
-                  <Grid item xs={0}>
-                    <FakeParticipantButton
-                      footer
-                      increment={false}
-                    />
-                  </Grid>
-                  : null}
-
-                </Grid>
-              </Grid>
-
-          <Grid item sx={{display: {xs: "none", sm: "block"}}}>
-            <TimeZone/>
+          <Grid item xs={0}>
+            <MessageButton footer />
           </Grid>
-        </CustomizedGrid>
-    );
-}
+          <Grid item xs={0}>
+            <ParticipantListButton footer />
+          </Grid>
+          <Grid item xs={0}>
+            <EndCallButton footer />
+          </Grid>
+          {process.env.NODE_ENV === "development" ?
+            <Grid item xs={0}>
+              <FakeParticipantButton
+                footer
+                increment={true}
+              />
+            </Grid>
+            : null}
+
+          {process.env.NODE_ENV === "development" ?
+            <Grid item xs={0}>
+              <FakeParticipantButton
+                footer
+                increment={false}
+              />
+            </Grid>
+            : null}
+
+        </Grid>
+      </Grid>
+
+      <Grid item sx={{ display: { xs: "none", sm: "block" } }}>
+        <TimeZone />
+      </Grid>
+    </CustomizedGrid>
+  );
+});
 
 export default Footer;

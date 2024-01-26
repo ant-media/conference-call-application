@@ -14,7 +14,7 @@ import MicButton, {
 import CameraButton from "Components/Footer/Components/CameraButton";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { SettingsDialog }  from "Components/Footer/Components/SettingsDialog";
+import  SettingsDialog   from "Components/Footer/Components/SettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
 import { useSnackbar } from "notistack";
 import { ConferenceContext } from "./AntMedia";

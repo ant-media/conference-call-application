@@ -138,7 +138,7 @@ if (localStorage.getItem('selectedMicrophone')) {
   mediaConstraints.audio.deviceId = localStorage.getItem('selectedMicrophone');
 }
 
-let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = "ws://localhost:5080/ConferenceCall/websocket"
 
 if (!websocketURL) {
 
