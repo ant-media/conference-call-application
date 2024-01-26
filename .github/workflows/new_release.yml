@@ -14,13 +14,16 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-        
+
+    - name: Get versions data from repo
+      run: wget -O maven-metadata.xml https://oss.sonatype.org/service/local/repositories/snapshots/content/io/antmedia/ant-media-server/maven-metadata.xml       
+
     - name: Download war File
       run: |
-        mvn dependency:get -Dartifact=io.antmedia.webrtc:ConferenceCall:2.6.0-SNAPSHOT:war -DremoteRepositories=https://oss.sonatype.org/content/repositories/snapshots -quiet
-        cp ~/.m2/repository/io/antmedia/webrtc/ConferenceCall/2.6.0-SNAPSHOT/ConferenceCall*-SNAPSHOT.war ConferenceCall-${{ github.ref_name }}.war
+        export LATEST_SNAPSHOT=$(cat maven-metadata.xml | grep "<version>" | tail -n 1 |  xargs | cut -c 10-23)
+        echo $LATEST_SNAPSHOT
+        wget -O ConferenceCall-${{ github.ref_name }}.war "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=io.antmedia.webrtc&a=ConferenceCall&v=${LATEST_SNAPSHOT}&e=war"
         ls -al
-        pwd
 
     - name: Create Release
       id: create_release

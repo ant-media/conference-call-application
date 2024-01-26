@@ -1,13 +1,13 @@
 import React from "react";
-import { useTheme } from "@mui/material/styles";
-import { Routes, Route } from "react-router-dom";
-import { Grid } from "@mui/material";
+import {useTheme} from "@mui/material/styles";
+import {Route, Routes} from "react-router-dom";
+import {Grid} from "@mui/material";
 import Home from "pages/Home";
 import AntMedia from "pages/AntMedia";
-import { getRoomNameAttribute } from "utils";
+import {getRoomNameAttribute} from "utils";
 
 function isComponent() {
-    return getRoomNameAttribute();
+  return getRoomNameAttribute();
 }
 
 function CustomRoutes(props) {
@@ -16,22 +16,22 @@ function CustomRoutes(props) {
   console.log("CustomRoutes");
 
   if (isComponent()) {
-      return (
-          <Grid container style={{background: theme.palette.background}}>
-              <Routes>
-                  <Route path="/" element={<AntMedia/>}/>
-              </Routes>
-          </Grid>
-      );
+    return (
+      <Grid container style={{background: theme.palette.background}}>
+        <Routes>
+          <Route path="/" element={<AntMedia/>}/>
+        </Routes>
+      </Grid>
+    );
   } else {
-      return (
-          <Grid container style={{ background: theme.palette.background }}>
-              <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/:id" element={<AntMedia />} />
-              </Routes>
-          </Grid>
-      )
+    return (
+      <Grid container style={{background: theme.palette.background}}>
+        <Routes>
+          <Route path="/" element={<Home/>}/>
+          <Route path="/:id" element={<AntMedia/>}/>
+        </Routes>
+      </Grid>
+    )
   }
 }
 

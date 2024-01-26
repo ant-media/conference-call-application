@@ -35,7 +35,8 @@ function ParticipantListButton({ footer, ...props }) {
                     color={conference?.participantListDrawerOpen ? 'primary' : 'secondary'}
                 >
                     <SvgIcon size={32} color={conference?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
-                    {Object.keys(conference.allParticipants).length}
+                  {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                    <a style={{color: conference?.participantListDrawerOpen ? 'black' : 'white'}}>{Object.keys(conference.allParticipants).length}</a>
                 </CustomizedBtn>
             </Tooltip>
         );

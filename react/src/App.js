@@ -1,57 +1,39 @@
 import "./App.css";
 /* eslint-disable eqeqeq */
-import { ThemeProvider, CssBaseline } from "@mui/material";
+import {CssBaseline, ThemeProvider} from "@mui/material";
 import theme from "./styles/theme";
 import React from "react";
-import { SnackbarProvider } from "notistack";
+import {SnackbarProvider} from "notistack";
 import AntSnackBar from "Components/AntSnackBar";
-import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
+import {initReactI18next} from "react-i18next";
 import i18n from "i18next";
-import translationEN from "i18n/en.json";
-import translationTR from "i18n/tr.json";
-import translationES from "i18n/es.json";
 import CustomRoutes from "CustomRoutes";
+import {ThemeList} from "./styles/themeList";
+import {AvailableLanguages} from "./i18n/AvailableLanguages";
 
+i18n.use(initReactI18next).init({
+  resources: AvailableLanguages,
+}).then(r => console.log("i18n is initialized"));
 
+const availableLanguagesList = Object.keys(AvailableLanguages);
+let preferredLanguage = localStorage.getItem("i18nextLng");
+if (!preferredLanguage) {
+  preferredLanguage = window.navigator.language.slice(0, 2);
+}
+if (availableLanguagesList.includes(preferredLanguage)) {
+  localStorage.setItem("i18nextLng", preferredLanguage);
+} else {
+  // Falling back to english.
+  localStorage.setItem("i18nextLng", "en");
+  preferredLanguage = "en";
+}
 
-const resources = {
-  en: {
-    translation: translationEN,
-  },
-  tr: {
-    translation: translationTR,
-  },
-  es: {
-    translation: translationES,
-  },
-};
+i18n.changeLanguage(preferredLanguage).then(r => console.log("Language is set to", preferredLanguage));
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    fallbackLng: "en",
-    interpolation: {
-      escapeValue: false,
-    },
-    keySeperator: false,
-    resources,
-  });
-
-const availableLangs = Object.keys(resources);
-if (!availableLangs.includes(i18n.language)) {
-
-  const maybeLang = i18n.language.slice(0, 2);
-  if (availableLangs.includes(maybeLang)) {
-    localStorage.setItem("i18nextLng", maybeLang);
-    i18n.changeLanguage(maybeLang);
-  } else {
-    // Falling back to english.
-    localStorage.setItem("i18nextLng", "en");
-    i18n.changeLanguage("en");
-  }
-
+let selectedTheme = localStorage.getItem('selectedTheme');
+if (!selectedTheme) {
+  selectedTheme = ThemeList.Green;
+  localStorage.setItem('selectedTheme', selectedTheme);
 }
 
 function getWindowLocation() {
@@ -72,18 +54,22 @@ function copyWindowLocation() {
 window.getWindowLocation = getWindowLocation;
 window.copyWindowLocation = copyWindowLocation;
 
-function App() 
-{
-  React.useEffect(() => {
-    const handleFullScreen = (e) => {
-      if (e.target?.id === "meeting-gallery") {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen();
-        } else {
-          document.exitFullscreen();
-        }
+export const ThemeContext = React.createContext(null);
+
+function App() {
+  const [currentTheme, setCurrentTheme] = React.useState(selectedTheme);
+
+  const handleFullScreen = (e) => {
+    if (e.target?.id === "meeting-gallery") {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().then(r => console.log("Fullscreen is requested", r));
+      } else {
+        document.exitFullscreen().then(r => console.log("Fullscreen is exited", r));
       }
     }
+  };
+
+  React.useEffect(() => {
     window.addEventListener("dblclick", handleFullScreen);
 
     // cleanup this component
@@ -91,24 +77,28 @@ function App()
       window.removeEventListener("dblclick", handleFullScreen);
     };
   }, []);
-
-  // "#d2c8f1", "#323135", "#000", "#1b1b1b", "white"
   return (
-      <ThemeProvider theme={theme()}>
-        <CssBaseline />
-        <SnackbarProvider
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
-          maxSnack={3}
-          content={(key, notificationData) => (
-            <AntSnackBar id={key} notificationData={notificationData} />
-          )}
-        >
-          <CustomRoutes />
-        </SnackbarProvider>
-      </ThemeProvider>
+    <ThemeProvider theme={theme(currentTheme)}>
+      <CssBaseline/>
+      <SnackbarProvider
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        maxSnack={3}
+        content={(key, notificationData) => (
+          <AntSnackBar id={key} notificationData={notificationData}/>
+        )}
+      >
+        <ThemeContext.Provider
+          value={{
+            currentTheme,
+            setCurrentTheme,
+          }}>
+          <CustomRoutes/>
+        </ThemeContext.Provider>
+      </SnackbarProvider>
+    </ThemeProvider>
   );
 }
 

@@ -28,7 +28,7 @@ const getAntDrawerStyle = (theme) => {
         [theme.breakpoints.down('sm')]: {
           width: '100%',
           padding: 0,
-          backgroundColor: theme.palette.green70,
+          backgroundColor: theme.palette.themeColor70,
         },
       },
     }
@@ -46,7 +46,7 @@ const getAntDrawerStyle = (theme) => {
           [theme.breakpoints.down('sm')]: {
         width: '100%',
             padding: 0,
-            backgroundColor: theme.palette.green70,
+            backgroundColor: theme.palette.themeColor70,
       },
     },
     };
@@ -58,7 +58,7 @@ const AntDrawer = styled(Drawer)(({ theme }) => (getAntDrawerStyle(theme)));
 const MessageGrid = styled(Grid)(({ theme }) => ({
   position: 'relative',
   padding: 16,
-  background: theme.palette.green[70],
+  background: theme.palette.themeColor[70],
   borderRadius: 10,
 }));
 const TabGrid = styled(Grid)(({ theme }) => ({
