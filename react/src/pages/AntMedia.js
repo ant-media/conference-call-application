@@ -334,8 +334,6 @@ function AntMedia() {
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
-  const customContext = React.useContext(CustomContext);
-
   function handleUnauthorizedDialogExitClicked(){
 
     setUnAuthorizedDialogOpen(false)
