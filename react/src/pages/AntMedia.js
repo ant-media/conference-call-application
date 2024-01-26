@@ -793,8 +793,6 @@ function AntMedia() {
 
   };
 
-  window.makeFullScreen = makeFullScreen;
-
 
 
   function setLocalVideo() {
