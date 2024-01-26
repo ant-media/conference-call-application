@@ -80,6 +80,17 @@ function LayoutTiled(props) {
       <>
         {
           playingParticipants.map((element, index) => {
+            let isPlayOnly
+            try {
+              isPlayOnly = JSON.parse(conference?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
+            } catch (e) {
+              isPlayOnly = false;
+            }
+
+            if (element.name === "" || typeof element.name === 'undefined' || isPlayOnly || element.name === "Anonymous") {
+              return null;
+            }
+
             //console.log("cw:"+cardWidth+" ch:"+cardHeight);
             return (
               <div

@@ -156,6 +156,26 @@ function OptionButton({footer, ...props}) {
           </MenuItem>
           : null}
 
+        {conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true ?
+          <MenuItem onClick={() => { conference.startRecord(); handleClose(); } }
+          >
+            <ListItemIcon>
+              <SvgIcon size={36} name={"camera"} color={"white"} />
+            </ListItemIcon>
+            <ListItemText>{t("Start Record")}</ListItemText>
+          </MenuItem>
+          : null}
+
+        {conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true ?
+          <MenuItem onClick={() => { conference.stopRecord(); handleClose(); }}
+          >
+            <ListItemIcon>
+              <SvgIcon size={36} name={"camera"} color={"white"} />
+            </ListItemIcon>
+            <ListItemText>{t("Stop Record")}</ListItemText>
+          </MenuItem>
+          : null}
+
         {process.env.REACT_APP_OPTION_MENU_REPORT_PROBLEM_BUTTON_VISIBILITY === 'true' ?
           <MenuItem
             component={"a"}
