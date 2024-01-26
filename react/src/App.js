@@ -58,9 +58,9 @@ export const ThemeContext = React.createContext(null);
 
 function App()
 {
-  React.useEffect(() => {
   const [currentTheme, setCurrentTheme] = React.useState(selectedTheme);
 
+  React.useEffect(() => {
   const handleFullScreen = (e) => {
     if (e.target?.id === "meeting-gallery") {
       if (!document.fullscreenElement) {
@@ -70,7 +70,7 @@ function App()
       }
     }
   }
-  
+
     window.addEventListener("dblclick", handleFullScreen);
 
     // cleanup this component
