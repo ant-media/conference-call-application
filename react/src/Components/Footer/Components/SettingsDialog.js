@@ -49,17 +49,17 @@ const SettingsDialog = React.memo((props) => {
     onClose(selectedValue);
   }, [onClose, selectedValue]);
 
-  const switchVideoMode = React.useCallback((value) => {
-    conference.cameraSelected(value);
+  const switchVideoMode = React.useCallback((event) => {
+    conference.cameraSelected(event.target.value);
   }, [conference]);
 
-  const switchAudioMode = React.useCallback((value) => {
-    conference.microphoneSelected(value);
+  const switchAudioMode = React.useCallback((event) => {
+    conference.microphoneSelected(event.target.value);
   }, [conference]);
 
-  const setBackground = React.useCallback((value) => {
-    conference.setSelectedBackgroundMode(value);
-    conference.handleBackgroundReplacement(value);
+  const setBackground = React.useCallback((event) => {
+    conference.setSelectedBackgroundMode(event.target.value);
+    conference.handleBackgroundReplacement(event.target.value);
   }, [conference]);
 
   React.useEffect(() => {
@@ -77,7 +77,115 @@ const SettingsDialog = React.memo((props) => {
     <Dialog onClose={handleClose} open={open} fullScreen={fullScreen} maxWidth={'sm'}>
       <AntDialogTitle onClose={handleClose}>{t('Set Camera and Microphone')}</AntDialogTitle>
       <DialogContent>
-        {/* ... (rest of your component code) */}
+        <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
+          <Grid container>
+            <Grid container>
+              <InputLabel>{t('Camera')}</InputLabel>
+            </Grid>
+            <Grid container alignItems={'center'} spacing={2}>
+              <Grid item xs={10}>
+                <Select
+                  autoFocus={selectFocus === 'camera'}
+                  fullWidth
+                  id="demo-dialog-native"
+                  variant="outlined"
+                  value={conference.selectedCamera}
+                  onChange={switchVideoMode}
+                  sx={{ color: 'white' }}
+                >
+                  {conference.devices && conference.devices?.length > 0 && conference.devices
+                    .filter(device => device.kind === 'videoinput')
+                    .map(device => (
+                      <MenuItem key={device.deviceId} value={device.deviceId}>
+                        {device.label}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </Grid>
+              <Hidden xsDown>
+                <Grid item>
+                  <SvgIcon size={30} name={'camera'} color={'white'} />
+                </Grid>
+              </Hidden>
+            </Grid>
+          </Grid>
+          <Grid container sx={{ mt: 4 }}>
+            <Grid container>
+              <InputLabel>{t('Video Send resolution (maximum)')}</InputLabel>
+            </Grid>
+            <Grid container alignItems={'center'} spacing={2}>
+              <Grid item xs={10}>
+                <Select variant="outlined" fullWidth value={conference.videoSendResolution} onChange={e => conference.setVideoSendResolution(e.target.value)} sx={{ color: 'white' }}>
+                  <MenuItem key="auto" value="auto">
+                    {t('Auto')}
+                  </MenuItem>
+                  <MenuItem key="high-definition" value="highDefinition">
+                    {t('High definition (720p)')}
+                  </MenuItem>
+                  <MenuItem key="standart-definition" value="standardDefinition">
+                    {t('Standard definition (360p)')}
+                  </MenuItem>
+                  <MenuItem key="low-definition" value="lowDefinition">
+                    {t('Low definition (180p)')}
+                  </MenuItem>
+                </Select>
+              </Grid>
+              <Hidden xsDown>
+                <Grid item>
+                  <SvgIcon size={36} name={'resolution'} color={'white'} />
+                </Grid>
+              </Hidden>
+            </Grid>
+          </Grid>
+          <Grid container sx={{ mt: 4 }}>
+            <Grid container>
+              <InputLabel>{t('Microphone')}</InputLabel>
+            </Grid>
+            <Grid container alignItems={'center'} spacing={2}>
+              <Grid item xs={10}>
+                <Select autoFocus={selectFocus === 'audio'} variant="outlined" fullWidth value={conference.selectedMicrophone} onChange={switchAudioMode} sx={{ color: 'white' }}>
+                  {conference.devices && conference.devices?.length > 0 && conference.devices
+                    .filter(device => device.kind === 'audioinput')
+                    .map(device => (
+                      <MenuItem key={device.deviceId} value={device.deviceId}>
+                        {device.label}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </Grid>
+              <Hidden xsDown>
+                <Grid item>
+                  <SvgIcon size={36} name={'microphone'} color={'white'} />
+                </Grid>
+              </Hidden>
+            </Grid>
+          </Grid>
+          <Grid container sx={{ mt: 4 }}>
+            <Grid container>
+              <InputLabel>{t('Background')}</InputLabel>
+            </Grid>
+            <Grid container alignItems={'center'} spacing={2}>
+              <Grid item xs={10}>
+                <Select variant="outlined" fullWidth value={conference.selectedBackgroundMode} onChange={setBackground} sx={{ color: 'white' }}>
+                  <MenuItem key="none" value="none">
+                    {t('No Effect')}
+                  </MenuItem>
+                  <MenuItem key="blur" value="blur">
+                    {t('Blur Background')}
+                  </MenuItem>
+                  <MenuItem key="background" value="background">
+                    {t('Virtual Background')}
+                  </MenuItem>
+                </Select>
+              </Grid>
+              <Hidden xsDown>
+                <Grid item>
+                  <SvgIcon size={36} name={'background-replacement'} color={'white'} />
+                </Grid>
+              </Hidden>
+            </Grid>
+          </Grid>
+        </Box>
       </DialogContent>
     </Dialog>
   );

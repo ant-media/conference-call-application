@@ -1,26 +1,12 @@
 import React, { useContext } from "react";
-import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
 import { SvgIcon } from "../../SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import { Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useSnackbar } from "notistack";
+import CustomizedButton from "./CustomizedButton";
 
 
-const CustomizedBtn = styled(Button)(({ theme }) => ({
-  "&.footer-icon-button": {
-    height: "100%",
-    [theme.breakpoints.down("sm")]: {
-      padding: 8,
-      minWidth: "unset",
-      width: "100%",
-    },
-    "& > svg": {
-      width: 36,
-    },
-  },
-}));
 
 function CameraButton(props) {
   const { rounded, footer } = props;
@@ -82,19 +68,19 @@ function CameraButton(props) {
     <>
       {conference?.isMyCamTurnedOff ? (
         <Tooltip title={conference.isScreenShared ? t('Camera is disabled while screensharing') : t('Turn on camera')} placement="top">
-          <CustomizedBtn 
+          <CustomizedButton 
             id="camera-button"
             className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={conference.isScreenShared} onClick={handleOn}>
             <SvgIcon size={40} name={'camera-off'} color="#fff" />
-          </CustomizedBtn>
+          </CustomizedButton>
         </Tooltip>
       ) : (
         <Tooltip title={conference.isScreenShared ? t('Camera is disabled while screensharing') : t('Turn off camera')} placement="top">
-          <CustomizedBtn 
+          <CustomizedButton 
             id="camera-button"
             className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={conference.isScreenShared} onClick={handleOff}>
             <SvgIcon size={40} name={'camera'} color='inherit' />
-          </CustomizedBtn>
+          </CustomizedButton>
         </Tooltip>
       )}
     </>

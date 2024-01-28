@@ -1,30 +1,16 @@
 import React, { useContext } from 'react';
-import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
 import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import CustomizedButton from './CustomizedButton';
 
-const CustomizedBtn = styled(Button)(({ theme }) => ({
-  '&.footer-icon-button':{
-    height: '100%',
-    [theme.breakpoints.down('sm')]:{
-      padding:8,
-      minWidth: 'unset',
-      width: '100%',
-      '& > svg': {
-        width: 36
-      },
-    },
-  }
-}));
 
 function FakeParticipantButton({ footer, increment, ...props }) {
   const {t} = useTranslation();
   const conference = useContext(ConferenceContext);
   return (
       <Tooltip title={t((increment?'Add':'Remove')+' Fake Participant')} placement="top">
-        <CustomizedBtn
+        <CustomizedButton
           onClick={() => {
             console.log("add/remove");
             if(increment) {
@@ -39,7 +25,7 @@ function FakeParticipantButton({ footer, increment, ...props }) {
           color='secondary'
         >
           {increment ? "+" : "-"}
-        </CustomizedBtn>
+        </CustomizedButton>
       </Tooltip>
   );
 }

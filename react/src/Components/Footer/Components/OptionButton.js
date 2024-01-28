@@ -1,28 +1,14 @@
 import React, { useState, useContext, useCallback } from "react";
-import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { styled } from "@mui/material/styles";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ConferenceContext } from 'pages/AntMedia';
 import  SettingsDialog   from "./SettingsDialog";
 import LayoutSettingsDialog from "./LayoutSettingsDialog";
 import { SvgIcon } from "Components/SvgIcon";
+import CustomizedButton from "./CustomizedButton";
 
-const CustomizedBtn = styled(Button)(({ theme }) => ({
-  "&.footer-icon-button": {
-    height: "100%",
-    [theme.breakpoints.down("sm")]: {
-      padding: 8,
-      minWidth: "unset",
-      width: "100%",
-      "& > svg": {
-        width: 36,
-      },
-    },
-  },
-}));
 
 const OptionButton = React.memo(({ footer }) => {
   const conference = useContext(ConferenceContext);
@@ -74,7 +60,7 @@ const OptionButton = React.memo(({ footer }) => {
         selectFocus={selectFocus}
       />
       <Tooltip title={t("More options")} placement="top">
-        <CustomizedBtn
+        <CustomizedButton
           className={footer ? "footer-icon-button" : ""}
           id="settings-button"
           variant="contained"
@@ -85,7 +71,7 @@ const OptionButton = React.memo(({ footer }) => {
           onClick={handleClick}
         >
           <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'white'} />
-        </CustomizedBtn>
+        </CustomizedButton>
       </Tooltip>
       <Menu
         id="basic-menu"

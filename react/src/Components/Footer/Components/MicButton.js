@@ -1,11 +1,10 @@
 import React, { useContext, useCallback } from 'react';
-import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
 import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import CustomizedButton from './CustomizedButton';
 
 export const roundStyle = {
   width: { xs: 36, md: 46 },
@@ -16,20 +15,6 @@ export const roundStyle = {
   borderRadius: '50%',
   padding: '4px',
 };
-
-export const CustomizedBtn = styled(Button)(({ theme }) => ({
-  '&.footer-icon-button': {
-    height: '100%',
-    [theme.breakpoints.down('sm')]: {
-      padding: 8,
-      minWidth: 'unset',
-      width: '100%',
-    },
-    '& > svg': {
-      width: 36
-    },
-  }
-}));
 
 const MicButton = React.memo(({ rounded, footer }) => {
   const conference = useContext(ConferenceContext);
@@ -74,7 +59,7 @@ const MicButton = React.memo(({ rounded, footer }) => {
     <>
       {conference.isMyMicMuted ? (
         <Tooltip title={t('Turn on microphone')} placement="top">
-          <CustomizedBtn
+          <CustomizedButton
             id="mic-button"
             className={footer ? 'footer-icon-button' : ''}
             variant="contained"
@@ -83,11 +68,11 @@ const MicButton = React.memo(({ rounded, footer }) => {
             onClick={handleUnmute}
           >
             <SvgIcon size={40} name={'muted-microphone'} color="#fff" />
-          </CustomizedBtn>
+          </CustomizedButton>
         </Tooltip>
       ) : (
         <Tooltip title={t('Turn off microphone')} placement="top">
-          <CustomizedBtn
+          <CustomizedButton
             id="mic-button"
             className={footer ? 'footer-icon-button' : ''}
             variant="contained"
@@ -96,7 +81,7 @@ const MicButton = React.memo(({ rounded, footer }) => {
             onClick={handleMute}
           >
             <SvgIcon size={40} name={'microphone'} color='inherit' />
-          </CustomizedBtn>
+          </CustomizedButton>
         </Tooltip>
       )}
     </>

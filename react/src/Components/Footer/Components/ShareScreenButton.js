@@ -1,24 +1,10 @@
 import React, { useContext, useCallback } from "react";
-import Button from "@mui/material/Button";
 import { SvgIcon } from "../../SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import { Tooltip } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import CustomizedButton from "./CustomizedButton";
 
-const CustomizedBtn = styled(Button)(({ theme }) => ({
-  "&.footer-icon-button": {
-    height: "100%",
-    [theme.breakpoints.down("sm")]: {
-      padding: 8,
-      minWidth: "unset",
-      width: "100%",
-    },
-    "& > svg": {
-      width: 36,
-    },
-  },
-}));
 
 const ShareScreenButton = React.memo(({ footer, ...props }) => {
   const { t } = useTranslation();
@@ -41,7 +27,7 @@ const ShareScreenButton = React.memo(({ footer, ...props }) => {
       }
       placement="top"
     >
-      <CustomizedBtn
+      <CustomizedButton
         className={footer ? "footer-icon-button" : ""}
         id="share-screen-button"
         onClick={toggleScreenShare}
@@ -53,7 +39,7 @@ const ShareScreenButton = React.memo(({ footer, ...props }) => {
           size={40}
           name={"share-screen-off"}
         />
-      </CustomizedBtn>
+      </CustomizedButton>
     </Tooltip>
   );
 });

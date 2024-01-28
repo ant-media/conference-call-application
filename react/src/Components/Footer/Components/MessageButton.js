@@ -1,24 +1,10 @@
 import React, { useContext } from 'react';
-import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
 import { SvgIcon } from '../../SvgIcon';
 import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip, Badge } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import CustomizedButton from './CustomizedButton';
 
-const CustomizedBtn = styled(Button)(({ theme }) => ({
-  '&.footer-icon-button':{
-    height: '100%',
-    [theme.breakpoints.down('sm')]:{
-      padding:8,
-      minWidth: 'unset',
-      width: '100%',
-      '& > svg': {
-        width: 36
-      },
-    },
-  }
-}));
 
 const MessageButton = React.memo(({ footer }) => {
   const {t} = useTranslation();
@@ -43,14 +29,14 @@ const MessageButton = React.memo(({ footer }) => {
       style={{height: '100%',width:'100%'}}
     >
       <Tooltip title={t('Chat with everyone')} placement="top">
-        <CustomizedBtn
+        <CustomizedButton
           onClick={toggleMessageDrawerOpen}
           variant="contained"
           className={footer ? 'footer-icon-button' : ''}
           color={conference?.messageDrawerOpen ? 'primary' : 'secondary'}
         >
           <SvgIcon size={40} color={conference?.messageDrawerOpen ? 'black' : 'white'} name={'message-off'} />
-        </CustomizedBtn>
+        </CustomizedButton>
       </Tooltip>
     </Badge>
   );
