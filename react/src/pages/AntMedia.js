@@ -1490,15 +1490,20 @@ function AntMedia() {
       currentStreamName = "Anonymous"
     }
 
-    webRTCAdaptor.publish(
-      publishStreamId,
-      token,
-      subscriberId,
-      subscriberCode,
-      currentStreamName,
-      roomName,
-      JSON.stringify(userStatusMetadata)
-    );
+    // if signalling state is stable then we are not going to publish again.
+    if (webRTCAdaptor.signallingState(publishStreamId) !== "stable") {
+      webRTCAdaptor.publish(
+        publishStreamId,
+        token,
+        subscriberId,
+        subscriberCode,
+        currentStreamName,
+        roomName,
+        JSON.stringify(userStatusMetadata)
+      );
+    } else {
+      console.log("Signalling state is stable. Not publishing again.");
+    }
   }
 
   function handlePlayVideo(obj) {
