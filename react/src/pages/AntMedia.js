@@ -362,12 +362,28 @@ function AntMedia() {
       const camera = devices.find(d => d.kind === 'videoinput');
       if (camera) {
         selectedDevices.videoDeviceId = camera.deviceId;
+      } else {
+        console.error("Unable to access Camera");
+        enqueueSnackbar({
+          message: t('Unable to access Camera'),
+          variant: 'error',
+        }, {
+          autoHideDuration: 1500,
+        });
       }
     }
     if (selectedDevices.audioDeviceId === '' || isAudioDeviceAvailable === false) {
       const audio = devices.find(d => d.kind === 'audioinput');
       if (audio) {
         selectedDevices.audioDeviceId = audio.deviceId;
+      } else {
+        console.error("Unable to access Microphone");
+        enqueueSnackbar({
+          message: t('Unable to access Microphone'),
+          variant: 'error',
+        }, {
+          autoHideDuration: 1500,
+        });
       }
     }
 
