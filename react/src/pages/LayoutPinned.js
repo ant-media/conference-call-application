@@ -91,6 +91,7 @@ function LayoutPinned (props) {
   const othersCard = () => {
     return (
       <>
+      {showOthers ? (
         <div className="unpinned">
         <div className="single-video-container  others-tile-wrapper">
         <OthersCard
@@ -98,6 +99,8 @@ function LayoutPinned (props) {
         />
         </div>
       </div>
+        ) : null
+      }
       </>
     );
   }
