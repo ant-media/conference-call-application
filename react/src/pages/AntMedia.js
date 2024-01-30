@@ -182,6 +182,8 @@ if (!websocketURL) {
 
 }
 
+websocketURL = "wss://meet.antmedia.io/Conference/websocket";
+
 var fullScreenId = -1;
 
 if (mcuEnabled == null) {

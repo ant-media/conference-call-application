@@ -91,6 +91,12 @@ function LayoutTiled(props) {
               return null;
             }
 
+            var mcardHeight = cardHeight;
+            var ismobilAndLocalvideo = element.id==="localVideo" && conference.globals.isMobileDevice;
+            if(ismobilAndLocalvideo) {
+              mcardHeight = cardHeight + 100;
+            }
+
             //console.log("cw:"+cardWidth+" ch:"+cardHeight);
             return (
               <div
@@ -98,7 +104,7 @@ function LayoutTiled(props) {
                   key={index}
                   style={{
                     width: cardWidth + "px",
-                    height: cardHeight + "px",
+                    height: ismobilAndLocalvideo ? mcardHeight +"px" : cardHeight + "px",
                   }}
               >
                 <VideoCard

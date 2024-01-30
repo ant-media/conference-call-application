@@ -261,7 +261,7 @@ function VideoCard(props) {
         >
           <CustomizedVideo
             {...props}
-            style={{ objectFit: props.pinned || isScreenSharedVideo ? "contain" : "cover" }}
+            style={{ objectFit: props.pinned || isScreenSharedVideo || conference.globals.isMobileDevice ? "contain" : "cover" }}
             ref={refVideo}
             playsInline
             muted={isLocal}
@@ -368,6 +368,7 @@ function VideoCard(props) {
           height: "100%",
           width: "100%",
           position: "relative",
+          margin: "auto"
         }}
         onMouseEnter={() => setDisplayHover(true)}
         onMouseLeave={(e) => setDisplayHover(false)}
