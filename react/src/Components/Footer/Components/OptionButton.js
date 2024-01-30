@@ -9,6 +9,7 @@ import { LayoutSettingsDialog } from "./LayoutSettingsDialog";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ConferenceContext } from 'pages/AntMedia';
+import {GeneralSettingsDialog} from "./GeneralSettingsDialog";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -31,6 +32,7 @@ function OptionButton({ footer, ...props }) {
   const open = Boolean(anchorEl);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
+  const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
 
   // if you select camera then we are going to focus on camera button.
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -60,6 +62,16 @@ function OptionButton({ footer, ...props }) {
     setLayoutDialogOpen(false);
   };
 
+  const handleGeneralSettingsDialogOpen = (focus) => {
+    setSelectFocus(focus);
+    setGeneralSettingsDialogOpen(true);
+    handleClose();
+  }
+
+  const handleGeneralSettingsDialogClose = (value) => {
+    setGeneralSettingsDialogOpen(false);
+  }
+
     return (
         <>
           <SettingsDialog
@@ -72,10 +84,15 @@ function OptionButton({ footer, ...props }) {
               onClose={handleLayoutDialogClose}
               selectFocus={selectFocus}
           />
+          <GeneralSettingsDialog
+            open={generalSettingsDialogOpen}
+            onClose={handleGeneralSettingsDialogClose}
+            selectFocus={selectFocus}
+          />
           <Tooltip title={t("More options")} placement="top">
             <CustomizedBtn
                 className={footer ? "footer-icon-button" : ""}
-                id="demo-positioned-button"
+                id="settings-button"
                 variant="contained"
                 color={open ? "primary" : "secondary"}
                 aria-controls={open ? "demo-positioned-menu" : undefined}
@@ -103,11 +120,26 @@ function OptionButton({ footer, ...props }) {
                 horizontal: "left",
               }}
           >
+            <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
+              <ListItemIcon>
+                <SvgIcon size={36} name={"settings"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText
+                id="general-button"
+              >
+                {t("General")}
+              </ListItemText>
+            </MenuItem>
+
             <MenuItem onClick={() => handleLayoutDialogOpen()}>
               <ListItemIcon>
                 <SvgIcon size={36} name={"layout"} color={"white"} />
               </ListItemIcon>
-              <ListItemText>{t("Change Layout")}</ListItemText>
+              <ListItemText
+                id="change-layout-button"
+              >
+                {t("Change Layout")}
+              </ListItemText>
             </MenuItem>
 
               {conference.isPlayOnly === false ?
@@ -118,6 +150,26 @@ function OptionButton({ footer, ...props }) {
               <ListItemText>{t("Call Settings")}</ListItemText>
             </MenuItem>
                     : null}
+
+            {conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true ?
+            <MenuItem onClick={() => { conference.startRecord(); handleClose(); } }
+            >
+              <ListItemIcon>
+                <SvgIcon size={36} name={"camera"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Start Record")}</ListItemText>
+            </MenuItem>
+                : null}
+
+            {conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true ?
+            <MenuItem onClick={() => { conference.stopRecord(); handleClose(); }}
+            >
+              <ListItemIcon>
+                <SvgIcon size={36} name={"camera"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Stop Record")}</ListItemText>
+            </MenuItem>
+                : null}
 
             <MenuItem
                 component={"a"}

@@ -5,6 +5,7 @@ import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
 import { useTranslation } from "react-i18next";
+
 const CustomizedVideo = styled("video")({
   borderRadius: 4,
   width: "100%",
@@ -34,10 +35,10 @@ function VideoCard(props) {
     position: "relative",
   };
 
-  const refVideo = useCallback(
-    (node) => {
+  const refVideo = useCallback( (node) => {
       if (node && props.track) {
         node.srcObject = new MediaStream([props.track]);
+        node.play().then(()=> {}).catch((e) => { console.log("play failed because ", e)});
       }
     },
     [props.track]
@@ -130,6 +131,8 @@ function VideoCard(props) {
 
   const timeoutRef = React.useRef(null);
 
+  const isScreenSharedVideo = (conference?.screenSharedVideoId === props?.id) || (conference?.isScreenShared === true && isLocal);
+
   const mirrorView = isLocal && !conference?.isScreenShared;
   //const isScreenSharing =
   //  conference?.isScreenShared ||
@@ -197,7 +200,7 @@ function VideoCard(props) {
               >
                 <SvgIcon
                   size={36}
-                  name={props.pinned ? t("unpin") : t("pin")}
+                  name={props.pinned ? "unpin" : "pin"}
                   color={theme.palette.grey[80]}
                 />
               </Fab>
@@ -258,7 +261,7 @@ function VideoCard(props) {
         >
           <CustomizedVideo
             {...props}
-            style= {{ objectFit: props.pinned || conference.globals.isMobileDevice ? "contain" : "cover" }}
+            style={{ objectFit: props.pinned || isScreenSharedVideo ? "contain" : "cover" }}
             ref={refVideo}
             playsInline
             muted={isLocal}
@@ -287,7 +290,9 @@ function VideoCard(props) {
         {micMuted && (
           <Tooltip title={t("mic is muted")} placement="top">
             <Grid item>
-              <CustomizedBox sx={cardBtnStyle}>
+              <CustomizedBox
+                id={"mic-muted-"+props.id}
+                sx={cardBtnStyle}>
                 <SvgIcon size={32} name={"muted-microphone"} color="#fff" />
               </CustomizedBox>
             </Grid>
@@ -339,6 +344,7 @@ function VideoCard(props) {
       <div
         className="talking-indicator-light"
         style={{
+          borderColor: theme.palette.themeColor[20],
           ...(isTalking || conference.talkers.includes(props.streamId)
             ? {}
             : { display: "none" }),
@@ -353,16 +359,15 @@ function VideoCard(props) {
       conference.setLocalVideo();
     }
   };
-  
+
   return isLocal || props.track?.kind !== "audio" ? (
     <>
       <Grid
         container
         style={{
           height: "100%",
-          width:  "100%", 
+          width: "100%",
           position: "relative",
-          margin: "auto"
         }}
         onMouseEnter={() => setDisplayHover(true)}
         onMouseLeave={(e) => setDisplayHover(false)}
@@ -372,12 +377,7 @@ function VideoCard(props) {
 
         <div
           className={`single-video-card`}
-        // style={{
-        //   ...(isTalking || conference.talkers.includes(props.id) ? {
-        //     outline: `thick solid ${theme.palette.primary.main}`,
-        //     borderRadius: '10px'
-        //   } : {})
-        // }}
+          id={'card-'+(props.id !== undefined ? props?.id : "")}
         >
           {avatarOrPlayer()}
 

@@ -54,6 +54,7 @@
     </bean>
     
     <bean id="streamAcceptFilter" class="io.antmedia.filter.StreamAcceptFilter"/>
+	<bean id="conferenceRoomSettings" class="io.antmedia.enterprise.streamapp.ConferenceRoomSettings"/>
 
 	<!-- Defines the web handler which acts as an applications endpoint -->
 	<bean id="web.handler" class="#{ T(io.antmedia.rest.RestServiceBase).isEnterprise() ? 'io.antmedia.enterprise.webrtc.WebRTCApplication' : 'io.antmedia.AntMediaApplicationAdapter' }">
