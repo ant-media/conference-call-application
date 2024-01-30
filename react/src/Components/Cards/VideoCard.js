@@ -261,7 +261,7 @@ function VideoCard(props) {
         >
           <CustomizedVideo
             {...props}
-            style={{ objectFit: props.pinned || isScreenSharedVideo ? "contain" : "cover" }}
+            style={{ objectFit: "contain" }}
             ref={refVideo}
             playsInline
             muted={isLocal}
