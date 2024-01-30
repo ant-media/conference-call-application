@@ -16,6 +16,7 @@ import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
 import { getRoomNameAttribute } from 'utils';
 import ReactionsButton from "./Components/ReactionsButton";
+import MoreOptionsButton from "./Components/MoreOptionsButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -25,8 +26,7 @@ const getCustomizedGridStyle = (theme) => {
     left: 0,
     padding: 16,
     width: "100vw",
-    zIndex: 2,
-    height: 80,
+    zIndex: 101,
   };
 
   if (getRoomNameAttribute()) {
@@ -44,7 +44,23 @@ function Footer(props) {
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
 
+  const mobileBreakpoint = 900;
+
   const [isRecordingTextVisible, setIsRecordingTextVisible] = React.useState(false);
+
+  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   React.useEffect(() => {
     //debugger;
@@ -94,28 +110,35 @@ function Footer(props) {
                     <MicButton footer/>
                   </Grid>
                       : null}
-
-                  {conference.isPlayOnly === false ?
+                  {(conference.isPlayOnly === false) && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     {" "}
                     <ShareScreenButton footer/>
                   </Grid>
                       : null}
 
-                  <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
-                    <ReactionsButton footer/>
-                  </Grid>
+                  {windowWidth > mobileBreakpoint ? (
+                    <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
+                      <ReactionsButton footer/>
+                    </Grid>)
+                    : null}
 
-                  <Grid item xs={0}>
-                    <MessageButton footer/>
-                  </Grid>
-                  <Grid item xs={0}>
-                      <ParticipantListButton footer />
-                  </Grid>
+                  {windowWidth > mobileBreakpoint ? (
+                    <Grid item xs={0}>
+                      <MessageButton footer/>
+                    </Grid>)
+                    : null}
+
+                  {windowWidth > mobileBreakpoint ? (
+                    <Grid item xs={0}>
+                        <ParticipantListButton footer />
+                    </Grid>)
+                    : null}
+
                   <Grid item xs={0}>
                     <EndCallButton footer/>
                   </Grid>
-                  {process.env.NODE_ENV === "development" ?
+                  {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     <FakeParticipantButton
                       footer
@@ -124,7 +147,7 @@ function Footer(props) {
                   </Grid>
                   : null}
 
-                  {process.env.NODE_ENV === "development" ?
+                  {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     <FakeParticipantButton
                       footer
@@ -132,6 +155,12 @@ function Footer(props) {
                     />
                   </Grid>
                   : null}
+
+                  {windowWidth <= mobileBreakpoint ? (
+                    <Grid item xs={0}>
+                      <MoreOptionsButton footer/>
+                    </Grid>
+                  ) : null}
 
                 </Grid>
               </Grid>
