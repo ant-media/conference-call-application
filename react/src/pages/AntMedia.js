@@ -17,6 +17,7 @@ import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
 import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
 import { useWebSocket } from 'Components/WebSocketProvider';
+import {useTranslation} from "react-i18next";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -180,8 +181,6 @@ if (!websocketURL) {
 
 }
 
-websocketURL = "ws://localhost:5080/Conference/websocket";
-
 var fullScreenId = -1;
 
 if (mcuEnabled == null) {
@@ -215,6 +214,8 @@ var publishReconnected;
 var playReconnected;
 
 function AntMedia() {
+  const { t } = useTranslation();
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const roomName = id;
@@ -1546,13 +1547,19 @@ function AntMedia() {
       localStorage.setItem('customBackgroundImage', base64Image);
 
       console.log('Image saved to local storage.');
+      enqueueSnackbar({
+        message: t('Image is uploaded successfully.'),
+        variant: 'info'
+      }, {
+        autoHideDuration: 2500,
+      });
     };
 
     // Read the file as a Data URL (base64)
     reader.readAsDataURL(file);
   }
 
-  function setVirtualBackgroundImage(imageUrl) {
+  function setAndEnableVirtualBackgroundImage(imageUrl) {
     let virtualBackgroundImage = document.createElement("img");
     virtualBackgroundImage.id = "virtualBackgroundImage";
     virtualBackgroundImage.style.visibility = "hidden";
@@ -1569,6 +1576,14 @@ function AntMedia() {
       console.log("Virtual background image is loaded");
       setVirtualBackground(virtualBackgroundImage);
       webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+
+      webRTCAdaptor.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
+        console.log("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is enabled");
+        setIsVideoEffectRunning(true);
+      }).catch(err => {
+        console.error("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is not enabled. Error is " + err);
+        setIsVideoEffectRunning(false);
+      });
     };
   }
 
@@ -1583,10 +1598,9 @@ function AntMedia() {
       setIsVideoEffectRunning(true);
     } else if (option === "background") {
       if (virtualBackground === null) {
-        setVirtualBackgroundImage(null);
+        setAndEnableVirtualBackgroundImage(null);
       }
-      effectName = VideoEffect.VIRTUAL_BACKGROUND
-      setIsVideoEffectRunning(true);
+      return;
     }
     webRTCAdaptor.enableEffect(effectName).then(() => {
       console.log("Effect: " + effectName + " is enabled");
@@ -1916,7 +1930,7 @@ function AntMedia() {
               isEnterDirectly,
               effectsDrawerOpen,
               handleEffectsOpen,
-              setVirtualBackgroundImage,
+              setAndEnableVirtualBackgroundImage,
               saveCustomBackgroundImageToLocalStorage
             }}
           >

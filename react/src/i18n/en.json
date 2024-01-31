@@ -85,5 +85,7 @@
   "Dislike": "Dislike",
   "Other": "Other",
   "Others": "Others",
-  "Virtual Effects": "Virtual Effects"
+  "Virtual Effects": "Virtual Effects",
+  "Image is uploaded successfully.": "Image is uploaded successfully.",
+  "Image size cannot exceed more than 1MB.": "Image size cannot exceed more than 1MB."
 }

@@ -83,5 +83,7 @@
   "Dislike": "Je n'aime pas",
   "Other": "Autre",
   "Others": "Autres",
-  "Virtual Effects": "Effets virtuels"
+  "Virtual Effects": "Effets virtuels",
+  "Image is uploaded successfully.": "L'image a été téléchargée avec succès.",
+  "Image size cannot exceed more than 1MB.": "La taille de l'image ne peut pas dépasser 1 Mo."
 }

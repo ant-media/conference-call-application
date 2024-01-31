@@ -83,5 +83,7 @@
   "Dislike": "Beğenmedim",
   "Other": "Diger Katılımcı",
   "Others": "Diger Katılımcı",
-  "Virtual Effects": "Sanal Efektler"
+  "Virtual Effects": "Sanal Efektler",
+  "Image is uploaded successfully.": "Resim başarıyla yüklendi.",
+  "Image size cannot exceed more than 1MB.": "Resim boyutu 1MB'dan fazla olamaz."
 }

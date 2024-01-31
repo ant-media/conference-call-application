@@ -6,32 +6,29 @@ import { ConferenceContext } from "pages/AntMedia";
 import {CustomizedBtn} from "./Footer/Components/MicButton";
 import {useTheme} from "@mui/material";
 import virtualBackgroundImageData from 'virtualBackground.json';
+import {useSnackbar} from "notistack";
+import {useTranslation} from "react-i18next";
 
 function EffectsTab() {
   const conference = React.useContext(ConferenceContext);
+  const { t } = useTranslation();
+  const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
-
-  const [virtualBackgroundFile, setVirtualBackgroundFile] = React.useState(null);
-
-  React.useEffect(() => {
-    if (virtualBackgroundFile !== null) {
-      let customBackgroundImage = localStorage.getItem("customBackgroundImage");
-      if (customBackgroundImage !== null) {
-        conference.setVirtualBackgroundImage(customBackgroundImage);
-        conference.handleBackgroundReplacement("background");
-      }
-    }
-  }, [virtualBackgroundFile]);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     const maxSize = 1024 * 1024; // 1MB
 
     if (selectedFile && selectedFile.size > maxSize) {
-      console.error("File size cannot exceed more than 1MB");
+      console.error("Image size cannot exceed more than 1MB");
+      enqueueSnackbar({
+        message: t('Image size cannot exceed more than 1MB.'),
+        variant: 'info'
+      }, {
+        autoHideDuration: 2500,
+      });
     } else {
       conference.saveCustomBackgroundImageToLocalStorage(selectedFile);
-      setVirtualBackgroundFile(selectedFile);
     }
   };
 
@@ -40,8 +37,7 @@ function EffectsTab() {
       <CustomizedBtn
         style={{background: theme.palette.themeColor[60], marginRight: 10, marginBottom: 10}}
         id="mic-button" onClick={(e) => {
-        conference.setVirtualBackgroundImage(imageSrc);
-        conference.handleBackgroundReplacement("background");
+        conference.setAndEnableVirtualBackgroundImage(imageSrc);
       }}>
         <img width={40} height={40} src={imageSrc}
              alt={"virtual background image " + i}></img>
@@ -58,7 +54,6 @@ function EffectsTab() {
     }
     let customBackgroundImage = localStorage.getItem("customBackgroundImage");
     if (customBackgroundImage !== null) {
-      console.log("customBackgroundImage", customBackgroundImage);
       images.push(
         getVirtualBackgroundButton(customBackgroundImage, virtualBackgroundImageData.virtualBackgroundImages.length+1)
       );
