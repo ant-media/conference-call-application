@@ -180,6 +180,8 @@ if (!websocketURL) {
 
 }
 
+websocketURL = "ws://localhost:5080/Conference/websocket";
+
 var fullScreenId = -1;
 
 if (mcuEnabled == null) {
