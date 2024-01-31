@@ -1604,8 +1604,10 @@ function AntMedia() {
     } else if (option === "background") {
       if (virtualBackground === null) {
         setAndEnableVirtualBackgroundImage(null);
+        return;
       }
-      return;
+      effectName = VideoEffect.VIRTUAL_BACKGROUND;
+      setIsVideoEffectRunning(true);
     }
     webRTCAdaptor.enableEffect(effectName).then(() => {
       console.log("Effect: " + effectName + " is enabled");
