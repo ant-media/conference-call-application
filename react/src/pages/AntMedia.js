@@ -1539,14 +1539,18 @@ function AntMedia() {
     virtualBackgroundImage.style.visibility = "hidden";
     virtualBackgroundImage.alt = "virtual-background";
 
+    console.log("Virtual background image url: " + imageUrl);
     if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
       virtualBackgroundImage.src = imageUrl;
     } else {
-      virtualBackgroundImage.src = "virtual-background.png";
+      virtualBackgroundImage.src = "virtual-background0.png";
     }
 
-    setVirtualBackground(virtualBackgroundImage);
-    webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+    virtualBackgroundImage.onload = () => {
+      console.log("Virtual background image is loaded");
+      setVirtualBackground(virtualBackgroundImage);
+      webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+    };
   }
 
   function handleBackgroundReplacement(option) {
