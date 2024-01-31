@@ -11,6 +11,7 @@ import LeftTheRoom from "./LeftTheRoom";
 import {getUrlParameter, VideoEffect, WebRTCAdaptor} from "@antmedia/webrtc_adaptor";
 import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
+import EffectsDrawer from "../Components/EffectsDrawer";
 
 import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
 import floating from "../external/floating.js";
@@ -1918,6 +1919,7 @@ function AntMedia() {
                   <MeetingRoom/>
                   <MessageDrawer/>
                   <ParticipantListDrawer/>
+                  <EffectsDrawer/>
                 </>
               )}
             </SnackbarProvider>

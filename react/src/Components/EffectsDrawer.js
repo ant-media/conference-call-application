@@ -96,7 +96,7 @@ const EffectsDrawer = React.memo(props => {
   }
 
   return (
-      <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={conference.effectsDrawerOpen} variant="persistent">
+      <AntDrawer transitionDuration={200} anchor={'right'} id="effects-drawer" open={conference.effectsDrawerOpen} variant="persistent">
         <EffectsGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
           <Grid item container justifyContent="space-between" alignItems="center">
             <Tabs

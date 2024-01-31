@@ -151,7 +151,7 @@ function OptionButton({ footer, ...props }) {
             </MenuItem>
                     : null}
 
-            <MenuItem onClick={() => handleDialogOpen()}>
+            <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }}>
               <ListItemIcon>
                 <SvgIcon size={36} name={"background-replacement"} color={"white"} />
               </ListItemIcon>
