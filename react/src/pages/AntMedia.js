@@ -1593,7 +1593,12 @@ function AntMedia() {
     if (option === "none") {
       effectName = VideoEffect.NO_EFFECT;
       setIsVideoEffectRunning(false);
+    } else if (option === "slight-blur") {
+      webRTCAdaptor?.setBlurEffectRange(3, 4);
+      effectName = VideoEffect.BLUR_BACKGROUND;
+      setIsVideoEffectRunning(true);
     } else if (option === "blur") {
+      webRTCAdaptor?.setBlurEffectRange(6, 8);
       effectName = VideoEffect.BLUR_BACKGROUND;
       setIsVideoEffectRunning(true);
     } else if (option === "background") {

@@ -77,6 +77,13 @@ function EffectsTab() {
               </CustomizedBtn>
               <CustomizedBtn
                 style={{background: theme.palette.themeColor[60], marginRight: 10}}
+                id="slight-blur-button" onClick={(e) => {
+                conference.handleBackgroundReplacement("slight-blur");
+              }}>
+                <SvgIcon size={40} name={'slight-blur'} color="#fff"/>
+              </CustomizedBtn>
+              <CustomizedBtn
+                style={{background: theme.palette.themeColor[60], marginRight: 10}}
                 id="blur-button" onClick={(e) => {
                 conference.handleBackgroundReplacement("blur");
               }}>
