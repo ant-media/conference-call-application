@@ -1533,15 +1533,7 @@ function AntMedia() {
     }
   }
 
-  function saveCustomBackgroundImageToLocalStorage() {
-    // Access the file input element and get the selected file
-    const input = document.getElementById('imageInput');
-    if (!input.files || input.files.length === 0) {
-      alert('Please select an image.');
-      return;
-    }
-    const file = input.files[0];
-
+  function saveCustomBackgroundImageToLocalStorage(file) {
     // Create a FileReader to read the file
     const reader = new FileReader();
 
@@ -1553,7 +1545,7 @@ function AntMedia() {
       // Store the base64 image in local storage
       localStorage.setItem('customBackgroundImage', base64Image);
 
-      alert('Image saved to local storage.');
+      console.log('Image saved to local storage.');
     };
 
     // Read the file as a Data URL (base64)

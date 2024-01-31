@@ -11,6 +11,30 @@ function EffectsTab() {
   const conference = React.useContext(ConferenceContext);
   const theme = useTheme();
 
+  const [virtualBackgroundFile, setVirtualBackgroundFile] = React.useState(null);
+
+  React.useEffect(() => {
+    if (virtualBackgroundFile !== null) {
+      let customBackgroundImage = localStorage.getItem("customBackgroundImage");
+      if (customBackgroundImage !== null) {
+        conference.setVirtualBackgroundImage(customBackgroundImage);
+        conference.handleBackgroundReplacement("background");
+      }
+    }
+  }, [virtualBackgroundFile]);
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    const maxSize = 1024 * 1024; // 1MB
+
+    if (selectedFile && selectedFile.size > maxSize) {
+      console.error("File size cannot exceed more than 1MB");
+    } else {
+      conference.saveCustomBackgroundImageToLocalStorage(selectedFile);
+      setVirtualBackgroundFile(selectedFile);
+    }
+  };
+
   function getVirtualBackgroundButton(imageSrc, i) {
     return <Grid item key={i}>
       <CustomizedBtn
@@ -67,7 +91,7 @@ function EffectsTab() {
             <Grid container>
               <p>Backgrounds</p>
             </Grid>
-            <input type="file" id="imageInput"/>
+            <input type="file" accept=".jpg, .jpeg, .png" style={{display: "none"}} onChange={handleFileChange} id="imageInput"/>
             <Grid container>
               <Grid item key={"add-background-image"}>
                 <CustomizedBtn
@@ -79,7 +103,7 @@ function EffectsTab() {
                     height: 60
                   }}
                   id="upload-background-image-button" onClick={(e) => {
-                  conference.saveCustomBackgroundImageToLocalStorage();
+                  document.getElementById("imageInput").click();
                 }}>
                   <SvgIcon size={40} name={'add-background-image'} color="#fff"/>
                 </CustomizedBtn>
