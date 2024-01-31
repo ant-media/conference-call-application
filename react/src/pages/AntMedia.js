@@ -265,6 +265,11 @@ function AntMedia() {
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
+  const [presenters, setPresenters] = React.useState([]);
+  const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
+
   const [reactions] = useState({
     'sparkling_heart': '💖',
     'thumbs_up': '👍🏼',
@@ -1879,7 +1884,15 @@ function AntMedia() {
               isRecordPluginActive,
               isEnterDirectly,
               publisherRequestListDrawerOpen,
-              setPublisherRequestListDrawerOpen
+              setPublisherRequestListDrawerOpen,
+              isAdmin,
+              setIsAdmin,
+              approvedSpeakerRequestList,
+              setApprovedSpeakerRequestList,
+              presenters,
+              setPresenters,
+              presenterButtonDisabled,
+              setPresenterButtonDisabled
             }}
           >
             <UnauthrorizedDialog
