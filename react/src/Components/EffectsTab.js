@@ -40,12 +40,12 @@ function EffectsTab() {
         conference.setAndEnableVirtualBackgroundImage(imageSrc);
       }}>
         <img width={40} height={40} src={imageSrc}
-             alt={"virtual background image " + i}></img>
+             alt={"virtual background image " + i} loading="lazy"></img>
       </CustomizedBtn>
     </Grid>;
   }
 
-  const getBackgroundImages = () => {
+  const getBackgroundImages = ()  => {
     const images = [];
     for (let i = 0; i < virtualBackgroundImageData.virtualBackgroundImages.length; i++) {
       images.push(
