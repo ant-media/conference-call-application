@@ -222,6 +222,9 @@ function AntMedia() {
   // drawerOpen for participant list components.
   const [participantListDrawerOpen, setParticipantListDrawerOpen] = useState(false);
 
+  // drawerOpen for effects components.
+  const [effectsDrawerOpen, setEffectsDrawerOpen] = useState(false);
+
   const [publishStreamId, setPublishStreamId] = useState(InitialStreamId);
 
   // this is my own name when i enter the room.
@@ -1070,6 +1073,7 @@ function AntMedia() {
     setMessageDrawerOpen(open);
     if (open) {
       setParticipantListDrawerOpen(false);
+      setEffectsDrawerOpen(false);
     }
   }
 
@@ -1077,6 +1081,15 @@ function AntMedia() {
     setParticipantListDrawerOpen(open);
     if (open) {
       setMessageDrawerOpen(false);
+      setEffectsDrawerOpen(false);
+    }
+  }
+
+  function handleEffectsOpen(open) {
+    setEffectsDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+      setParticipantListDrawerOpen(false);
     }
   }
 
@@ -1874,7 +1887,10 @@ function AntMedia() {
               stopRecord,
               isRecordPluginInstalled,
               isRecordPluginActive,
-              isEnterDirectly
+              isEnterDirectly,
+              effectsDrawerOpen,
+              handleEffectsOpen,
+              setVirtualBackgroundImage
             }}
           >
             <UnauthrorizedDialog
