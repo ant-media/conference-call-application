@@ -1533,6 +1533,33 @@ function AntMedia() {
     }
   }
 
+  function saveCustomBackgroundImageToLocalStorage() {
+    // Access the file input element and get the selected file
+    const input = document.getElementById('imageInput');
+    if (!input.files || input.files.length === 0) {
+      alert('Please select an image.');
+      return;
+    }
+    const file = input.files[0];
+
+    // Create a FileReader to read the file
+    const reader = new FileReader();
+
+    // Define what happens once the file is read
+    reader.onload = function(event) {
+      // The file content is in event.target.result, which is a data URL (base64)
+      const base64Image = event.target.result;
+
+      // Store the base64 image in local storage
+      localStorage.setItem('customBackgroundImage', base64Image);
+
+      alert('Image saved to local storage.');
+    };
+
+    // Read the file as a Data URL (base64)
+    reader.readAsDataURL(file);
+  }
+
   function setVirtualBackgroundImage(imageUrl) {
     let virtualBackgroundImage = document.createElement("img");
     virtualBackgroundImage.id = "virtualBackgroundImage";
@@ -1897,7 +1924,8 @@ function AntMedia() {
               isEnterDirectly,
               effectsDrawerOpen,
               handleEffectsOpen,
-              setVirtualBackgroundImage
+              setVirtualBackgroundImage,
+              saveCustomBackgroundImageToLocalStorage
             }}
           >
             <UnauthrorizedDialog
