@@ -55,11 +55,6 @@ export function SettingsDialog(props) {
     conference.microphoneSelected(value);
   }
 
-  function setBackground(value) {
-    conference.setSelectedBackgroundMode(value);
-    conference.handleBackgroundReplacement(value);
-  }
-
   React.useEffect(() => {
     if (conference.devices) {
       const camera = conference.devices.find(d => d.kind === 'videoinput');
