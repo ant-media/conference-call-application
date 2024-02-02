@@ -32,7 +32,11 @@ script:
 - cp -a react/build/. webapp/src/main/webapp
 - cd webapp
 - mvn clean install -DskipTests -Dgpg.skip=true --quiet
-# run tests
+# run unit tests
+- cd ..
+- cd react
+- npm test
+# run functional tests
 - cd ../test
 - python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
 - cd ../webapp
