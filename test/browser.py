@@ -72,6 +72,14 @@ class Browser:
       print("element not exist")
       return False
   
+  def is_element_exist_by_class_name(self, id):
+    try:
+      element = self.driver.find_elements(By.CLASS_NAME, id)
+      return len(element) != 0
+    except NoSuchElementException:
+      print("element not exist")
+      return False
+    
   def get_elements_of_an_element_by_class_name(self, element, class_name):
     timeout = 15
     try:
