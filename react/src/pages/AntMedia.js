@@ -1534,31 +1534,6 @@ function AntMedia() {
     }
   }
 
-  function saveCustomBackgroundImageToLocalStorage(file) {
-    // Create a FileReader to read the file
-    const reader = new FileReader();
-
-    // Define what happens once the file is read
-    reader.onload = function(event) {
-      // The file content is in event.target.result, which is a data URL (base64)
-      const base64Image = event.target.result;
-
-      // Store the base64 image in local storage
-      localStorage.setItem('customBackgroundImage', base64Image);
-
-      console.log('Image saved to local storage.');
-      enqueueSnackbar({
-        message: t('Image is uploaded successfully.'),
-        variant: 'info'
-      }, {
-        autoHideDuration: 2500,
-      });
-    };
-
-    // Read the file as a Data URL (base64)
-    reader.readAsDataURL(file);
-  }
-
   function setAndEnableVirtualBackgroundImage(imageUrl) {
     let virtualBackgroundImage = document.createElement("img");
     virtualBackgroundImage.id = "virtualBackgroundImage";
@@ -1937,8 +1912,7 @@ function AntMedia() {
               isEnterDirectly,
               effectsDrawerOpen,
               handleEffectsOpen,
-              setAndEnableVirtualBackgroundImage,
-              saveCustomBackgroundImageToLocalStorage
+              setAndEnableVirtualBackgroundImage
             }}
           >
             <UnauthrorizedDialog

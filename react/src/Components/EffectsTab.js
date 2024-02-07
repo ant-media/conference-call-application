@@ -15,51 +15,171 @@ function EffectsTab() {
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
 
+  const [customVirtualBackgroundImages, setCustomVirtualBackgroundImages] = React.useState([]);
+  const [backgroundImagesButtonList, setBackgroundImagesButtonList] = React.useState([]);
+
+  React.useEffect(() => {
+    updateCustomVirtualBackgroundImages().then(() => {
+      console.log("Custom virtual background images initialized");
+    });
+  }, []);
+
+  React.useEffect(() => {
+    getBackgroundImages();
+  }, [customVirtualBackgroundImages]);
+
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
-    const maxSize = 1024 * 1024; // 1MB
 
-    if (selectedFile && selectedFile.size > maxSize) {
-      console.error("Image size cannot exceed more than 1MB");
-      enqueueSnackbar({
-        message: t('Image size cannot exceed more than 1MB.'),
-        variant: 'info'
-      }, {
-        autoHideDuration: 2500,
+    if (typeof selectedFile !== 'undefined' && selectedFile !== null) {
+      navigator.storage.getDirectory().then((directoryHandle) => {
+        saveImageToFileSystem(selectedFile, directoryHandle).then(() => {
+          console.log("Image saved to file system");
+        });
       });
-    } else {
-      conference.saveCustomBackgroundImageToLocalStorage(selectedFile);
     }
   };
 
-  function getVirtualBackgroundButton(imageSrc, i) {
-    return <Grid item key={i}>
-      <CustomizedBtn
-        style={{background: theme.palette.themeColor[60], marginRight: 10, marginBottom: 10}}
-        id="mic-button" onClick={(e) => {
-        conference.setAndEnableVirtualBackgroundImage(imageSrc);
-      }}>
-        <img width={40} height={40} src={imageSrc}
-             alt={"virtual background image " + i} loading="lazy"></img>
-      </CustomizedBtn>
-    </Grid>;
+  function getVirtualBackgroundButton(imageSrc, i, showRemoveButton = false) {
+    return (
+      <Grid item key={i}>
+        <CustomizedBtn
+          style={{
+            background: theme.palette.themeColor[60],
+            marginRight: 10,
+            marginBottom: 10,
+            position: 'relative'
+          }}
+          id="custom-virtual-background-button"
+          onClick={(e) => {
+            conference.setAndEnableVirtualBackgroundImage(imageSrc);
+          }}
+        >
+          <img
+            width={40}
+            height={40}
+            src={imageSrc}
+            alt={"virtual background image " + i}
+            loading="lazy"
+          ></img>
+          {
+            showRemoveButton === true ?
+              <button
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  fontSize: 'small', // Make the 'x' icon small
+                  padding: '2px', // Add some padding
+                  borderRadius: '50%', // Make the button round
+                  backgroundColor: '#f00', // Make the button red
+                  color: '#fff', // Make the 'x' icon white
+                }}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent the parent button's onClick from firing
+                  removeCustomVirtualBackgroundImage(imageSrc).then(r => {
+                    enqueueSnackbar(t("Virtual background image removed"), {variant: "success"});
+                  });
+                }}
+              >
+                &#x2715; {/* HTML entity for 'x' */}
+              </button>
+            : null
+          }
+        </CustomizedBtn>
+      </Grid>
+    );
   }
 
   const getBackgroundImages = ()  => {
     const images = [];
+    let imageIndex = 0;
     for (let i = 0; i < virtualBackgroundImageData.virtualBackgroundImages.length; i++) {
       images.push(
-        getVirtualBackgroundButton(virtualBackgroundImageData.virtualBackgroundImages[i], i)
+        getVirtualBackgroundButton(virtualBackgroundImageData.virtualBackgroundImages[i], imageIndex, false)
       );
+      ++imageIndex;
     }
-    let customBackgroundImage = localStorage.getItem("customBackgroundImage");
-    if (customBackgroundImage !== null) {
+
+    for(let customVirtualBackgroundImage of customVirtualBackgroundImages) {
       images.push(
-        getVirtualBackgroundButton(customBackgroundImage, virtualBackgroundImageData.virtualBackgroundImages.length+1)
+        getVirtualBackgroundButton(customVirtualBackgroundImage, imageIndex, true)
       );
+      ++imageIndex;
     }
+
+    setBackgroundImagesButtonList(images);
     return images;
   };
+
+  async function saveImageToFileSystem(file, directoryHandle) {
+    try {
+      const opfsRoot = await navigator.storage.getDirectory();
+      const fileHandle = await opfsRoot.getFileHandle(file.name, { create: true });
+
+      // save file name to local storage as list of files
+      let files = localStorage.getItem("customVirtualBackgroundImages");
+      if (files === null) {
+        files = [];
+      } else {
+        files = JSON.parse(files);
+      }
+      files.push(file.name);
+      localStorage.setItem("customVirtualBackgroundImages", JSON.stringify(files));
+
+      const accessHandle = await fileHandle.createWritable();
+      await accessHandle.write(file);
+      await accessHandle.close();
+      console.log('File saved successfully.');
+      await updateCustomVirtualBackgroundImages();
+    } catch (error) {
+      console.error('Error saving file:', error);
+    }
+  }
+
+  async function updateCustomVirtualBackgroundImages() {
+    const imageUrls = await listFiles();
+    if (imageUrls.length > 0) {
+      setCustomVirtualBackgroundImages(imageUrls);
+    }
+  }
+
+  async function removeCustomVirtualBackgroundImage(fileName) {
+    try {
+      const opfsRoot = await navigator.storage.getDirectory();
+      await opfsRoot.removeEntry(fileName);
+      await updateCustomVirtualBackgroundImages();
+    } catch (error) {
+      console.error('Error removing file:', error);
+    }
+  }
+
+  async function listFiles() {
+    let files = [];
+
+    const opfsRoot = await navigator.storage.getDirectory();
+
+    // get list of files from local storage
+    let filesFromLocalStorage = localStorage.getItem("customVirtualBackgroundImages");
+    if (filesFromLocalStorage === null) {
+      filesFromLocalStorage = [];
+    } else {
+      filesFromLocalStorage = JSON.parse(filesFromLocalStorage);
+    }
+
+    for await (const entry of opfsRoot.values()) {
+      if (entry.kind === "file" && filesFromLocalStorage.includes(entry.name)) {
+        const fileHandle = await opfsRoot.getFileHandle(entry.name, { create: false });
+        const accessHandle = await fileHandle.getFile();
+        const buffer = await accessHandle.arrayBuffer();
+        const blob = new Blob([buffer], { type: "image/jpeg" });
+        const url = URL.createObjectURL(blob);
+        files.push(url);
+      }
+    }
+
+    return files;
+  }
 
   return (
         <div style={{width: "100%", overflowY: "auto"}}>
@@ -110,7 +230,7 @@ function EffectsTab() {
                   <SvgIcon size={40} name={'add-background-image'} color="#fff"/>
                 </CustomizedBtn>
               </Grid>
-              {getBackgroundImages()}
+                {backgroundImagesButtonList}
             </Grid>
           </Stack>
         </div>
