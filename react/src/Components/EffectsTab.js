@@ -40,7 +40,7 @@ function EffectsTab() {
     }
   };
 
-  function getVirtualBackgroundButton(imageSrc, i, showRemoveButton = false) {
+  function getVirtualBackgroundButton(imageSrc, imageName, i, showRemoveButton = false) {
     return (
       <Grid item key={i}>
         <CustomizedBtn
@@ -77,7 +77,7 @@ function EffectsTab() {
                 }}
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent the parent button's onClick from firing
-                  removeCustomVirtualBackgroundImage(imageSrc).then(r => {
+                  removeCustomVirtualBackgroundImage(imageName).then(r => {
                     enqueueSnackbar(t("Virtual background image removed"), {variant: "success"});
                   });
                 }}
@@ -96,14 +96,14 @@ function EffectsTab() {
     let imageIndex = 0;
     for (let i = 0; i < virtualBackgroundImageData.virtualBackgroundImages.length; i++) {
       images.push(
-        getVirtualBackgroundButton(virtualBackgroundImageData.virtualBackgroundImages[i], imageIndex, false)
+        getVirtualBackgroundButton(virtualBackgroundImageData.virtualBackgroundImages[i], "image"+imageIndex, imageIndex, false)
       );
       ++imageIndex;
     }
 
     for(let customVirtualBackgroundImage of customVirtualBackgroundImages) {
       images.push(
-        getVirtualBackgroundButton(customVirtualBackgroundImage, imageIndex, true)
+        getVirtualBackgroundButton(customVirtualBackgroundImage.url, customVirtualBackgroundImage.name, imageIndex, true)
       );
       ++imageIndex;
     }
@@ -138,16 +138,18 @@ function EffectsTab() {
   }
 
   async function updateCustomVirtualBackgroundImages() {
-    const imageUrls = await listFiles();
-    if (imageUrls.length > 0) {
-      setCustomVirtualBackgroundImages(imageUrls);
+    const imageFileList = await listFiles();
+    if (imageFileList.length > 0) {
+      setCustomVirtualBackgroundImages(imageFileList);
     }
   }
 
   async function removeCustomVirtualBackgroundImage(fileName) {
     try {
       const opfsRoot = await navigator.storage.getDirectory();
+
       await opfsRoot.removeEntry(fileName);
+      console.log('File ' + fileName + ' removed successfully.');
       await updateCustomVirtualBackgroundImages();
     } catch (error) {
       console.error('Error removing file:', error);
@@ -174,7 +176,12 @@ function EffectsTab() {
         const buffer = await accessHandle.arrayBuffer();
         const blob = new Blob([buffer], { type: "image/jpeg" });
         const url = URL.createObjectURL(blob);
-        files.push(url);
+
+        let foundedImage = {
+          name: entry.name,
+          url: url
+        };
+        files.push(foundedImage);
       }
     }
 
