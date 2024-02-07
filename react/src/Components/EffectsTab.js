@@ -103,7 +103,7 @@ function EffectsTab() {
 
     for(let customVirtualBackgroundImage of customVirtualBackgroundImages) {
       images.push(
-        getVirtualBackgroundButton(customVirtualBackgroundImage.url, customVirtualBackgroundImage.name, imageIndex, true)
+        getVirtualBackgroundButton(customVirtualBackgroundImage.url, customVirtualBackgroundImage.name, imageIndex, false)
       );
       ++imageIndex;
     }
