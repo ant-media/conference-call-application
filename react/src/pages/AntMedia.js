@@ -17,7 +17,6 @@ import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
 import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
 import { useWebSocket } from 'Components/WebSocketProvider';
-import {useTranslation} from "react-i18next";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -214,7 +213,6 @@ var publishReconnected;
 var playReconnected;
 
 function AntMedia() {
-  const { t } = useTranslation();
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
