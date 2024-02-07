@@ -149,6 +149,15 @@ function EffectsTab() {
       const opfsRoot = await navigator.storage.getDirectory();
 
       await opfsRoot.removeEntry(fileName);
+
+      let filesFromLocalStorage = localStorage.getItem("customVirtualBackgroundImages");
+
+      if (filesFromLocalStorage !== null) {
+        filesFromLocalStorage = JSON.parse(filesFromLocalStorage);
+        filesFromLocalStorage = filesFromLocalStorage.filter(item => item !== fileName);
+        localStorage.setItem("customVirtualBackgroundImages", JSON.stringify(filesFromLocalStorage));
+      }
+
       console.log('File ' + fileName + ' removed successfully.');
       await updateCustomVirtualBackgroundImages();
     } catch (error) {
