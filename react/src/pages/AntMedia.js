@@ -942,6 +942,7 @@ function AntMedia() {
     displayMessage("Recording is about to stop...", "white")
     var jsCmd = {
       command: "stopRecording",
+      websocketURL: websocketURL,
       streamId: roomName,
     };
 
@@ -1126,20 +1127,7 @@ function AntMedia() {
     infoText += debugInfo;
 
     //fake message to add chat
-    var obj = {
-      streamId: publishStreamId,
-      data: JSON.stringify({
-        eventType: "MESSAGE_RECEIVED",
-        name: "Debugger",
-        date: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        message: infoText,
-      }),
-    };
-
-    handleNotificationEvent(obj);
+    createFakeMessage(publishStreamId,infoText)
   }
 
   function toggleSetNumberOfUnreadMessages(numb) {
@@ -1706,6 +1694,22 @@ function AntMedia() {
     }
   },[isWebSocketConnected, sendMessage]);
 
+  function createFakeMessage(publishStreamId, infoText){
+    var msgobj = {
+      streamId: publishStreamId,
+      data: JSON.stringify({
+        eventType: "MESSAGE_RECEIVED",
+        name: "Recording",
+        date: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        message: infoText,
+      }),
+    };
+    handleNotificationEvent(msgobj);
+  }
+
   React.useEffect(() => {
     if (!latestMessage) {
       return;
@@ -1748,13 +1752,19 @@ function AntMedia() {
           publishStreamId
         );
         displayMessage("Recording is stopped successfully", "white")
+        var recordingLink = definition.dataId;
+        if(recordingLink !== null && recordingLink !== undefined){
+          var infoText = "Recording is available on this link " + recordingLink;
+          createFakeMessage("Recording" ,infoText);
+        }
       }
       else {
         console.log("Stop Recording is failed");
         displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
       }
-    }
-  },[latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);
+    } // eslint-disable-next-line
+  },[latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);  
+
 
   const makeFullScreen = (divId) => {
     if (fullScreenId === divId) {
