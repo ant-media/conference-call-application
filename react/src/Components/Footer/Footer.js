@@ -44,7 +44,7 @@ function Footer(props) {
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
 
-  const [isRecordingTextVisible, setIsRecordingTextVisible] = React.useState(false);
+  const [, setIsRecordingTextVisible] = React.useState(false);
 
   React.useEffect(() => {
     //debugger;
