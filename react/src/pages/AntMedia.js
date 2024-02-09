@@ -11,6 +11,7 @@ import LeftTheRoom from "./LeftTheRoom";
 import {getUrlParameter, VideoEffect, WebRTCAdaptor} from "@antmedia/webrtc_adaptor";
 import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
+import EffectsDrawer from "../Components/EffectsDrawer";
 
 import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
 import floating from "../external/floating.js";
@@ -212,6 +213,7 @@ var publishReconnected;
 var playReconnected;
 
 function AntMedia() {
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const roomName = id;
@@ -221,6 +223,9 @@ function AntMedia() {
 
   // drawerOpen for participant list components.
   const [participantListDrawerOpen, setParticipantListDrawerOpen] = useState(false);
+
+  // drawerOpen for effects components.
+  const [effectsDrawerOpen, setEffectsDrawerOpen] = useState(false);
 
   const [publishStreamId, setPublishStreamId] = useState(InitialStreamId);
 
@@ -542,8 +547,8 @@ function AntMedia() {
       if (userStatusMetadata.isScreenShared) {
         // if the participant was already pin someone than we should not update it
         if (!screenSharedVideoId) {
-          setScreenSharedVideoId(broadcastObject.streamId);
-          setScreenSharePinWaiting(true)
+         // setScreenSharedVideoId(broadcastObject.streamId);
+         // setScreenSharePinWaiting(true)
 
 /* 
            let videoLab = participants.find((p) => p.streamId === broadcastObject.streamId)
@@ -617,9 +622,8 @@ function AntMedia() {
           aspectRatio:16/9,
           frameRate: 20,
       },
-      audio: false,
+      audio: true,
     };
-    console.log("creating screen share adaptor!!")
     screenShareWebRtcAdaptor.current =  new WebRTCAdaptor({
       websocket_url: websocketURL,
       mediaConstraints: mediaConstraints2,
@@ -655,9 +659,8 @@ function AntMedia() {
       playOnly: false
     }
 
-    screenShareStreamId.current = publishStreamId+"_screen"
+    screenShareStreamId.current = publishStreamId + "_presentation"
 
-    console.log("will publish screen!")
     screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
      subscriberCode, screenShareStreamId.current, roomName, JSON.stringify(metaData))
 
@@ -734,9 +737,9 @@ function AntMedia() {
         return;
       }
     } else if (info === "screen_share_stopped") {
-    //  handleScreenshareNotFromPlatform();
+
     } else if (info === "screen_share_started") {
-     // screenShareOnNotification();
+
     } else if (info === "data_received") {
       try {
         handleNotificationEvent(obj);
@@ -795,11 +798,9 @@ function AntMedia() {
      
       console.log("newStreamAvailable:", obj);
     } else if (info === "publish_started") {
-      screenShareOnNotification()
-      console.log("screen publish started");
+      setIsScreenShared(true);
      
     } else if (info === "publish_finished") {
-      screenShareOffNotification()
 
     } else if (info === "session_restored") {
    
@@ -1101,12 +1102,8 @@ function AntMedia() {
   }
 
   function handleStartScreenShare() {
-  //  webRTCAdaptor.switchDesktopCapture(publishStreamId)
-    //  .then(() => {
-     //   screenShareOnNotification();
-     // });
-    createScreenShareWebRtcAdaptor()
 
+    createScreenShareWebRtcAdaptor()
 
   }
 
@@ -1116,26 +1113,13 @@ function AntMedia() {
       screenShareStreamId.current
     ); */
     //if I stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
-    if (pinnedVideoId === "localVideo") {
-      setPinnedVideoId(undefined);
-    }
+    
+   
 
-    let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff, false);
-    screenShareWebRtcAdaptor.current.updateStreamMetaData(screenShareStreamId.current, JSON.stringify(userStatusMetadata));
+    //let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff, false);
+    //screenShareWebRtcAdaptor.current.updateStreamMetaData(screenShareStreamId.current, JSON.stringify(userStatusMetadata));
+  
   }
-
-  function screenShareOnNotification() {
-    setIsScreenShared(true);
-
-   // handleSendScreenOnNotificationEvent(
-    //  "SCREEN_SHARED_ON",
-  //    screenShareStreamId.current
-    //);
-
-  //  let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, isMyCamTurnedOff, true);
-  //  screenShareWebRtcAdaptor.current.updateStreamMetaData(screenShareStreamId.current, JSON.stringify(userStatusMetadata));
- 
-}
 
   function turnOffYourMicNotification(participantId) {
     handleSendNotificationEvent(
@@ -1223,7 +1207,6 @@ function AntMedia() {
       } else {
         webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
       }
-      screenShareOffNotification();
       updateVideoSendResolution(false);
       setCloseScreenShare(false);
     } else {
@@ -1234,7 +1217,10 @@ function AntMedia() {
   function handleStopScreenShare() {
     setIsScreenShared(false);
     screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current)
-    screenShareOffNotification();
+
+    if (pinnedVideoId === "localVideo") {
+      setPinnedVideoId(undefined);
+    }
   }
 
   function handleSetMessages(newMessage) {
@@ -1290,6 +1276,7 @@ function AntMedia() {
     setMessageDrawerOpen(open);
     if (open) {
       setParticipantListDrawerOpen(false);
+      setEffectsDrawerOpen(false);
     }
   }
 
@@ -1297,6 +1284,15 @@ function AntMedia() {
     setParticipantListDrawerOpen(open);
     if (open) {
       setMessageDrawerOpen(false);
+      setEffectsDrawerOpen(false);
+    }
+  }
+
+  function handleEffectsOpen(open) {
+    setEffectsDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+      setParticipantListDrawerOpen(false);
     }
   }
 
@@ -1489,7 +1485,7 @@ function AntMedia() {
         let videoTrackAssignments = notificationEvent.payload;
 
         let temp = participants;
-
+        
         //remove not available videotracks if exist
         temp.forEach((p) => {
           let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
@@ -1510,20 +1506,20 @@ function AntMedia() {
                 console.log("BROADCAST OBJECT IS UNDEFINED. REQUEST IN 1000 MS")
                 setTimeout(()=>webRTCAdaptor.requestVideoTrackAssignments(roomName), 1000)
                 
-
-
-
               }
               if (broadcastObject) {
                 p.name = broadcastObject.name;
+                  
               }
             }
           });
         });
-
-
-
         setParticipants(temp);
+
+        checkScreenSharingStatus()
+
+
+
         if(screenSharePinWaiting){
           console.log("SCREEN SHARE PINNING WAITING!")
           console.log(temp)
@@ -1544,8 +1540,6 @@ function AntMedia() {
 
 
         }
-
-
 
         setParticipantUpdated(!participantUpdated);
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
@@ -1573,6 +1567,47 @@ function AntMedia() {
     }
   }
 
+  function checkScreenSharingStatus(){
+      console.log("CHECK SCREEN SHARING STATUS")
+
+      const broadcastObjectsArray = Object.values(allParticipants);
+
+      broadcastObjectsArray.forEach((broadcastObject) => {
+        console.log(broadcastObject)
+        if(broadcastObject.metaData !== undefined && broadcastObject.metaData !== null){
+
+          let userStatusMetadata = JSON.parse(broadcastObject.metaData);
+            if(userStatusMetadata.isScreenShared){
+                
+                setScreenSharedVideoId(broadcastObject.streamId);
+              //setScreenSharePinWaiting(true)
+    
+     
+               let videoLab = participants.find((p) => p.streamId === broadcastObject.streamId)
+                ?.videoLabel
+                ? participants.find((p) => p.streamId === broadcastObject.streamId).videoLabel
+                : ""; 
+              console.log(broadcastObject)
+              pinVideo(broadcastObject.streamId, videoLab); 
+              setParticipantUpdated(!participantUpdated);
+
+              return
+              
+
+            }
+
+        }
+        
+        })
+
+
+
+
+
+
+
+  }
+
   function getUserStatusMetadata(isMicMuted, isCameraOn, isScreenShareActive) {
     let metadata = {
       isMicMuted: isMicMuted === null ? null : isMicMuted,
@@ -1595,7 +1630,11 @@ function AntMedia() {
   },[webRTCAdaptor, roomName]);
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
-    let metadata = getUserStatusMetadata(micMuted, cameraOn, isScreenShared);
+    console.log("UPDATE USER STATUS METADATA CALLED!!!")
+    let metadata = getUserStatusMetadata(micMuted, cameraOn, false);
+    console.log(metadata)
+    
+    
     webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
   }
 
@@ -1768,7 +1807,7 @@ function AntMedia() {
         track: obj.track,
         isCameraOn: true,
         streamId: obj.streamId,
-        name: "test"
+        name: " "
       };
       //append new video track, track id should be unique because of video track limitation
       let temp = participants;
@@ -1777,20 +1816,32 @@ function AntMedia() {
     }
   }
 
-  function setVirtualBackgroundImage(imageUrl) {
+  function setAndEnableVirtualBackgroundImage(imageUrl) {
     let virtualBackgroundImage = document.createElement("img");
     virtualBackgroundImage.id = "virtualBackgroundImage";
     virtualBackgroundImage.style.visibility = "hidden";
     virtualBackgroundImage.alt = "virtual-background";
 
+    console.log("Virtual background image url: " + imageUrl);
     if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
       virtualBackgroundImage.src = imageUrl;
     } else {
-      virtualBackgroundImage.src = "virtual-background.png";
+      virtualBackgroundImage.src = "virtual-background0.png";
     }
 
-    setVirtualBackground(virtualBackgroundImage);
-    webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+    virtualBackgroundImage.onload = () => {
+      console.log("Virtual background image is loaded");
+      setVirtualBackground(virtualBackgroundImage);
+      webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+
+      webRTCAdaptor.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
+        console.log("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is enabled");
+        setIsVideoEffectRunning(true);
+      }).catch(err => {
+        console.error("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is not enabled. Error is " + err);
+        setIsVideoEffectRunning(false);
+      });
+    };
   }
 
   function handleBackgroundReplacement(option) {
@@ -1799,14 +1850,20 @@ function AntMedia() {
     if (option === "none") {
       effectName = VideoEffect.NO_EFFECT;
       setIsVideoEffectRunning(false);
+    } else if (option === "slight-blur") {
+      webRTCAdaptor?.setBlurEffectRange(3, 4);
+      effectName = VideoEffect.BLUR_BACKGROUND;
+      setIsVideoEffectRunning(true);
     } else if (option === "blur") {
+      webRTCAdaptor?.setBlurEffectRange(6, 8);
       effectName = VideoEffect.BLUR_BACKGROUND;
       setIsVideoEffectRunning(true);
     } else if (option === "background") {
       if (virtualBackground === null) {
-        setVirtualBackgroundImage(null);
+        setAndEnableVirtualBackgroundImage(null);
+        return;
       }
-      effectName = VideoEffect.VIRTUAL_BACKGROUND
+      effectName = VideoEffect.VIRTUAL_BACKGROUND;
       setIsVideoEffectRunning(true);
     }
     webRTCAdaptor.enableEffect(effectName).then(() => {
@@ -2134,7 +2191,10 @@ function AntMedia() {
               stopRecord,
               isRecordPluginInstalled,
               isRecordPluginActive,
-              isEnterDirectly
+              isEnterDirectly,
+              effectsDrawerOpen,
+              handleEffectsOpen,
+              setAndEnableVirtualBackgroundImage
             }}
           >
             <UnauthrorizedDialog
@@ -2162,6 +2222,7 @@ function AntMedia() {
                   <MeetingRoom/>
                   <MessageDrawer/>
                   <ParticipantListDrawer/>
+                  <EffectsDrawer/>
                 </>
               )}
             </SnackbarProvider>

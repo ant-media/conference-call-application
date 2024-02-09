@@ -117,9 +117,9 @@ function VideoCard(props) {
   }
 
   // if I am sharing my screen, then don't use avatar (even if I turned off my cam)
-  if (conference.isScreenShared === true && isLocal) {
+ /*  if (conference.isScreenShared === true && isLocal) {
     useAvatar = false;
-  }
+  } */
   // if someone shares his screen, then don't use avatar for him (even if he turned off his cam)
   if (conference.screenSharedVideoId === props?.id) {
     useAvatar = false;
