@@ -141,8 +141,9 @@ function LayoutTiled(props) {
 
   return (
       <>
+        {conference?.participants.length === 0 ? <p>There is no active publisher right now.</p> : null}
         {videoCards()}
-        {othersCard()}
+        {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
       </>
     )
 };

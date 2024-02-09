@@ -11,6 +11,7 @@ import LeftTheRoom from "./LeftTheRoom";
 import {getUrlParameter, VideoEffect, WebRTCAdaptor} from "@antmedia/webrtc_adaptor";
 import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
+import EffectsDrawer from "../Components/EffectsDrawer";
 
 import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
 import floating from "../external/floating.js";
@@ -212,6 +213,7 @@ var publishReconnected;
 var playReconnected;
 
 function AntMedia() {
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const roomName = id;
@@ -221,6 +223,9 @@ function AntMedia() {
 
   // drawerOpen for participant list components.
   const [participantListDrawerOpen, setParticipantListDrawerOpen] = useState(false);
+
+  // drawerOpen for effects components.
+  const [effectsDrawerOpen, setEffectsDrawerOpen] = useState(false);
 
   const [publishStreamId, setPublishStreamId] = useState(InitialStreamId);
 
@@ -264,6 +269,11 @@ function AntMedia() {
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
+
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
+  const [presenters, setPresenters] = React.useState([]);
+  const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
 
   const [reactions] = useState({
     'sparkling_heart': '💖',
@@ -332,6 +342,7 @@ function AntMedia() {
   const [initialized, setInitialized] = React.useState(false);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
+  const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
   function handleUnauthorizedDialogExitClicked(){
 
@@ -1070,6 +1081,7 @@ function AntMedia() {
     setMessageDrawerOpen(open);
     if (open) {
       setParticipantListDrawerOpen(false);
+      setEffectsDrawerOpen(false);
     }
   }
 
@@ -1077,6 +1089,15 @@ function AntMedia() {
     setParticipantListDrawerOpen(open);
     if (open) {
       setMessageDrawerOpen(false);
+      setEffectsDrawerOpen(false);
+    }
+  }
+
+  function handleEffectsOpen(open) {
+    setEffectsDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+      setParticipantListDrawerOpen(false);
     }
   }
 
@@ -1172,7 +1193,9 @@ function AntMedia() {
       } else if (eventType === "RECORDING_TURNED_OFF") {
         setIsRecordPluginActive(false);
       } else if (eventType === "MESSAGE_RECEIVED") {
-        if (notificationEvent.senderId === publishStreamId) {
+        // if message arrives from myself or footer message button is disabled then we are not going to show it.
+        if (notificationEvent.senderId === publishStreamId
+          || process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'false') {
           return;
         }
         calculate_scroll_height();
@@ -1517,20 +1540,32 @@ function AntMedia() {
     }
   }
 
-  function setVirtualBackgroundImage(imageUrl) {
+  function setAndEnableVirtualBackgroundImage(imageUrl) {
     let virtualBackgroundImage = document.createElement("img");
     virtualBackgroundImage.id = "virtualBackgroundImage";
     virtualBackgroundImage.style.visibility = "hidden";
     virtualBackgroundImage.alt = "virtual-background";
 
+    console.log("Virtual background image url: " + imageUrl);
     if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
       virtualBackgroundImage.src = imageUrl;
     } else {
-      virtualBackgroundImage.src = "virtual-background.png";
+      virtualBackgroundImage.src = "virtual-background0.png";
     }
 
-    setVirtualBackground(virtualBackgroundImage);
-    webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+    virtualBackgroundImage.onload = () => {
+      console.log("Virtual background image is loaded");
+      setVirtualBackground(virtualBackgroundImage);
+      webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+
+      webRTCAdaptor.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
+        console.log("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is enabled");
+        setIsVideoEffectRunning(true);
+      }).catch(err => {
+        console.error("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is not enabled. Error is " + err);
+        setIsVideoEffectRunning(false);
+      });
+    };
   }
 
   function handleBackgroundReplacement(option) {
@@ -1539,14 +1574,20 @@ function AntMedia() {
     if (option === "none") {
       effectName = VideoEffect.NO_EFFECT;
       setIsVideoEffectRunning(false);
+    } else if (option === "slight-blur") {
+      webRTCAdaptor?.setBlurEffectRange(3, 4);
+      effectName = VideoEffect.BLUR_BACKGROUND;
+      setIsVideoEffectRunning(true);
     } else if (option === "blur") {
+      webRTCAdaptor?.setBlurEffectRange(6, 8);
       effectName = VideoEffect.BLUR_BACKGROUND;
       setIsVideoEffectRunning(true);
     } else if (option === "background") {
       if (virtualBackground === null) {
-        setVirtualBackgroundImage(null);
+        setAndEnableVirtualBackgroundImage(null);
+        return;
       }
-      effectName = VideoEffect.VIRTUAL_BACKGROUND
+      effectName = VideoEffect.VIRTUAL_BACKGROUND;
       setIsVideoEffectRunning(true);
     }
     webRTCAdaptor.enableEffect(effectName).then(() => {
@@ -1874,7 +1915,20 @@ function AntMedia() {
               stopRecord,
               isRecordPluginInstalled,
               isRecordPluginActive,
-              isEnterDirectly
+              isEnterDirectly,
+              publisherRequestListDrawerOpen,
+              setPublisherRequestListDrawerOpen,
+              isAdmin,
+              setIsAdmin,
+              approvedSpeakerRequestList,
+              setApprovedSpeakerRequestList,
+              presenters,
+              setPresenters,
+              presenterButtonDisabled,
+              setPresenterButtonDisabled,
+              effectsDrawerOpen,
+              handleEffectsOpen,
+              setAndEnableVirtualBackgroundImage
             }}
           >
             <UnauthrorizedDialog
@@ -1902,6 +1956,7 @@ function AntMedia() {
                   <MeetingRoom/>
                   <MessageDrawer/>
                   <ParticipantListDrawer/>
+                  <EffectsDrawer/>
                 </>
               )}
             </SnackbarProvider>
