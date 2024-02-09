@@ -156,15 +156,22 @@ function OptionButton({footer, ...props}) {
           </MenuItem>
           : null}
 
-        {conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true ?
-          <MenuItem onClick={() => { conference.startRecord(); handleClose(); } }
-          >
-            <ListItemIcon>
-              <SvgIcon size={36} name={"camera"} color={"white"} />
-            </ListItemIcon>
-            <ListItemText>{t("Start Record")}</ListItemText>
-          </MenuItem>
-          : null}
+            <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }}>
+              <ListItemIcon>
+                <SvgIcon size={36} name={"background-replacement"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Virtual Effects")}</ListItemText>
+            </MenuItem>
+
+            {conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true ?
+            <MenuItem onClick={() => { conference.startRecord(); handleClose(); } }
+            >
+              <ListItemIcon>
+                <SvgIcon size={36} name={"camera"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Start Record")}</ListItemText>
+            </MenuItem>
+                : null}
 
         {conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true ?
           <MenuItem onClick={() => { conference.stopRecord(); handleClose(); }}
