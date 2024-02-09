@@ -133,7 +133,7 @@ function VideoCard(props) {
 
   const isScreenSharedVideo = (conference?.screenSharedVideoId === props?.id) || (conference?.isScreenShared === true && isLocal);
 
-  const mirrorView = isLocal && !conference?.isScreenShared;
+  const mirrorView = isLocal;
   //const isScreenSharing =
   //  conference?.isScreenShared ||
   //  conference?.screenSharedVideoId === props?.id;

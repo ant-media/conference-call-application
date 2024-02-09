@@ -153,7 +153,7 @@ if (playOnly) {
   };
 }
 
-let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = "ws://localhost:5080/ConferenceCall/websocket";
 
 if (!websocketURL) {
 
@@ -224,6 +224,7 @@ function AntMedia() {
 
   const [publishStreamId, setPublishStreamId] = useState(InitialStreamId);
 
+
   // this is my own name when i enter the room.
   const [streamName, setStreamName] = useState("");
 
@@ -261,6 +262,8 @@ function AntMedia() {
   const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
 
   const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
+  const [screenSharePinWaiting, setScreenSharePinWaiting] = useState(false);
+
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
@@ -311,6 +314,8 @@ function AntMedia() {
   const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
   const [virtualBackground, setVirtualBackground] = React.useState(null);
   const timeoutRef = React.useRef(null);
+  const screenShareWebRtcAdaptor = React.useRef(null)
+  const screenShareStreamId = React.useRef(null)
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
 
@@ -329,6 +334,9 @@ function AntMedia() {
   const [localVideo, setLocalVideoLocal] = React.useState(null);
 
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
+
+
+
   const [initialized, setInitialized] = React.useState(false);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
@@ -527,19 +535,24 @@ function AntMedia() {
 
 
   function handleSubtrackBroadcastObject(broadcastObject) {
+    console.log("HANDLE SUBTRACK BROADCAST OBJECT")
     if (broadcastObject.metaData !== undefined && broadcastObject.metaData !== null) {
       let userStatusMetadata = JSON.parse(broadcastObject.metaData);
-
+      console.log(userStatusMetadata)
       if (userStatusMetadata.isScreenShared) {
         // if the participant was already pin someone than we should not update it
         if (!screenSharedVideoId) {
           setScreenSharedVideoId(broadcastObject.streamId);
-          let videoLab = participants.find((p) => p.streamId === broadcastObject.streamId)
+          setScreenSharePinWaiting(true)
+
+/* 
+           let videoLab = participants.find((p) => p.streamId === broadcastObject.streamId)
             ?.videoLabel
             ? participants.find((p) => p.streamId === broadcastObject.streamId).videoLabel
-            : "";
-
-          pinVideo(broadcastObject.streamId, videoLab);
+            : ""; 
+          alert("PİNNİNG HİM!")
+          console.log(broadcastObject)
+          pinVideo(broadcastObject.streamId, videoLab); */
         }
       }
     }
@@ -596,6 +609,60 @@ function AntMedia() {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
+  }
+
+  function createScreenShareWebRtcAdaptor(){
+    var mediaConstraints2 = {
+      video: {
+          aspectRatio:16/9,
+          frameRate: 20,
+      },
+      audio: false,
+    };
+    console.log("creating screen share adaptor!!")
+    screenShareWebRtcAdaptor.current =  new WebRTCAdaptor({
+      websocket_url: websocketURL,
+      mediaConstraints: mediaConstraints2,
+      publishMode: "screen",
+    
+
+      sdp_constraints: {
+          OfferToReceiveAudio : false,
+          OfferToReceiveVideo : false,
+      },
+      dataChannelEnabled: true,
+      
+      debug: true,
+      callback: screenShareWebRtcAdaptorInfoCallback,
+      callbackError: screenShareWebRtcAdaptorErrorCallback
+    })
+
+
+  }
+
+  function startScreenSharing(){
+    
+    var token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
+
+    if (token === undefined) {
+      token = publishToken;
+    }
+
+    var metaData = {
+      isMicMuted: false,
+      isCameraOn: true,
+      isScreenShared: true,
+      playOnly: false
+    }
+
+    screenShareStreamId.current = publishStreamId+"_screen"
+
+    console.log("will publish screen!")
+    screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
+     subscriberCode, screenShareStreamId.current, roomName, JSON.stringify(metaData))
+
+    
+
   }
 
   React.useEffect(() => {
@@ -667,9 +734,9 @@ function AntMedia() {
         return;
       }
     } else if (info === "screen_share_stopped") {
-      handleScreenshareNotFromPlatform();
+    //  handleScreenshareNotFromPlatform();
     } else if (info === "screen_share_started") {
-      screenShareOnNotification();
+     // screenShareOnNotification();
     } else if (info === "data_received") {
       try {
         handleNotificationEvent(obj);
@@ -713,6 +780,151 @@ function AntMedia() {
       }
     }
   };
+
+
+  function screenShareWebRtcAdaptorInfoCallback(info, obj) {
+    if (info === "initialized") {
+      startScreenSharing();
+
+    } else if (info === "broadcastObject") {
+      if (obj.broadcast === undefined) {
+        return;
+      }
+
+    } else if (info === "newStreamAvailable") {
+     
+      console.log("newStreamAvailable:", obj);
+    } else if (info === "publish_started") {
+      screenShareOnNotification()
+      console.log("screen publish started");
+     
+    } else if (info === "publish_finished") {
+      screenShareOffNotification()
+
+    } else if (info === "session_restored") {
+   
+
+    } else if (info === "play_started") {
+   
+
+    } else if (info === "screen_share_stopped") {
+      //handleScreenshareNotFromPlatform();
+    } else if (info === "screen_share_started") {
+      //screenShareOnNotification();
+    } else if (info === "data_received") {
+      try {
+        handleNotificationEvent(obj);
+      } catch (e) {
+      }
+    } else if (info === "available_devices") {
+      setDevices(obj);
+
+    } else if (info === "updated_stats") {
+      let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
+      let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
+      let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
+
+      let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+      let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
+      let packageLostPercentage = 0;
+      if (packageLost > 0) {
+        packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
+      }
+
+      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate) {
+        console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
+        displayPoorNetworkConnectionWarning();
+      }
+
+    } else if (info === "debugInfo") {
+      handleDebugInfo(obj.debugInfo);
+    } else if (info === "ice_connection_state_changed") {
+      console.log("iceConnectionState Changed: ", JSON.stringify(obj))
+      var iceState = obj.state;
+      if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
+
+        setTimeout(() => {
+          if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" &&
+            webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
+            webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
+            reconnectionInProgress();
+          }
+        }, 5000);
+
+      }
+    }
+  };
+
+
+  function screenShareWebRtcAdaptorErrorCallback(error, message){
+    console.log("error from screen share webrtc adaptor callback")
+ //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
+ var errorMessage = JSON.stringify(error);
+ if (typeof message != "undefined") {
+   errorMessage = message;
+ }
+ if (error.indexOf("no_active_streams_in_room") !== -1) {
+   errorMessage = "No active stream in the room.";
+ }
+ errorMessage = JSON.stringify(error);
+ if (error.indexOf("NotFoundError") !== -1) {
+   errorMessage =
+     "Camera or Mic are not found or not allowed in your device.";
+   alert(errorMessage);
+ } else if (
+   error.indexOf("NotReadableError") !== -1 ||
+   error.indexOf("TrackStartError") !== -1
+ ) {
+   errorMessage =
+     "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
+   displayWarning(errorMessage);
+
+ } else if (
+   error.indexOf("OverconstrainedError") !== -1 ||
+   error.indexOf("ConstraintNotSatisfiedError") !== -1
+ ) {
+   errorMessage =
+     "There is no device found that fits your video and audio constraints. You may change video and audio constraints.";
+   alert(errorMessage);
+ } else if (
+   error.indexOf("NotAllowedError") !== -1 ||
+   error.indexOf("PermissionDeniedError") !== -1
+ ) {
+   errorMessage = "You are not allowed to access camera and mic.";
+   if (isScreenShared) {
+     handleScreenshareNotFromPlatform();
+   }
+ } else if (error.indexOf("TypeError") !== -1) {
+   errorMessage = "Video/Audio is required.";
+   displayWarning(errorMessage);
+   webRTCAdaptor.mediaManager.getDevices();
+ } else if (error.indexOf("UnsecureContext") !== -1) {
+   errorMessage =
+     "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
+ } else if (error.indexOf("WebSocketNotSupported") !== -1) {
+   errorMessage = "Fatal Error: WebSocket not supported in this browser";
+ } else if (error.indexOf("no_stream_exist") !== -1) {
+   //TODO: removeRemoteVideo(error.streamId);
+ } else if (error.indexOf("data_channel_error") !== -1) {
+   errorMessage = "There was a error during data channel communication";
+ } else if (error.indexOf("ScreenSharePermissionDenied") !== -1) {
+   errorMessage = "You are not allowed to access screen share";
+   handleScreenshareNotFromPlatform();
+   
+ } else if (error.indexOf("WebSocketNotConnected") !== -1) {
+ } else if (error.indexOf("already_publishing") !== -1) {
+
+ } else if(error.indexOf("unauthorized_access") !== -1) {
+   handleLeaveFromRoom()
+
+   setUnAuthorizedDialogOpen(true)
+ }
+
+ console.log("***** " + error)
+  }
+
+
+
 
   function errorCallback(error, message) {
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
@@ -820,10 +1032,16 @@ function AntMedia() {
 
     // id is for pinning user.
     let videoLabel = videoLabelProp;
+
+    console.log(id)
+    console.log(videoLabel)
+
     if (videoLabel === undefined || videoLabel === "") {
       // if videoLabel is missing try to find it from participants.
       videoLabel = participants.find((p) => id === p.id)?.videoLabel;
     }
+
+    
     if (videoLabel === undefined || videoLabel === "") {
       // if videoLabel is still missing get the firs one if it exist, this may happen when one join while someone is sharing screen
       videoLabel = participants[1]?.videoLabel;
@@ -839,6 +1057,8 @@ function AntMedia() {
       // if there is no pinned video we are gonna pin the targeted user.
     // and we need to inform pinned user.
     else {
+      console.log(videoLabel)
+      console.log(id)
       setPinnedVideoId(videoLabel);
       handleNotifyPinUser(id);
       webRTCAdaptor.assignVideoTrack(videoLabel, streamId, true);
@@ -881,36 +1101,41 @@ function AntMedia() {
   }
 
   function handleStartScreenShare() {
-    webRTCAdaptor.switchDesktopCapture(publishStreamId)
-      .then(() => {
-        screenShareOnNotification();
-      });
+  //  webRTCAdaptor.switchDesktopCapture(publishStreamId)
+    //  .then(() => {
+     //   screenShareOnNotification();
+     // });
+    createScreenShareWebRtcAdaptor()
+
+
   }
 
   function screenShareOffNotification() {
-    handleSendNotificationEvent(
+    /* handleSendNotificationEvent(
       "SCREEN_SHARED_OFF",
-      publishStreamId
-    );
+      screenShareStreamId.current
+    ); */
     //if I stop my screen share and if i have pin someone different from myself it just should not effect my pinned video.
     if (pinnedVideoId === "localVideo") {
       setPinnedVideoId(undefined);
     }
 
     let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff, false);
-    webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(userStatusMetadata));
+    screenShareWebRtcAdaptor.current.updateStreamMetaData(screenShareStreamId.current, JSON.stringify(userStatusMetadata));
   }
 
   function screenShareOnNotification() {
     setIsScreenShared(true);
-    handleSendNotificationEvent(
-      "SCREEN_SHARED_ON",
-      publishStreamId
-    );
 
-    let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff, true);
-    webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(userStatusMetadata));
-  }
+   // handleSendScreenOnNotificationEvent(
+    //  "SCREEN_SHARED_ON",
+  //    screenShareStreamId.current
+    //);
+
+  //  let userStatusMetadata = getUserStatusMetadata(isMyMicMuted, isMyCamTurnedOff, true);
+  //  screenShareWebRtcAdaptor.current.updateStreamMetaData(screenShareStreamId.current, JSON.stringify(userStatusMetadata));
+ 
+}
 
   function turnOffYourMicNotification(participantId) {
     handleSendNotificationEvent(
@@ -990,6 +1215,7 @@ function AntMedia() {
   }
 
   function handleScreenshareNotFromPlatform() {
+    console.log("handle screen share not from platform called")
     if (typeof webRTCAdaptor !== "undefined") {
       setIsScreenShared(false);
       if (isMyCamTurnedOff) {
@@ -1007,13 +1233,7 @@ function AntMedia() {
 
   function handleStopScreenShare() {
     setIsScreenShared(false);
-    if (isMyCamTurnedOff) {
-      webRTCAdaptor.turnOffLocalCamera(publishStreamId);
-    } else {
-      webRTCAdaptor.switchVideoCameraCapture(publishStreamId);
-
-      // isCameraOff = true;
-    }
+    screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current)
     screenShareOffNotification();
   }
 
@@ -1221,6 +1441,8 @@ function AntMedia() {
           }
         });
       } else if (eventType === "SCREEN_SHARED_ON") {
+        alert("SCREEN SHARED ON RECEIVED!")
+        console.log(eventStreamId)
         let videoLab = participants.find((p) => p.streamId === eventStreamId)?.videoLabel;
 
         if (videoLab === undefined) {
@@ -1229,9 +1451,9 @@ function AntMedia() {
           assignVideoToStream(videoLab, eventStreamId);
         }
 
-        //if (videoLab !== "localVideo") {
+        if (videoLab !== "localVideo") {
         pinVideo(videoLab, videoLab);
-        //}
+        }
         setScreenSharedVideoId(eventStreamId);
         webRTCAdaptor.getBroadcastObject(eventStreamId);
       } else if (eventType === "SCREEN_SHARED_OFF") {
@@ -1262,6 +1484,8 @@ function AntMedia() {
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
         console.debug("VIDEO_TRACK_ASSIGNMENT_LIST -> ", obj);
 
+        console.log("VIDEO TRACK ASSIGNMENT LIST CALLED!")
+
         let videoTrackAssignments = notificationEvent.payload;
 
         let temp = participants;
@@ -1280,13 +1504,49 @@ function AntMedia() {
             if (p.videoLabel === vta.videoLabel) {
               p.streamId = vta.trackId;
               let broadcastObject = allParticipants[p.streamId];
+              console.log("PRINT BROADCAST OBJECT FROM VIDEO TRACK ASSIGNMENT LIST CALLED")
+              console.log(broadcastObject)
+              if(broadcastObject === undefined){
+                console.log("BROADCAST OBJECT IS UNDEFINED. REQUEST IN 1000 MS")
+                setTimeout(()=>webRTCAdaptor.requestVideoTrackAssignments(roomName), 1000)
+                
+
+
+
+              }
               if (broadcastObject) {
                 p.name = broadcastObject.name;
               }
             }
           });
         });
+
+
+
         setParticipants(temp);
+        if(screenSharePinWaiting){
+          console.log("SCREEN SHARE PINNING WAITING!")
+          console.log(temp)
+        
+
+          console.log(screenSharedVideoId)
+          let videoLab = temp.find((p) => p.streamId === screenSharedVideoId)
+          ?.videoLabel
+          ? temp.find((p) => p.streamId === screenSharedVideoId).videoLabel
+          : ""; 
+          console.log(videoLab)
+          if(videoLab !== ""){
+            console.log(videoLab)
+            pinVideo(screenSharedVideoId, videoLab)
+            setScreenSharePinWaiting(false)
+
+          }
+
+
+        }
+
+
+
         setParticipantUpdated(!participantUpdated);
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
@@ -1508,7 +1768,7 @@ function AntMedia() {
         track: obj.track,
         isCameraOn: true,
         streamId: obj.streamId,
-        name: ""
+        name: "test"
       };
       //append new video track, track id should be unique because of video track limitation
       let temp = participants;
