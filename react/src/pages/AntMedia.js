@@ -273,6 +273,11 @@ function AntMedia() {
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
+  const [presenters, setPresenters] = React.useState([]);
+  const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
+
   const [reactions] = useState({
     'sparkling_heart': '💖',
     'thumbs_up': '👍🏼',
@@ -345,6 +350,7 @@ function AntMedia() {
   const [initialized, setInitialized] = React.useState(false);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
+  const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
   function handleUnauthorizedDialogExitClicked(){
 
@@ -1388,7 +1394,9 @@ function AntMedia() {
       } else if (eventType === "RECORDING_TURNED_OFF") {
         setIsRecordPluginActive(false);
       } else if (eventType === "MESSAGE_RECEIVED") {
-        if (notificationEvent.senderId === publishStreamId) {
+        // if message arrives from myself or footer message button is disabled then we are not going to show it.
+        if (notificationEvent.senderId === publishStreamId
+          || process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'false') {
           return;
         }
         calculate_scroll_height();
@@ -2192,6 +2200,16 @@ function AntMedia() {
               isRecordPluginInstalled,
               isRecordPluginActive,
               isEnterDirectly,
+              publisherRequestListDrawerOpen,
+              setPublisherRequestListDrawerOpen,
+              isAdmin,
+              setIsAdmin,
+              approvedSpeakerRequestList,
+              setApprovedSpeakerRequestList,
+              presenters,
+              setPresenters,
+              presenterButtonDisabled,
+              setPresenterButtonDisabled,
               effectsDrawerOpen,
               handleEffectsOpen,
               setAndEnableVirtualBackgroundImage
