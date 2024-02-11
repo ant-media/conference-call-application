@@ -72,7 +72,7 @@ function WaitingRoom(props) {
     }
 
     conference.joinRoom(roomName, streamId, conference.roomJoinMode);
-    conference.setWaitingOrMeetingRoom("meeting");
+    //conference.setWaitingOrMeetingRoom("meeting");
   }
 
   const handleDialogOpen = (focus) => {

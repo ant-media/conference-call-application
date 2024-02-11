@@ -315,6 +315,8 @@ function AntMedia() {
 
   const [talkers, setTalkers] = useState([]);
   const [isPublished, setIsPublished] = useState(false);
+  const [isPlayed, setIsPlayed] = useState(false);
+
   const [selectedCamera, setSelectedCamera] = React.useState(localStorage.getItem('selectedCamera'));
   const [selectedMicrophone, setSelectedMicrophone] = React.useState(localStorage.getItem('selectedMicrophone'));
   const [selectedBackgroundMode, setSelectedBackgroundMode] = React.useState("");
@@ -609,6 +611,12 @@ function AntMedia() {
     return result;
   }
 
+  React.useCallback(()=>{
+    if(isPublished && isPlayed)
+        setWaitingOrMeetingRoom("meeting")
+      
+  },[isPublished , isPlayed])
+
   React.useEffect(() => {
     if(playOnly && enterDirectly && initialized) {
       let streamId = makeid(10);
@@ -669,7 +677,7 @@ function AntMedia() {
       }
     } else if (info === "play_started") {
       console.log("**** play started:" + reconnecting);
-
+      setIsPlayed(true);
       webRTCAdaptor.getBroadcastObject(roomName);
 
       if (reconnecting) {
