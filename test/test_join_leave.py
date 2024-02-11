@@ -130,6 +130,7 @@ class TestJoinLeave(unittest.TestCase):
     assert(not self.chrome.is_element_exist_by_class_name('others-tile-inner'))
     for i in range(3,7):
         handler = self.join_room_in_new_tab("participant" + str(i), room)
+        assert(self.chrome.get_element_by_id("localVideo").is_displayed())
         self.chrome.switch_to_tab(handler)
         wait.until(lambda x: len(self.get_participants()) == i)
 
