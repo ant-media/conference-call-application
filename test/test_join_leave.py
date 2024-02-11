@@ -116,10 +116,12 @@ class TestJoinLeave(unittest.TestCase):
     print("current: "+self.chrome.get_current_tab_id())
     assert(handle_2 == self.chrome.get_current_tab_id())
     assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+
     wait = self.chrome.get_wait()
     wait.until(lambda x: len(self.get_participants()) == 2)
     self.chrome.switch_to_tab(handle_1)
     wait.until(lambda x: len(self.get_participants()) == 2)
+    
     ss_button = self.chrome.get_element_by_id("share-screen-button")
     self.chrome.click_element(ss_button)
     self.chrome.switch_to_tab(handle_2)
@@ -136,6 +138,7 @@ class TestJoinLeave(unittest.TestCase):
             break
         assert(not self.chrome.is_element_exist_by_class_name("others-tile-inner"))
     self.chrome.close_all()
+
 
   def test_join_room_2_participants(self):
     room = "room"+str(random.randint(100, 999))
