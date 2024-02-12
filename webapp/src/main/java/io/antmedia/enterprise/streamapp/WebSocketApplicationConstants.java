@@ -59,6 +59,26 @@ public class WebSocketApplicationConstants {
 	public static final String START_RECORDING_COMMAND = "startRecording";
 
 	public static final String STOP_RECORDING_COMMAND = "stopRecording";
+
+    public static final String MAKE_PRESENTER_COMMAND = "makePresenter";
+
+    public static final String UNDO_PRESENTER_COMMAND = "undoPresenter";
+
+    public static final String CREATE_ROOM_COMMAND = "createRoom";
+
+    public static final String DELETE_ROOM_COMMAND = "deleteRoom";
+
+    public static final String SEND_DATA_CHANNEL_COMMAND = "sendData";
+
+    public static final String RECEIVER_STREAM_ID_FIELD = "receiverStreamId";
+
+    public static final String PARTICIPANT_ID_FIELD = "participantId";
+
+    public static final String MESSAGE_FIELD = "message";
+
+    public static final String ROOM_NAME_FIELD = "roomName";
+
+    public static final String STATUS_FIELD = "status";
 	
 	public static final String WEBSOCKET_URL_FIELD = "websocketURL";
 	

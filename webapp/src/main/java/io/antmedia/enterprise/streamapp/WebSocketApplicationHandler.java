@@ -281,9 +281,43 @@ public class WebSocketApplicationHandler
 			JSONObject jsonObjectResponse = new JSONObject();
 			jsonObjectResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.STOP_RECORDING_RESPONSE);
 			jsonObjectResponse.put(WebSocketConstants.DEFINITION,  gson.toJson(result));
-			
+
 			
 			sendMessage(session, jsonObjectResponse.toJSONString());
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.MAKE_PRESENTER_COMMAND))
+		{
+			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
+			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+
+			handleMakePresenter(participantId, roomName);
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.UNDO_PRESENTER_COMMAND))
+		{
+			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
+			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+
+			handleUndoPresenter(participantId, roomName);
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.CREATE_ROOM_COMMAND))
+		{
+			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+			String status = (String)jsonObject.get(WebSocketApplicationConstants.STATUS_FIELD);
+
+			handleCreateRoom(roomName, status);
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.DELETE_ROOM_COMMAND))
+		{
+			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+
+			handleDeleteRoom(roomName);
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.SEND_DATA_CHANNEL_COMMAND))
+		{
+			String receiverStreamId = (String)jsonObject.get(WebSocketApplicationConstants.RECEIVER_STREAM_ID_FIELD);
+			String messageData = (String)jsonObject.get(WebSocketApplicationConstants.MESSAGE_FIELD);
+
+			handleSendDataChannelMessage(receiverStreamId, messageData);
 		}
 	}
 
@@ -350,7 +384,6 @@ public class WebSocketApplicationHandler
 		mainBroadcast.setOriginAdress(getServerSettings().getHostAddress());
 		getDataStore().save(mainBroadcast);
 
-
 	}
 
 	//room creation with password generates a permanent publish jwt which should be passed to publish and play on conference client.
@@ -415,5 +448,32 @@ public class WebSocketApplicationHandler
 		}
 	}
 
+	public void handleMakePresenter(String participantId, String roomName) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void handleUndoPresenter(String participantId, String roomName) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void handleSendDataChannelMessage(String receiverStreamId, String messageData) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void handleCreateRoom(String roomName, String status) {
+		createMainRoomBroadcast(roomName);
+	}
+
+	public void handleDeleteRoom(String id) {
+
+		if (id != null && (getDataStore().get(id)) != null)
+		{
+			getDataStore().delete(id);
+		}
+
+	}
 
 }

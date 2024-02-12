@@ -402,8 +402,9 @@ function AntMedia() {
 
     var jsCmd = {
       command: "makePresenter",
-      streamId: roomName,
+      streamId: publishStreamId,
       participantId: streamId,
+      roomName: roomName,
       websocketURL: websocketURL,
       token: token
     };
@@ -420,7 +421,7 @@ function AntMedia() {
     var jsCmd = {
       command: "sendData",
       streamId: roomName,
-      messageBody: JSON.stringify(command),
+      message: JSON.stringify(command),
       receiverStreamId: speakerName,
       websocketURL: websocketURL,
       token: token
@@ -440,7 +441,7 @@ function AntMedia() {
     var jsCmd = {
       command: "sendData",
       streamId: roomName,
-      messageBody: JSON.stringify(command),
+      message: JSON.stringify(command),
       receiverStreamId: speakerName,
       websocketURL: websocketURL,
       token: token
@@ -462,7 +463,7 @@ function AntMedia() {
     var jsCmd = {
       command: "sendData",
       streamId: roomName,
-      messageBody: JSON.stringify(command),
+      message: JSON.stringify(command),
       receiverStreamId: speakerName,
       websocketURL: websocketURL,
       token: token
@@ -532,8 +533,9 @@ function AntMedia() {
 
     var jsCmd = {
       command: "undoPresenter",
-      streamId: roomName,
+      streamId: publishStreamId,
       participantId: streamId,
+      roomName: roomName,
       websocketURL: websocketURL,
       token: token
     };
@@ -565,8 +567,9 @@ function AntMedia() {
 
   function createListenerRoomIfNotExists() {
     var jsCmd = {
-      command: "createStream",
+      command: "createROOM",
       streamId: roomName,
+      roomName: roomName+"listener",
       websocketURL: websocketURL,
       status: "broadcasting",
       token: token
@@ -577,8 +580,9 @@ function AntMedia() {
 
   function deleteListenerRoom() {
     var jsCmd = {
-      command: "deleteStream",
+      command: "deleteRoom",
       streamId: roomName,
+      roomName: roomName+"listener",
       websocketURL: websocketURL,
       token: token
     };
