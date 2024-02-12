@@ -47,6 +47,7 @@ function WaitingRoom(props) {
   }, [conference.initialized]);
 
   function joinRoom(e) {
+    conference.setIsJoining(true);
     if (conference.localVideo === null && conference.isPlayOnly === false) {
       e.preventDefault();
       enqueueSnackbar(
@@ -169,9 +170,16 @@ function WaitingRoom(props) {
         <Grid item md={conference.isPlayOnly === false ? 4 : 12}>
           <Grid container justifyContent={"center"}>
             <Grid container justifyContent={"center"}>
+              {conference.isJoining ?
+              <Typography variant="h5" align="center" className="dot-animation">
+                {t("Connecting")}
+              </Typography>
+              :
               <Typography variant="h5" align="center">
                 {t("What's your name?")}
               </Typography>
+              }
+
             </Grid>
             <Grid
               container
@@ -192,8 +200,10 @@ function WaitingRoom(props) {
 
             <form
               onSubmit={(e) => {
+                e.preventDefault();
                 joinRoom(e);
               }}
+              
             >
               <Grid item xs={12} sx={{mt: 3, mb: 4}}>
                 {process.env.REACT_APP_WAITING_ROOM_PARTICIPANT_NAME_READONLY === 'true' ?

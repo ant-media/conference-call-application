@@ -316,6 +316,7 @@ function AntMedia() {
   const [talkers, setTalkers] = useState([]);
   const [isPublished, setIsPublished] = useState(false);
   const [isPlayed, setIsPlayed] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
 
   const [selectedCamera, setSelectedCamera] = React.useState(localStorage.getItem('selectedCamera'));
   const [selectedMicrophone, setSelectedMicrophone] = React.useState(localStorage.getItem('selectedMicrophone'));
@@ -611,12 +612,12 @@ function AntMedia() {
     return result;
   }
 
-  React.useCallback(()=>{
-    if(isPublished && isPlayed)
-        setWaitingOrMeetingRoom("meeting")
-      
+  React.useEffect(() => {
+    if(isPublished && isPlayed){
+      setWaitingOrMeetingRoom("meeting")
+    }
   },[isPublished , isPlayed])
-
+  
   React.useEffect(() => {
     if(playOnly && enterDirectly && initialized) {
       let streamId = makeid(10);
@@ -667,6 +668,10 @@ function AntMedia() {
       //stream is being published
       webRTCAdaptor.enableStats(publishStreamId);
     } else if (info === "publish_finished") {
+      setIsPublished(false);
+      //stream is being finished
+    } else if (info === "play_finished") {
+      setIsPlayed(false);
       //stream is being finished
     } else if (info === "session_restored") {
       console.log("**** session_restored:" + reconnecting);
@@ -1371,6 +1376,8 @@ function AntMedia() {
   }
 
   function handleLeaveFromRoom() {
+
+    return;
     // we need to empty participant array. if we are going to leave it in the first place.
     setParticipants([]);
     setAllParticipants({});
@@ -1379,9 +1386,9 @@ function AntMedia() {
     audioListenerIntervalJob = null;
 
     if (!playOnly) {
-      webRTCAdaptor?.stop(publishStreamId);
+  //    webRTCAdaptor?.stop(publishStreamId);
     }
-    webRTCAdaptor?.stop(roomName);
+ //   webRTCAdaptor?.stop(roomName);
 
     if (!playOnly) {
       webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
@@ -1936,7 +1943,9 @@ function AntMedia() {
               setPresenterButtonDisabled,
               effectsDrawerOpen,
               handleEffectsOpen,
-              setAndEnableVirtualBackgroundImage
+              setAndEnableVirtualBackgroundImage,
+              setIsJoining,
+              isJoining
             }}
           >
             <UnauthrorizedDialog
