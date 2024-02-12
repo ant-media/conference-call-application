@@ -274,6 +274,8 @@ function AntMedia() {
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [presenters, setPresenters] = React.useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
+  const [microphoneButtonDisabled, setMicrophoneButtonDisabled] = React.useState(false);
+  const [cameraButtonDisabled, setCameraButtonDisabled] = React.useState(false);
 
   const [reactions] = useState({
     'sparkling_heart': '💖',
@@ -362,9 +364,11 @@ function AntMedia() {
     for (let index = 0; index < devices.length; index++) {
       if (devices[index].kind === "videoinput" && devices[index].deviceId === selectedDevices.videoDeviceId) {
         isVideoDeviceAvailable = true;
+        setCameraButtonDisabled(false)
       }
       if (devices[index].kind === "audioinput" && devices[index].deviceId === selectedDevices.audioDeviceId) {
         isAudioDeviceAvailable = true;
+        setMicrophoneButtonDisabled(false)
       }
     }
 
@@ -373,12 +377,24 @@ function AntMedia() {
       const camera = devices.find(d => d.kind === 'videoinput');
       if (camera) {
         selectedDevices.videoDeviceId = camera.deviceId;
+        setCameraButtonDisabled(false)
+      } else {
+        // if there is no camera, set the video to false
+        checkAndTurnOffLocalCamera()
+        setCameraButtonDisabled(true)
       }
     }
     if (selectedDevices.audioDeviceId === '' || isAudioDeviceAvailable === false) {
       const audio = devices.find(d => d.kind === 'audioinput');
       if (audio) {
         selectedDevices.audioDeviceId = audio.deviceId;
+        setMicrophoneButtonDisabled(false)
+        displayMessage("There is no camera device available.", "white")
+      } else {
+        // if there is no audio, set the audio to false
+        muteLocalMic()
+        setMicrophoneButtonDisabled(true)
+        displayMessage("There is no microphone available.", "white")
       }
     }
 
@@ -1928,7 +1944,11 @@ function AntMedia() {
               setPresenterButtonDisabled,
               effectsDrawerOpen,
               handleEffectsOpen,
-              setAndEnableVirtualBackgroundImage
+              setAndEnableVirtualBackgroundImage,
+              microphoneButtonDisabled,
+              setMicrophoneButtonDisabled,
+              cameraButtonDisabled,
+              setCameraButtonDisabled
             }}
           >
             <UnauthrorizedDialog
