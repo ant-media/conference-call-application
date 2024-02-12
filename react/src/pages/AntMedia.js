@@ -650,6 +650,10 @@ function AntMedia() {
       console.log("**** publish started:" + reconnecting);
 
       if (reconnecting) {
+        // we need to set the local video again after the reconnection
+        setLocalVideo()
+        // we need to set the setVideoCameraSource to be able to update sender source after the reconnection
+        webRTCAdaptor.mediaManager.setVideoCameraSource(publishStreamId, webRTCAdaptor.mediaManager.mediaConstraints, null, true);
         webRTCAdaptor.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
