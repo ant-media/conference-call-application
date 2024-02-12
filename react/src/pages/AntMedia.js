@@ -240,19 +240,6 @@ if (!websocketURL) {
 
 }
 
-let restBaseUrl = process.env.REACT_APP_REST_BASE_URL;
-
-if (!restBaseUrl) {
-  restBaseUrl = websocketURL.replace("ws", "http");
-
-  restBaseUrl = restBaseUrl.replace("websocket", "");
-
-  //remove last slash
-  if (restBaseUrl.endsWith("/")) {
-    restBaseUrl = restBaseUrl.substring(0, restBaseUrl.length - 1);
-  }
-}
-
 var fullScreenId = -1;
 
 var roomOfStream = [];
@@ -413,77 +400,15 @@ function AntMedia() {
       streamId = publishStreamId;
     }
 
-    const baseUrl = restBaseUrl;
-    const requestOptions0 = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+    var jsCmd = {
+      command: "makePresenter",
+      streamId: roomName,
+      participantId: streamId,
+      websocketURL: websocketURL,
+      token: token
     };
 
-    const requestOptions1 = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/add?streamId=" + streamId, requestOptions0)
-      .then(() => {
-        fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions1)
-          .then((response) => { return response.json(); })
-          .then((data) => {
-            setPresenterButtonStreamIdInProcess(null);
-            setPresenterButtonDisabled(false);
-            presenters.push(streamId);
-            var newPresenters = [...presenters];
-            setPresenters(newPresenters);
-
-            if (data.success) {
-
-              enqueueSnackbar({
-                message: t('Speaker has joined to the presenter room successfully'),
-                variant: 'info',
-              }, {
-                autoHideDuration: 1500,
-              });
-            }
-            else
-            {
-              enqueueSnackbar({
-                message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
-                variant: 'info',
-              }, {
-                autoHideDuration: 1500,
-              });
-            }
-
-            let command = {
-              "eventType": "BROADCAST_ON",
-              "streamId": streamId,
-            }
-            const requestOptions = {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(command)
-            };
-
-            fetch( baseUrl+ "/rest/v2/broadcasts/" + roomName + "/data", requestOptions)
-              .then((response) => { return response.json(); })
-              .then((data) => {
-                if (!data.success) {
-                  console.error("Data: " , command , " cannot be sent. The error is " + data.message);
-                }
-
-              });
-          })
-          .catch(error => {
-            console.error(error);
-            setPresenterButtonStreamIdInProcess(null);
-            setPresenterButtonDisabled(false);
-          });
-      })
-      .catch(error => {
-        console.error(error);
-        setPresenterButtonStreamIdInProcess(null);
-        setPresenterButtonDisabled(false);
-      });
+    sendMessage(JSON.stringify(jsCmd));
   }
 
   function rejectSpeakerRequest(streamId) {
@@ -491,47 +416,60 @@ function AntMedia() {
       "eventType": "REJECT_SPEAKER_REQUEST",
       "streamId": streamId,
     }
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(command)
+
+    var jsCmd = {
+      command: "sendData",
+      streamId: roomName,
+      messageBody: JSON.stringify(command),
+      receiverStreamId: speakerName,
+      websocketURL: websocketURL,
+      token: token
     };
-    fetch( restBaseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
+
+    sendMessage(JSON.stringify(jsCmd));
   }
 
   function approveBecomeSpeakerRequest(requestingSpeakerName) {
     setOpenRequestBecomeSpeakerDialog(false);
 
-    const baseUrl = restBaseUrl;
-
     let command = {
       "eventType": "GRANT_BECOME_PUBLISHER",
       "streamId": requestingSpeakerName,
     }
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(command)
+
+    var jsCmd = {
+      command: "sendData",
+      streamId: roomName,
+      messageBody: JSON.stringify(command),
+      receiverStreamId: speakerName,
+      websocketURL: websocketURL,
+      token: token
     };
-    fetch( baseUrl+ "/rest/v2/broadcasts/" + requestingSpeakerName + "/data", requestOptions).then(() => {});
+
+    sendMessage(JSON.stringify(jsCmd));
+
     approvedSpeakerRequestList.push(requestingSpeakerName+"tempPublisher");
     var newList = [...approvedSpeakerRequestList]
     setApprovedSpeakerRequestList(newList);
   }
 
   function makeListenerAgain(speakerName) {
-
-    const baseUrl = restBaseUrl;
     let command = {
       "eventType": "MAKE_LISTENER_AGAIN",
       "streamId": speakerName,
     }
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(command)
+
+    var jsCmd = {
+      command: "sendData",
+      streamId: roomName,
+      messageBody: JSON.stringify(command),
+      receiverStreamId: speakerName,
+      websocketURL: websocketURL,
+      token: token
     };
-    fetch( baseUrl+ "/rest/v2/broadcasts/" + speakerName + "/data", requestOptions).then(() => {});
+
+    sendMessage(JSON.stringify(jsCmd));
+
     // remove speakerName from approvedSpeakerRequestList
     let index = approvedSpeakerRequestList.indexOf(speakerName);
     if (index > -1) {
@@ -551,10 +489,6 @@ function AntMedia() {
 
   function resetPartipants() {
     setParticipants([]);
-  }
-
-  function changeRoomName(roomNameParam) {
-    roomName = roomNameParam;
   }
 
   function addBecomingPublisherRequest(listenerName)
@@ -596,83 +530,15 @@ function AntMedia() {
       streamId = publishStreamId;
     }
 
-    const baseUrl = restBaseUrl;
-    const requestOptions0 = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    const requestOptions2 = {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+    var jsCmd = {
+      command: "undoPresenter",
+      streamId: roomName,
+      participantId: streamId,
+      websocketURL: websocketURL,
+      token: token
     };
 
-    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions2)
-      .then((response) => response.json())
-      .then((result) => {
-
-        console.log("make participant undo presenter result: " + result.success);
-
-        //update the mainTrack Id again because remove track cannot set the mainTrackId to old value
-        var options = {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            mainTrackStreamId: roomName,
-            metaData: allParticipants[streamId].metaData
-          })
-        };
-
-        fetch(baseUrl + "/rest/v2/broadcasts/" + streamId, options)
-          .then((response) => response.json())
-          .then((result) => {
-            console.log("update subtrack result: " + result.success + " for stream: " + streamId);
-
-            fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + streamId, requestOptions0)
-              .then(() => {
-                setPresenterButtonStreamIdInProcess(null);
-                setPresenterButtonDisabled(false);
-                presenters.splice(presenters.indexOf(streamId), 1);
-                var newPresenters = [...presenters];
-                setPresenters(newPresenters);
-                let command = {
-                  "eventType": "STOP_PLAYING",
-                  "streamId": streamId,
-                }
-                const requestOptions = {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(command)
-                };
-                fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
-                let command2 = {
-                  "eventType": "BROADCAST_OFF",
-                  "streamId": streamId,
-                }
-                const requestOptions2 = {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(command2)
-                };
-                fetch( baseUrl+ "/rest/v2/broadcasts/" + roomName + "/data", requestOptions2).then(() => {});
-              })
-              .catch(error => {
-                console.error(error);
-                setPresenterButtonStreamIdInProcess(null);
-                setPresenterButtonDisabled(false);
-              });
-          })
-          .catch(error => {
-            console.error(error);
-            setPresenterButtonStreamIdInProcess(null);
-            setPresenterButtonDisabled(false);
-          });
-
-      })
-      .catch(error => {
-        console.error(error);
-        setPresenterButtonStreamIdInProcess(null);
-        setPresenterButtonDisabled(false);
-      });
+    sendMessage(JSON.stringify(jsCmd));
   }
 
   function handleSendMessageAdmin(message) {
@@ -698,38 +564,26 @@ function AntMedia() {
   }
 
   function createListenerRoomIfNotExists() {
-    const baseUrl = restBaseUrl;
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ streamId: roomName + "listener", status: "broadcasting" })
+    var jsCmd = {
+      command: "createStream",
+      streamId: roomName,
+      websocketURL: websocketURL,
+      status: "broadcasting",
+      token: token
     };
-    fetch(baseUrl + "/rest/v2/broadcasts/create", requestOptions)
-      .then((response) => { return response.json(); })
-      .then((data) => {
-        if (data.success) {
-          console.log("listener room created.");
-        } else {
-          console.log("listener room is already exist.");
-        }
-      });
+
+    sendMessage(JSON.stringify(jsCmd));
   }
 
   function deleteListenerRoom() {
-    const baseUrl = restBaseUrl;
-    const requestOptions = {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
+    var jsCmd = {
+      command: "deleteStream",
+      streamId: roomName,
+      websocketURL: websocketURL,
+      token: token
     };
-    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions)
-      .then((response) => { return response.json(); })
-      .then((data) => {
-        if (data.success) {
-          console.log("listener room is deleted.");
-        } else {
-          console.log("listener room is not deleted.");
-        }
-      });
+
+    sendMessage(JSON.stringify(jsCmd));
   }
 
   function handleUnauthorizedDialogExitClicked(){
