@@ -16,6 +16,7 @@ import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
 import { getRoomNameAttribute } from 'utils';
 import ReactionsButton from "./Components/ReactionsButton";
+import {useTheme} from "@mui/material/styles";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -43,6 +44,7 @@ function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
+  const theme = useTheme();
 
   const [, setIsRecordingTextVisible] = React.useState(false);
 
@@ -63,10 +65,12 @@ function Footer(props) {
         >
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <Grid container alignItems={"center"}>
-              <a href={process.env.REACT_APP_FOOTER_LOGO_ON_CLICK_URL} alt="Circle" target="_blank" rel="noreferrer">
-                <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
-              </a>
-              <Typography color="#ffffff" variant="body1">
+              {process.env.REACT_APP_FOOTER_APP_LOGO_VISIBILITY === "true" ?
+                <a href={process.env.REACT_APP_FOOTER_LOGO_ON_CLICK_URL} alt="Circle" target="_blank" rel="noreferrer">
+                  <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
+                </a>
+              : null}
+              <Typography color={theme.palette.textColor} variant="body1">
                 {id}
               </Typography>
               <InfoButton/>

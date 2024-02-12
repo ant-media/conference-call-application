@@ -35,3 +35,7 @@ export function getWebSocketURLAttribute() {
     //if it exists, it means it is in component mode
     return document.getElementById("root").getAttribute("data-websocket-url")
 }
+
+export function getRootAttribute(attribute) {
+    return document.getElementById("root").getAttribute(attribute);
+}

@@ -13,17 +13,18 @@ import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import EffectsDrawer from "../Components/EffectsDrawer";
 
-import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
+import {getRoomNameAttribute, getRootAttribute, getWebSocketURLAttribute} from "../utils";
 import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
 import { useWebSocket } from 'Components/WebSocketProvider';
+import {useTranslation} from "react-i18next";
 
 export const ConferenceContext = React.createContext(null);
 
 const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
-  maxVideoTrackCount: 6,
+  maxVideoTrackCount: 60,
   trackEvents: [],
 };
 
@@ -92,24 +93,83 @@ function getMediaConstraints(videoSendResolution, frameRate) {
 
 function getPlayToken() {
   const dataPlayToken = document.getElementById("root")?.getAttribute("data-play-token");
-  return (dataPlayToken) ? dataPlayToken : getUrlParameter("playToken");
+  let playToken = (dataPlayToken) ? dataPlayToken : getUrlParameter("playToken");
+  if (playToken === null || typeof playToken === "undefined") {
+    playToken = "";
+  }
+  return playToken;
 }
 
 function getPublishToken() {
   const dataPublishToken = document.getElementById("root")?.getAttribute("data-publish-token");
-  return (dataPublishToken) ? dataPublishToken : getUrlParameter("publishToken");
+  let publishToken = (dataPublishToken) ? dataPublishToken : getUrlParameter("publishToken");
+  if (publishToken === null || typeof publishToken === "undefined") {
+    publishToken = "";
+  }
+  return publishToken;
+}
+
+function getToken() {
+  const dataToken = document.getElementById("root")?.getAttribute("data-token");
+  let token = (dataToken) ? dataToken : getUrlParameter("token");
+  if (token === null || typeof token === "undefined") {
+    token = "";
+  }
+  return token;
 }
 
 var playToken = getPlayToken();
 var publishToken = getPublishToken();
-var token =  getUrlParameter("token")
+var token =  getToken();
 var mcuEnabled = getUrlParameter("mcuEnabled");
-var InitialStreamId = getUrlParameter("streamId");
-var playOnly = getUrlParameter("playOnly");
+
+if (mcuEnabled == null) {
+  mcuEnabled = false;
+}
+
+var onlyDataChannel = getRootAttribute("only-data-channel");
+if (!onlyDataChannel) {
+  onlyDataChannel = getUrlParameter("onlyDataChannel");
+}
+
+if (onlyDataChannel == null || typeof onlyDataChannel === "undefined") {
+  onlyDataChannel = false;
+} else {
+  onlyDataChannel = (onlyDataChannel === "true");
+}
+
+var playOnly = getRootAttribute("play-only");
+if (!playOnly) {
+  playOnly = getUrlParameter("playOnly");
+}
+
+if (playOnly == null || typeof playOnly === "undefined") {
+  playOnly = false;
+} else {
+  playOnly = (playOnly === "true");
+}
+
+var InitialStreamId = getRootAttribute("publish-stream-id");
+if (!InitialStreamId) {
+  InitialStreamId = getUrlParameter("streamId");
+}
+
 var enterDirectly = getUrlParameter("enterDirectly");
 if (enterDirectly == null || typeof enterDirectly === "undefined") {
   enterDirectly = false;
 }
+
+var admin = getRootAttribute("admin");
+if (!admin) {
+  admin = getUrlParameter("admin");
+}
+
+if (admin == null || typeof admin === "undefined") {
+  admin = false;
+} else {
+  admin = (admin === "true");
+}
+
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
@@ -154,11 +214,11 @@ if (playOnly) {
   };
 }
 
-let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = getWebSocketURLAttribute();
 
 if (!websocketURL) {
 
-  websocketURL = getWebSocketURLAttribute();
+  websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
   if (!websocketURL) {
     const appName = window.location.pathname.substring(
@@ -180,32 +240,24 @@ if (!websocketURL) {
 
 }
 
+let restBaseUrl = process.env.REACT_APP_REST_BASE_URL;
+
+if (!restBaseUrl) {
+  restBaseUrl = websocketURL.replace("ws", "http");
+
+  restBaseUrl = restBaseUrl.replace("websocket", "");
+
+  //remove last slash
+  if (restBaseUrl.endsWith("/")) {
+    restBaseUrl = restBaseUrl.substring(0, restBaseUrl.length - 1);
+  }
+}
+
 var fullScreenId = -1;
-
-if (mcuEnabled == null) {
-  mcuEnabled = false;
-}
-
-if (playOnly == null) {
-  playOnly = false;
-}
-
-if (playToken == null || typeof playToken === "undefined") {
-  playToken = "";
-}
-
-if (publishToken == null || typeof publishToken === "undefined") {
-  publishToken = "";
-}
-
-if (token == null || typeof token === "undefined") {
-  token = "";
-}
 
 var roomOfStream = [];
 
 var audioListenerIntervalJob = null;
-
 
 var room = null;
 var reconnecting = false;
@@ -213,6 +265,7 @@ var publishReconnected;
 var playReconnected;
 
 function AntMedia() {
+  const { t } = useTranslation();
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
@@ -230,7 +283,7 @@ function AntMedia() {
   const [publishStreamId, setPublishStreamId] = useState(InitialStreamId);
 
   // this is my own name when i enter the room.
-  const [streamName, setStreamName] = useState("");
+  const [streamName, setStreamName] = useState(getRootAttribute("stream-name"));
 
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
@@ -270,10 +323,18 @@ function AntMedia() {
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
-  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [isAdmin, setIsAdmin] = React.useState(admin);
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [presenters, setPresenters] = React.useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
+  // presenterButtonStreamIdInProcess keeps the streamId of the participant who is in the process of becoming presenter/unpresenter.
+  const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState(null);
+
+  const [openRequestBecomeSpeakerDialog, setOpenRequestBecomeSpeakerDialog] = React.useState(false);
+  const [requestingSpeakerName] = React.useState("");
+  const [requestSpeakerList, setRequestSpeakerList] = React.useState([]);
+  const [isBroadcasting, setIsBroadcasting] = React.useState(false);
+
 
   const [reactions] = useState({
     'sparkling_heart': '💖',
@@ -344,6 +405,333 @@ function AntMedia() {
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
+  function makeParticipantPresenter(id) {
+    setPresenterButtonStreamIdInProcess(id);
+    setPresenterButtonDisabled(true);
+    let streamId = id;
+    if (streamId === 'localVideo' && publishStreamId !== null) {
+      streamId = publishStreamId;
+    }
+
+    const baseUrl = restBaseUrl;
+    const requestOptions0 = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    const requestOptions1 = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/add?streamId=" + streamId, requestOptions0)
+      .then(() => {
+        fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions1)
+          .then((response) => { return response.json(); })
+          .then((data) => {
+            setPresenterButtonStreamIdInProcess(null);
+            setPresenterButtonDisabled(false);
+            presenters.push(streamId);
+            var newPresenters = [...presenters];
+            setPresenters(newPresenters);
+
+            if (data.success) {
+
+              enqueueSnackbar({
+                message: t('Speaker has joined to the presenter room successfully'),
+                variant: 'info',
+              }, {
+                autoHideDuration: 1500,
+              });
+            }
+            else
+            {
+              enqueueSnackbar({
+                message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
+                variant: 'info',
+              }, {
+                autoHideDuration: 1500,
+              });
+            }
+
+            let command = {
+              "eventType": "BROADCAST_ON",
+              "streamId": streamId,
+            }
+            const requestOptions = {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(command)
+            };
+
+            fetch( baseUrl+ "/rest/v2/broadcasts/" + roomName + "/data", requestOptions)
+              .then((response) => { return response.json(); })
+              .then((data) => {
+                if (!data.success) {
+                  console.error("Data: " , command , " cannot be sent. The error is " + data.message);
+                }
+
+              });
+          })
+          .catch(error => {
+            console.error(error);
+            setPresenterButtonStreamIdInProcess(null);
+            setPresenterButtonDisabled(false);
+          });
+      })
+      .catch(error => {
+        console.error(error);
+        setPresenterButtonStreamIdInProcess(null);
+        setPresenterButtonDisabled(false);
+      });
+  }
+
+  function rejectSpeakerRequest(streamId) {
+    let command = {
+      "eventType": "REJECT_SPEAKER_REQUEST",
+      "streamId": streamId,
+    }
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command)
+    };
+    fetch( restBaseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
+  }
+
+  function approveBecomeSpeakerRequest(requestingSpeakerName) {
+    setOpenRequestBecomeSpeakerDialog(false);
+
+    const baseUrl = restBaseUrl;
+
+    let command = {
+      "eventType": "GRANT_BECOME_PUBLISHER",
+      "streamId": requestingSpeakerName,
+    }
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command)
+    };
+    fetch( baseUrl+ "/rest/v2/broadcasts/" + requestingSpeakerName + "/data", requestOptions).then(() => {});
+    approvedSpeakerRequestList.push(requestingSpeakerName+"tempPublisher");
+    var newList = [...approvedSpeakerRequestList]
+    setApprovedSpeakerRequestList(newList);
+  }
+
+  function makeListenerAgain(speakerName) {
+
+    const baseUrl = restBaseUrl;
+    let command = {
+      "eventType": "MAKE_LISTENER_AGAIN",
+      "streamId": speakerName,
+    }
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command)
+    };
+    fetch( baseUrl+ "/rest/v2/broadcasts/" + speakerName + "/data", requestOptions).then(() => {});
+    // remove speakerName from approvedSpeakerRequestList
+    let index = approvedSpeakerRequestList.indexOf(speakerName);
+    if (index > -1) {
+      approvedSpeakerRequestList.splice(index, 1);
+    }
+    var newList = [...approvedSpeakerRequestList]
+    setApprovedSpeakerRequestList(newList);
+  }
+
+  function resetAllParticipants() {
+    setAllParticipants([]);
+  }
+
+  function getAllParticipants() {
+    return allParticipants;
+  }
+
+  function resetPartipants() {
+    setParticipants([]);
+  }
+
+  function changeRoomName(roomNameParam) {
+    roomName = roomNameParam;
+  }
+
+  function addBecomingPublisherRequest(listenerName)
+  {
+    let listener = {"streamId": listenerName};
+    if (requestSpeakerList.find((l) => l.streamId === listenerName)) {
+      return;
+    }
+
+    requestSpeakerList.push(listener);
+    //we just need to change the reference of the array to trigger the re-render.
+    var newRequestSpeakerList = [...requestSpeakerList];
+    setRequestSpeakerList(newRequestSpeakerList);
+
+  }
+
+  function displayNoVideoAudioDeviceFoundWarning() {
+    enqueueSnackbar(
+      {
+        message: "No video or audio device found. You cannot become publisher.",
+        variant: "warning",
+        icon: <SvgIcon size={24} name={'report'} color="red" />
+      },
+      {
+        autoHideDuration: 5000,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
+        },
+      }
+    );
+  }
+
+  function makeParticipantUndoPresenter(id) {
+    setPresenterButtonStreamIdInProcess(id);
+    setPresenterButtonDisabled(true);
+    let streamId = id;
+    if (streamId === 'localVideo') {
+      streamId = publishStreamId;
+    }
+
+    const baseUrl = restBaseUrl;
+    const requestOptions0 = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+    };
+    const requestOptions2 = {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener/subtrack?id=" + streamId, requestOptions2)
+      .then((response) => response.json())
+      .then((result) => {
+
+        console.log("make participant undo presenter result: " + result.success);
+
+        //update the mainTrack Id again because remove track cannot set the mainTrackId to old value
+        var options = {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mainTrackStreamId: roomName,
+            metaData: allParticipants[streamId].metaData
+          })
+        };
+
+        fetch(baseUrl + "/rest/v2/broadcasts/" + streamId, options)
+          .then((response) => response.json())
+          .then((result) => {
+            console.log("update subtrack result: " + result.success + " for stream: " + streamId);
+
+            fetch( baseUrl+ "/rest/v2/broadcasts/conference-rooms/" + roomName + "listener/delete?streamId=" + streamId, requestOptions0)
+              .then(() => {
+                setPresenterButtonStreamIdInProcess(null);
+                setPresenterButtonDisabled(false);
+                presenters.splice(presenters.indexOf(streamId), 1);
+                var newPresenters = [...presenters];
+                setPresenters(newPresenters);
+                let command = {
+                  "eventType": "STOP_PLAYING",
+                  "streamId": streamId,
+                }
+                const requestOptions = {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(command)
+                };
+                fetch( baseUrl+ "/rest/v2/broadcasts/" + streamId + "/data", requestOptions).then(() => {});
+                let command2 = {
+                  "eventType": "BROADCAST_OFF",
+                  "streamId": streamId,
+                }
+                const requestOptions2 = {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(command2)
+                };
+                fetch( baseUrl+ "/rest/v2/broadcasts/" + roomName + "/data", requestOptions2).then(() => {});
+              })
+              .catch(error => {
+                console.error(error);
+                setPresenterButtonStreamIdInProcess(null);
+                setPresenterButtonDisabled(false);
+              });
+          })
+          .catch(error => {
+            console.error(error);
+            setPresenterButtonStreamIdInProcess(null);
+            setPresenterButtonDisabled(false);
+          });
+
+      })
+      .catch(error => {
+        console.error(error);
+        setPresenterButtonStreamIdInProcess(null);
+        setPresenterButtonDisabled(false);
+      });
+  }
+
+  function handleSendMessageAdmin(message) {
+    if (publishStreamId) {
+      let iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
+      if (
+        iceState !== null &&
+        iceState !== "failed" &&
+        iceState !== "disconnected"
+      ) {
+        let commandList = message.split('*');
+        if (commandList.length > 3 && commandList[0] === "admin" && isAdmin === true) {
+          if (commandList[1] === "publisher_room") {
+            webRTCAdaptor.sendData(publishStreamId,
+              JSON.stringify({
+                streamId: commandList[2],
+                eventType: commandList[3]
+              }));
+          }
+        }
+      }
+    }
+  }
+
+  function createListenerRoomIfNotExists() {
+    const baseUrl = restBaseUrl;
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ streamId: roomName + "listener", status: "broadcasting" })
+    };
+    fetch(baseUrl + "/rest/v2/broadcasts/create", requestOptions)
+      .then((response) => { return response.json(); })
+      .then((data) => {
+        if (data.success) {
+          console.log("listener room created.");
+        } else {
+          console.log("listener room is already exist.");
+        }
+      });
+  }
+
+  function deleteListenerRoom() {
+    const baseUrl = restBaseUrl;
+    const requestOptions = {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    };
+    fetch(baseUrl + "/rest/v2/broadcasts/" + roomName + "listener", requestOptions)
+      .then((response) => { return response.json(); })
+      .then((data) => {
+        if (data.success) {
+          console.log("listener room is deleted.");
+        } else {
+          console.log("listener room is not deleted.");
+        }
+      });
+  }
+
   function handleUnauthorizedDialogExitClicked(){
 
     setUnAuthorizedDialogOpen(false)
@@ -407,7 +795,7 @@ function AntMedia() {
     room = roomName;
     roomOfStream[generatedStreamId] = room;
 
-    globals.maxVideoTrackCount = 6; //FIXME
+    globals.maxVideoTrackCount = 60; //FIXME
     setPublishStreamId(generatedStreamId);
 
     token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
@@ -934,6 +1322,17 @@ function AntMedia() {
     );
   }
 
+  function turnOnYourMicNotification(participantId) {
+    handleSendNotificationEvent(
+      "TURN_YOUR_MIC_ON",
+      publishStreamId,
+      {
+        streamId: participantId,
+        senderStreamId: publishStreamId
+      }
+    );
+  }
+
   function startRecord()
   {
 
@@ -957,6 +1356,17 @@ function AntMedia() {
     };
 
     sendMessage(JSON.stringify(jsCmd));
+  }
+
+  function turnOffYourCamNotification(participantId) {
+    handleSendNotificationEvent(
+      "TURN_YOUR_CAM_OFF",
+      publishStreamId,
+      {
+        streamId: participantId,
+        senderStreamId: publishStreamId
+      }
+    );
   }
 
   function sendReactions(reaction) {
@@ -1268,6 +1678,17 @@ function AntMedia() {
           console.warn(notificationEvent.senderStreamId, "muted you");
           muteLocalMic();
         }
+      } else if (eventType === "TURN_YOUR_MIC_ON") {
+        if (publishStreamId === notificationEvent.streamId) {
+          console.warn(notificationEvent.senderStreamId, "turns your mic on");
+          unmuteLocalMic();
+        }
+      }
+      else if (eventType === "TURN_YOUR_CAM_OFF") {
+        if (publishStreamId === notificationEvent.streamId) {
+          console.warn(notificationEvent.senderStreamId, "closed your cam");
+          checkAndTurnOffLocalCamera(publishStreamId);
+        }
       } else if (eventType === "PIN_USER") {
         if (
           notificationEvent.streamId === publishStreamId &&
@@ -1332,6 +1753,51 @@ function AntMedia() {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
         webRTCAdaptor.getBroadcastObject(roomName);
+      } else if (eventType === "GRANT_BECOME_PUBLISHER"/* && webRTCAdaptor.*/ && eventStreamId === publishStreamId)
+      {
+        /*
+        navigator.mediaDevices
+          .enumerateDevices()
+          .then((devices) => {
+            let audioInputDevices = [];
+            let videoInputDevices = [];
+            devices.forEach((device) => {
+              if (device.kind === "audioinput") {
+                audioInputDevices.push(device);
+              } else if (device.kind === "videoinput") {
+                videoInputDevices.push(device);
+              }
+              console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
+            });
+            if (audioInputDevices.length > 0 && videoInputDevices.length > 0)
+            {
+              //makeOnlyDataChannelPublisher = true;
+              //makePublisherOnlyDataChannel = false;
+              let tempPublishStreamId = publishStreamId + "tempPublisher";
+              setPublishStreamId(tempPublishStreamId);
+              webRTCAdaptor.leaveFromRoom(roomName);
+            } else {
+              webRTCAdaptor.displayNoVideoAudioDeviceFoundWarning();
+            }
+          })
+          .catch((err) => {
+            console.error(`${err.name}: ${err.message}`);
+          });
+        */
+      } else if (eventType == "REJECT_SPEAKER_REQUEST" && webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId)
+      {
+        window.showNotification(
+          'Your request to join the room is rejected by the host'
+        );
+      } else if (eventType === "MAKE_LISTENER_AGAIN" && !webRTCAdaptor.onlyDataChannel && eventStreamId === publishStreamId) {
+        /*
+        makePublisherOnlyDataChannel = true;
+        makeOnlyDataChannelPublisher = false;
+        setIsBroadcasting(false);
+        let tempPublishStreamId = publishStreamId.replace('tempPublisher', '');
+        setPublishStreamId(tempPublishStreamId);
+        handleLeaveFromRoom();
+        */
       }
     }
   }
@@ -1867,6 +2333,7 @@ function AntMedia() {
               publishStreamId,
               isMyMicMuted,
               isMyCamTurnedOff,
+              turnOffYourCamNotification,
               sendReactions,
               setSelectedBackgroundMode,
               setIsVideoEffectRunning,
@@ -1898,6 +2365,7 @@ function AntMedia() {
               handleSetMaxVideoTrackCount,
               screenShareOffNotification,
               handleSendMessage,
+              turnOnYourMicNotification,
               turnOffYourMicNotification,
               addFakeParticipant,
               removeFakeParticipant,
@@ -1928,7 +2396,9 @@ function AntMedia() {
               setPresenterButtonDisabled,
               effectsDrawerOpen,
               handleEffectsOpen,
-              setAndEnableVirtualBackgroundImage
+              setAndEnableVirtualBackgroundImage,
+              makeParticipantPresenter,
+              makeParticipantUndoPresenter
             }}
           >
             <UnauthrorizedDialog

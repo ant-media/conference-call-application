@@ -19,6 +19,7 @@ export function getGreenTheme() {
   const themeColor90 = "#6BCBC3";
   const chatText = "#DDFFFC";
   const darkGray = "#222B2A";
+  const textColor = "#FFFFFF";
 
   const error = "#DF0515";
   const primaryColor = themeColor10;
@@ -26,7 +27,7 @@ export function getGreenTheme() {
   let themeObject = {
     typography: {
       allVariants: {
-        color: "#FFFFFF",
+        color: textColor,
         fontFamily: "'OpenSans'",
       },
       h1: {

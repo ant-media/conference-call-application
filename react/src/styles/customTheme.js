@@ -4,7 +4,7 @@ import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
 import {getRoomNameAttribute} from "../utils";
 
-export function getBlueTheme() {
+export function getCustomTheme() {
     const themeColor0 = "#ffffff";
     //camera mic color
     const themeColor10 = "#3D7AB1";
@@ -15,14 +15,15 @@ export function getBlueTheme() {
     const themeColor50 = "#2B6197";
     //button
     const themeColor60 = "#2B6197";
-    //partiint list background
+    //participant list background
     const themeColor70 = "white";
-    //fotter bacckground
+    //footer background
     const themeColor80 = "white";
     const themeColor85 = "#3D7AB1";
     const themeColor90 = "#6BCBC3";
     const chatText = "#DDFFFC";
     const darkGray = "#222B2A";
+    const textColor = "#000000";
 
     const error = "#DF0515";
     const primaryColor = themeColor10;
@@ -30,7 +31,7 @@ export function getBlueTheme() {
     let themeObject = {
         typography: {
             allVariants: {
-                color: textColor ? textColor : "#FFFFFF",
+                color: textColor,
                 fontFamily: "'OpenSans'",
             },
             h1: {
@@ -348,8 +349,8 @@ export function getBlueTheme() {
                 90: darkGray,
             },
             text: {
-                primary: "#FFFFFF",
-                default: "#FFFFFF",
+                primary: "#000000",
+                default: "#000000",
                 secondary: chatText, // dark4
             },
         },

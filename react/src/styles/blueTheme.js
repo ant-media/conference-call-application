@@ -19,6 +19,7 @@ export function getBlueTheme() {
   const themeColor90 = "#84FFFF";
   const chatText = "#E0F7FA";
   const darkGray = "#37474F";
+  const textColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
@@ -26,7 +27,7 @@ export function getBlueTheme() {
   let themeObject = {
     typography: {
       allVariants: {
-        color: "#FFFFFF",
+        color: textColor,
         fontFamily: "'OpenSans'",
       },
       h1: {

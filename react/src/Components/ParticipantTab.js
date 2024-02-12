@@ -7,9 +7,10 @@ import { styled } from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import {CircularProgress} from "@mui/material";
+import {useTheme} from "@mui/material/styles";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
-  color: "#ffffff",
+  color: theme.palette.textColor,
   fontWeight: 500,
   fontSize: 14,
 }));
@@ -22,10 +23,10 @@ const PinBtn = styled(Button)(({ theme }) => ({
 
 function ParticipantTab(props) {
   const conference = React.useContext(ConferenceContext);
+  const theme = useTheme();
 
   const getAdminButtons = (streamId, assignedVideoCardId) => {
-    return (
-      <div>
+    return <>
       {(streamId === "localVideo" ? conference?.presenters.includes(conference.publishStreamId) : conference?.presenters.includes(streamId) )&& conference?.isAdmin === true ? (
       <PinBtn
         disabled={conference?.presenterButtonDisabled}
@@ -69,8 +70,7 @@ function ParticipantTab(props) {
       <SvgIcon size={28} name="close" color="black" />
     </PinBtn>
   ) : null}
-      </div>
-    );
+    </>;
   }
   const getParticipantItem = (streamId, name, assignedVideoCardId) => {
     return (
@@ -91,7 +91,7 @@ function ParticipantTab(props) {
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
               onClick={() => conference.pinVideo(assignedVideoCardId)}
             >
-              <SvgIcon size={28} name="unpin" color="#fff" />
+              <SvgIcon size={28} name="unpin" color={theme.palette.textColor} />
             </PinBtn>
           ) : (
             <PinBtn
@@ -109,14 +109,14 @@ function ParticipantTab(props) {
                 }
               }}
             >
-              <SvgIcon size={28} name="pin" color="#fff" />
+              <SvgIcon size={28} name="pin" color={theme.palette.textColor} />
             </PinBtn>
           )}
-          <div>
+          <>
           {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
             getAdminButtons(streamId, assignedVideoCardId)
         ) : null}
-        </div>
+        </>
         </Grid>
       </Grid>
     );
@@ -125,7 +125,7 @@ function ParticipantTab(props) {
         <div style={{width: "100%", overflowY: "auto"}}>
           <Stack sx={{width: "100%",}} spacing={2}>
             <Grid container>
-              <SvgIcon size={28} name="participants" color="#fff"/>
+              <SvgIcon size={28} name="participants" color={theme.palette.textColor}/>
               <ParticipantName
                   variant="body2"
                   style={{marginLeft: 4, fontWeight: 500}}

@@ -200,6 +200,7 @@ function EffectsTab() {
   return (
         <div style={{width: "100%", overflowY: "auto"}}>
           <Stack sx={{width: "100%",}} spacing={2}>
+            <div style={{height: 10}}/>
             <Grid container>
               <p>No effect & blur</p>
             </Grid>

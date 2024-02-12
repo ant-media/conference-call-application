@@ -19,6 +19,7 @@ export function getPurpleTheme() {
   const themeColor90 = "#EA80FC";
   const chatText = "#F3E5F5";
   const darkGray = "#37474F";
+  const textColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
@@ -26,7 +27,7 @@ export function getPurpleTheme() {
   let themeObject = {
     typography: {
       allVariants: {
-        color: "#FFFFFF",
+        color: textColor,
         fontFamily: "'OpenSans'",
       },
       h1: {

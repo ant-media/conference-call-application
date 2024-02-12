@@ -9,6 +9,7 @@ import { ListItemIcon, ListItemText, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
 import { ConferenceContext } from 'pages/AntMedia';
+import { useTheme } from '@mui/material/styles';
 
 const StyledListItemText = styled(ListItemText)(({ theme }) => ({
   '& .MuiListItemText-primary': {
@@ -27,6 +28,7 @@ function InfoButton(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const conference = React.useContext(ConferenceContext);
+  const theme = useTheme();
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget);
@@ -58,7 +60,7 @@ function InfoButton(props) {
                 onClick={handleClick}
                 sx={{ml: 0.5, px: 1, py: 1.5, minWidth: 'unset'}}
             >
-              <SvgIcon size={20} name={'info'} viewBox="0 0 500 500" color="#fff"/>
+              <SvgIcon size={20} name={'info'} viewBox="0 0 500 500" color={theme.palette.textColor}/>
             </Button>
           </Tooltip>
           <Menu

@@ -19,6 +19,7 @@ export function getOrangeTheme() {
   const themeColor90 = "#FFD180";
   const chatText = "#FFF3E0";
   const darkGray = "#37474F";
+  const textColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
@@ -26,7 +27,7 @@ export function getOrangeTheme() {
   let themeObject = {
     typography: {
       allVariants: {
-        color: "#FFFFFF",
+        color: textColor,
         fontFamily: "'OpenSans'",
       },
       h1: {

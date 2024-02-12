@@ -19,6 +19,7 @@ export function getPinkTheme() {
   const themeColor90 = "#FF80AB";
   const chatText = "#FCE4EC";
   const darkGray = "#37474F";
+  const textColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
@@ -26,7 +27,7 @@ export function getPinkTheme() {
   let themeObject = {
     typography: {
       allVariants: {
-        color: "#FFFFFF",
+        color: textColor,
         fontFamily: "'OpenSans'",
       },
       h1: {
