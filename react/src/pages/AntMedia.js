@@ -570,16 +570,19 @@ function AntMedia() {
   }
 
   function createListenerRoomIfNotExists() {
-    var jsCmd = {
-      command: "createROOM",
-      streamId: roomName,
-      roomName: roomName+"listener",
-      websocketURL: websocketURL,
-      status: "broadcasting",
-      token: token
-    };
+    if (isWebSocketConnected) {
+      console.log("createListenerRoomIfNotExistscalled");
+      var jsCmd = {
+        command: "createRoom",
+        streamId: roomName,
+        roomName: roomName + "listener",
+        websocketURL: websocketURL,
+        status: "broadcasting",
+        token: token
+      };
 
-    sendMessage(JSON.stringify(jsCmd));
+      sendMessage(JSON.stringify(jsCmd));
+    }
   }
 
   function deleteListenerRoom() {
@@ -898,6 +901,9 @@ function AntMedia() {
     } else if (info === "publish_started") {
       setIsPublished(true);
       console.log("**** publish started:" + reconnecting);
+      setTimeout(() => {
+        createListenerRoomIfNotExists()
+      }, 1000);
 
       if (reconnecting) {
         webRTCAdaptor.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it

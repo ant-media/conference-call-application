@@ -8,32 +8,35 @@ export const WebSocketProvider = ({ children }) => {
     const [latestMessage, setLatestMessage] = useState(null);
     const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
 
-    var websocketUrlTemp = process.env.REACT_APP_WEBSOCKET_URL;
+  var websocketUrlTemp = getWebSocketURLAttribute();
+  if (!websocketUrlTemp) {
+    websocketUrlTemp = process.env.REACT_APP_WEBSOCKET_URL;
     if (!websocketUrlTemp) {
-        websocketUrlTemp = getWebSocketURLAttribute();
-        if (!websocketUrlTemp) {
-            const appName = window.location.pathname.substring(
-                0,
-                window.location.pathname.lastIndexOf("/") + 1
-            );
-            const path =
-                window.location.hostname +
-                ":" +
-                window.location.port +
-                appName +
-                "websocket";
+      websocketUrlTemp = getWebSocketURLAttribute();
+      if (!websocketUrlTemp) {
+        const appName = window.location.pathname.substring(
+          0,
+          window.location.pathname.lastIndexOf("/") + 1
+        );
+        const path =
+          window.location.hostname +
+          ":" +
+          window.location.port +
+          appName +
+          "websocket";
 
-            websocketUrlTemp = "ws://" + path;
+        websocketUrlTemp = "ws://" + path;
 
-            if (window.location.protocol.startsWith("https")) {
-                websocketUrlTemp = "wss://" + path;
-            }
+        if (window.location.protocol.startsWith("https")) {
+          websocketUrlTemp = "wss://" + path;
         }
+      }
     }
-    
+  }
+
     const webSocketUrl = websocketUrlTemp
     const applicationWebSocketUrl = webSocketUrl + "/application";
-    
+
     useEffect(() => {
             console.log("--> websocket url connection: " + applicationWebSocketUrl);
             webSocket.current = new WebSocket(applicationWebSocketUrl);
