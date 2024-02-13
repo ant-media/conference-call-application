@@ -404,7 +404,7 @@ function AntMedia() {
       command: "makePresenter",
       streamId: publishStreamId,
       participantId: streamId,
-      roomName: roomName,
+      roomName: roomName+"listener",
       websocketURL: websocketURL,
       token: token
     };

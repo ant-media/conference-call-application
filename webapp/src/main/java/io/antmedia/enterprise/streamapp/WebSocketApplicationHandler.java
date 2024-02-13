@@ -117,7 +117,7 @@ public class WebSocketApplicationHandler
 
 	private AMSBroadcastManager getAMSBroadcastManager() {
 		if (amsBroadcastManager == null && context != null) {
-			amsBroadcastManager = (AMSBroadcastManager) context.getBean("plugin.amsBroadcastManager");
+			amsBroadcastManager = (AMSBroadcastManager) context.getBean("amsBroadcastManager");
 		}
 		return amsBroadcastManager;
 	}

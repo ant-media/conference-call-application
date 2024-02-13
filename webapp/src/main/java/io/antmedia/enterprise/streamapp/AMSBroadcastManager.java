@@ -7,6 +7,8 @@ import io.antmedia.datastore.db.IDataStoreFactory;
 import io.antmedia.datastore.db.types.Broadcast;
 import io.antmedia.rest.RestServiceBase;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -15,8 +17,9 @@ import org.springframework.stereotype.Component;
 import static io.antmedia.rest.RestServiceBase.addStreamToConferenceRoom;
 import static io.antmedia.rest.RestServiceBase.removeStreamFromRoom;
 
-@Component(value="plugin.amsBroadcastManager")
 public class AMSBroadcastManager implements ApplicationContextAware {
+
+    protected static Logger logger = LoggerFactory.getLogger(AMSBroadcastManager.class);
 
     private ApplicationContext applicationContext;
     private AntMediaApplicationAdapter appAdaptor;
