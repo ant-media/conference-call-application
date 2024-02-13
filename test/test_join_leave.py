@@ -50,8 +50,10 @@ class TestJoinLeave(unittest.TestCase):
   def get_conference(self):
     script = "return window.conference;"
     result_json = self.chrome.execute_script(script)
+    print(result_json)
     if result_json is None:
       return []
+    print(result_json)
     return result_json
   
   def get_video_track_limit(self):
@@ -169,9 +171,29 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_2)
 
-    #wait.until(lambda x: self.is_first_participant_pinned())
+    wait.until(lambda x: len(self.get_participants()) == 3)
+    
+    conference = self.get_conference()
+    allParticipants = conference["allParticipants"]
+    participants = conference["participants"]
+    
+    ss_button2 = self.chrome.get_element_by_id("share-screen-button")
 
-    assert(self.chrome.get_element_by_id("unpinned-gallery").is_displayed())
+    self.chrome.click_element(ss_button2)
+
+    wait.until(lambda x: len(self.get_participants()) == 4)
+
+    presenter2Exists = participants[1]["streamId"] + "_presentation" in allParticipants
+    
+    conference = self.get_conference()
+    allParticipants = conference["allParticipants"]
+    participants = conference["participants"]
+
+    presenterPinned = participants[2]["id"] == conference["pinnedVideoId"]
+
+    presenter1Exists = participants[2]["streamId"] in allParticipants
+
+    assert(presenter1Exists and presenter2Exists and presenterPinned)
 
     self.chrome.close_all()
 

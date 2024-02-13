@@ -31,7 +31,7 @@ class Browser:
     
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
-    #service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
+    #service = Service(executable_path='C:/Users/yunus/Desktop/antmedia/121/chromedriver-win64/chromedriver.exe') 
     service = Service(executable_path='/tmp/chromedriver')
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
