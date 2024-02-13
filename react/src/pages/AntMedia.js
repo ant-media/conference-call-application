@@ -413,6 +413,8 @@ function AntMedia() {
   }
 
   function rejectSpeakerRequest(streamId) {
+    let speakerName = ""
+
     let command = {
       "eventType": "REJECT_SPEAKER_REQUEST",
       "streamId": streamId,
@@ -431,6 +433,8 @@ function AntMedia() {
   }
 
   function approveBecomeSpeakerRequest(requestingSpeakerName) {
+    let speakerName = ""
+
     setOpenRequestBecomeSpeakerDialog(false);
 
     let command = {
