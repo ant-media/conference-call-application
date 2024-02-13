@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import static io.antmedia.rest.RestServiceBase.addStreamToConferenceRoom;
 import static io.antmedia.rest.RestServiceBase.removeStreamFromRoom;
 
-@Component(value="amsBroadcastManager")
+@Component(value="plugin.amsBroadcastManager")
 public class AMSBroadcastManager implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;

@@ -86,7 +86,6 @@ public class WebSocketApplicationHandler
 
 		setApplicationContext(session);
 		setConferenceRoomSettings();
-		setAMSBroadcastManager();
 		setAppSettings();
 	}
 
@@ -115,16 +114,10 @@ public class WebSocketApplicationHandler
 			sendNotInitializedError(session);
 		}
 	}
-	
-	private void setAMSBroadcastManager() {
-		if(context != null) {
-			amsBroadcastManager = (AMSBroadcastManager) context.getBean("amsBroadcastManager");
-		}
-	}
 
 	private AMSBroadcastManager getAMSBroadcastManager() {
 		if (amsBroadcastManager == null && context != null) {
-			amsBroadcastManager = (AMSBroadcastManager) context.getBean("amsBroadcastManager");
+			amsBroadcastManager = (AMSBroadcastManager) context.getBean("plugin.amsBroadcastManager");
 		}
 		return amsBroadcastManager;
 	}

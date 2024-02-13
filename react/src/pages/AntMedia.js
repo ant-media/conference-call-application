@@ -901,9 +901,6 @@ function AntMedia() {
     } else if (info === "publish_started") {
       setIsPublished(true);
       console.log("**** publish started:" + reconnecting);
-      setTimeout(() => {
-        createListenerRoomIfNotExists()
-      }, 1000);
 
       if (reconnecting) {
         webRTCAdaptor.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
@@ -2078,6 +2075,9 @@ function AntMedia() {
         command: "getSettings",
       };
       sendMessage(JSON.stringify(jsCmd));
+    }
+    if (isAdmin) {
+      createListenerRoomIfNotExists();
     }
   },[isWebSocketConnected, sendMessage]);
 
