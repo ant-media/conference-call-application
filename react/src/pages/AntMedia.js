@@ -539,7 +539,7 @@ function AntMedia() {
       command: "undoPresenter",
       streamId: publishStreamId,
       participantId: streamId,
-      roomName: roomName,
+      roomName: roomName+"listener",
       websocketURL: websocketURL,
       token: token
     };
@@ -2109,7 +2109,7 @@ function AntMedia() {
     {
       console.log("Incoming makePresenterResponse", obj);
 
-      var data = JSON.parse(obj.data);
+      var data = JSON.parse(obj.definition);
       var streamId = data.dataId;
 
       if (data.success) {
@@ -2152,7 +2152,7 @@ function AntMedia() {
     {
       console.log("Incoming undoPresenterResponse", obj);
 
-      var data = JSON.parse(obj.data);
+      var data = JSON.parse(obj.definition);
       var streamId = data.dataId;
 
       if (data.success) {

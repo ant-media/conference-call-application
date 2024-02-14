@@ -298,7 +298,7 @@ public class WebSocketApplicationHandler
 			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
 
 			boolean isSuccess = handleMakePresenter(participantId, roomName);
-			Result result = new Result(isSuccess);
+			Result result = new Result(true);//TODO: change this to isSuccess after fixing the addSubTrack method return value
 			result.setDataId(participantId);
 
 			JSONObject jsonObjectResponse = new JSONObject();
