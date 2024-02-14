@@ -81,6 +81,14 @@ public class WebSocketApplicationConstants {
     public static final String STATUS_FIELD = "status";
 	
 	public static final String WEBSOCKET_URL_FIELD = "websocketURL";
+
+    public static final String MAKE_PRESENTER_RESPONSE = "makePresenterResponse";
+
+    public static final String UNDO_PRESENTER_RESPONSE = "undoPresenterResponse";
+
+    public static final String CREATE_ROOM_RESPONSE = "createRoomResponse";
+
+    public static final String DELETE_ROOM_RESPONSE = "deleteRoomResponse";
 	
 	public static final String START_RECORDING_RESPONSE = "startRecordingResponse";
 

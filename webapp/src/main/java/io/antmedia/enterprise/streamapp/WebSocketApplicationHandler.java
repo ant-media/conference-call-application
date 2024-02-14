@@ -297,14 +297,32 @@ public class WebSocketApplicationHandler
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
 			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
 
-			handleMakePresenter(participantId, roomName);
+			boolean isSuccess = handleMakePresenter(participantId, roomName);
+			Result result = new Result(isSuccess);
+			result.setDataId(participantId);
+
+			JSONObject jsonObjectResponse = new JSONObject();
+			jsonObjectResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.MAKE_PRESENTER_RESPONSE);
+			jsonObjectResponse.put(WebSocketConstants.DEFINITION,  gson.toJson(result));
+
+
+			sendMessage(session, jsonObjectResponse.toJSONString());
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.UNDO_PRESENTER_COMMAND))
 		{
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
 			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
 
-			handleUndoPresenter(participantId, roomName);
+			boolean isSuccess = handleUndoPresenter(participantId, roomName);
+			Result result = new Result(isSuccess);
+			result.setDataId(participantId);
+
+			JSONObject jsonObjectResponse = new JSONObject();
+			jsonObjectResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.UNDO_PRESENTER_RESPONSE);
+			jsonObjectResponse.put(WebSocketConstants.DEFINITION, gson.toJson(result));
+
+
+			sendMessage(session, jsonObjectResponse.toJSONString());
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.CREATE_ROOM_COMMAND))
 		{
@@ -312,12 +330,30 @@ public class WebSocketApplicationHandler
 			String status = (String)jsonObject.get(WebSocketApplicationConstants.STATUS_FIELD);
 
 			handleCreateRoom(roomName, status);
+			Result result = new Result(true);
+			result.setDataId(roomName);
+
+			JSONObject jsonObjectResponse = new JSONObject();
+			jsonObjectResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.CREATE_ROOM_RESPONSE);
+			jsonObjectResponse.put(WebSocketConstants.DEFINITION, gson.toJson(result));
+
+
+			sendMessage(session, jsonObjectResponse.toJSONString());
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.DELETE_ROOM_COMMAND))
 		{
 			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
 
 			handleDeleteRoom(roomName);
+			Result result = new Result(true);
+			result.setDataId(roomName);
+
+			JSONObject jsonObjectResponse = new JSONObject();
+			jsonObjectResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.DELETE_ROOM_RESPONSE);
+			jsonObjectResponse.put(WebSocketConstants.DEFINITION, gson.toJson(result));
+
+
+			sendMessage(session, jsonObjectResponse.toJSONString());
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.SEND_DATA_CHANNEL_COMMAND))
 		{
@@ -455,7 +491,7 @@ public class WebSocketApplicationHandler
 		}
 	}
 
-	public void handleMakePresenter(String participantId, String roomName) {
+	public boolean handleMakePresenter(String participantId, String roomName) {
 		boolean result = getAMSBroadcastManager().addSubTrack(roomName, participantId);
 
 		if (result) {
@@ -463,9 +499,11 @@ public class WebSocketApplicationHandler
 		} else {
 			logger.error("Participant {} could not be made presenter in room {}", participantId, roomName);
 		}
+
+		return result;
 	}
 
-	public void handleUndoPresenter(String participantId, String roomName) {
+	public boolean handleUndoPresenter(String participantId, String roomName) {
 		boolean result = getAMSBroadcastManager().removeSubTrack(roomName, participantId);
 
 		if (result) {
@@ -473,6 +511,8 @@ public class WebSocketApplicationHandler
 		} else {
 			logger.error("Participant {} could not be removed from presenter in room {}", participantId, roomName);
 		}
+
+		return result;
 	}
 
 	public void handleSendDataChannelMessage(String receiverStreamId, String messageData) {
@@ -486,7 +526,9 @@ public class WebSocketApplicationHandler
 	}
 
 	public void handleCreateRoom(String roomName, String status) {
-		createMainRoomBroadcast(roomName);
+		if (roomName != null && getDataStore().get(roomName) == null) {
+			createMainRoomBroadcast(roomName);
+		}
 	}
 
 	public void handleDeleteRoom(String id) {
