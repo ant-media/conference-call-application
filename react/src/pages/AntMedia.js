@@ -547,6 +547,19 @@ function AntMedia() {
     sendMessage(JSON.stringify(jsCmd));
   }
 
+  function sendDataChannelMessage(receiverStreamId, messageData) {
+    var jsCmd = {
+      command: "sendData",
+      streamId: publishStreamId,
+      receiverStreamId: receiverStreamId,
+      messageData: messageData,
+      websocketURL: websocketURL,
+      token: token
+    };
+
+    sendMessage(JSON.stringify(jsCmd));
+  }
+
   function handleSendMessageAdmin(message) {
     if (publishStreamId) {
       let iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
@@ -2091,6 +2104,89 @@ function AntMedia() {
       var localSettings =  JSON.parse(obj.settings);
       console.log("--isRecordingFeatureAvailable: ", localSettings.isRecordingFeatureAvailable);
       setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
+    }
+    else if (obj.command === "makePresenterResponse")
+    {
+      console.log("Incoming makePresenterResponse", obj);
+
+      var data = JSON.parse(obj.data);
+      var streamId = data.dataId;
+
+      if (data.success) {
+
+        setPresenterButtonStreamIdInProcess(null);
+        setPresenterButtonDisabled(false);
+        presenters.push(streamId);
+        var newPresenters = [...presenters];
+        setPresenters(newPresenters);
+
+        if (data.success) {
+
+          enqueueSnackbar({
+            message: t('Speaker has joined to the presenter room successfully'),
+            variant: 'info',
+          }, {
+            autoHideDuration: 1500,
+          });
+        } else {
+          enqueueSnackbar({
+            message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
+            variant: 'info',
+          }, {
+            autoHideDuration: 1500,
+          });
+        }
+
+        let command = {
+          "eventType": "BROADCAST_ON",
+          "streamId": streamId,
+        }
+
+        sendDataChannelMessage(roomName, JSON.stringify(command))
+      } else {
+        setPresenterButtonStreamIdInProcess(null);
+        setPresenterButtonDisabled(false);
+      }
+    }
+    else if (obj.command === "undoPresenterResponse")
+    {
+      console.log("Incoming undoPresenterResponse", obj);
+
+      var data = JSON.parse(obj.data);
+      var streamId = data.dataId;
+
+      if (data.success) {
+        setPresenterButtonStreamIdInProcess(null);
+        setPresenterButtonDisabled(false);
+        presenters.splice(presenters.indexOf(streamId), 1);
+        var newPresenters = [...presenters];
+        setPresenters(newPresenters);
+
+        let command = {
+          "eventType": "STOP_PLAYING",
+          "streamId": streamId,
+        }
+
+        sendDataChannelMessage(streamId, JSON.stringify(command))
+
+        let command2 = {
+          "eventType": "BROADCAST_OFF",
+          "streamId": streamId,
+        }
+
+        sendDataChannelMessage(roomName, JSON.stringify(command2))
+      } else {
+        setPresenterButtonStreamIdInProcess(null);
+        setPresenterButtonDisabled(false);
+      }
+    }
+    else if (obj.command === "createRoomResponse")
+    {
+      console.log("Incoming createRoomResponse", obj);
+    }
+    else if (obj.command === "deleteRoomResponse")
+    {
+      console.log("Incoming deleteRoomResponse", obj);
     }
     else if (obj.command === "startRecordingResponse")
     {
