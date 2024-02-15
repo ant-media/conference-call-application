@@ -18,12 +18,7 @@ class TestDeployment(unittest.TestCase):
   def test_install_app(self):
     # burak: install app is currently not working through LB
     # so we get first node ip and call install through it
-    nodes_json = self.rest_helper.call_get_cluster_nodes()
-    ip_of_first_node = nodes_json[0]["ip"]
-    temp_rest_helper = RestHelper("http://"+ip_of_first_node+":5080", self.rest_helper.user, self.rest_helper.password)
-    temp_rest_helper.login()
-
-    response = temp_rest_helper.call_install_app(os.environ.get('WAR_FILE'), self.test_app_name)
+    response = self.rest_helper.call_install_app(os.environ.get('WAR_FILE'), self.test_app_name)
     print(response)
     assert(response["success"])
     time.sleep(20)
