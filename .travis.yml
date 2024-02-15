@@ -34,7 +34,7 @@ script:
 - mvn clean install -DskipTests -Dgpg.skip=true --quiet
 # run tests
 - cd ../test
-- python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
+- python3 test_main.py "https://burak2.antmedia.cloud" $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
 - cd ../webapp
 
 deploy:
