@@ -71,7 +71,9 @@ public class AMSBroadcastManager implements ApplicationContextAware {
             return false;
         }
 
-        return deleteStreamFromTheRoom(mainTrackId, subTrackId);
+        RestServiceBase.removeStreamFromRoom(mainTrackId,subTrackId,getDataStore());
+
+        return result.isSuccess();
     }
 
     public boolean deleteStreamFromTheRoom(String mainTrackId, String subTrackId) {
