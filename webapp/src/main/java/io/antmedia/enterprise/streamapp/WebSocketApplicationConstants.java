@@ -78,6 +78,8 @@ public class WebSocketApplicationConstants {
 
     public static final String ROOM_NAME_FIELD = "roomName";
 
+    public static final String LISTENER_ROOM_NAME_FIELD = "listenerRoomName";
+
     public static final String STATUS_FIELD = "status";
 	
 	public static final String WEBSOCKET_URL_FIELD = "websocketURL";

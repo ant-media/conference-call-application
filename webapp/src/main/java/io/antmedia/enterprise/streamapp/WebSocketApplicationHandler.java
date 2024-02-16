@@ -311,9 +311,10 @@ public class WebSocketApplicationHandler
 		else if (cmd.equals(WebSocketApplicationConstants.UNDO_PRESENTER_COMMAND))
 		{
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
+			String listenerRoomName = (String)jsonObject.get(WebSocketApplicationConstants.LISTENER_ROOM_NAME_FIELD);
 			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
 
-			boolean isSuccess = handleUndoPresenter(participantId, roomName);
+			boolean isSuccess = handleUndoPresenter(participantId, listenerRoomName, roomName);
 			Result result = new Result(isSuccess);
 			result.setDataId(participantId);
 
@@ -503,13 +504,14 @@ public class WebSocketApplicationHandler
 		return result;
 	}
 
-	public boolean handleUndoPresenter(String participantId, String roomName) {
-		boolean result = getAMSBroadcastManager().removeSubTrack(roomName, participantId);
+	public boolean handleUndoPresenter(String participantId, String listenerRoomName, String roomName) {
+		boolean result = getAMSBroadcastManager().removeSubTrack(listenerRoomName, participantId);
 
 		if (result) {
-			logger.info("Participant {} is removed from presenter in room {}", participantId, roomName);
+			logger.info("Participant {} is removed from presenter in room {}", participantId, listenerRoomName);
+			getAMSBroadcastManager().updateMainTrackId(participantId, roomName, getDataStore());
 		} else {
-			logger.error("Participant {} could not be removed from presenter in room {}", participantId, roomName);
+			logger.error("Participant {} could not be removed from presenter in room {}", participantId, listenerRoomName);
 		}
 
 		return result;

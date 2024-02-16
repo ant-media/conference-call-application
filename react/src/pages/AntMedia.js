@@ -545,7 +545,8 @@ function AntMedia() {
       command: "undoPresenter",
       streamId: publishStreamId,
       participantId: streamId,
-      roomName: roomName+"listener",
+      listenerRoomName: roomName+"listener",
+      roomName: roomName,
       websocketURL: websocketURL,
       token: token
     };

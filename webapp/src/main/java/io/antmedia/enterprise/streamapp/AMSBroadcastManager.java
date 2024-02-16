@@ -76,6 +76,12 @@ public class AMSBroadcastManager implements ApplicationContextAware {
         return result.isSuccess();
     }
 
+    public boolean updateMainTrackId(String participantId, String roomName, DataStore dataStore) {
+        Broadcast broadcast = dataStore.get(participantId);
+        broadcast.setMainTrackStreamId(roomName);
+        return dataStore.updateBroadcastFields(participantId, broadcast);
+    }
+
     public boolean deleteStreamFromTheRoom(String mainTrackId, String subTrackId) {
         AntMediaApplicationAdapter application = getApplication();
 
