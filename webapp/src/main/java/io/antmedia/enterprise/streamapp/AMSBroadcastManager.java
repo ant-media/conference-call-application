@@ -5,6 +5,7 @@ import io.antmedia.datastore.db.DataStore;
 import io.antmedia.datastore.db.DataStoreFactory;
 import io.antmedia.datastore.db.IDataStoreFactory;
 import io.antmedia.datastore.db.types.Broadcast;
+import io.antmedia.rest.model.Result;
 import io.antmedia.rest.RestServiceBase;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -46,76 +47,27 @@ public class AMSBroadcastManager implements ApplicationContextAware {
         return dataStoreFactory.getDataStore();
     }
 
-    public boolean isMainTrack(String streamId) {
-        boolean result = false;
-        if (streamId != null)
-        {
-            Broadcast broadcast = getDataStore().get(streamId);
-            if (broadcast != null)
-            {
-                result = !broadcast.getSubTrackStreamIds().isEmpty();
-            }
-        }
-        return result;
-    }
-
     public boolean sendDataChannelMessage(String id, String message) {
         AntMediaApplicationAdapter application = getApplication();
 
-        if(application != null && application.isDataChannelMessagingSupported()) {
-            if(application.isDataChannelEnabled()) {
-                if(application.doesWebRTCStreamExist(id) || isMainTrack(id)) {
-                    return application.sendDataChannelMessage(id,message);
-                }
-            }
+        if(application == null) {
+            return false;
         }
-        return false;
+
+        Result result = RestServiceBase.sendDataChannelMessage(id, message, application, getDataStore());
+
+        return result.isSuccess();
     }
 
     public boolean addSubTrack(String mainTrackId, String subTrackId) {
-        Broadcast subTrack = getDataStore().get(subTrackId);
-
-        if (subTrack == null) {
-            return false;
-        }
-
-        subTrack.setMainTrackStreamId(mainTrackId);
-
-        boolean isBroadcastUpdated = getDataStore().updateBroadcastFields(subTrackId, subTrack);
-
-        if (!isBroadcastUpdated) {
-            return false;
-        }
-
-        boolean isMainBroadcastUpdated = getDataStore().addSubTrack(mainTrackId, subTrackId);
-
-        if (!isMainBroadcastUpdated) {
-            return false;
-        }
-
-        return addStreamToConferenceRoom(mainTrackId, subTrackId, getDataStore());
+        Result result = RestServiceBase.addSubTrack(mainTrackId, subTrackId, getDataStore());
+        return result.isSuccess();
     }
 
     public boolean removeSubTrack(String mainTrackId, String subTrackId) {
-        Broadcast subTrack = getDataStore().get(subTrackId);
+        Result result = RestServiceBase.removeSubTrack(id, subTrackId, getDataStore());
 
-        if (subTrack == null) {
-            return false;
-        }
-
-        if(mainTrackId != null && mainTrackId.equals(subTrack.getMainTrackStreamId())) {
-            subTrack.setMainTrackStreamId("");
-        }
-
-        boolean isBroadcastUpdate = getDataStore().updateBroadcastFields(subTrackId, subTrack);
-
-        if (!isBroadcastUpdate) {
-            return false;
-        }
-
-        boolean isMainBroadcastUpdated = getDataStore().removeSubTrack(mainTrackId, subTrackId);
-
-        if (!isMainBroadcastUpdated) {
+        if (!result) {
             return false;
         }
 
