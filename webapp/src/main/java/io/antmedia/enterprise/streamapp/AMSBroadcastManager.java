@@ -65,9 +65,9 @@ public class AMSBroadcastManager implements ApplicationContextAware {
     }
 
     public boolean removeSubTrack(String mainTrackId, String subTrackId) {
-        Result result = RestServiceBase.removeSubTrack(id, subTrackId, getDataStore());
+        Result result = RestServiceBase.removeSubTrack(mainTrackId, subTrackId, getDataStore());
 
-        if (!result) {
+        if (!result.isSuccess()) {
             return false;
         }
 
