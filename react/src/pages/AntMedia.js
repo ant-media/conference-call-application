@@ -554,12 +554,12 @@ function AntMedia() {
     sendMessage(JSON.stringify(jsCmd));
   }
 
-  function sendDataChannelMessage(receiverStreamId, messageData) {
+  function sendDataChannelMessage(receiverStreamId, message) {
     var jsCmd = {
       command: "sendData",
       streamId: publishStreamId,
       receiverStreamId: receiverStreamId,
-      messageData: messageData,
+      message: message,
       websocketURL: websocketURL,
       token: token
     };
@@ -1487,6 +1487,12 @@ function AntMedia() {
         setIsRecordPluginActive(true);
       } else if (eventType === "RECORDING_TURNED_OFF") {
         setIsRecordPluginActive(false);
+      } else if (eventType === "BROADCAST_ON" && eventStreamId === publishStreamId) {
+        setIsBroadcasting(true);
+        console.log("BROADCAST_ON");
+      } else if (eventType === "BROADCAST_OFF" && eventStreamId === publishStreamId) {
+        setIsBroadcasting(false);
+        console.log("BROADCAST_OFF");
       } else if (eventType === "MESSAGE_RECEIVED") {
         // if message arrives from myself or footer message button is disabled then we are not going to show it.
         if (notificationEvent.senderId === publishStreamId
@@ -2369,7 +2375,8 @@ function AntMedia() {
               handleEffectsOpen,
               setAndEnableVirtualBackgroundImage,
               makeParticipantPresenter,
-              makeParticipantUndoPresenter
+              makeParticipantUndoPresenter,
+              isBroadcasting
             }}
           >
             <UnauthrorizedDialog
