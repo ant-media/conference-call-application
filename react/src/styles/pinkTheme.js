@@ -72,11 +72,11 @@ export function getPinkTheme() {
         styleOverrides: {
           root: {
             "& fieldset": {
-              borderColor: "white",
+              borderColor: "#fff",
             },
           },
           icon: {
-            color: "white",
+            color: "#fff",
           },
         },
       },
@@ -112,7 +112,7 @@ export function getPinkTheme() {
       MuiDialogTitle: {
         styleOverrides: {
           root: {
-            color: "white",
+            color: "#fff",
             padding: "24px 0",
             fontSize: 24,
           },
@@ -131,7 +131,7 @@ export function getPinkTheme() {
           root: {
             paddingTop: 16,
             paddingBottom: 16,
-            color: "white",
+            color: "#fff",
           },
         },
       },
@@ -145,7 +145,7 @@ export function getPinkTheme() {
       MuiListItemText: {
         styleOverrides: {
           primary: {
-            color: "white",
+            color: "#fff",
           },
         },
       },
@@ -204,11 +204,11 @@ export function getPinkTheme() {
         styleOverrides: {
           outlinedSecondary: {
             border: `1px solid ${themeColor60}`,
-            color: "white",
+            color: "#fff",
           },
 
           root: {
-            color: "white",
+            color: "#fff",
             borderRadius: 6,
             fontSize: 16,
             fontWeight: 500,

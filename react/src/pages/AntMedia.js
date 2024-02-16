@@ -127,6 +127,12 @@ if (mcuEnabled == null) {
   mcuEnabled = false;
 }
 
+var streamNameInit = getRootAttribute("stream-name");
+
+if (!streamNameInit) {
+  streamNameInit = getUrlParameter("streamName");
+}
+
 var onlyDataChannel = getRootAttribute("only-data-channel");
 if (!onlyDataChannel) {
   onlyDataChannel = getUrlParameter("onlyDataChannel");
@@ -270,7 +276,7 @@ function AntMedia() {
   const [publishStreamId, setPublishStreamId] = useState(InitialStreamId);
 
   // this is my own name when i enter the room.
-  const [streamName, setStreamName] = useState(getRootAttribute("stream-name"));
+  const [streamName, setStreamName] = useState(streamNameInit);
 
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
@@ -1214,7 +1220,7 @@ function AntMedia() {
   function startRecord()
   {
 
-    displayMessage("Recording is about to start...", "white")
+    displayMessage("Recording is about to start...", "#fff")
     var jsCmd = {
       command: "startRecording",
       streamId: roomName,
@@ -1227,7 +1233,7 @@ function AntMedia() {
 
   function stopRecord()
   {
-    displayMessage("Recording is about to stop...", "white")
+    displayMessage("Recording is about to stop...", "#fff")
     var jsCmd = {
       command: "stopRecording",
       streamId: roomName,
@@ -2200,11 +2206,11 @@ function AntMedia() {
           "RECORDING_TURNED_ON",
           publishStreamId
         );
-        displayMessage("Recording is started successfully", "white")
+        displayMessage("Recording is started successfully", "#fff")
       }
       else {
         console.log("Start Recording is failed");
-        displayMessage("Recording cannot be started. Error is " + definition.message, "white")
+        displayMessage("Recording cannot be started. Error is " + definition.message, "#fff")
       }
     }
     else if (obj.command === "stopRecordingResponse") {
@@ -2218,11 +2224,11 @@ function AntMedia() {
           "RECORDING_TURNED_OFF",
           publishStreamId
         );
-        displayMessage("Recording is stopped successfully", "white")
+        displayMessage("Recording is stopped successfully", "#fff")
       }
       else {
         console.log("Stop Recording is failed");
-        displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
+        displayMessage("Recording cannot be stoped due to error: " + definition.message, "#fff")
       }
     }
   },[latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);

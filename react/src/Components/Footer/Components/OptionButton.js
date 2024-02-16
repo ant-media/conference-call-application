@@ -123,7 +123,7 @@ function OptionButton({footer, ...props}) {
         {process.env.REACT_APP_OPTION_MENU_GENERAL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
         <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
           <ListItemIcon>
-            <SvgIcon size={36} name={"settings"} color={"white"}/>
+            <SvgIcon size={36} name={"settings"} color={"#fff"}/>
           </ListItemIcon>
           <ListItemText
             id="general-button"
@@ -136,7 +136,7 @@ function OptionButton({footer, ...props}) {
         {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
         <MenuItem onClick={() => handleLayoutDialogOpen()}>
           <ListItemIcon>
-            <SvgIcon size={36} name={"layout"} color={"white"}/>
+            <SvgIcon size={36} name={"layout"} color={"#fff"}/>
           </ListItemIcon>
           <ListItemText
             id="change-layout-button"
@@ -150,7 +150,7 @@ function OptionButton({footer, ...props}) {
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
           <MenuItem onClick={() => handleDialogOpen()}>
             <ListItemIcon>
-              <SvgIcon size={36} name={"call-settings"} color={"white"}/>
+              <SvgIcon size={36} name={"call-settings"} color={"#fff"}/>
             </ListItemIcon>
             <ListItemText>{t("Call Settings")}</ListItemText>
           </MenuItem>
@@ -158,7 +158,7 @@ function OptionButton({footer, ...props}) {
 
             <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }}>
               <ListItemIcon>
-                <SvgIcon size={36} name={"background-replacement"} color={"white"} />
+                <SvgIcon size={36} name={"background-replacement"} color={"#fff"} />
               </ListItemIcon>
               <ListItemText>{t("Virtual Effects")}</ListItemText>
             </MenuItem>
@@ -168,7 +168,7 @@ function OptionButton({footer, ...props}) {
                 (
                   <MenuItem key="startRecord" onClick={() => { conference.startRecord(); handleClose(); }}>
                     <ListItemIcon>
-                      <SvgIcon size={36} name={"camera"} color={"white"} />
+                      <SvgIcon size={36} name={"camera"} color={"#fff"} />
                     </ListItemIcon>
                     <ListItemText>{t("Start Record")}</ListItemText>
                   </MenuItem>
@@ -178,7 +178,7 @@ function OptionButton({footer, ...props}) {
                 (
                   <MenuItem key="stopRecord" onClick={() => { conference.stopRecord(); handleClose(); }}>
                     <ListItemIcon>
-                      <SvgIcon size={36} name={"camera"} color={"white"} />
+                      <SvgIcon size={36} name={"camera"} color={"#fff"} />
                     </ListItemIcon>
                     <ListItemText>{t("Stop Record")}</ListItemText>
                   </MenuItem>
@@ -196,7 +196,7 @@ function OptionButton({footer, ...props}) {
             rel="noopener noreferrer"
           >
             <ListItemIcon>
-              <SvgIcon size={36} name={"report"} color={"white"}/>
+              <SvgIcon size={36} name={"report"} color={"#fff"}/>
             </ListItemIcon>
             <ListItemText>{t("Report Problem")}</ListItemText>
           </MenuItem>

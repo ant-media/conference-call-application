@@ -16,7 +16,7 @@ const PublisherRequestName = styled(Typography)(({ theme }) => ({
 const PinBtn = styled(Button)(({ theme }) => ({
     "&:hover": {
         backgroundColor: theme.palette.green[50],
-        color: "white",
+        color: "#fff",
     },
 }));
 

@@ -16,9 +16,9 @@ export function getCustomTheme() {
     //button
     const themeColor60 = "#2B6197";
     //participant list background
-    const themeColor70 = "white";
+    const themeColor70 = "#fff";
     //footer background
-    const themeColor80 = "white";
+    const themeColor80 = "#fff";
     const themeColor85 = "#3D7AB1";
     const themeColor90 = "#6BCBC3";
     const chatText = "#DDFFFC";
@@ -76,11 +76,11 @@ export function getCustomTheme() {
                 styleOverrides: {
                     root: {
                         "& fieldset": {
-                            borderColor: "white",
+                            borderColor: "#fff",
                         },
                     },
                     icon: {
-                        color: "white",
+                        color: "#fff",
                     },
                 },
             },
@@ -116,7 +116,7 @@ export function getCustomTheme() {
             MuiDialogTitle: {
                 styleOverrides: {
                     root: {
-                        color: "white",
+                        color: "#fff",
                         padding: "24px 0",
                         fontSize: 24,
                     },
@@ -136,7 +136,7 @@ export function getCustomTheme() {
                     root: {
                         paddingTop: 16,
                         paddingBottom: 16,
-                        color: "white",
+                        color: "#fff",
                     },
                 },
             },
@@ -150,7 +150,7 @@ export function getCustomTheme() {
             MuiListItemText: {
                 styleOverrides: {
                     primary: {
-                        color: "white",
+                        color: "#fff",
                     },
                 },
             },
