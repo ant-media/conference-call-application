@@ -1720,6 +1720,19 @@ function AntMedia() {
   }
 
   function handleLeaveFromRoom() {
+    if (isBroadcasting === true) {
+      var jsCmd = {
+        command: "undoPresenter",
+        streamId: publishStreamId,
+        participantId: publishStreamId,
+        listenerRoomName: roomName+"listener",
+        roomName: roomName,
+        websocketURL: websocketURL,
+        token: token
+      };
+
+      sendMessage(JSON.stringify(jsCmd));
+    }
     // we need to empty participant array. if we are going to leave it in the first place.
     setParticipants([]);
     setAllParticipants({});
