@@ -46,7 +46,7 @@ function Footer(props) {
 
   const mobileBreakpoint = 900;
 
-  const [isRecordingTextVisible, setIsRecordingTextVisible] = React.useState(false);
+  const [, setIsRecordingTextVisible] = React.useState(false);
 
   const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
 
@@ -79,7 +79,7 @@ function Footer(props) {
         >
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <Grid container alignItems={"center"}>
-              <a href="https://antmedia.io/circle" alt="Circle" target="_blank" rel="noreferrer">
+              <a href={process.env.REACT_APP_FOOTER_LOGO_ON_CLICK_URL} alt="Circle" target="_blank" rel="noreferrer">
                 <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
               </a>
               <Typography color="#ffffff" variant="body1">
@@ -95,50 +95,58 @@ function Footer(props) {
                     justifyContent="center"
                     columnSpacing={{xs: 1, sm: 2}}
                 >
+                  {process.env.REACT_APP_FOOTER_OPTION_BUTTON_VISIBILITY === 'true' ?
                   <Grid item xs={0}>
                     <OptionButton footer/>
                   </Grid>
+                  : null}
 
-                  {conference.isPlayOnly === false ?
+                  {conference.isPlayOnly === false
+                    && process.env.REACT_APP_FOOTER_CAMERA_BUTTON_VISIBILITY === 'true' ?
                   <Grid item xs={0}>
                     <CameraButton {...props} footer/>
                   </Grid>
                     : null}
 
-                  {conference.isPlayOnly === false ?
+                  {conference.isPlayOnly === false
+                    && process.env.REACT_APP_FOOTER_MIC_BUTTON_VISIBILITY === 'true' ?
                   <Grid item xs={0}>
                     <MicButton footer/>
                   </Grid>
                       : null}
-                  {(conference.isPlayOnly === false) && (windowWidth > mobileBreakpoint) ?
+                  {(conference.isPlayOnly === false) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     {" "}
                     <ShareScreenButton footer/>
                   </Grid>
                       : null}
 
-                  {windowWidth > mobileBreakpoint ? (
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_REACTIONS_BUTTON_VISIBILITY === 'true') ? (
                     <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
                       <ReactionsButton footer/>
                     </Grid>)
                     : null}
 
-                  {windowWidth > mobileBreakpoint ? (
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'true') ? (
                     <Grid item xs={0}>
                       <MessageButton footer/>
                     </Grid>)
                     : null}
 
-                  {windowWidth > mobileBreakpoint ? (
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PARTICIPANT_LIST_BUTTON_VISIBILITY === 'true') ? (
                     <Grid item xs={0}>
                         <ParticipantListButton footer />
                     </Grid>)
                     : null}
 
-                  <Grid item xs={0}>
-                    <EndCallButton footer/>
-                  </Grid>
+                  {process.env.REACT_APP_FOOTER_END_CALL_BUTTON_VISIBILITY === 'true' ?
+                    <Grid item xs={0}>
+                      <EndCallButton footer/>
+                    </Grid>
+                   : null}
+
                   {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
+
                   <Grid item xs={0}>
                     <FakeParticipantButton
                       footer
@@ -166,14 +174,11 @@ function Footer(props) {
               </Grid>
         : null}
 
-          <Grid item sx={{display: {xs: "none", sm: "block"}}}>
-            <>
-              { isRecordingTextVisible === true ?
-              <p style={{color: 'red'}}>Recording</p>
-              : ""}
-            </>
-            <TimeZone/>
-          </Grid>
+            <Grid item sx={{display: {xs: "none", sm: "block"}}}>
+              {process.env.REACT_APP_FOOTER_CLOCK_VISIBILITY === 'true' ?
+                <TimeZone/>
+                : null}
+            </Grid>
         </CustomizedGrid>
     );
 }

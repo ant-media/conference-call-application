@@ -155,8 +155,167 @@ function VideoCard(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conference.isPublished]);
 
+    const overlayButtonsGroup = () => {
+        if (process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true") {
+        return (!props.hidePin && (
+            <Grid
+                container
+                justifyContent={"center"}
+                alignItems="center"
+                className="pin-overlay"
+                sx={{
+                    opacity: displayHover ? 1 : 0,
+                    transition: "opacity 0.3s ease",
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    height: "100%",
+                    zIndex: 100,
+                }}
+            >
+                <Grid
+                    container
+                    justifyContent={"center"}
+                    alignItems="center"
+                    style={{ height: "100%" }}
+                    wrap='nowrap'
+                >
+                    <Grid
+                        item
+                        container
+                        justifyContent={"center"}
+                        alignItems="center"
+                        columnSpacing={0.5}
+                    >
+                        <Tooltip
+                            title={`${props.pinned ? t("unpin") : t("pin")} ${props.name
+                            }`}
+                            placement="top"
+                        >
+                            <Fab
+                                onClick={() => conference.pinVideo(props.id, props.videoLabel)}
+                                color="primary"
+                                aria-label="add"
+                                size="small"
+                            >
+                                <SvgIcon
+                                    size={36}
+                                    name={props.pinned ? t("unpin") : t("pin")}
+                                    color={theme.palette.grey[80]}
+                                />
+                            </Fab>
+                        </Tooltip>
 
-  const overlayButtonsGroup = () => {
+                        { props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin === true ?
+                            <Grid item>
+                                {!useAvatar ?
+                                    <Tooltip
+                                        title={`Camera on ${
+                                            props.name
+                                        }`}
+                                        placement="top"
+                                    >
+                                        <Fab
+                                            onClick={()=>{
+                                                let participant = {};
+                                                participant.streamId=props.streamId;
+                                                participant.streamName=props.name;
+                                                conference?.setParticipantIdMuted(participant);
+                                                conference?.turnOffYourCamNotification(participant.streamId);
+                                            }}
+                                            color="primary"
+                                            aria-label="add"
+                                            size="small"
+                                        >
+                                            <SvgIcon
+                                                size={36}
+                                                name={"camera"}
+                                                color={theme.palette.grey[80]}
+                                            />
+                                        </Fab>
+                                    </Tooltip>
+                                    :
+                                    <Tooltip
+                                        title={`Camera off ${
+                                            props.name
+                                        }`}
+                                        placement="top"
+                                    >
+                                        <Fab
+                                            color="error"
+                                            aria-label="add"
+                                            size="small"
+                                        >
+                                            <SvgIcon
+                                                size={36}
+                                                name={"camera-off"}
+                                                color={theme.palette.grey[80]}
+                                            />
+                                        </Fab>
+                                    </Tooltip>
+                                }
+                            </Grid>
+                            : null }
+
+                        {(props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin === true) ?
+                            <Grid item>
+                                {!micMuted ?
+                                    <Tooltip
+                                        title={`Microphone on ${props.name
+                                        }`}
+                                        placement="top"
+                                    >
+                                        <Fab
+                                            onClick={() => {
+                                                let participant = {};
+                                                participant.streamId=props.streamId;
+                                                participant.streamName=props.name;
+                                                conference?.setParticipantIdMuted(participant);
+                                                conference?.turnOffYourMicNotification(participant.streamId);
+                                            }}
+                                            color="primary"
+                                            aria-label="add"
+                                            size="small"
+                                        >
+                                            <SvgIcon
+                                                size={36}
+                                                name={"microphone"}
+                                                color={theme.palette.grey[80]}
+                                            />
+                                        </Fab>
+                                    </Tooltip>
+                                    : <Tooltip
+                                        title={`Microphone off ${
+                                            props.name
+                                        }`}
+                                        placement="top"
+                                    >
+                                        <Fab
+                                            onClick={()=>{
+                                                let participant = {};
+                                                participant.streamId=props.streamId;
+                                                participant.streamName=props.name;
+                                                conference?.setParticipantIdMuted(participant);
+                                                conference?.turnOnYourMicNotification(participant.streamId);
+                                            }}
+                                            color="error"
+                                            aria-label="add"
+                                            size="small"
+                                        >
+                                            <SvgIcon
+                                                size={36}
+                                                name={"muted-microphone"}
+                                                color={theme.palette.grey[80]}
+                                            />
+                                        </Fab>
+                                    </Tooltip> }
+                            </Grid>
+                            : null }
+                    </Grid>
+                </Grid>
+            </Grid>
+        ))
+    } else {
     return (!props.hidePin && (
       <Grid
         container
@@ -219,7 +378,9 @@ function VideoCard(props) {
                         participant.streamId=props.streamId;
                         participant.streamName=props.name;
                       conference?.setParticipantIdMuted(participant);
+                        conference?.turnOffYourMicNotification(participant.streamId);
                         conference?.setMuteParticipantDialogOpen(true);
+
                     }}
                     color="primary"
                     aria-label="add"
@@ -238,7 +399,7 @@ function VideoCard(props) {
         </Grid>
       </Grid>
     ))
-  };
+  };}
 
   const avatarOrPlayer = () => {
     return (
@@ -270,7 +431,6 @@ function VideoCard(props) {
       </>
     )
   }
-
 
   const overlayParticipantStatus = () => {
     return (
