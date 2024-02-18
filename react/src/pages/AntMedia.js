@@ -18,6 +18,7 @@ import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
 import { useWebSocket } from 'Components/WebSocketProvider';
 import {useTranslation} from "react-i18next";
+import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -1377,6 +1378,7 @@ function AntMedia() {
     if (open) {
       setParticipantListDrawerOpen(false);
       setEffectsDrawerOpen(false);
+      setPublisherRequestListDrawerOpen(false);
     }
   }
 
@@ -1385,6 +1387,7 @@ function AntMedia() {
     if (open) {
       setMessageDrawerOpen(false);
       setEffectsDrawerOpen(false);
+      setPublisherRequestListDrawerOpen(false);
     }
   }
 
@@ -1393,6 +1396,16 @@ function AntMedia() {
     if (open) {
       setMessageDrawerOpen(false);
       setParticipantListDrawerOpen(false);
+      setPublisherRequestListDrawerOpen(false);
+    }
+  }
+
+  function handlePublisherRequestListOpen(open) {
+    setPublisherRequestListDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+      setParticipantListDrawerOpen(false);
+      setEffectsDrawerOpen(false);
     }
   }
 
@@ -2309,6 +2322,7 @@ function AntMedia() {
               participants,
               messageDrawerOpen,
               participantListDrawerOpen,
+              handlePublisherRequestListOpen,
               messages,
               numberOfUnReadMessages,
               pinnedVideoId,
@@ -2373,6 +2387,7 @@ function AntMedia() {
               stopRecord,
               isRecordPluginInstalled,
               isRecordPluginActive,
+              requestSpeakerList,
               isEnterDirectly,
               publisherRequestListDrawerOpen,
               setPublisherRequestListDrawerOpen,
@@ -2418,6 +2433,7 @@ function AntMedia() {
                   <MessageDrawer/>
                   <ParticipantListDrawer/>
                   <EffectsDrawer/>
+                  <PublisherRequestListDrawer/>
                 </>
               )}
             </SnackbarProvider>

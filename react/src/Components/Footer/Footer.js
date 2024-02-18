@@ -17,6 +17,7 @@ import { ConferenceContext } from 'pages/AntMedia';
 import { getRoomNameAttribute } from 'utils';
 import ReactionsButton from "./Components/ReactionsButton";
 import {useTheme} from "@mui/material/styles";
+import PublisherRequestListButton from "./Components/PublisherRequestListButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -128,6 +129,12 @@ function Footer(props) {
                       <ParticipantListButton footer />
                   </Grid>
                   : null}
+
+                  {process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_LIST_BUTTON_VISIBILITY === 'true' && conference.isAdmin === true ?
+                    <Grid item xs={0}>
+                      <PublisherRequestListButton footer />
+                    </Grid>
+                    : null}
 
                   {process.env.REACT_APP_FOOTER_END_CALL_BUTTON_VISIBILITY === 'true' ?
                   <Grid item xs={0}>
