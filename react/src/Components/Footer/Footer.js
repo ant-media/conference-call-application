@@ -14,7 +14,7 @@ import FakeParticipantButton from "./Components/FakeParticipantButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
-import { getRoomNameAttribute } from 'utils';
+import {getRoomNameAttribute, getWebSocketURLAttribute} from 'utils';
 import ReactionsButton from "./Components/ReactionsButton";
 import {useTheme} from "@mui/material/styles";
 import PublisherRequestListButton from "./Components/PublisherRequestListButton";
@@ -31,7 +31,7 @@ const getCustomizedGridStyle = (theme) => {
     height: 80,
   };
 
-  if (getRoomNameAttribute()) {
+  if (getWebSocketURLAttribute()) {
     customizedGridStyle.position = "absolute";
     customizedGridStyle.width = "100%";
   }
@@ -130,7 +130,7 @@ function Footer(props) {
                   </Grid>
                   : null}
 
-                  {process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_LIST_BUTTON_VISIBILITY === 'true' && conference.isAdmin === true ?
+                  {process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true' && conference.isAdmin === true ?
                     <Grid item xs={0}>
                       <PublisherRequestListButton footer />
                     </Grid>

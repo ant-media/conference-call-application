@@ -5,11 +5,11 @@ import {  Grid,  Tabs, Tab } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseDrawerButton from './DrawerButton';
 import { ConferenceContext } from 'pages/AntMedia';
-import { getRoomNameAttribute } from 'utils';
+import { getWebSocketURLAttribute } from 'utils';
 import EffectsTab from "./EffectsTab";
 
 const getAntDrawerStyle = (theme) => {
-  if (getRoomNameAttribute()) {
+  if (getWebSocketURLAttribute()) {
     return {
       '& .MuiDrawer-root': {
         position: 'absolute',

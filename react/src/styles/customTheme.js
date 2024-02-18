@@ -2,7 +2,7 @@ import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
 import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
-import {getRoomNameAttribute} from "../utils";
+import {getWebSocketURLAttribute} from "../utils";
 
 export function getCustomTheme() {
     const themeColor0 = "#ffffff";
@@ -355,7 +355,7 @@ export function getCustomTheme() {
             },
         },
     };
-    if (!getRoomNameAttribute()) {
+    if (!getWebSocketURLAttribute()) {
         themeObject.palette.background = {};
         themeObject.palette.background.default = themeColor80;
     }
