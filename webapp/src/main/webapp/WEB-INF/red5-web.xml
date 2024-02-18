@@ -52,6 +52,10 @@
     <bean id="chunked.cache.manager"
 		class="#{ T(io.antmedia.rest.RestServiceBase).isEnterprise() ? 'io.antmedia.enterprise.chunkedTransfer.ChunkedCacheManager' : 'io.antmedia.servlet.MockChunkedCacheManager' }">
     </bean>
+
+	<bean id="push.notification.service"
+		class="#{ T(io.antmedia.rest.RestServiceBase).isEnterprise() ? 'io.antmedia.enterprise.pushnotification.PushNotificationService' : 'io.antmedia.pushnotification.PushNotificationServiceCommunity' }">
+    </bean>
     
     <bean id="streamAcceptFilter" class="io.antmedia.filter.StreamAcceptFilter"/>
 	<bean id="conferenceRoomSettings" class="io.antmedia.enterprise.streamapp.ConferenceRoomSettings"/>
