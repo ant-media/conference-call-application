@@ -615,6 +615,7 @@ function AntMedia() {
   React.useEffect(() => {
     if(isPublished && isPlayed){
       setWaitingOrMeetingRoom("meeting")
+      setIsJoining(false);
     }
   },[isPublished , isPlayed])
   
@@ -812,7 +813,13 @@ function AntMedia() {
 
       setUnAuthorizedDialogOpen(true)
     }
-
+    else if(error.indexOf("highResourceUsage") !== -1){
+      if(!isJoining && roomName && publishStreamId){
+        setTimeout(() => {
+          joinRoom(roomName,publishStreamId);
+        }, 2000);
+      }
+    }
     console.log("***** " + error)
 
   };
@@ -1377,7 +1384,7 @@ function AntMedia() {
 
   function handleLeaveFromRoom() {
 
-    return;
+
     // we need to empty participant array. if we are going to leave it in the first place.
     setParticipants([]);
     setAllParticipants({});
@@ -1386,9 +1393,9 @@ function AntMedia() {
     audioListenerIntervalJob = null;
 
     if (!playOnly) {
-  //    webRTCAdaptor?.stop(publishStreamId);
+      webRTCAdaptor?.stop(publishStreamId);
     }
- //   webRTCAdaptor?.stop(roomName);
+    webRTCAdaptor?.stop(roomName);
 
     if (!playOnly) {
       webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
