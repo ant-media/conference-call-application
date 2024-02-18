@@ -65,7 +65,7 @@ function ParticipantTab(props) {
   {conference?.approvedSpeakerRequestList.includes(streamId) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ?(
     <PinBtn
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-      onClick={() => conference?.makeListenerAgain(streamId)}
+      onClick={() => {conference?.makeListenerAgain(streamId)}}
     >
       <SvgIcon size={28} name="close" color="black" />
     </PinBtn>

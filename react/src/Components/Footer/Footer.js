@@ -44,7 +44,6 @@ const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme
 
 function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
   const theme = useTheme();
 
@@ -73,7 +72,7 @@ function Footer(props) {
                 </a>
               : null}
               <Typography color={theme.palette.textColor} variant="body1">
-                {id}
+                {conference?.roomName}
               </Typography>
               <InfoButton/>
             </Grid>
