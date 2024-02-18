@@ -68,7 +68,11 @@ public class WebSocketApplicationConstants {
 
     public static final String DELETE_ROOM_COMMAND = "deleteRoom";
 
+    public static final String REQUEST_PUBLISH_COMMAND = "requestPublish";
+
     public static final String SEND_DATA_CHANNEL_COMMAND = "sendData";
+
+    public static final String STREAM_ID_FIELD = "streamId";
 
     public static final String RECEIVER_STREAM_ID_FIELD = "receiverStreamId";
 

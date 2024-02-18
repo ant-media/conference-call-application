@@ -437,6 +437,11 @@ function AntMedia() {
     };
 
     sendMessage(JSON.stringify(jsCmd));
+
+    let tempRequestSpeakerList = requestSpeakerList;
+    let index = tempRequestSpeakerList.findIndex((l) => l.streamId === streamId);
+    tempRequestSpeakerList.splice(index, 1);
+    setRequestSpeakerList(tempRequestSpeakerList);
   }
 
   function approveBecomeSpeakerRequest(requestingSpeakerName) {
@@ -459,6 +464,11 @@ function AntMedia() {
     };
 
     sendMessage(JSON.stringify(jsCmd));
+
+    let tempRequestSpeakerList = requestSpeakerList;
+    let index = tempRequestSpeakerList.findIndex((l) => l.streamId === requestingSpeakerName);
+    tempRequestSpeakerList.splice(index, 1);
+    setRequestSpeakerList(tempRequestSpeakerList);
 
     approvedSpeakerRequestList.push(requestingSpeakerName+"tempPublisher");
     var newList = [...approvedSpeakerRequestList]
@@ -551,6 +561,19 @@ function AntMedia() {
       websocketURL: websocketURL,
       token: token
     };
+
+    sendMessage(JSON.stringify(jsCmd));
+  }
+
+  function handlePublisherRequest() {
+
+    var jsCmd = {
+      command: "requestPublish",
+      streamId: publishStreamId,
+      roomName: roomName,
+      websocketURL: websocketURL,
+      token: token
+    }
 
     sendMessage(JSON.stringify(jsCmd));
   }
@@ -1657,6 +1680,8 @@ function AntMedia() {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
         webRTCAdaptor.getBroadcastObject(roomName);
+      } else if (eventType === "PUBLISH_REQUEST" && isAdmin === true) {
+        addBecomingPublisherRequest(notificationEvent.streamId);
       } else if (eventType === "GRANT_BECOME_PUBLISHER"/* && webRTCAdaptor.*/ && eventStreamId === publishStreamId)
       {
         /*
@@ -2330,6 +2355,7 @@ function AntMedia() {
               allParticipants,
               globals,
               isPlayOnly,
+              handlePublisherRequest,
               localVideo,
               streamName,
               initialized,
@@ -2404,7 +2430,9 @@ function AntMedia() {
               setAndEnableVirtualBackgroundImage,
               makeParticipantPresenter,
               makeParticipantUndoPresenter,
-              isBroadcasting
+              isBroadcasting,
+              approveBecomeSpeakerRequest,
+              rejectSpeakerRequest
             }}
           >
             <UnauthrorizedDialog

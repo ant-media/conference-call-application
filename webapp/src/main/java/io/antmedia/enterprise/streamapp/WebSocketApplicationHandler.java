@@ -9,6 +9,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.catalina.core.ApplicationContextFacade;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -355,8 +357,13 @@ public class WebSocketApplicationHandler
 
 
 			sendMessage(session, jsonObjectResponse.toJSONString());
-		}
-		else if (cmd.equals(WebSocketApplicationConstants.SEND_DATA_CHANNEL_COMMAND))
+		} else if (cmd.equals(WebSocketApplicationConstants.REQUEST_PUBLISH_COMMAND)) {
+			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+			String streamId = (String)jsonObject.get(WebSocketApplicationConstants.STREAM_ID_FIELD);
+
+			handleRequestPublish(roomName, streamId);
+
+		} else if (cmd.equals(WebSocketApplicationConstants.SEND_DATA_CHANNEL_COMMAND))
 		{
 			String receiverStreamId = (String)jsonObject.get(WebSocketApplicationConstants.RECEIVER_STREAM_ID_FIELD);
 			String messageData = (String)jsonObject.get(WebSocketApplicationConstants.MESSAGE_FIELD);
@@ -515,6 +522,40 @@ public class WebSocketApplicationHandler
 		}
 
 		return result;
+	}
+
+	public void handleRequestPublish(String roomName, String streamId) {
+		String mainRoomName = roomName;
+
+		if (mainRoomName.endsWith("listener")) {
+			mainRoomName = mainRoomName.substring(0, mainRoomName.length() - 8);
+		} else {
+			logger.warn("You are not in a listener room. You cannot request to be publisher.");
+			return;
+		}
+
+		DataStore dataStore = getDataStore();
+		Broadcast mainRoomBroadcast = dataStore.get(mainRoomName);
+
+		if (mainRoomBroadcast == null) {
+			logger.warn("Main room broadcast is not found for {}", mainRoomName);
+			return;
+		}
+
+		String metaData = mainRoomBroadcast.getMetaData();
+		if (metaData == null) {
+			metaData = "{}";
+		}
+
+		JsonObject metaDataJsonObject = JsonParser.parseString(metaData)
+				.getAsJsonObject();
+		MainRoomConfiguration mainRoomConfiguration = gson.fromJson(metaDataJsonObject, MainRoomConfiguration.class);
+		if (mainRoomConfiguration != null) {
+			mainRoomConfiguration.addPublisherRequest(streamId);
+		}
+		dataStore.updateStreamMetaData(mainRoomName, gson.toJson(mainRoomConfiguration));
+
+		getAMSBroadcastManager().sendDataChannelMessage(mainRoomName, "{\"eventType\":\"PUBLISH_REQUEST\",\"streamId\":\"" + streamId + "\"}");
 	}
 
 	public void handleSendDataChannelMessage(String receiverStreamId, String messageData) {

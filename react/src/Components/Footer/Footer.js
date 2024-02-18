@@ -18,6 +18,7 @@ import {getRoomNameAttribute, getWebSocketURLAttribute} from 'utils';
 import ReactionsButton from "./Components/ReactionsButton";
 import {useTheme} from "@mui/material/styles";
 import PublisherRequestListButton from "./Components/PublisherRequestListButton";
+import RequestPublishButton from "./Components/RequestPublishButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -133,6 +134,12 @@ function Footer(props) {
                   {process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true' && conference.isAdmin === true ?
                     <Grid item xs={0}>
                       <PublisherRequestListButton footer />
+                    </Grid>
+                    : null}
+
+                  {process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true' && conference.isPlayOnly === true ?
+                    <Grid item xs={0}>
+                      <RequestPublishButton footer />
                     </Grid>
                     : null}
 
