@@ -1289,6 +1289,16 @@ function AntMedia() {
 
         let temp = participants;
 
+        //workaround solution for empty track id
+        let emptyTrackId = [];
+        videoTrackAssignments.forEach((e)=>{
+          if(e.trackId === ""){
+            console.warn("trackid empty")
+            emptyTrackId.push(e.videoLabel);
+          }
+        });
+        temp = temp.filter((e) => !emptyTrackId.includes(e.videoLabel));
+
         //remove not available videotracks if exist
         temp.forEach((p) => {
           let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
