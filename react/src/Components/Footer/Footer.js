@@ -20,7 +20,6 @@ import {useTheme} from "@mui/material/styles";
 import PublisherRequestListButton from "./Components/PublisherRequestListButton";
 import RequestPublishButton from "./Components/RequestPublishButton";
 import MoreOptionsButton from "./Components/MoreOptionsButton";
-import { isMobile } from 'react-device-detect';
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
