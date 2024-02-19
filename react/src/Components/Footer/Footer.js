@@ -14,6 +14,7 @@ import FakeParticipantButton from "./Components/FakeParticipantButton";
 import TimeZone from "./Components/TimeZone";
 import { ConferenceContext } from 'pages/AntMedia';
 import {getWebSocketURLAttribute} from 'utils';
+import { isMobile, isTablet } from 'react-device-detect';
 import ReactionsButton from "./Components/ReactionsButton";
 import {useTheme} from "@mui/material/styles";
 import PublisherRequestListButton from "./Components/PublisherRequestListButton";
@@ -120,7 +121,7 @@ function Footer(props) {
                     </Grid>
                       : null}
 
-                  {(conference.isPlayOnly === false) && (!isMobile) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
+                  {(conference.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
                     <Grid item xs={0}>
                       {" "}
                       <ShareScreenButton footer/>
