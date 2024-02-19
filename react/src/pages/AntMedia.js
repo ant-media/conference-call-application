@@ -569,7 +569,6 @@ function AntMedia() {
 
     // if initialized is true, and the room name is changed, then we need to recreate the adaptor
     if (initialized) {
-      console.log("WIP Mustafa");
       setWebRTCAdaptor(null);
       setRecreateAdaptor(true);
     }
