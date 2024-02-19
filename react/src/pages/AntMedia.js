@@ -1273,11 +1273,11 @@ function AntMedia() {
 
   function startRecord()
   {
-
+    var listenerRoom = roomName + "listener";
     displayMessage("Recording is about to start...", "#fff")
     var jsCmd = {
       command: "startRecording",
-      streamId: roomName,
+      streamId: listenerRoom,
       websocketURL: websocketURL,
       token: token
     };
@@ -1287,10 +1287,12 @@ function AntMedia() {
 
   function stopRecord()
   {
+    var listenerRoom = roomName + "listener";
+
     displayMessage("Recording is about to stop...", "#fff")
     var jsCmd = {
       command: "stopRecording",
-      streamId: roomName,
+      streamId: listenerRoom,
     };
 
     sendMessage(JSON.stringify(jsCmd));
