@@ -54,7 +54,9 @@ function LayoutPinned (props) {
       {
       // eslint-disable-next-line
       conference.participants.map((element, index) => {
-        let isPlayOnly
+
+        let isPlayOnly;
+
         try {
           isPlayOnly = JSON.parse(conference?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
         } catch (e) {
@@ -64,7 +66,6 @@ function LayoutPinned (props) {
         if (element.name === "" || typeof element.name === 'undefined' || isPlayOnly || element.name === "Anonymous") {
           return null;
         }
-
         if(element !== pinnedParticipant && playingParticipantsCount < maxPlayingParticipantsCount) {
           playingParticipantsCount ++;
           playingParticipants.push(element);
@@ -106,8 +107,9 @@ function LayoutPinned (props) {
     <>
       {pinnedVideo()}
       <div id="unpinned-gallery">
+        {conference?.participants.length === 0 ? <p>There is no active publisher right now.</p> : null}
         {videoCards()}
-        {othersCard()}
+        {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
       </div>
     </>
   );
