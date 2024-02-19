@@ -15,7 +15,7 @@ import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
 import { getRoomNameAttribute } from 'utils';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import ReactionsButton from "./Components/ReactionsButton";
 import MoreOptionsButton from "./Components/MoreOptionsButton";
 
@@ -115,7 +115,7 @@ function Footer(props) {
                     <MicButton footer/>
                   </Grid>
                       : null}
-                  {(conference.isPlayOnly === false) && (!isMobile) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
+                  {(conference.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     {" "}
                     <ShareScreenButton footer/>

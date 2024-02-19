@@ -10,7 +10,7 @@ import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ConferenceContext } from 'pages/AntMedia';
 import {GeneralSettingsDialog} from "./GeneralSettingsDialog";
-import {isMobile} from "react-device-detect";
+import {isMobile,isTablet} from "react-device-detect";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -106,7 +106,7 @@ function MoreOptionsButton({ footer, ...props }) {
               }}
           >
 
-            {(conference.isPlayOnly === false) && (!isMobile) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') ?
+            {(conference.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') ?
               <MenuItem onClick={() => {
                 if (conference.isScreenShared) {
                 conference.handleStopScreenShare();
