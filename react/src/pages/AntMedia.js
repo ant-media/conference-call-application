@@ -567,6 +567,8 @@ function AntMedia() {
       //according to the result we modify mediaConstraints
       await checkDevices();
       if (recreateAdaptor && webRTCAdaptor == null) {
+        removeAllRemoteParticipants();
+
         setWebRTCAdaptor(new WebRTCAdaptor({
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
@@ -627,6 +629,12 @@ function AntMedia() {
   function infoCallback(info, obj) {
     if (info === "initialized") {
       enableDisableMCU(mcuEnabled);
+
+      // if already initialized, we need to join again
+      if (initialized) {
+        joinRoom(roomName, publishStreamId, roomJoinMode);
+      }
+
       setInitialized(true);
     } else if (info === "broadcastObject") {
       if (obj.broadcast === undefined) {
@@ -723,7 +731,7 @@ function AntMedia() {
 
       }
     }
-  };
+  }
 
   function errorCallback(error, message) {
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
@@ -798,6 +806,9 @@ function AntMedia() {
       handleLeaveFromRoom()
 
       setUnAuthorizedDialogOpen(true)
+    } else if(error.indexof("notSetRemoteDescription") !== -1) {
+      // When we get not Set Remote Description error, we need to recreate the adaptor
+      handleResetWebRTCAdaptor();
     }
 
     console.log("***** " + error)
@@ -805,6 +816,19 @@ function AntMedia() {
   };
 
 
+  function handleResetWebRTCAdaptor() {
+    if (!isPlayOnly) {
+      webRTCAdaptor?.stop(publishStreamId);
+    }
+    webRTCAdaptor?.stop(roomName);
+
+    webRTCAdaptor?.mediaManager?.localStream?.getTracks().forEach((track) => {
+      track.stop();
+    });
+
+    setWebRTCAdaptor(null);
+    setRecreateAdaptor(true);
+  }
 
   function setLocalVideo() {
 
