@@ -165,6 +165,28 @@ function MoreOptionsButton({ footer, ...props }) {
                 <ListItemText id={"more-options-participant-list-button"}>{t("Participant List")}</ListItemText>
               </MenuItem>
               : null}
+
+            {(process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ?
+              <MenuItem
+                onClick={() => {conference?.handlePublisherRequestListOpen(!conference?.publisherRequestListDrawerOpen); handleClose();}}
+              >
+                <ListItemIcon>
+                  <SvgIcon size={36} name={"raise-hand"} color={"white"} />
+                </ListItemIcon>
+                <ListItemText id={"more-options-participant-list-button"}>{t("Publisher Request List")}</ListItemText>
+              </MenuItem>
+              : null}
+
+            {(process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isPlayOnly === true) ?
+              <MenuItem
+                onClick={() => {conference.handlePublisherRequest(); handleClose();}}
+              >
+                <ListItemIcon>
+                  <SvgIcon size={36} name={"raise-hand"} color={"white"} />
+                </ListItemIcon>
+                <ListItemText id={"more-options-participant-list-button"}>{t("Request becoming publisher")}</ListItemText>
+              </MenuItem>
+              : null}
           </Menu>
         </>
     );

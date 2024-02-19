@@ -89,5 +89,7 @@
   "Others": "más",
   "Virtual Effects": "Efectos virtuales",
   "Image is uploaded successfully.": "Imagen subida con éxito.",
-  "Image size cannot exceed more than 1MB.": "El tamaño de la imagen no puede exceder más de 1 MB."
+  "Image size cannot exceed more than 1MB.": "El tamaño de la imagen no puede exceder más de 1 MB.",
+  "Publisher Request List": "Lista de solicitudes de publicador",
+  "Request becoming publisher": "Solicitar ser publicador"
 }
