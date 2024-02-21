@@ -212,7 +212,7 @@ var reconnecting = false;
 var publishReconnected;
 var playReconnected;
 
-function AntMedia() {
+function AntMedia({children}) {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
@@ -1816,6 +1816,48 @@ function AntMedia() {
   }
   window.makeFullScreen = makeFullScreen;
 
+  const getChildrenComponents = () => {
+    if(children === undefined || children === null) {
+      console.log("aaaaaaaaaaa");
+      return (
+        <>
+          <UnauthrorizedDialog
+            onClose={handleUnauthorizedDialogExitClicked}
+            open={unAuthorizedDialogOpen}
+            onExitClicked={handleUnauthorizedDialogExitClicked}
+
+          />
+          <SnackbarProvider
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            maxSnack={3}
+            content={(key, notificationData) => (
+              <AntSnackBar id={key} notificationData={notificationData} />
+            )}
+          >
+            {leftTheRoom ? (
+              <LeftTheRoom />
+            ) : waitingOrMeetingRoom === "waiting" ? (
+              <WaitingRoom />
+            ) : (
+              <>
+                <MeetingRoom />
+                <MessageDrawer />
+                <ParticipantListDrawer />
+                <EffectsDrawer />
+              </>
+            )}
+          </SnackbarProvider>
+        </>);
+    }
+    else {
+      console.log("bbbbbbbbbbbb");
+      return children;
+    }
+  }
+
   return (!initialized ? <>
         <Grid
           container
@@ -1931,35 +1973,7 @@ function AntMedia() {
               setAndEnableVirtualBackgroundImage
             }}
           >
-            <UnauthrorizedDialog
-              onClose={handleUnauthorizedDialogExitClicked}
-              open={unAuthorizedDialogOpen}
-              onExitClicked ={handleUnauthorizedDialogExitClicked}
-
-            />
-            <SnackbarProvider
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "center",
-              }}
-              maxSnack={3}
-              content={(key, notificationData) => (
-                <AntSnackBar id={key} notificationData={notificationData}/>
-              )}
-            >
-              {leftTheRoom ? (
-                <LeftTheRoom/>
-              ) : waitingOrMeetingRoom === "waiting" ? (
-                <WaitingRoom/>
-              ) : (
-                <>
-                  <MeetingRoom/>
-                  <MessageDrawer/>
-                  <ParticipantListDrawer/>
-                  <EffectsDrawer/>
-                </>
-              )}
-            </SnackbarProvider>
+            {getChildrenComponents()}
           </ConferenceContext.Provider>
         </Grid>
       </Grid>

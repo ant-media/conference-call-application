@@ -20,7 +20,7 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-function ParticipantListButton({ footer, ...props }) {
+function ParticipantListButton({ footer }) {
     const conference = React.useContext(ConferenceContext);
     const {t} = useTranslation();
 
