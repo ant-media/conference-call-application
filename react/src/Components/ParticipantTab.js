@@ -45,7 +45,7 @@ function ParticipantTab() {
           <SvgIcon size={28} name="unpresenter" color="black" />}
       </PinBtn>
     ) : null}
-  {(streamId === "localVideo" ? !conference?.presenters.includes(conference.publishStreamId) : !conference?.presenters.includes(streamId) ) && ( !conference?.approvedSpeakerRequestList.includes(streamId) ) && conference?.isAdmin === true ?(
+  {(streamId === "localVideo" ? !conference?.presenters.includes(conference.publishStreamId) : !conference?.presenters.includes(streamId) ) && conference?.isAdmin === true ?(
     <PinBtn
       id={"add-presenter-"+streamId}
       disabled={conference?.presenterButtonDisabled}
