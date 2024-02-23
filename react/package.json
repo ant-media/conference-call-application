@@ -42,7 +42,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build && node custom-post-build.js",
     "eject": "react-scripts eject",
-    "test": "jest --changedSince=main"
+    "test": "jest --changedSince=main",
+    "upload-coverage": "codecov"
   },
   "eslintConfig": {
     "extends": [

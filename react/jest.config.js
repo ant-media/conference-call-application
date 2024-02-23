@@ -1,5 +1,6 @@
 module.exports = {
     collectCoverage: true,
+    coverageReporters: ["json", "lcov", "text", "clover"],
     collectCoverageFrom: ['src/Components/*.js','src/pages/*.js'],
     coverageDirectory: 'coverage',
     testEnvironment: 'jsdom',
