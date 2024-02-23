@@ -35,6 +35,7 @@ script:
 # run unit tests
 - cd ..
 - cd react
+- npm install codecov --save-dev
 - npm test
 - npm run upload-coverage
 # run functional tests
