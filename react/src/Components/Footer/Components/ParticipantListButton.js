@@ -6,6 +6,7 @@ import { Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ConferenceContext } from 'pages/AntMedia';
 
+
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   '&.footer-icon-button':{
     height: '100%',
@@ -30,6 +31,7 @@ function ParticipantListButton({ footer }) {
                     onClick={() => {
                         conference?.handleParticipantListOpen(!conference?.participantListDrawerOpen);
                     }}
+                    id="participant-list-button"
                     variant="contained"
                     className={footer ? 'footer-icon-button' : ''}
                     color={conference?.participantListDrawerOpen ? 'primary' : 'secondary'}
