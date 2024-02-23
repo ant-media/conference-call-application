@@ -12,6 +12,7 @@ import {getUrlParameter, VideoEffect, WebRTCAdaptor} from "@antmedia/webrtc_adap
 import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import EffectsDrawer from "../Components/EffectsDrawer";
+import {useTranslation} from "react-i18next";
 
 import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
 import floating from "../external/floating.js";
@@ -347,6 +348,8 @@ function AntMedia() {
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
+  const {t} = useTranslation();
+
   function handleUnauthorizedDialogExitClicked(){
 
     setUnAuthorizedDialogOpen(false)
@@ -612,6 +615,23 @@ function AntMedia() {
     return result;
   }
 
+  React.useEffect(()=>{
+    if(isJoining){
+      enqueueSnackbar(
+        {
+          message: t("Joining"),
+          variant: "info",
+        },
+        {
+          autoHideDuration: null
+        }
+      );
+    }else{
+      closeSnackbar();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[isJoining]);
+
   React.useEffect(() => {
     if(isPublished && isPlayed){
       setWaitingOrMeetingRoom("meeting")
@@ -816,8 +836,14 @@ function AntMedia() {
     else if(error.indexOf("highResourceUsage") !== -1){
       if(!isJoining && roomName && publishStreamId){
         setTimeout(() => {
+          webRTCAdaptor.closeWebSocket();
+          if (!playOnly) {
+            webRTCAdaptor?.stop(publishStreamId);
+          }
+          webRTCAdaptor?.stop(roomName);
+          webRTCAdaptor.checkWebSocketConnection();
           joinRoom(roomName,publishStreamId);
-        }, 2000);
+        }, 10000);
       }
     }
     console.log("***** " + error)

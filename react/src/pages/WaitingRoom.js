@@ -35,7 +35,7 @@ function WaitingRoom(props) {
 
   const conference = useContext(ConferenceContext);
   window.conference = conference;
-  const {enqueueSnackbar} = useSnackbar();
+  const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
 
   React.useEffect(() => {
@@ -47,7 +47,6 @@ function WaitingRoom(props) {
   }, [conference.initialized]);
 
   function joinRoom(e) {
-    conference.setIsJoining(true);
     if (conference.localVideo === null && conference.isPlayOnly === false) {
       e.preventDefault();
       enqueueSnackbar(
@@ -71,13 +70,14 @@ function WaitingRoom(props) {
     } else {
       streamId = publishStreamId;
     }
-
+    
+    conference.setIsJoining(true);
     conference.joinRoom(roomName, streamId, conference.roomJoinMode);
-    //conference.setWaitingOrMeetingRoom("meeting");
   }
+  
 
   const handleDialogOpen = (focus) => {
-    if (false && conference.localVideo === null) {
+    if (conference.localVideo === null) {
       enqueueSnackbar(
         {
           message: t(
@@ -170,16 +170,9 @@ function WaitingRoom(props) {
         <Grid item md={conference.isPlayOnly === false ? 4 : 12}>
           <Grid container justifyContent={"center"}>
             <Grid container justifyContent={"center"}>
-              {conference.isJoining ?
-              <Typography variant="h5" align="center" className="dot-animation">
-                {t("Connecting")}
-              </Typography>
-              :
               <Typography variant="h5" align="center">
                 {t("What's your name?")}
               </Typography>
-              }
-
             </Grid>
             <Grid
               container
@@ -203,7 +196,6 @@ function WaitingRoom(props) {
                 e.preventDefault();
                 joinRoom(e);
               }}
-              
             >
               <Grid item xs={12} sx={{mt: 3, mb: 4}}>
                 {process.env.REACT_APP_WAITING_ROOM_PARTICIPANT_NAME_READONLY === 'true' ?
