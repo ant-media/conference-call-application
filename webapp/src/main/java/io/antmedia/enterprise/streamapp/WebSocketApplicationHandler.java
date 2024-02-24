@@ -542,6 +542,7 @@ public class WebSocketApplicationHandler
 			return;
 		}
 
+		/*
 		String metaData = mainRoomBroadcast.getMetaData();
 		if (metaData == null) {
 			metaData = "{}";
@@ -554,6 +555,8 @@ public class WebSocketApplicationHandler
 			mainRoomConfiguration.addPublisherRequest(streamId);
 		}
 		dataStore.updateStreamMetaData(mainRoomName, gson.toJson(mainRoomConfiguration));
+
+		 */
 
 		getAMSBroadcastManager().sendDataChannelMessage(mainRoomName, "{\"eventType\":\"PUBLISH_REQUEST\",\"streamId\":\"" + streamId + "\"}");
 	}
