@@ -42,7 +42,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build && node custom-post-build.js",
     "eject": "react-scripts eject",
-    "test": "jest --changedSince=main",
+    "test": "jest",
     "upload-coverage": "codecov"
   },
   "eslintConfig": {

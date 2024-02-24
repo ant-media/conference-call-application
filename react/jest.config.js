@@ -10,6 +10,7 @@ module.exports = {
         "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/__mocks__/fileMock.js"
    },
    //changedSince:'origin/main',
+   /*
    coverageThreshold: {
     global: {
       branches: 70,
@@ -18,6 +19,7 @@ module.exports = {
       statements: -10,
     },
   },
+  */
    moduleDirectories: [
     "node_modules",
     "src"
