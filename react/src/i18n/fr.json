@@ -35,6 +35,8 @@
   "Messages can only be seen by people in the call and are deleted when the call ends.": "Les messages ne peuvent être vus que par les personnes dans l'appel et sont supprimés à la fin de l'appel.",
   "Please enter your name. This will be visible to the host and other participants.": "Veuillez entrer votre nom. Celui-ci sera visible par l'hôte et les autres participants.",
   "Emoji reactions": "Réactions Emoji",
+  "Reactions": "Réactions",
+  "Chat": "Chat",
   "Participant List": "Liste des participants",
   "Send a message": "Envoyer un message",
   "Participants": "Participants",
@@ -85,5 +87,7 @@
   "Others": "Autres",
   "Virtual Effects": "Effets virtuels",
   "Image is uploaded successfully.": "L'image a été téléchargée avec succès.",
-  "Image size cannot exceed more than 1MB.": "La taille de l'image ne peut pas dépasser 1 Mo."
+  "Image size cannot exceed more than 1MB.": "La taille de l'image ne peut pas dépasser 1 Mo.",
+  "Publisher Request List": "Liste des demandes de publication",
+  "Request becoming publisher": "Demander à devenir éditeur"
 }

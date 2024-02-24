@@ -2,7 +2,7 @@ import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
 import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
-import {getRoomNameAttribute} from "../utils";
+import {getWebSocketURLAttribute} from "../utils";
 
 export function getPurpleTheme() {
   const themeColor0 = "#F3E5F5";
@@ -347,7 +347,7 @@ export function getPurpleTheme() {
       },
     },
   };
-  if (!getRoomNameAttribute()) {
+  if (!getWebSocketURLAttribute()) {
     themeObject.palette.background = {};
     themeObject.palette.background.default = themeColor80;
   }

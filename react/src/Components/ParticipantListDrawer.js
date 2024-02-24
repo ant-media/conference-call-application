@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next';
 import ParticipantTab from './ParticipantTab';
 import CloseDrawerButton from './DrawerButton';
 import { ConferenceContext } from 'pages/AntMedia';
-import { getRoomNameAttribute } from 'utils';
+import {getWebSocketURLAttribute} from 'utils';
 
 const getAntDrawerStyle = (theme) => {
-  if (getRoomNameAttribute()) {
+  if (getWebSocketURLAttribute()) {
     return {
       '& .MuiDrawer-root': {
         position: 'absolute',

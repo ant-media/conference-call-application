@@ -30,6 +30,7 @@ function ParticipantListButton({ footer, ...props }) {
                     onClick={() => {
                         conference?.handleParticipantListOpen(!conference?.participantListDrawerOpen);
                     }}
+                    id="participant-list-button"
                     variant="contained"
                     className={footer ? 'footer-icon-button' : ''}
                     color={conference?.participantListDrawerOpen ? 'primary' : 'secondary'}

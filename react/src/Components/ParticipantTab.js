@@ -21,7 +21,7 @@ const PinBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-function ParticipantTab(props) {
+function ParticipantTab() {
   const conference = React.useContext(ConferenceContext);
   const theme = useTheme();
 
@@ -29,6 +29,7 @@ function ParticipantTab(props) {
     return <>
       {(streamId === "localVideo" ? conference?.presenters.includes(conference.publishStreamId) : conference?.presenters.includes(streamId) )&& conference?.isAdmin === true ? (
       <PinBtn
+        id={"remove-presenter-"+streamId}
         disabled={conference?.presenterButtonDisabled}
         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
         onClick={() => {
@@ -44,8 +45,9 @@ function ParticipantTab(props) {
           <SvgIcon size={28} name="unpresenter" color="black" />}
       </PinBtn>
     ) : null}
-  {(streamId === "localVideo" ? !conference?.presenters.includes(conference.publishStreamId) : !conference?.presenters.includes(streamId) ) && ( !conference?.approvedSpeakerRequestList.includes(streamId) ) && conference?.isAdmin === true ?(
+  {(streamId === "localVideo" ? !conference?.presenters.includes(conference.publishStreamId) : !conference?.presenters.includes(streamId) ) && conference?.isAdmin === true ?(
     <PinBtn
+      id={"add-presenter-"+streamId}
       disabled={conference?.presenterButtonDisabled}
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => {
@@ -65,7 +67,7 @@ function ParticipantTab(props) {
   {conference?.approvedSpeakerRequestList.includes(streamId) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ?(
     <PinBtn
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-      onClick={() => conference?.makeListenerAgain(streamId)}
+      onClick={() => {conference?.makeListenerAgain(streamId)}}
     >
       <SvgIcon size={28} name="close" color="black" />
     </PinBtn>

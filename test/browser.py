@@ -32,7 +32,7 @@ class Browser:
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
     #service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
-    service = Service(executable_path='/tmp/chromedriver')
+    service = Service(executable_path='/Users/mustafa/chromedriver-mac-arm64/chromedriver')
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
   def open_in_new_tab(self, url):
@@ -105,6 +105,9 @@ class Browser:
 
   def get_wait(self):
     return WebDriverWait(self.driver, 15)
+
+  def get_wait(self, timeout):
+    return WebDriverWait(self.driver, timeout)
 
   def close(self):
     self.driver.close()
