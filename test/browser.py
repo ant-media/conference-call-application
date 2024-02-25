@@ -26,13 +26,13 @@ class Browser:
     browser_options.add_argument('--disable-gpu')
     browser_options.add_argument('--disable-dev-shm-usage')
     browser_options.add_argument('--disable-setuid-sandbox')
-    if is_headless:
-      browser_options.add_argument("--headless")
+    #if is_headless:
+    #  browser_options.add_argument("--headless")
     
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
-    #service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
-    service = Service(executable_path='/tmp/chromedriver')
+    service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
+    #service = Service(executable_path='/tmp/chromedriver')
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
   def open_in_new_tab(self, url):
@@ -112,7 +112,10 @@ class Browser:
     move.click_and_hold(element).move_by_offset(value, 0).release().perform()
 
   def get_wait(self):
-    return WebDriverWait(self.driver, 15)
+    return WebDriverWait(self.driver, 25)
+  
+  def get_wait(self, timeout):
+    return WebDriverWait(self.driver, timeout)
 
   def close(self):
     self.driver.close()
