@@ -542,22 +542,6 @@ public class WebSocketApplicationHandler
 			return;
 		}
 
-		/*
-		String metaData = mainRoomBroadcast.getMetaData();
-		if (metaData == null) {
-			metaData = "{}";
-		}
-
-		JsonObject metaDataJsonObject = JsonParser.parseString(metaData)
-				.getAsJsonObject();
-		MainRoomConfiguration mainRoomConfiguration = gson.fromJson(metaDataJsonObject, MainRoomConfiguration.class);
-		if (mainRoomConfiguration != null) {
-			mainRoomConfiguration.addPublisherRequest(streamId);
-		}
-		dataStore.updateStreamMetaData(mainRoomName, gson.toJson(mainRoomConfiguration));
-
-		 */
-
 		getAMSBroadcastManager().sendDataChannelMessage(mainRoomName, "{\"eventType\":\"PUBLISH_REQUEST\",\"streamId\":\"" + streamId + "\"}");
 	}
 
