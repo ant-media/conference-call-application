@@ -247,6 +247,8 @@ if (!websocketURL) {
 
 }
 
+var listenerRoomPostfix = "listener";
+
 var fullScreenId = -1;
 
 var roomOfStream = [];
@@ -412,7 +414,7 @@ function AntMedia() {
       command: "makePresenter",
       streamId: publishStreamId,
       participantId: streamId,
-      roomName: roomName+"listener",
+      roomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
@@ -430,7 +432,7 @@ function AntMedia() {
 
     var jsCmd = {
       command: "sendData",
-      streamId: roomName+"listener",
+      streamId: roomName+listenerRoomPostfix,
       message: JSON.stringify(command),
       receiverStreamId: speakerName,
       websocketURL: websocketURL,
@@ -458,7 +460,7 @@ function AntMedia() {
       command: "sendData",
       streamId: publishStreamId,
       message: JSON.stringify(command),
-      receiverStreamId: roomName+"listener",
+      receiverStreamId: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
@@ -556,7 +558,7 @@ function AntMedia() {
       command: "undoPresenter",
       streamId: publishStreamId,
       participantId: streamId,
-      listenerRoomName: roomName+"listener",
+      listenerRoomName: roomName+listenerRoomPostfix,
       roomName: roomName,
       websocketURL: websocketURL,
       token: token
@@ -628,7 +630,7 @@ function AntMedia() {
       var jsCmd = {
         command: "createRoom",
         streamId: roomName,
-        roomName: roomName + "listener",
+        roomName: roomName + listenerRoomPostfix,
         websocketURL: websocketURL,
         status: "broadcasting",
         token: token
@@ -642,7 +644,7 @@ function AntMedia() {
     var jsCmd = {
       command: "deleteRoom",
       streamId: roomName,
-      roomName: roomName+"listener",
+      roomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
@@ -1273,7 +1275,7 @@ function AntMedia() {
 
   function startRecord()
   {
-    var listenerRoom = roomName + "listener";
+    var listenerRoom = roomName + listenerRoomPostfix;
     displayMessage("Recording is about to start...", "#fff")
     var jsCmd = {
       command: "startRecording",
@@ -1287,7 +1289,7 @@ function AntMedia() {
 
   function stopRecord()
   {
-    var listenerRoom = roomName + "listener";
+    var listenerRoom = roomName + listenerRoomPostfix;
 
     displayMessage("Recording is about to stop...", "#fff")
     var jsCmd = {
@@ -1717,7 +1719,7 @@ function AntMedia() {
       {
         webRTCAdaptor?.stop(roomName);
         // remove listener string from the room name
-        let mainRoomName = roomName.endsWith("listener") ? roomName.substring(0, roomName.length - 8) : roomName;
+        let mainRoomName = roomName.endsWith(listenerRoomPostfix) ? roomName.substring(0, roomName.length - 8) : roomName;
         setIsPlayOnly(false);
         setRoomName(mainRoomName);
       } else if (eventType === "REJECT_SPEAKER_REQUEST" && eventStreamId === publishStreamId)
@@ -1737,8 +1739,8 @@ function AntMedia() {
 
         // append listener string to the room name
         let mainRoomName = roomName;
-        if (!roomName.endsWith("listener")) {
-          mainRoomName = roomName + "listener";
+        if (!roomName.endsWith(listenerRoomPostfix)) {
+          mainRoomName = roomName + listenerRoomPostfix;
         }
         setRoomName(mainRoomName);
         setIsPlayOnly(true);
@@ -1780,7 +1782,7 @@ function AntMedia() {
         command: "undoPresenter",
         streamId: publishStreamId,
         participantId: publishStreamId,
-        listenerRoomName: roomName+"listener",
+        listenerRoomName: roomName+listenerRoomPostfix,
         roomName: roomName,
         websocketURL: websocketURL,
         token: token
@@ -2169,6 +2171,14 @@ function AntMedia() {
         command: "getSettings",
       };
       sendMessage(JSON.stringify(jsCmd));
+
+      var jsCmd2 = {
+        command: "syncAdministrativeFields",
+        roomName: roomName,
+        streamId: publishStreamId,
+        token: token
+      };
+      sendMessage(JSON.stringify(jsCmd2));
     }
     if (isAdmin) {
       createListenerRoomIfNotExists();
@@ -2185,6 +2195,20 @@ function AntMedia() {
       var localSettings =  JSON.parse(obj.settings);
       console.log("--isRecordingFeatureAvailable: ", localSettings.isRecordingFeatureAvailable);
       setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
+    }
+    else if (obj.command === "makeGrantedSpeakerListenerResponse")
+    {
+      console.log("Incoming makeGrantedSpeakerListenerResponse", obj);
+
+      var data = JSON.parse(obj.definition);
+
+      data.presenterList = data.presenterList || [];
+      data.publisherRequestList = data.publisherRequestList || [];
+      data.publisherFromListenerList = data.publisherFromListenerList || [];
+
+      setPresenters(data.presenterList);
+      setRequestSpeakerList(data.publisherRequestList);
+      setApprovedSpeakerRequestList(data.publisherFromListenerList);
     }
     else if (obj.command === "makePresenterResponse")
     {

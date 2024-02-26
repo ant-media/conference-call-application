@@ -56,6 +56,8 @@ public class WebSocketApplicationConstants {
      */
 	public static final String SETTINGS = "settings";
 
+    public static final String SYNC_ADMINISTRATIVE_FIELDS_COMMAND = "syncAdministrativeFields";
+
 	public static final String START_RECORDING_COMMAND = "startRecording";
 
 	public static final String STOP_RECORDING_COMMAND = "stopRecording";
@@ -69,6 +71,12 @@ public class WebSocketApplicationConstants {
     public static final String DELETE_ROOM_COMMAND = "deleteRoom";
 
     public static final String REQUEST_PUBLISH_COMMAND = "requestPublish";
+
+    public static final String GRANT_SPEAKER_REQUEST_COMMAND = "grantSpeakerRequest";
+
+    public static final String REJECT_SPEAKER_REQUEST_COMMAND = "rejectSpeakerRequest";
+
+    public static final String MAKE_GRANTED_SPEAKER_LISTENER_COMMAND = "makeGrantedSpeakerListener";
 
     public static final String SEND_DATA_CHANNEL_COMMAND = "sendData";
 
@@ -92,9 +100,17 @@ public class WebSocketApplicationConstants {
 
     public static final String UNDO_PRESENTER_RESPONSE = "undoPresenterResponse";
 
+    public static final String GRANT_SPEAKER_REQUEST_RESPONSE = "grantSpeakerRequestResponse";
+
+    public static final String REJECT_SPEAKER_REQUEST_RESPONSE = "rejectSpeakerRequestResponse";
+
+    public static final String MAKE_GRANTED_SPEAKER_LISTENER_RESPONSE = "makeGrantedSpeakerListenerResponse";
+
     public static final String CREATE_ROOM_RESPONSE = "createRoomResponse";
 
     public static final String DELETE_ROOM_RESPONSE = "deleteRoomResponse";
+
+    public static final String SYNC_ADMINISTRATIVE_FIELDS_RESPONSE = "syncAdministrativeFieldsResponse";
 	
 	public static final String START_RECORDING_RESPONSE = "startRecordingResponse";
 
