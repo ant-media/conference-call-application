@@ -414,7 +414,8 @@ function AntMedia() {
       command: "makePresenter",
       streamId: publishStreamId,
       participantId: streamId,
-      roomName: roomName+listenerRoomPostfix,
+      roomName: roomName,
+      listenerRoomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
@@ -558,8 +559,8 @@ function AntMedia() {
       command: "undoPresenter",
       streamId: publishStreamId,
       participantId: streamId,
-      listenerRoomName: roomName+listenerRoomPostfix,
       roomName: roomName,
+      listenerRoomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
@@ -1746,6 +1747,8 @@ function AntMedia() {
         setIsPlayOnly(true);
         setWebRTCAdaptor(null);
         setRecreateAdaptor(true);
+      } else if (eventType === "MAIN_ROOM_BROADCAST_UPDATED") {
+        requestSyncAdministrativeFields();
       }
     }
   }
@@ -2164,6 +2167,16 @@ function AntMedia() {
     }
   }
 
+  function requestSyncAdministrativeFields() {
+    var jsCmd = {
+      command: "syncAdministrativeFields",
+      roomName: roomName,
+      streamId: publishStreamId,
+      token: token
+    };
+    sendMessage(JSON.stringify(jsCmd));
+  }
+
   React.useEffect(() => {
     //gets the setting from the server through websocket
     if (isWebSocketConnected) {
@@ -2172,13 +2185,7 @@ function AntMedia() {
       };
       sendMessage(JSON.stringify(jsCmd));
 
-      var jsCmd2 = {
-        command: "syncAdministrativeFields",
-        roomName: roomName,
-        streamId: publishStreamId,
-        token: token
-      };
-      sendMessage(JSON.stringify(jsCmd2));
+      requestSyncAdministrativeFields();
     }
     if (isAdmin) {
       createListenerRoomIfNotExists();
@@ -2196,11 +2203,13 @@ function AntMedia() {
       console.log("--isRecordingFeatureAvailable: ", localSettings.isRecordingFeatureAvailable);
       setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
     }
-    else if (obj.command === "makeGrantedSpeakerListenerResponse")
-    {
+    else if (obj.command === "makeGrantedSpeakerListenerResponse") {
       console.log("Incoming makeGrantedSpeakerListenerResponse", obj);
+    }
+    else if (obj.command === "syncAdministrativeFieldsResponse") {
+      console.log("Incoming syncAdministrativeFieldsResponse", obj);
 
-      var data = JSON.parse(obj.definition);
+      var data = obj.definition;
 
       data.presenterList = data.presenterList || [];
       data.publisherRequestList = data.publisherRequestList || [];

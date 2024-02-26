@@ -292,6 +292,7 @@ public class WebSocketApplicationHandler
 			// Extract fields from JSON object
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
 			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+			String listenerRoomName = (String)jsonObject.get(WebSocketApplicationConstants.LISTENER_ROOM_NAME_FIELD);
 			String streamId = (String)jsonObject.get(WebSocketApplicationConstants.STREAM_ID_FIELD);
 			String token = (String)jsonObject.get(WebSocketConstants.TOKEN);
 
@@ -303,7 +304,7 @@ public class WebSocketApplicationHandler
 			}
 
 			// Attempt to make presenter and prepare result
-			boolean isSuccess = handleMakePresenter(participantId, roomName);
+			boolean isSuccess = handleMakePresenter(participantId, roomName,listenerRoomName);
 			Result result = new Result(true);//TODO: change this to isSuccess after fixing the addSubTrack method return value
 			result.setDataId(participantId);
 
@@ -326,7 +327,7 @@ public class WebSocketApplicationHandler
 			}
 
 			// Process undo presenter action and send response
-			boolean isSuccess = handleUndoPresenter(participantId, listenerRoomName, roomName);
+			boolean isSuccess = handleUndoPresenter(participantId, roomName, listenerRoomName);
 			Result result = new Result(isSuccess);
 			result.setDataId(participantId);
 
@@ -367,88 +368,75 @@ public class WebSocketApplicationHandler
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.GRANT_SPEAKER_REQUEST_COMMAND))
 		{
-			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+			String mainRoomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+			String listenerRoomName = (String)jsonObject.get(WebSocketApplicationConstants.LISTENER_ROOM_NAME_FIELD);
 			String streamId = (String)jsonObject.get(WebSocketApplicationConstants.STREAM_ID_FIELD);
 			String token = (String)jsonObject.get(WebSocketConstants.TOKEN);
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
 
 			// Check for admin rights
-			if (!checkAdminRights(token, streamId, roomName)) {
+			if (!checkAdminRights(token, streamId, mainRoomName)) {
 				sendResponse(session, WebSocketApplicationConstants.GRANT_SPEAKER_REQUEST_RESPONSE,
 						new Result(true, "You do not have admin rights in the room"));
 				return;
 			}
 
-			Broadcast broadcast = getDataStore().get(roomName);
-			if (broadcast == null) {
-				logger.error("Room {} does not exist", roomName);
-				return;
-			}
-
-			RestServiceBase.removeFromPublisherRequestList(roomName, participantId, getDataStore());
-			RestServiceBase.addIntoPublisherFromListenerList(roomName, participantId, getDataStore());
+			RestServiceBase.removeFromPublisherRequestList(mainRoomName, participantId, getDataStore());
+			RestServiceBase.addIntoPublisherFromListenerList(mainRoomName, participantId, getDataStore());
 
 			JSONObject command = new JSONObject();
 			command.put("eventType", "GRANT_BECOME_PUBLISHER");
 			command.put("streamId", participantId);
 
-			handleSendDataChannelMessage(roomName, command.toString());
+			handleSendDataChannelMessage(listenerRoomName, command.toString());
+			sendUpdatedMainRoomBroadcast(mainRoomName);
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.REJECT_SPEAKER_REQUEST_COMMAND))
 		{
-			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+			String mainRoomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+			String listenerRoomName = (String)jsonObject.get(WebSocketApplicationConstants.LISTENER_ROOM_NAME_FIELD);
 			String streamId = (String)jsonObject.get(WebSocketApplicationConstants.STREAM_ID_FIELD);
 			String token = (String)jsonObject.get(WebSocketConstants.TOKEN);
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
 
 			// Check for admin rights
-			if (!checkAdminRights(token, streamId, roomName)) {
+			if (!checkAdminRights(token, streamId, mainRoomName)) {
 				sendResponse(session, WebSocketApplicationConstants.REJECT_SPEAKER_REQUEST_RESPONSE,
 						new Result(true, "You do not have admin rights in the room"));
 				return;
 			}
 
-			Broadcast broadcast = getDataStore().get(roomName);
-			if (broadcast == null) {
-				logger.error("Room {} does not exist", roomName);
-				return;
-			}
-
-			RestServiceBase.removeFromPublisherRequestList(roomName, participantId, getDataStore());
+			RestServiceBase.removeFromPublisherRequestList(mainRoomName, participantId, getDataStore());
 
 			JSONObject command = new JSONObject();
 			command.put("eventType", "REJECT_SPEAKER_REQUEST");
 			command.put("streamId", participantId);
 
-			handleSendDataChannelMessage(roomName, command.toString());
+			handleSendDataChannelMessage(listenerRoomName, command.toString());
+			sendUpdatedMainRoomBroadcast(mainRoomName);
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.MAKE_GRANTED_SPEAKER_LISTENER_COMMAND))
 		{
-			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+			String mainRoomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
 			String streamId = (String)jsonObject.get(WebSocketApplicationConstants.STREAM_ID_FIELD);
 			String token = (String)jsonObject.get(WebSocketConstants.TOKEN);
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
 
 			// Check for admin rights
-			if (!checkAdminRights(token, streamId, roomName)) {
+			if (!checkAdminRights(token, streamId, mainRoomName)) {
 				sendResponse(session, WebSocketApplicationConstants.MAKE_GRANTED_SPEAKER_LISTENER_RESPONSE,
 						new Result(true, "You do not have admin rights in the room"));
 				return;
 			}
 
-			Broadcast broadcast = getDataStore().get(roomName);
-			if (broadcast == null) {
-				logger.error("Room {} does not exist", roomName);
-				return;
-			}
-
-			RestServiceBase.removeFromPublisherFromListenerList(roomName, participantId, getDataStore());
+			RestServiceBase.removeFromPublisherFromListenerList(mainRoomName, participantId, getDataStore());
 
 			JSONObject command = new JSONObject();
 			command.put("eventType", "MAKE_LISTENER_AGAIN");
 			command.put("streamId", participantId);
 
-			handleSendDataChannelMessage(roomName, command.toString());
+			handleSendDataChannelMessage(mainRoomName, command.toString());
+			sendUpdatedMainRoomBroadcast(mainRoomName);
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.SEND_DATA_CHANNEL_COMMAND))
 		{
@@ -630,54 +618,56 @@ public class WebSocketApplicationHandler
 		}
 	}
 
-	public boolean handleMakePresenter(String participantId, String roomName) {
+	public boolean handleMakePresenter(String participantId, String mainRoom, String listenerRoom) {
 		DataStore dataStore = getDataStore();
-		Broadcast roomBroadcast =  dataStore.get(roomName);
+		Broadcast roomBroadcast =  dataStore.get(mainRoom);
 
 		if(roomBroadcast == null) {
-			logger.error("Room {} does not exist", roomName);
+			logger.error("Room {} does not exist", mainRoom);
 			return false;
 		}
 
 		if (roomBroadcast.getPresenterList().contains(participantId)) {
-			logger.warn("Participant {} is already presenter in room {}", participantId, roomName);
+			logger.warn("Participant {} is already presenter in listener room {}", participantId, listenerRoom);
 			return true;
 		}
 
-		boolean result = getAMSBroadcastManager().addSubTrack(roomName, participantId);
-		RestServiceBase.addIntoPresenterList(roomName, participantId, dataStore);
+		boolean result = getAMSBroadcastManager().addSubTrack(listenerRoom, participantId);
 
 		if (result) {
-			logger.info("Participant {} is made presenter in room {}", participantId, roomName);
+			logger.info("Participant {} is made presenter in listener room {}", participantId, listenerRoom);
+			RestServiceBase.addIntoPresenterList(mainRoom, participantId, dataStore);
+			sendUpdatedMainRoomBroadcast(mainRoom);
 		} else {
-			logger.error("Participant {} could not be made presenter in room {}", participantId, roomName);
+			logger.error("Participant {} could not be made presenter in listener room {}", participantId, listenerRoom);
 		}
 
 		return result;
 	}
 
-	public boolean handleUndoPresenter(String participantId, String listenerRoomName, String roomName) {
+	public boolean handleUndoPresenter(String participantId, String mainRoom, String listenerRoomName) {
 		DataStore dataStore = getDataStore();
-		Broadcast roomBroadcast =  dataStore.get(roomName);
+		Broadcast roomBroadcast =  dataStore.get(mainRoom);
 
 		if(roomBroadcast == null) {
-			logger.error("Room {} does not exist", roomName);
+			logger.error("Room {} does not exist", mainRoom);
 			return false;
 		}
 
-		if (roomBroadcast.getPresenterList().contains(participantId)) {
-			logger.warn("Participant {} is not a presenter in room {}", participantId, roomName);
+		if (!roomBroadcast.getPresenterList().contains(participantId)) {
+			logger.warn("Participant {} is not a presenter in room {}", participantId, mainRoom);
 			return true;
 		}
 
 		boolean result = getAMSBroadcastManager().removeSubTrack(listenerRoomName, participantId);
-		RestServiceBase.removeFromPresenterList(roomName, participantId, dataStore);
 
 		if (result) {
-			logger.info("Participant {} is removed from presenter in room {}", participantId, listenerRoomName);
-			getAMSBroadcastManager().updateMainTrackId(participantId, roomName, getDataStore());
+			logger.info("Participant {} is removed from presenter in listener room {}", participantId, listenerRoomName);
+			RestServiceBase.removeFromPresenterList(mainRoom, participantId, dataStore);
+			getAMSBroadcastManager().updateMainTrackId(participantId, mainRoom, getDataStore());
+			sendUpdatedMainRoomBroadcast(mainRoom);
 		} else {
-			logger.error("Participant {} could not be removed from presenter in room {}", participantId, listenerRoomName);
+			logger.error("Participant {} could not be removed from presenter in listener room {}", participantId, listenerRoomName);
 		}
 
 		return result;
@@ -708,6 +698,7 @@ public class WebSocketApplicationHandler
 		}
 
 		RestServiceBase.addIntoPublisherRequestList(mainRoomName, streamId, dataStore);
+		sendUpdatedMainRoomBroadcast(mainRoomName);
 		getAMSBroadcastManager().sendDataChannelMessage(mainRoomName, "{\"eventType\":\"PUBLISH_REQUEST\",\"streamId\":\"" + streamId + "\"}");
 	}
 
@@ -735,6 +726,17 @@ public class WebSocketApplicationHandler
 			getDataStore().delete(id);
 		}
 
+	}
+
+	public void sendUpdatedMainRoomBroadcast(String roomName) {
+		Broadcast broadcast = getDataStore().get(roomName);
+		if (broadcast != null) {
+			JSONObject command = new JSONObject();
+			command.put("eventStreamId", roomName);
+			command.put("eventType", WebSocketApplicationConstants.MAIN_ROOM_BROADCAST_UPDATED_EVENT);
+
+			getAMSBroadcastManager().sendDataChannelMessage(roomName, command.toString());
+		}
 	}
 
 	public boolean checkAdminRights(String token, String streamId, String roomName) {

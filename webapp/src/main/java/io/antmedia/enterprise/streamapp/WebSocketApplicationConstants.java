@@ -115,4 +115,6 @@ public class WebSocketApplicationConstants {
 	public static final String START_RECORDING_RESPONSE = "startRecordingResponse";
 
 	public static final String STOP_RECORDING_RESPONSE = "stopRecordingResponse";
+
+    public static final String MAIN_ROOM_BROADCAST_UPDATED_EVENT = "MAIN_ROOM_BROADCAST_UPDATED";
 }
