@@ -233,6 +233,17 @@ public class WebSocketApplicationHandler
 			responseRoomSettings(session);
 
 		}
+		else if (cmd.equals(WebSocketApplicationConstants.CHECK_IF_HAS_ADMIN_RIGHTS_COMMAND))
+		{
+			String streamId = (String)jsonObject.get(WebSocketConstants.STREAM_ID);
+			String roomName = (String) jsonObject.get(WebSocketApplicationConstants.ROOM_NAME);
+			String token =  (String) jsonObject.get(WebSocketConstants.TOKEN);
+
+			boolean hasAdminRights = checkAdminRights(token, streamId, roomName);
+
+			Result result = new Result(hasAdminRights);
+			sendResponse(session, WebSocketApplicationConstants.CHECK_IF_HAS_ADMIN_RIGHTS_RESPONSE, result);
+		}
 		else if (cmd.equals(WebSocketApplicationConstants.START_RECORDING_COMMAND)) {
 			//start recording
 			String streamId = (String)jsonObject.get(WebSocketConstants.STREAM_ID);
@@ -264,7 +275,6 @@ public class WebSocketApplicationHandler
 				}
 
 				result = startRecording(streamIdRecording, websocketUrl, 1280, 720, urlToPublish, publishToken);
-
 
 			}
 			catch (URISyntaxException e) {
@@ -299,7 +309,7 @@ public class WebSocketApplicationHandler
 			// Check for admin rights
 			if (!checkAdminRights(token, streamId, roomName)) {
 				sendResponse(session, WebSocketApplicationConstants.MAKE_PRESENTER_RESPONSE,
-						new Result(true, "You do not have admin rights in the room"));
+						new Result(false, "You do not have admin rights in the room"));
 				return;
 			}
 
@@ -322,7 +332,7 @@ public class WebSocketApplicationHandler
 			// Check for admin rights and respond if check fails
 			if (!checkAdminRights(token, streamId, roomName)) {
 				sendResponse(session, WebSocketApplicationConstants.UNDO_PRESENTER_RESPONSE,
-						new Result(true, "You do not have admin rights in the room"));
+						new Result(false, "You do not have admin rights in the room"));
 				return;
 			}
 
@@ -377,7 +387,7 @@ public class WebSocketApplicationHandler
 			// Check for admin rights
 			if (!checkAdminRights(token, streamId, mainRoomName)) {
 				sendResponse(session, WebSocketApplicationConstants.GRANT_SPEAKER_REQUEST_RESPONSE,
-						new Result(true, "You do not have admin rights in the room"));
+						new Result(false, "You do not have admin rights in the room"));
 				return;
 			}
 
@@ -402,7 +412,7 @@ public class WebSocketApplicationHandler
 			// Check for admin rights
 			if (!checkAdminRights(token, streamId, mainRoomName)) {
 				sendResponse(session, WebSocketApplicationConstants.REJECT_SPEAKER_REQUEST_RESPONSE,
-						new Result(true, "You do not have admin rights in the room"));
+						new Result(false, "You do not have admin rights in the room"));
 				return;
 			}
 
@@ -425,7 +435,7 @@ public class WebSocketApplicationHandler
 			// Check for admin rights
 			if (!checkAdminRights(token, streamId, mainRoomName)) {
 				sendResponse(session, WebSocketApplicationConstants.MAKE_GRANTED_SPEAKER_LISTENER_RESPONSE,
-						new Result(true, "You do not have admin rights in the room"));
+						new Result(false, "You do not have admin rights in the room"));
 				return;
 			}
 
@@ -454,7 +464,7 @@ public class WebSocketApplicationHandler
 			// Check for admin rights
 			if (!checkAdminRights(token, streamId, roomName)) {
 				sendResponse(session, WebSocketApplicationConstants.MAKE_GRANTED_SPEAKER_LISTENER_RESPONSE,
-						new Result(true, "You do not have admin rights in the room"));
+						new Result(false, "You do not have admin rights in the room"));
 				return;
 			}
 
@@ -749,8 +759,8 @@ public class WebSocketApplicationHandler
 		// Retrieve broadcast and validate
 		Broadcast broadcast = getDataStore().get(roomName);
 		if (broadcast == null) {
-			logger.error("Room {} does not exist", roomName);
-			return false;
+			logger.error("Room {} does not exist so admin list is empty", roomName);
+			return true;
 		}
 
 		// Check if admin list is defined and non-empty
@@ -767,18 +777,26 @@ public class WebSocketApplicationHandler
 			return false;
 		}
 
+		// if there is no secret key, then user has admin rights
+		if (StringUtils.isAllBlank(appSettings.getJwtStreamSecretKey())) {
+			logger.info("StreamId {} has admin rights in the roomName {}", streamId, roomName);
+			return true;
+		}
+
 		// Validate token
 		if (token == null) {
-			logger.error("Cannot check admin rights without a token.");
+			logger.error("JWT security is enabled but token is not available.");
 			return false;
 		}
 
 		// Check if token is valid
 		if (JWTFilter.isJWTTokenValid(token, streamId)) {
 			logger.info("Token is valid for streamId: {}", streamId);
+			logger.info("StreamId {} has admin rights in the roomName {}", streamId, roomName);
 			return true;
 		} else {
 			logger.error("Token is not valid for streamId: {}", streamId);
+			logger.error("StreamId {} does not have admin rights in the roomName {}", streamId, roomName);
 			return false;
 		}
 	}

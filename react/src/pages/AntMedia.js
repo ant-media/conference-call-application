@@ -145,15 +145,15 @@ if (onlyDataChannel == null || typeof onlyDataChannel === "undefined") {
   onlyDataChannel = (onlyDataChannel === "true");
 }
 
-var playOnly = getRootAttribute("play-only");
-if (!playOnly) {
-  playOnly = getUrlParameter("playOnly");
+var initialPlayOnly = getRootAttribute("play-only");
+if (!initialPlayOnly) {
+  initialPlayOnly = getUrlParameter("playOnly");
 }
 
-if (playOnly == null || typeof playOnly === "undefined") {
-  playOnly = false;
+if (initialPlayOnly == null || typeof initialPlayOnly === "undefined") {
+  initialPlayOnly = false;
 } else {
-  playOnly = (playOnly === "true");
+  initialPlayOnly = (initialPlayOnly === "true");
 }
 
 var InitialStreamId = getRootAttribute("publish-stream-id");
@@ -214,7 +214,7 @@ if (localStorage.getItem('selectedMicrophone')) {
 }
 
 
-if (playOnly) {
+if (initialPlayOnly) {
   mediaConstraints = {
     video: false,
     audio: false,
@@ -390,7 +390,7 @@ function AntMedia() {
 
   const [devices, setDevices] = React.useState([]);
 
-  const [isPlayOnly, setIsPlayOnly] = React.useState(playOnly);
+  const [isPlayOnly, setIsPlayOnly] = React.useState(initialPlayOnly);
 
   const [isEnterDirectly] = React.useState(enterDirectly);
 
@@ -877,7 +877,7 @@ function AntMedia() {
       await checkDevices();
       if (recreateAdaptor && webRTCAdaptor == null) {
 
-        if (!isPlayOnly && playOnly) {
+        if (!isPlayOnly && initialPlayOnly) {
           mediaConstraints = {
             video: true,
             audio: true,
@@ -2177,6 +2177,16 @@ function AntMedia() {
     sendMessage(JSON.stringify(jsCmd));
   }
 
+  function checkIfHasAdminRights() {
+    var jsCmd = {
+      command: "checkIfHasAdminRights",
+      roomName: roomName,
+      streamId: publishStreamId,
+      token: token
+    };
+    sendMessage(JSON.stringify(jsCmd));
+  }
+
   React.useEffect(() => {
     //gets the setting from the server through websocket
     if (isWebSocketConnected) {
@@ -2184,6 +2194,10 @@ function AntMedia() {
         command: "getSettings",
       };
       sendMessage(JSON.stringify(jsCmd));
+
+      if (isAdmin) {
+        checkIfHasAdminRights();
+      }
 
       requestSyncAdministrativeFields();
     }
@@ -2198,10 +2212,18 @@ function AntMedia() {
     }
     var obj = JSON.parse(latestMessage);
     var definition;
-    if (obj.command === "setSettings") {
+    if (obj.command === "setSettings")
+    {
       var localSettings =  JSON.parse(obj.settings);
       console.log("--isRecordingFeatureAvailable: ", localSettings.isRecordingFeatureAvailable);
       setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
+    }
+    else if (obj.command === "checkIfHasAdminRightsResponse")
+    {
+      console.log("Incoming checkIfHasAdminRightsResponse", obj);
+
+      definition = JSON.parse(obj.definition);
+      setIsAdmin(definition.success);
     }
     else if (obj.command === "makeGrantedSpeakerListenerResponse") {
       console.log("Incoming makeGrantedSpeakerListenerResponse", obj);
@@ -2234,22 +2256,12 @@ function AntMedia() {
         var newPresenters = [...presenters];
         setPresenters(newPresenters);
 
-        if (data.success) {
-
-          enqueueSnackbar({
-            message: t('Speaker has joined to the presenter room successfully'),
-            variant: 'info',
-          }, {
-            autoHideDuration: 1500,
-          });
-        } else {
-          enqueueSnackbar({
-            message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
-            variant: 'info',
-          }, {
-            autoHideDuration: 1500,
-          });
-        }
+        enqueueSnackbar({
+          message: t('Speaker has joined to the presenter room successfully'),
+          variant: 'info',
+        }, {
+          autoHideDuration: 1500,
+        });
 
         let command = {
           "eventType": "BROADCAST_ON",
@@ -2260,6 +2272,13 @@ function AntMedia() {
       } else {
         setPresenterButtonStreamIdInProcess(null);
         setPresenterButtonDisabled(false);
+
+        enqueueSnackbar({
+          message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
+          variant: 'info',
+        }, {
+          autoHideDuration: 1500,
+        });
       }
     }
     else if (obj.command === "undoPresenterResponse")
