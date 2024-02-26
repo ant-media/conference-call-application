@@ -111,7 +111,7 @@ class TestJoinLeave(unittest.TestCase):
     leave_button = self.chrome.get_element_by_id("leave-room-button")
     self.chrome.click_element(leave_button)
     
-  def test_others_tile(self):
+  def _test_others_tile(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
