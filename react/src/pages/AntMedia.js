@@ -456,6 +456,7 @@ function AntMedia() {
   }
 
   function makeListenerAgain(speakerName) {
+    makeParticipantUndoPresenter(speakerName);
 
     var jsCmd = {
       command: "makeGrantedSpeakerListener",
@@ -1695,6 +1696,11 @@ function AntMedia() {
         );
       } else if (eventType === "MAKE_LISTENER_AGAIN" && eventStreamId === publishStreamId) {
         console.log("MAKE_LISTENER_AGAIN");
+
+        unmuteLocalMic();
+        checkAndTurnOnLocalCamera(publishStreamId);
+        setIsBroadcasting(false);
+
         webRTCAdaptor?.stop(publishStreamId);
         webRTCAdaptor?.stop(roomName);
         webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
