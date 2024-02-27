@@ -424,84 +424,49 @@ function AntMedia() {
   }
 
   function rejectSpeakerRequest(streamId) {
-    let speakerName = ""
-
-    let command = {
-      "eventType": "REJECT_SPEAKER_REQUEST",
-      "streamId": streamId,
-    }
 
     var jsCmd = {
-      command: "sendData",
-      streamId: roomName+listenerRoomPostfix,
-      message: JSON.stringify(command),
-      receiverStreamId: speakerName,
+      command: "rejectSpeakerRequest",
+      streamId: publishStreamId,
+      participantId: streamId,
+      roomName: roomName,
+      listenerRoomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
 
     sendMessage(JSON.stringify(jsCmd));
-
-    let tempRequestSpeakerList = requestSpeakerList;
-    let index = tempRequestSpeakerList.findIndex((l) => l.streamId === streamId);
-    tempRequestSpeakerList.splice(index, 1);
-    setRequestSpeakerList(tempRequestSpeakerList);
   }
 
-  function approveBecomeSpeakerRequest(requestingSpeakerName) {
+  function approveBecomeSpeakerRequest(requestingSpeaker) {
 
     setOpenRequestBecomeSpeakerDialog(false);
 
-    let command = {
-      "eventType": "GRANT_BECOME_PUBLISHER",
-      "streamId": requestingSpeakerName,
-    }
-
     var jsCmd = {
-      command: "sendData",
+      command: "grantSpeakerRequest",
       streamId: publishStreamId,
-      message: JSON.stringify(command),
-      receiverStreamId: roomName+listenerRoomPostfix,
+      participantId: requestingSpeaker,
+      roomName: roomName,
+      listenerRoomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
 
     sendMessage(JSON.stringify(jsCmd));
-
-    let tempRequestSpeakerList = requestSpeakerList;
-    let index = tempRequestSpeakerList.findIndex((l) => l.streamId === requestingSpeakerName);
-    tempRequestSpeakerList.splice(index, 1);
-    setRequestSpeakerList(tempRequestSpeakerList);
-
-    approvedSpeakerRequestList.push(requestingSpeakerName);
-    var newList = [...approvedSpeakerRequestList]
-    setApprovedSpeakerRequestList(newList);
   }
 
   function makeListenerAgain(speakerName) {
-    let command = {
-      "eventType": "MAKE_LISTENER_AGAIN",
-      "streamId": speakerName,
-    }
 
     var jsCmd = {
-      command: "sendData",
-      streamId: roomName,
-      message: JSON.stringify(command),
-      receiverStreamId: roomName,
+      command: "makeGrantedSpeakerListener",
+      streamId: publishStreamId,
+      participantId: speakerName,
+      roomName: roomName,
       websocketURL: websocketURL,
       token: token
     };
 
     sendMessage(JSON.stringify(jsCmd));
-
-    // remove speakerName from approvedSpeakerRequestList
-    let index = approvedSpeakerRequestList.indexOf(speakerName);
-    if (index > -1) {
-      approvedSpeakerRequestList.splice(index, 1);
-    }
-    var newList = [...approvedSpeakerRequestList]
-    setApprovedSpeakerRequestList(newList);
   }
 
   function resetAllParticipants() {
@@ -2172,6 +2137,7 @@ function AntMedia() {
       command: "syncAdministrativeFields",
       roomName: roomName,
       streamId: publishStreamId,
+      websocketURL: websocketURL,
       token: token
     };
     sendMessage(JSON.stringify(jsCmd));
@@ -2182,6 +2148,7 @@ function AntMedia() {
       command: "checkIfHasAdminRights",
       roomName: roomName,
       streamId: publishStreamId,
+      websocketURL: websocketURL,
       token: token
     };
     sendMessage(JSON.stringify(jsCmd));
