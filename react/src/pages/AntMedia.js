@@ -145,15 +145,15 @@ if (onlyDataChannel == null || typeof onlyDataChannel === "undefined") {
   onlyDataChannel = (onlyDataChannel === "true");
 }
 
-var playOnly = getRootAttribute("play-only");
-if (!playOnly) {
-  playOnly = getUrlParameter("playOnly");
+var initialPlayOnly = getRootAttribute("play-only");
+if (!initialPlayOnly) {
+  initialPlayOnly = getUrlParameter("playOnly");
 }
 
-if (playOnly == null || typeof playOnly === "undefined") {
-  playOnly = false;
+if (initialPlayOnly == null || typeof initialPlayOnly === "undefined") {
+  initialPlayOnly = false;
 } else {
-  playOnly = (playOnly === "true");
+  initialPlayOnly = (initialPlayOnly === "true");
 }
 
 var InitialStreamId = getRootAttribute("publish-stream-id");
@@ -214,7 +214,7 @@ if (localStorage.getItem('selectedMicrophone')) {
 }
 
 
-if (playOnly) {
+if (initialPlayOnly) {
   mediaConstraints = {
     video: false,
     audio: false,
@@ -246,6 +246,8 @@ if (!websocketURL) {
   }
 
 }
+
+var listenerRoomPostfix = "listener";
 
 var fullScreenId = -1;
 
@@ -386,7 +388,7 @@ function AntMedia() {
 
   const [devices, setDevices] = React.useState([]);
 
-  const [isPlayOnly, setIsPlayOnly] = React.useState(playOnly);
+  const [isPlayOnly, setIsPlayOnly] = React.useState(initialPlayOnly);
 
   const [isEnterDirectly] = React.useState(enterDirectly);
 
@@ -421,7 +423,8 @@ function AntMedia() {
       command: "makePresenter",
       streamId: publishStreamId,
       participantId: streamId,
-      roomName: roomName+"listener",
+      roomName: roomName,
+      listenerRoomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
@@ -430,86 +433,50 @@ function AntMedia() {
   }
 
   function rejectSpeakerRequest(streamId) {
-    let speakerName = ""
-
-    let command = {
-      "eventType": "REJECT_SPEAKER_REQUEST",
-      "streamId": streamId,
-    }
 
     var jsCmd = {
-      command: "sendData",
-      streamId: roomName+"listener",
-      message: JSON.stringify(command),
-      receiverStreamId: speakerName,
+      command: "rejectSpeakerRequest",
+      streamId: publishStreamId,
+      participantId: streamId,
+      roomName: roomName,
+      listenerRoomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
 
     sendMessage(JSON.stringify(jsCmd));
-
-    let tempRequestSpeakerList = requestSpeakerList;
-    let index = tempRequestSpeakerList.findIndex((l) => l.streamId === streamId);
-    tempRequestSpeakerList.splice(index, 1);
-    setRequestSpeakerList(tempRequestSpeakerList);
   }
 
-  function approveBecomeSpeakerRequest(requestingSpeakerName) {
+  function approveBecomeSpeakerRequest(requestingSpeaker) {
 
     setOpenRequestBecomeSpeakerDialog(false);
 
-    let command = {
-      "eventType": "GRANT_BECOME_PUBLISHER",
-      "streamId": requestingSpeakerName,
-    }
-
     var jsCmd = {
-      command: "sendData",
+      command: "grantSpeakerRequest",
       streamId: publishStreamId,
-      message: JSON.stringify(command),
-      receiverStreamId: roomName+"listener",
+      participantId: requestingSpeaker,
+      roomName: roomName,
+      listenerRoomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
 
     sendMessage(JSON.stringify(jsCmd));
-
-    let tempRequestSpeakerList = requestSpeakerList;
-    let index = tempRequestSpeakerList.findIndex((l) => l.streamId === requestingSpeakerName);
-    tempRequestSpeakerList.splice(index, 1);
-    setRequestSpeakerList(tempRequestSpeakerList);
-
-    approvedSpeakerRequestList.push(requestingSpeakerName);
-    var newList = [...approvedSpeakerRequestList]
-    setApprovedSpeakerRequestList(newList);
   }
 
   function makeListenerAgain(speakerName) {
     makeParticipantUndoPresenter(speakerName);
 
-    let command = {
-      "eventType": "MAKE_LISTENER_AGAIN",
-      "streamId": speakerName,
-    }
-
     var jsCmd = {
-      command: "sendData",
-      streamId: roomName,
-      message: JSON.stringify(command),
-      receiverStreamId: roomName,
+      command: "makeGrantedSpeakerListener",
+      streamId: publishStreamId,
+      participantId: speakerName,
+      roomName: roomName,
       websocketURL: websocketURL,
       token: token
     };
 
     sendMessage(JSON.stringify(jsCmd));
-
-    // remove speakerName from approvedSpeakerRequestList
-    let index = approvedSpeakerRequestList.indexOf(speakerName);
-    if (index > -1) {
-      approvedSpeakerRequestList.splice(index, 1);
-    }
-    var newList = [...approvedSpeakerRequestList]
-    setApprovedSpeakerRequestList(newList);
   }
 
   function resetAllParticipants() {
@@ -567,8 +534,8 @@ function AntMedia() {
       command: "undoPresenter",
       streamId: publishStreamId,
       participantId: streamId,
-      listenerRoomName: roomName+"listener",
       roomName: roomName,
+      listenerRoomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
@@ -639,7 +606,7 @@ function AntMedia() {
       var jsCmd = {
         command: "createRoom",
         streamId: roomName,
-        roomName: roomName + "listener",
+        roomName: roomName + listenerRoomPostfix,
         websocketURL: websocketURL,
         status: "broadcasting",
         token: token
@@ -653,7 +620,7 @@ function AntMedia() {
     var jsCmd = {
       command: "deleteRoom",
       streamId: roomName,
-      roomName: roomName+"listener",
+      roomName: roomName+listenerRoomPostfix,
       websocketURL: websocketURL,
       token: token
     };
@@ -885,7 +852,7 @@ function AntMedia() {
       await checkDevices();
       if (recreateAdaptor && webRTCAdaptor == null) {
 
-        if (!isPlayOnly && playOnly) {
+        if (!isPlayOnly && initialPlayOnly) {
           mediaConstraints = {
             video: true,
             audio: true,
@@ -1284,7 +1251,7 @@ function AntMedia() {
 
   function startRecord()
   {
-    var listenerRoom = roomName + "listener";
+    var listenerRoom = roomName + listenerRoomPostfix;
     displayMessage("Recording is about to start...", "#fff")
     var jsCmd = {
       command: "startRecording",
@@ -1298,7 +1265,7 @@ function AntMedia() {
 
   function stopRecord()
   {
-    var listenerRoom = roomName + "listener";
+    var listenerRoom = roomName + listenerRoomPostfix;
 
     displayMessage("Recording is about to stop...", "#fff")
     var jsCmd = {
@@ -1728,7 +1695,7 @@ function AntMedia() {
       {
         webRTCAdaptor?.stop(roomName);
         // remove listener string from the room name
-        let mainRoomName = roomName.endsWith("listener") ? roomName.substring(0, roomName.length - 8) : roomName;
+        let mainRoomName = roomName.endsWith(listenerRoomPostfix) ? roomName.substring(0, roomName.length - 8) : roomName;
         setIsPlayOnly(false);
         setRoomName(mainRoomName);
       } else if (eventType === "REJECT_SPEAKER_REQUEST" && eventStreamId === publishStreamId)
@@ -1753,13 +1720,15 @@ function AntMedia() {
 
         // append listener string to the room name
         let mainRoomName = roomName;
-        if (!roomName.endsWith("listener")) {
-          mainRoomName = roomName + "listener";
+        if (!roomName.endsWith(listenerRoomPostfix)) {
+          mainRoomName = roomName + listenerRoomPostfix;
         }
         setRoomName(mainRoomName);
         setIsPlayOnly(true);
         setWebRTCAdaptor(null);
         setRecreateAdaptor(true);
+      } else if (eventType === "MAIN_ROOM_BROADCAST_UPDATED") {
+        requestSyncAdministrativeFields();
       }
     }
   }
@@ -1796,7 +1765,7 @@ function AntMedia() {
         command: "undoPresenter",
         streamId: publishStreamId,
         participantId: publishStreamId,
-        listenerRoomName: roomName+"listener",
+        listenerRoomName: roomName+listenerRoomPostfix,
         roomName: roomName,
         websocketURL: websocketURL,
         token: token
@@ -2178,6 +2147,28 @@ function AntMedia() {
     }
   }
 
+  function requestSyncAdministrativeFields() {
+    var jsCmd = {
+      command: "syncAdministrativeFields",
+      roomName: roomName,
+      streamId: publishStreamId,
+      websocketURL: websocketURL,
+      token: token
+    };
+    sendMessage(JSON.stringify(jsCmd));
+  }
+
+  function checkIfHasAdminRights() {
+    var jsCmd = {
+      command: "checkIfHasAdminRights",
+      roomName: roomName,
+      streamId: publishStreamId,
+      websocketURL: websocketURL,
+      token: token
+    };
+    sendMessage(JSON.stringify(jsCmd));
+  }
+
   React.useEffect(() => {
     //gets the setting from the server through websocket
     if (isWebSocketConnected) {
@@ -2185,11 +2176,17 @@ function AntMedia() {
         command: "getSettings",
       };
       sendMessage(JSON.stringify(jsCmd));
+
+      if (isAdmin) {
+        checkIfHasAdminRights();
+      }
+
+      requestSyncAdministrativeFields();
     }
     if (isAdmin) {
       createListenerRoomIfNotExists();
     }
-  },[isWebSocketConnected, sendMessage]);
+  },[isWebSocketConnected]);
 
   React.useEffect(() => {
     if (!latestMessage) {
@@ -2197,10 +2194,34 @@ function AntMedia() {
     }
     var obj = JSON.parse(latestMessage);
     var definition;
-    if (obj.command === "setSettings") {
+    if (obj.command === "setSettings")
+    {
       var localSettings =  JSON.parse(obj.settings);
       console.log("--isRecordingFeatureAvailable: ", localSettings.isRecordingFeatureAvailable);
       setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
+    }
+    else if (obj.command === "checkIfHasAdminRightsResponse")
+    {
+      console.log("Incoming checkIfHasAdminRightsResponse", obj);
+
+      definition = JSON.parse(obj.definition);
+      setIsAdmin(definition.success);
+    }
+    else if (obj.command === "makeGrantedSpeakerListenerResponse") {
+      console.log("Incoming makeGrantedSpeakerListenerResponse", obj);
+    }
+    else if (obj.command === "syncAdministrativeFieldsResponse") {
+      console.log("Incoming syncAdministrativeFieldsResponse", obj);
+
+      var data = obj.definition;
+
+      data.presenterList = data.presenterList || [];
+      data.publisherRequestList = data.publisherRequestList || [];
+      data.publisherFromListenerList = data.publisherFromListenerList || [];
+
+      setPresenters(data.presenterList);
+      setRequestSpeakerList(data.publisherRequestList);
+      setApprovedSpeakerRequestList(data.publisherFromListenerList);
     }
     else if (obj.command === "makePresenterResponse")
     {
@@ -2217,22 +2238,12 @@ function AntMedia() {
         var newPresenters = [...presenters];
         setPresenters(newPresenters);
 
-        if (data.success) {
-
-          enqueueSnackbar({
-            message: t('Speaker has joined to the presenter room successfully'),
-            variant: 'info',
-          }, {
-            autoHideDuration: 1500,
-          });
-        } else {
-          enqueueSnackbar({
-            message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
-            variant: 'info',
-          }, {
-            autoHideDuration: 1500,
-          });
-        }
+        enqueueSnackbar({
+          message: t('Speaker has joined to the presenter room successfully'),
+          variant: 'info',
+        }, {
+          autoHideDuration: 1500,
+        });
 
         let command = {
           "eventType": "BROADCAST_ON",
@@ -2243,6 +2254,13 @@ function AntMedia() {
       } else {
         setPresenterButtonStreamIdInProcess(null);
         setPresenterButtonDisabled(false);
+
+        enqueueSnackbar({
+          message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
+          variant: 'info',
+        }, {
+          autoHideDuration: 1500,
+        });
       }
     }
     else if (obj.command === "undoPresenterResponse")
