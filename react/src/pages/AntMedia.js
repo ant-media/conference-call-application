@@ -589,10 +589,10 @@ function AntMedia() {
 
     setSelectedDevices(selectedDevices);
 
-    if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
+    if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined' && isPlayOnly === false) {
       webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
     }
-    if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
+    if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined' && isPlayOnly === false) {
       webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
     }
   }
@@ -1218,14 +1218,20 @@ function AntMedia() {
   }
 
   function sendReactions(reaction) {
-    handleSendNotificationEvent(
-      "REACTIONS",
-      publishStreamId,
-      {
-        reaction: reaction,
-        senderStreamId: publishStreamId,
-      }
-    );
+    let reactionEvent = {
+      streamId: publishStreamId,
+      eventType: "REACTIONS",
+      reaction: reaction,
+      senderStreamId: publishStreamId,
+    };
+
+    let roomId = roomName;
+    if (isPlayOnly && roomId.endsWith(listenerRoomPostfix)) {
+      roomId = roomId.substring(0, roomId.length - listenerRoomPostfix.length);
+    }
+
+    sendDataChannelMessage(roomId, JSON.stringify(reactionEvent));
+
     showReactions(publishStreamId, reaction);
   }
 
@@ -1386,7 +1392,6 @@ function AntMedia() {
           setMessages([]);
           return;
         }
-
 
         webRTCAdaptor.sendData(
           publishStreamId,
@@ -2026,7 +2031,7 @@ function AntMedia() {
 
   function showReactions(streamId, reactionRequest) {
     let reaction = '😀';
-    let streamName = '';
+    let streamName = streamId;
 
     if (reactions[reactionRequest] !== undefined) {
       reaction = reactions[reactionRequest];
