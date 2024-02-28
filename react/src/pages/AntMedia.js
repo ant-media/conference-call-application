@@ -328,7 +328,6 @@ function AntMedia() {
   const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState(null);
 
   const [openRequestBecomeSpeakerDialog, setOpenRequestBecomeSpeakerDialog] = React.useState(false);
-  const [requestingSpeakerName] = React.useState("");
   const [requestSpeakerList, setRequestSpeakerList] = React.useState([]);
   const [isBroadcasting, setIsBroadcasting] = React.useState(false);
 
