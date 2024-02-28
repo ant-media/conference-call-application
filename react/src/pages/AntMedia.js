@@ -327,7 +327,6 @@ function AntMedia() {
   // presenterButtonStreamIdInProcess keeps the streamId of the participant who is in the process of becoming presenter/unpresenter.
   const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState(null);
 
-  const [openRequestBecomeSpeakerDialog, setOpenRequestBecomeSpeakerDialog] = React.useState(false);
   const [requestSpeakerList, setRequestSpeakerList] = React.useState([]);
   const [isBroadcasting, setIsBroadcasting] = React.useState(false);
 
@@ -451,8 +450,6 @@ function AntMedia() {
 
   function approveBecomeSpeakerRequest(requestingSpeaker) {
 
-    setOpenRequestBecomeSpeakerDialog(false);
-
     var jsCmd = {
       command: "grantSpeakerRequest",
       streamId: publishStreamId,
@@ -537,28 +534,6 @@ function AntMedia() {
     sendMessage(JSON.stringify(jsCmd));
   }
 
-  function handleSendMessageAdmin(message) {
-    if (publishStreamId) {
-      let iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
-      if (
-        iceState !== null &&
-        iceState !== "failed" &&
-        iceState !== "disconnected"
-      ) {
-        let commandList = message.split('*');
-        if (commandList.length > 3 && commandList[0] === "admin" && isAdmin === true) {
-          if (commandList[1] === "publisher_room") {
-            webRTCAdaptor.sendData(publishStreamId,
-              JSON.stringify({
-                streamId: commandList[2],
-                eventType: commandList[3]
-              }));
-          }
-        }
-      }
-    }
-  }
-
   function createListenerRoomIfNotExists() {
     if (isWebSocketConnected) {
       console.log("createListenerRoomIfNotExistscalled");
@@ -573,18 +548,6 @@ function AntMedia() {
 
       sendMessage(JSON.stringify(jsCmd));
     }
-  }
-
-  function deleteListenerRoom() {
-    var jsCmd = {
-      command: "deleteRoom",
-      streamId: roomName,
-      roomName: roomName+listenerRoomPostfix,
-      websocketURL: websocketURL,
-      token: token
-    };
-
-    sendMessage(JSON.stringify(jsCmd));
   }
 
   function handleUnauthorizedDialogExitClicked(){
@@ -2163,7 +2126,7 @@ function AntMedia() {
     if (isAdmin) {
       createListenerRoomIfNotExists();
     }
-  },[isWebSocketConnected]);
+  },[isWebSocketConnected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   React.useEffect(() => {
     if (!latestMessage) {
@@ -2204,15 +2167,15 @@ function AntMedia() {
     {
       console.log("Incoming makePresenterResponse", obj);
 
-      var data = JSON.parse(obj.definition);
-      var streamId = data.dataId;
+      let data = JSON.parse(obj.definition);
+      let streamId = data.dataId;
 
       if (data.success) {
 
         setPresenterButtonStreamIdInProcess(null);
         setPresenterButtonDisabled(false);
         presenters.push(streamId);
-        var newPresenters = [...presenters];
+        let newPresenters = [...presenters];
         setPresenters(newPresenters);
 
         enqueueSnackbar({
@@ -2244,14 +2207,14 @@ function AntMedia() {
     {
       console.log("Incoming undoPresenterResponse", obj);
 
-      var data = JSON.parse(obj.definition);
-      var streamId = data.dataId;
+      let data = JSON.parse(obj.definition);
+      let streamId = data.dataId;
 
       if (data.success) {
         setPresenterButtonStreamIdInProcess(null);
         setPresenterButtonDisabled(false);
         presenters.splice(presenters.indexOf(streamId), 1);
-        var newPresenters = [...presenters];
+        let newPresenters = [...presenters];
         setPresenters(newPresenters);
 
         let command = {
@@ -2317,7 +2280,7 @@ function AntMedia() {
         displayMessage("Recording cannot be stoped due to error: " + definition.message, "#fff")
       }
     }
-  },[latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);
+  },[latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const makeFullScreen = (divId) => {
     if (fullScreenId === divId) {

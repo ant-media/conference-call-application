@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import {styled, useTheme} from "@mui/material/styles";
+import {styled} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import {ConferenceContext} from "../pages/AntMedia";
 
@@ -12,7 +12,7 @@ const PublisherRequestName = styled(Typography)(({ theme }) => ({
     fontWeight: 500,
     fontSize: 14,
 }));
-//hover color of allow or denay
+//hover color of allow or deny
 const PinBtn = styled(Button)(({ theme }) => ({
     "&:hover": {
         backgroundColor: theme.palette.themeColor[50],
@@ -21,7 +21,6 @@ const PinBtn = styled(Button)(({ theme }) => ({
 
 function PublisherRequestTab(props) {
     const conference = useContext(ConferenceContext);
-    const theme = useTheme();
 
     const getPublisherRequestItem = (videoId) => {
         return (
