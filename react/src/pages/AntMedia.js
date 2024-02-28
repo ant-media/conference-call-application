@@ -1026,8 +1026,8 @@ function AntMedia() {
       setUnAuthorizedDialogOpen(true)
     } else if (error === "publishTimeoutError"){
       console.log(error , "Firewall might be blocking the connection Please setup a TURN Server");
-      leaveRoomWithError.current = true;
-      setLeftTheRoom(true);
+      //leaveRoomWithError.current = true;
+      //setLeftTheRoom(true);
     }
     else if (error === "license_suspended_please_renew_license"){
       console.log(error , "Licence is Expired please renew the licence");
@@ -1037,7 +1037,7 @@ function AntMedia() {
 
     console.log("***** " + error)
 
-  };
+  }
 
 
 
