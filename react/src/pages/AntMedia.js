@@ -378,6 +378,7 @@ function AntMedia() {
   const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
   const [virtualBackground, setVirtualBackground] = React.useState(null);
   const timeoutRef = React.useRef(null);
+  const leaveRoomWithError = React.useRef(false);
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
 
@@ -1103,6 +1104,15 @@ function AntMedia() {
       handleLeaveFromRoom()
 
       setUnAuthorizedDialogOpen(true)
+    } else if (error === "publishTimeoutError"){
+      console.log(error , "Firewall might be blocking the connection Please setup a TURN Server");
+      leaveRoomWithError.current = true;
+      setLeftTheRoom(true);
+    }
+    else if (error === "license_suspended_please_renew_license"){
+      console.log(error , "Licence is Expired please renew the licence");
+      leaveRoomWithError.current = true;
+      setLeftTheRoom(true);
     }
 
     console.log("***** " + error)
@@ -1641,18 +1651,24 @@ function AntMedia() {
           updateVideoSendResolution(false);
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
-        console.debug("VIDEO_TRACK_ASSIGNMENT_LIST -> ", obj);
-
         let videoTrackAssignments = notificationEvent.payload;
 
         let temp = participants;
 
-        //remove not available videotracks if exist
-        temp.forEach((p) => {
-          let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
-          if (!p.isMine && assignment === undefined) {
-            temp.splice(temp.findIndex(p), 1);
+        //workaround solution for empty track id
+        let emptyTrackId = [];
+        videoTrackAssignments.forEach((e)=>{
+          if(e.trackId === ""){
+            console.warn("trackid empty")
+            emptyTrackId.push(e.videoLabel);
           }
+        });
+        temp = temp.filter((e) => !emptyTrackId.includes(e.videoLabel));
+
+        //remove not available videotracks if exist
+        temp = temp.filter((p) => {
+          let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
+          return p.isMine || assignment !== undefined;
         });
 
         //add and/or update participants according to current assignments
@@ -1661,6 +1677,9 @@ function AntMedia() {
             if (p.videoLabel === vta.videoLabel) {
               p.streamId = vta.trackId;
               let broadcastObject = allParticipants[p.streamId];
+              if(broadcastObject === undefined){
+                setTimeout(()=>webRTCAdaptor.requestVideoTrackAssignments(roomName), 1000)
+              }
               if (broadcastObject) {
                 p.name = broadcastObject.name;
               }
@@ -2508,7 +2527,7 @@ function AntMedia() {
               )}
             >
               {leftTheRoom ? (
-                <LeftTheRoom/>
+                <LeftTheRoom isError={leaveRoomWithError.current} />
               ) : waitingOrMeetingRoom === "waiting" ? (
                 <WaitingRoom/>
               ) : (
