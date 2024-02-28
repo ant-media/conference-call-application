@@ -313,7 +313,7 @@ public class WebSocketApplicationHandler
 
 			// Attempt to make presenter and prepare result
 			boolean isSuccess = handleMakePresenter(participantId, roomName,listenerRoomName);
-			Result result = new Result(true);//TODO: change this to isSuccess after fixing the addSubTrack method return value
+			Result result = new Result(isSuccess);
 			result.setDataId(participantId);
 
 			sendResponse(session, WebSocketApplicationConstants.MAKE_PRESENTER_RESPONSE, result);
@@ -642,7 +642,28 @@ public class WebSocketApplicationHandler
 
 		boolean result = getAMSBroadcastManager().addSubTrack(listenerRoom, participantId);
 
-		if (result) {
+		boolean isSuccess = result;
+
+		DataStore datastore = getDataStore();
+
+		// check if the operation is successful
+		Broadcast subTrack = datastore.get(participantId);
+		if (subTrack != null) {
+			isSuccess = subTrack.getMainTrackStreamId().equals(mainRoom);
+		} else {
+			isSuccess = false;
+		}
+
+		if (isSuccess) {
+			Broadcast mainTrack = datastore.get(mainRoom);
+			if (mainTrack != null) {
+				isSuccess = mainTrack.getSubTrackStreamIds().contains(participantId);
+			} else {
+				isSuccess = false;
+			}
+		}
+
+		if (isSuccess) {
 			logger.info("Participant {} is made presenter in listener room {}", participantId, listenerRoom);
 			RestServiceBase.addIntoPresenterList(mainRoom, participantId, dataStore);
 			sendUpdatedMainRoomBroadcast(mainRoom);
@@ -650,7 +671,7 @@ public class WebSocketApplicationHandler
 			logger.error("Participant {} could not be made presenter in listener room {}", participantId, listenerRoom);
 		}
 
-		return result;
+		return isSuccess;
 	}
 
 	public boolean handleUndoPresenter(String participantId, String mainRoom, String listenerRoomName) {
