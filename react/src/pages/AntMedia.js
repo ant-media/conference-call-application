@@ -480,49 +480,6 @@ function AntMedia() {
     sendMessage(JSON.stringify(jsCmd));
   }
 
-  function resetAllParticipants() {
-    setAllParticipants([]);
-  }
-
-  function getAllParticipants() {
-    return allParticipants;
-  }
-
-  function resetPartipants() {
-    setParticipants([]);
-  }
-
-  function addBecomingPublisherRequest(listenerName)
-  {
-    let listener = {"streamId": listenerName};
-    if (requestSpeakerList.find((l) => l.streamId === listenerName)) {
-      return;
-    }
-
-    requestSpeakerList.push(listener);
-    //we just need to change the reference of the array to trigger the re-render.
-    var newRequestSpeakerList = [...requestSpeakerList];
-    setRequestSpeakerList(newRequestSpeakerList);
-
-  }
-
-  function displayNoVideoAudioDeviceFoundWarning() {
-    enqueueSnackbar(
-      {
-        message: "No video or audio device found. You cannot become publisher.",
-        variant: "warning",
-        icon: <SvgIcon size={24} name={'report'} color="red" />
-      },
-      {
-        autoHideDuration: 5000,
-        anchorOrigin: {
-          vertical: "top",
-          horizontal: "right",
-        },
-      }
-    );
-  }
-
   function makeParticipantUndoPresenter(id) {
     setPresenterButtonStreamIdInProcess(id);
     setPresenterButtonDisabled(true);
@@ -1709,7 +1666,7 @@ function AntMedia() {
 
         webRTCAdaptor.getBroadcastObject(roomName);
       } else if (eventType === "PUBLISH_REQUEST" && isAdmin === true) {
-        addBecomingPublisherRequest(notificationEvent.streamId);
+        requestSyncAdministrativeFields();
       } else if (eventType === "GRANT_BECOME_PUBLISHER" && eventStreamId === publishStreamId)
       {
         webRTCAdaptor?.stop(roomName);
