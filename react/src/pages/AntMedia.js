@@ -402,6 +402,17 @@ function AntMedia() {
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
+  React.useEffect(() => {
+    if (presenterButtonStreamIdInProcess !== null) {
+      setTimeout(() => {
+        if (presenterButtonStreamIdInProcess !== null) {
+          setPresenterButtonStreamIdInProcess(null);
+          setPresenterButtonDisabled(false);
+        }
+      }, 3000);
+    }
+  }, [presenterButtonStreamIdInProcess]); // eslint-disable-line react-hooks/exhaustive-deps
+
   function makeParticipantPresenter(id) {
     setPresenterButtonStreamIdInProcess(id);
     setPresenterButtonDisabled(true);
