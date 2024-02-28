@@ -642,28 +642,7 @@ public class WebSocketApplicationHandler
 
 		boolean result = getAMSBroadcastManager().addSubTrack(listenerRoom, participantId);
 
-		boolean isSuccess = result;
-
-		DataStore datastore = getDataStore();
-
-		// check if the operation is successful
-		Broadcast subTrack = datastore.get(participantId);
-		if (subTrack != null) {
-			isSuccess = subTrack.getMainTrackStreamId().equals(mainRoom);
-		} else {
-			isSuccess = false;
-		}
-
-		if (isSuccess) {
-			Broadcast mainTrack = datastore.get(mainRoom);
-			if (mainTrack != null) {
-				isSuccess = mainTrack.getSubTrackStreamIds().contains(participantId);
-			} else {
-				isSuccess = false;
-			}
-		}
-
-		if (isSuccess) {
+		if (result) {
 			logger.info("Participant {} is made presenter in listener room {}", participantId, listenerRoom);
 			RestServiceBase.addIntoPresenterList(mainRoom, participantId, dataStore);
 			sendUpdatedMainRoomBroadcast(mainRoom);
@@ -671,7 +650,7 @@ public class WebSocketApplicationHandler
 			logger.error("Participant {} could not be made presenter in listener room {}", participantId, listenerRoom);
 		}
 
-		return isSuccess;
+		return result;
 	}
 
 	public boolean handleUndoPresenter(String participantId, String mainRoom, String listenerRoomName) {
