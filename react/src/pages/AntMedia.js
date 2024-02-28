@@ -2171,7 +2171,7 @@ function AntMedia() {
     if (isAdmin) {
       createListenerRoomIfNotExists();
     }
-  },[isWebSocketConnected, sendMessage]);
+  },[isWebSocketConnected]);
 
   React.useEffect(() => {
     if (!latestMessage) {
@@ -2471,7 +2471,8 @@ function AntMedia() {
               rejectSpeakerRequest,
               setRequestSpeakerList,
               makeListenerAgain,
-              roomName
+              roomName,
+              presenterButtonStreamIdInProcess
             }}
           >
             <UnauthrorizedDialog
