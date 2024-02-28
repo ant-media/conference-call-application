@@ -326,10 +326,8 @@ function AntMedia() {
   const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState(null);
 
   const [openRequestBecomeSpeakerDialog, setOpenRequestBecomeSpeakerDialog] = React.useState(false);
-  const [requestingSpeakerName] = React.useState("");
   const [requestSpeakerList, setRequestSpeakerList] = React.useState([]);
   const [isBroadcasting, setIsBroadcasting] = React.useState(false);
-
 
   const [reactions] = useState({
     'sparkling_heart': '💖',
@@ -399,6 +397,17 @@ function AntMedia() {
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [closeScreenShare, setCloseScreenShare] = React.useState(false);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (presenterButtonStreamIdInProcess !== null) {
+      setTimeout(() => {
+        if (presenterButtonStreamIdInProcess !== null) {
+          setPresenterButtonStreamIdInProcess(null);
+          setPresenterButtonDisabled(false);
+        }
+      }, 3000);
+    }
+  }, [presenterButtonStreamIdInProcess]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function makeParticipantPresenter(id) {
     setPresenterButtonStreamIdInProcess(id);
@@ -2459,7 +2468,8 @@ function AntMedia() {
               rejectSpeakerRequest,
               setRequestSpeakerList,
               makeListenerAgain,
-              roomName
+              roomName,
+              presenterButtonStreamIdInProcess
             }}
           >
             <UnauthrorizedDialog

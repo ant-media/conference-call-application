@@ -300,13 +300,12 @@ public class WebSocketApplicationHandler
 			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
 
 			boolean isSuccess = handleMakePresenter(participantId, roomName);
-			Result result = new Result(true);//TODO: change this to isSuccess after fixing the addSubTrack method return value
+			Result result = new Result(isSuccess);
 			result.setDataId(participantId);
 
 			JSONObject jsonObjectResponse = new JSONObject();
 			jsonObjectResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.MAKE_PRESENTER_RESPONSE);
 			jsonObjectResponse.put(WebSocketConstants.DEFINITION,  gson.toJson(result));
-
 
 			sendMessage(session, jsonObjectResponse.toJSONString());
 		}
@@ -502,13 +501,34 @@ public class WebSocketApplicationHandler
 	public boolean handleMakePresenter(String participantId, String roomName) {
 		boolean result = getAMSBroadcastManager().addSubTrack(roomName, participantId);
 
-		if (result) {
+		boolean isSuccess = result;
+
+		DataStore datastore = getDataStore();
+
+		// check if the operation is successful
+		Broadcast subTrack = datastore.get(participantId);
+		if (subTrack != null) {
+			isSuccess = subTrack.getMainTrackStreamId().equals(roomName);
+		} else {
+			isSuccess = false;
+		}
+
+		if (isSuccess) {
+			Broadcast mainTrack = datastore.get(roomName);
+			if (mainTrack != null) {
+				isSuccess = mainTrack.getSubTrackStreamIds().contains(participantId);
+			} else {
+				isSuccess = false;
+			}
+		}
+
+		if (isSuccess) {
 			logger.info("Participant {} is made presenter in room {}", participantId, roomName);
 		} else {
 			logger.error("Participant {} could not be made presenter in room {}", participantId, roomName);
 		}
 
-		return result;
+		return isSuccess;
 	}
 
 	public boolean handleUndoPresenter(String participantId, String listenerRoomName, String roomName) {
@@ -541,22 +561,6 @@ public class WebSocketApplicationHandler
 			logger.warn("Main room broadcast is not found for {}", mainRoomName);
 			return;
 		}
-
-		/*
-		String metaData = mainRoomBroadcast.getMetaData();
-		if (metaData == null) {
-			metaData = "{}";
-		}
-
-		JsonObject metaDataJsonObject = JsonParser.parseString(metaData)
-				.getAsJsonObject();
-		MainRoomConfiguration mainRoomConfiguration = gson.fromJson(metaDataJsonObject, MainRoomConfiguration.class);
-		if (mainRoomConfiguration != null) {
-			mainRoomConfiguration.addPublisherRequest(streamId);
-		}
-		dataStore.updateStreamMetaData(mainRoomName, gson.toJson(mainRoomConfiguration));
-
-		 */
 
 		getAMSBroadcastManager().sendDataChannelMessage(mainRoomName, "{\"eventType\":\"PUBLISH_REQUEST\",\"streamId\":\"" + streamId + "\"}");
 	}
