@@ -4,7 +4,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "@antmedia/webrtc_adaptor": "^2.8.3-SNAPSHOT-2024-Feb-13-10-23",
+    "@antmedia/webrtc_adaptor": "^2.8.3-SNAPSHOT-2024-Feb-26-07-14",
     "@charkour/react-reactions": "^0.11.0",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
