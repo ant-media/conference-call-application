@@ -10,8 +10,6 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.antmedia.rest.RestServiceBase;
 import org.apache.catalina.core.ApplicationContextFacade;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -239,7 +237,7 @@ public class WebSocketApplicationHandler
 			String roomName = (String) jsonObject.get(WebSocketApplicationConstants.ROOM_NAME);
 			String token =  (String) jsonObject.get(WebSocketConstants.TOKEN);
 
-			boolean hasAdminRights = checkAdminRights(token, streamId, roomName);
+			boolean hasAdminRights = hasAdminRights(token, streamId, roomName);
 
 			Result result = new Result(hasAdminRights);
 			sendResponse(session, WebSocketApplicationConstants.CHECK_IF_HAS_ADMIN_RIGHTS_RESPONSE, result);
@@ -307,7 +305,7 @@ public class WebSocketApplicationHandler
 			String token = (String)jsonObject.get(WebSocketConstants.TOKEN);
 
 			// Check for admin rights
-			if (!checkAdminRights(token, streamId, roomName)) {
+			if (!hasAdminRights(token, streamId, roomName)) {
 				sendResponse(session, WebSocketApplicationConstants.MAKE_PRESENTER_RESPONSE,
 						new Result(false, "You do not have admin rights in the room"));
 				return;
@@ -330,7 +328,7 @@ public class WebSocketApplicationHandler
 			String token = (String)jsonObject.get(WebSocketConstants.TOKEN);
 
 			// Check for admin rights and respond if check fails
-			if (!checkAdminRights(token, streamId, roomName)) {
+			if (!hasAdminRights(token, streamId, roomName)) {
 				sendResponse(session, WebSocketApplicationConstants.UNDO_PRESENTER_RESPONSE,
 						new Result(false, "You do not have admin rights in the room"));
 				return;
@@ -385,7 +383,7 @@ public class WebSocketApplicationHandler
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
 
 			// Check for admin rights
-			if (!checkAdminRights(token, streamId, mainRoomName)) {
+			if (!hasAdminRights(token, streamId, mainRoomName)) {
 				sendResponse(session, WebSocketApplicationConstants.GRANT_SPEAKER_REQUEST_RESPONSE,
 						new Result(false, "You do not have admin rights in the room"));
 				return;
@@ -410,7 +408,7 @@ public class WebSocketApplicationHandler
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
 
 			// Check for admin rights
-			if (!checkAdminRights(token, streamId, mainRoomName)) {
+			if (!hasAdminRights(token, streamId, mainRoomName)) {
 				sendResponse(session, WebSocketApplicationConstants.REJECT_SPEAKER_REQUEST_RESPONSE,
 						new Result(false, "You do not have admin rights in the room"));
 				return;
@@ -433,7 +431,7 @@ public class WebSocketApplicationHandler
 			String participantId = (String)jsonObject.get(WebSocketApplicationConstants.PARTICIPANT_ID_FIELD);
 
 			// Check for admin rights
-			if (!checkAdminRights(token, streamId, mainRoomName)) {
+			if (!hasAdminRights(token, streamId, mainRoomName)) {
 				sendResponse(session, WebSocketApplicationConstants.MAKE_GRANTED_SPEAKER_LISTENER_RESPONSE,
 						new Result(false, "You do not have admin rights in the room"));
 				return;
@@ -462,7 +460,7 @@ public class WebSocketApplicationHandler
 			String token = (String)jsonObject.get(WebSocketConstants.TOKEN);
 
 			// Check for admin rights
-			if (!checkAdminRights(token, streamId, roomName)) {
+			if (!hasAdminRights(token, streamId, roomName)) {
 				sendResponse(session, WebSocketApplicationConstants.MAKE_GRANTED_SPEAKER_LISTENER_RESPONSE,
 						new Result(false, "You do not have admin rights in the room"));
 				return;
@@ -749,7 +747,7 @@ public class WebSocketApplicationHandler
 		}
 	}
 
-	public boolean checkAdminRights(String token, String streamId, String roomName) {
+	public boolean hasAdminRights(String token, String streamId, String roomName) {
 		// Validate room name
 		if (roomName == null || roomName.isEmpty()) {
 			logger.error("Room name is not valid: {}", roomName);
