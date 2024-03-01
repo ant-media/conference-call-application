@@ -4,7 +4,6 @@ import { SvgIcon } from '../../SvgIcon';
 import { Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from 'notistack';
 import { ConferenceContext} from "../../../pages/AntMedia";
 
 export const roundStyle = {
@@ -35,7 +34,6 @@ function RequestPublishButton(props) {
     const { rounded, footer } = props;
     const conference = useContext(ConferenceContext);
     const { t } = useTranslation();
-    const { enqueueSnackbar } = useSnackbar();
 
     return (
         <>
