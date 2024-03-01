@@ -173,7 +173,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 <ListItemIcon>
                   <SvgIcon size={36} name={"raise-hand"} color={"white"} />
                 </ListItemIcon>
-                <ListItemText id={"more-options-participant-list-button"}>{t("Publisher Request List")}</ListItemText>
+                <ListItemText id={"publisher-request-list-button"}>{t("Publisher Request List")}</ListItemText>
               </MenuItem>
               : null}
 
@@ -184,7 +184,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 <ListItemIcon>
                   <SvgIcon size={36} name={"raise-hand"} color={"white"} />
                 </ListItemIcon>
-                <ListItemText id={"more-options-participant-list-button"}>{t("Request becoming publisher")}</ListItemText>
+                <ListItemText id={"request-to-publisher-button"}>{t("Request becoming publisher")}</ListItemText>
               </MenuItem>
               : null}
           </Menu>
