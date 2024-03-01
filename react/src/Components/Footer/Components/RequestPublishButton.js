@@ -4,7 +4,6 @@ import { SvgIcon } from '../../SvgIcon';
 import { Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from 'notistack';
 import { ConferenceContext} from "../../../pages/AntMedia";
 
 export const roundStyle = {
@@ -31,17 +30,15 @@ export const CustomizedBtn = styled(Button)(({ theme }) => ({
     }
 }));
 
-
 function RequestPublishButton(props) {
     const { rounded, footer } = props;
     const conference = useContext(ConferenceContext);
     const { t } = useTranslation();
-    const { enqueueSnackbar } = useSnackbar();
 
     return (
         <>
             <Tooltip title={t('Request becoming publisher')} placement="top">
-                <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e) => { conference.handlePublisherRequest() }}>
+                <CustomizedBtn id="request-to-publisher-button" className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e) => { conference.handlePublisherRequest() }}>
                     <SvgIcon size={32} name={'raise-hand'} color="#fff" />
                 </CustomizedBtn>
             </Tooltip>

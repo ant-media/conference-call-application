@@ -66,6 +66,7 @@ function ParticipantTab() {
   ) : null}
   {conference?.approvedSpeakerRequestList.includes(streamId) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ?(
     <PinBtn
+      id={"remove-speaker-"+streamId}
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => {conference?.makeListenerAgain(streamId)}}
     >

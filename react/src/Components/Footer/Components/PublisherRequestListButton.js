@@ -27,6 +27,7 @@ function PublisherRequestListButton({ footer, ...props }) {
     return (
         <Tooltip title={t('Publisher Request List')} placement="top">
             <CustomizedBtn
+                id="publisher-request-list-button"
                 onClick={() => {
                     conference?.handlePublisherRequestListOpen(!conference?.publisherRequestListDrawerOpen);
                 }}

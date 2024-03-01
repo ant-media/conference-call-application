@@ -37,6 +37,7 @@ function PublisherRequestTab(props) {
                 </Grid>
                 <Grid item>
                     <PinBtn
+                        id={"approve-publisher-request-"+videoId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                         onClick={() => {conference.approveBecomeSpeakerRequest(videoId); conference.setRequestSpeakerList(conference.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
                     >
@@ -44,6 +45,7 @@ function PublisherRequestTab(props) {
                     </PinBtn>
 
                     <PinBtn
+                        id={"deny-publisher-request-"+videoId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                         onClick={() => {conference.rejectSpeakerRequest(videoId); conference.setRequestSpeakerList(conference.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
                     >

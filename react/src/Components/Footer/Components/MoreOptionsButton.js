@@ -36,7 +36,7 @@ function MoreOptionsButton({ footer, ...props }) {
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
 
   // if you select camera then we are going to focus on camera button.
-  const [selectFocus, setSelectFocus] = React.useState(null);
+  const [selectFocus] = React.useState(null);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -173,7 +173,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 <ListItemIcon>
                   <SvgIcon size={36} name={"raise-hand"} color={"white"} />
                 </ListItemIcon>
-                <ListItemText id={"more-options-participant-list-button"}>{t("Publisher Request List")}</ListItemText>
+                <ListItemText id={"publisher-request-list-button"}>{t("Publisher Request List")}</ListItemText>
               </MenuItem>
               : null}
 
@@ -184,7 +184,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 <ListItemIcon>
                   <SvgIcon size={36} name={"raise-hand"} color={"white"} />
                 </ListItemIcon>
-                <ListItemText id={"more-options-participant-list-button"}>{t("Request becoming publisher")}</ListItemText>
+                <ListItemText id={"request-to-publisher-button"}>{t("Request becoming publisher")}</ListItemText>
               </MenuItem>
               : null}
           </Menu>
