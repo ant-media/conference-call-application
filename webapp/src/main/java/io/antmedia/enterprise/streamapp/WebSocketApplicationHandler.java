@@ -117,6 +117,16 @@ public class WebSocketApplicationHandler
 		}
 	}
 
+	// this method is added to set the context for unit tests
+	public void setContext(ConfigurableWebApplicationContext context) {
+		this.context = context;
+	}
+
+	// this method is added to set the context for unit tests
+	public void setAMSBroadcastManager(AMSBroadcastManager amsBroadcastManager) {
+		this.amsBroadcastManager = amsBroadcastManager;
+	}
+
 	private AMSBroadcastManager getAMSBroadcastManager() {
 		if (amsBroadcastManager == null && context != null) {
 			amsBroadcastManager = (AMSBroadcastManager) context.getBean("amsBroadcastManager");
@@ -130,7 +140,7 @@ public class WebSocketApplicationHandler
 		}
 	}
 	
-	private void setAppSettings() {
+	public void setAppSettings() {
 		if (context != null) {
 			appSettings = (AppSettings)context.getBean(AppSettings.BEAN_NAME);
 		}
@@ -204,6 +214,27 @@ public class WebSocketApplicationHandler
 			jwtTokenId = JWT.create().
 					withClaim("streamId", streamId).
 					withClaim("type", type).
+					withExpiresAt(expireDateType).
+					sign(algorithm);
+
+		} catch (Exception e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+		}
+
+		return jwtTokenId;
+	}
+
+	public static String generateJwtTokenWithIssuer(String jwtSecretKey, String streamId, long expireDateUnixTimeStampMs, String type, String issuerStreamId)
+	{
+		Date expireDateType = new Date(expireDateUnixTimeStampMs);
+		String jwtTokenId = null;
+		try {
+			Algorithm algorithm = Algorithm.HMAC256(jwtSecretKey);
+
+			jwtTokenId = JWT.create().
+					withClaim("streamId", streamId).
+					withClaim("type", type).
+					withIssuer(issuerStreamId).
 					withExpiresAt(expireDateType).
 					sign(algorithm);
 
@@ -788,7 +819,7 @@ public class WebSocketApplicationHandler
 		}
 
 		// Check if token is valid
-		if (JWTFilter.isJWTTokenValid(token, streamId)) {
+		if (JWTFilter.isJWTTokenValid(appSettings.getJwtStreamSecretKey(), token, streamId)) {
 			logger.info("Token is valid for streamId: {}", streamId);
 			logger.info("StreamId {} has admin rights in the roomName {}", streamId, roomName);
 			return true;
