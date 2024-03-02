@@ -227,6 +227,8 @@ class TestJoinLeave(unittest.TestCase):
 
     presenter1Exists = participants[2]["streamId"] in allParticipants
 
+    print("presenter1Exists: "+str(presenter1Exists)+" presenter2Exists: "+str(presenter2Exists)+" presenterPinned: "+str(presenterPinned))
+
     assert(presenter1Exists and presenter2Exists and presenterPinned)
 
     self.chrome.close_all()
