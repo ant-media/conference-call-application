@@ -837,66 +837,65 @@ function AntMedia() {
   };
 
 
-  function screenShareWebRtcAdaptorErrorCallback(error, message){
+  function screenShareWebRtcAdaptorErrorCallback(error, message) {
     console.log("error from screen share webrtc adaptor callback")
- //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
- var errorMessage = JSON.stringify(error);
- if (typeof message != "undefined") {
-   errorMessage = message;
- }
- if (error.indexOf("no_active_streams_in_room") !== -1) {
-   errorMessage = "No active stream in the room.";
- }
- errorMessage = JSON.stringify(error);
- if (error.indexOf("NotFoundError") !== -1) {
-   errorMessage =
-     "Camera or Mic are not found or not allowed in your device.";
-   alert(errorMessage);
- } else if (
-   error.indexOf("NotReadableError") !== -1 ||
-   error.indexOf("TrackStartError") !== -1
- ) {
-   errorMessage =
-     "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
-   displayWarning(errorMessage);
+    //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
+    var errorMessage = JSON.stringify(error);
+    if (typeof message != "undefined") {
+      errorMessage = message;
+    }
+    if (error.indexOf("no_active_streams_in_room") !== -1) {
+      errorMessage = "No active stream in the room.";
+    }
+    errorMessage = JSON.stringify(error);
+    if (error.indexOf("NotFoundError") !== -1) {
+      errorMessage =
+        "Camera or Mic are not found or not allowed in your device.";
+      alert(errorMessage);
+    } else if (
+      error.indexOf("NotReadableError") !== -1 ||
+      error.indexOf("TrackStartError") !== -1
+    ) {
+      errorMessage =
+        "Camera or Mic is being used by some other process that does not not allow these devices to be read.";
+      displayWarning(errorMessage);
 
- } else if (
-   error.indexOf("OverconstrainedError") !== -1 ||
-   error.indexOf("ConstraintNotSatisfiedError") !== -1
- ) {
-   errorMessage =
-     "There is no device found that fits your video and audio constraints. You may change video and audio constraints.";
-   alert(errorMessage);
- } else if (
-   error.indexOf("NotAllowedError") !== -1 ||
-   error.indexOf("PermissionDeniedError") !== -1
- ) {
-   errorMessage = "You are not allowed to access camera and mic.";
- } else if (error.indexOf("TypeError") !== -1) {
-   errorMessage = "Video/Audio is required.";
-   displayWarning(errorMessage);
-   webRTCAdaptor.mediaManager.getDevices();
- } else if (error.indexOf("UnsecureContext") !== -1) {
-   errorMessage =
-     "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
- } else if (error.indexOf("WebSocketNotSupported") !== -1) {
-   errorMessage = "Fatal Error: WebSocket not supported in this browser";
- } else if (error.indexOf("no_stream_exist") !== -1) {
-   //TODO: removeRemoteVideo(error.streamId);
- } else if (error.indexOf("data_channel_error") !== -1) {
-   errorMessage = "There was a error during data channel communication";
- } else if (error.indexOf("ScreenSharePermissionDenied") !== -1) {
-   errorMessage = "You are not allowed to access screen share";
- } else if (error.indexOf("WebSocketNotConnected") !== -1) {
- } else if (error.indexOf("already_publishing") !== -1) {
+    } else if (
+      error.indexOf("OverconstrainedError") !== -1 ||
+      error.indexOf("ConstraintNotSatisfiedError") !== -1
+    ) {
+      errorMessage =
+        "There is no device found that fits your video and audio constraints. You may change video and audio constraints.";
+      alert(errorMessage);
+    } else if (
+      error.indexOf("NotAllowedError") !== -1 ||
+      error.indexOf("PermissionDeniedError") !== -1
+    ) {
+      errorMessage = "You are not allowed to access camera and mic.";
+    } else if (error.indexOf("TypeError") !== -1) {
+      errorMessage = "Video/Audio is required.";
+      displayWarning(errorMessage);
+      webRTCAdaptor.mediaManager.getDevices();
+    } else if (error.indexOf("UnsecureContext") !== -1) {
+      errorMessage =
+        "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
+    } else if (error.indexOf("WebSocketNotSupported") !== -1) {
+      errorMessage = "Fatal Error: WebSocket not supported in this browser";
+    } else if (error.indexOf("no_stream_exist") !== -1) {
+      //TODO: removeRemoteVideo(error.streamId);
+    } else if (error.indexOf("data_channel_error") !== -1) {
+      errorMessage = "There was a error during data channel communication";
+    } else if (error.indexOf("ScreenSharePermissionDenied") !== -1) {
+      errorMessage = "You are not allowed to access screen share";
+    } else if (error.indexOf("WebSocketNotConnected") !== -1) {
+    } else if (error.indexOf("already_publishing") !== -1) {
 
- } else if(error.indexOf("unauthorized_access") !== -1) {
-   handleLeaveFromRoom()
+    } else if (error.indexOf("unauthorized_access") !== -1) {
+      handleLeaveFromRoom()
 
-   setUnAuthorizedDialogOpen(true)
- }
+      setUnAuthorizedDialogOpen(true)
+    }
 
- console.log("***** " + error)
   }
 
 
