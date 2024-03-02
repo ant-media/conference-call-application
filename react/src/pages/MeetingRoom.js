@@ -112,6 +112,10 @@ const MeetingRoom = React.memo((props) => {
             />)
           }
         </>
+        <div id="captionContainer" style={{ position: 'absolute', backgroundColor: 'transparent', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', border: '1px solid #ccc', overflow: 'hidden', resize: 'both', zIndex: 1000 }}>
+          <iframe title="caption" id="captionIframe" src="./subtitle.html" frameborder="0" allowfullscreen style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}></iframe>
+        </div>
+
       </div>
 
       {conference.showEmojis && (
@@ -126,6 +130,7 @@ const MeetingRoom = React.memo((props) => {
         }}>
           <ReactionBarSelector reactions={reactionList} iconSize={32}
                                style={{backgroundColor: theme.palette.themeColor[70]}} onSelect={sendEmoji}/>
+
         </div>)
       }
       <Footer {...props} />

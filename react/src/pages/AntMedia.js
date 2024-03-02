@@ -682,6 +682,11 @@ function AntMedia() {
     } else if (info === "screen_share_started") {
       screenShareOnNotification();
     } else if (info === "data_received") {
+      let message = JSON.parse(obj.data)
+      if(message["eventType"] === "caption"){
+        var iframe = document.getElementById("captionIframe")
+        iframe.contentWindow.postMessage(message);
+      }
       try {
         handleNotificationEvent(obj);
       } catch (e) {
