@@ -213,7 +213,7 @@ var reconnecting = false;
 var publishReconnected;
 var playReconnected;
 
-function AntMedia() {
+function AntMedia(props) {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
@@ -349,7 +349,7 @@ function AntMedia() {
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
 
 
-  const [initialized, setInitialized] = React.useState(false);
+  const [initialized, setInitialized] = React.useState(props.isTest ? true : false);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
@@ -2092,6 +2092,7 @@ function AntMedia() {
               setAndEnableVirtualBackgroundImage
             }}
           >
+            {props.children}
             <UnauthrorizedDialog
               onClose={handleUnauthorizedDialogExitClicked}
               open={unAuthorizedDialogOpen}
