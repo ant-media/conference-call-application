@@ -47,7 +47,6 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
   }),
 }));
 
-
 const MockChild = () => {
   const conference = React.useContext(ConferenceContext);
   currentConference = conference;
@@ -136,6 +135,53 @@ describe('AntMedia Component', () => {
       console.log(currentConference);
 
       expect(currentConference.isScreenShared).toBe(true);
+    });
+
+    it('share screen adaptor callbacks', async () => {
+
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+      //console.log(container);
+
+      
+      expect(currentConference.isScreenShared).toBe(false);
+      
+      await act(async () => {
+      currentConference.handleStartScreenShare();
+      });
+
+      await waitFor(() => {
+        expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+      });
+
+      act(() => {
+          webRTCAdaptorScreenConstructor.callback("initialized");
+          var obj = {videoRoundTripTime: 1000, 
+            audioRoundTripTime: 0, 
+            videoJitter: 0, 
+            audioJitter: 0, 
+            currentOutgoingBitrate: 0, 
+            videoPacketsLost: 0, 
+            audioPacketsLost: 0, 
+            totalVideoPacketsSent: 0, 
+            totalAudioPacketsSent: 0,
+            availableOutgoingBitrate: 0};
+          webRTCAdaptorScreenConstructor.callback("updated_stats", obj);
+
+          expect(consoleSpy).toHaveBeenCalledWith("displayPoorNetworkConnectionWarning");
+
+
+          webRTCAdaptorScreenConstructor.callbackError("error", "message");
+        });
+
+        expect(consoleSpy).toHaveBeenCalledWith("error:error message:message");
+
+        // Restore the mock
+        consoleSpy.mockRestore();
     });
 
   
