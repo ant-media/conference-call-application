@@ -217,12 +217,12 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_participants()) == 4)
 
-    presenter2Exists = participants[1]["streamId"] + "_presentation" in allParticipants
     
     conference = self.get_conference()
     allParticipants = conference["allParticipants"]
     participants = conference["participants"]
 
+    presenter2Exists = participants[1]["streamId"] + "_presentation" in allParticipants
     presenterPinned = participants[2]["id"] == conference["pinnedVideoId"]
 
     presenter1Exists = participants[2]["streamId"] in allParticipants
