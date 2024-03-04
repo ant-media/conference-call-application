@@ -43,6 +43,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       stopPlaying: jest.fn(),
       getLocalStream: jest.fn(),
       applyConstraints: jest.fn(),
+      sendData: jest.fn().mockImplementation((publishStreamId, data) => console.log('send data called with ')),
     };
   }),
 }));
@@ -51,7 +52,7 @@ const MockChild = () => {
   const conference = React.useContext(ConferenceContext);
   currentConference = conference;
 
-  console.log(conference);
+  //console.log(conference);
 
   return (
     <div> My Mock </div>
@@ -68,12 +69,6 @@ const mediaDevicesMock = {
 };
 
 global.navigator.mediaDevices = mediaDevicesMock; // here
-
-
-//jest.mock('pages/MeetingRoom', () => ({ value }) => <div>{value}</div>);
-//jest.mock('Components/MessageDrawer', () => ({ value }) => <div>{value}</div>);
-//jest.mock('Components/ParticipantListDrawer', () => ({ value }) => <div>{value}</div>);
-//jest.mock('Components/EffectsDrawer', () => ({ value }) => <div>{value}</div>);
 
 describe('AntMedia Component', () => {
   
@@ -184,5 +179,53 @@ describe('AntMedia Component', () => {
         consoleSpy.mockRestore();
     });
 
+
+    it('handle video track assignment', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+   
+      currentConference.allParticipants["p1"] = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
+
+      var obj = {};
+      var notificationEvent = {
+        eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+        streamId: "stream1",
+        payload: [
+          {videoLabel:"videoTrack1", trackId:"tracka1"},
+          {videoLabel:"videoTrack2", trackId:"tracka2"},
+        ] 
+      };
+      var json = JSON.stringify(notificationEvent);
+
+      obj.data = json;
+
+      
+      
+      
+      console.log("*********************************");
+      const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("data_received", obj);
+      });
+
+
+      await waitFor(() => {
+        expect(currentConference.screenSharedVideoId).toBe("p1");
+      });
+
+      var event = {"eventType": "PIN_USER", "streamId": "p1"};
+      expect(consoleSpy).toHaveBeenCalledWith("send notification event", event);
+      
+
+      consoleSpy.mockRestore();
+      
+    });
   
 });

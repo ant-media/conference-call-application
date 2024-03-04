@@ -1270,7 +1270,7 @@ function AntMedia(props) {
         }
 
         if (videoLab !== "localVideo") {
-        pinVideo(videoLab, videoLab);
+           pinVideo(videoLab, videoLab);
         }
         setScreenSharedVideoId(eventStreamId);
         webRTCAdaptor.getBroadcastObject(eventStreamId);
@@ -1581,7 +1581,7 @@ function AntMedia(props) {
         track: obj.track,
         isCameraOn: true,
         streamId: obj.streamId,
-        name: " "
+        name: ""
       };
       //append new video track, track id should be unique because of video track limitation
       let temp = participants;
