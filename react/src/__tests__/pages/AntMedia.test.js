@@ -205,10 +205,6 @@ describe('AntMedia Component', () => {
 
       obj.data = json;
 
-      
-      
-      
-      console.log("*********************************");
       const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
 
       await act(async () => {
@@ -226,6 +222,37 @@ describe('AntMedia Component', () => {
 
       consoleSpy.mockRestore();
       
+    });
+
+    it('handle sharing on', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      var testStreamId = "stream1";
+
+      currentConference.participants.push({streamId: testStreamId, videoLabel: "test1"});
+      var obj = {};
+      var notificationEvent = {
+        eventType: "SCREEN_SHARED_ON",
+        streamId: testStreamId,
+      };
+      var json = JSON.stringify(notificationEvent);
+
+      obj.data = json;
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("data_received", obj);
+      });
+
+      await waitFor(() => {
+        expect(currentConference.pinnedVideoId).toBe("test1");
+      });
     });
   
 });
