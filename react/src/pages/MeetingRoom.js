@@ -9,6 +9,7 @@ import {ReactionBarSelector} from "@charkour/react-reactions";
 import MuteParticipantDialog from "../Components/MuteParticipantDialog";
 import {useTheme} from "@mui/material/styles";
 import {t} from "i18next";
+import {getWebSocketURLAttribute} from "../utils";
 
 
 function debounce(fn, ms) {
@@ -116,7 +117,7 @@ const MeetingRoom = React.memo((props) => {
 
       {conference.showEmojis && (
         <div id="meeting-reactions" style={{
-          position: "fixed",
+          position: getWebSocketURLAttribute() ? "absolute" : "fixed",
           bottom: 80,
           display: "flex",
           alignItems: "center",
