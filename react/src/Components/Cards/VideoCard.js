@@ -116,10 +116,7 @@ function VideoCard(props) {
     return (isJsonString(metaData)) ? JSON.parse(metaData).isMicMuted : true;
   }
 
-  // if I am sharing my screen, then don't use avatar (even if I turned off my cam)
-  if (conference.isScreenShared === true && isLocal) {
-    useAvatar = false;
-  }
+
   // if someone shares his screen, then don't use avatar for him (even if he turned off his cam)
   if (conference.screenSharedVideoId === props?.id) {
     useAvatar = false;
@@ -133,7 +130,7 @@ function VideoCard(props) {
 
   const isScreenSharedVideo = (conference?.screenSharedVideoId === props?.id) || (conference?.isScreenShared === true && isLocal);
 
-  const mirrorView = isLocal && !conference?.isScreenShared;
+  const mirrorView = isLocal;
   //const isScreenSharing =
   //  conference?.isScreenShared ||
   //  conference?.screenSharedVideoId === props?.id;
