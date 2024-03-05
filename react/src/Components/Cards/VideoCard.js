@@ -190,7 +190,9 @@ function VideoCard(props) {
                             placement="top"
                         >
                             <Fab
-                                onClick={() => conference.pinVideo(props.id, props.videoLabel)}
+                                onClick={() => {
+                                  conference.pinVideo(props.id !== "localVideo" ? props.streamId : "localVideo", props.videoLabel);
+                                }}
                                 color="primary"
                                 aria-label="add"
                                 size="small"
@@ -349,7 +351,7 @@ function VideoCard(props) {
               placement="top"
             >
               <Fab
-                onClick={() => conference.pinVideo(props.id, props.videoLabel)}
+                onClick={() => {conference.pinVideo(props.id !== "localVideo" ? props.streamId : "localVideo", props.videoLabel);}}
                 color="primary"
                 aria-label="add"
                 size="small"

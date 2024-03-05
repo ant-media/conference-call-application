@@ -41,7 +41,7 @@ function getMediaConstraints(videoSendResolution, frameRate) {
         video: {
           width: {max: window.screen.width}, height: {max: window.screen.height}, frameRate: {ideal: frameRate}
         },
-        audio:true, 
+        audio:true,
       };
       break;
     case "qvgaConstraints":
@@ -249,6 +249,9 @@ function AntMedia(props) {
   // pinned screen this could be by you or by shared screen.
   const [pinnedVideoId, setPinnedVideoId] = useState();
 
+  // pinned screen this could be by you or by shared screen.
+  const [pinnedVideoStreamId, setPinnedVideoStreamId] = useState();
+
   //If a user unpins screen share participant this needs to be set thus when video track assignment message comes its not re-pinned.
   const [unPinnedStreamId, setUnPinnedStreamId] = useState();
 
@@ -280,6 +283,7 @@ function AntMedia(props) {
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [presenters, setPresenters] = React.useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
+  const [screenSharingStatusChecked, setScreenSharingStatusChecked] = React.useState(true);
 
   const [reactions] = useState({
     'sparkling_heart': '💖',
@@ -626,7 +630,7 @@ function AntMedia(props) {
                 callback: screenShareWebRtcAdaptorInfoCallback,
                 callbackError: screenShareWebRtcAdaptorErrorCallback
               })
-              
+
             }).catch(error => {
               console.log(error)
            })
@@ -634,7 +638,7 @@ function AntMedia(props) {
   }
 
   function startScreenSharing(){
-    
+
     var token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
 
     if (token === undefined) {
@@ -653,7 +657,7 @@ function AntMedia(props) {
     screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
      subscriberCode, screenShareStreamId.current, roomName, JSON.stringify(metaData))
 
-    
+
 
   }
 
@@ -756,7 +760,7 @@ function AntMedia(props) {
 
       }
     }
-  };
+  }
 
   function checkConnectionQuality(obj) {
     let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
@@ -776,12 +780,17 @@ function AntMedia(props) {
       }
   }
 
-
   function screenShareWebRtcAdaptorInfoCallback(info, obj) {
     if (info === "initialized") {
       startScreenSharing();
     } else if (info === "publish_started") {
       setIsScreenShared(true);
+      //webRTCAdaptor.assignVideoTrack("videoTrack0", screenShareStreamId.current, true);
+      pinVideo(screenShareStreamId.current);
+      handleSendNotificationEvent(
+        "SCREEN_SHARED_ON",
+        screenShareStreamId.current
+      );
     } else if (info === "updated_stats") {
       checkConnectionQuality(obj);
     } else if (info === "ice_connection_state_changed") {
@@ -891,8 +900,8 @@ function AntMedia(props) {
     webRTCAdaptor.assignVideoTrack(videoTrackId, streamId, true);
   }
 
-  function pinVideo(id, videoLabelProp = "") {
-    if (id === "localVideo") {
+  function pinVideo(streamId, videoLabelProp = "") {
+    if (streamId === "localVideo") {
       videoLabelProp = "localVideo";
     }
 
@@ -901,31 +910,33 @@ function AntMedia(props) {
 
     if (videoLabel === undefined || videoLabel === "") {
       // if videoLabel is missing try to find it from participants.
-      videoLabel = participants.find((p) => id === p.id)?.videoLabel;
+      videoLabel = participants.find((p) => streamId === p.streamId)?.videoLabel;
     }
 
-
-
-    
-    if (videoLabel === undefined || videoLabel === "") {
-      // if videoLabel is still missing get the firs one if it exist, this may happen when one join while someone is sharing screen
-      videoLabel = participants[1]?.videoLabel;
-    }
-
-    var streamId = participants.find((p) => id === p.id)?.streamId;
     // if we already pin the targeted user then we are going to remove it from pinned video.
-    if (pinnedVideoId === id) {
+    if (pinnedVideoStreamId === streamId) {
       setPinnedVideoId(undefined);
+      setPinnedVideoStreamId(undefined);
       setUnPinnedStreamId(streamId)
-      handleNotifyUnpinUser(id);
-      webRTCAdaptor.assignVideoTrack(videoLabel, streamId, false);
+      handleNotifyUnpinUser(streamId !== "localVideo" ? streamId : publishStreamId);
+      //if (streamId !== "localVideo") {
+        //webRTCAdaptor.assignVideoTrack(videoLabel, streamId, false);
+      //}
     }
-      // if there is no pinned video we are gonna pin the targeted user.
+    // if there is no pinned video we are gonna pin the targeted user.
     // and we need to inform pinned user.
     else {
+
+      if (videoLabel === undefined || videoLabel === "" && streamId !== undefined) {
+        debugger;
+        // if videoLabel is still missing get the firs one if it exist, this may happen when one join while someone is sharing screen
+        videoLabel = participants[1]?.videoLabel;
+        webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
+      }
+
+      setPinnedVideoStreamId(streamId);
       setPinnedVideoId(videoLabel);
-      handleNotifyPinUser(id);
-      webRTCAdaptor.assignVideoTrack(videoLabel, streamId, true);
+      handleNotifyPinUser(streamId !== "localVideo" ? streamId : publishStreamId);
     }
   }
 
@@ -1053,8 +1064,9 @@ function AntMedia(props) {
     setIsScreenShared(false);
     screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current)
 
-    if (pinnedVideoId === "localVideo" || pinnedVideoId === screenShareStreamId.current) {
+    if (pinnedVideoId === "localVideo" || pinnedVideoStreamId === screenShareStreamId.current) {
       setPinnedVideoId(undefined);
+      setPinnedVideoStreamId(undefined);
     }
   }
 
@@ -1272,20 +1284,16 @@ function AntMedia(props) {
         console.log(eventStreamId)
         let videoLab = participants.find((p) => p.streamId === eventStreamId)?.videoLabel;
 
-        if (videoLab === undefined) {
-          //no video player assigned to that participant, assign first player to screen sharer
-          videoLab = participants[1].id;
-          assignVideoToStream(videoLab, eventStreamId);
+        if (videoLab !== "localVideo") {
+           //pinVideo(eventStreamId);
+          // TODO: check if this is needed!!!
         }
 
-        if (videoLab !== "localVideo") {
-           pinVideo(videoLab, videoLab);
-        }
-        setScreenSharedVideoId(eventStreamId);
-        webRTCAdaptor.getBroadcastObject(eventStreamId);
+        checkScreenSharingStatus();
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(undefined);
+        setPinnedVideoStreamId(undefined);
         webRTCAdaptor.getBroadcastObject(eventStreamId);
       } else if (eventType === "REACTIONS" && notificationEvent.senderStreamId !== publishStreamId) {
         showReactions(notificationEvent.senderStreamId, notificationEvent.reaction);
@@ -1312,14 +1320,14 @@ function AntMedia(props) {
         let videoTrackAssignments = notificationEvent.payload;
 
         let temp = participants;
-        
+
         //remove not available videotracks if exist
         temp = temp.filter((p) => {
           let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
           return p.isMine || assignment !== undefined;
         });
-        
-      
+
+
         //add and/or update participants according to current assignments
         videoTrackAssignments.forEach((vta) => {
           temp.forEach((p) => {
@@ -1337,7 +1345,10 @@ function AntMedia(props) {
         });
         setParticipants(temp);
 
-        checkScreenSharingStatus()
+        if (allParticipants != null && Object.keys(allParticipants).length > 1 && screenSharingStatusChecked) {
+          setScreenSharingStatusChecked(false);
+          checkScreenSharingStatus();
+        }
 
         setParticipantUpdated(!participantUpdated);
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
@@ -1373,24 +1384,24 @@ function AntMedia(props) {
 
           let userStatusMetadata = JSON.parse(broadcastObject.metaData);
             if(userStatusMetadata.isScreenShared){
-                
+
             setScreenSharedVideoId(broadcastObject.streamId);
-                            
+
               if(pinnedVideoId === undefined && broadcastObject.streamId !== unPinnedStreamId){
                 let videoLab = participants.find((p) => p.streamId === broadcastObject.streamId)
                 ?.videoLabel
                 ? participants.find((p) => p.streamId === broadcastObject.streamId).videoLabel
-                : ""; 
-                pinVideo(broadcastObject.streamId, videoLab); 
+                : "";
+                pinVideo(broadcastObject.streamId, videoLab);
                 setParticipantUpdated(!participantUpdated);
 
-              }  
+              }
 
               return
-              
+
             }
         }
-      
+
         })
   }
 
@@ -1417,7 +1428,7 @@ function AntMedia(props) {
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
     let metadata = getUserStatusMetadata(micMuted, cameraOn, false);
-      
+
     webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
   }
 
@@ -1986,7 +1997,8 @@ function AntMedia(props) {
               setPresenterButtonDisabled,
               effectsDrawerOpen,
               handleEffectsOpen,
-              setAndEnableVirtualBackgroundImage
+              setAndEnableVirtualBackgroundImage,
+              pinnedVideoStreamId
             }}
           >
             {props.children}

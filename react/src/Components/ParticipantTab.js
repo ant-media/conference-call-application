@@ -73,6 +73,9 @@ function ParticipantTab(props) {
     );
   }
   const getParticipantItem = (streamId, name, assignedVideoCardId) => {
+    if (streamId === "localVideo") {
+      assignedVideoCardId = "localVideo";
+    }
     return (
       <Grid
         key={streamId}
@@ -89,7 +92,7 @@ function ParticipantTab(props) {
           {conference.pinnedVideoId === assignedVideoCardId || conference.pinnedVideoId === streamId ? (
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => conference.pinVideo(assignedVideoCardId)}
+              onClick={() => {conference.pinVideo(streamId);}}
             >
               <SvgIcon size={28} name="unpin" color="#fff" />
             </PinBtn>
@@ -97,16 +100,7 @@ function ParticipantTab(props) {
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
               onClick={() => {
-                if(assignedVideoCardId === undefined) {
-                  //if videoTrackId is undefined, then it means that we try to pin someone who has no video player on the screen
-                  //then we will assign the 1st player in the screen to that user
-
-                  conference.assignVideoToStream(conference.participants[1].id, streamId);
-                  //conference.pinVideo(conference.participants[1].id);
-                }
-                else {
-                  conference.pinVideo(assignedVideoCardId);
-                }
+                conference.pinVideo(streamId);
               }}
             >
               <SvgIcon size={28} name="pin" color="#fff" />

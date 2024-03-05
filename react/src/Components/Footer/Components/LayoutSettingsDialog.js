@@ -90,7 +90,7 @@ export function LayoutSettingsDialog(props) {
 
     if (mode === "tiled") {
       //unpin the pinned video
-      conference.pinVideo(conference.pinnedVideoId);
+      conference.pinVideo(conference.pinnedVideoStreamId);
     } else if (mode === "sidebar") {
       const participants = document.querySelectorAll(
         ".single-video-container.not-pinned video"
@@ -99,7 +99,7 @@ export function LayoutSettingsDialog(props) {
         participants.length > 1 ? participants[1] : participants[0];
 
       //pin the first participant
-      conference.pinVideo(firstParticipant?.id ? firstParticipant.id : "localVideo");
+      conference.pinVideo(firstParticipant?.id ? firstParticipant.streamId : "localVideo");
     }
   };
   const radioLabel = (label, icon) => {

@@ -38,7 +38,7 @@ function LayoutPinned (props) {
               pinned
               onHandlePin={() => {
                 conference.pinVideo(
-                  pinnedParticipant.id,
+                  pinnedParticipant.streamId,
                   pinnedParticipant.videoLabel
                 );
               }}
