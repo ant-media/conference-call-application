@@ -6,6 +6,7 @@ import { Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ConferenceContext } from 'pages/AntMedia';
 
+
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   '&.footer-icon-button':{
     height: '100%',
@@ -20,7 +21,7 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-function ParticipantListButton({ footer, ...props }) {
+function ParticipantListButton({ footer }) {
     const conference = React.useContext(ConferenceContext);
     const {t} = useTranslation();
 

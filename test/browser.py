@@ -18,7 +18,7 @@ class Browser:
   def init(self, is_headless):
     browser_options = Options()
     browser_options.add_experimental_option("detach", True)
-    browser_options.add_argument("--use-fake-ui-for-media-stream") 
+    browser_options.add_argument("--use-fake-ui-for-media-stream")
     browser_options.add_argument("--use-fake-device-for-media-stream")
     browser_options.add_argument('--log-level=3')
     browser_options.add_argument('--no-sandbox')
@@ -28,10 +28,10 @@ class Browser:
     browser_options.add_argument('--disable-setuid-sandbox')
     if is_headless:
       browser_options.add_argument("--headless")
-    
+
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
-    #service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
+    #service = Service(executable_path='C:/WebDriver/chromedriver.exe')
     service = Service(executable_path='/Users/mustafa/chromedriver-mac-arm64/chromedriver')
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
@@ -51,7 +51,7 @@ class Browser:
       return self.driver.execute_script(script)
     except StaleElementReferenceException as e:
       return None
-    
+
 
   def get_element_by_id(self, id):
     timeout = 15
@@ -63,7 +63,7 @@ class Browser:
 
     element = self.driver.find_element(By.ID, id)
     return element
-  
+
   def is_element_exist_by_id(self, id):
     try:
       element = self.driver.find_elements(By.ID, id)
@@ -71,7 +71,15 @@ class Browser:
     except NoSuchElementException:
       print("element not exist")
       return False
-  
+
+  def is_element_exist_by_class_name(self, id):
+    try:
+      element = self.driver.find_elements(By.CLASS_NAME, id)
+      return len(element) != 0
+    except NoSuchElementException:
+      print("element not exist")
+      return False
+
   def get_elements_of_an_element_by_class_name(self, element, class_name):
     timeout = 15
     try:
@@ -82,14 +90,14 @@ class Browser:
 
     elemnets = element.find_elements(By.CLASS_NAME, class_name)
     return elemnets
-  
+
   def is_element_of_element_exist_by_class_name(self, element, class_name):
     try:
       subs = element.find_elements(By.CLASS_NAME, class_name)
       return len(subs) != 0
     except NoSuchElementException:
       return False
-      
+
   def mouse_click_on(self, element):
     ActionChains(self.driver).move_to_element(element).click().perform()
 
@@ -104,7 +112,7 @@ class Browser:
     move.click_and_hold(element).move_by_offset(value, 0).release().perform()
 
   def get_wait(self):
-    return WebDriverWait(self.driver, 15)
+    return WebDriverWait(self.driver, 25)
 
   def get_wait(self, timeout):
     return WebDriverWait(self.driver, timeout)

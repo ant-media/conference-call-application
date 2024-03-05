@@ -20,7 +20,7 @@ function EffectsTab() {
 
   React.useEffect(() => {
     updateCustomVirtualBackgroundImages().then(() => {
-      console.log("Custom virtual background images initialized");
+      //console.log("Custom virtual background images initialized");
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
