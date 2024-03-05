@@ -534,6 +534,11 @@ function AntMedia(props) {
         delete temp[trackId];
       }
     });
+    // Check and drop pinned video if the participant who shared the screen leave
+    if (screenShareStreamId !== null && !participantIds.includes(screenShareStreamId.current) && pinnedVideoId === screenShareStreamId.current) {
+      setScreenSharedVideoId(null);
+      setPinnedVideoId(undefined);
+    }
     setAllParticipants(temp);
     setParticipantUpdated(!participantUpdated);
 
@@ -605,6 +610,10 @@ function AntMedia(props) {
 
     navigator.mediaDevices.getDisplayMedia(getMediaConstraints("screenConstraints", 20))
             .then((stream) => {
+              stream.getVideoTracks()[0].onended = function (event) {
+                console.log("screen sharing ended");
+                handleStopScreenShare();
+              }
               screenShareWebRtcAdaptor.current =  new WebRTCAdaptor({
                 websocket_url: websocketURL,
                 localStream:stream,
@@ -778,7 +787,7 @@ function AntMedia(props) {
     } else if (info === "ice_connection_state_changed") {
       //FIXME: handle reconnection
     }
-  };
+  }
 
 
   function screenShareWebRtcAdaptorErrorCallback(error, message) {
@@ -860,7 +869,7 @@ function AntMedia(props) {
 
     console.log("***** " + error)
 
-  };
+  }
 
 
 
@@ -1044,7 +1053,7 @@ function AntMedia(props) {
     setIsScreenShared(false);
     screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current)
 
-    if (pinnedVideoId === "localVideo") {
+    if (pinnedVideoId === "localVideo" || pinnedVideoId === screenShareStreamId.current) {
       setPinnedVideoId(undefined);
     }
   }
