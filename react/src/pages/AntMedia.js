@@ -740,6 +740,12 @@ function AntMedia(props) {
         delete temp[trackId];
       }
     });
+
+    if (screenShareStreamId !== null && !participantIds.includes(screenShareStreamId.current) && pinnedVideoId === screenShareStreamId.current) {
+      setScreenSharedVideoId(null);
+      setPinnedVideoId(undefined);
+    }
+
     setAllParticipants(temp);
     setParticipantUpdated(!participantUpdated);
 
@@ -826,6 +832,10 @@ function AntMedia(props) {
 
     navigator.mediaDevices.getDisplayMedia(getMediaConstraints("screenConstraints", 20))
             .then((stream) => {
+              stream.getVideoTracks()[0].onended = function (event) {
+                console.log("screen sharing ended");
+                handleScreenshareNotFromPlatform();
+              }
               screenShareWebRtcAdaptor.current =  new WebRTCAdaptor({
                 websocket_url: websocketURL,
                 localStream:stream,
@@ -1004,7 +1014,7 @@ function AntMedia(props) {
     } else if (info === "ice_connection_state_changed") {
       //FIXME: handle reconnection
     }
-  };
+  }
 
 
   function screenShareWebRtcAdaptorErrorCallback(error, message) {
@@ -1305,11 +1315,46 @@ function AntMedia(props) {
     displayMessage(message, "red");
   }
 
+  function handleScreenshareNotFromPlatform() {
+    if (handleScreenshareNotFromPlatform != null) {
+        var jsCmd = {
+          command: "undoPresenter",
+          streamId: screenShareStreamId.current,
+          participantId: screenShareStreamId.current,
+          listenerRoomName: roomName+listenerRoomPostfix,
+          roomName: roomName,
+          websocketURL: websocketURL,
+          token: token
+        };
+
+        sendMessage(JSON.stringify(jsCmd));
+
+      setIsScreenShared(false);
+      screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current)
+
+      if (pinnedVideoId === "localVideo" || pinnedVideoId === screenShareStreamId.current) {
+        setPinnedVideoId(undefined);
+      }
+    }
+  }
+
   function handleStopScreenShare() {
+      var jsCmd = {
+        command: "undoPresenter",
+        streamId: screenShareStreamId.current,
+        participantId: screenShareStreamId.current,
+        listenerRoomName: roomName+listenerRoomPostfix,
+        roomName: roomName,
+        websocketURL: websocketURL,
+        token: token
+      };
+
+      sendMessage(JSON.stringify(jsCmd));
+
     setIsScreenShared(false);
     screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current)
 
-    if (pinnedVideoId === "localVideo") {
+    if (pinnedVideoId === "localVideo" || pinnedVideoId === screenShareStreamId.current) {
       setPinnedVideoId(undefined);
     }
   }
