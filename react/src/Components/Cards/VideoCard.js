@@ -23,7 +23,6 @@ function VideoCard(props) {
   const { t } = useTranslation();
   const [displayHover, setDisplayHover] = React.useState(false);
   const theme = useTheme();
-  const isLocal = props?.streamId === conference?.publishStreamId;
 
   const cardBtnStyle = {
     display: "flex",
@@ -36,18 +35,18 @@ function VideoCard(props) {
   };
 
   const refVideo = useCallback( (node) => {
-      if (node && props.track) {
-        node.srcObject = new MediaStream([props.track]);
+      if (node && props.trackAssignment.track) {
+        node.srcObject = new MediaStream([props.trackAssignment.track]);
         node.play().then(()=> {}).catch((e) => { console.log("play failed because ", e)});
       }
     },
-    [props.track]
+    [props.trackAssignment.track]
   );
 
   React.useEffect(() => {
-    if (props.track?.kind === "video" && !props.track.onended) {
-      props.track.onended = (event) => {
-        conference?.globals?.trackEvents.push({ track: props.track.id, event: "removed" });
+    if (props.trackAssignment.track?.kind === "video" && !props.trackAssignment.track.onended) {
+      props.trackAssignment.track.onended = (event) => {
+        conference?.globals?.trackEvents.push({ track: props.trackAssignment.track.id, event: "removed" });
         /*
          * I've commented out the following if statement because
          * when there is less participants than the maxVideoTrackCount,
@@ -60,10 +59,10 @@ function VideoCard(props) {
          *
          * mekya
          */
-        //if (conference.participants.length > conference?.globals?.maxVideoTrackCount)
+        //if (conference.videoTrackAssignments.length > conference?.globals?.maxVideoTrackCount)
         //{
-        console.log("video before:" + JSON.stringify(conference.participants));
-        conference.setParticipants((oldParts) => {
+        console.log("video before:" + JSON.stringify(conference?.videoTrackAssignments));
+        conference.setVideoTrackAssignments((oldParts) => {
           return oldParts.filter(
             /*
            * the meaning of the following line is that it does not render the video track that videolabel equals the id in the list
@@ -71,23 +70,23 @@ function VideoCard(props) {
            *
            *
            */
-            (p) => !(p.id === props.id || p.videoLabel === props.id)
+            (p) => !(p.streamId === props.trackAssignment.streamId || p.videoLabel === props.trackAssignment.streamId)
           );
         });
-        console.log("video after:" + JSON.stringify(conference.participants));
+        console.log("video after:" + JSON.stringify(conference.videoTrackAssignments));
 
         //}
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.track]);
+  }, [props.trackAssignment.track]);
 
   let useAvatar = true;
-  if(isLocal) {
+  if(props?.isLocal) {
     useAvatar = conference?.isMyCamTurnedOff;
   }
-  else if (props.track?.kind === "video") {
-    let broadcastObject = conference?.allParticipants[props?.streamId];
+  else if (props.trackAssignment.track?.kind === "video") {
+    let broadcastObject = conference?.allParticipants[props?.trackAssignment.streamId];
     let metaData = broadcastObject?.metaData;
     useAvatar = !parseMetaDataAndGetIsCameraOn(metaData) && !parseMetaDataAndGetIsScreenShared(metaData);
   }
@@ -116,23 +115,23 @@ function VideoCard(props) {
     return (isJsonString(metaData)) ? JSON.parse(metaData).isMicMuted : true;
   }
 
-  const micMuted = (isLocal) ? conference?.isMyMicMuted : parseMetaDataAndGetIsMicMuted(conference?.allParticipants[props?.streamId]?.metaData);
+  const micMuted = (props?.isLocal) ? conference?.isMyMicMuted : parseMetaDataAndGetIsMicMuted(conference?.allParticipants[props?.trackAssignment.streamId]?.metaData);
 
   const [isTalking, setIsTalking] = React.useState(false);
 
 
   const timeoutRef = React.useRef(null);
 
-  const isScreenSharedVideo = (conference?.allParticipants[props.streamId]?.isScreenShared === true);
+  const isScreenSharedVideo = (conference?.allParticipants[props.trackAssignment.streamId]?.isScreenShared === true);
 
-  const mirrorView = isLocal;
+  const mirrorView = props?.isLocal;
   //const isScreenSharing =
   //  conference?.isScreenShared ||
-  //  conference?.screenSharedVideoId === props?.id;
+  //  conference?.screenSharedVideoId === props?.trackAssignment.streamId;
   //conference?.isScreenShared means am i sharing my screen
-  //conference?.screenSharedVideoId === props?.id means is someone else sharing their screen
+  //conference?.screenSharedVideoId === props?.trackAssignment.streamId means is someone else sharing their screen
   useEffect(() => {
-    if (isLocal && conference.isPublished && !conference.isPlayOnly) {
+    if (props?.isLocal && conference.isPublished && !conference.isPlayOnly) {
       conference.setAudioLevelListener((value) => {
         // sounds under 0.01 are probably background noise
         if (value >= 0.01) {
@@ -186,7 +185,7 @@ function VideoCard(props) {
                         >
                             <Fab
                                 onClick={() => {
-                                  conference.pinVideo(props.streamId);
+                                  conference.pinVideo(props.trackAssignment.streamId);
                                 }}
                                 color="primary"
                                 aria-label="add"
@@ -200,7 +199,7 @@ function VideoCard(props) {
                             </Fab>
                         </Tooltip>
 
-                        { !isLocal && conference.isAdmin && conference.isAdmin === true ?
+                        { !props?.isLocal && conference.isAdmin && conference.isAdmin === true ?
                             <Grid item>
                                 {!useAvatar ?
                                     <Tooltip
@@ -212,7 +211,7 @@ function VideoCard(props) {
                                         <Fab
                                             onClick={()=>{
                                                 let participant = {};
-                                                participant.streamId=props.streamId;
+                                                participant.streamId=props.trackAssignment.streamId;
                                                 participant.streamName=props.name;
                                                 conference?.setParticipantIdMuted(participant);
                                                 conference?.turnOffYourCamNotification(participant.streamId);
@@ -251,7 +250,7 @@ function VideoCard(props) {
                             </Grid>
                             : null }
 
-                        {(!isLocal && conference.isAdmin && conference.isAdmin === true) ?
+                        {(!props?.isLocal && conference.isAdmin && conference.isAdmin === true) ?
                             <Grid item>
                                 {!micMuted ?
                                     <Tooltip
@@ -262,7 +261,7 @@ function VideoCard(props) {
                                         <Fab
                                             onClick={() => {
                                                 let participant = {};
-                                                participant.streamId=props.streamId;
+                                                participant.streamId=props.trackAssignment.streamId;
                                                 participant.streamName=props.name;
                                                 conference?.setParticipantIdMuted(participant);
                                                 conference?.turnOffYourMicNotification(participant.streamId);
@@ -287,7 +286,7 @@ function VideoCard(props) {
                                         <Fab
                                             onClick={()=>{
                                                 let participant = {};
-                                                participant.streamId=props.streamId;
+                                                participant.streamId=props.trackAssignment.streamId;
                                                 participant.streamName=props.name;
                                                 conference?.setParticipantIdMuted(participant);
                                                 conference?.turnOnYourMicNotification(participant.streamId);
@@ -346,7 +345,7 @@ function VideoCard(props) {
               placement="top"
             >
               <Fab
-                onClick={() => {conference.pinVideo(props.streamId);}}
+                onClick={() => {conference.pinVideo(props.trackAssignment.streamId);}}
                 color="primary"
                 aria-label="add"
                 size="small"
@@ -359,7 +358,7 @@ function VideoCard(props) {
               </Fab>
             </Tooltip>
 
-            {(!isLocal && !micMuted) ?
+            {(!props?.isLocal && !micMuted) ?
               <Grid item>
                 <Tooltip
                   title={`Microphone off ${props.name
@@ -369,7 +368,7 @@ function VideoCard(props) {
                   <Fab
                     onClick={() => {
                         let participant = {};
-                        participant.streamId=props.streamId;
+                        participant.streamId=props.trackAssignment.streamId;
                         participant.streamName=props.name;
                       conference?.setParticipantIdMuted(participant);
                         conference?.turnOffYourMicNotification(participant.streamId);
@@ -416,10 +415,13 @@ function VideoCard(props) {
         >
           <CustomizedVideo
             {...props}
+            track={props.trackAssignment.track}
+            label={props.trackAssignment.videoLabel}
+            id={(typeof props.trackAssignment.streamId === "undefined") ? "localVideo" : props.trackAssignment.streamId}
             style={{ objectFit: props.pinned || isScreenSharedVideo ? "contain" : "cover" }}
             ref={refVideo}
             playsInline
-            muted={isLocal}
+            muted={props?.isLocal}
           />
         </Grid>
       </>
@@ -445,7 +447,7 @@ function VideoCard(props) {
           <Tooltip title={t("mic is muted")} placement="top">
             <Grid item>
               <CustomizedBox
-                id={"mic-muted-"+props.id}
+                id={"mic-muted-"+props.trackAssignment.streamId}
                 sx={cardBtnStyle}>
                 <SvgIcon size={32} name={"muted-microphone"} color="#fff" />
               </CustomizedBox>
@@ -478,13 +480,11 @@ function VideoCard(props) {
           <Typography color="white" align="left" className="name">
             {props.name}{" "}
             {process.env.NODE_ENV === "development"
-              ? `${isLocal
-                ? conference.publishStreamId +
-                " " +
-                props.id +
+              ? `${props?.isLocal
+                ? props.trackAssignment.streamId +
                 " " +
                 conference.streamName
-                : props.id + " " + props.track?.id
+                : props.trackAssignment.streamId + " " + props.trackAssignment.track?.id
               }`
               : ""}
           </Typography>
@@ -499,7 +499,7 @@ function VideoCard(props) {
         className="talking-indicator-light"
         style={{
           borderColor: theme.palette.themeColor[20],
-          ...(isTalking || conference.talkers.includes(props.streamId)
+          ...(isTalking || conference.talkers.includes(props.trackAssignment.streamId)
             ? {}
             : { display: "none" }),
         }}
@@ -508,13 +508,13 @@ function VideoCard(props) {
   }
 
   const setLocalVideo = () => {
-    let tempLocalVideo = document.getElementById("localVideo");
-    if(isLocal && conference.localVideo !== tempLocalVideo) {
-      conference.setLocalVideo();
+    let tempLocalVideo = document.getElementById((typeof conference?.publishStreamId === "undefined")? "localVideo" : conference?.publishStreamId);
+    if(props?.isLocal && conference.localVideo !== tempLocalVideo) {
+      conference.localVideoCreate(tempLocalVideo);
     }
   };
 
-  return isLocal || props.track?.kind !== "audio" ? (
+  return props?.isLocal || props.trackAssignment.track?.kind !== "audio" ? (
     <>
       <Grid
         container
@@ -531,7 +531,7 @@ function VideoCard(props) {
 
         <div
           className={`single-video-card`}
-          id={'card-'+(props.id !== undefined ? props?.id : "")}
+          id={'card-'+(props.trackAssignment.streamId !== undefined ? props?.trackAssignment.streamId : "")}
         >
           {avatarOrPlayer()}
 

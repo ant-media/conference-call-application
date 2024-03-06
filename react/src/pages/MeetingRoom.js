@@ -32,7 +32,7 @@ const MeetingRoom = React.memo((props) => {
   React.useEffect(() => {
     handleGalleryResize(false);
     window.conference = conference;
-  }, [conference.participants, conference.participantUpdated]);
+  }, [conference.videoTrackAssignments, conference.participantUpdated]);
 
   React.useEffect(() => {
     handleGalleryResize(true);
@@ -105,11 +105,11 @@ const MeetingRoom = React.memo((props) => {
   return (
     <>
       <MuteParticipantDialog/>
-      {conference.audioTracks.map((audio, index) => (
+      {conference.audioTracks.map((audioTrackAssignment, index) => (
         <VideoCard
           key={index}
-          id={audio.streamId}
-          track={audio.track}
+          trackAssignment={audioTrackAssignment}
+          isLocal={audioTrackAssignment.streamId === conference?.allParticipants[conference?.localStreamId]?.streamId}
           autoPlay
           name={""}
           style={{display: "none"}}

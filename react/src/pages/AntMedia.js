@@ -299,7 +299,9 @@ function AntMedia(props) {
    * 3. videoTrackAssignment (DC message):
    * Here we change the assigned participant video to video player according to the assginments we got.
    */
-  const [participants, setParticipants] = useState([]);
+  //const [participants, setParticipants] = useState([]);
+
+  const [videoTrackAssignments, setVideoTrackAssignments] = useState([]);
 
   /*
    * allParticipants: is a dictionary of (streamId, broadcastObject) for all participants in the room.
@@ -336,7 +338,7 @@ function AntMedia(props) {
 
   const [isEnterDirectly] = React.useState(enterDirectly);
 
-  const [localVideo, setLocalVideoLocal] = React.useState(null);
+  const [localVideo, setLocalVideo] = React.useState(null);
 
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
 
@@ -467,17 +469,14 @@ function AntMedia(props) {
     setAllParticipants(allParticipantsTemp);
 
     if (Object.keys(allParticipantsTemp).length <= globals.maxVideoTrackCount) {
-      let newVideoTrack = {
-        id: "id_" + suffix,
+      let newVideoTrackAssignment = {
         videoLabel: "label_" + suffix,
         track: null,
-        isCameraOn: false,
         streamId: "streamId_" + suffix,
-        name: "name_" + suffix,
       };
-      let temp = participants;
-      temp.push(newVideoTrack);
-      setParticipants(temp);
+      let temp = videoTrackAssignments;
+      temp.push(newVideoTrackAssignment);
+      setVideoTrackAssignments(temp);
     }
 
     console.log("fake participant added");
@@ -489,8 +488,8 @@ function AntMedia(props) {
     let suffix = "fake" + tempCount;
     setFakeParticipantCounter(tempCount);
 
-    let temp = participants.filter(el => el.streamId !== "streamId_" + suffix)
-    setParticipants(temp);
+    let tempVideoTrackAssignments = videoTrackAssignments.filter(el => el.streamId !== "streamId_" + suffix)
+    setVideoTrackAssignments(tempVideoTrackAssignments);
 
     let allParticipantsTemp = allParticipants;
     delete allParticipantsTemp["streamId_" + suffix];
@@ -859,6 +858,7 @@ function AntMedia(props) {
   }
 
 
+  /*
   function setLocalVideo() {
 
     //workaround solution because it can update one component while rendering another component
@@ -873,6 +873,8 @@ function AntMedia(props) {
     }, 300);
   }
 
+   */
+
   function pinVideo(streamId) {
     // id is for pinning user.
     let videoLabel;
@@ -884,7 +886,7 @@ function AntMedia(props) {
 
     if (videoLabel === undefined || videoLabel === "") {
       // if videoLabel is missing try to find it from participants.
-      videoLabel = participants.find((p) => streamId === p.streamId)?.videoLabel;
+      videoLabel = videoTrackAssignments.find((vta) => streamId === vta.streamId)?.videoLabel;
     }
 
     // if we already pin the targeted user then we are going to remove it from pinned video.
@@ -899,7 +901,7 @@ function AntMedia(props) {
 
       if ((videoLabel === undefined || videoLabel === "") && (streamId !== undefined)) {
         // if videoLabel is still missing get the firs one if it exist, this may happen when one join while someone is sharing screen
-        videoLabel = participants[1]?.videoLabel;
+        videoLabel = videoTrackAssignments[1]?.videoLabel;
         webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
       }
 
@@ -1147,8 +1149,8 @@ function AntMedia(props) {
     var infoText = "Client Debug Info\n";
     infoText += "Events:\n";
     infoText += JSON.stringify(globals.trackEvents) + "\n";
-    infoText += "Participants (" + participants.length + "):\n\n";
-    infoText += JSON.stringify(participants) + "\n\n";
+    infoText += "Video Track Assignments (" + videoTrackAssignments.length + "):\n\n";
+    infoText += JSON.stringify(videoTrackAssignments) + "\n\n";
     infoText += "All Participants (" + Object.keys(allParticipants).length + "):\n";
     Object.entries(allParticipants).forEach(([key, value]) => {
       infoText += "- " + key + "\n";
@@ -1276,8 +1278,9 @@ function AntMedia(props) {
           updateVideoSendResolution(false);
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
-        let videoTrackAssignments = notificationEvent.payload;
+        let videoTrackAssignmentList = notificationEvent.payload;
 
+        /*
         let temp = participants;
 
         //remove not available videotracks if exist
@@ -1303,6 +1306,29 @@ function AntMedia(props) {
           });
         });
         setParticipants(temp);
+        */
+        let tempVideoTrackAssignments = videoTrackAssignments;
+
+        //remove not available videotracks if exist
+        tempVideoTrackAssignments = tempVideoTrackAssignments.filter((oldVTA) => {
+          let assignment = videoTrackAssignmentList.find((vta) => oldVTA.videoLabel === vta.videoLabel);
+          return oldVTA.isMine || assignment !== undefined;
+        });
+
+        //add and/or update participants according to current assignments
+        videoTrackAssignmentList.forEach((vta) => {
+          tempVideoTrackAssignments.forEach((oldVTA) => {
+            if (oldVTA.videoLabel === vta.videoLabel) {
+              oldVTA.streamId = vta.trackId;
+              let broadcastObject = allParticipants[oldVTA.streamId];
+              if (broadcastObject === undefined) {
+                setTimeout(() => webRTCAdaptor?.requestVideoTrackAssignments(roomName), 1000)
+              }
+            }
+          });
+        });
+
+        setVideoTrackAssignments(tempVideoTrackAssignments);
 
         checkScreenSharingStatus();
 
@@ -1372,7 +1398,7 @@ function AntMedia(props) {
 
   function handleLeaveFromRoom() {
     // we need to empty participant array. if we are going to leave it in the first place.
-    setParticipants([]);
+    setVideoTrackAssignments([]);
     setAllParticipants({});
 
     clearInterval(audioListenerIntervalJob);
@@ -1446,21 +1472,18 @@ function AntMedia(props) {
   }
 
   function removeAllRemoteParticipants() {
-    let newVideoTrack = {
-      id: "localVideo",
+    let newVideoTrackAssignment = {
       videoLabel: "localVideo",
       track: null,
-      isCameraOn: false,
       streamId: publishStreamId,
-      name: "You",
       isMine: true
     };
 
-    let tempParticipants = [];
+    let tempVideoTrackAssignments = [];
     if (!playOnly) {
-      tempParticipants.push(newVideoTrack);
+      tempVideoTrackAssignments.push(newVideoTrackAssignment);
     }
-    setParticipants(tempParticipants);
+    setVideoTrackAssignments(tempVideoTrackAssignments);
 
     let allParticipantsTemp = {};
     if (!playOnly) {
@@ -1470,24 +1493,21 @@ function AntMedia(props) {
   }
 
   function addMeAsParticipant(publishStreamId) {
-    let isParticipantExist = participants.find((p) => p.id === "localVideo");
+    let isParticipantExist = videoTrackAssignments.find((vta) => vta.label === "localVideo");
 
     if (isParticipantExist || playOnly) {
       return;
     }
 
-    let newVideoTrack = {
-      id: "localVideo",
+    let newVideoTrackAssignment = {
       videoLabel: "localVideo",
       track: null,
-      isCameraOn: false,
       streamId: publishStreamId,
-      name: "You",
       isMine: true
     };
-    let tempParticipants = participants;
-    tempParticipants.push(newVideoTrack);
-    setParticipants(tempParticipants);
+    let tempVideoTrackAssignments = videoTrackAssignments;
+    tempVideoTrackAssignments.push(newVideoTrackAssignment);
+    setVideoTrackAssignments(tempVideoTrackAssignments);
 
     let allParticipantsTemp = allParticipants;
     allParticipantsTemp[publishStreamId] = {streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false};
@@ -1533,18 +1553,14 @@ function AntMedia(props) {
       temp.push(newAudioTrack);
       setAudioTracks(temp);
     } else if (obj.track.kind === "video") {
-      let newVideoTrack = {
-        id: index,
+      let newVideoTrackAssignment = {
         videoLabel: index,
         track: obj.track,
-        isCameraOn: true,
-        streamId: obj.streamId,
-        name: ""
+        streamId: obj.streamId
       };
-      //append new video track, track id should be unique because of video track limitation
-      let temp = participants;
-      temp.push(newVideoTrack);
-      setParticipants(temp);
+      let tempVideoTrackAssignments = videoTrackAssignments;
+      tempVideoTrackAssignments.push(newVideoTrackAssignment);
+      setVideoTrackAssignments(tempVideoTrackAssignments);
     }
   }
 
@@ -1745,6 +1761,16 @@ function AntMedia(props) {
     }
   }
 
+  function localVideoCreate(tempLocalVideo) {
+    // it can be null when we first open the page
+    // due to the fact that local stream is not ready yet.
+    if (typeof tempLocalVideo !== "undefined" && tempLocalVideo !== null) {
+      setLocalVideo(tempLocalVideo);
+      webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
+      webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
+      }
+  }
+
   React.useEffect(() => {
     //gets the setting from the server through websocket
     if (isWebSocketConnected) {
@@ -1850,7 +1876,8 @@ function AntMedia(props) {
               selectedCamera,
               selectedMicrophone,
               selectedBackgroundMode,
-              participants,
+              videoTrackAssignments,
+              setVideoTrackAssignments,
               messageDrawerOpen,
               participantListDrawerOpen,
               messages,
@@ -1869,7 +1896,6 @@ function AntMedia(props) {
               sendReactions,
               setSelectedBackgroundMode,
               setIsVideoEffectRunning,
-              setParticipants,
               handleMessageDrawerOpen,
               handleParticipantListOpen,
               setSelectedCamera,
@@ -1925,7 +1951,8 @@ function AntMedia(props) {
               setPresenterButtonDisabled,
               effectsDrawerOpen,
               handleEffectsOpen,
-              setAndEnableVirtualBackgroundImage
+              setAndEnableVirtualBackgroundImage,
+              localVideoCreate
             }}
           >
             {props.children}

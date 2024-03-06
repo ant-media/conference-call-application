@@ -8,7 +8,7 @@ import { ConferenceContext } from "./AntMedia";
 function LayoutPinned (props) {
   const conference = React.useContext(ConferenceContext);
 
-  const pinnedParticipant = conference.participants.find(e => e.streamId === props.pinnedParticipant?.streamId);
+  const pinnedParticipant = conference.videoTrackAssignments.find(e => e.streamId === props.pinnedParticipant?.streamId);
 
   let MAX_VIDEO_AT_SIDE = 4;
 
@@ -16,26 +16,27 @@ function LayoutPinned (props) {
   let playingParticipantsCount = 0;
 
   //if we need to show others card, then we don't show the last video to hold place for the others card
-  const maxPlayingParticipantsCount = showOthers ? MAX_VIDEO_AT_SIDE - 1 : Math.min(conference.participants.length, MAX_VIDEO_AT_SIDE);
+  const maxPlayingParticipantsCount = showOthers ? MAX_VIDEO_AT_SIDE - 1 : Math.min(conference.videoTrackAssignments.length, MAX_VIDEO_AT_SIDE);
   const playingParticipants = [];
 
   const pinnedVideo = () => {
+    let isLocal = false;
+    let pinnedParticipantName;
     if(pinnedParticipant !== undefined) {
-      playingParticipants.push(conference.participants.find(e => e.id === pinnedParticipant.id));
+      playingParticipants.push(conference.videoTrackAssignments.find(e => e.streamId === pinnedParticipant.streamId));
+      pinnedParticipantName = conference?.allParticipants[pinnedParticipant.streamId]?.name;
+      isLocal = conference?.publishStreamId === pinnedParticipant.streamId;
     }
     return (
       pinnedParticipant ? (
         <div className="single-video-container pinned keep-ratio">
           <VideoCard
-              id={pinnedParticipant?.id}
-              streamId={pinnedParticipant.streamId}
-              track={
-                pinnedParticipant?.track
-              }
+            trackAssignment={pinnedParticipant}
               autoPlay
               name={
-                pinnedParticipant?.name
+                pinnedParticipantName
               }
+              isLocal={isLocal}
               pinned
               onHandlePin={() => {
                 conference.pinVideo(
@@ -53,7 +54,7 @@ function LayoutPinned (props) {
       <>
       {
       // eslint-disable-next-line
-      conference.participants.map((element, index) => {
+      conference.videoTrackAssignments.map((element, index) => {
 
         let isPlayOnly;
 
@@ -63,7 +64,11 @@ function LayoutPinned (props) {
           isPlayOnly = false;
         }
 
-        if (element.name === "" || typeof element.name === 'undefined' || isPlayOnly || element.name === "Anonymous") {
+        let isLocal = conference?.publishStreamId === element?.streamId;
+
+        let participantName = conference?.allParticipants[element?.streamId]?.name;
+
+        if (participantName === "" || typeof participantName === 'undefined' || isPlayOnly || participantName === "Anonymous") {
           return null;
         }
 
@@ -74,12 +79,10 @@ function LayoutPinned (props) {
               <div className="unpinned" key={index}>
                 <div className="single-video-container">
                   <VideoCard
-                      id={element.id}
-                      streamId={element.streamId}
-                      track={element.track}
-                      label={element.label}
+                    trackAssignment={element}
+                      isLocal={isLocal}
                       autoPlay
-                      name={element.name}
+                      name={participantName}
                   />
                 </div>
               </div>
@@ -111,7 +114,7 @@ function LayoutPinned (props) {
     <>
       {pinnedVideo()}
       <div id="unpinned-gallery">
-        {conference?.participants.length === 0 ? <p>There is no active publisher right now.</p> : null}
+        {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
         {videoCards()}
         {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
       </div>

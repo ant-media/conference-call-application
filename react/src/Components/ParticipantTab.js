@@ -131,7 +131,7 @@ function ParticipantTab(props) {
             {conference.isPlayOnly === false ? getParticipantItem(conference.publishStreamId, "You") : ""}
             {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
               if (conference.publishStreamId !== streamId) {
-                var assignedVideoCardId = conference.participants.find(p => p.streamId === streamId)?.id;
+                var assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
                 return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
               } else {
                 return "";

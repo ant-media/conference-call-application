@@ -40,7 +40,8 @@ function WaitingRoom(props) {
 
   React.useEffect(() => {
     if (!conference.isPlayOnly && conference.initialized) {
-      conference.setLocalVideo(document.getElementById("localVideo"));
+      const tempLocalVideo = document.getElementById("localVideo");
+      conference?.localVideoCreate(tempLocalVideo);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -123,7 +124,7 @@ function WaitingRoom(props) {
               className="waiting-room-video"
               sx={{position: "relative"}}
             >
-              <VideoCard id="localVideo" streamId={conference?.publishStreamId} autoPlay muted hidePin={true}/>
+              <VideoCard streamId="localVideo" trackAssignment={{videoLabel: "localVideo",track: null,streamId: "localVideo"}} isLocal={true} autoPlay muted hidePin={true}/>
 
               <Grid
                 container
