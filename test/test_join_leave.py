@@ -201,6 +201,11 @@ class TestJoinLeave(unittest.TestCase):
 
     ss_button = self.chrome.get_element_by_id("share-screen-button")
 
+    if(ss_button is None):
+      self.chrome.get_element_by_id("more-button")
+      self.chrome.click_element(ss_button)
+      ss_button = self.chrome.get_element_by_id("more-options-share-screen-button")
+
     self.chrome.click_element(ss_button)
 
     self.chrome.switch_to_tab(handle_2)

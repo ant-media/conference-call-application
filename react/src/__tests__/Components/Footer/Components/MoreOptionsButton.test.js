@@ -46,7 +46,7 @@ describe('ParticipantList Button Component', () => {
 
     console.log(container.outerHTML);
 
-    const menuComponent = getByTestId('settings-button-test');
+    const menuComponent = getByTestId('more-button-test');
     console.log(menuComponent);
     expect(menuComponent).toBeInTheDocument();
      

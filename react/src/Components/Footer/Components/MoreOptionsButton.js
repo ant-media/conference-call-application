@@ -77,8 +77,8 @@ function MoreOptionsButton({ footer, ...props }) {
           <Tooltip title={t("More options")} placement="top">
             <CustomizedBtn
                 className={footer ? "footer-icon-button" : ""}
-                id="settings-button"
-                data-testid="settings-button-test"
+                id="more-button"
+                data-testid="more-button-test"
                 variant="contained"
                 color={open ? "primary" : "secondary"}
                 aria-controls={open ? "demo-positioned-menu" : undefined}
