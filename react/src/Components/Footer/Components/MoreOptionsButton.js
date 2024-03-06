@@ -35,8 +35,6 @@ function MoreOptionsButton({ footer, ...props }) {
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
 
-  // if you select camera then we are going to focus on camera button.
-  const [selectFocus, setSelectFocus] = React.useState(null);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -62,17 +60,14 @@ function MoreOptionsButton({ footer, ...props }) {
           <SettingsDialog
               open={dialogOpen}
               onClose={handleDialogClose}
-              selectFocus={selectFocus}
           />
           <LayoutSettingsDialog
               open={layoutDialogOpen}
               onClose={handleLayoutDialogClose}
-              selectFocus={selectFocus}
           />
           <GeneralSettingsDialog
             open={generalSettingsDialogOpen}
             onClose={handleGeneralSettingsDialogClose}
-            selectFocus={selectFocus}
           />
           <Tooltip title={t("More options")} placement="top">
             <CustomizedBtn
