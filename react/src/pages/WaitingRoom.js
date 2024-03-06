@@ -37,6 +37,15 @@ function WaitingRoom(props) {
   window.conference = conference;
   const {enqueueSnackbar} = useSnackbar();
 
+  // This is a temporary video track assignment for local video
+  // It is used to show local video in the waiting room
+  // After we get publish stream id, we will create real video track assignment
+  const tempVTA = {
+    videoLabel: "localVideo",
+    track: null,
+    streamId: "localVideo",
+    isMine: true
+  };
 
   React.useEffect(() => {
     if (!conference.isPlayOnly && conference.initialized) {
@@ -124,7 +133,7 @@ function WaitingRoom(props) {
               className="waiting-room-video"
               sx={{position: "relative"}}
             >
-              <VideoCard streamId="localVideo" trackAssignment={{videoLabel: "localVideo",track: null,streamId: "localVideo"}} isLocal={true} autoPlay muted hidePin={true}/>
+              <VideoCard trackAssignment={tempVTA} autoPlay muted hidePin={true}/>
 
               <Grid
                 container

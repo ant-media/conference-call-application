@@ -287,20 +287,6 @@ function AntMedia(props) {
 
   const {sendMessage, latestMessage, isWebSocketConnected} = useWebSocket();
 
-  /*
-   * participants: is a list of participant tracks to which videoTracks (video players on the screen)
-   * are assigned. This matches participants with the video players on the screen.
-   *
-   * This list is set partially in 3 places:
-   * 1. in handlePlayVideo where a new track added to WebRTC.
-   * Here a new participant structure is created and added the participants
-   * 2. broadcastObject callback (which is return of getBroadcastObject request) for a participant
-   * Here we get the name of the participant and set it.
-   * 3. videoTrackAssignment (DC message):
-   * Here we change the assigned participant video to video player according to the assginments we got.
-   */
-  //const [participants, setParticipants] = useState([]);
-
   const [videoTrackAssignments, setVideoTrackAssignments] = useState([]);
 
   /*
@@ -343,7 +329,7 @@ function AntMedia(props) {
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
 
 
-  const [initialized, setInitialized] = React.useState(props.isTest ? true : false);
+  const [initialized, setInitialized] = React.useState(!!props.isTest);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
@@ -427,7 +413,13 @@ function AntMedia(props) {
       token = playToken;
     }
 
-    webRTCAdaptor.play(roomName, token, roomName, null, subscriberId, subscriberCode);
+    webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
+  }
+
+  function requestVideoTrackAssignmentsInterval() {
+    requestVideoTrackAssignmentsInterval = setInterval(() => {
+      webRTCAdaptor?.requestVideoTrackAssignments(roomName);
+    }, 3000);
   }
 
   async function checkDevices() {
@@ -696,12 +688,15 @@ function AntMedia(props) {
       console.log("**** play started:" + reconnecting);
 
       webRTCAdaptor.getBroadcastObject(roomName);
+      requestVideoTrackAssignmentsInterval();
 
       if (reconnecting) {
         playReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
       }
+    } else if (info === "play_finished") {
+      clearInterval(requestVideoTrackAssignmentsInterval);
     } else if (info === "screen_share_stopped") {
 
     } else if (info === "screen_share_started") {
@@ -856,24 +851,6 @@ function AntMedia(props) {
     console.log("***** " + error)
 
   }
-
-
-  /*
-  function setLocalVideo() {
-
-    //workaround solution because it can update one component while rendering another component
-    //VideoCard setLocalVideo triggers this problem
-    setTimeout(() => {
-      let tempLocalVideo = document.getElementById("localVideo");
-      if (tempLocalVideo) {
-        setLocalVideoLocal(tempLocalVideo);
-        webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
-        webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
-      }
-    }, 300);
-  }
-
-   */
 
   function pinVideo(streamId) {
     // id is for pinning user.
@@ -1280,33 +1257,6 @@ function AntMedia(props) {
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
         let videoTrackAssignmentList = notificationEvent.payload;
 
-        /*
-        let temp = participants;
-
-        //remove not available videotracks if exist
-        temp = temp.filter((p) => {
-          let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
-          return p.isMine || assignment !== undefined;
-        });
-
-
-        //add and/or update participants according to current assignments
-        videoTrackAssignments.forEach((vta) => {
-          temp.forEach((p) => {
-            if (p.videoLabel === vta.videoLabel) {
-              p.streamId = vta.trackId;
-              let broadcastObject = allParticipants[p.streamId];
-              if (broadcastObject === undefined) {
-                setTimeout(() => webRTCAdaptor.requestVideoTrackAssignments(roomName), 1000)
-              }
-              if (broadcastObject) {
-                p.name = broadcastObject.name;
-              }
-            }
-          });
-        });
-        setParticipants(temp);
-        */
         let tempVideoTrackAssignments = videoTrackAssignments;
 
         //remove not available videotracks if exist
@@ -1320,10 +1270,6 @@ function AntMedia(props) {
           tempVideoTrackAssignments.forEach((oldVTA) => {
             if (oldVTA.videoLabel === vta.videoLabel) {
               oldVTA.streamId = vta.trackId;
-              let broadcastObject = allParticipants[oldVTA.streamId];
-              if (broadcastObject === undefined) {
-                setTimeout(() => webRTCAdaptor?.requestVideoTrackAssignments(roomName), 1000)
-              }
             }
           });
         });

@@ -109,7 +109,6 @@ const MeetingRoom = React.memo((props) => {
         <VideoCard
           key={index}
           trackAssignment={audioTrackAssignment}
-          isLocal={audioTrackAssignment.streamId === conference?.allParticipants[conference?.localStreamId]?.streamId}
           autoPlay
           name={""}
           style={{display: "none"}}

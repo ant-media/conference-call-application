@@ -20,12 +20,10 @@ function LayoutPinned (props) {
   const playingParticipants = [];
 
   const pinnedVideo = () => {
-    let isLocal = false;
     let pinnedParticipantName;
     if(pinnedParticipant !== undefined) {
       playingParticipants.push(conference.videoTrackAssignments.find(e => e.streamId === pinnedParticipant.streamId));
       pinnedParticipantName = conference?.allParticipants[pinnedParticipant.streamId]?.name;
-      isLocal = conference?.publishStreamId === pinnedParticipant.streamId;
     }
     return (
       pinnedParticipant ? (
@@ -36,7 +34,6 @@ function LayoutPinned (props) {
               name={
                 pinnedParticipantName
               }
-              isLocal={isLocal}
               pinned
               onHandlePin={() => {
                 conference.pinVideo(
@@ -64,8 +61,6 @@ function LayoutPinned (props) {
           isPlayOnly = false;
         }
 
-        let isLocal = conference?.publishStreamId === element?.streamId;
-
         let participantName = conference?.allParticipants[element?.streamId]?.name;
 
         if (participantName === "" || typeof participantName === 'undefined' || isPlayOnly || participantName === "Anonymous") {
@@ -80,7 +75,6 @@ function LayoutPinned (props) {
                 <div className="single-video-container">
                   <VideoCard
                     trackAssignment={element}
-                      isLocal={isLocal}
                       autoPlay
                       name={participantName}
                   />

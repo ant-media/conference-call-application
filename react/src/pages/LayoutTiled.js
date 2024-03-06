@@ -93,8 +93,6 @@ function LayoutTiled(props) {
               return null;
             }
 
-            let isLocal = conference?.publishStreamId === element.streamId;
-
             //console.log("cw:"+cardWidth+" ch:"+cardHeight);
             return (
               <div
@@ -107,11 +105,6 @@ function LayoutTiled(props) {
               >
                 <VideoCard
                     trackAssignment={element}
-                    /*
-                    streamId={element.streamId}
-                    label={element.label}
-                     */
-                    isLocal={isLocal}
                     autoPlay
                     name={participantName}
                 />
