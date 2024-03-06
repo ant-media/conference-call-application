@@ -32,8 +32,7 @@ const MeetingRoom = React.memo((props) => {
   React.useEffect(() => {
     handleGalleryResize(false);
     window.conference = conference;
-
-  }, [conference.participants, conference.pinnedVideoId, conference.participantUpdated]);
+  }, [conference.participants, conference.participantUpdated]);
 
   React.useEffect(() => {
     handleGalleryResize(true);
@@ -84,7 +83,25 @@ const MeetingRoom = React.memo((props) => {
     }
   }
 
-  const pinLayout = conference.pinnedVideoId !== undefined;
+  function getPinnedParticipant() {
+    let firstPinnedParticipant;
+    conference.allParticipants = conference.allParticipants || {};
+    Object.keys(conference.allParticipants).forEach(streamId => {
+      let participant = conference.allParticipants[streamId];
+      if (typeof participant.isPinned !== 'undefined'
+        && participant.isPinned === true
+        && typeof firstPinnedParticipant === 'undefined') {
+
+        firstPinnedParticipant = conference.allParticipants[streamId];
+        return firstPinnedParticipant;
+      }
+    });
+    return firstPinnedParticipant;
+  }
+
+  const firstPinnedParticipant = getPinnedParticipant();
+
+  const pinLayout = typeof firstPinnedParticipant !== "undefined";
   return (
     <>
       <MuteParticipantDialog/>
@@ -102,6 +119,7 @@ const MeetingRoom = React.memo((props) => {
         <>
           {pinLayout ?
             (<LayoutPinned
+              pinnedParticipant={firstPinnedParticipant}
               width={gallerySize.w}
               height={gallerySize.h}
             />)

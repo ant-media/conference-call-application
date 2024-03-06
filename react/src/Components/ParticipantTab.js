@@ -73,9 +73,10 @@ function ParticipantTab(props) {
     );
   }
   const getParticipantItem = (streamId, name, assignedVideoCardId) => {
-    if (streamId === "localVideo") {
+    if (streamId === conference?.publishStreamId) {
       assignedVideoCardId = "localVideo";
     }
+
     return (
       <Grid
         key={streamId}
@@ -89,7 +90,7 @@ function ParticipantTab(props) {
           <ParticipantName variant="body1">{name}</ParticipantName>
         </Grid>
         <Grid item>
-          {conference.pinnedVideoId === assignedVideoCardId || conference.pinnedVideoId === streamId ? (
+          {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
               onClick={() => {conference.pinVideo(streamId);}}
@@ -127,7 +128,7 @@ function ParticipantTab(props) {
                 {Object.keys(conference.allParticipants).length}
               </ParticipantName>
             </Grid>
-            {conference.isPlayOnly === false ? getParticipantItem("localVideo", "You") : ""}
+            {conference.isPlayOnly === false ? getParticipantItem(conference.publishStreamId, "You") : ""}
             {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
               if (conference.publishStreamId !== streamId) {
                 var assignedVideoCardId = conference.participants.find(p => p.streamId === streamId)?.id;

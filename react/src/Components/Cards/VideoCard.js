@@ -23,7 +23,7 @@ function VideoCard(props) {
   const { t } = useTranslation();
   const [displayHover, setDisplayHover] = React.useState(false);
   const theme = useTheme();
-  const isLocal = props?.id === "localVideo";
+  const isLocal = props?.streamId === conference?.publishStreamId;
 
   const cardBtnStyle = {
     display: "flex",
@@ -116,11 +116,6 @@ function VideoCard(props) {
     return (isJsonString(metaData)) ? JSON.parse(metaData).isMicMuted : true;
   }
 
-
-  // if someone shares his screen, then don't use avatar for him (even if he turned off his cam)
-  if (conference.screenSharedVideoId === props?.id) {
-    useAvatar = false;
-  }
   const micMuted = (isLocal) ? conference?.isMyMicMuted : parseMetaDataAndGetIsMicMuted(conference?.allParticipants[props?.streamId]?.metaData);
 
   const [isTalking, setIsTalking] = React.useState(false);
@@ -128,7 +123,7 @@ function VideoCard(props) {
 
   const timeoutRef = React.useRef(null);
 
-  const isScreenSharedVideo = (conference?.screenSharedVideoId === props?.id) || (conference?.isScreenShared === true && isLocal);
+  const isScreenSharedVideo = (conference?.allParticipants[props.streamId]?.isScreenShared === true);
 
   const mirrorView = isLocal;
   //const isScreenSharing =
@@ -191,7 +186,7 @@ function VideoCard(props) {
                         >
                             <Fab
                                 onClick={() => {
-                                  conference.pinVideo(props.id !== "localVideo" ? props.streamId : "localVideo", props.videoLabel);
+                                  conference.pinVideo(props.streamId);
                                 }}
                                 color="primary"
                                 aria-label="add"
@@ -205,7 +200,7 @@ function VideoCard(props) {
                             </Fab>
                         </Tooltip>
 
-                        { props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin === true ?
+                        { !isLocal && conference.isAdmin && conference.isAdmin === true ?
                             <Grid item>
                                 {!useAvatar ?
                                     <Tooltip
@@ -256,7 +251,7 @@ function VideoCard(props) {
                             </Grid>
                             : null }
 
-                        {(props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin === true) ?
+                        {(!isLocal && conference.isAdmin && conference.isAdmin === true) ?
                             <Grid item>
                                 {!micMuted ?
                                     <Tooltip
@@ -351,7 +346,7 @@ function VideoCard(props) {
               placement="top"
             >
               <Fab
-                onClick={() => {conference.pinVideo(props.id !== "localVideo" ? props.streamId : "localVideo", props.videoLabel);}}
+                onClick={() => {conference.pinVideo(props.streamId);}}
                 color="primary"
                 aria-label="add"
                 size="small"
@@ -364,7 +359,7 @@ function VideoCard(props) {
               </Fab>
             </Tooltip>
 
-            {(props.id !== 'localVideo' && !micMuted) ?
+            {(!isLocal && !micMuted) ?
               <Grid item>
                 <Tooltip
                   title={`Microphone off ${props.name

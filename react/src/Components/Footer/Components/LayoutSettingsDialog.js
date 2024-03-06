@@ -70,16 +70,11 @@ export function LayoutSettingsDialog(props) {
   const [value, setValue] = React.useState(
     conference.globals.maxVideoTrackCount ? conference.globals.maxVideoTrackCount : 4
   );
-  const [layout, setLayout] = React.useState(
-    conference.pinnedVideoId !== null ? "sidebar" : "tiled"
-  ); //just for radioo buttons
+  const [layout, setLayout] = React.useState( "sidebar"); //just for radioo buttons
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
-  React.useEffect(() => {
-    setLayout(conference.pinnedVideoId !== null ? "sidebar" : "tiled");
-  }, [conference.pinnedVideoId]);
   const handleClose = () => {
     onClose(selectedValue);
   };
@@ -90,7 +85,13 @@ export function LayoutSettingsDialog(props) {
 
     if (mode === "tiled") {
       //unpin the pinned video
-      conference.pinVideo(conference.pinnedVideoStreamId);
+      conference.allParticipants = conference.allParticipants || {};
+      Object.keys(conference.allParticipants).forEach(streamId => {
+        if (typeof conference.allParticipants[streamId].pinned === 'undefined'
+          && conference.allParticipants[streamId].pinned === true) {
+          conference.pinVideo(streamId);
+        }
+      });
     } else if (mode === "sidebar") {
       const participants = document.querySelectorAll(
         ".single-video-container.not-pinned video"
@@ -160,7 +161,7 @@ export function LayoutSettingsDialog(props) {
             <FormControl sx={{width: "100%"}}>
               <RadioGroup
                 aria-labelledby="layout-radio-buttons"
-                defaultValue={conference.pinnedVideoId !== null ? "sidebar" : "tiled"}
+                defaultValue={"sidebar"}
                 value={layout}
                 onChange={changeLayout}
                 name="layout-radio-buttons-group"
@@ -210,6 +211,9 @@ export function LayoutSettingsDialog(props) {
                 min={3}
                 max={30}
                 marks={[
+                  {
+                    value: 3,
+                  },
                   {
                     value: 4,
                   },

@@ -8,10 +8,11 @@ import { ConferenceContext } from "./AntMedia";
 function LayoutPinned (props) {
   const conference = React.useContext(ConferenceContext);
 
-  const pinnedParticipant = conference.participants.find((v) => v.id === conference.pinnedVideoId)
+  const pinnedParticipant = conference.participants.find(e => e.streamId === props.pinnedParticipant?.streamId);
 
   let MAX_VIDEO_AT_SIDE = 4;
-  const showOthers = Object.keys(conference.allParticipants).length > MAX_VIDEO_AT_SIDE + 1; //one video is pinned
+
+  const showOthers = Object.keys(conference.allParticipants).length > (Math.min(conference.globals.maxVideoTrackCount, MAX_VIDEO_AT_SIDE) + 1); //one video is pinned
   let playingParticipantsCount = 0;
 
   //if we need to show others card, then we don't show the last video to hold place for the others card
@@ -38,8 +39,7 @@ function LayoutPinned (props) {
               pinned
               onHandlePin={() => {
                 conference.pinVideo(
-                  pinnedParticipant.streamId,
-                  pinnedParticipant.videoLabel
+                  pinnedParticipant.streamId
                 );
               }}
           />
@@ -66,7 +66,8 @@ function LayoutPinned (props) {
         if (element.name === "" || typeof element.name === 'undefined' || isPlayOnly || element.name === "Anonymous") {
           return null;
         }
-        if(element !== pinnedParticipant && playingParticipantsCount < maxPlayingParticipantsCount) {
+
+        if(element?.streamId !== pinnedParticipant?.streamId && playingParticipantsCount < maxPlayingParticipantsCount) {
           playingParticipantsCount ++;
           playingParticipants.push(element);
           return (

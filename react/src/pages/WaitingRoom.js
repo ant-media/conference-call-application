@@ -123,7 +123,7 @@ function WaitingRoom(props) {
               className="waiting-room-video"
               sx={{position: "relative"}}
             >
-              <VideoCard id="localVideo" autoPlay muted hidePin={true}/>
+              <VideoCard id="localVideo" streamId={conference?.publishStreamId} autoPlay muted hidePin={true}/>
 
               <Grid
                 container
