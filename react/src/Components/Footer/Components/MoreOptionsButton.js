@@ -78,6 +78,7 @@ function MoreOptionsButton({ footer, ...props }) {
             <CustomizedBtn
                 className={footer ? "footer-icon-button" : ""}
                 id="settings-button"
+                data-testid="settings-button-test"
                 variant="contained"
                 color={open ? "primary" : "secondary"}
                 aria-controls={open ? "demo-positioned-menu" : undefined}
