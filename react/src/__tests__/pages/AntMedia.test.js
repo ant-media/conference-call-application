@@ -35,6 +35,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
     return {
       init: jest.fn(),
       publish: jest.fn().mockImplementation(() => console.log('publishhhhhh')),
+      play: jest.fn(),
       unpublish: jest.fn(),
       leaveRoom: jest.fn(),
       startPublishing: jest.fn(),
@@ -44,6 +45,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       getLocalStream: jest.fn(),
       applyConstraints: jest.fn(),
       sendData: jest.fn().mockImplementation((publishStreamId, data) => console.log('send data called with ')),
+      setMaxVideoTrackCount: jest.fn(),
     };
   }),
 }));
@@ -317,6 +319,10 @@ describe('AntMedia Component', () => {
       
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await waitFor(() => {
+        currentConference.joinRoom("room", "publishStreamId");
       });
 
       await act(async () => {
