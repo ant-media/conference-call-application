@@ -254,5 +254,57 @@ describe('AntMedia Component', () => {
         expect(currentConference.pinnedVideoId).toBe("test1");
       });
     });
+
+    it('publishTimeoutError error callback', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callbackError("publishTimeoutError", {});
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith("publishTimeoutError", "Firewall might be blocking the connection Please setup a TURN Server");
+            
+      await act(async () => {
+        expect(currentConference.leftTheRoom == true);
+      });
+      
+      consoleSpy.mockRestore();
+    });
+
+    it('license_suspended_please_renew_license error callback', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith("license_suspended_please_renew_license", "Licence is Expired please renew the licence");
+      
+      
+      await act(async () => {
+        expect(currentConference.leftTheRoom == true);
+      });
+      
+      consoleSpy.mockRestore();
+
+    });
   
 });

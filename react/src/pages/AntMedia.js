@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Box, CircularProgress, Grid} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
@@ -331,6 +331,7 @@ function AntMedia(props) {
   const screenShareStreamId = React.useRef(null)
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
+  const leaveRoomWithError = useRef(false);
 
   // video send resolution for publishing
   // possible values: "auto", "highDefinition", "standartDefinition", "lowDefinition"
@@ -857,7 +858,16 @@ function AntMedia(props) {
 
       setUnAuthorizedDialogOpen(true)
     }
-
+    else if (error === "publishTimeoutError"){
+      console.error(error , "Firewall might be blocking the connection Please setup a TURN Server");
+      leaveRoomWithError.current = true;
+      setLeftTheRoom(true);
+    }
+    else if (error === "license_suspended_please_renew_license"){
+      console.error(error , "Licence is Expired please renew the licence");
+      leaveRoomWithError.current = true;
+      setLeftTheRoom(true);
+    }
     console.log("***** " + error)
 
   };
@@ -1998,7 +2008,7 @@ function AntMedia(props) {
               )}
             >
               {leftTheRoom ? (
-                <LeftTheRoom/>
+               <LeftTheRoom isError={leaveRoomWithError.current} />
               ) : waitingOrMeetingRoom === "waiting" ? (
                 <WaitingRoom/>
               ) : (
