@@ -61,7 +61,7 @@ class TestJoinLeave(unittest.TestCase):
     result_json = self.chrome.execute_script(script)
     if result_json is None:
       return -1
-    return result_json["globals"]["maxVideoTrackCount"]
+    return result_json["globals"]["desiredMaxVideoTrackCount"]
   
   def change_video_track_count(self, count):
     index = 0
