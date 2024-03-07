@@ -218,10 +218,6 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_participants()) == 3)
     
-    conference = self.get_conference()
-    allParticipants = conference["allParticipants"]
-    participants = conference["participants"]
-    
     if(self.chrome.is_element_exist_by_id("share-screen-button")):
       ss_button2 = self.chrome.get_element_by_id("share-screen-button")
     else:
