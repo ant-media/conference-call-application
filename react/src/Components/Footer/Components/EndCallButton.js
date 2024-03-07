@@ -32,7 +32,9 @@ function EndCallButton({ footer, ...props }) {
   // }
   return (
     <Tooltip title={t('Leave call')} placement="top">
-      <CustomizedBtn onClick={() => conference.setLeftTheRoom(true)} className={footer ? 'footer-icon-button' : ''} variant="contained" color="error">
+      <CustomizedBtn 
+        id="leave-room-button"
+        onClick={() => conference.setLeftTheRoom(true)} className={footer ? 'footer-icon-button' : ''} variant="contained" color="error">
         <SvgIcon size={28} name={"end-call"} />
       </CustomizedBtn>
     </Tooltip>

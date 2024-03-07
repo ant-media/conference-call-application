@@ -83,7 +83,7 @@ function InfoButton(props) {
               {t('Meeting link')}
             </Typography>
             <StyledMenuItem>
-              <StyledListItemText>{meetingLink.replace(/^https?:\/\//, '')}</StyledListItemText>
+              <StyledListItemText>{meetingLink.replace(/^https?:\/\//, '').split('?')[0]}</StyledListItemText>
               <ListItemIcon sx={{pl: 1, cursor: 'pointer'}}>
                 <Tooltip title={t('Copy meeting link')} placement="top">
                   <Button

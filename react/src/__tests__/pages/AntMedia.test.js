@@ -1,146 +1,310 @@
-import { render } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
-import { AntMedia } from 'pages/AntMedia';
-import { getMediaConstraints } from 'pages/AntMedia';
+// src/Button.test.js
+import React from 'react';
+import { render, fireEvent, act, waitFor } from '@testing-library/react';
+import AntMedia from 'pages/AntMedia';
+import { useWebSocket } from 'Components/WebSocketProvider';
+import { SnackbarProvider, useSnackbar} from "notistack";
+import { ConferenceContext } from "pages/AntMedia";
+import { assert, timeout } from 'workbox-core/_private';
 
-describe('getMediaConstraints', () => {
-    it('should return qvgaConstraints when input is qvgaConstraints', () => {
-        const result = getMediaConstraints('qvgaConstraints', 30);
-        expect(result).toEqual({
-            video: {
-                width: { ideal: 320 },
-                height: { ideal: 180 },
-                advanced: [
-                    { frameRate: { min: 30 } },
-                    { height: { min: 180 } },
-                    { width: { min: 320 } },
-                    { frameRate: { max: 30 } },
-                    { width: { max: 320 } },
-                    { height: { max: 180 } },
-                    { aspectRatio: { exact: 1.77778 } }
-                ]
-            }
-        });
-    });
 
-    it('should return vgaConstraints when input is vgaConstraints', () => {
-        const result = getMediaConstraints('vgaConstraints', 30);
-        expect(result).toEqual({
-            video: {
-                width: { ideal: 640 },
-                height: { ideal: 360 },
-                advanced: [
-                    { frameRate: { min: 30 } },
-                    { height: { min: 360 } },
-                    { width: { min: 640 } },
-                    { frameRate: { max: 30 } },
-                    { width: { max: 640 } },
-                    { height: { max: 360 } },
-                    { aspectRatio: { exact: 1.77778 } }
-                ]
-            }
-        });
-    });
+var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
+var currentConference;
 
-    it('should return hdConstraints when input is hdConstraints', () => {
-        const result = getMediaConstraints('hdConstraints', 30);
-        expect(result).toEqual({
-            video: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                advanced: [
-                    { frameRate: { min: 30 } },
-                    { height: { min: 720 } },
-                    { width: { min: 1280 } },
-                    { frameRate: { max: 30 } },
-                    { width: { max: 1280 } },
-                    { height: { max: 720 } },
-                    { aspectRatio: { exact: 1.77778 } }
-                ]
-            }
-        });
-    });
+jest.mock('Components/WebSocketProvider', () => ({
+  ...jest.requireActual('Components/WebSocketProvider'),
+  useWebSocket: jest.fn(),
+}));
 
-    it('should return fullHdConstraints when input is fullHdConstraints', () => {
-        const result = getMediaConstraints('fullHdConstraints', 30);
-        expect(result).toEqual({
-            video: {
-                width: { ideal: 1920 },
-                height: { ideal: 1080 },
-                advanced: [
-                    { frameRate: { min: 30 } },
-                    { height: { min: 1080 } },
-                    { width: { min: 1920 } },
-                    { frameRate: { max: 30 } },
-                    { width: { max: 1920 } },
-                    { height: { max: 1080 } },
-                    { aspectRatio: { exact: 1.77778 } }
-                ]
-            }
-        });
-    });
+jest.mock('notistack', () => ({
+  ...jest.requireActual('notistack'),
+  useSnackbar: jest.fn(),
+  SnackbarProvider: ({ children }) => <div></div>,
+}));
 
-    it('should return null when input is not a valid constraint', () => {
-        const result = getMediaConstraints('invalidConstraint', 30);
-        expect(result).toBeNull();
-    });
-});
-
-describe('AntMedia', () => {
-    let component;
-    let mockWebRTCAdaptor = {
-        switchVideoCameraCapture: jest.fn(),
-        switchAudioInputSource: jest.fn()
+jest.mock('@antmedia/webrtc_adaptor', () => ({
+  ...jest.requireActual('@antmedia/webrtc_adaptor'),
+  WebRTCAdaptor: jest.fn().mockImplementation((params) => {
+    console.log(params);
+    if(params.mediaConstraints.audio === true) {
+      webRTCAdaptorScreenConstructor = params;
+    }
+    else {
+      webRTCAdaptorConstructor = params;
+    }
+    return {
+      init: jest.fn(),
+      publish: jest.fn().mockImplementation(() => console.log('publishhhhhh')),
+      unpublish: jest.fn(),
+      leaveRoom: jest.fn(),
+      startPublishing: jest.fn(),
+      stopPublishing: jest.fn(),
+      startPlaying: jest.fn(),
+      stopPlaying: jest.fn(),
+      getLocalStream: jest.fn(),
+      applyConstraints: jest.fn(),
+      sendData: jest.fn().mockImplementation((publishStreamId, data) => console.log('send data called with ')),
     };
+  }),
+}));
 
-    beforeEach(() => {
-        global.localStorage = {
-            getItem: jest.fn(),
-            setItem: jest.fn()
-        };
-        global.console = {
-            log: jest.fn()
-        };
-        global.webRTCAdaptor = mockWebRTCAdaptor;
+const MockChild = () => {
+  const conference = React.useContext(ConferenceContext);
+  currentConference = conference;
+
+  //console.log(conference);
+
+  return (
+    <div> My Mock </div>
+  );
+};
+
+const mediaDevicesMock = {
+  enumerateDevices: jest.fn().mockResolvedValue([
+    { deviceId: '1', kind: 'audioinput' },
+    { deviceId: '2', kind: 'videoinput' },
+  ]),
+  getUserMedia: jest.fn(),
+  getDisplayMedia: jest.fn().mockResolvedValue(null),
+};
+
+global.navigator.mediaDevices = mediaDevicesMock; // here
+
+describe('AntMedia Component', () => {
+  
+  beforeEach(() => {
+    // Reset the mock implementation before each test
+    jest.clearAllMocks();
+
+    useWebSocket.mockImplementation(() => ({
+        return: {
+            sendMessage: jest.fn(),
+            latestMessage: null,
+            isWebSocketConnected: true,
+        }
+    }));        
+
+    useSnackbar.mockImplementation(() => ({
+        enqueueSnackbar: jest.fn(),
+        closeSnackbar: jest.fn(),
+    }));    
+  });
+  
+
+  it('renders without crashing', async () => {
+    await act(async () => {
+      const { container } = render(
+          <AntMedia isTest={true}/>
+        );
+        console.log(container.outerHTML);
     });
 
-    it('should set selected camera when cameraSelected is called', () => {
-        component = render(<AntMedia />);
-        act(() => {
-            component.cameraSelected('camera1');
+  });
+
+  it('share screen', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+      //console.log(container);
+    
+      expect(currentConference.isScreenShared).toBe(false);
+      
+      await act(async () => {
+      currentConference.handleStartScreenShare();
+      });
+
+      await waitFor(() => {
+        expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+      });
+
+      act(() => {
+          webRTCAdaptorScreenConstructor.callback("publish_started");
+      });
+  
+
+      await waitFor(() => {
+        expect(currentConference.isScreenShared).toBe(true);
+      });
+
+      console.log(currentConference);
+
+      expect(currentConference.isScreenShared).toBe(true);
+    });
+
+    it('share screen adaptor callbacks', async () => {
+
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+      //console.log(container);
+
+      
+      expect(currentConference.isScreenShared).toBe(false);
+      
+      await act(async () => {
+      currentConference.handleStartScreenShare();
+      });
+
+      await waitFor(() => {
+        expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+      });
+
+      act(() => {
+          webRTCAdaptorScreenConstructor.callback("initialized");
+          var obj = {videoRoundTripTime: 1000, 
+            audioRoundTripTime: 0, 
+            videoJitter: 0, 
+            audioJitter: 0, 
+            currentOutgoingBitrate: 0, 
+            videoPacketsLost: 0, 
+            audioPacketsLost: 0, 
+            totalVideoPacketsSent: 0, 
+            totalAudioPacketsSent: 0,
+            availableOutgoingBitrate: 0};
+          webRTCAdaptorScreenConstructor.callback("updated_stats", obj);
+
+          expect(consoleSpy).toHaveBeenCalledWith("displayPoorNetworkConnectionWarning");
+
+
+          webRTCAdaptorScreenConstructor.callbackError("error", "message");
         });
 
-        expect(global.localStorage.setItem).toHaveBeenCalledWith('selectedCamera', 'camera1');
-        expect(mockWebRTCAdaptor.switchVideoCameraCapture).toHaveBeenCalledWith('publishStreamId', 'camera1');
+        expect(consoleSpy).toHaveBeenCalledWith("error:error message:message");
+
+        // Restore the mock
+        consoleSpy.mockRestore();
     });
 
-    it('should not call switchVideoCameraCapture when cameraSelected is called with the same value', () => {
-        component = render(<AntMedia />);
-        act(() => {
-            component.cameraSelected('camera1');
-            component.cameraSelected('camera1');
-        });
 
-        expect(mockWebRTCAdaptor.switchVideoCameraCapture).toHaveBeenCalledTimes(1);
+    it('handle video track assignment', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+   
+      currentConference.allParticipants["p1"] = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
+
+      var obj = {};
+      var notificationEvent = {
+        eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+        streamId: "stream1",
+        payload: [
+          {videoLabel:"videoTrack1", trackId:"tracka1"},
+          {videoLabel:"videoTrack2", trackId:"tracka2"},
+        ] 
+      };
+      var json = JSON.stringify(notificationEvent);
+
+      obj.data = json;
+
+      const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("data_received", obj);
+      });
+
+
+      await waitFor(() => {
+        expect(currentConference.screenSharedVideoId).toBe("p1");
+      });
+
+      var event = {"eventType": "PIN_USER", "streamId": "p1"};
+      expect(consoleSpy).toHaveBeenCalledWith("send notification event", event);
+      
+
+      consoleSpy.mockRestore();
+      
     });
 
-    it('should set selected microphone when microphoneSelected is called', () => {
-        component = render(<AntMedia />);
-        act(() => {
-            component.microphoneSelected('microphone1');
-        });
+    it('handle sharing on', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
-        expect(global.localStorage.setItem).toHaveBeenCalledWith('selectedMicrophone', 'microphone1');
-        expect(mockWebRTCAdaptor.switchAudioInputSource).toHaveBeenCalledWith('publishStreamId', 'microphone1');
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      var testStreamId = "stream1";
+
+      currentConference.participants.push({streamId: testStreamId, videoLabel: "test1"});
+      var obj = {};
+      var notificationEvent = {
+        eventType: "SCREEN_SHARED_ON",
+        streamId: testStreamId,
+      };
+      var json = JSON.stringify(notificationEvent);
+
+      obj.data = json;
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("data_received", obj);
+      });
+
+      await waitFor(() => {
+        expect(currentConference.pinnedVideoId).toBe("test1");
+      });
     });
 
-    it('should not call switchAudioInputSource when microphoneSelected is called with the same value', () => {
-        component = render(<AntMedia />);
-        act(() => {
-            component.microphoneSelected('microphone1');
-            component.microphoneSelected('microphone1');
-        });
+    it('publishTimeoutError error callback', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
-        expect(mockWebRTCAdaptor.switchAudioInputSource).toHaveBeenCalledTimes(1);
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callbackError("publishTimeoutError", {});
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith("publishTimeoutError", "Firewall might be blocking the connection Please setup a TURN Server");
+            
+      await act(async () => {
+        expect(currentConference.leftTheRoom == true);
+      });
+      
+      consoleSpy.mockRestore();
     });
+
+    it('license_suspended_please_renew_license error callback', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith("license_suspended_please_renew_license", "Licence is Expired please renew the licence");
+      
+      
+      await act(async () => {
+        expect(currentConference.leftTheRoom == true);
+      });
+      
+      consoleSpy.mockRestore();
+
+    });
+  
 });
