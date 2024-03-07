@@ -24,6 +24,7 @@ const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
   maxVideoTrackCount: 6,
+  desiredMaxVideoTrackCount: 6,
   trackEvents: [],
 };
 
@@ -951,9 +952,13 @@ function AntMedia(props) {
   }
 
   function handleSetMaxVideoTrackCount(maxTrackCount) {
-    if (publishStreamId) {
-      webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, maxTrackCount);
-      globals.maxVideoTrackCount = maxTrackCount;
+    globals.desiredMaxVideoTrackCount = maxTrackCount;
+  }
+
+  function updateMaxVideoTrackCount(newCount) {
+    if (publishStreamId && globals.maxVideoTrackCount !== newCount) {
+      globals.maxVideoTrackCount = newCount;
+      webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, newCount);
     }
   }
 
@@ -1086,17 +1091,6 @@ function AntMedia(props) {
       return navigator.languages[0];
     return navigator.language;
   }
-
-  useEffect(() => {
-    if(pinnedVideoId === undefined || pinnedVideoId === null){
-      globals.maxVideoTrackCount = 6;
-      handleSetMaxVideoTrackCount(globals.maxVideoTrackCount);
-    }
-    else{
-      globals.maxVideoTrackCount = 3;
-      handleSetMaxVideoTrackCount(globals.maxVideoTrackCount);
-    }
-  }, [pinnedVideoId]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     scrollToBottom();
@@ -1998,7 +1992,8 @@ function AntMedia(props) {
               setPresenterButtonDisabled,
               effectsDrawerOpen,
               handleEffectsOpen,
-              setAndEnableVirtualBackgroundImage
+              setAndEnableVirtualBackgroundImage,
+              updateMaxVideoTrackCount
             }}
           >
             {props.children}

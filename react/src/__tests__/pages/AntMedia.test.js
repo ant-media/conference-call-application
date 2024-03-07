@@ -306,5 +306,33 @@ describe('AntMedia Component', () => {
       consoleSpy.mockRestore();
 
     });
+
+    it('max video count setting', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.handleSetMaxVideoTrackCount(5);
+      });
+
+      expect(currentConference.globals.desiredMaxVideoTrackCount == 5);
+
+      await act(async () => {
+        currentConference.updateMaxVideoTrackCount(7);
+      });
+
+      expect(currentConference.globals.maxVideoTrackCount == 7);
+      
+      consoleSpy.mockRestore();
+
+    });
   
 });
