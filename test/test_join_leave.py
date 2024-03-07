@@ -65,14 +65,16 @@ class TestJoinLeave(unittest.TestCase):
   
   def change_video_track_count(self, count):
     index = 0
-    if count == 4:
+    if count == 2:
       index = 0
-    elif count == 6:
+    elif count == 4:
       index = 1
-    elif count == 12:
+    elif count == 6:
       index = 2
-    elif count == 30:
+    elif count == 12:
       index = 3
+    elif count == 30:
+      index = 4
 
     settings_button = self.chrome.get_element_by_id("settings-button")
     self.chrome.click_element(settings_button)
