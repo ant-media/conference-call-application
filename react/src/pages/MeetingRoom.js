@@ -9,6 +9,7 @@ import {ReactionBarSelector} from "@charkour/react-reactions";
 import MuteParticipantDialog from "../Components/MuteParticipantDialog";
 import {useTheme} from "@mui/material/styles";
 import {t} from "i18next";
+import { isMobile, isTablet } from "react-device-detect";
 
 
 function debounce(fn, ms) {
@@ -84,7 +85,7 @@ const MeetingRoom = React.memo((props) => {
     }
   }
 
-  const pinLayout = conference.pinnedVideoId !== undefined;
+  const pinLayout = (conference.pinnedVideoId !== undefined) && !isMobile && !isTablet;
   return (
     <>
       <MuteParticipantDialog/>
@@ -124,7 +125,7 @@ const MeetingRoom = React.memo((props) => {
           zIndex: 666,
           height: 46,
         }}>
-          <ReactionBarSelector reactions={reactionList} iconSize={32}
+          <ReactionBarSelector reactions={reactionList} iconSize={28}
                                style={{backgroundColor: theme.palette.themeColor[70]}} onSelect={sendEmoji}/>
         </div>)
       }
