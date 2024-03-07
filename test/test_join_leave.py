@@ -103,6 +103,8 @@ class TestJoinLeave(unittest.TestCase):
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
 
+    self.set_and_test_track_limit(2)
+    time.sleep(2)
     self.set_and_test_track_limit(4)
     time.sleep(2)
     self.set_and_test_track_limit(6)
