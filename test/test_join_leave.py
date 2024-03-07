@@ -199,7 +199,14 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_participants()) == 2)
 
-    ss_button = self.chrome.get_element_by_id("share-screen-button")
+
+
+    if(self.chrome.is_element_exist_by_id("share-screen-button")):
+      ss_button = self.chrome.get_element_by_id("share-screen-button")
+    else:
+      more_button = self.chrome.get_element_by_id("more-button")
+      self.chrome.click_element(more_button)
+      ss_button = self.chrome.get_element_by_id("more-options-share-screen-button")
 
     self.chrome.click_element(ss_button)
 
@@ -211,7 +218,12 @@ class TestJoinLeave(unittest.TestCase):
     allParticipants = conference["allParticipants"]
     participants = conference["participants"]
     
-    ss_button2 = self.chrome.get_element_by_id("share-screen-button")
+    if(self.chrome.is_element_exist_by_id("share-screen-button")):
+      ss_button2 = self.chrome.get_element_by_id("share-screen-button")
+    else:
+      more_button = self.chrome.get_element_by_id("more-button")
+      self.chrome.click_element(more_button)
+      ss_button2 = self.chrome.get_element_by_id("more-options-share-screen-button")
 
     self.chrome.click_element(ss_button2)
 
