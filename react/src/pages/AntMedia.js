@@ -457,7 +457,7 @@ function AntMedia(props) {
       token = playToken;
     }
 
-    webRTCAdaptor.play(roomName, token, roomName, null, subscriberId, subscriberCode);
+    webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
   }
 
   async function checkDevices() {
@@ -564,7 +564,7 @@ function AntMedia(props) {
     //request broadcast object for new tracks
     participantIds.forEach(pid => {
       if (allParticipants[pid] === undefined) {
-        webRTCAdaptor.getBroadcastObject(pid);
+        webRTCAdaptor?.getBroadcastObject(pid);
       }
     });
   }
@@ -713,14 +713,14 @@ function AntMedia(props) {
       console.log("**** publish started:" + reconnecting);
 
       if (reconnecting) {
-        webRTCAdaptor.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
+        webRTCAdaptor?.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
       }
       console.log("publish started");
       //stream is being published
-      webRTCAdaptor.enableStats(publishStreamId);
+      webRTCAdaptor?.enableStats(publishStreamId);
     } else if (info === "publish_finished") {
       //stream is being finished
     } else if (info === "session_restored") {
@@ -733,7 +733,7 @@ function AntMedia(props) {
     } else if (info === "play_started") {
       console.log("**** play started:" + reconnecting);
 
-      webRTCAdaptor.getBroadcastObject(roomName);
+      webRTCAdaptor?.getBroadcastObject(roomName);
 
       if (reconnecting) {
         playReconnected = true;
@@ -762,9 +762,9 @@ function AntMedia(props) {
       if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
 
         setTimeout(() => {
-          if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" &&
-            webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
-            webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
+          if (webRTCAdaptor?.iceConnectionState(publishStreamId) !== "checking" &&
+            webRTCAdaptor?.iceConnectionState(publishStreamId) !== "connected" &&
+            webRTCAdaptor?.iceConnectionState(publishStreamId) !== "completed") {
             reconnectionInProgress();
           }
         }, 5000);
@@ -865,7 +865,7 @@ function AntMedia(props) {
     } else if (error.indexOf("already_publishing") !== -1) {
       console.log("**** already publishing:" + reconnecting);
       if (reconnecting) {
-        webRTCAdaptor.stop(publishStreamId);
+        webRTCAdaptor?.stop(publishStreamId);
 
         setTimeout(() => {
           handlePublish(
@@ -916,7 +916,7 @@ function AntMedia(props) {
   }
 
   function assignVideoToStream(videoTrackId, streamId) {
-    webRTCAdaptor.assignVideoTrack(videoTrackId, streamId, true);
+    webRTCAdaptor?.assignVideoTrack(videoTrackId, streamId, true);
   }
 
   function pinVideo(id, videoLabelProp = "") {
@@ -946,14 +946,14 @@ function AntMedia(props) {
       setPinnedVideoId(undefined);
       setUnPinnedStreamId(streamId)
       handleNotifyUnpinUser(id);
-      webRTCAdaptor.assignVideoTrack(videoLabel, streamId, false);
+      webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, false);
     }
       // if there is no pinned video we are gonna pin the targeted user.
     // and we need to inform pinned user.
     else {
       setPinnedVideoId(videoLabel);
       handleNotifyPinUser(id);
-      webRTCAdaptor.assignVideoTrack(videoLabel, streamId, true);
+      webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
     }
   }
 
@@ -984,7 +984,7 @@ function AntMedia(props) {
   function updateMaxVideoTrackCount(newCount) {
     if (publishStreamId && globals.maxVideoTrackCount !== newCount) {
       globals.maxVideoTrackCount = newCount;
-      webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, newCount);
+      webRTCAdaptor?.setMaxVideoTrackCount(publishStreamId, newCount);
     }
   }
 
@@ -1160,14 +1160,14 @@ function AntMedia(props) {
 
   function handleSendMessage(message) {
     if (publishStreamId) {
-      let iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
+      let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
       if (
         iceState !== null &&
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
         if (message === "debugme") {
-          webRTCAdaptor.getDebugInfo(publishStreamId);
+          webRTCAdaptor?.getDebugInfo(publishStreamId);
           return;
         } else if (message === "clearme") {
           setMessages([]);
@@ -1175,7 +1175,7 @@ function AntMedia(props) {
         }
 
 
-        webRTCAdaptor.sendData(
+        webRTCAdaptor?.sendData(
           publishStreamId,
           JSON.stringify({
             eventType: "MESSAGE_RECEIVED",
@@ -1244,7 +1244,7 @@ function AntMedia(props) {
         eventType === "CAM_TURNED_ON" ||
         eventType === "MIC_MUTED" ||
         eventType === "MIC_UNMUTED") {
-        webRTCAdaptor.getBroadcastObject(eventStreamId);
+        webRTCAdaptor?.getBroadcastObject(eventStreamId);
       } else if (eventType === "RECORDING_TURNED_ON") {
         setIsRecordPluginActive(true);
       } else if (eventType === "RECORDING_TURNED_OFF") {
@@ -1314,11 +1314,11 @@ function AntMedia(props) {
            pinVideo(videoLab, videoLab);
         }
         setScreenSharedVideoId(eventStreamId);
-        webRTCAdaptor.getBroadcastObject(eventStreamId);
+        webRTCAdaptor?.getBroadcastObject(eventStreamId);
       } else if (eventType === "SCREEN_SHARED_OFF") {
         setScreenSharedVideoId(null);
         setPinnedVideoId(undefined);
-        webRTCAdaptor.getBroadcastObject(eventStreamId);
+        webRTCAdaptor?.getBroadcastObject(eventStreamId);
       } else if (eventType === "REACTIONS" && notificationEvent.senderStreamId !== publishStreamId) {
         showReactions(notificationEvent.senderStreamId, notificationEvent.reaction);
       } else if (eventType === "TURN_YOUR_MIC_OFF") {
@@ -1359,7 +1359,7 @@ function AntMedia(props) {
               p.streamId = vta.trackId;
               let broadcastObject = allParticipants[p.streamId];
               if(broadcastObject === undefined){
-                setTimeout(()=>webRTCAdaptor.requestVideoTrackAssignments(roomName), 1000)
+                setTimeout(()=>webRTCAdaptor?.requestVideoTrackAssignments(roomName), 1000)
               }
               if (broadcastObject) {
                 p.name = broadcastObject.name;
@@ -1392,7 +1392,7 @@ function AntMedia(props) {
       } else if (eventType === "TRACK_LIST_UPDATED") {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
-        webRTCAdaptor.getBroadcastObject(roomName);
+        webRTCAdaptor?.getBroadcastObject(roomName);
       }
     }
   }
@@ -1444,13 +1444,13 @@ function AntMedia(props) {
     } else {
       metadata.isRecording = false;
     }
-    webRTCAdaptor.updateStreamMetaData(roomName, JSON.stringify(metadata));
+    webRTCAdaptor?.updateStreamMetaData(roomName, JSON.stringify(metadata));
   },[webRTCAdaptor, roomName]);
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
     let metadata = getUserStatusMetadata(micMuted, cameraOn, false);
 
-    webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
+    webRTCAdaptor?.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
   }
 
   function handleLeaveFromRoom() {
@@ -1486,7 +1486,7 @@ function AntMedia(props) {
       ...(info ? info : {}),
     };
     console.info("send notification event", notEvent);
-    webRTCAdaptor.sendData(publishStreamId, JSON.stringify(notEvent));
+    webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
   },[webRTCAdaptor]);
 
   function updateVideoSendResolution(isPinned) {
@@ -1588,7 +1588,7 @@ function AntMedia(props) {
       currentStreamName = "Anonymous"
     }
 
-    webRTCAdaptor.publish(
+    webRTCAdaptor?.publish(
       publishStreamId,
       token,
       subscriberId,
@@ -1647,9 +1647,9 @@ function AntMedia(props) {
     virtualBackgroundImage.onload = () => {
       console.log("Virtual background image is loaded");
       setVirtualBackground(virtualBackgroundImage);
-      webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+      webRTCAdaptor?.setBackgroundImage(virtualBackgroundImage);
 
-      webRTCAdaptor.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
+      webRTCAdaptor?.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
         console.log("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is enabled");
         setIsVideoEffectRunning(true);
       }).catch(err => {
@@ -1681,7 +1681,7 @@ function AntMedia(props) {
       effectName = VideoEffect.VIRTUAL_BACKGROUND;
       setIsVideoEffectRunning(true);
     }
-    webRTCAdaptor.enableEffect(effectName).then(() => {
+    webRTCAdaptor?.enableEffect(effectName).then(() => {
       console.log("Effect: " + effectName + " is enabled");
     }).catch(err => {
       console.error("Effect: " + effectName + " is not enabled. Error is " + err);
@@ -1693,7 +1693,7 @@ function AntMedia(props) {
     if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
     } else {
-      webRTCAdaptor.turnOnLocalCamera(streamId);
+      webRTCAdaptor?.turnOnLocalCamera(streamId);
     }
 
     updateUserStatusMetadata(isMyMicMuted, true);
@@ -1709,7 +1709,7 @@ function AntMedia(props) {
     if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
     } else {
-      webRTCAdaptor.turnOffLocalCamera(streamId);
+      webRTCAdaptor?.turnOffLocalCamera(streamId);
     }
 
     updateUserStatusMetadata(isMyMicMuted, false);
@@ -1746,7 +1746,7 @@ function AntMedia(props) {
       // When we first open home page, React will call this function and local stream is null at that time.
       // So, we need to catch the error.
       try {
-        webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
+        webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, value);
       } catch (e) {
         console.log("Local stream is not ready yet.");
       }
@@ -1759,7 +1759,7 @@ function AntMedia(props) {
       // When we first open home page, React will call this function and local stream is null at that time.
       // So, we need to catch the error.
       try {
-        webRTCAdaptor.switchAudioInputSource(publishStreamId, value);
+        webRTCAdaptor?.switchAudioInputSource(publishStreamId, value);
       } catch (e) {
         console.log("Local stream is not ready yet.");
       }
@@ -1791,7 +1791,7 @@ function AntMedia(props) {
   }
 
   function muteLocalMic() {
-    webRTCAdaptor.muteLocalMic();
+    webRTCAdaptor?.muteLocalMic();
     updateUserStatusMetadata(true, !isMyCamTurnedOff);
     setIsMyMicMuted(true);
 
@@ -1802,7 +1802,7 @@ function AntMedia(props) {
   }
 
   function unmuteLocalMic() {
-    webRTCAdaptor.unmuteLocalMic();
+    webRTCAdaptor?.unmuteLocalMic();
     updateUserStatusMetadata(false, !isMyCamTurnedOff);
     setIsMyMicMuted(false);
 
