@@ -207,9 +207,12 @@ export function LayoutSettingsDialog(props) {
                 id="tile-count-slider"
                 defaultValue={value}
                 step={null}
-                min={3}
+                min={2}
                 max={30}
                 marks={[
+                  {
+                    value: 2,
+                  },
                   {
                     value: 4,
                   },

@@ -50,8 +50,10 @@ class TestJoinLeave(unittest.TestCase):
   def get_conference(self):
     script = "return window.conference;"
     result_json = self.chrome.execute_script(script)
+    print(result_json)
     if result_json is None:
       return []
+    print(result_json)
     return result_json
   
   def get_video_track_limit(self):
@@ -59,18 +61,20 @@ class TestJoinLeave(unittest.TestCase):
     result_json = self.chrome.execute_script(script)
     if result_json is None:
       return -1
-    return result_json["globals"]["maxVideoTrackCount"]
+    return result_json["globals"]["desiredMaxVideoTrackCount"]
   
   def change_video_track_count(self, count):
     index = 0
-    if count == 4:
+    if count == 2:
       index = 0
-    elif count == 6:
+    elif count == 4:
       index = 1
-    elif count == 12:
+    elif count == 6:
       index = 2
-    elif count == 30:
+    elif count == 12:
       index = 3
+    elif count == 30:
+      index = 4
 
     settings_button = self.chrome.get_element_by_id("settings-button")
     self.chrome.click_element(settings_button)
@@ -96,11 +100,16 @@ class TestJoinLeave(unittest.TestCase):
       wait.until(lambda x: self.get_video_track_limit() == limit-1)
   
   def test_video_track_count(self):
+    self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
 
+    self.set_and_test_track_limit(2)
+    time.sleep(2)
     self.set_and_test_track_limit(4)
+    time.sleep(2)
     self.set_and_test_track_limit(6)
+    time.sleep(2)
     self.set_and_test_track_limit(12)
 
     self.chrome.close_all()
@@ -108,7 +117,39 @@ class TestJoinLeave(unittest.TestCase):
   def leave_room(self):
     leave_button = self.chrome.get_element_by_id("leave-room-button")
     self.chrome.click_element(leave_button)
-  
+    
+  def _test_others_tile(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+    print("current: "+self.chrome.get_current_tab_id())
+    assert(handle_2 == self.chrome.get_current_tab_id())
+    assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+
+    wait = self.chrome.get_wait()
+    wait.until(lambda x: len(self.get_participants()) == 2)
+    self.chrome.switch_to_tab(handle_1)
+    wait.until(lambda x: len(self.get_participants()) == 2)
+    
+    ss_button = self.chrome.get_element_by_id("share-screen-button")
+    self.chrome.click_element(ss_button)
+    self.chrome.switch_to_tab(handle_2)
+    assert(self.chrome.get_element_by_id("unpinned-gallery").is_displayed())
+
+    assert(not self.chrome.is_element_exist_by_class_name('others-tile-inner'))
+    for i in range(3,7):
+        handler = self.join_room_in_new_tab("participant" + str(i), room)
+        assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+        self.chrome.switch_to_tab(handler)
+        wait.until(lambda x: len(self.get_participants()) == i)
+
+        if i==6:
+            assert(self.chrome.is_element_exist_by_class_name('others-tile-inner'))
+            break
+        assert(not self.chrome.is_element_exist_by_class_name("others-tile-inner"))
+    self.chrome.close_all()
+
+
 
   def test_join_room_2_participants(self):
     room = "room"+str(random.randint(100, 999))
@@ -163,15 +204,45 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_participants()) == 2)
 
-    ss_button = self.chrome.get_element_by_id("share-screen-button")
+
+
+    if(self.chrome.is_element_exist_by_id("share-screen-button")):
+      ss_button = self.chrome.get_element_by_id("share-screen-button")
+    else:
+      more_button = self.chrome.get_element_by_id("more-button")
+      self.chrome.click_element(more_button)
+      ss_button = self.chrome.get_element_by_id("more-options-share-screen-button")
 
     self.chrome.click_element(ss_button)
 
     self.chrome.switch_to_tab(handle_2)
 
-    #wait.until(lambda x: self.is_first_participant_pinned())
+    wait.until(lambda x: len(self.get_participants()) == 3)
+    
+    if(self.chrome.is_element_exist_by_id("share-screen-button")):
+      ss_button2 = self.chrome.get_element_by_id("share-screen-button")
+    else:
+      more_button = self.chrome.get_element_by_id("more-button")
+      self.chrome.click_element(more_button)
+      ss_button2 = self.chrome.get_element_by_id("more-options-share-screen-button")
 
-    assert(self.chrome.get_element_by_id("unpinned-gallery").is_displayed())
+    self.chrome.click_element(ss_button2)
+
+    wait.until(lambda x: len(self.get_participants()) == 4)
+
+    
+    conference = self.get_conference()
+    allParticipants = conference["allParticipants"]
+    participants = conference["participants"]
+
+    presenter2Exists = participants[1]["streamId"] + "_presentation" in allParticipants
+    presenterPinned = participants[2]["id"] == conference["pinnedVideoId"]
+
+    presenter1Exists = participants[2]["streamId"] in allParticipants
+
+    print("presenter1Exists: "+str(presenter1Exists)+" presenter2Exists: "+str(presenter2Exists)+" presenterPinned: "+str(presenterPinned))
+
+    assert(presenter1Exists and presenter2Exists and presenterPinned)
 
     self.chrome.close_all()
 
