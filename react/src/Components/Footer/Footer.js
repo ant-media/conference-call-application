@@ -30,7 +30,7 @@ const getCustomizedGridStyle = (theme) => {
     zIndex: 101,
   };
 
-  if (getRoomNameAttribute()) {
+  if (isComponentMode()) {
     customizedGridStyle.position = "absolute";
     customizedGridStyle.width = "100%";
   }
@@ -42,7 +42,7 @@ const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme
 
 function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
+  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
 
   const mobileBreakpoint = 900;
