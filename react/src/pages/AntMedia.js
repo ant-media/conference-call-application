@@ -364,11 +364,15 @@ function AntMedia() {
     for (let index = 0; index < devices.length; index++) {
       if (devices[index].kind === "videoinput" && devices[index].deviceId === selectedDevices.videoDeviceId) {
         isVideoDeviceAvailable = true;
-        setCameraButtonDisabled(false)
+        setCameraButtonDisabled(false);
+        console.info("Unable to access selected camera, switching the first available camera.");
+        displayMessage("Unable to access selected camera, switching the first available camera.", "white");
       }
       if (devices[index].kind === "audioinput" && devices[index].deviceId === selectedDevices.audioDeviceId) {
         isAudioDeviceAvailable = true;
-        setMicrophoneButtonDisabled(false)
+        setMicrophoneButtonDisabled(false);
+        console.info("Unable to access selected microphone, switching the first available microphone.");
+        displayMessage("Unable to access selected microphone, switching the first available microphone.", "white");
       }
     }
 
@@ -382,6 +386,8 @@ function AntMedia() {
         // if there is no camera, set the video to false
         checkAndTurnOffLocalCamera()
         setCameraButtonDisabled(true)
+        console.info("There is no available camera device.");
+        displayMessage("There is no available camera device.", "white")
       }
     }
     if (selectedDevices.audioDeviceId === '' || isAudioDeviceAvailable === false) {
@@ -389,22 +395,22 @@ function AntMedia() {
       if (audio) {
         selectedDevices.audioDeviceId = audio.deviceId;
         setMicrophoneButtonDisabled(false)
-        displayMessage("There is no camera device available.", "white")
       } else {
         // if there is no audio, set the audio to false
         muteLocalMic()
         setMicrophoneButtonDisabled(true)
-        displayMessage("There is no microphone available.", "white")
+        console.info("There is no microphone device available.");
+        displayMessage("There is no microphone device available.", "white")
       }
     }
 
     setSelectedDevices(selectedDevices);
 
     if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
-      webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+      webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
     }
     if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
-      webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+      webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
     }
   }
 
