@@ -881,7 +881,7 @@ function AntMedia(props) {
 
       setUnAuthorizedDialogOpen(true)
     }
-    else if (error === "publishTimeoutError"){
+    else if ((error === "publishTimeoutError") && (!reconnecting)){
       console.error(error , "Firewall might be blocking the connection Please setup a TURN Server");
       leaveRoomWithError.current = true;
       setLeftTheRoom(true);
@@ -890,10 +890,14 @@ function AntMedia(props) {
       console.error(error , "Licence is Expired please renew the licence");
       leaveRoomWithError.current = true;
       setLeftTheRoom(true);
+    } else if (error === "notSetRemoteDescription"){
+      console.error(error , "Not set remote description");
+      leaveRoomWithError.current = true;
+      setLeftTheRoom(true);
     }
     console.log("***** " + error)
 
-  };
+  }
 
 
 
