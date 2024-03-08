@@ -35,6 +35,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
     return {
       init: jest.fn(),
       publish: jest.fn().mockImplementation(() => console.log('publishhhhhh')),
+      play: jest.fn(),
       unpublish: jest.fn(),
       leaveRoom: jest.fn(),
       startPublishing: jest.fn(),
@@ -44,6 +45,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       getLocalStream: jest.fn(),
       applyConstraints: jest.fn(),
       sendData: jest.fn().mockImplementation((publishStreamId, data) => console.log('send data called with ')),
+      setMaxVideoTrackCount: jest.fn(),
     };
   }),
 }));
@@ -302,6 +304,38 @@ describe('AntMedia Component', () => {
       await act(async () => {
         expect(currentConference.leftTheRoom == true);
       });
+      
+      consoleSpy.mockRestore();
+
+    });
+
+    it('max video count setting', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await waitFor(() => {
+        currentConference.joinRoom("room", "publishStreamId");
+      });
+
+      await act(async () => {
+        currentConference.handleSetMaxVideoTrackCount(5);
+      });
+
+      expect(currentConference.globals.desiredMaxVideoTrackCount == 5);
+
+      await act(async () => {
+        currentConference.updateMaxVideoTrackCount(7);
+      });
+
+      expect(currentConference.globals.maxVideoTrackCount == 7);
       
       consoleSpy.mockRestore();
 
