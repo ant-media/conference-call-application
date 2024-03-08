@@ -11,7 +11,9 @@ function LayoutPinned (props) {
   const pinnedParticipant = conference.participants.find((v) => v.id === conference.pinnedVideoId)
 
   let MAX_VIDEO_AT_SIDE = 4;
-  const showOthers = Object.keys(conference.allParticipants).length > MAX_VIDEO_AT_SIDE;
+  conference.updateMaxVideoTrackCount(Math.min(conference.globals.desiredMaxVideoTrackCount, MAX_VIDEO_AT_SIDE));
+
+  const showOthers = Object.keys(conference.allParticipants).length > MAX_VIDEO_AT_SIDE + 1; //one video is pinned
   let playingParticipantsCount = 0;
 
   //if we need to show others card, then we don't show the last video to hold place for the others card
@@ -92,6 +94,7 @@ function LayoutPinned (props) {
   const othersCard = () => {
     return (
       <>
+      {showOthers ? (
         <div className="unpinned">
         <div className="single-video-container  others-tile-wrapper">
         <OthersCard
@@ -99,6 +102,8 @@ function LayoutPinned (props) {
         />
         </div>
       </div>
+        ) : null
+      }
       </>
     );
   }
