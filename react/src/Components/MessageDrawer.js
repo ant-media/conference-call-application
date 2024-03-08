@@ -7,10 +7,10 @@ import { useTranslation } from 'react-i18next';
 import MessagesTab from './MessagesTab';
 import CloseDrawerButton from './DrawerButton';
 import { ConferenceContext } from 'pages/AntMedia';
-import { getRoomNameAttribute } from 'utils';
+import { isComponentMode } from 'utils';
 
 const getAntDrawerStyle = (theme) => {
-  if (getRoomNameAttribute()) {
+  if (isComponentMode()) {
     return {
       '& .MuiDrawer-root': {
         position: 'absolute',
