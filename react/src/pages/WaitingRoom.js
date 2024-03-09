@@ -166,6 +166,46 @@ function WaitingRoom(props) {
           </Grid>
           : null}
 
+        <Modal
+            open={speedTestBeforeLoginModal}
+            onClose={()=>{console.log("close")}}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+        >
+          <Box sx = {{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'green.70',
+            border: '2px solid #000',
+            boxShadow: 24,
+            pt: 2,
+            px: 4,
+            pb: 3,
+          }}>
+            <Typography id="modal-modal-title" variant="h6" component="h2" sx={{position: "center"}}>
+              Connection Test
+            </Typography>
+            <Typography id="modal-modal-description" sx={{ mt: 2, color: "white" }}>
+              {speedTestObject.message}
+            </Typography>
+            <Button sx={buttonVisibility} onClick={()=>{
+              setSpeedTestBeforeLoginModal(false);
+              setLeftTheRoom(true);
+              speedTestObject.message = "Please wait while we are testing your connection speed";
+              speedTestObject.isfinished = false;
+            }}>Close</Button>
+            <Button sx={buttonVisibility} onClick={()=>{
+              antmedia.joinRoom(roomName, undefined, roomJoinMode);
+              props.handleChangeRoomStatus("meeting");
+              speedTestObject.message = "Please wait while we are testing your connection speed";
+              speedTestObject.isfinished = false;
+            }}>Join</Button>
+          </Box>
+        </Modal>
+
         <Grid item md={conference.isPlayOnly === false ? 4 : 12}>
           <Grid container justifyContent={"center"}>
             <Grid container justifyContent={"center"}>
