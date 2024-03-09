@@ -385,8 +385,10 @@ function AntMedia(props) {
   const [virtualBackground, setVirtualBackground] = React.useState(null);
   const timeoutRef = React.useRef(null);
   const leaveRoomWithError = React.useRef(false);
-  const screenShareWebRtcAdaptor = React.useRef(null)
-  const screenShareStreamId = React.useRef(null)
+  const speedTestWebRTCAdaptor = React.useRef(null);
+  const htmlCanvas = React.useRef(null);
+  const screenShareWebRtcAdaptor = React.useRef(null);
+  const screenShareStreamId = React.useRef(null);
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
 
@@ -829,6 +831,84 @@ function AntMedia(props) {
     return result;
   }
 
+  function createSpeedTestWebRtcAdaptor() {
+    if (isPlayOnly) {
+      // if play only mode, we should not use device's camera and microphone,
+      // so we will use fake video and audio
+      let speedTestMediaConstraints = {
+            video: false,
+            audio: false,
+        }
+
+      htmlCanvas.current = document.createElement('canvas');
+
+      speedTestWebRTCAdaptor.current = new WebRTCAdaptor({
+        websocket_url: websocketURL,
+        localStream: htmlCanvas.current.captureStream(20),
+        mediaConstraints: speedTestMediaConstraints,
+        isPlayMode: false,
+        debug: true,
+        callback: speedTestWebRtcAdaptorInfoCallback,
+        callbackError: speedTestWebRtcAdaptorErrorCallback
+      })
+    } else {
+      let speedTestMediaConstraints = {
+        video: true,
+        audio: true,
+      }
+
+      speedTestWebRTCAdaptor.current = new WebRTCAdaptor({
+        websocket_url: websocketURL,
+        mediaConstraints: speedTestMediaConstraints,
+        isPlayMode: false,
+        debug: true,
+        callback: speedTestWebRtcAdaptorInfoCallback,
+        callbackError: speedTestWebRtcAdaptorErrorCallback
+      })
+    }
+  }
+
+    function speedTestWebRtcAdaptorInfoCallback(info, obj) {
+        if (info === "initialized") {
+            speedTestWebRTCAdaptor.current.getMediaDevices();
+        } else if (info === "updated_stats") {
+          speedTestCounter++;
+          if(speedTestCounter > 2) {
+            speedTestWebRTCAdaptor.current.stop("streamId");
+
+            let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
+            let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
+            let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
+            let bandwidth = parseInt(obj.availableOutgoingBitrate);
+
+            let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+            let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
+            let packageLostPercentage = 0;
+            if (packageLost > 0) {
+              packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
+            }
+
+            console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
+
+            if (rtt >= 150 || packageLost >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
+              console.log("-> Your Connection is bad");
+              speedTestObject.message = "Your Connection is bad";
+            } else if (rtt >= 50 || packageLost >= 1 || jitter >= 30 || outgoingBitrate >= bandwidth) {
+              console.log("-> Your connection is fair");
+              speedTestObject.message = "Your connection is fair";
+            } else {
+              console.log("-> Your connection is good");
+              speedTestObject.message = "Your connection is good";
+            }
+            speedTestObject.isfinished = true;
+          }
+        }
+    }
+
+    function speedTestWebRtcAdaptorErrorCallback(error, message) {
+        console.error("Speed Test WebRTC Adaptor Error:", error);
+    }
+
   function createScreenShareWebRtcAdaptor(){
 
     navigator.mediaDevices.getDisplayMedia(getMediaConstraints("screenConstraints", 20))
@@ -984,7 +1064,7 @@ function AntMedia(props) {
 
       }
     }
-  };
+  }
 
   function checkConnectionQuality(obj) {
     let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
@@ -2541,7 +2621,8 @@ function AntMedia(props) {
               makeListenerAgain,
               roomName,
               presenterButtonStreamIdInProcess,
-              updateMaxVideoTrackCount
+              updateMaxVideoTrackCount,
+              createSpeedTestWebRtcAdaptor
             }}
           >
             {props.children}
