@@ -145,6 +145,18 @@ function Footer(props) {
                     </Grid>)
                     : null}
 
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ? (
+                    <Grid item xs={0}>
+                        <PublisherRequestListButton footer />
+                    </Grid>)
+                    : null}
+
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isPlayOnly === true) ? (
+                    <Grid item xs={0}>
+                        <RequestPublishButton footer />
+                    </Grid>)
+                    : null}
+
                   {process.env.REACT_APP_FOOTER_END_CALL_BUTTON_VISIBILITY === 'true' ?
                     <Grid item xs={0}>
                       <EndCallButton footer/>
