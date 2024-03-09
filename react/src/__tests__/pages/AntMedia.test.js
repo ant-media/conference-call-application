@@ -238,7 +238,7 @@ describe('AntMedia Component', () => {
 
       var testStreamId = "stream1";
 
-      currentConference.participants.push({streamId: testStreamId, videoLabel: "test1"});
+      currentConference.videoTrackAssignments.push({streamId: testStreamId, videoLabel: "test1"});
       var obj = {};
       var notificationEvent = {
         eventType: "SCREEN_SHARED_ON",

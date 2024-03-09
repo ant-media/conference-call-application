@@ -14,7 +14,7 @@ import MeetingRoom from 'pages/MeetingRoom';
 // Mock the context value
 const contextValue = {
   allParticipants: {},
-  participants: [{id: 1, name: 'test'}],
+  videoTrackAssignments: [{id: 1, name: 'test'}],
   audioTracks: [{audio: {streamId:"1234", track: ""}}],
 };
 

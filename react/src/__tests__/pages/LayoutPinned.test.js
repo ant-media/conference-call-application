@@ -13,7 +13,7 @@ import { assert } from 'workbox-core/_private';
 // Mock the context value
 const contextValue = {
   allParticipants: {},
-  participants: [{id: 1, name: 'test'}],
+  videoTrackAssignments: [{id: 1, name: 'test'}],
   globals: {desiredMaxVideoTrackCount: 10},
   updateMaxVideoTrackCount: jest.fn(),
 };
@@ -59,7 +59,7 @@ describe('Pinned Layout Component', () => {
 
     for (let i = 0; i < noOfParticipants; i++) {
       contextValue.allParticipants[`p${i}`] = {id: i, name: `test${i}`};
-      contextValue.participants.push({id: i, name: `test${i}`});
+      contextValue.videoTrackAssignments.push({id: i, name: `test${i}`});
     }
 
     contextValue.pipinnedVideoId = 1;
@@ -85,7 +85,7 @@ describe('Pinned Layout Component', () => {
 
     for (let i = 0; i < noOfParticipants; i++) {
       contextValue.allParticipants[`p${i}`] = {id: i, name: `test${i}`};
-      contextValue.participants.push({id: i, name: `test${i}`});
+      contextValue.videoTrackAssignments.push({id: i, name: `test${i}`});
     }
 
     contextValue.pipinnedVideoId = 1;

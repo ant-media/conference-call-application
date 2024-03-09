@@ -49,6 +49,7 @@ describe('ParticipantList Button Component', () => {
 
       console.log(container.outerHTML);
 
+    // eslint-disable-next-line testing-library/no-node-access
       const aElement = getByRole("button").querySelector('a');
 
       // Assert the value inside the <a> tag
