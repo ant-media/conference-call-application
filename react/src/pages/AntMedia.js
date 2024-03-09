@@ -1450,7 +1450,7 @@ function AntMedia(props) {
   function updateUserStatusMetadata(micMuted, cameraOn) {
     let metadata = getUserStatusMetadata(micMuted, cameraOn, false);
 
-    webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
+    webRTCAdaptor?.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
   }
 
   function handleLeaveFromRoom() {
@@ -1486,7 +1486,7 @@ function AntMedia(props) {
       ...(info ? info : {}),
     };
     console.info("send notification event", notEvent);
-    webRTCAdaptor.sendData(publishStreamId, JSON.stringify(notEvent));
+    webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
   },[webRTCAdaptor]);
 
   function updateVideoSendResolution(isPinned) {
@@ -1709,7 +1709,7 @@ function AntMedia(props) {
     if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
     } else {
-      webRTCAdaptor.turnOffLocalCamera(streamId);
+      webRTCAdaptor?.turnOffLocalCamera(streamId);
     }
 
     updateUserStatusMetadata(isMyMicMuted, false);
@@ -1791,7 +1791,7 @@ function AntMedia(props) {
   }
 
   function muteLocalMic() {
-    webRTCAdaptor.muteLocalMic();
+    webRTCAdaptor?.muteLocalMic();
     updateUserStatusMetadata(true, !isMyCamTurnedOff);
     setIsMyMicMuted(true);
 
