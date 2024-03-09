@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
-import LayoutPinned from 'pages/LayoutPinned';
+import LayoutTiled from 'pages/LayoutTiled';
 import { random } from 'lodash';
 import theme from "styles/theme";
 import { ThemeProvider } from '@mui/material/styles';
@@ -46,76 +46,24 @@ describe('Pinned Layout Component', () => {
   it('renders without crashing', () => {
     const { container, getByText, getByRole } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutPinned />
+            <LayoutTiled />
         </ThemeProvider>
       );
 
     console.log(container.outerHTML);
   });
 
-  it('test other cards not visible until limit', () => {
-    process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY = true;
-    var noOfParticipants = 4;
-
-    for (let i = 0; i < noOfParticipants; i++) {
-      contextValue.allParticipants[`p${i}`] = {id: i, name: `test${i}`};
-      contextValue.participants.push({id: i, name: `test${i}`});
-    }
-
-    contextValue.pipinnedVideoId = 1;
-
-    const { container, getAllByTestId, queryByTestId  } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutPinned />
-        </ThemeProvider>
-      );
-
-    const videoCards = getAllByTestId('mocked-video-card');
-    expect(videoCards).toHaveLength(4);
-
-    const otherCard = queryByTestId('mocked-others-card');
-    expect(otherCard).toBeNull();
-
-    console.log(container.outerHTML);
-  });
-
-  it('test show other cards after limit', () => {
-    process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY = true;
-    var noOfParticipants = 10;
-
-    for (let i = 0; i < noOfParticipants; i++) {
-      contextValue.allParticipants[`p${i}`] = {id: i, name: `test${i}`};
-      contextValue.participants.push({id: i, name: `test${i}`});
-    }
-
-    contextValue.pipinnedVideoId = 1;
-
-    const { container, getAllByTestId, getByTestId  } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutPinned />
-        </ThemeProvider>
-      );
-
-    const videoCards = getAllByTestId('mocked-video-card');
-    expect(videoCards).toHaveLength(3);
-
-    const otherCard = getByTestId('mocked-others-card');
-    expect(otherCard).toBeTruthy();
-
-    console.log(container.outerHTML);
-  });
-
+  
   it('set the max video count', () => {
     process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY = true;
-    contextValue.pipinnedVideoId = 1;
 
     const { container, getAllByTestId, getByTestId  } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutPinned />
+            <LayoutTiled />
         </ThemeProvider>
       );
 
-      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(4);
+      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(10);
 
   });
 });

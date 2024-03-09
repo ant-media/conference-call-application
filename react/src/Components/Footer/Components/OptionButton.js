@@ -134,13 +134,11 @@ function OptionButton({footer, ...props}) {
             : null}
 
         {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
-        <MenuItem onClick={() => handleLayoutDialogOpen()}>
+        <MenuItem onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
           <ListItemIcon>
             <SvgIcon size={36} name={"layout"} color={"white"}/>
           </ListItemIcon>
-          <ListItemText
-            id="change-layout-button"
-          >
+          <ListItemText>
             {t("Change Layout")}
           </ListItemText>
         </MenuItem>
