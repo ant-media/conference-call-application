@@ -35,9 +35,6 @@ function MoreOptionsButton({ footer, ...props }) {
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
 
-  // if you select camera then we are going to focus on camera button.
-  const [selectFocus] = React.useState(null);
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -62,22 +59,20 @@ function MoreOptionsButton({ footer, ...props }) {
           <SettingsDialog
               open={dialogOpen}
               onClose={handleDialogClose}
-              selectFocus={selectFocus}
           />
           <LayoutSettingsDialog
               open={layoutDialogOpen}
               onClose={handleLayoutDialogClose}
-              selectFocus={selectFocus}
           />
           <GeneralSettingsDialog
             open={generalSettingsDialogOpen}
             onClose={handleGeneralSettingsDialogClose}
-            selectFocus={selectFocus}
           />
           <Tooltip title={t("More options")} placement="top">
             <CustomizedBtn
                 className={footer ? "footer-icon-button" : ""}
-                id="settings-button"
+                id="more-button"
+                data-testid="more-button-test"
                 variant="contained"
                 color={open ? "primary" : "secondary"}
                 aria-controls={open ? "demo-positioned-menu" : undefined}
@@ -165,7 +160,6 @@ function MoreOptionsButton({ footer, ...props }) {
                 <ListItemText id={"more-options-participant-list-button"}>{t("Participant List")}</ListItemText>
               </MenuItem>
               : null}
-
             {(process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ?
               <MenuItem
                 onClick={() => {conference?.handlePublisherRequestListOpen(!conference?.publisherRequestListDrawerOpen); handleClose();}}

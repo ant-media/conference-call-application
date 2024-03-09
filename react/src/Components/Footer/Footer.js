@@ -121,49 +121,38 @@ function Footer(props) {
                       : null}
 
                   {(conference.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
-                    <Grid item xs={0}>
-                      {" "}
-                      <ShareScreenButton footer/>
-                    </Grid>
+                  <Grid item xs={0}>
+                    {" "}
+                    <ShareScreenButton footer/>
+                  </Grid>
                       : null}
 
-                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_REACTIONS_BUTTON_VISIBILITY === 'true') ?
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_REACTIONS_BUTTON_VISIBILITY === 'true') ? (
                     <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
                       <ReactionsButton footer/>
-                    </Grid>
-                  : null}
-
-                  {(windowWidth > mobileBreakpoint) && (conference.isPlayOnly === false) && (process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'true') ?
-                  <Grid item xs={0}>
-                    <MessageButton footer/>
-                  </Grid>
-                  : null}
-
-                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PARTICIPANT_LIST_BUTTON_VISIBILITY === 'true') ?
-                  <Grid item xs={0}>
-                      <ParticipantListButton footer />
-                  </Grid>
-                  : null}
-
-                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ?
-                    <Grid item xs={0}>
-                      <PublisherRequestListButton footer />
-                    </Grid>
+                    </Grid>)
                     : null}
 
-                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isPlayOnly === true) ?
+                  {(windowWidth > mobileBreakpoint) && (conference.isPlayOnly === false) && (process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'true') ? (
                     <Grid item xs={0}>
-                      <RequestPublishButton footer />
-                    </Grid>
+                      <MessageButton footer/>
+                    </Grid>)
+                    : null}
+
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PARTICIPANT_LIST_BUTTON_VISIBILITY === 'true') ? (
+                    <Grid item xs={0}>
+                        <ParticipantListButton footer />
+                    </Grid>)
                     : null}
 
                   {process.env.REACT_APP_FOOTER_END_CALL_BUTTON_VISIBILITY === 'true' ?
-                  <Grid item xs={0}>
-                    <EndCallButton footer/>
-                  </Grid>
-                    : null}
+                    <Grid item xs={0}>
+                      <EndCallButton footer/>
+                    </Grid>
+                   : null}
 
                   {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
+
                   <Grid item xs={0}>
                     <FakeParticipantButton
                       footer

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Box, CircularProgress, Grid} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
@@ -25,7 +25,8 @@ export const ConferenceContext = React.createContext(null);
 const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
-  maxVideoTrackCount: 60,
+  maxVideoTrackCount: 6,
+  desiredMaxVideoTrackCount: 6,
   trackEvents: [],
 };
 
@@ -1102,7 +1103,16 @@ function AntMedia(props) {
       leaveRoomWithError.current = true;
       setLeftTheRoom(true);
     }
-
+    else if (error === "publishTimeoutError"){
+      console.error(error , "Firewall might be blocking the connection Please setup a TURN Server");
+      leaveRoomWithError.current = true;
+      setLeftTheRoom(true);
+    }
+    else if (error === "license_suspended_please_renew_license"){
+      console.error(error , "Licence is Expired please renew the licence");
+      leaveRoomWithError.current = true;
+      setLeftTheRoom(true);
+    }
     console.log("***** " + error)
 
   }
@@ -1186,9 +1196,13 @@ function AntMedia(props) {
   }
 
   function handleSetMaxVideoTrackCount(maxTrackCount) {
-    if (publishStreamId) {
-      webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, maxTrackCount);
-      globals.maxVideoTrackCount = maxTrackCount;
+    globals.desiredMaxVideoTrackCount = maxTrackCount;
+  }
+
+  function updateMaxVideoTrackCount(newCount) {
+    if (publishStreamId && globals.maxVideoTrackCount !== newCount) {
+      globals.maxVideoTrackCount = newCount;
+      webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, newCount);
     }
   }
 
@@ -2526,7 +2540,8 @@ function AntMedia(props) {
               setRequestSpeakerList,
               makeListenerAgain,
               roomName,
-              presenterButtonStreamIdInProcess
+              presenterButtonStreamIdInProcess,
+              updateMaxVideoTrackCount
             }}
           >
             {props.children}
@@ -2547,7 +2562,7 @@ function AntMedia(props) {
               )}
             >
               {leftTheRoom ? (
-                <LeftTheRoom isError={leaveRoomWithError.current} />
+               <LeftTheRoom isError={leaveRoomWithError.current} />
               ) : waitingOrMeetingRoom === "waiting" ? (
                 <WaitingRoom/>
               ) : (

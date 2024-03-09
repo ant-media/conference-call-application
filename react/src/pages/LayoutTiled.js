@@ -48,6 +48,8 @@ function calculateLayout(
 function LayoutTiled(props) {
   const conference = React.useContext(ConferenceContext);
 
+  conference.updateMaxVideoTrackCount(conference.globals.desiredMaxVideoTrackCount);
+
   const aspectRatio = 16 / 9;
   const [cardWidth, setCardWidth] = React.useState(500*aspectRatio);
   const [cardHeight, setCardHeight] = React.useState(500);

@@ -29,8 +29,7 @@ function LeftTheRoom({ isError : leaveRoomWithError }) {
   React.useEffect(() => {
     conference.handleLeaveFromRoom();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
+  }, []);
   const message = leaveRoomWithError ? t('Something Went Wrong') : t('You have left the meeting');
 
   return (
