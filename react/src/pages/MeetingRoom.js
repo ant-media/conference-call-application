@@ -9,6 +9,7 @@ import {ReactionBarSelector} from "@charkour/react-reactions";
 import MuteParticipantDialog from "../Components/MuteParticipantDialog";
 import {useTheme} from "@mui/material/styles";
 import {t} from "i18next";
+import {isComponentMode} from "../utils";
 import { isMobile, isTablet } from "react-device-detect";
 
 
@@ -117,7 +118,7 @@ const MeetingRoom = React.memo((props) => {
 
       {conference.showEmojis && (
         <div id="meeting-reactions" style={{
-          position: "fixed",
+          position: isComponentMode() ? "absolute" : "fixed",
           bottom: 80,
           display: "flex",
           alignItems: "center",

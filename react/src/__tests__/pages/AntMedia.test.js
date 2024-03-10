@@ -1,11 +1,10 @@
 // src/Button.test.js
 import React from 'react';
-import { render, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, act, waitFor } from '@testing-library/react';
 import AntMedia from 'pages/AntMedia';
 import { useWebSocket } from 'Components/WebSocketProvider';
-import { SnackbarProvider, useSnackbar} from "notistack";
+import { useSnackbar} from "notistack";
 import { ConferenceContext } from "pages/AntMedia";
-import { assert, timeout } from 'workbox-core/_private';
 
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
