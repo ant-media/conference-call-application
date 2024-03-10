@@ -25,7 +25,7 @@ function ParticipantTab(props) {
 
   const getAdminButtons = (streamId, assignedVideoCardId) => {
     return (
-      <div>
+      <div id={'admin-button-group-'+streamId}>
       {(streamId === "localVideo" ? conference?.presenters.includes(conference.publishStreamId) : conference?.presenters.includes(streamId) )&& conference?.isAdmin === true ? (
       <PinBtn
         disabled={conference?.presenterButtonDisabled}
@@ -79,6 +79,7 @@ function ParticipantTab(props) {
 
     return (
       <Grid
+        id={"participant-item-" + streamId}
         key={streamId}
         container
         alignItems="center"
@@ -116,6 +117,7 @@ function ParticipantTab(props) {
       </Grid>
     );
   };
+
   return (
         <div style={{width: "100%", overflowY: "auto"}}>
           <Stack sx={{width: "100%",}} spacing={2}>
