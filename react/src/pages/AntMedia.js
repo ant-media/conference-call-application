@@ -13,7 +13,7 @@ import {SvgIcon} from "../Components/SvgIcon";
 import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import EffectsDrawer from "../Components/EffectsDrawer";
 
-import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
+import {getRoomNameAttribute, getWebSocketURLAttribute, isComponentMode} from "../utils";
 import floating from "../external/floating.js";
 import {UnauthrorizedDialog} from "Components/Footer/Components/UnauthorizedDialog";
 import {useWebSocket} from 'Components/WebSocketProvider';
@@ -217,7 +217,7 @@ var playReconnected;
 function AntMedia(props) {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
+  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
   const roomName = id;
 
   // drawerOpen for message components.
