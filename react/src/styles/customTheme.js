@@ -2,7 +2,7 @@ import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
 import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
-import {getRoomNameAttribute} from "../utils";
+import {isComponentMode} from "../utils";
 
 export function getBlueTheme() {
     const themeColor0 = "#ffffff";
@@ -15,9 +15,9 @@ export function getBlueTheme() {
     const themeColor50 = "#2B6197";
     //button
     const themeColor60 = "#2B6197";
-    //partiint list background
+    //participant list background
     const themeColor70 = "white";
-    //fotter bacckground
+    //footer background
     const themeColor80 = "white";
     const themeColor85 = "#3D7AB1";
     const themeColor90 = "#6BCBC3";
@@ -354,7 +354,7 @@ export function getBlueTheme() {
             },
         },
     };
-    if (!getRoomNameAttribute()) {
+    if (!isComponentMode()) {
         themeObject.palette.background = {};
         themeObject.palette.background.default = themeColor80;
     }
