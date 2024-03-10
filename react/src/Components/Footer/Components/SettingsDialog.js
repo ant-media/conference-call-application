@@ -36,7 +36,7 @@ const AntDialogTitle = props => {
   );
 };
 
-export function SettingsDialog(props) {
+export default function SettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
   const conference = React.useContext(ConferenceContext);
