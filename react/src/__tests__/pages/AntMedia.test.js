@@ -54,6 +54,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       setCameraButtonDisabled: jest.fn(),
       setSelectedDevices: jest.fn(),
       checkAndTurnOffLocalCamera: jest.fn(),
+      devices: [],
     };
   }),
 }));
@@ -445,6 +446,46 @@ describe('AntMedia Component', () => {
     // Expectations
     expect(currentConference.cameraButtonDisabled === false);
     expect(currentConference.microphoneButtonDisabled === false);
+  });
+
+  it('should disable microphone button if no microphone is available', async () => {
+    // Make devices array have no audioinput
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      {videoDeviceId: '2'},
+    ]);
+
+    currentConference.devices = [];
+
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(consoleSpy).toHaveBeenCalledWith("There is no microphone device available.");
+
+  });
+
+  it('should disable microphone button if no microphone is available', async () => {
+    // Make devices array have no audioinput
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      {audioDeviceId: '2'},
+    ]);
+
+    currentConference.devices = [];
+
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(consoleSpy).toHaveBeenCalledWith("There is no available camera device.");
+
   });
 
 });
