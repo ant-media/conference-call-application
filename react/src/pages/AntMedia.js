@@ -418,10 +418,10 @@ function AntMedia(props) {
     setSelectedDevices(selectedDevices);
 
     if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
-      webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+      webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
     }
     if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
-      webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+      webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
     }
   }
 
@@ -2023,7 +2023,8 @@ function AntMedia(props) {
               setMicrophoneButtonDisabled,
               cameraButtonDisabled,
               setCameraButtonDisabled,
-              updateMaxVideoTrackCount
+              updateMaxVideoTrackCount,
+              checkAndUpdateVideoAudioSources
             }}
           >
             {props.children}

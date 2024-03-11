@@ -49,6 +49,11 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       muteLocalMic: jest.fn(),
       switchVideoCameraCapture: jest.fn(),
       switchAudioInputSource: jest.fn(),
+      displayMessage: jest.fn(),
+      setMicrophoneButtonDisabled: jest.fn(),
+      setCameraButtonDisabled: jest.fn(),
+      setSelectedDevices: jest.fn(),
+      checkAndTurnOffLocalCamera: jest.fn(),
     };
   }),
 }));
@@ -312,6 +317,33 @@ describe('AntMedia Component', () => {
 
     });
 
+  it('notSetRemoteDescription error callback', async () => {
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("notSetRemoteDescription", {});
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith("notSetRemoteDescription", "Not set remote description");
+
+
+    await act(async () => {
+      expect(currentConference.leftTheRoom === true);
+    });
+
+    consoleSpy.mockRestore();
+
+  });
+
     it('max video count setting', async () => {
       const { container } = render(
         <AntMedia isTest={true}>
@@ -402,6 +434,17 @@ describe('AntMedia Component', () => {
     expect(currentConference.cameraButtonDisabled === true);
     expect(currentConference.microphoneButtonDisabled === true);
 
+  });
+
+  it('should enable camera and microphone buttons if selected devices are available', async () => {
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(currentConference.cameraButtonDisabled === false);
+    expect(currentConference.microphoneButtonDisabled === false);
   });
 
 });
