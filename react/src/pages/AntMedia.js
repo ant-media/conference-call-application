@@ -376,14 +376,10 @@ function AntMedia(props) {
       if (devices[index].kind === "videoinput" && devices[index].deviceId === selectedDevices.videoDeviceId) {
         isVideoDeviceAvailable = true;
         setCameraButtonDisabled(false);
-        console.info("Unable to access selected camera, switching the first available camera.");
-        displayMessage("Unable to access selected camera, switching the first available camera.", "white");
       }
       if (devices[index].kind === "audioinput" && devices[index].deviceId === selectedDevices.audioDeviceId) {
         isAudioDeviceAvailable = true;
         setMicrophoneButtonDisabled(false);
-        console.info("Unable to access selected microphone, switching the first available microphone.");
-        displayMessage("Unable to access selected microphone, switching the first available microphone.", "white");
       }
     }
 
@@ -392,7 +388,9 @@ function AntMedia(props) {
       const camera = devices.find(d => d.kind === 'videoinput');
       if (camera) {
         selectedDevices.videoDeviceId = camera.deviceId;
-        setCameraButtonDisabled(false)
+        setCameraButtonDisabled(false);
+        console.info("Unable to access selected camera, switching the first available camera.");
+        displayMessage("Unable to access selected camera, switching the first available camera.", "white");
       } else {
         // if there is no camera, set the video to false
         checkAndTurnOffLocalCamera()
@@ -405,7 +403,9 @@ function AntMedia(props) {
       const audio = devices.find(d => d.kind === 'audioinput');
       if (audio) {
         selectedDevices.audioDeviceId = audio.deviceId;
-        setMicrophoneButtonDisabled(false)
+        setMicrophoneButtonDisabled(false);
+        console.info("Unable to access selected microphone, switching the first available microphone.");
+        displayMessage("Unable to access selected microphone, switching the first available microphone.", "white");
       } else {
         // if there is no audio, set the audio to false
         muteLocalMic()
@@ -2024,7 +2024,9 @@ function AntMedia(props) {
               cameraButtonDisabled,
               setCameraButtonDisabled,
               updateMaxVideoTrackCount,
-              checkAndUpdateVideoAudioSources
+              checkAndUpdateVideoAudioSources,
+              setDevices,
+              getSelectedDevices
             }}
           >
             {props.children}

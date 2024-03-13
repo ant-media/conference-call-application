@@ -55,6 +55,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       setSelectedDevices: jest.fn(),
       checkAndTurnOffLocalCamera: jest.fn(),
       devices: [],
+      updateStreamMetaData: jest.fn(),
     };
   }),
 }));
@@ -485,6 +486,91 @@ describe('AntMedia Component', () => {
 
     // Expectations
     expect(consoleSpy).toHaveBeenCalledWith("There is no available camera device.");
+
+  });
+
+  it('should switching the first available camera due to selected camera is not available', async () => {
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      { deviceId: 'camera2', kind: 'videoinput' },
+    ]);
+
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("available_devices", [
+        { deviceId: 'camera2', kind: 'videoinput' },
+      ]);
+    });
+
+    await act(async () => {
+      currentConference.setSelectedCamera("camera1");
+    });
+
+    await waitFor(() => {
+      expect(currentConference.selectedCamera).toBe("camera1");
+    });
+
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+    console.log(currentConference.getSelectedDevices());
+
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(consoleSpy).toHaveBeenCalledWith("Unable to access selected camera, switching the first available camera.");
+
+  });
+
+
+  it('should switching the first available microphone due to selected microphone is not available', async () => {
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      { deviceId: 'mic2', kind: 'audioinput' },
+    ]);
+
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("available_devices", [
+        { deviceId: 'mic2', kind: 'audioinput' },
+      ]);
+    });
+
+    await act(async () => {
+      currentConference.setSelectedMicrophone("mic1");
+    });
+
+    await waitFor(() => {
+      expect(currentConference.selectedMicrophone).toBe("mic1");
+    });
+
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+    console.log(currentConference.getSelectedDevices());
+
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(consoleSpy).toHaveBeenCalledWith("Unable to access selected microphone, switching the first available microphone.");
 
   });
 
