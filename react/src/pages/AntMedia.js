@@ -563,6 +563,7 @@ function AntMedia(props) {
 
   useEffect(() => {
     async function createWebRTCAdaptor() {
+      console.log("----------------- createWebRTCAdaptor");
       //here we check if audio or video device available and wait result
       //according to the result we modify mediaConstraints
       await checkDevices();
@@ -627,7 +628,7 @@ function AntMedia(props) {
   },[isJoining]);
 
   React.useEffect(() => {
-    if(isPublished && isPlayed){
+    if((isPublished || isPlayOnly) && isPlayed){
       setWaitingOrMeetingRoom("meeting")
       setIsJoining(false);
     }
@@ -903,7 +904,7 @@ function AntMedia(props) {
           webRTCAdaptor?.stop(roomName);
           webRTCAdaptor.checkWebSocketConnection();
           joinRoom(roomName,publishStreamId);
-        }, 10000);
+        }, 3000);
       }
     }
     else if (error === "publishTimeoutError"){

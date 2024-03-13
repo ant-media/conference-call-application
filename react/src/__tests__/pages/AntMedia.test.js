@@ -6,6 +6,7 @@ import { useWebSocket } from 'Components/WebSocketProvider';
 import { SnackbarProvider, useSnackbar} from "notistack";
 import { ConferenceContext } from "pages/AntMedia";
 import { assert, timeout } from 'workbox-core/_private';
+import exp from 'constants';
 
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
@@ -22,31 +23,48 @@ jest.mock('notistack', () => ({
   SnackbarProvider: ({ children }) => <div></div>,
 }));
 
+jest.mock('utils', () => ({
+  ...jest.requireActual('utils'),
+  getRoomNameAttribute: jest.fn().mockReturnValue("room"),
+}));
+
 jest.mock('@antmedia/webrtc_adaptor', () => ({
   ...jest.requireActual('@antmedia/webrtc_adaptor'),
   WebRTCAdaptor: jest.fn().mockImplementation((params) => {
     console.log(params);
+      var mockAdaptor = {
+      init : jest.fn(),
+      publish : jest.fn().mockImplementation(() => console.log('publishhhhhh')),
+      play : jest.fn(),
+      unpublish : jest.fn(),
+      leaveRoom : jest.fn(),
+      startPublishing : jest.fn(),
+      stopPublishing : jest.fn(),
+      startPlaying : jest.fn(),
+      stopPlaying : jest.fn(),
+      getLocalStream : jest.fn(),
+      applyConstraints : jest.fn(),
+      sendData : jest.fn().mockImplementation((publishStreamId, data) => console.log('send data called with ')),
+      setMaxVideoTrackCount : jest.fn(),
+      enableStats : jest.fn(),
+      getBroadcastObject : jest.fn(),
+      checkWebSocketConnection : jest.fn(),
+    }
+
+    for (var key in params) {
+      if (typeof params[key] === 'function') {
+        mockAdaptor[key] = params[key];
+      }
+    }
+
+
     if(params.mediaConstraints.audio === true) {
-      webRTCAdaptorScreenConstructor = params;
+      webRTCAdaptorScreenConstructor = mockAdaptor;
     }
     else {
-      webRTCAdaptorConstructor = params;
+      webRTCAdaptorConstructor = mockAdaptor;
     }
-    return {
-      init: jest.fn(),
-      publish: jest.fn().mockImplementation(() => console.log('publishhhhhh')),
-      play: jest.fn(),
-      unpublish: jest.fn(),
-      leaveRoom: jest.fn(),
-      startPublishing: jest.fn(),
-      stopPublishing: jest.fn(),
-      startPlaying: jest.fn(),
-      stopPlaying: jest.fn(),
-      getLocalStream: jest.fn(),
-      applyConstraints: jest.fn(),
-      sendData: jest.fn().mockImplementation((publishStreamId, data) => console.log('send data called with ')),
-      setMaxVideoTrackCount: jest.fn(),
-    };
+    return mockAdaptor;
   }),
 }));
 
@@ -92,7 +110,6 @@ describe('AntMedia Component', () => {
     }));    
   });
   
-
   it('renders without crashing', async () => {
     await act(async () => {
       const { container } = render(
@@ -339,6 +356,65 @@ describe('AntMedia Component', () => {
       
       consoleSpy.mockRestore();
 
+    });
+
+    it('is joining state test', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      expect(currentConference.isJoining).toBe(false);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      await act(async () => {
+        currentConference.setIsJoining(true);
+      });
+
+      expect(currentConference.isJoining).toBe(true);
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("publish_started");
+      });
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("play_started");
+      });
+
+
+      expect(currentConference.isJoining).toBe(false);
+      
+      consoleSpy.mockRestore();
+
+    });
+
+
+    it('high resource usage', async () => {
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      expect(currentConference.isJoining).toBe(false);
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callbackError("highResourceUsage", {});
+      });
+
+      waitFor(() => {
+        expect(webRTCAdaptorConstructor.checkWebSocketConnection).toHaveBeenCalled();
+      });
     });
   
 });
