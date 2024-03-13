@@ -52,6 +52,9 @@ class Browser:
     except StaleElementReferenceException as e:
       return None
     
+  def makeFullScreen(self):
+    self.driver.maximize_window()
+    
 
   def get_element_by_id(self, id):
     timeout = 15

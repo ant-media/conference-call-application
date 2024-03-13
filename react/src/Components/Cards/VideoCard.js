@@ -5,6 +5,7 @@ import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
 import { useTranslation } from "react-i18next";
+import { isMobile, isTablet } from 'react-device-detect';
 
 const CustomizedVideo = styled("video")({
   borderRadius: 4,
@@ -116,10 +117,7 @@ function VideoCard(props) {
     return (isJsonString(metaData)) ? JSON.parse(metaData).isMicMuted : true;
   }
 
-  // if I am sharing my screen, then don't use avatar (even if I turned off my cam)
-  if (conference.isScreenShared === true && isLocal) {
-    useAvatar = false;
-  }
+
   // if someone shares his screen, then don't use avatar for him (even if he turned off his cam)
   if (conference.screenSharedVideoId === props?.id) {
     useAvatar = false;
@@ -131,9 +129,9 @@ function VideoCard(props) {
 
   const timeoutRef = React.useRef(null);
 
-  const isScreenSharedVideo = (conference?.screenSharedVideoId === props?.id) || (conference?.isScreenShared === true && isLocal);
+  //const isScreenSharedVideo = (conference?.screenSharedVideoId === props?.id) || (conference?.isScreenShared === true && isLocal);
 
-  const mirrorView = isLocal && !conference?.isScreenShared;
+  const mirrorView = isLocal;
   //const isScreenSharing =
   //  conference?.isScreenShared ||
   //  conference?.screenSharedVideoId === props?.id;
@@ -187,6 +185,7 @@ function VideoCard(props) {
                         alignItems="center"
                         columnSpacing={0.5}
                     >
+                      {(!isMobile) && (!isTablet) ?
                         <Tooltip
                             title={`${props.pinned ? t("unpin") : t("pin")} ${props.name
                             }`}
@@ -205,6 +204,7 @@ function VideoCard(props) {
                                 />
                             </Fab>
                         </Tooltip>
+                        : null }
 
                         { props.id !== 'localVideo' && conference.isAdmin && conference.isAdmin === true ?
                             <Grid item>
@@ -346,6 +346,7 @@ function VideoCard(props) {
             alignItems="center"
             columnSpacing={0.5}
           >
+            {(!isMobile) && (!isTablet) ?
             <Tooltip
               title={`${props.pinned ? t("unpin") : t("pin")} ${props.name
                 }`}
@@ -364,6 +365,7 @@ function VideoCard(props) {
                 />
               </Fab>
             </Tooltip>
+            : null }
 
             {(props.id !== 'localVideo' && !micMuted) ?
               <Grid item>
@@ -399,7 +401,7 @@ function VideoCard(props) {
         </Grid>
       </Grid>
     ))
-  };}
+  }}
 
   const avatarOrPlayer = () => {
     return (
@@ -422,7 +424,7 @@ function VideoCard(props) {
         >
           <CustomizedVideo
             {...props}
-            style={{ objectFit: props.pinned || isScreenSharedVideo ? "contain" : "cover" }}
+            style={{ objectFit: "contain" }}
             ref={refVideo}
             playsInline
             muted={isLocal}
