@@ -35,7 +35,7 @@ function WaitingRoom(props) {
 
   const conference = useContext(ConferenceContext);
   window.conference = conference;
-  const {enqueueSnackbar, closeSnackbar} = useSnackbar();
+  const {enqueueSnackbar} = useSnackbar();
 
 
   React.useEffect(() => {

@@ -632,7 +632,7 @@ function AntMedia(props) {
       setWaitingOrMeetingRoom("meeting")
       setIsJoining(false);
     }
-  },[isPublished , isPlayed])
+  },[isPublished , isPlayed, isPlayOnly])
   
   function createScreenShareWebRtcAdaptor(){
 
