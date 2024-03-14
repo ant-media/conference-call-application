@@ -3,7 +3,6 @@ import {Button, Container, Grid, TextField, Tooltip, Typography,} from "@mui/mat
 import VideoCard from "Components/Cards/VideoCard";
 import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
-import {useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {SettingsDialog} from "Components/Footer/Components/SettingsDialog";
 
@@ -11,18 +10,16 @@ import {SvgIcon} from "Components/SvgIcon";
 import {useSnackbar} from "notistack";
 import {ConferenceContext} from "./AntMedia";
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
-import {getRoomNameAttribute} from "utils";
 import {useTheme} from "@mui/material/styles";
 
 
 function getPublishStreamId() {
-  const dataRoomName = document.getElementById("root").getAttribute("data-publish-stream-id");
-  return (dataRoomName) ? dataRoomName : getUrlParameter("streamId");
+  const dataPublishStreamId = document.getElementById("root").getAttribute("data-publish-stream-id");
+  return (dataPublishStreamId) ? dataPublishStreamId : getUrlParameter("streamId");
 }
 
 function WaitingRoom(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const publishStreamId = getPublishStreamId()
   const {t} = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -30,8 +27,6 @@ function WaitingRoom(props) {
   const [selectFocus, setSelectFocus] = React.useState(null);
 
   const theme = useTheme();
-
-  const roomName = id;
 
   const conference = useContext(ConferenceContext);
   window.conference = conference;
@@ -71,8 +66,8 @@ function WaitingRoom(props) {
       streamId = publishStreamId;
     }
 
-    conference.joinRoom(roomName, streamId, conference.roomJoinMode);
-    conference.setWaitingOrMeetingRoom("meeting");
+    conference?.joinRoom(conference?.roomName, streamId, conference?.roomJoinMode);
+    conference?.setWaitingOrMeetingRoom("meeting");
   }
 
   const handleDialogOpen = (focus) => {

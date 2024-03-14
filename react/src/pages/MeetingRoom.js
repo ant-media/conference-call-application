@@ -11,6 +11,7 @@ import {useTheme} from "@mui/material/styles";
 import {t} from "i18next";
 import { isMobile, isTablet } from "react-device-detect";
 import {getWebSocketURLAttribute} from "../utils";
+import BecomePublisherConfirmationDialog from "../Components/BecomePublisherConfirmationDialog";
 
 
 function debounce(fn, ms) {
@@ -90,6 +91,7 @@ const MeetingRoom = React.memo((props) => {
   return (
     <>
       <MuteParticipantDialog/>
+      <BecomePublisherConfirmationDialog/>
       {conference.audioTracks.map((audio, index) => (
         <VideoCard
           key={index}
