@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {Box, CircularProgress, Grid} from "@mui/material";
+import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
 import _ from "lodash";
@@ -17,6 +17,8 @@ import {getRoomNameAttribute, getWebSocketURLAttribute, isComponentMode} from ".
 import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
 import { useWebSocket } from 'Components/WebSocketProvider';
+import {useTheme} from "@mui/material/styles";
+import { timeout } from "workbox-core/_private";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -282,6 +284,8 @@ function AntMedia(props) {
   const [presenters, setPresenters] = React.useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
 
+  const [screenSharingInProgress, setScreenSharingInProgress] = React.useState(false);
+
   const [reactions] = useState({
     'sparkling_heart': '💖',
     'thumbs_up': '👍🏼',
@@ -359,6 +363,9 @@ function AntMedia(props) {
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
   const {t} = useTranslation();
+
+  const theme = useTheme();
+
 
   function handleUnauthorizedDialogExitClicked(){
 
@@ -610,23 +617,6 @@ function AntMedia(props) {
     return result;
   }
 
-  React.useEffect(()=>{
-    if(isJoining){
-      enqueueSnackbar(
-        {
-          message: t("Joining"),
-          variant: "info",
-        },
-        {
-          autoHideDuration: null
-        }
-      );
-    }else{
-      closeSnackbar();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[isJoining]);
-
   React.useEffect(() => {
     if((isPublished || isPlayOnly) && isPlayed){
       setWaitingOrMeetingRoom("meeting")
@@ -677,8 +667,11 @@ function AntMedia(props) {
     screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
      subscriberCode, screenShareStreamId.current, roomName, JSON.stringify(metaData))
 
-    
+    setScreenSharingInProgress(true);
 
+    setTimeout(() => {
+      setScreenSharingInProgress(false);
+    }, 5000);
   }
 
   React.useEffect(() => {
@@ -2049,6 +2042,36 @@ function AntMedia(props) {
               onExitClicked ={handleUnauthorizedDialogExitClicked}
 
             />
+
+            <Backdrop
+                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    open={isJoining}
+                    //onClick={handleClose}
+                  >
+              <Grid container alignItems='center' justify='center' alignContent='center'>
+                <Grid item xs={12} align='center'>
+                    <CircularProgress/>
+                </Grid>
+                <Grid item xs={12} align='center'>
+                    <Typography style={{color: theme.palette.themeColor10}}><b>{t("Joining the room...")}</b></Typography>
+                </Grid>
+              </Grid>
+            </Backdrop>
+
+            <Backdrop
+                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    open={screenSharingInProgress}
+                    //onClick={handleClose}
+                  >
+              <Grid container alignItems='center' justify='center' alignContent='center'>
+                <Grid item xs={12} align='center'>
+                    <CircularProgress/>
+                </Grid>
+                <Grid item xs={12} align='center'>
+                    <Typography style={{color: theme.palette.themeColor10}}><b>{t("Starting Screen Share...")}</b></Typography>
+                </Grid>
+              </Grid>
+            </Backdrop>
             
               {leftTheRoom ? (
                <LeftTheRoom isError={leaveRoomWithError.current} />
