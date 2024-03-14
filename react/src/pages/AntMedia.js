@@ -308,6 +308,9 @@ function AntMedia(props) {
   // open or close the mute participant dialog.
   const [isMuteParticipantDialogOpen, setMuteParticipantDialogOpen] = React.useState(false);
 
+  // open or close the mute participant dialog.
+  const [isBecomePublisherConfirmationDialogOpen, setBecomePublisherConfirmationDialogOpen] = React.useState(false);
+
   // set participant id you wanted to mute.
   const [participantIdMuted, setParticipantIdMuted] = React.useState({streamName: "", streamId: ""});
 
@@ -405,7 +408,7 @@ function AntMedia(props) {
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
 
 
-  const [initialized, setInitialized] = React.useState(props.isTest ? true : false);
+  const [initialized, setInitialized] = React.useState(!!props.isTest);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
@@ -897,7 +900,9 @@ function AntMedia(props) {
       enableDisableMCU(mcuEnabled);
 
       // if we make play only participant to publisher or vice versa, we need to join the room again
-      if (initialized) {
+      if (initialized && !isPlayOnly) {
+        setWaitingOrMeetingRoom("waiting");
+      } else if (initialized) {
         joinRoom(roomName, publishStreamId, roomJoinMode);
       }
 
@@ -1702,11 +1707,7 @@ function AntMedia(props) {
         requestSyncAdministrativeFields();
       } else if (eventType === "GRANT_BECOME_PUBLISHER" && eventStreamId === publishStreamId)
       {
-        webRTCAdaptor?.stop(roomName);
-        // remove listener string from the room name
-        let mainRoomName = roomName.endsWith(listenerRoomPostfix) ? roomName.substring(0, roomName.length - 8) : roomName;
-        setIsPlayOnly(false);
-        setRoomName(mainRoomName);
+        setBecomePublisherConfirmationDialogOpen(true);
       } else if (eventType === "REJECT_SPEAKER_REQUEST" && eventStreamId === publishStreamId)
       {
         window.showNotification(
@@ -1740,6 +1741,17 @@ function AntMedia(props) {
         requestSyncAdministrativeFields();
       }
     }
+  }
+
+  function handleStartBecomePublisher() {
+
+    console.log("handleStartBecomePublisher");
+
+    webRTCAdaptor?.stop(roomName);
+    // remove listener string from the room name
+    let mainRoomName = roomName.endsWith(listenerRoomPostfix) ? roomName.substring(0, roomName.length - 8) : roomName;
+    setIsPlayOnly(false);
+    setRoomName(mainRoomName);
   }
 
   function checkScreenSharingStatus(){
@@ -2525,7 +2537,10 @@ function AntMedia(props) {
               setRequestSpeakerList,
               makeListenerAgain,
               roomName,
-              presenterButtonStreamIdInProcess
+              presenterButtonStreamIdInProcess,
+              handleStartBecomePublisher,
+              isBecomePublisherConfirmationDialogOpen,
+              setBecomePublisherConfirmationDialogOpen
             }}
           >
             {props.children}
