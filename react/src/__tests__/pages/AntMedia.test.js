@@ -56,9 +56,14 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       checkAndTurnOffLocalCamera: jest.fn(),
       devices: [],
       updateStreamMetaData: jest.fn(),
+      stop: jest.fn(),
+      turnOffLocalCamera: jest.fn(),
     };
   }),
 }));
+
+jest.mock('Components/Cards/VideoCard', () => ({ value }) => <div data-testid="mocked-video-card">{value}</div>);
+
 
 const MockChild = () => {
   const conference = React.useContext(ConferenceContext);

@@ -87,9 +87,10 @@ function App()
           horizontal: "center",
         }}
         maxSnack={3}
-        content={(key, notificationData) => (
-          <AntSnackBar id={key} notificationData={notificationData}/>
-        )}
+        Components={{
+          info: AntSnackBar,
+          message: AntSnackBar,
+        }}
       >
         <ThemeContext.Provider
           value={{
