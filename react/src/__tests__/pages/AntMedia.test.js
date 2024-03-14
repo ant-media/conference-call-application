@@ -45,9 +45,14 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       applyConstraints: jest.fn(),
       sendData: jest.fn().mockImplementation((publishStreamId, data) => console.log('send data called with ')),
       setMaxVideoTrackCount: jest.fn(),
+      stop: jest.fn(),
+      turnOffLocalCamera: jest.fn(),
     };
   }),
 }));
+
+jest.mock('Components/Cards/VideoCard', () => ({ value }) => <div data-testid="mocked-video-card">{value}</div>);
+
 
 const MockChild = () => {
   const conference = React.useContext(ConferenceContext);
