@@ -18,7 +18,6 @@ import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
 import { useWebSocket } from 'Components/WebSocketProvider';
 import {useTheme} from "@mui/material/styles";
-import { timeout } from "workbox-core/_private";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -2043,35 +2042,39 @@ function AntMedia(props) {
 
             />
 
-            <Backdrop
-                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                    open={isJoining}
-                    //onClick={handleClose}
-                  >
-              <Grid container alignItems='center' justify='center' alignContent='center'>
-                <Grid item xs={12} align='center'>
-                    <CircularProgress/>
+            {isJoining ? (
+              <Backdrop
+                      sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                      open={isJoining}
+                      //onClick={handleClose}
+                    >
+                <Grid container alignItems='center' justify='center' alignContent='center'>
+                  <Grid item xs={12} align='center'>
+                      <CircularProgress/>
+                  </Grid>
+                  <Grid item xs={12} align='center'>
+                      <Typography style={{color: theme.palette.themeColor10}}><b>{t("Joining the room...")}</b></Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12} align='center'>
-                    <Typography style={{color: theme.palette.themeColor10}}><b>{t("Joining the room...")}</b></Typography>
-                </Grid>
-              </Grid>
-            </Backdrop>
+              </Backdrop>
+            ):null}
 
-            <Backdrop
-                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                    open={screenSharingInProgress}
-                    //onClick={handleClose}
-                  >
-              <Grid container alignItems='center' justify='center' alignContent='center'>
-                <Grid item xs={12} align='center'>
-                    <CircularProgress/>
+            {screenSharingInProgress ? (
+              <Backdrop
+                      sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                      open={screenSharingInProgress}
+                      //onClick={handleClose}
+                    >
+                <Grid container alignItems='center' justify='center' alignContent='center'>
+                  <Grid item xs={12} align='center'>
+                      <CircularProgress/>
+                  </Grid>
+                  <Grid item xs={12} align='center'>
+                      <Typography style={{color: theme.palette.themeColor10}}><b>{t("Starting Screen Share...")}</b></Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12} align='center'>
-                    <Typography style={{color: theme.palette.themeColor10}}><b>{t("Starting Screen Share...")}</b></Typography>
-                </Grid>
-              </Grid>
-            </Backdrop>
+              </Backdrop>
+            ):null}
             
               {leftTheRoom ? (
                <LeftTheRoom isError={leaveRoomWithError.current} />

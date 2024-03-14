@@ -7,6 +7,9 @@ import { useSnackbar} from "notistack";
 import { ConferenceContext } from "pages/AntMedia";
 import { assert, timeout } from 'workbox-core/_private';
 import exp from 'constants';
+import { ThemeProvider } from '@mui/material/styles';
+import {ThemeList} from "styles/themeList";
+import theme from "styles/theme";
 
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
@@ -49,6 +52,8 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       enableStats : jest.fn(),
       getBroadcastObject : jest.fn(),
       checkWebSocketConnection : jest.fn(),
+      stop : jest.fn(),
+      turnOffLocalCamera : jest.fn(),
     }
 
     for (var key in params) {
@@ -70,6 +75,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
 }));
 
 jest.mock('Components/Cards/VideoCard', () => ({ value }) => <div data-testid="mocked-video-card">{value}</div>);
+jest.mock('Components/EffectsDrawer', () => ({ value }) => <div data-testid="mocked-effect-drawer">{value}</div>);
 
 
 const MockChild = () => {
@@ -365,9 +371,11 @@ describe('AntMedia Component', () => {
 
     it('is joining state test', async () => {
       const { container } = render(
-        <AntMedia isTest={true}>
-          <MockChild/>
-        </AntMedia>);
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
 
       
       await waitFor(() => {
@@ -402,9 +410,11 @@ describe('AntMedia Component', () => {
 
     it('high resource usage', async () => {
       const { container } = render(
-        <AntMedia isTest={true}>
-          <MockChild/>
-        </AntMedia>);
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
 
       
       await waitFor(() => {
@@ -419,6 +429,38 @@ describe('AntMedia Component', () => {
 
       waitFor(() => {
         expect(webRTCAdaptorConstructor.checkWebSocketConnection).toHaveBeenCalled();
+      });
+    });
+
+    it('screen sharing state test', async () => {
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+      
+
+      expect(currentConference.isScreenShared).toBe(false);
+
+      await act(async () => {
+        currentConference.handleStartScreenShare();
+      });
+
+      await waitFor(() => {
+        expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+      });
+
+      expect(container).not.toContain("Starting Screen Share...");
+
+
+      act(() => {
+          webRTCAdaptorScreenConstructor.callback("initialized");
+      });
+
+      waitFor(() => {
+        expect(container).toContain("Starting Screen Share...");
       });
     });
   
