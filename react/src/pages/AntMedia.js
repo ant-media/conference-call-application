@@ -5,8 +5,7 @@ import WaitingRoom from "./WaitingRoom";
 import _ from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
-import {SnackbarProvider, useSnackbar} from "notistack";
-import AntSnackBar from "Components/AntSnackBar";
+import {useSnackbar} from "notistack";
 import LeftTheRoom from "./LeftTheRoom";
 import {getUrlParameter, VideoEffect, WebRTCAdaptor} from "@antmedia/webrtc_adaptor";
 import {SvgIcon} from "../Components/SvgIcon";
@@ -14,7 +13,7 @@ import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import EffectsDrawer from "../Components/EffectsDrawer";
 import {useTranslation} from "react-i18next";
 
-import {getRoomNameAttribute, getWebSocketURLAttribute} from "../utils";
+import {getRoomNameAttribute, getWebSocketURLAttribute, isComponentMode} from "../utils";
 import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
 import { useWebSocket } from 'Components/WebSocketProvider';
@@ -218,7 +217,7 @@ var playReconnected;
 function AntMedia(props) {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
+  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
   const roomName = id;
 
   // drawerOpen for message components.
@@ -466,6 +465,7 @@ function AntMedia(props) {
   }
 
   function addFakeParticipant() {
+    displayMessage("Fake participant added");
     let suffix = "fake" + fakeParticipantCounter;
     let tempCount = fakeParticipantCounter + 1;
     setFakeParticipantCounter(tempCount);
@@ -1083,13 +1083,10 @@ function AntMedia(props) {
 
   const displayMessage = React.useCallback((message, color) => {
     closeSnackbar();
-    enqueueSnackbar(
+    enqueueSnackbar(message, 
       {
-        message: message,
+        icon: <SvgIcon size={24} name={'report'} color={color} />,
         variant: "info",
-        icon: <SvgIcon size={24} name={'report'} color={color} />
-      },
-      {
         autoHideDuration: 5000,
         anchorOrigin: {
           vertical: "top",
@@ -1288,17 +1285,14 @@ function AntMedia(props) {
         // if there is an new message and user has not opened message component then we are going to increase number of unread messages by one.
         // we are gonna also send snackbar.
         if (!messageDrawerOpen) {
-          enqueueSnackbar(
+          enqueueSnackbar(notificationEvent.message,
             {
               sender: notificationEvent.name,
-              message: notificationEvent.message,
               variant: "message",
               onClick: () => {
                 handleMessageDrawerOpen(true);
                 setNumberOfUnReadMessages(0);
               },
-            },
-            {
               autoHideDuration: 5000,
               anchorOrigin: {
                 vertical: "top",
@@ -2055,16 +2049,7 @@ function AntMedia(props) {
               onExitClicked ={handleUnauthorizedDialogExitClicked}
 
             />
-            <SnackbarProvider
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "center",
-              }}
-              maxSnack={3}
-              content={(key, notificationData) => (
-                <AntSnackBar id={key} notificationData={notificationData}/>
-              )}
-            >
+            
               {leftTheRoom ? (
                <LeftTheRoom isError={leaveRoomWithError.current} />
               ) : waitingOrMeetingRoom === "waiting" ? (
@@ -2077,7 +2062,6 @@ function AntMedia(props) {
                   <EffectsDrawer/>
                 </>
               )}
-            </SnackbarProvider>
           </ConferenceContext.Provider>
         </Grid>
       </Grid>
