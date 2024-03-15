@@ -15,8 +15,8 @@ import {useTranslation} from "react-i18next";
 
 import {getRoomNameAttribute, getWebSocketURLAttribute, isComponentMode} from "../utils";
 import floating from "../external/floating.js";
-import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
-import { useWebSocket } from 'Components/WebSocketProvider';
+import {UnauthrorizedDialog} from "Components/Footer/Components/UnauthorizedDialog";
+import {useWebSocket} from 'Components/WebSocketProvider';
 import {useTheme} from "@mui/material/styles";
 
 export const ConferenceContext = React.createContext(null);
@@ -43,7 +43,7 @@ function getMediaConstraints(videoSendResolution, frameRate) {
         video: {
           width: {max: window.screen.width}, height: {max: window.screen.height}, frameRate: {ideal: frameRate}
         },
-        audio:true,
+        audio: true,
       };
       break;
     case "qvgaConstraints":
@@ -105,7 +105,7 @@ function getPublishToken() {
 
 var playToken = getPlayToken();
 var publishToken = getPublishToken();
-var token =  getUrlParameter("token")
+var token = getUrlParameter("token")
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var InitialStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
@@ -157,7 +157,7 @@ if (playOnly) {
   };
 }
 
-let websocketURL =  process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
 
@@ -248,12 +248,6 @@ function AntMedia(props) {
   //we are going to store number of unread messages to display on screen if user has not opened message component.
   const [numberOfUnReadMessages, setNumberOfUnReadMessages] = useState(0);
 
-  // pinned screen this could be by you or by shared screen.
-  const [pinnedVideoId, setPinnedVideoId] = useState();
-
-  //If a user unpins screen share participant this needs to be set thus when video track assignment message comes its not re-pinned.
-  const [unPinnedStreamId, setUnPinnedStreamId] = useState();
-
   // hide or show the emoji reaction component.
   const [showEmojis, setShowEmojis] = React.useState(false);
 
@@ -271,8 +265,6 @@ function AntMedia(props) {
   const [isRecordPluginActive, setIsRecordPluginActive] = useState(false);
 
   const [roomJoinMode, setRoomJoinMode] = useState(JoinModes.MULTITRACK);
-
-  const [screenSharedVideoId, setScreenSharedVideoId] = useState(null);
 
   const [waitingOrMeetingRoom, setWaitingOrMeetingRoom] = useState("waiting");
   const [leftTheRoom, setLeftTheRoom] = useState(false);
@@ -299,21 +291,9 @@ function AntMedia(props) {
     'thumbs_down': '👎🏼'
   });
 
-  const { sendMessage, latestMessage, isWebSocketConnected } = useWebSocket();
+  const {sendMessage, latestMessage, isWebSocketConnected} = useWebSocket();
 
-  /*
-   * participants: is a list of participant tracks to which videoTracks (video players on the screen)
-   * are assigned. This matches participants with the video players on the screen.
-   *
-   * This list is set partially in 3 places:
-   * 1. in handlePlayVideo where a new track added to WebRTC.
-   * Here a new participant structure is created and added the participants
-   * 2. broadcastObject callback (which is return of getBroadcastObject request) for a participant
-   * Here we get the name of the participant and set it.
-   * 3. videoTrackAssignment (DC message):
-   * Here we change the assigned participant video to video player according to the assginments we got.
-   */
-  const [participants, setParticipants] = useState([]);
+  const [videoTrackAssignments, setVideoTrackAssignments] = useState([]);
 
   /*
    * allParticipants: is a dictionary of (streamId, broadcastObject) for all participants in the room.
@@ -354,12 +334,12 @@ function AntMedia(props) {
 
   const [isEnterDirectly] = React.useState(enterDirectly);
 
-  const [localVideo, setLocalVideoLocal] = React.useState(null);
+  const [localVideo, setLocalVideo] = React.useState(null);
 
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
 
 
-  const [initialized, setInitialized] = React.useState(props.isTest ? true : false);
+  const [initialized, setInitialized] = React.useState(!!props.isTest);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
@@ -429,10 +409,10 @@ function AntMedia(props) {
     setSelectedDevices(selectedDevices);
 
     if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
-      webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+      webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
     }
     if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
-      webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+      webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
     }
   }
 
@@ -468,7 +448,13 @@ function AntMedia(props) {
       token = playToken;
     }
 
-    webRTCAdaptor.play(roomName, token, roomName, null, subscriberId, subscriberCode);
+    webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
+  }
+
+  function requestVideoTrackAssignmentsInterval() {
+    requestVideoTrackAssignmentsInterval = setInterval(() => {
+      webRTCAdaptor?.requestVideoTrackAssignments(roomName);
+    }, 3000);
   }
 
   async function checkDevices() {
@@ -503,23 +489,22 @@ function AntMedia(props) {
       name: "name_" + suffix,
       streamId: "streamId_" + suffix,
       metaData: JSON.stringify({isCameraOn: false}),
+      isPinned: undefined,
+      isScreenShared: undefined,
       isFake: true
     };
     allParticipantsTemp["streamId_" + suffix] = broadcastObject;
     setAllParticipants(allParticipantsTemp);
 
     if (Object.keys(allParticipantsTemp).length <= globals.maxVideoTrackCount) {
-      let newVideoTrack = {
-        id: "id_" + suffix,
+      let newVideoTrackAssignment = {
         videoLabel: "label_" + suffix,
         track: null,
-        isCameraOn: false,
         streamId: "streamId_" + suffix,
-        name: "name_" + suffix,
       };
-      let temp = participants;
-      temp.push(newVideoTrack);
-      setParticipants(temp);
+      let temp = videoTrackAssignments;
+      temp.push(newVideoTrackAssignment);
+      setVideoTrackAssignments(temp);
     }
 
     console.log("fake participant added");
@@ -531,8 +516,8 @@ function AntMedia(props) {
     let suffix = "fake" + tempCount;
     setFakeParticipantCounter(tempCount);
 
-    let temp = participants.filter(el => el.streamId !== "streamId_" + suffix)
-    setParticipants(temp);
+    let tempVideoTrackAssignments = videoTrackAssignments.filter(el => el.streamId !== "streamId_" + suffix)
+    setVideoTrackAssignments(tempVideoTrackAssignments);
 
     let allParticipantsTemp = allParticipants;
     delete allParticipantsTemp["streamId_" + suffix];
@@ -560,13 +545,6 @@ function AntMedia(props) {
       if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
         console.log("stream removed:" + trackId);
 
-        //check if pinned participant left the room. If this is the case, set pinnedVideoId to undefined
-        let pinnedParticipant = participants.find(e => e.id === pinnedVideoId);
-        if ((pinnedVideoId !== undefined && pinnedParticipant === undefined)  //because participantVideo may be remeoved
-          || pinnedParticipant?.streamId === trackId) {
-          setPinnedVideoId(undefined);
-        }
-
         delete temp[trackId];
       }
     });
@@ -576,7 +554,7 @@ function AntMedia(props) {
     //request broadcast object for new tracks
     participantIds.forEach(pid => {
       if (allParticipants[pid] === undefined) {
-        webRTCAdaptor.getBroadcastObject(pid);
+        webRTCAdaptor?.getBroadcastObject(pid);
       }
     });
   }
@@ -584,6 +562,8 @@ function AntMedia(props) {
 
   function handleSubtrackBroadcastObject(broadcastObject) {
     let allParticipantsTemp = allParticipants;
+    let metaData = JSON.parse(broadcastObject.metaData);
+    broadcastObject.isScreenShared = metaData.isScreenShared;
     allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
     setAllParticipants(allParticipantsTemp);
     setParticipantUpdated(!participantUpdated);
@@ -617,11 +597,6 @@ function AntMedia(props) {
     checkAndUpdateVideoAudioSources();
   }, [devices]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    updateVideoSendResolution(pinnedVideoId === "localVideo");
-    localStorage.setItem('videoSendResolution', videoSendResolution);
-  }, [videoSendResolution, isScreenShared, pinnedVideoId]);  // eslint-disable-line react-hooks/exhaustive-deps
-
   if (webRTCAdaptor) {
     webRTCAdaptor.callback = infoCallback;
     webRTCAdaptor.callbackError = errorCallback;
@@ -629,10 +604,10 @@ function AntMedia(props) {
   }
 
   function makeid(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
+    for (var i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
@@ -644,7 +619,7 @@ function AntMedia(props) {
       setIsJoining(false);
     }
   },[isPublished , isPlayed, isPlayOnly])
-  
+
   function createScreenShareWebRtcAdaptor(){
 
     navigator.mediaDevices.getDisplayMedia(getMediaConstraints("screenConstraints", 20))
@@ -686,7 +661,7 @@ function AntMedia(props) {
     screenShareStreamId.current = publishStreamId + "_presentation"
 
     screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
-     subscriberCode, screenShareStreamId.current, roomName, JSON.stringify(metaData))
+      subscriberCode, screenShareStreamId.current, roomName, JSON.stringify(metaData))
 
     setScreenSharingInProgress(true);
 
@@ -696,7 +671,7 @@ function AntMedia(props) {
   }
 
   React.useEffect(() => {
-    if(playOnly && enterDirectly && initialized) {
+    if (playOnly && enterDirectly && initialized) {
       let streamId = makeid(10);
       setStreamName("Anonymous");
 
@@ -736,14 +711,14 @@ function AntMedia(props) {
       console.log("**** publish started:" + reconnecting);
 
       if (reconnecting) {
-        webRTCAdaptor.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
+        webRTCAdaptor?.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
       }
       console.log("publish started");
       //stream is being published
-      webRTCAdaptor.enableStats(publishStreamId);
+      webRTCAdaptor?.enableStats(publishStreamId);
     } else if (info === "publish_finished") {
       setIsPublished(false);
       //stream is being finished
@@ -760,13 +735,16 @@ function AntMedia(props) {
     } else if (info === "play_started") {
       console.log("**** play started:" + reconnecting);
       setIsPlayed(true);
-      webRTCAdaptor.getBroadcastObject(roomName);
+      webRTCAdaptor?.getBroadcastObject(roomName);
+      requestVideoTrackAssignmentsInterval();
 
       if (reconnecting) {
         playReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
       }
+    } else if (info === "play_finished") {
+      clearInterval(requestVideoTrackAssignmentsInterval);
     } else if (info === "screen_share_stopped") {
 
     } else if (info === "screen_share_started") {
@@ -789,53 +767,62 @@ function AntMedia(props) {
       if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
 
         setTimeout(() => {
-          if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" &&
-            webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
-            webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
+          if (webRTCAdaptor?.iceConnectionState(publishStreamId) !== "checking" &&
+            webRTCAdaptor?.iceConnectionState(publishStreamId) !== "connected" &&
+            webRTCAdaptor?.iceConnectionState(publishStreamId) !== "completed") {
             reconnectionInProgress();
           }
         }, 5000);
 
       }
     }
-  };
+  }
 
   function checkConnectionQuality(obj) {
     let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
-      let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
-      let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
+    let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
+    let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
 
-      let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
-      let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
-      let packageLostPercentage = 0;
-      if (packageLost > 0) {
-        packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
-      }
+    let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+    let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
+    let packageLostPercentage = 0;
+    if (packageLost > 0) {
+      packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
+    }
 
-      if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate) {
-        console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
-        displayPoorNetworkConnectionWarning();
-      }
+    if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate) {
+      console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
+      displayPoorNetworkConnectionWarning();
+    }
   }
-
 
   function screenShareWebRtcAdaptorInfoCallback(info, obj) {
     if (info === "initialized") {
       startScreenSharing();
     } else if (info === "publish_started") {
+      let notEvent = {
+        streamId: screenShareStreamId.current,
+        eventType: "SCREEN_SHARED_ON"
+      };
+      console.info("send notification event", notEvent);
+      webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
+
       setIsScreenShared(true);
+      //webRTCAdaptor?.assignVideoTrack("videoTrack0", screenShareStreamId.current, true);
+      //pinVideo(screenShareStreamId.current);
+
     } else if (info === "updated_stats") {
       checkConnectionQuality(obj);
     } else if (info === "ice_connection_state_changed") {
       //FIXME: handle reconnection
     }
-  };
+  }
 
 
   function screenShareWebRtcAdaptorErrorCallback(error, message) {
     console.log("error from screen share webrtc adaptor callback")
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
-    console.log("error:"+error+" message:" + message);
+    console.log("error:" + error + " message:" + message);
   }
 
   function errorCallback(error, message) {
@@ -875,7 +862,7 @@ function AntMedia(props) {
     } else if (error.indexOf("TypeError") !== -1) {
       errorMessage = "Video/Audio is required.";
       displayWarning(errorMessage);
-      webRTCAdaptor.mediaManager.getDevices();
+      webRTCAdaptor?.mediaManager.getDevices();
     } else if (error.indexOf("UnsecureContext") !== -1) {
       errorMessage =
         "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
@@ -892,7 +879,7 @@ function AntMedia(props) {
     } else if (error.indexOf("already_publishing") !== -1) {
       console.log("**** already publishing:" + reconnecting);
       if (reconnecting) {
-        webRTCAdaptor.stop(publishStreamId);
+        webRTCAdaptor?.stop(publishStreamId);
 
         setTimeout(() => {
           handlePublish(
@@ -903,7 +890,7 @@ function AntMedia(props) {
           );
         }, 2000);
       }
-    } else if(error.indexOf("unauthorized_access") !== -1) {
+    } else if (error.indexOf("unauthorized_access") !== -1) {
       handleLeaveFromRoom()
 
       setUnAuthorizedDialogOpen(true)
@@ -911,12 +898,12 @@ function AntMedia(props) {
     else if(error.indexOf("highResourceUsage") !== -1){
       if(!isJoining && roomName && publishStreamId){
         setTimeout(() => {
-          webRTCAdaptor.closeWebSocket();
+          webRTCAdaptor?.closeWebSocket();
           if (!playOnly) {
             webRTCAdaptor?.stop(publishStreamId);
           }
           webRTCAdaptor?.stop(roomName);
-          webRTCAdaptor.checkWebSocketConnection();
+          webRTCAdaptor?.checkWebSocketConnection();
           joinRoom(roomName,publishStreamId);
         }, 3000);
       }
@@ -936,65 +923,53 @@ function AntMedia(props) {
       setLeftTheRoom(true);
     }
     console.log("***** " + error)
-
   }
 
-
-
-  function setLocalVideo() {
-
-    //workaround solution because it can update one component while rendering another component
-    //VideoCard setLocalVideo triggers this problem
-    setTimeout(()=> {
-      let tempLocalVideo = document.getElementById("localVideo");
-      if (tempLocalVideo) {
-        setLocalVideoLocal(tempLocalVideo);
-        webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
-        webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
-      }
-    }, 300);
-  }
-
-  function assignVideoToStream(videoTrackId, streamId) {
-    webRTCAdaptor.assignVideoTrack(videoTrackId, streamId, true);
-  }
-
-  function pinVideo(id, videoLabelProp = "") {
-    if (id === "localVideo") {
-      videoLabelProp = "localVideo";
-    }
-
+  function pinVideo(streamId) {
     // id is for pinning user.
-    let videoLabel = videoLabelProp;
+    let videoLabel;
+    let broadcastObject = allParticipants[streamId];
 
+    if (streamId === publishStreamId) {
+      videoLabel = "localVideo";
+    }
     if (videoLabel === undefined || videoLabel === "") {
       // if videoLabel is missing try to find it from participants.
-      videoLabel = participants.find((p) => id === p.id)?.videoLabel;
+      videoLabel = videoTrackAssignments.find((vta) => streamId === vta.streamId)?.videoLabel;
     }
 
-
-
-
-    if (videoLabel === undefined || videoLabel === "") {
-      // if videoLabel is still missing get the firs one if it exist, this may happen when one join while someone is sharing screen
-      videoLabel = participants[1]?.videoLabel;
-    }
-
-    var streamId = participants.find((p) => id === p.id)?.streamId;
     // if we already pin the targeted user then we are going to remove it from pinned video.
-    if (pinnedVideoId === id) {
-      setPinnedVideoId(undefined);
-      setUnPinnedStreamId(streamId)
-      handleNotifyUnpinUser(id);
-      webRTCAdaptor.assignVideoTrack(videoLabel, streamId, false);
+    if ((typeof broadcastObject.isPinned !== "undefined") && (broadcastObject.isPinned === true)) {
+      broadcastObject.isPinned = false; // false means user unpin manually
+      allParticipants[streamId] = broadcastObject;
+      handleNotifyUnpinUser(streamId !== publishStreamId ? streamId : publishStreamId);
     }
       // if there is no pinned video we are gonna pin the targeted user.
     // and we need to inform pinned user.
     else {
-      setPinnedVideoId(videoLabel);
-      handleNotifyPinUser(id);
-      webRTCAdaptor.assignVideoTrack(videoLabel, streamId, true);
+
+      if ((videoLabel === undefined || videoLabel === "") && (streamId !== undefined)) {
+        // if videoLabel is still missing get the firs one if it exist, this may happen when one join while someone is sharing screen
+        videoLabel = videoTrackAssignments[1]?.videoLabel;
+        webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
+      }
+
+      Object.keys(allParticipants).forEach(id => {
+        let participant = allParticipants[id];
+        if (typeof participant.isPinned !== 'undefined'
+          && participant.isPinned === true) {
+
+          participant.isPinned = false;
+          allParticipants[id] = participant;
+        }
+      });
+
+      broadcastObject.isPinned = true;
+      allParticipants[streamId] = broadcastObject;
+
+      handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
     }
+    setParticipantUpdated(!participantUpdated);
   }
 
   function handleNotifyPinUser(id) {
@@ -1024,7 +999,7 @@ function AntMedia(props) {
   function updateMaxVideoTrackCount(newCount) {
     if (publishStreamId && globals.maxVideoTrackCount !== newCount) {
       globals.maxVideoTrackCount = newCount;
-      webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, newCount);
+      webRTCAdaptor?.setMaxVideoTrackCount(publishStreamId, newCount);
     }
   }
 
@@ -1053,8 +1028,7 @@ function AntMedia(props) {
     );
   }
 
-  function startRecord()
-  {
+  function startRecord() {
 
     displayMessage("Recording is about to start...", "white")
     var jsCmd = {
@@ -1067,8 +1041,7 @@ function AntMedia(props) {
     sendMessage(JSON.stringify(jsCmd));
   }
 
-  function stopRecord()
-  {
+  function stopRecord() {
     displayMessage("Recording is about to stop...", "white")
     var jsCmd = {
       command: "stopRecording",
@@ -1101,7 +1074,7 @@ function AntMedia(props) {
 
   const displayMessage = React.useCallback((message, color) => {
     closeSnackbar();
-    enqueueSnackbar(message, 
+    enqueueSnackbar(message,
       {
         icon: <SvgIcon size={24} name={'report'} color={color} />,
         variant: "info",
@@ -1112,7 +1085,7 @@ function AntMedia(props) {
         },
       }
     );
-  },[closeSnackbar, enqueueSnackbar]);
+  }, [closeSnackbar, enqueueSnackbar]);
 
   const displayWarning = (message) => {
     displayMessage(message, "red");
@@ -1120,11 +1093,7 @@ function AntMedia(props) {
 
   function handleStopScreenShare() {
     setIsScreenShared(false);
-    screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current)
-
-    if (pinnedVideoId === "localVideo") {
-      setPinnedVideoId(undefined);
-    }
+    screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
   }
 
   function handleSetMessages(newMessage) {
@@ -1197,14 +1166,14 @@ function AntMedia(props) {
 
   function handleSendMessage(message) {
     if (publishStreamId) {
-      let iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
+      let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
       if (
         iceState !== null &&
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
         if (message === "debugme") {
-          webRTCAdaptor.getDebugInfo(publishStreamId);
+          webRTCAdaptor?.getDebugInfo(publishStreamId);
           return;
         } else if (message === "clearme") {
           setMessages([]);
@@ -1212,7 +1181,7 @@ function AntMedia(props) {
         }
 
 
-        webRTCAdaptor.sendData(
+        webRTCAdaptor?.sendData(
           publishStreamId,
           JSON.stringify({
             eventType: "MESSAGE_RECEIVED",
@@ -1230,8 +1199,8 @@ function AntMedia(props) {
     var infoText = "Client Debug Info\n";
     infoText += "Events:\n";
     infoText += JSON.stringify(globals.trackEvents) + "\n";
-    infoText += "Participants (" + participants.length + "):\n\n";
-    infoText += JSON.stringify(participants) + "\n\n";
+    infoText += "Video Track Assignments (" + videoTrackAssignments.length + "):\n\n";
+    infoText += JSON.stringify(videoTrackAssignments) + "\n\n";
     infoText += "All Participants (" + Object.keys(allParticipants).length + "):\n";
     Object.entries(allParticipants).forEach(([key, value]) => {
       infoText += "- " + key + "\n";
@@ -1281,7 +1250,7 @@ function AntMedia(props) {
         eventType === "CAM_TURNED_ON" ||
         eventType === "MIC_MUTED" ||
         eventType === "MIC_UNMUTED") {
-        webRTCAdaptor.getBroadcastObject(eventStreamId);
+        webRTCAdaptor?.getBroadcastObject(eventStreamId);
       } else if (eventType === "RECORDING_TURNED_ON") {
         setIsRecordPluginActive(true);
       } else if (eventType === "RECORDING_TURNED_OFF") {
@@ -1334,25 +1303,6 @@ function AntMedia(props) {
             return [...oldMessages, notificationEvent];
           }
         });
-      } else if (eventType === "SCREEN_SHARED_ON") {
-        console.log(eventStreamId)
-        let videoLab = participants.find((p) => p.streamId === eventStreamId)?.videoLabel;
-
-        if (videoLab === undefined) {
-          //no video player assigned to that participant, assign first player to screen sharer
-          videoLab = participants[1].id;
-          assignVideoToStream(videoLab, eventStreamId);
-        }
-
-        if (videoLab !== "localVideo") {
-           pinVideo(videoLab, videoLab);
-        }
-        setScreenSharedVideoId(eventStreamId);
-        webRTCAdaptor.getBroadcastObject(eventStreamId);
-      } else if (eventType === "SCREEN_SHARED_OFF") {
-        setScreenSharedVideoId(null);
-        setPinnedVideoId(undefined);
-        webRTCAdaptor.getBroadcastObject(eventStreamId);
       } else if (eventType === "REACTIONS" && notificationEvent.senderStreamId !== publishStreamId) {
         showReactions(notificationEvent.senderStreamId, notificationEvent.reaction);
       } else if (eventType === "TURN_YOUR_MIC_OFF") {
@@ -1375,35 +1325,28 @@ function AntMedia(props) {
           updateVideoSendResolution(false);
         }
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
-        let videoTrackAssignments = notificationEvent.payload;
+        let videoTrackAssignmentList = notificationEvent.payload;
 
-        let temp = participants;
+        let tempVideoTrackAssignments = videoTrackAssignments;
 
         //remove not available videotracks if exist
-        temp = temp.filter((p) => {
-          let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
-          return p.isMine || assignment !== undefined;
+        tempVideoTrackAssignments = tempVideoTrackAssignments.filter((oldVTA) => {
+          let assignment = videoTrackAssignmentList.find((vta) => oldVTA.videoLabel === vta.videoLabel);
+          return oldVTA.isMine || assignment !== undefined;
         });
 
-
         //add and/or update participants according to current assignments
-        videoTrackAssignments.forEach((vta) => {
-          temp.forEach((p) => {
-            if (p.videoLabel === vta.videoLabel) {
-              p.streamId = vta.trackId;
-              let broadcastObject = allParticipants[p.streamId];
-              if(broadcastObject === undefined){
-                setTimeout(()=>webRTCAdaptor.requestVideoTrackAssignments(roomName), 1000)
-              }
-              if (broadcastObject) {
-                p.name = broadcastObject.name;
-              }
+        videoTrackAssignmentList.forEach((vta) => {
+          tempVideoTrackAssignments.forEach((oldVTA) => {
+            if (oldVTA.videoLabel === vta.videoLabel) {
+              oldVTA.streamId = vta.trackId;
             }
           });
         });
-        setParticipants(temp);
 
-        checkScreenSharingStatus()
+        setVideoTrackAssignments(tempVideoTrackAssignments);
+
+        checkScreenSharingStatus();
 
         setParticipantUpdated(!participantUpdated);
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
@@ -1417,7 +1360,6 @@ function AntMedia(props) {
             .filter(
               (p) =>
                 p.trackId !== "" &&
-                screenSharedVideoId !== p.trackId &&
                 p.audioLevel < 60
             )
             .map((p) => p.trackId);
@@ -1426,38 +1368,20 @@ function AntMedia(props) {
       } else if (eventType === "TRACK_LIST_UPDATED") {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
-        webRTCAdaptor.getBroadcastObject(roomName);
+        webRTCAdaptor?.getBroadcastObject(roomName);
       }
     }
   }
 
-  function checkScreenSharingStatus(){
+  function checkScreenSharingStatus() {
 
-      const broadcastObjectsArray = Object.values(allParticipants);
-      broadcastObjectsArray.forEach((broadcastObject) => {
-        if(broadcastObject.metaData !== undefined && broadcastObject.metaData !== null){
-
-          let userStatusMetadata = JSON.parse(broadcastObject.metaData);
-            if(userStatusMetadata.isScreenShared){
-
-            setScreenSharedVideoId(broadcastObject.streamId);
-
-              if(pinnedVideoId === undefined && broadcastObject.streamId !== unPinnedStreamId){
-                let videoLab = participants.find((p) => p.streamId === broadcastObject.streamId)
-                ?.videoLabel
-                ? participants.find((p) => p.streamId === broadcastObject.streamId).videoLabel
-                : "";
-                pinVideo(broadcastObject.streamId, videoLab);
-                setParticipantUpdated(!participantUpdated);
-
-              }
-
-              return
-
-            }
+    const broadcastObjectsArray = Object.values(allParticipants);
+    broadcastObjectsArray.forEach((broadcastObject) => {
+        if (broadcastObject.isScreenShared === true && typeof broadcastObject.isPinned === "undefined") {
+          pinVideo(broadcastObject.streamId);
         }
-
-        })
+      }
+    )
   }
 
   function getUserStatusMetadata(isMicMuted, isCameraOn, isScreenShareActive) {
@@ -1478,8 +1402,8 @@ function AntMedia(props) {
     } else {
       metadata.isRecording = false;
     }
-    webRTCAdaptor.updateStreamMetaData(roomName, JSON.stringify(metadata));
-  },[webRTCAdaptor, roomName]);
+    webRTCAdaptor?.updateStreamMetaData(roomName, JSON.stringify(metadata));
+  }, [webRTCAdaptor, roomName]);
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
     let metadata = getUserStatusMetadata(micMuted, cameraOn, false);
@@ -1491,7 +1415,7 @@ function AntMedia(props) {
 
 
     // we need to empty participant array. if we are going to leave it in the first place.
-    setParticipants([]);
+    setVideoTrackAssignments([]);
     setAllParticipants({});
 
     clearInterval(audioListenerIntervalJob);
@@ -1565,21 +1489,18 @@ function AntMedia(props) {
   }
 
   function removeAllRemoteParticipants() {
-    let newVideoTrack = {
-      id: "localVideo",
+    let newVideoTrackAssignment = {
       videoLabel: "localVideo",
       track: null,
-      isCameraOn: false,
       streamId: publishStreamId,
-      name: "You",
       isMine: true
     };
 
-    let tempParticipants = [];
+    let tempVideoTrackAssignments = [];
     if (!playOnly) {
-      tempParticipants.push(newVideoTrack);
+      tempVideoTrackAssignments.push(newVideoTrackAssignment);
     }
-    setParticipants(tempParticipants);
+    setVideoTrackAssignments(tempVideoTrackAssignments);
 
     let allParticipantsTemp = {};
     if (!playOnly) {
@@ -1589,27 +1510,24 @@ function AntMedia(props) {
   }
 
   function addMeAsParticipant(publishStreamId) {
-    let isParticipantExist = participants.find((p) => p.id === "localVideo");
+    let isParticipantExist = videoTrackAssignments.find((vta) => vta.label === "localVideo");
 
     if (isParticipantExist || playOnly) {
       return;
     }
 
-    let newVideoTrack = {
-      id: "localVideo",
+    let newVideoTrackAssignment = {
       videoLabel: "localVideo",
       track: null,
-      isCameraOn: false,
       streamId: publishStreamId,
-      name: "You",
       isMine: true
     };
-    let tempParticipants = participants;
-    tempParticipants.push(newVideoTrack);
-    setParticipants(tempParticipants);
+    let tempVideoTrackAssignments = videoTrackAssignments;
+    tempVideoTrackAssignments.push(newVideoTrackAssignment);
+    setVideoTrackAssignments(tempVideoTrackAssignments);
 
     let allParticipantsTemp = allParticipants;
-    allParticipantsTemp[publishStreamId] = {name: "You"};
+    allParticipantsTemp[publishStreamId] = {streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false};
     setAllParticipants(allParticipantsTemp);
   }
 
@@ -1624,7 +1542,7 @@ function AntMedia(props) {
       currentStreamName = "Anonymous"
     }
 
-    webRTCAdaptor.publish(
+    webRTCAdaptor?.publish(
       publishStreamId,
       token,
       subscriberId,
@@ -1652,18 +1570,14 @@ function AntMedia(props) {
       temp.push(newAudioTrack);
       setAudioTracks(temp);
     } else if (obj.track.kind === "video") {
-      let newVideoTrack = {
-        id: index,
+      let newVideoTrackAssignment = {
         videoLabel: index,
         track: obj.track,
-        isCameraOn: true,
-        streamId: obj.streamId,
-        name: ""
+        streamId: obj.streamId
       };
-      //append new video track, track id should be unique because of video track limitation
-      let temp = participants;
-      temp.push(newVideoTrack);
-      setParticipants(temp);
+      let tempVideoTrackAssignments = videoTrackAssignments;
+      tempVideoTrackAssignments.push(newVideoTrackAssignment);
+      setVideoTrackAssignments(tempVideoTrackAssignments);
     }
   }
 
@@ -1683,9 +1597,9 @@ function AntMedia(props) {
     virtualBackgroundImage.onload = () => {
       console.log("Virtual background image is loaded");
       setVirtualBackground(virtualBackgroundImage);
-      webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+      webRTCAdaptor?.setBackgroundImage(virtualBackgroundImage);
 
-      webRTCAdaptor.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
+      webRTCAdaptor?.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
         console.log("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is enabled");
         setIsVideoEffectRunning(true);
       }).catch(err => {
@@ -1717,7 +1631,7 @@ function AntMedia(props) {
       effectName = VideoEffect.VIRTUAL_BACKGROUND;
       setIsVideoEffectRunning(true);
     }
-    webRTCAdaptor.enableEffect(effectName).then(() => {
+    webRTCAdaptor?.enableEffect(effectName).then(() => {
       console.log("Effect: " + effectName + " is enabled");
     }).catch(err => {
       console.error("Effect: " + effectName + " is not enabled. Error is " + err);
@@ -1729,7 +1643,7 @@ function AntMedia(props) {
     if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
     } else {
-      webRTCAdaptor.turnOnLocalCamera(streamId);
+      webRTCAdaptor?.turnOnLocalCamera(streamId);
     }
 
     updateUserStatusMetadata(isMyMicMuted, true);
@@ -1782,7 +1696,7 @@ function AntMedia(props) {
       // When we first open home page, React will call this function and local stream is null at that time.
       // So, we need to catch the error.
       try {
-        webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
+        webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, value);
       } catch (e) {
         console.log("Local stream is not ready yet.");
       }
@@ -1795,7 +1709,7 @@ function AntMedia(props) {
       // When we first open home page, React will call this function and local stream is null at that time.
       // So, we need to catch the error.
       try {
-        webRTCAdaptor.switchAudioInputSource(publishStreamId, value);
+        webRTCAdaptor?.switchAudioInputSource(publishStreamId, value);
       } catch (e) {
         console.log("Local stream is not ready yet.");
       }
@@ -1838,7 +1752,7 @@ function AntMedia(props) {
   }
 
   function unmuteLocalMic() {
-    webRTCAdaptor.unmuteLocalMic();
+    webRTCAdaptor?.unmuteLocalMic();
     updateUserStatusMetadata(false, !isMyCamTurnedOff);
     setIsMyMicMuted(false);
 
@@ -1864,6 +1778,16 @@ function AntMedia(props) {
     }
   }
 
+  function localVideoCreate(tempLocalVideo) {
+    // it can be null when we first open the page
+    // due to the fact that local stream is not ready yet.
+    if (typeof tempLocalVideo !== "undefined" && tempLocalVideo !== null) {
+      setLocalVideo(tempLocalVideo);
+      webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
+      webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
+      }
+  }
+
   React.useEffect(() => {
     //gets the setting from the server through websocket
     if (isWebSocketConnected) {
@@ -1872,7 +1796,7 @@ function AntMedia(props) {
       };
       sendMessage(JSON.stringify(jsCmd));
     }
-  },[isWebSocketConnected, sendMessage]);
+  }, [isWebSocketConnected, sendMessage]);
 
   React.useEffect(() => {
     if (!latestMessage) {
@@ -1881,16 +1805,13 @@ function AntMedia(props) {
     var obj = JSON.parse(latestMessage);
     var definition;
     if (obj.command === "setSettings") {
-      var localSettings =  JSON.parse(obj.settings);
+      var localSettings = JSON.parse(obj.settings);
       console.log("--isRecordingFeatureAvailable: ", localSettings.isRecordingFeatureAvailable);
       setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
-    }
-    else if (obj.command === "startRecordingResponse")
-    {
+    } else if (obj.command === "startRecordingResponse") {
       console.log("Incoming startRecordingResponse:", obj);
       definition = JSON.parse(obj.definition);
-      if (definition.success)
-      {
+      if (definition.success) {
         setIsRecordPluginActive(true);
         updateRoomRecordingStatus(true);
         handleSendNotificationEvent(
@@ -1898,17 +1819,14 @@ function AntMedia(props) {
           publishStreamId
         );
         displayMessage("Recording is started successfully", "white")
-      }
-      else {
+      } else {
         console.log("Start Recording is failed");
         displayMessage("Recording cannot be started. Error is " + definition.message, "white")
       }
-    }
-    else if (obj.command === "stopRecordingResponse") {
+    } else if (obj.command === "stopRecordingResponse") {
       console.log("Incoming stopRecordingResponse:", obj);
       definition = JSON.parse(obj.definition);
-      if (definition.success)
-      {
+      if (definition.success) {
         setIsRecordPluginActive(false);
         updateRoomRecordingStatus(false);
         handleSendNotificationEvent(
@@ -1916,13 +1834,12 @@ function AntMedia(props) {
           publishStreamId
         );
         displayMessage("Recording is stopped successfully", "white")
-      }
-      else {
+      } else {
         console.log("Stop Recording is failed");
         displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
       }
     }
-  },[latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);
+  }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);
 
   const makeFullScreen = (divId) => {
     if (fullScreenId === divId) {
@@ -1970,19 +1887,18 @@ function AntMedia(props) {
             value={{
               isScreenShared,
               talkers,
-              screenSharedVideoId,
               roomJoinMode,
               audioTracks,
               isPublished,
               selectedCamera,
               selectedMicrophone,
               selectedBackgroundMode,
-              participants,
+              videoTrackAssignments,
+              setVideoTrackAssignments,
               messageDrawerOpen,
               participantListDrawerOpen,
               messages,
               numberOfUnReadMessages,
-              pinnedVideoId,
               participantUpdated,
               allParticipants,
               globals,
@@ -1997,7 +1913,6 @@ function AntMedia(props) {
               sendReactions,
               setSelectedBackgroundMode,
               setIsVideoEffectRunning,
-              setParticipants,
               handleMessageDrawerOpen,
               handleParticipantListOpen,
               setSelectedCamera,
@@ -2027,7 +1942,6 @@ function AntMedia(props) {
               turnOffYourMicNotification,
               addFakeParticipant,
               removeFakeParticipant,
-              assignVideoToStream,
               showEmojis,
               setShowEmojis,
               isMuteParticipantDialogOpen,
@@ -2055,6 +1969,7 @@ function AntMedia(props) {
               effectsDrawerOpen,
               handleEffectsOpen,
               setAndEnableVirtualBackgroundImage,
+              localVideoCreate,
               microphoneButtonDisabled,
               setMicrophoneButtonDisabled,
               cameraButtonDisabled,
@@ -2072,7 +1987,7 @@ function AntMedia(props) {
             <UnauthrorizedDialog
               onClose={handleUnauthorizedDialogExitClicked}
               open={unAuthorizedDialogOpen}
-              onExitClicked ={handleUnauthorizedDialogExitClicked}
+              onExitClicked={handleUnauthorizedDialogExitClicked}
 
             />
 
@@ -2109,7 +2024,7 @@ function AntMedia(props) {
                 </Grid>
               </Backdrop>
             ):null}
-            
+
               {leftTheRoom ? (
                <LeftTheRoom isError={leaveRoomWithError.current} />
               ) : waitingOrMeetingRoom === "waiting" ? (

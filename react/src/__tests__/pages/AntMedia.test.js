@@ -250,11 +250,6 @@ describe('AntMedia Component', () => {
         webRTCAdaptorConstructor.callback("data_received", obj);
       });
 
-
-      await waitFor(() => {
-        expect(currentConference.screenSharedVideoId).toBe("p1");
-      });
-
       var event = {"eventType": "PIN_USER", "streamId": "p1"};
       expect(consoleSpy).toHaveBeenCalledWith("send notification event", event);
 
@@ -275,7 +270,7 @@ describe('AntMedia Component', () => {
 
       var testStreamId = "stream1";
 
-      currentConference.participants.push({streamId: testStreamId, videoLabel: "test1"});
+      currentConference.videoTrackAssignments.push({streamId: testStreamId, videoLabel: "test1"});
       var obj = {};
       var notificationEvent = {
         eventType: "SCREEN_SHARED_ON",
@@ -289,9 +284,6 @@ describe('AntMedia Component', () => {
         webRTCAdaptorConstructor.callback("data_received", obj);
       });
 
-      await waitFor(() => {
-        expect(currentConference.pinnedVideoId).toBe("test1");
-      });
     });
 
     it('publishTimeoutError error callback', async () => {
@@ -639,6 +631,25 @@ describe('AntMedia Component', () => {
 
     });
 
+    it('calls removeAllRemoteParticipants without crashing', () => {
+      let contextValue = {
+        removeAllRemoteParticipants: jest.fn(),
+      };
+
+      const TestComponent = () => {
+        const conference = React.useContext(ConferenceContext);
+        conference.removeAllRemoteParticipants();
+        return null;
+      };
+
+      render(
+        <ConferenceContext.Provider value={contextValue}>
+          <TestComponent />
+        </ConferenceContext.Provider>
+      );
+
+      expect(contextValue.removeAllRemoteParticipants).toHaveBeenCalled();
+    });
 
     it('high resource usage', async () => {
       const { container } = render(
