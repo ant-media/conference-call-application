@@ -80,13 +80,14 @@ function WaitingRoom(props) {
     } else {
       streamId = publishStreamId;
     }
-
+    
+    conference.setIsJoining(true);
     conference.joinRoom(roomName, streamId, conference.roomJoinMode);
-    conference.setWaitingOrMeetingRoom("meeting");
   }
+  
 
   const handleDialogOpen = (focus) => {
-    if (false && conference.localVideo === null) {
+    if (conference.localVideo === null) {
       enqueueSnackbar(
         {
           message: t(
@@ -202,6 +203,7 @@ function WaitingRoom(props) {
 
             <form
               onSubmit={(e) => {
+                e.preventDefault();
                 joinRoom(e);
               }}
             >
