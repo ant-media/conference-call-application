@@ -5,6 +5,11 @@ import AntMedia from 'pages/AntMedia';
 import { useWebSocket } from 'Components/WebSocketProvider';
 import { useSnackbar} from "notistack";
 import { ConferenceContext } from "pages/AntMedia";
+import { assert, timeout } from 'workbox-core/_private';
+import exp from 'constants';
+import { ThemeProvider } from '@mui/material/styles';
+import {ThemeList} from "styles/themeList";
+import theme from "styles/theme";
 
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
@@ -21,37 +26,56 @@ jest.mock('notistack', () => ({
   SnackbarProvider: ({ children }) => <div></div>,
 }));
 
+jest.mock('utils', () => ({
+  ...jest.requireActual('utils'),
+  getRoomNameAttribute: jest.fn().mockReturnValue("room"),
+}));
+
 jest.mock('@antmedia/webrtc_adaptor', () => ({
   ...jest.requireActual('@antmedia/webrtc_adaptor'),
   WebRTCAdaptor: jest.fn().mockImplementation((params) => {
     console.log(params);
+      var mockAdaptor = {
+      init : jest.fn(),
+      publish : jest.fn().mockImplementation(() => console.log('publishhhhhh')),
+      play : jest.fn(),
+      unpublish : jest.fn(),
+      leaveRoom : jest.fn(),
+      startPublishing : jest.fn(),
+      stopPublishing : jest.fn(),
+      startPlaying : jest.fn(),
+      stopPlaying : jest.fn(),
+      getLocalStream : jest.fn(),
+      applyConstraints : jest.fn(),
+      sendData : jest.fn().mockImplementation((publishStreamId, data) => console.log('send data called with ')),
+      setMaxVideoTrackCount : jest.fn(),
+      enableStats : jest.fn(),
+      getBroadcastObject : jest.fn(),
+      checkWebSocketConnection : jest.fn(),
+      stop : jest.fn(),
+      turnOffLocalCamera : jest.fn(),
+    }
+
+    for (var key in params) {
+      if (typeof params[key] === 'function') {
+        mockAdaptor[key] = params[key];
+      }
+    }
+
+
     if(params.mediaConstraints.audio === true) {
-      webRTCAdaptorScreenConstructor = params;
+      webRTCAdaptorScreenConstructor = mockAdaptor;
     }
     else {
-      webRTCAdaptorConstructor = params;
+      webRTCAdaptorConstructor = mockAdaptor;
     }
-    return {
-      init: jest.fn(),
-      publish: jest.fn().mockImplementation(() => console.log('publishhhhhh')),
-      play: jest.fn(),
-      unpublish: jest.fn(),
-      leaveRoom: jest.fn(),
-      startPublishing: jest.fn(),
-      stopPublishing: jest.fn(),
-      startPlaying: jest.fn(),
-      stopPlaying: jest.fn(),
-      getLocalStream: jest.fn(),
-      applyConstraints: jest.fn(),
-      sendData: jest.fn().mockImplementation((publishStreamId, data) => console.log('send data called with ')),
-      setMaxVideoTrackCount: jest.fn(),
-      stop: jest.fn(),
-      turnOffLocalCamera: jest.fn(),
-    };
+    return mockAdaptor;
+
   }),
 }));
 
 jest.mock('Components/Cards/VideoCard', () => ({ value }) => <div data-testid="mocked-video-card">{value}</div>);
+jest.mock('Components/EffectsDrawer', () => ({ value }) => <div data-testid="mocked-effect-drawer">{value}</div>);
 
 
 const MockChild = () => {
@@ -345,4 +369,99 @@ describe('AntMedia Component', () => {
 
     });
 
+    it('is joining state test', async () => {
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      expect(currentConference.isJoining).toBe(false);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      await act(async () => {
+        currentConference.setIsJoining(true);
+      });
+
+      expect(currentConference.isJoining).toBe(true);
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("publish_started");
+      });
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("play_started");
+      });
+
+
+      expect(currentConference.isJoining).toBe(false);
+      
+      consoleSpy.mockRestore();
+
+    });
+
+
+    it('high resource usage', async () => {
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+      
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      expect(currentConference.isJoining).toBe(false);
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callbackError("highResourceUsage", {});
+      });
+
+      waitFor(() => {
+        expect(webRTCAdaptorConstructor.checkWebSocketConnection).toHaveBeenCalled();
+      });
+    });
+
+    it('screen sharing state test', async () => {
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+      
+
+      expect(currentConference.isScreenShared).toBe(false);
+
+      await act(async () => {
+        currentConference.handleStartScreenShare();
+      });
+
+      await waitFor(() => {
+        expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+      });
+
+      expect(container).not.toContain("Starting Screen Share...");
+
+
+      act(() => {
+          webRTCAdaptorScreenConstructor.callback("initialized");
+      });
+
+      waitFor(() => {
+        expect(container).toContain("Starting Screen Share...");
+      });
+    });
+  
 });
