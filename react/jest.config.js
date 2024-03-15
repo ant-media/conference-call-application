@@ -4,6 +4,7 @@ module.exports = {
     collectCoverageFrom: ['src/Components/*.js','src/pages/*.js'],
     coverageDirectory: 'coverage',
     testEnvironment: 'jsdom',
+    setupFiles: ['<rootDir>/.jest/setEnvVars.js'],
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
     moduleNameMapper:{
         "\\.(css|less|sass|scss)$": "<rootDir>/src/__mocks__/styleMock.js",

@@ -37,10 +37,20 @@ function WaitingRoom(props) {
   window.conference = conference;
   const {enqueueSnackbar} = useSnackbar();
 
+  // This is a temporary video track assignment for local video
+  // It is used to show local video in the waiting room
+  // After we get publish stream id, we will create real video track assignment
+  const tempVTA = {
+    videoLabel: "localVideo",
+    track: null,
+    streamId: "localVideo",
+    isMine: true
+  };
 
   React.useEffect(() => {
     if (!conference.isPlayOnly && conference.initialized) {
-      conference.setLocalVideo(document.getElementById("localVideo"));
+      const tempLocalVideo = document.getElementById("localVideo");
+      conference?.localVideoCreate(tempLocalVideo);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,13 +80,14 @@ function WaitingRoom(props) {
     } else {
       streamId = publishStreamId;
     }
-
+    
+    conference.setIsJoining(true);
     conference.joinRoom(roomName, streamId, conference.roomJoinMode);
-    conference.setWaitingOrMeetingRoom("meeting");
   }
+  
 
   const handleDialogOpen = (focus) => {
-    if (false && conference.localVideo === null) {
+    if (conference.localVideo === null) {
       enqueueSnackbar(
         {
           message: t(
@@ -123,7 +134,7 @@ function WaitingRoom(props) {
               className="waiting-room-video"
               sx={{position: "relative"}}
             >
-              <VideoCard id="localVideo" autoPlay muted hidePin={true}/>
+              <VideoCard trackAssignment={tempVTA} autoPlay muted hidePin={true}/>
 
               <Grid
                 container
@@ -192,6 +203,7 @@ function WaitingRoom(props) {
 
             <form
               onSubmit={(e) => {
+                e.preventDefault();
                 joinRoom(e);
               }}
             >
