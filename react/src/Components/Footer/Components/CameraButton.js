@@ -79,17 +79,17 @@ function CameraButton(props) {
     <>
       {conference?.isMyCamTurnedOff ? (
         <Tooltip title={t('Turn on camera')} placement="top">
-          <CustomizedBtn 
+          <CustomizedBtn
             id="camera-button"
-            className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}}  onClick={(e) => handleOn(e)}>
+            className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={conference?.cameraButtonDisabled} onClick={(e) => handleOn(e)}>
             <SvgIcon size={40} name={'camera-off'} color="#fff" />
           </CustomizedBtn>
          </Tooltip>
       ) : (
         <Tooltip title={t('Turn off camera')} placement="top">
-          <CustomizedBtn 
+          <CustomizedBtn
             id="camera-button"
-            className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => handleOff(e)}>
+            className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={conference?.cameraButtonDisabled} onClick={(e) => handleOff(e)}>
             <SvgIcon size={40} name={'camera'} color='inherit' />
           </CustomizedBtn>
         </Tooltip>
