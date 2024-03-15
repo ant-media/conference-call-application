@@ -208,6 +208,7 @@ if (token == null || typeof token === "undefined") {
 var roomOfStream = [];
 
 var audioListenerIntervalJob = null;
+var videoTrackAssignmentsIntervalJob = null;
 
 
 var room = null;
@@ -452,9 +453,11 @@ function AntMedia(props) {
   }
 
   function requestVideoTrackAssignmentsInterval() {
-    requestVideoTrackAssignmentsInterval = setInterval(() => {
-      webRTCAdaptor?.requestVideoTrackAssignments(roomName);
-    }, 3000);
+    if (videoTrackAssignmentsIntervalJob === null) {
+      videoTrackAssignmentsIntervalJob = setInterval(() => {
+        webRTCAdaptor?.requestVideoTrackAssignments(roomName);
+      }, 3000);
+    }
   }
 
   async function checkDevices() {
@@ -594,7 +597,9 @@ function AntMedia(props) {
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    checkAndUpdateVideoAudioSources();
+    if (devices.length > 0) {
+      checkAndUpdateVideoAudioSources();
+    }
   }, [devices]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (webRTCAdaptor) {
@@ -735,7 +740,6 @@ function AntMedia(props) {
       if (reconnecting) {
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
-        return;
       }
     } else if (info === "play_started") {
       console.log("**** play started:" + reconnecting);
@@ -746,10 +750,10 @@ function AntMedia(props) {
       if (reconnecting) {
         playReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
-        return;
       }
     } else if (info === "play_finished") {
       clearInterval(requestVideoTrackAssignmentsInterval);
+      videoTrackAssignmentsIntervalJob = null;
     } else if (info === "screen_share_stopped") {
 
     } else if (info === "screen_share_started") {
