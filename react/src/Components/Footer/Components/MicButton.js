@@ -76,16 +76,18 @@ function MicButton(props) {
     <>
       {conference?.isMyMicMuted ? (
         <Tooltip title={t('Turn on microphone')} placement="top">
-          <CustomizedBtn 
+          <CustomizedBtn
             id="mic-button"
+            disabled={conference?.microphoneButtonDisabled}
             className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="error" onClick={(e) => { handleUnmute(e) }}>
             <SvgIcon size={40} name={'muted-microphone'} color="#fff" />
           </CustomizedBtn>
         </Tooltip>
       ) : (
         <Tooltip title={t('Turn off microphone')} placement="top">
-          <CustomizedBtn 
+          <CustomizedBtn
             id="mic-button"
+            disabled={conference?.microphoneButtonDisabled}
             className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => { handleMute(e) }}>
             <SvgIcon size={40} name={'microphone'} color='inherit' />
           </CustomizedBtn>

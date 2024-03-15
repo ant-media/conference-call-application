@@ -4,7 +4,7 @@ import {SvgIcon} from "Components/SvgIcon";
 import Menu from "@mui/material/Menu";
 import {styled} from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
-import {SettingsDialog} from "./SettingsDialog";
+import SettingsDialog from "./SettingsDialog";
 import {LayoutSettingsDialog} from "./LayoutSettingsDialog";
 import {ListItemIcon, ListItemText, Tooltip} from "@mui/material";
 import {useTranslation} from "react-i18next";
@@ -134,13 +134,11 @@ function OptionButton({footer, ...props}) {
             : null}
 
         {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
-        <MenuItem onClick={() => handleLayoutDialogOpen()}>
+        <MenuItem onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
           <ListItemIcon>
             <SvgIcon size={36} name={"layout"} color={"white"}/>
           </ListItemIcon>
-          <ListItemText
-            id="change-layout-button"
-          >
+          <ListItemText>
             {t("Change Layout")}
           </ListItemText>
         </MenuItem>

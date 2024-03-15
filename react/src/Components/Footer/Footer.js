@@ -14,8 +14,10 @@ import FakeParticipantButton from "./Components/FakeParticipantButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
-import { getRoomNameAttribute } from 'utils';
+import {getRoomNameAttribute, isComponentMode} from 'utils';
+import { isMobile, isTablet } from 'react-device-detect';
 import ReactionsButton from "./Components/ReactionsButton";
+import MoreOptionsButton from "./Components/MoreOptionsButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -25,11 +27,10 @@ const getCustomizedGridStyle = (theme) => {
     left: 0,
     padding: 16,
     width: "100vw",
-    zIndex: 2,
-    height: 80,
+    zIndex: 101,
   };
 
-  if (getRoomNameAttribute()) {
+  if (isComponentMode()) {
     customizedGridStyle.position = "absolute";
     customizedGridStyle.width = "100%";
   }
@@ -41,10 +42,26 @@ const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme
 
 function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
+  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
 
+  const mobileBreakpoint = 900;
+
   const [, setIsRecordingTextVisible] = React.useState(false);
+
+  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   React.useEffect(() => {
     //debugger;
@@ -98,40 +115,39 @@ function Footer(props) {
                     <MicButton footer/>
                   </Grid>
                       : null}
-
-                  {conference.isPlayOnly === false
-                    && process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true' ?
+                  {(conference.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     {" "}
                     <ShareScreenButton footer/>
                   </Grid>
                       : null}
 
-                  {process.env.REACT_APP_FOOTER_REACTIONS_BUTTON_VISIBILITY === 'true' ?
-                  <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
-                    <ReactionsButton footer/>
-                  </Grid>
-                  : null}
-
-                  {process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'true' ?
-                  <Grid item xs={0}>
-                    <MessageButton footer/>
-                  </Grid>
-                  : null}
-
-                  {process.env.REACT_APP_FOOTER_PARTICIPANT_LIST_BUTTON_VISIBILITY === 'true' ?
-                  <Grid item xs={0}>
-                      <ParticipantListButton footer />
-                  </Grid>
-                  : null}
-
-                  {process.env.REACT_APP_FOOTER_END_CALL_BUTTON_VISIBILITY === 'true' ?
-                  <Grid item xs={0}>
-                    <EndCallButton footer/>
-                  </Grid>
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_REACTIONS_BUTTON_VISIBILITY === 'true') ? (
+                    <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
+                      <ReactionsButton footer/>
+                    </Grid>)
                     : null}
 
-                  {process.env.NODE_ENV === "development" ?
+                  {(windowWidth > mobileBreakpoint) && (conference.isPlayOnly === false) && (process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'true') ? (
+                    <Grid item xs={0}>
+                      <MessageButton footer/>
+                    </Grid>)
+                    : null}
+
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PARTICIPANT_LIST_BUTTON_VISIBILITY === 'true') ? (
+                    <Grid item xs={0}>
+                        <ParticipantListButton footer />
+                    </Grid>)
+                    : null}
+
+                  {process.env.REACT_APP_FOOTER_END_CALL_BUTTON_VISIBILITY === 'true' ?
+                    <Grid item xs={0}>
+                      <EndCallButton footer/>
+                    </Grid>
+                   : null}
+
+                  {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
+
                   <Grid item xs={0}>
                     <FakeParticipantButton
                       footer
@@ -140,7 +156,7 @@ function Footer(props) {
                   </Grid>
                   : null}
 
-                  {process.env.NODE_ENV === "development" ?
+                  {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     <FakeParticipantButton
                       footer
@@ -148,6 +164,12 @@ function Footer(props) {
                     />
                   </Grid>
                   : null}
+
+                  {windowWidth <= mobileBreakpoint ? (
+                    <Grid item xs={0}>
+                      <MoreOptionsButton footer/>
+                    </Grid>
+                  ) : null}
 
                 </Grid>
               </Grid>
