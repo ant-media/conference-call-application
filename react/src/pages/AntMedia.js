@@ -43,7 +43,7 @@ function getMediaConstraints(videoSendResolution, frameRate) {
         video: {
           width: {max: window.screen.width}, height: {max: window.screen.height}, frameRate: {ideal: frameRate}
         },
-        audio:true, 
+        audio:true,
       };
       break;
     case "qvgaConstraints":
@@ -282,6 +282,8 @@ function AntMedia(props) {
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [presenters, setPresenters] = React.useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
+  const [microphoneButtonDisabled, setMicrophoneButtonDisabled] = React.useState(false);
+  const [cameraButtonDisabled, setCameraButtonDisabled] = React.useState(false);
 
   const [screenSharingInProgress, setScreenSharingInProgress] = React.useState(false);
 
@@ -384,9 +386,11 @@ function AntMedia(props) {
     for (let index = 0; index < devices.length; index++) {
       if (devices[index].kind === "videoinput" && devices[index].deviceId === selectedDevices.videoDeviceId) {
         isVideoDeviceAvailable = true;
+        setCameraButtonDisabled(false);
       }
       if (devices[index].kind === "audioinput" && devices[index].deviceId === selectedDevices.audioDeviceId) {
         isAudioDeviceAvailable = true;
+        setMicrophoneButtonDisabled(false);
       }
     }
 
@@ -395,12 +399,30 @@ function AntMedia(props) {
       const camera = devices.find(d => d.kind === 'videoinput');
       if (camera) {
         selectedDevices.videoDeviceId = camera.deviceId;
+        setCameraButtonDisabled(false);
+        console.info("Unable to access selected camera, switching the first available camera.");
+        displayMessage("Unable to access selected camera, switching the first available camera.", "white");
+      } else {
+        // if there is no camera, set the video to false
+        checkAndTurnOffLocalCamera()
+        setCameraButtonDisabled(true)
+        console.info("There is no available camera device.");
+        displayMessage("There is no available camera device.", "white")
       }
     }
     if (selectedDevices.audioDeviceId === '' || isAudioDeviceAvailable === false) {
       const audio = devices.find(d => d.kind === 'audioinput');
       if (audio) {
         selectedDevices.audioDeviceId = audio.deviceId;
+        setMicrophoneButtonDisabled(false);
+        console.info("Unable to access selected microphone, switching the first available microphone.");
+        displayMessage("Unable to access selected microphone, switching the first available microphone.", "white");
+      } else {
+        // if there is no audio, set the audio to false
+        muteLocalMic()
+        setMicrophoneButtonDisabled(true)
+        console.info("There is no microphone device available.");
+        displayMessage("There is no microphone device available.", "white")
       }
     }
 
@@ -639,7 +661,7 @@ function AntMedia(props) {
                 callback: screenShareWebRtcAdaptorInfoCallback,
                 callbackError: screenShareWebRtcAdaptorErrorCallback
               })
-              
+
             }).catch(error => {
               console.log(error)
            })
@@ -647,7 +669,7 @@ function AntMedia(props) {
   }
 
   function startScreenSharing(){
-    
+
     var token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
 
     if (token === undefined) {
@@ -899,7 +921,7 @@ function AntMedia(props) {
         }, 3000);
       }
     }
-    else if (error === "publishTimeoutError"){
+    else if ((error === "publishTimeoutError") && (!reconnecting)){
       console.error(error , "Firewall might be blocking the connection Please setup a TURN Server");
       leaveRoomWithError.current = true;
       setLeftTheRoom(true);
@@ -908,10 +930,14 @@ function AntMedia(props) {
       console.error(error , "Licence is Expired please renew the licence");
       leaveRoomWithError.current = true;
       setLeftTheRoom(true);
+    } else if (error === "notSetRemoteDescription"){
+      console.error(error , "Not set remote description");
+      leaveRoomWithError.current = true;
+      setLeftTheRoom(true);
     }
     console.log("***** " + error)
 
-  };
+  }
 
 
 
@@ -948,7 +974,7 @@ function AntMedia(props) {
 
 
 
-    
+
     if (videoLabel === undefined || videoLabel === "") {
       // if videoLabel is still missing get the firs one if it exist, this may happen when one join while someone is sharing screen
       videoLabel = participants[1]?.videoLabel;
@@ -1352,14 +1378,14 @@ function AntMedia(props) {
         let videoTrackAssignments = notificationEvent.payload;
 
         let temp = participants;
-        
+
         //remove not available videotracks if exist
         temp = temp.filter((p) => {
           let assignment = videoTrackAssignments.find((vta) => p.videoLabel === vta.videoLabel);
           return p.isMine || assignment !== undefined;
         });
-        
-      
+
+
         //add and/or update participants according to current assignments
         videoTrackAssignments.forEach((vta) => {
           temp.forEach((p) => {
@@ -1413,24 +1439,24 @@ function AntMedia(props) {
 
           let userStatusMetadata = JSON.parse(broadcastObject.metaData);
             if(userStatusMetadata.isScreenShared){
-                
+
             setScreenSharedVideoId(broadcastObject.streamId);
-                            
+
               if(pinnedVideoId === undefined && broadcastObject.streamId !== unPinnedStreamId){
                 let videoLab = participants.find((p) => p.streamId === broadcastObject.streamId)
                 ?.videoLabel
                 ? participants.find((p) => p.streamId === broadcastObject.streamId).videoLabel
-                : ""; 
-                pinVideo(broadcastObject.streamId, videoLab); 
+                : "";
+                pinVideo(broadcastObject.streamId, videoLab);
                 setParticipantUpdated(!participantUpdated);
 
-              }  
+              }
 
               return
-              
+
             }
         }
-      
+
         })
   }
 
@@ -1457,8 +1483,8 @@ function AntMedia(props) {
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
     let metadata = getUserStatusMetadata(micMuted, cameraOn, false);
-      
-    webRTCAdaptor.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
+
+    webRTCAdaptor?.updateStreamMetaData(publishStreamId, JSON.stringify(metadata));
   }
 
   function handleLeaveFromRoom() {
@@ -1496,7 +1522,7 @@ function AntMedia(props) {
       ...(info ? info : {}),
     };
     console.info("send notification event", notEvent);
-    webRTCAdaptor.sendData(publishStreamId, JSON.stringify(notEvent));
+    webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
   },[webRTCAdaptor]);
 
   function updateVideoSendResolution(isPinned) {
@@ -1719,7 +1745,7 @@ function AntMedia(props) {
     if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
     } else {
-      webRTCAdaptor.turnOffLocalCamera(streamId);
+      webRTCAdaptor?.turnOffLocalCamera(streamId);
     }
 
     updateUserStatusMetadata(isMyMicMuted, false);
@@ -1801,7 +1827,7 @@ function AntMedia(props) {
   }
 
   function muteLocalMic() {
-    webRTCAdaptor.muteLocalMic();
+    webRTCAdaptor?.muteLocalMic();
     updateUserStatusMetadata(true, !isMyCamTurnedOff);
     setIsMyMicMuted(true);
 
@@ -2029,6 +2055,14 @@ function AntMedia(props) {
               effectsDrawerOpen,
               handleEffectsOpen,
               setAndEnableVirtualBackgroundImage,
+              microphoneButtonDisabled,
+              setMicrophoneButtonDisabled,
+              cameraButtonDisabled,
+              setCameraButtonDisabled,
+              updateMaxVideoTrackCount,
+              checkAndUpdateVideoAudioSources,
+              setDevices,
+              getSelectedDevices,
               setIsJoining,
               isJoining,
               updateMaxVideoTrackCount

@@ -54,6 +54,16 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       checkWebSocketConnection : jest.fn(),
       stop : jest.fn(),
       turnOffLocalCamera : jest.fn(),
+      muteLocalMic: jest.fn(),
+      switchVideoCameraCapture: jest.fn(),
+      switchAudioInputSource: jest.fn(),
+      displayMessage: jest.fn(),
+      setMicrophoneButtonDisabled: jest.fn(),
+      setCameraButtonDisabled: jest.fn(),
+      setSelectedDevices: jest.fn(),
+      checkAndTurnOffLocalCamera: jest.fn(),
+      devices: [],
+      updateStreamMetaData: jest.fn(),
     }
 
     for (var key in params) {
@@ -70,7 +80,6 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       webRTCAdaptorConstructor = mockAdaptor;
     }
     return mockAdaptor;
-
   }),
 }));
 
@@ -337,6 +346,33 @@ describe('AntMedia Component', () => {
 
     });
 
+  it('notSetRemoteDescription error callback', async () => {
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("notSetRemoteDescription", {});
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith("notSetRemoteDescription", "Not set remote description");
+
+
+    await act(async () => {
+      expect(currentConference.leftTheRoom === true);
+    });
+
+    consoleSpy.mockRestore();
+
+  });
+
     it('max video count setting', async () => {
       const { container } = render(
         <AntMedia isTest={true}>
@@ -363,11 +399,207 @@ describe('AntMedia Component', () => {
         currentConference.updateMaxVideoTrackCount(7);
       });
 
-      expect(currentConference.globals.maxVideoTrackCount == 7);
+      expect(currentConference.globals.maxVideoTrackCount === 7);
 
       consoleSpy.mockRestore();
 
     });
+
+    it('start with camera and microphone', async () => {
+      mediaDevicesMock.enumerateDevices.mockResolvedValue([
+        { deviceId: '1', kind: 'videoinput' },
+        { deviceId: '1', kind: 'audioinput' },
+      ]);
+
+      const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+      expect(currentConference.cameraButtonDisabled === false);
+      expect(currentConference.microphoneButtonDisabled === false);
+
+    });
+
+  it('start with one microphone and without any camera', async () => {
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      { deviceId: '1', kind: 'audioinput' },
+    ]);
+
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    expect(currentConference.cameraButtonDisabled === true);
+    expect(currentConference.microphoneButtonDisabled === false);
+
+  });
+
+  it('start with one camera and without any microphone', async () => {
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      { deviceId: '1', kind: 'videoinput' },
+    ]);
+
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    expect(currentConference.cameraButtonDisabled === false);
+    expect(currentConference.microphoneButtonDisabled === true);
+
+  });
+
+  it('start without camera nor microphone', async () => {
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+    ]);
+
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    expect(currentConference.cameraButtonDisabled === true);
+    expect(currentConference.microphoneButtonDisabled === true);
+
+  });
+
+  it('should enable camera and microphone buttons if selected devices are available', async () => {
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(currentConference.cameraButtonDisabled === false);
+    expect(currentConference.microphoneButtonDisabled === false);
+  });
+
+  it('should disable microphone button if no microphone is available', async () => {
+    // Make devices array have no audioinput
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      {videoDeviceId: '2'},
+    ]);
+
+    currentConference.devices = [];
+
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(consoleSpy).toHaveBeenCalledWith("There is no microphone device available.");
+
+  });
+
+  it('should disable microphone button if no microphone is available', async () => {
+    // Make devices array have no audioinput
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      {audioDeviceId: '2'},
+    ]);
+
+    currentConference.devices = [];
+
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(consoleSpy).toHaveBeenCalledWith("There is no available camera device.");
+
+  });
+
+  it('should switching the first available camera due to selected camera is not available', async () => {
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      { deviceId: 'camera2', kind: 'videoinput' },
+    ]);
+
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("available_devices", [
+        { deviceId: 'camera2', kind: 'videoinput' },
+      ]);
+    });
+
+    await act(async () => {
+      currentConference.setSelectedCamera("camera1");
+    });
+
+    await waitFor(() => {
+      expect(currentConference.selectedCamera).toBe("camera1");
+    });
+
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+    console.log(currentConference.getSelectedDevices());
+
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(consoleSpy).toHaveBeenCalledWith("Unable to access selected camera, switching the first available camera.");
+
+  });
+
+
+  it('should switching the first available microphone due to selected microphone is not available', async () => {
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      { deviceId: 'mic2', kind: 'audioinput' },
+    ]);
+
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("available_devices", [
+        { deviceId: 'mic2', kind: 'audioinput' },
+      ]);
+    });
+
+    await act(async () => {
+      currentConference.setSelectedMicrophone("mic1");
+    });
+
+    await waitFor(() => {
+      expect(currentConference.selectedMicrophone).toBe("mic1");
+    });
+
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+    console.log(currentConference.getSelectedDevices());
+
+    // Execute the function
+    await act(async () => {
+      currentConference.checkAndUpdateVideoAudioSources();
+    });
+
+    // Expectations
+    expect(consoleSpy).toHaveBeenCalledWith("Unable to access selected microphone, switching the first available microphone.");
+
+  });
 
     it('is joining state test', async () => {
       const { container } = render(
