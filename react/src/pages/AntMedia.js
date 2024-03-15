@@ -409,10 +409,10 @@ function AntMedia(props) {
     setSelectedDevices(selectedDevices);
 
     if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
-      webRTCAdaptor.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+      webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
     }
     if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
-      webRTCAdaptor.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+      webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
     }
   }
 
@@ -554,7 +554,7 @@ function AntMedia(props) {
     //request broadcast object for new tracks
     participantIds.forEach(pid => {
       if (allParticipants[pid] === undefined) {
-        webRTCAdaptor.getBroadcastObject(pid);
+        webRTCAdaptor?.getBroadcastObject(pid);
       }
     });
   }
@@ -619,7 +619,7 @@ function AntMedia(props) {
       setIsJoining(false);
     }
   },[isPublished , isPlayed, isPlayOnly])
-  
+
   function createScreenShareWebRtcAdaptor(){
 
     navigator.mediaDevices.getDisplayMedia(getMediaConstraints("screenConstraints", 20))
@@ -711,14 +711,14 @@ function AntMedia(props) {
       console.log("**** publish started:" + reconnecting);
 
       if (reconnecting) {
-        webRTCAdaptor.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
+        webRTCAdaptor?.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
       }
       console.log("publish started");
       //stream is being published
-      webRTCAdaptor.enableStats(publishStreamId);
+      webRTCAdaptor?.enableStats(publishStreamId);
     } else if (info === "publish_finished") {
       setIsPublished(false);
       //stream is being finished
@@ -735,7 +735,7 @@ function AntMedia(props) {
     } else if (info === "play_started") {
       console.log("**** play started:" + reconnecting);
       setIsPlayed(true);
-      webRTCAdaptor.getBroadcastObject(roomName);
+      webRTCAdaptor?.getBroadcastObject(roomName);
       requestVideoTrackAssignmentsInterval();
 
       if (reconnecting) {
@@ -767,9 +767,9 @@ function AntMedia(props) {
       if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
 
         setTimeout(() => {
-          if (webRTCAdaptor.iceConnectionState(publishStreamId) !== "checking" &&
-            webRTCAdaptor.iceConnectionState(publishStreamId) !== "connected" &&
-            webRTCAdaptor.iceConnectionState(publishStreamId) !== "completed") {
+          if (webRTCAdaptor?.iceConnectionState(publishStreamId) !== "checking" &&
+            webRTCAdaptor?.iceConnectionState(publishStreamId) !== "connected" &&
+            webRTCAdaptor?.iceConnectionState(publishStreamId) !== "completed") {
             reconnectionInProgress();
           }
         }, 5000);
@@ -805,10 +805,10 @@ function AntMedia(props) {
         eventType: "SCREEN_SHARED_ON"
       };
       console.info("send notification event", notEvent);
-      webRTCAdaptor.sendData(publishStreamId, JSON.stringify(notEvent));
+      webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
 
       setIsScreenShared(true);
-      //webRTCAdaptor.assignVideoTrack("videoTrack0", screenShareStreamId.current, true);
+      //webRTCAdaptor?.assignVideoTrack("videoTrack0", screenShareStreamId.current, true);
       //pinVideo(screenShareStreamId.current);
 
     } else if (info === "updated_stats") {
@@ -862,7 +862,7 @@ function AntMedia(props) {
     } else if (error.indexOf("TypeError") !== -1) {
       errorMessage = "Video/Audio is required.";
       displayWarning(errorMessage);
-      webRTCAdaptor.mediaManager.getDevices();
+      webRTCAdaptor?.mediaManager.getDevices();
     } else if (error.indexOf("UnsecureContext") !== -1) {
       errorMessage =
         "Fatal Error: Browser cannot access camera and mic because of unsecure context. Please install SSL and access via https";
@@ -879,7 +879,7 @@ function AntMedia(props) {
     } else if (error.indexOf("already_publishing") !== -1) {
       console.log("**** already publishing:" + reconnecting);
       if (reconnecting) {
-        webRTCAdaptor.stop(publishStreamId);
+        webRTCAdaptor?.stop(publishStreamId);
 
         setTimeout(() => {
           handlePublish(
@@ -898,12 +898,12 @@ function AntMedia(props) {
     else if(error.indexOf("highResourceUsage") !== -1){
       if(!isJoining && roomName && publishStreamId){
         setTimeout(() => {
-          webRTCAdaptor.closeWebSocket();
+          webRTCAdaptor?.closeWebSocket();
           if (!playOnly) {
             webRTCAdaptor?.stop(publishStreamId);
           }
           webRTCAdaptor?.stop(roomName);
-          webRTCAdaptor.checkWebSocketConnection();
+          webRTCAdaptor?.checkWebSocketConnection();
           joinRoom(roomName,publishStreamId);
         }, 3000);
       }
@@ -923,26 +923,6 @@ function AntMedia(props) {
       setLeftTheRoom(true);
     }
     console.log("***** " + error)
-  }
-
-
-
-  function setLocalVideo() {
-
-    //workaround solution because it can update one component while rendering another component
-    //VideoCard setLocalVideo triggers this problem
-    setTimeout(()=> {
-      let tempLocalVideo = document.getElementById("localVideo");
-      if (tempLocalVideo) {
-        setLocalVideoLocal(tempLocalVideo);
-        webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
-        webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
-      }
-    }, 300);
-  }
-
-  function assignVideoToStream(videoTrackId, streamId) {
-    webRTCAdaptor.assignVideoTrack(videoTrackId, streamId, true);
   }
 
   function pinVideo(streamId) {
@@ -1019,7 +999,7 @@ function AntMedia(props) {
   function updateMaxVideoTrackCount(newCount) {
     if (publishStreamId && globals.maxVideoTrackCount !== newCount) {
       globals.maxVideoTrackCount = newCount;
-      webRTCAdaptor.setMaxVideoTrackCount(publishStreamId, newCount);
+      webRTCAdaptor?.setMaxVideoTrackCount(publishStreamId, newCount);
     }
   }
 
@@ -1094,7 +1074,7 @@ function AntMedia(props) {
 
   const displayMessage = React.useCallback((message, color) => {
     closeSnackbar();
-    enqueueSnackbar(message, 
+    enqueueSnackbar(message,
       {
         icon: <SvgIcon size={24} name={'report'} color={color} />,
         variant: "info",
@@ -1186,14 +1166,14 @@ function AntMedia(props) {
 
   function handleSendMessage(message) {
     if (publishStreamId) {
-      let iceState = webRTCAdaptor.iceConnectionState(publishStreamId);
+      let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
       if (
         iceState !== null &&
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
         if (message === "debugme") {
-          webRTCAdaptor.getDebugInfo(publishStreamId);
+          webRTCAdaptor?.getDebugInfo(publishStreamId);
           return;
         } else if (message === "clearme") {
           setMessages([]);
@@ -1201,7 +1181,7 @@ function AntMedia(props) {
         }
 
 
-        webRTCAdaptor.sendData(
+        webRTCAdaptor?.sendData(
           publishStreamId,
           JSON.stringify({
             eventType: "MESSAGE_RECEIVED",
@@ -1270,7 +1250,7 @@ function AntMedia(props) {
         eventType === "CAM_TURNED_ON" ||
         eventType === "MIC_MUTED" ||
         eventType === "MIC_UNMUTED") {
-        webRTCAdaptor.getBroadcastObject(eventStreamId);
+        webRTCAdaptor?.getBroadcastObject(eventStreamId);
       } else if (eventType === "RECORDING_TURNED_ON") {
         setIsRecordPluginActive(true);
       } else if (eventType === "RECORDING_TURNED_OFF") {
@@ -1388,7 +1368,7 @@ function AntMedia(props) {
       } else if (eventType === "TRACK_LIST_UPDATED") {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
-        webRTCAdaptor.getBroadcastObject(roomName);
+        webRTCAdaptor?.getBroadcastObject(roomName);
       }
     }
   }
@@ -1422,7 +1402,7 @@ function AntMedia(props) {
     } else {
       metadata.isRecording = false;
     }
-    webRTCAdaptor.updateStreamMetaData(roomName, JSON.stringify(metadata));
+    webRTCAdaptor?.updateStreamMetaData(roomName, JSON.stringify(metadata));
   }, [webRTCAdaptor, roomName]);
 
   function updateUserStatusMetadata(micMuted, cameraOn) {
@@ -1562,7 +1542,7 @@ function AntMedia(props) {
       currentStreamName = "Anonymous"
     }
 
-    webRTCAdaptor.publish(
+    webRTCAdaptor?.publish(
       publishStreamId,
       token,
       subscriberId,
@@ -1617,9 +1597,9 @@ function AntMedia(props) {
     virtualBackgroundImage.onload = () => {
       console.log("Virtual background image is loaded");
       setVirtualBackground(virtualBackgroundImage);
-      webRTCAdaptor.setBackgroundImage(virtualBackgroundImage);
+      webRTCAdaptor?.setBackgroundImage(virtualBackgroundImage);
 
-      webRTCAdaptor.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
+      webRTCAdaptor?.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
         console.log("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is enabled");
         setIsVideoEffectRunning(true);
       }).catch(err => {
@@ -1651,7 +1631,7 @@ function AntMedia(props) {
       effectName = VideoEffect.VIRTUAL_BACKGROUND;
       setIsVideoEffectRunning(true);
     }
-    webRTCAdaptor.enableEffect(effectName).then(() => {
+    webRTCAdaptor?.enableEffect(effectName).then(() => {
       console.log("Effect: " + effectName + " is enabled");
     }).catch(err => {
       console.error("Effect: " + effectName + " is not enabled. Error is " + err);
@@ -1663,7 +1643,7 @@ function AntMedia(props) {
     if (isVideoEffectRunning) {
       webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
     } else {
-      webRTCAdaptor.turnOnLocalCamera(streamId);
+      webRTCAdaptor?.turnOnLocalCamera(streamId);
     }
 
     updateUserStatusMetadata(isMyMicMuted, true);
@@ -1716,7 +1696,7 @@ function AntMedia(props) {
       // When we first open home page, React will call this function and local stream is null at that time.
       // So, we need to catch the error.
       try {
-        webRTCAdaptor.switchVideoCameraCapture(publishStreamId, value);
+        webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, value);
       } catch (e) {
         console.log("Local stream is not ready yet.");
       }
@@ -1729,7 +1709,7 @@ function AntMedia(props) {
       // When we first open home page, React will call this function and local stream is null at that time.
       // So, we need to catch the error.
       try {
-        webRTCAdaptor.switchAudioInputSource(publishStreamId, value);
+        webRTCAdaptor?.switchAudioInputSource(publishStreamId, value);
       } catch (e) {
         console.log("Local stream is not ready yet.");
       }
@@ -1772,7 +1752,7 @@ function AntMedia(props) {
   }
 
   function unmuteLocalMic() {
-    webRTCAdaptor.unmuteLocalMic();
+    webRTCAdaptor?.unmuteLocalMic();
     updateUserStatusMetadata(false, !isMyCamTurnedOff);
     setIsMyMicMuted(false);
 
@@ -2044,7 +2024,7 @@ function AntMedia(props) {
                 </Grid>
               </Backdrop>
             ):null}
-            
+
               {leftTheRoom ? (
                <LeftTheRoom isError={leaveRoomWithError.current} />
               ) : waitingOrMeetingRoom === "waiting" ? (
