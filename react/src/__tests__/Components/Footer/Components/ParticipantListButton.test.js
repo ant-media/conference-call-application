@@ -1,6 +1,6 @@
 // src/Button.test.js
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
 import ParticipantListButton from 'Components/Footer/Components/ParticipantListButton';
 import { random } from 'lodash';
@@ -17,7 +17,7 @@ jest.mock('react', () => ({
 }));
 
 describe('ParticipantList Button Component', () => {
-  
+
   beforeEach(() => {
     // Reset the mock implementation before each test
     jest.clearAllMocks();
@@ -25,11 +25,11 @@ describe('ParticipantList Button Component', () => {
     React.useContext.mockImplementation(input => {
       if (input === ConferenceContext) {
         return contextValue;
-      } 
+      }
       return jest.requireActual('react').useContext(input);
     });
   });
-  
+
 
   it('renders without crashing', () => {
     render(
@@ -49,6 +49,7 @@ describe('ParticipantList Button Component', () => {
 
       console.log(container.outerHTML);
 
+    // eslint-disable-next-line testing-library/no-node-access
       const aElement = getByRole("button").querySelector('a');
 
       // Assert the value inside the <a> tag

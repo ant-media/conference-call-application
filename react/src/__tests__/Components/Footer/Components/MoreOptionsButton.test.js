@@ -46,6 +46,7 @@ describe('ParticipantList Button Component', () => {
 
     console.log(container.outerHTML);
 
+    // eslint-disable-next-line testing-library/prefer-screen-queries
     const menuComponent = getByTestId('more-button-test');
     console.log(menuComponent);
     expect(menuComponent).toBeInTheDocument();

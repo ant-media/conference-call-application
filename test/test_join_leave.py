@@ -38,14 +38,14 @@ class TestJoinLeave(unittest.TestCase):
 
     return handle
     
-  def get_participants(self):
+  def get_videoTrackAssignments(self):
     script = "return window.conference;"
     result_json = self.chrome.execute_script(script)
     if result_json is None:
       return []
     #print("result_json:" + str(result_json))
-    print ("participant count:" + str(len(result_json["participants"])))
-    return result_json["participants"]
+    print ("videoTrackAssignments count:" + str(len(result_json["videoTrackAssignments"])))
+    return result_json["videoTrackAssignments"]
   
   def get_conference(self):
     script = "return window.conference;"
@@ -127,9 +127,9 @@ class TestJoinLeave(unittest.TestCase):
     assert(self.chrome.get_element_by_id("localVideo").is_displayed())
 
     wait = self.chrome.get_wait()
-    wait.until(lambda x: len(self.get_participants()) == 2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
     self.chrome.switch_to_tab(handle_1)
-    wait.until(lambda x: len(self.get_participants()) == 2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
     
     ss_button = self.chrome.get_element_by_id("share-screen-button")
     self.chrome.click_element(ss_button)
@@ -141,7 +141,7 @@ class TestJoinLeave(unittest.TestCase):
         handler = self.join_room_in_new_tab("participant" + str(i), room)
         assert(self.chrome.get_element_by_id("localVideo").is_displayed())
         self.chrome.switch_to_tab(handler)
-        wait.until(lambda x: len(self.get_participants()) == i)
+        wait.until(lambda x: len(self.get_videoTrackAssignments()) == i)
 
         if i==6:
             assert(self.chrome.is_element_exist_by_class_name('others-tile-inner'))
@@ -164,11 +164,11 @@ class TestJoinLeave(unittest.TestCase):
 
     wait = self.chrome.get_wait()
 
-    wait.until(lambda x: len(self.get_participants()) == 2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
     self.chrome.switch_to_tab(handle_1)
 
-    wait.until(lambda x: len(self.get_participants()) == 2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
     self.chrome.switch_to_tab(handle_2)
 
@@ -176,14 +176,14 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_1)
 
-    wait.until(lambda x: len(self.get_participants()) == 1)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
 
     self.chrome.close_all()
 
   def is_first_participant_pinned(self):
     conference = self.get_conference()
-    participants = conference["participants"]
-    return participants[1]["streamId"] == conference["pinnedVideoId"]
+    videoTrackAssignments = conference["videoTrackAssignments"]
+    return videoTrackAssignments[1]["streamId"] == conference["pinnedVideoId"]
 
   def test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
@@ -198,11 +198,11 @@ class TestJoinLeave(unittest.TestCase):
 
     wait = self.chrome.get_wait()
 
-    wait.until(lambda x: len(self.get_participants()) == 2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
     self.chrome.switch_to_tab(handle_1)
 
-    wait.until(lambda x: len(self.get_participants()) == 2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
 
 
@@ -217,7 +217,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_2)
 
-    wait.until(lambda x: len(self.get_participants()) == 3)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
     
     if(self.chrome.is_element_exist_by_id("share-screen-button")):
       ss_button2 = self.chrome.get_element_by_id("share-screen-button")
@@ -228,17 +228,17 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.click_element(ss_button2)
 
-    wait.until(lambda x: len(self.get_participants()) == 4)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 4)
 
     
     conference = self.get_conference()
     allParticipants = conference["allParticipants"]
-    participants = conference["participants"]
+    videoTrackAssignments = conference["videoTrackAssignments"]
 
-    presenter2Exists = participants[1]["streamId"] + "_presentation" in allParticipants
-    presenterPinned = participants[2]["id"] == conference["pinnedVideoId"]
+    presenter2Exists = videoTrackAssignments[1]["streamId"] + "_presentation" in allParticipants
+    presenterPinned = videoTrackAssignments[2]["id"] == conference["pinnedVideoId"]
 
-    presenter1Exists = participants[2]["streamId"] in allParticipants
+    presenter1Exists = videoTrackAssignments[2]["streamId"] in allParticipants
 
     print("presenter1Exists: "+str(presenter1Exists)+" presenter2Exists: "+str(presenter2Exists)+" presenterPinned: "+str(presenterPinned))
 
@@ -260,13 +260,13 @@ class TestJoinLeave(unittest.TestCase):
     assert(self.chrome.get_element_by_id("localVideo").is_displayed())
 
 
-    wait.until(lambda x: len(self.get_participants()) == N)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
     self.set_and_test_track_limit(4)
-    wait.until(lambda x: len(self.get_participants()) == 4)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 4)
 
     self.set_and_test_track_limit(6)
-    wait.until(lambda x: len(self.get_participants()) == N)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
     self.chrome.close_all()
 
@@ -293,11 +293,11 @@ class TestJoinLeave(unittest.TestCase):
 
     wait = self.chrome.get_wait()
 
-    wait.until(lambda x: len(self.get_participants()) == 2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
     self.chrome.switch_to_tab(handle_1)
 
-    wait.until(lambda x: len(self.get_participants()) == 2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
 
     #we are on participant 1 and turn off camera
@@ -306,7 +306,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_2)
 
-    other_participant = self.get_participants()[1]
+    other_participant = self.get_videoTrackAssignments()[1]
 
     #since participant 1 turned off camera, we should see avatar
     other_participant_label = other_participant["videoLabel"]

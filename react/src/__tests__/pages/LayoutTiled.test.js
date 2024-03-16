@@ -13,7 +13,7 @@ import { assert } from 'workbox-core/_private';
 // Mock the context value
 const contextValue = {
   allParticipants: {},
-  participants: [{id: 1, name: 'test'}],
+  videoTrackAssignments: [{id: 1, name: 'test'}],
   globals: {desiredMaxVideoTrackCount: 10},
   updateMaxVideoTrackCount: jest.fn(),
 };

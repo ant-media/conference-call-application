@@ -26,7 +26,8 @@ function ParticipantTab() {
   const theme = useTheme();
 
   const getAdminButtons = (streamId, assignedVideoCardId) => {
-    return <>
+    return (
+      <div id={'admin-button-group-'+streamId}>
       {(streamId === "localVideo" ? conference?.presenters.includes(conference.publishStreamId) : conference?.presenters.includes(streamId) )&& conference?.isAdmin === true ? (
       <PinBtn
         id={"remove-presenter-"+streamId}
@@ -73,11 +74,16 @@ function ParticipantTab() {
       <SvgIcon size={28} name="close" color="black" />
     </PinBtn>
   ) : null}
-    </>;
+    </div>);
   }
   const getParticipantItem = (streamId, name, assignedVideoCardId) => {
+    if (streamId === conference?.publishStreamId) {
+      assignedVideoCardId = "localVideo";
+    }
+
     return (
       <Grid
+        id={"participant-item-" + streamId}
         key={streamId}
         container
         alignItems="center"
@@ -89,10 +95,10 @@ function ParticipantTab() {
           <ParticipantName variant="body1">{name}</ParticipantName>
         </Grid>
         <Grid item>
-          {conference.pinnedVideoId === assignedVideoCardId || conference.pinnedVideoId === streamId ? (
+          {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => conference.pinVideo(assignedVideoCardId)}
+              onClick={() => {conference.pinVideo(streamId);}}
             >
               <SvgIcon size={28} name="unpin" color={theme.palette.textColor} />
             </PinBtn>
@@ -100,16 +106,7 @@ function ParticipantTab() {
             <PinBtn
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
               onClick={() => {
-                if(assignedVideoCardId === undefined) {
-                  //if videoTrackId is undefined, then it means that we try to pin someone who has no video player on the screen
-                  //then we will assign the 1st player in the screen to that user
-
-                  conference.assignVideoToStream(conference.participants[1].id, streamId);
-                  //conference.pinVideo(conference.participants[1].id);
-                }
-                else {
-                  conference.pinVideo(assignedVideoCardId);
-                }
+                conference.pinVideo(streamId);
               }}
             >
               <SvgIcon size={28} name="pin" color={theme.palette.textColor} />
@@ -124,6 +121,7 @@ function ParticipantTab() {
       </Grid>
     );
   };
+
   return (
         <div style={{width: "100%", overflowY: "auto"}}>
           <Stack sx={{width: "100%",}} spacing={2}>
@@ -136,10 +134,10 @@ function ParticipantTab() {
                 {Object.keys(conference.allParticipants).length}
               </ParticipantName>
             </Grid>
-            {conference.isPlayOnly === false ? getParticipantItem("localVideo", "You") : ""}
+            {conference.isPlayOnly === false ? getParticipantItem(conference.publishStreamId, "You") : ""}
             {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
               if (conference.publishStreamId !== streamId) {
-                var assignedVideoCardId = conference.participants.find(p => p.streamId === streamId)?.id;
+                var assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
                 return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
               } else {
                 return "";
