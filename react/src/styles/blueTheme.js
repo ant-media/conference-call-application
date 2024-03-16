@@ -2,7 +2,7 @@ import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
 import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
-import {getWebSocketURLAttribute} from "../utils";
+import {isComponentMode} from "../utils";
 
 export function getBlueTheme() {
   const themeColor0 = "#E0F7FA";
@@ -19,7 +19,6 @@ export function getBlueTheme() {
   const themeColor90 = "#84FFFF";
   const chatText = "#E0F7FA";
   const darkGray = "#37474F";
-  const textColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
@@ -27,7 +26,7 @@ export function getBlueTheme() {
   let themeObject = {
     typography: {
       allVariants: {
-        color: textColor,
+        color: "#FFFFFF",
         fontFamily: "'OpenSans'",
       },
       h1: {
@@ -72,11 +71,11 @@ export function getBlueTheme() {
         styleOverrides: {
           root: {
             "& fieldset": {
-              borderColor: "#fff",
+              borderColor: "white",
             },
           },
           icon: {
-            color: "#fff",
+            color: "white",
           },
         },
       },
@@ -112,7 +111,7 @@ export function getBlueTheme() {
       MuiDialogTitle: {
         styleOverrides: {
           root: {
-            color: "#fff",
+            color: "white",
             padding: "24px 0",
             fontSize: 24,
           },
@@ -131,7 +130,7 @@ export function getBlueTheme() {
           root: {
             paddingTop: 16,
             paddingBottom: 16,
-            color: "#fff",
+            color: "white",
           },
         },
       },
@@ -145,7 +144,7 @@ export function getBlueTheme() {
       MuiListItemText: {
         styleOverrides: {
           primary: {
-            color: "#fff",
+            color: "white",
           },
         },
       },
@@ -204,11 +203,11 @@ export function getBlueTheme() {
         styleOverrides: {
           outlinedSecondary: {
             border: `1px solid ${themeColor60}`,
-            color: "#fff",
+            color: "white",
           },
 
           root: {
-            color: "#fff",
+            color: "white",
             borderRadius: 6,
             fontSize: 16,
             fontWeight: 500,
@@ -347,7 +346,7 @@ export function getBlueTheme() {
       },
     },
   };
-  if (!getWebSocketURLAttribute()) {
+  if (!isComponentMode()) {
     themeObject.palette.background = {};
     themeObject.palette.background.default = themeColor80;
   }

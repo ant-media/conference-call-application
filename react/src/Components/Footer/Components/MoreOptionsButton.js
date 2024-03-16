@@ -4,7 +4,7 @@ import { SvgIcon } from "Components/SvgIcon";
 import Menu from "@mui/material/Menu";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
-import { SettingsDialog } from "./SettingsDialog";
+import SettingsDialog from "./SettingsDialog";
 import { LayoutSettingsDialog } from "./LayoutSettingsDialog";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";

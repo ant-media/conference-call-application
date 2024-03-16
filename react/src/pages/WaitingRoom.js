@@ -5,24 +5,24 @@ import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Component
 import CameraButton from "Components/Footer/Components/CameraButton";
 import {useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
-import {SettingsDialog} from "Components/Footer/Components/SettingsDialog";
+import SettingsDialog from "Components/Footer/Components/SettingsDialog";
 
 import {SvgIcon} from "Components/SvgIcon";
 import {useSnackbar} from "notistack";
 import {ConferenceContext} from "./AntMedia";
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
-import {getRoomNameAttribute} from "utils";
+import {isComponentMode, getRoomNameAttribute} from "utils";
 import {useTheme} from "@mui/material/styles";
 
 
 function getPublishStreamId() {
-  const dataRoomName = document.getElementById("root").getAttribute("data-publish-stream-id");
+  const dataRoomName = document.getElementById("root")?.getAttribute("data-publish-stream-id");
   return (dataRoomName) ? dataRoomName : getUrlParameter("streamId");
 }
 
 function WaitingRoom(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
+  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
   const publishStreamId = getPublishStreamId()
   const {t} = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);

@@ -266,7 +266,7 @@ function AntMedia(props) {
   const { t } = useTranslation();
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
+  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
 
   const [roomName, setRoomName] = useState(id);
 

@@ -1,11 +1,10 @@
 // src/Button.test.js
 import React from 'react';
-import { render, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, act, waitFor } from '@testing-library/react';
 import AntMedia from 'pages/AntMedia';
 import { useWebSocket } from 'Components/WebSocketProvider';
-import { SnackbarProvider, useSnackbar} from "notistack";
+import { useSnackbar} from "notistack";
 import { ConferenceContext } from "pages/AntMedia";
-import { assert, timeout } from 'workbox-core/_private';
 
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
@@ -73,7 +72,7 @@ const mediaDevicesMock = {
 global.navigator.mediaDevices = mediaDevicesMock; // here
 
 describe('AntMedia Component', () => {
-  
+
   beforeEach(() => {
     // Reset the mock implementation before each test
     jest.clearAllMocks();
@@ -84,14 +83,14 @@ describe('AntMedia Component', () => {
             latestMessage: null,
             isWebSocketConnected: true,
         }
-    }));        
+    }));
 
     useSnackbar.mockImplementation(() => ({
         enqueueSnackbar: jest.fn(),
         closeSnackbar: jest.fn(),
-    }));    
+    }));
   });
-  
+
 
   it('renders without crashing', async () => {
     await act(async () => {
@@ -109,9 +108,9 @@ describe('AntMedia Component', () => {
           <MockChild/>
         </AntMedia>);
       //console.log(container);
-    
+
       expect(currentConference.isScreenShared).toBe(false);
-      
+
       await act(async () => {
       currentConference.handleStartScreenShare();
       });
@@ -123,7 +122,7 @@ describe('AntMedia Component', () => {
       act(() => {
           webRTCAdaptorScreenConstructor.callback("publish_started");
       });
-  
+
 
       await waitFor(() => {
         expect(currentConference.isScreenShared).toBe(true);
@@ -137,16 +136,16 @@ describe('AntMedia Component', () => {
     it('share screen adaptor callbacks', async () => {
 
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
         </AntMedia>);
       //console.log(container);
 
-      
+
       expect(currentConference.isScreenShared).toBe(false);
-      
+
       await act(async () => {
       currentConference.handleStartScreenShare();
       });
@@ -157,14 +156,14 @@ describe('AntMedia Component', () => {
 
       act(() => {
           webRTCAdaptorScreenConstructor.callback("initialized");
-          var obj = {videoRoundTripTime: 1000, 
-            audioRoundTripTime: 0, 
-            videoJitter: 0, 
-            audioJitter: 0, 
-            currentOutgoingBitrate: 0, 
-            videoPacketsLost: 0, 
-            audioPacketsLost: 0, 
-            totalVideoPacketsSent: 0, 
+          var obj = {videoRoundTripTime: 1000,
+            audioRoundTripTime: 0,
+            videoJitter: 0,
+            audioJitter: 0,
+            currentOutgoingBitrate: 0,
+            videoPacketsLost: 0,
+            audioPacketsLost: 0,
+            totalVideoPacketsSent: 0,
             totalAudioPacketsSent: 0,
             availableOutgoingBitrate: 0};
           webRTCAdaptorScreenConstructor.callback("updated_stats", obj);
@@ -191,7 +190,7 @@ describe('AntMedia Component', () => {
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
-   
+
       currentConference.allParticipants["p1"] = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
 
       var obj = {};
@@ -201,7 +200,7 @@ describe('AntMedia Component', () => {
         payload: [
           {videoLabel:"videoTrack1", trackId:"tracka1"},
           {videoLabel:"videoTrack2", trackId:"tracka2"},
-        ] 
+        ]
       };
       var json = JSON.stringify(notificationEvent);
 
@@ -220,10 +219,10 @@ describe('AntMedia Component', () => {
 
       var event = {"eventType": "PIN_USER", "streamId": "p1"};
       expect(consoleSpy).toHaveBeenCalledWith("send notification event", event);
-      
+
 
       consoleSpy.mockRestore();
-      
+
     });
 
     it('handle sharing on', async () => {
@@ -264,7 +263,7 @@ describe('AntMedia Component', () => {
         </AntMedia>);
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
@@ -274,11 +273,11 @@ describe('AntMedia Component', () => {
       });
 
       expect(consoleSpy).toHaveBeenCalledWith("publishTimeoutError", "Firewall might be blocking the connection Please setup a TURN Server");
-            
+
       await act(async () => {
         expect(currentConference.leftTheRoom == true);
       });
-      
+
       consoleSpy.mockRestore();
     });
 
@@ -289,7 +288,7 @@ describe('AntMedia Component', () => {
         </AntMedia>);
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
@@ -299,12 +298,12 @@ describe('AntMedia Component', () => {
       });
 
       expect(consoleSpy).toHaveBeenCalledWith("license_suspended_please_renew_license", "Licence is Expired please renew the licence");
-      
-      
+
+
       await act(async () => {
         expect(currentConference.leftTheRoom == true);
       });
-      
+
       consoleSpy.mockRestore();
 
     });
@@ -316,7 +315,7 @@ describe('AntMedia Component', () => {
         </AntMedia>);
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
@@ -336,9 +335,9 @@ describe('AntMedia Component', () => {
       });
 
       expect(currentConference.globals.maxVideoTrackCount == 7);
-      
+
       consoleSpy.mockRestore();
 
     });
-  
+
 });

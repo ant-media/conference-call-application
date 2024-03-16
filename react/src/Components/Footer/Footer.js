@@ -13,7 +13,7 @@ import EndCallButton from "./Components/EndCallButton";
 import FakeParticipantButton from "./Components/FakeParticipantButton";
 import TimeZone from "./Components/TimeZone";
 import { ConferenceContext } from 'pages/AntMedia';
-import {getWebSocketURLAttribute} from 'utils';
+import {getRoomNameAttribute, isComponentMode} from 'utils';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactionsButton from "./Components/ReactionsButton";
 import {useTheme} from "@mui/material/styles";
@@ -32,7 +32,7 @@ const getCustomizedGridStyle = (theme) => {
     zIndex: 101,
   };
 
-  if (getWebSocketURLAttribute()) {
+  if (isComponentMode()) {
     customizedGridStyle.position = "absolute";
     customizedGridStyle.width = "100%";
   }
@@ -44,6 +44,7 @@ const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme
 
 function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
+  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
   const theme = useTheme();
 

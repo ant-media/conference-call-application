@@ -2,7 +2,7 @@ import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
 import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
-import {getWebSocketURLAttribute} from "../utils";
+import {isComponentMode} from "../utils";
 
 export function getGrayTheme() {
   const themeColor0 = "#FAFAFA";
@@ -18,7 +18,6 @@ export function getGrayTheme() {
   const themeColor85 = "#212121";
   const themeColor90 = "#000000";
   const chatText = "#FAFAFA";
-  const textColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
@@ -26,7 +25,7 @@ export function getGrayTheme() {
   let themeObject = {
     typography: {
       allVariants: {
-        color: textColor,
+        color: "#FFFFFF",
         fontFamily: "'OpenSans'",
       },
       h1: {
@@ -71,11 +70,11 @@ export function getGrayTheme() {
         styleOverrides: {
           root: {
             "& fieldset": {
-              borderColor: "#fff",
+              borderColor: "white",
             },
           },
           icon: {
-            color: "#fff",
+            color: "white",
           },
         },
       },
@@ -111,7 +110,7 @@ export function getGrayTheme() {
       MuiDialogTitle: {
         styleOverrides: {
           root: {
-            color: "#fff",
+            color: "white",
             padding: "24px 0",
             fontSize: 24,
           },
@@ -130,7 +129,7 @@ export function getGrayTheme() {
           root: {
             paddingTop: 16,
             paddingBottom: 16,
-            color: "#fff",
+            color: "white",
           },
         },
       },
@@ -144,7 +143,7 @@ export function getGrayTheme() {
       MuiListItemText: {
         styleOverrides: {
           primary: {
-            color: "#fff",
+            color: "white",
           },
         },
       },
@@ -203,11 +202,11 @@ export function getGrayTheme() {
         styleOverrides: {
           outlinedSecondary: {
             border: `1px solid ${themeColor60}`,
-            color: "#fff",
+            color: "white",
           },
 
           root: {
-            color: "#fff",
+            color: "white",
             borderRadius: 6,
             fontSize: 16,
             fontWeight: 500,
@@ -346,7 +345,7 @@ export function getGrayTheme() {
       },
     },
   };
-  if (!getWebSocketURLAttribute()) {
+  if (!isComponentMode()) {
     themeObject.palette.background = {};
     themeObject.palette.background.default = themeColor80;
   }
