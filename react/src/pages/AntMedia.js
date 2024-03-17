@@ -93,24 +93,6 @@ function getMediaConstraints(videoSendResolution, frameRate) {
   return constraint;
 }
 
-function getPlayToken() {
-  const dataPlayToken = document.getElementById("root")?.getAttribute("data-play-token");
-  let playToken = (dataPlayToken) ? dataPlayToken : getUrlParameter("playToken");
-  if (playToken === null || typeof playToken === "undefined") {
-    playToken = "";
-  }
-  return playToken;
-}
-
-function getPublishToken() {
-  const dataPublishToken = document.getElementById("root")?.getAttribute("data-publish-token");
-  let publishToken = (dataPublishToken) ? dataPublishToken : getUrlParameter("publishToken");
-  if (publishToken === null || typeof publishToken === "undefined") {
-    publishToken = "";
-  }
-  return publishToken;
-}
-
 function getToken() {
   const dataToken = document.getElementById("root")?.getAttribute("data-token");
   let token = (dataToken) ? dataToken : getUrlParameter("token");
@@ -120,9 +102,7 @@ function getToken() {
   return token;
 }
 
-var playToken = getPlayToken();
-var publishToken = getPublishToken();
-var token =  getToken();
+var initToken =  getToken();
 var mcuEnabled = getUrlParameter("mcuEnabled");
 
 if (mcuEnabled == null) {
@@ -268,6 +248,8 @@ function AntMedia(props) {
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
 
   const [roomName, setRoomName] = useState(id);
+
+  const [token, setToken] = useState(initToken);
 
   // drawerOpen for message components.
   const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
@@ -627,18 +609,8 @@ function AntMedia(props) {
     globals.maxVideoTrackCount = 60; //FIXME
     setPublishStreamId(generatedStreamId);
 
-    token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
-
-    if (!isPlayOnly && token === undefined) {
-      token = publishToken;
-    }
-
     if (!isPlayOnly) {
       handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
-    }
-
-    if (token === undefined) {
-      token = playToken;
     }
 
     webRTCAdaptor.play(roomName, token, roomName, null, subscriberId, subscriberCode);
@@ -858,13 +830,6 @@ function AntMedia(props) {
   }
 
   function startScreenSharing(){
-
-    var token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
-
-    if (token === undefined) {
-      token = publishToken;
-    }
-
     var metaData = {
       isMicMuted: false,
       isCameraOn: true,
@@ -1086,7 +1051,7 @@ function AntMedia(props) {
         setTimeout(() => {
           handlePublish(
             publishStreamId,
-            publishToken,
+            token,
             subscriberId,
             subscriberCode
           );
@@ -1707,6 +1672,21 @@ function AntMedia(props) {
         requestSyncAdministrativeFields();
       } else if (eventType === "GRANT_BECOME_PUBLISHER" && eventStreamId === publishStreamId)
       {
+        if (token !== undefined && token !== null && token !== "") {
+          var jsCmd = {
+            command: "requestPublishToken",
+            streamId: publishStreamId,
+            roomName: roomName,
+            token: token
+          };
+
+          sendMessage(JSON.stringify(jsCmd));
+        } else {
+          setBecomePublisherConfirmationDialogOpen(true);
+        }
+      } else if (eventType === "PUBLISH_TOKEN" && eventStreamId === publishStreamId)
+      {
+        setToken(notificationEvent.token);
         setBecomePublisherConfirmationDialogOpen(true);
       } else if (eventType === "REJECT_SPEAKER_REQUEST" && eventStreamId === publishStreamId)
       {
@@ -1715,6 +1695,8 @@ function AntMedia(props) {
         );
       } else if (eventType === "MAKE_LISTENER_AGAIN" && eventStreamId === publishStreamId) {
         console.log("MAKE_LISTENER_AGAIN");
+
+        setToken(initToken);
 
         unmuteLocalMic();
         checkAndTurnOnLocalCamera(publishStreamId);

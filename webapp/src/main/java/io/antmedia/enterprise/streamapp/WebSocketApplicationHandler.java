@@ -514,6 +514,30 @@ public class WebSocketApplicationHandler
 
 			sendResponse(session, WebSocketApplicationConstants.SYNC_ADMINISTRATIVE_FIELDS_RESPONSE, adminFields);
 		}
+		else if (cmd.equals(WebSocketApplicationConstants.REQUEST_PUBLISH_TOKEN_COMMAND))
+		{
+			String roomName = (String)jsonObject.get(WebSocketApplicationConstants.ROOM_NAME_FIELD);
+			String streamId = (String)jsonObject.get(WebSocketApplicationConstants.STREAM_ID_FIELD);
+			String token = (String)jsonObject.get(WebSocketConstants.TOKEN);
+
+			// Check for admin rights
+			if (!hasAdminRights(token, streamId, roomName)) {
+				sendResponse(session, WebSocketApplicationConstants.REQUEST_PUBLISH_TOKEN_COMMAND,
+						new Result(false, "You do not have admin rights in the room"));
+				return;
+			}
+
+			String publishToken = createJoinTokenForRoom(roomName);
+
+			JSONObject response = new JSONObject();
+			response.put("streamId", streamId);
+			response.put("token", publishToken);
+
+			sendResponse(session, "PUBLISH_TOKEN", response);
+		}
+		else {
+			logger.error("Undefined command: {}", cmd);
+		}
 	}
 
 	// Modular method to send a JSON response

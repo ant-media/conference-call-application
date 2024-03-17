@@ -72,6 +72,8 @@ public class WebSocketApplicationConstants {
 
     public static final String REQUEST_PUBLISH_COMMAND = "requestPublish";
 
+    public static final String REQUEST_PUBLISH_TOKEN_COMMAND = "requestPublishToken";
+
     public static final String GRANT_SPEAKER_REQUEST_COMMAND = "grantSpeakerRequest";
 
     public static final String REJECT_SPEAKER_REQUEST_COMMAND = "rejectSpeakerRequest";
