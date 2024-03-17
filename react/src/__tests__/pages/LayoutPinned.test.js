@@ -56,7 +56,7 @@ describe('Pinned Layout Component', () => {
 
     for (let i = 0; i < noOfParticipants; i++) {
       contextValue.allParticipants[`p${i}`] = {id: i, name: `test${i}`};
-      contextValue.videoTrackAssignments.push({id: i, name: `test${i}`});
+      contextValue.videoTrackAssignments.push({id: i, streamId: i, videoLabel: `test${i}`, name: `test${i}`, track: null});
     }
 
     contextValue.pipinnedVideoId = 1;
@@ -82,7 +82,7 @@ describe('Pinned Layout Component', () => {
 
     for (let i = 0; i < noOfParticipants; i++) {
       contextValue.allParticipants[`p${i}`] = {id: i, name: `test${i}`};
-      contextValue.videoTrackAssignments.push({id: i, name: `test${i}`});
+      contextValue.videoTrackAssignments.push({id: i, streamId: i, videoLabel: `test${i}`, track: null});
     }
 
     contextValue.pipinnedVideoId = 1;
@@ -94,6 +94,7 @@ describe('Pinned Layout Component', () => {
       );
 
     const videoCards = getAllByTestId('mocked-video-card');
+    console.log("Mustafa", videoCards);
     expect(videoCards).toHaveLength(3);
 
     const otherCard = getByTestId('mocked-others-card');
