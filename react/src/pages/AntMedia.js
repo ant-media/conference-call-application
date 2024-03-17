@@ -317,8 +317,13 @@ function AntMedia(props) {
   const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
   const [virtualBackground, setVirtualBackground] = React.useState(null);
   const timeoutRef = React.useRef(null);
-  const screenShareWebRtcAdaptor = React.useRef(null)
-  const screenShareStreamId = React.useRef(null)
+  const screenShareWebRtcAdaptor = React.useRef(null);
+  const screenShareStreamId = React.useRef(null);
+  const speedTestStreamId = React.useRef(makeid(20));
+  const speedTestForPublishWebRtcAdaptor = React.useRef(null);
+  const [speedTestObject, setSpeedTestObject] = React.useState({message: "Please wait while we are testing your connection speed", isfinished: false});
+  const speedTestCounter = React.useRef(0);
+  const speedTestForPlayWebRtcAdaptor = React.useRef(null);
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
   const leaveRoomWithError = useRef(false);
@@ -624,6 +629,121 @@ function AntMedia(props) {
       setIsJoining(false);
     }
   },[isPublished , isPlayed, isPlayOnly])
+
+  function startSpeedTest(){
+    createSpeedTestForPublishWebRtcAdaptor();
+    createSpeedTestForPlayWebRtcAdaptor();
+  }
+
+  function stopSpeedTest(){
+    if(speedTestForPublishWebRtcAdaptor.current){
+      speedTestForPublishWebRtcAdaptor.current.stop("speedTestStream"+speedTestStreamId.current);
+    }
+    if(speedTestForPlayWebRtcAdaptor.current){
+      speedTestForPlayWebRtcAdaptor.current.stop("speedTestStream"+speedTestStreamId.current);
+    }
+  }
+
+  function createSpeedTestForPublishWebRtcAdaptor(){
+    speedTestForPublishWebRtcAdaptor.current = new WebRTCAdaptor({
+      websocket_url: websocketURL,
+      mediaConstraints: {video: true, audio: false},
+      sdp_constraints: {
+        OfferToReceiveAudio : false,
+        OfferToReceiveVideo : false,
+      },
+      debug: true,
+      callback: speedTestForPublishWebRtcAdaptorInfoCallback,
+      callbackError: speedTestForPublishWebRtcAdaptorErrorCallback
+    })
+
+  }
+
+  function speedTestForPublishWebRtcAdaptorInfoCallback(info, obj) {
+    if (info === "initialized") {
+      speedTestForPublishWebRtcAdaptor.current.publish("speedTestStream"+speedTestStreamId.current, token, subscriberId, subscriberCode, "speedTestStream"+speedTestStreamId.current, "", "")
+    } else if (info === "publish_started") {
+      console.log("speed test publish started")
+      speedTestForPublishWebRtcAdaptor.current.enableStats("speedTestStream"+speedTestStreamId.current);
+    } else if (info === "updated_stats") {
+      speedTestCounter.current = speedTestCounter.current + 1;
+      if(speedTestCounter.current > 2) {
+        speedTestForPublishWebRtcAdaptor.current?.stop("speedTestStream"+speedTestStreamId.current);
+
+        let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
+        let packetLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
+        let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
+        let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
+        let bandwidth = parseInt(speedTestForPublishWebRtcAdaptor.current.mediaManager.bandwidth);
+
+        console.log("* rtt: " + rtt);
+        console.log("* packetLost: " + packetLost);
+        console.log("* jitter: " + jitter);
+        console.log("* outgoingBitrate: " + outgoingBitrate);
+        console.log("* bandwidth: " + bandwidth);
+
+        let speedTestResult = {};
+
+        if (rtt >= 150 || packetLost >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
+          console.log("-> Your Connection is bad");
+          speedTestResult.message = "Your Connection is bad";
+        } else if (rtt >= 50 || packetLost >= 1 || jitter >= 30 || outgoingBitrate >= bandwidth) {
+          console.log("-> Your connection is fair");
+          speedTestResult.message = "Your connection is fair";
+        } else {
+          console.log("-> Your connection is good");
+          speedTestResult.message = "Your connection is good";
+        }
+
+        speedTestResult.isfinished = true;
+        setSpeedTestObject(speedTestResult);
+
+        stopSpeedTest();
+      }
+    } else if (info === "ice_connection_state_changed") {
+      console.log("speed test ice connection state changed")
+    }
+  }
+
+  function speedTestForPublishWebRtcAdaptorErrorCallback(error, message) {
+    console.log("error from speed test webrtc adaptor callback")
+    //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
+    console.log("error:" + error + " message:" + message);
+  }
+
+  function createSpeedTestForPlayWebRtcAdaptor(){
+    speedTestForPlayWebRtcAdaptor.current = new WebRTCAdaptor({
+      websocket_url: websocketURL,
+      mediaConstraints: {video: false, audio: false},
+      playOnly: true,
+      sdp_constraints: {
+        OfferToReceiveAudio : false,
+        OfferToReceiveVideo : false,
+      },
+      debug: true,
+      callback: speedTestForPlayWebRtcAdaptorInfoCallback,
+      callbackError: speedTestForPlayWebRtcAdaptorErrorCallback
+    })
+
+  }
+
+  function speedTestForPlayWebRtcAdaptorInfoCallback(info, obj) {
+    if (info === "initialized") {
+      speedTestForPlayWebRtcAdaptor.current.play("speedTestStream"+speedTestStreamId.current, "", "", [], "","","");
+    } else if (info === "publish_started") {
+      console.log("speed test publish started")
+    } else if (info === "updated_stats") {
+      console.log("speed test updated stats")
+    } else if (info === "ice_connection_state_changed") {
+      console.log("speed test ice connection state changed")
+    }
+  }
+
+  function speedTestForPlayWebRtcAdaptorErrorCallback(error, message) {
+    console.log("error from speed test webrtc adaptor callback")
+    //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
+    console.log("error:" + error + " message:" + message);
+  }
 
   function createScreenShareWebRtcAdaptor(){
 
@@ -1988,7 +2108,11 @@ function AntMedia(props) {
               setDevices,
               getSelectedDevices,
               setIsJoining,
-              isJoining
+              isJoining,
+              speedTestObject,
+              setSpeedTestObject,
+              speedTestStreamId,
+              startSpeedTest
             }}
           >
             {props.children}

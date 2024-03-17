@@ -24,7 +24,7 @@ const AntDrawer = styled(Drawer)(({ theme }) => ({
         [theme.breakpoints.down('sm')]: {
             width: '100%',
             padding: 0,
-            backgroundColor: theme.palette.green70,
+            backgroundColor: theme.palette.themeColor70,
         },
     },
 }));
