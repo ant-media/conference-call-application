@@ -114,7 +114,7 @@ export function GeneralSettingsDialog(props) {
                   fullWidth
                   id="demo-dialog-native"
                   variant="outlined"
-                  value={themeContext.currentTheme}
+                  value={themeContext?.currentTheme ? themeContext?.currentTheme : ThemeList.Green}
                   onChange={e => switchTheme(e.target.value)}
                   sx={{color: 'white'}}
                 >

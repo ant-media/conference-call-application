@@ -513,7 +513,7 @@ function VideoCard(props) {
   const setLocalVideo = () => {
     let tempLocalVideo = document.getElementById((typeof conference?.publishStreamId === "undefined")? "localVideo" : conference?.publishStreamId);
     if(props?.trackAssignment.isMine && conference.localVideo !== tempLocalVideo) {
-      conference.localVideoCreate(tempLocalVideo);
+      conference?.localVideoCreate(tempLocalVideo);
     }
   };
 

@@ -64,6 +64,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       checkAndTurnOffLocalCamera: jest.fn(),
       devices: [],
       updateStreamMetaData: jest.fn(),
+      assignVideoTrack: jest.fn(),
     }
 
     for (var key in params) {
@@ -229,9 +230,18 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
 
-      currentConference.allParticipants["p1"] = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
-
       var obj = {};
+      let broadcastObject = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
+      let broadcastObjectMessage = JSON.stringify(broadcastObject);
+      
+      obj.broadcast = broadcastObjectMessage;
+      obj.streamId = "p1";
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("broadcastObject", obj);
+      });
+
+
       var notificationEvent = {
         eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
         streamId: "stream1",
@@ -242,6 +252,7 @@ describe('AntMedia Component', () => {
       };
       var json = JSON.stringify(notificationEvent);
 
+      obj = {};
       obj.data = json;
 
       const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
