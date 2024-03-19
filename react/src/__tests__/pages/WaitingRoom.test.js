@@ -6,6 +6,7 @@ import { ConferenceContext } from 'pages/AntMedia';
 const contextValue = {
   initialized: true,
   setLocalVideo: jest.fn(),
+  localVideoCreate: jest.fn(),
 };
 
 // Mock the useContext hook
@@ -33,7 +34,7 @@ jest.mock('Components/Footer/Components/CameraButton', () => ({ value }) => <div
 jest.mock('Components/Footer/Components/SettingsDialog', () => ({ value }) => <div data-testid="mocked-settings-dialog">{value}</div>);
 jest.mock('pages/AntMedia', () =>({ value }) => <div data-testid="mocked-ant-media">{value}</div>);
 
-describe('Pinned Layout Component', () => {
+describe('Waiting Room Component', () => {
 
   beforeEach(() => {
     // Reset the mock implementation before each test
