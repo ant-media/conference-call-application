@@ -157,7 +157,7 @@ if (initialPlayOnly == null || typeof initialPlayOnly === "undefined") {
   initialPlayOnly = (initialPlayOnly === "true");
 }
 
-var InitialStreamId = getRootAttribute("publish-stream-id");
+var InitialStreamId = getRootAttribute("data-publish-stream-id");
 if (!InitialStreamId) {
   InitialStreamId = getUrlParameter("streamId");
 }
@@ -806,7 +806,8 @@ function AntMedia(props) {
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    checkAndUpdateVideoAudioSources();
+    //if (devices.si)
+    //checkAndUpdateVideoAudioSources();
   }, [devices]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -2391,7 +2392,7 @@ function AntMedia(props) {
         displayMessage("Recording cannot be stoped due to error: " + definition.message, "#fff")
       }
     }
-  },[latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+  },[latestMessage, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const makeFullScreen = (divId) => {
     if (fullScreenId === divId) {
