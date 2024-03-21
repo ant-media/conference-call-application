@@ -156,12 +156,17 @@ function OptionButton({footer, ...props}) {
           </MenuItem>
           : null}
 
+        {conference.isPlayOnly === false
+        && process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true' ?
+
             <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }}>
               <ListItemIcon>
                 <SvgIcon size={36} name={"background-replacement"} color={"#fff"} />
               </ListItemIcon>
               <ListItemText>{t("Virtual Effects")}</ListItemText>
             </MenuItem>
+          : null}
+
             {process.env.REACT_APP_RECORDING_MANAGED_BY_ADMIN === 'false' || conference.isAdmin === true ?
             [
               conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true &&
