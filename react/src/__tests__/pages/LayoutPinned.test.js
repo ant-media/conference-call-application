@@ -10,7 +10,7 @@ import {ThemeList} from "styles/themeList";
 // Mock the context value
 const contextValue = {
   allParticipants: {},
-  videoTrackAssignments: [{id: 1, name: 'test'}],
+  videoTrackAssignments: [],
   globals: {desiredMaxVideoTrackCount: 10},
   updateMaxVideoTrackCount: jest.fn(),
 };
@@ -55,11 +55,11 @@ describe('Pinned Layout Component', () => {
     var noOfParticipants = 4;
 
     for (let i = 0; i < noOfParticipants; i++) {
-      contextValue.allParticipants[`p${i}`] = {id: i, name: `test${i}`};
-      contextValue.videoTrackAssignments.push({id: i, name: `test${i}`});
+      contextValue.allParticipants[`p${i}`] = {streamId: `p${i}`, name: `test${i}`};
+      contextValue.videoTrackAssignments.push({streamId: `p${i}`, videoLabel: `test${i}`, track: null, name: `test${i}`});
     }
 
-    contextValue.pipinnedVideoId = 1;
+    contextValue.pinnedVideoId = 1;
 
     const { container, getAllByTestId, queryByTestId  } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
@@ -81,11 +81,11 @@ describe('Pinned Layout Component', () => {
     var noOfParticipants = 10;
 
     for (let i = 0; i < noOfParticipants; i++) {
-      contextValue.allParticipants[`p${i}`] = {id: i, name: `test${i}`};
-      contextValue.videoTrackAssignments.push({id: i, name: `test${i}`});
+      contextValue.allParticipants[`p${i}`] = {streamId: `p${i}`, name: `test${i}`};
+      contextValue.videoTrackAssignments.push({streamId: `p${i}`, videoLabel: `test${i}`, track: null, name: `test${i}`});
     }
 
-    contextValue.pipinnedVideoId = 1;
+    contextValue.pinnedVideoId = 1;
 
     const { container, getAllByTestId, getByTestId  } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>

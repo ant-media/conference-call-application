@@ -44,16 +44,16 @@ class TestJoinLeave(unittest.TestCase):
     if result_json is None:
       return []
     #print("result_json:" + str(result_json))
-    print ("videoTrackAssignments count:" + str(len(result_json["videoTrackAssignments"])))
+    #print ("videoTrackAssignments count:" + str(len(result_json["videoTrackAssignments"])))
     return result_json["videoTrackAssignments"]
   
   def get_conference(self):
     script = "return window.conference;"
     result_json = self.chrome.execute_script(script)
-    print(result_json)
+    #print(result_json)
     if result_json is None:
-      return []
-    print(result_json)
+      return {}
+    #print(result_json)
     return result_json
   
   def get_video_track_limit(self):
@@ -114,6 +114,13 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
+  def assertLocalVideoAvailable(self):
+    publishStreamId = self.get_publishStreamId()
+    print("assertLocalVideoAvailable -> publishStreamId: "+publishStreamId)
+
+    assert(self.chrome.get_element_by_id(publishStreamId).is_displayed())
+
+
   def leave_room(self):
     leave_button = self.chrome.get_element_by_id("leave-room-button")
     self.chrome.click_element(leave_button)
@@ -124,7 +131,7 @@ class TestJoinLeave(unittest.TestCase):
     handle_2 = self.join_room_in_new_tab("participantB", room)
     print("current: "+self.chrome.get_current_tab_id())
     assert(handle_2 == self.chrome.get_current_tab_id())
-    assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+    self.assertLocalVideoAvailable()
 
     wait = self.chrome.get_wait()
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
@@ -139,7 +146,7 @@ class TestJoinLeave(unittest.TestCase):
     assert(not self.chrome.is_element_exist_by_class_name('others-tile-inner'))
     for i in range(3,7):
         handler = self.join_room_in_new_tab("participant" + str(i), room)
-        assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+        self.assertLocalVideoAvailable()
         self.chrome.switch_to_tab(handler)
         wait.until(lambda x: len(self.get_videoTrackAssignments()) == i)
 
@@ -149,7 +156,20 @@ class TestJoinLeave(unittest.TestCase):
         assert(not self.chrome.is_element_exist_by_class_name("others-tile-inner"))
     self.chrome.close_all()
 
+  # it tooks too long to get videoTrackAssignments so we need to wait for it
+  def get_publishStreamId(self, index=0):
+    # to avoid infinite loop
+    if index == 500:
+      return ""
+    
+    conference = self.get_conference()
 
+    videoTrackAssignments = conference.get("videoTrackAssignments")
+
+    if videoTrackAssignments:
+      return videoTrackAssignments[0]["streamId"] 
+    else:
+      return self.get_publishStreamId(index=index+1)
 
   def test_join_room_2_participants(self):
     room = "room"+str(random.randint(100, 999))
@@ -160,7 +180,7 @@ class TestJoinLeave(unittest.TestCase):
 
     assert(handle_2 == self.chrome.get_current_tab_id())
 
-    assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+    self.assertLocalVideoAvailable()
 
     wait = self.chrome.get_wait()
 
@@ -194,7 +214,7 @@ class TestJoinLeave(unittest.TestCase):
 
     assert(handle_2 == self.chrome.get_current_tab_id())
 
-    assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+    self.assertLocalVideoAvailable()
 
     wait = self.chrome.get_wait()
 
@@ -236,7 +256,12 @@ class TestJoinLeave(unittest.TestCase):
     videoTrackAssignments = conference["videoTrackAssignments"]
 
     presenter2Exists = videoTrackAssignments[1]["streamId"] + "_presentation" in allParticipants
-    presenterPinned = videoTrackAssignments[2]["id"] == conference["pinnedVideoId"]
+
+    streamIdOfPresenter = videoTrackAssignments[2]["streamId"]
+    print("streamIdOfPresenter: "+str(streamIdOfPresenter))
+    broadcastObjectOfPresenter = allParticipants[streamIdOfPresenter]
+    print("broadcastObjectOfPresenter: "+str(broadcastObjectOfPresenter))
+    presenterPinned = broadcastObjectOfPresenter.get('isPinned') == True
 
     presenter1Exists = videoTrackAssignments[2]["streamId"] in allParticipants
 
@@ -245,7 +270,6 @@ class TestJoinLeave(unittest.TestCase):
     assert(presenter1Exists and presenter2Exists and presenterPinned)
 
     self.chrome.close_all()
-
 
   def test_join_room_N_participants(self):
     N = 5
@@ -257,7 +281,7 @@ class TestJoinLeave(unittest.TestCase):
       handles.append(self.join_room_in_new_tab("participant"+str(i), room))
 
     assert(handles[N-1] == self.chrome.get_current_tab_id())
-    assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+    self.assertLocalVideoAvailable()
 
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
@@ -270,17 +294,16 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def is_avatar_displayed_for(self, card_label):
-    video_card = self.chrome.get_element_by_id("card-"+card_label)
+  def is_avatar_displayed_for(self, stream_id):
+    video_card = self.chrome.get_element_by_id("card-"+stream_id)
     return self.chrome.is_element_of_element_exist_by_class_name(video_card, "MuiAvatar-root")
   
-  def is_video_displayed_for(self, card_label):
-    video_tag = self.chrome.get_element_by_id(card_label)
+  def is_video_displayed_for(self, stream_id):
+    video_tag = self.chrome.get_element_by_id(stream_id)
     return video_tag.is_displayed()
   
-  def is_mic_off_displayed_for(self, card_label):
-    return self.chrome.is_element_exist_by_id("mic-muted-"+card_label)
-  
+  def is_mic_off_displayed_for(self, stream_id):
+    return self.chrome.is_element_exist_by_id("mic-muted-"+stream_id)
  
   def test_on_off_mic_cam(self):
     room = "room"+str(random.randint(100, 999))
@@ -289,7 +312,7 @@ class TestJoinLeave(unittest.TestCase):
 
     assert(handle_2 == self.chrome.get_current_tab_id())
 
-    assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+    self.assertLocalVideoAvailable()
 
     wait = self.chrome.get_wait()
 
@@ -309,8 +332,8 @@ class TestJoinLeave(unittest.TestCase):
     other_participant = self.get_videoTrackAssignments()[1]
 
     #since participant 1 turned off camera, we should see avatar
-    other_participant_label = other_participant["videoLabel"]
-    wait.until(lambda x: self.is_avatar_displayed_for(other_participant_label))
+    other_participant_streamId = other_participant["streamId"]
+    wait.until(lambda x: self.is_avatar_displayed_for(other_participant_streamId))
 
     print("cam off done")
 
@@ -323,7 +346,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_2)
     
     #since participant 1 turned on camera, we should see video
-    wait.until(lambda x: self.is_video_displayed_for(other_participant_label))
+    wait.until(lambda x: self.is_video_displayed_for(other_participant_streamId))
 
     print("cam on done")
 
@@ -336,7 +359,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_2)
     
     #since participant 1 turned off mic, we should see mic off icon
-    wait.until(lambda x: self.is_mic_off_displayed_for(other_participant_label))
+    wait.until(lambda x: self.is_mic_off_displayed_for(other_participant_streamId))
 
     print("mic off done")
 
@@ -349,7 +372,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_2)
     
     #since participant 1 turned off mic, we shouldn't see mic off icon
-    wait.until(lambda x: self.is_mic_off_displayed_for(other_participant_label) == False)
+    wait.until(lambda x: self.is_mic_off_displayed_for(other_participant_streamId) == False)
 
     print("mic on done")
 
