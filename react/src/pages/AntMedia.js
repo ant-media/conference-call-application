@@ -783,10 +783,12 @@ function AntMedia(props) {
       playOnly: false
     }
 
+    let currentStreamName = streamName + " - Screen Share";
+    
     screenShareStreamId.current = publishStreamId + "_presentation"
 
     screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
-      subscriberCode, screenShareStreamId.current, roomName, JSON.stringify(metaData))
+      subscriberCode, currentStreamName, roomName, JSON.stringify(metaData))
 
     setScreenSharingInProgress(true);
 
