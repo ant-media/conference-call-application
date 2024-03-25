@@ -943,6 +943,7 @@ function AntMedia(props) {
 
     // if we already pin the targeted user then we are going to remove it from pinned video.
     if ((typeof broadcastObject.isPinned !== "undefined") && (broadcastObject.isPinned === true)) {
+        broadcastObject.isPinned = false; // false means user unpin manually
         allParticipants[streamId] = broadcastObject;
         handleNotifyUnpinUser(streamId !== publishStreamId ? streamId : publishStreamId);
         setParticipantUpdated(!participantUpdated);
