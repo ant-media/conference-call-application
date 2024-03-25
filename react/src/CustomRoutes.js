@@ -19,7 +19,7 @@ function CustomRoutes(props) {
     return (
       <Grid container style={{background: theme.palette.background}}>
         <Routes>
-          <Route path="/" element={<AntMedia/>}/>
+          <Route path="*" element={<AntMedia/>}/>
         </Routes>
       </Grid>
     );
