@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import {Button, Container, Grid, TextField, Tooltip, Typography,} from "@mui/material";
+import {Box, Button, Container, Grid, Modal, TextField, Tooltip, Typography,} from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
 import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
@@ -28,6 +28,10 @@ function WaitingRoom(props) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const [selectFocus, setSelectFocus] = React.useState(null);
+
+  const [isSpeedTestModalVisible, setSpeedTestModelVisibility] = React.useState(false);
+
+  const [speedTestModalButtonVisibility, setSpeedTestModalButtonVisibility] = React.useState(false);
 
   const theme = useTheme();
 
@@ -80,11 +84,30 @@ function WaitingRoom(props) {
     } else {
       streamId = publishStreamId;
     }
-    
-    conference.setIsJoining(true);
-    conference.joinRoom(roomName, streamId, conference.roomJoinMode);
+
+    if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true') {
+      let speedTestObjectDefault = {};
+      speedTestObjectDefault.message = "Please wait while we are testing your connection speed";
+      speedTestObjectDefault.isfinished = false;
+
+      conference?.setSpeedTestObject(speedTestObjectDefault);
+
+      conference.speedTestStreamId.current = streamId;
+
+      setSpeedTestModelVisibility(true);
+
+      conference?.startSpeedTest();
+    } else {
+      conference?.setIsJoining(true);
+      conference?.joinRoom(roomName, streamId, conference.roomJoinMode);
+    }
   }
-  
+
+  React.useEffect(() => {
+    if (conference?.speedTestObject?.isfinished === true) {
+      setSpeedTestModalButtonVisibility(true);
+    }
+  }, [conference?.speedTestObject]);
 
   const handleDialogOpen = (focus) => {
     if (conference.localVideo === null) {
@@ -119,6 +142,41 @@ function WaitingRoom(props) {
         handleBackgroundReplacement={conference.handleBackgroundReplacement}
       />
 
+      <Modal
+        open={isSpeedTestModalVisible}
+        onClose={()=>{console.log("close")}}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx = {{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'themeColor.70',
+          border: '2px solid #000',
+          boxShadow: 24,
+          pt: 2,
+          px: 4,
+          pb: 3,
+        }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{position: "center"}}>
+            Connection Test
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2, color: "white" }}>
+            {conference?.speedTestObject?.message}
+          </Typography>
+          <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}} onClick={()=>{
+            setSpeedTestModelVisibility(false);
+          }}>Close</Button>
+          <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}} onClick={()=>{
+            setSpeedTestModelVisibility(false);
+            conference?.setIsJoining(true);
+            conference?.joinRoom(roomName, conference?.speedTestStreamId.current, conference?.roomJoinMode);
+          }}>Join</Button>
+        </Box>
+      </Modal>
 
       <Grid
         container
