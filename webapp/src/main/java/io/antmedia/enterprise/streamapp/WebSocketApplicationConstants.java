@@ -56,6 +56,8 @@ public class WebSocketApplicationConstants {
      */
 	public static final String SETTINGS = "settings";
 
+    public static final String PING_COMMAND = "ping";
+
     public static final String SYNC_ADMINISTRATIVE_FIELDS_COMMAND = "syncAdministrativeFields";
 
 	public static final String START_RECORDING_COMMAND = "startRecording";
@@ -119,6 +121,8 @@ public class WebSocketApplicationConstants {
 	public static final String STOP_RECORDING_RESPONSE = "stopRecordingResponse";
 
     public static final String CHECK_IF_HAS_ADMIN_RIGHTS_RESPONSE = "checkIfHasAdminRightsResponse";
+
+    public static final String PONG_RESPONSE = "pong";
 
     public static final String MAIN_ROOM_BROADCAST_UPDATED_EVENT = "MAIN_ROOM_BROADCAST_UPDATED";
 }

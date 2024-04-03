@@ -249,7 +249,12 @@ public class WebSocketApplicationHandler
 		JSONObject jsonObject = (JSONObject) jsonParser.parse(message);
 		String cmd = (String) jsonObject.get(WebSocketConstants.COMMAND);
 
-		if (cmd.equals(WebSocketApplicationConstants.IS_ROOM_CREATION_PASSWORD_REQUIRED_COMMAND))
+		if (cmd.equals(WebSocketApplicationConstants.PING_COMMAND))
+		{
+			Result result = new Result(true);
+			sendResponse(session, WebSocketApplicationConstants.PONG_RESPONSE, result);
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.IS_ROOM_CREATION_PASSWORD_REQUIRED_COMMAND))
 		{
 			handlePasswordRequiredCommand(session);
 		}
