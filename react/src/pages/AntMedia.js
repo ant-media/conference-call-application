@@ -664,7 +664,7 @@ function AntMedia(props) {
     }
 
     let currentStreamName = streamName + " - Screen Share";
-    
+
     screenShareStreamId.current = publishStreamId + "_presentation"
 
     screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
@@ -1337,11 +1337,25 @@ function AntMedia(props) {
 
         let tempVideoTrackAssignments = videoTrackAssignments;
 
-        //remove not available videotracks if exist
-        tempVideoTrackAssignments = tempVideoTrackAssignments.filter((oldVTA) => {
-          let assignment = videoTrackAssignmentList.find((vta) => oldVTA.videoLabel === vta.videoLabel);
-          return oldVTA.isMine || assignment !== undefined;
+        let tempVideoTrackAssignmentsNew = [];
+
+        tempVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
+          let assignment;
+
+          videoTrackAssignmentList.forEach(videoTrackAssignment => {
+            if (tempVideoTrackAssignment.videoLabel === videoTrackAssignment.videoLabel) {
+              assignment = videoTrackAssignment;
+            }
+          });
+
+          if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
+            tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
+          } else {
+            console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
+          }
         });
+
+        tempVideoTrackAssignments = tempVideoTrackAssignmentsNew;
 
         //add and/or update participants according to current assignments
         videoTrackAssignmentList.forEach((vta) => {
