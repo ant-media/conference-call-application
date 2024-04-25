@@ -11,7 +11,7 @@ import {useTheme} from "@mui/material/styles";
 import {t} from "i18next";
 import {isComponentMode} from "../utils";
 import { isMobile, isTablet } from "react-device-detect";
-
+import BecomePublisherConfirmationDialog from "../Components/BecomePublisherConfirmationDialog";
 
 function debounce(fn, ms) {
   let timer;
@@ -108,6 +108,7 @@ const MeetingRoom = React.memo((props) => {
   return (
     <>
       <MuteParticipantDialog/>
+      <BecomePublisherConfirmationDialog/>
       {conference.audioTracks.map((audioTrackAssignment, index) => (
         <VideoCard
           key={index}
