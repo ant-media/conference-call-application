@@ -5,12 +5,12 @@ import App from "./App";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
-import { getRoomNameAttribute } from "utils";
+import {getRootAttribute} from "utils";
 import { WebSocketProvider } from "Components/WebSocketProvider";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 let appName = undefined
-let roomName = getRoomNameAttribute();
+let roomName = getRootAttribute("data-room-name");
 
 if (process.env.NODE_ENV !== 'development' && !roomName) {
   appName = "/" + window.location.pathname.split("/")[1];

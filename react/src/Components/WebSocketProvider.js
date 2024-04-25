@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { getWebSocketURLAttribute } from "../utils";
+import {getRootAttribute} from "../utils";
 
 const WebSocketContext = createContext(null);
 
@@ -10,7 +10,7 @@ export const WebSocketProvider = ({ children }) => {
 
     var websocketUrlTemp = process.env.REACT_APP_WEBSOCKET_URL;
     if (!websocketUrlTemp) {
-        websocketUrlTemp = getWebSocketURLAttribute();
+        websocketUrlTemp = getRootAttribute("data-websocket-url");
         if (!websocketUrlTemp) {
             const appName = window.location.pathname.substring(
                 0,
@@ -30,10 +30,10 @@ export const WebSocketProvider = ({ children }) => {
             }
         }
     }
-    
+
     const webSocketUrl = websocketUrlTemp
     const applicationWebSocketUrl = webSocketUrl + "/application";
-    
+
     useEffect(() => {
             console.log("--> websocket url connection: " + applicationWebSocketUrl);
             webSocket.current = new WebSocket(applicationWebSocketUrl);

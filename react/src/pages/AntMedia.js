@@ -13,7 +13,7 @@ import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import EffectsDrawer from "../Components/EffectsDrawer";
 import {useTranslation} from "react-i18next";
 
-import {getRoomNameAttribute, getWebSocketURLAttribute, isComponentMode} from "../utils";
+import {getRootAttribute, isComponentMode} from "../utils";
 import floating from "../external/floating.js";
 import {UnauthrorizedDialog} from "Components/Footer/Components/UnauthorizedDialog";
 import {useWebSocket} from 'Components/WebSocketProvider';
@@ -161,7 +161,7 @@ let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
 if (!websocketURL) {
 
-  websocketURL = getWebSocketURLAttribute();
+  websocketURL = getRootAttribute("data-websocket-url");
 
   if (!websocketURL) {
     const appName = window.location.pathname.substring(
@@ -219,7 +219,7 @@ var playReconnected;
 function AntMedia(props) {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
+  const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
   const roomName = id;
 
   // drawerOpen for message components.

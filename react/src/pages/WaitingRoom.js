@@ -11,7 +11,7 @@ import {SvgIcon} from "Components/SvgIcon";
 import {useSnackbar} from "notistack";
 import {ConferenceContext} from "./AntMedia";
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
-import {isComponentMode, getRoomNameAttribute} from "utils";
+import {getRootAttribute, isComponentMode} from "utils";
 import {useTheme} from "@mui/material/styles";
 
 
@@ -22,7 +22,7 @@ function getPublishStreamId() {
 
 function WaitingRoom(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
+  const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
   const publishStreamId = getPublishStreamId()
   const {t} = useTranslation();
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -80,11 +80,11 @@ function WaitingRoom(props) {
     } else {
       streamId = publishStreamId;
     }
-    
+
     conference.setIsJoining(true);
     conference.joinRoom(roomName, streamId, conference.roomJoinMode);
   }
-  
+
 
   const handleDialogOpen = (focus) => {
     if (conference.localVideo === null) {
