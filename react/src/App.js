@@ -31,6 +31,12 @@ if (availableLanguagesList.includes(preferredLanguage)) {
 i18n.changeLanguage(preferredLanguage).then(r => console.log("Language is set to", preferredLanguage));
 
 let selectedTheme = localStorage.getItem('selectedTheme');
+
+if (process.env.REACT_APP_FORCE_THEME !== undefined && process.env.REACT_APP_FORCE_THEME !== "") {
+  selectedTheme = process.env.REACT_APP_FORCE_THEME;
+  localStorage.setItem('selectedTheme', selectedTheme);
+}
+
 if (!selectedTheme) {
   selectedTheme = ThemeList.Green;
   localStorage.setItem('selectedTheme', selectedTheme);
@@ -61,15 +67,15 @@ function App()
   const [currentTheme, setCurrentTheme] = React.useState(selectedTheme);
 
   React.useEffect(() => {
-  const handleFullScreen = (e) => {
-    if (e.target?.id === "meeting-gallery") {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().then(r => console.log("Fullscreen is requested", r));
-      } else {
-        document.exitFullscreen().then(r => console.log("Fullscreen is exited", r));
+    const handleFullScreen = (e) => {
+      if (e.target?.id === "meeting-gallery") {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().then(r => console.log("Fullscreen is requested", r));
+        } else {
+          document.exitFullscreen().then(r => console.log("Fullscreen is exited", r));
+        }
       }
     }
-  }
 
     window.addEventListener("dblclick", handleFullScreen);
 

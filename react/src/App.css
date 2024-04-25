@@ -95,9 +95,9 @@ form {
   padding-bottom: min(18px, 5%);
   background: rgb(254, 246, 243);
   background: linear-gradient(
-    180deg,
-    rgba(254, 246, 243, 0) 0%,
-    rgba(0, 0, 0, 0.5) 100%
+          180deg,
+          rgba(254, 246, 243, 0) 0%,
+          rgba(0, 0, 0, 0.5) 100%
   );
 }
 .name-indicator .name {
