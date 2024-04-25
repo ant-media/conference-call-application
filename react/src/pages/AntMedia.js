@@ -93,22 +93,61 @@ function getMediaConstraints(videoSendResolution, frameRate) {
   return constraint;
 }
 
-function getPlayToken() {
-  const dataPlayToken = document.getElementById("root")?.getAttribute("data-play-token");
-  return (dataPlayToken) ? dataPlayToken : getUrlParameter("playToken");
+var streamNameInit = getRootAttribute("stream-name");
+
+if (!streamNameInit) {
+  streamNameInit = getUrlParameter("streamName");
 }
 
-function getPublishToken() {
-  const dataPublishToken = document.getElementById("root")?.getAttribute("data-publish-token");
-  return (dataPublishToken) ? dataPublishToken : getUrlParameter("publishToken");
+var onlyDataChannel = getRootAttribute("only-data-channel");
+if (!onlyDataChannel) {
+  onlyDataChannel = getUrlParameter("onlyDataChannel");
 }
 
-var playToken = getPlayToken();
-var publishToken = getPublishToken();
-var token = getUrlParameter("token")
+if (onlyDataChannel == null || typeof onlyDataChannel === "undefined") {
+  onlyDataChannel = false;
+} else {
+  onlyDataChannel = (onlyDataChannel === "true");
+}
+
+var initialPlayOnly = getRootAttribute("play-only");
+if (!initialPlayOnly) {
+  initialPlayOnly = getUrlParameter("playOnly");
+}
+
+if (initialPlayOnly == null || typeof initialPlayOnly === "undefined") {
+  initialPlayOnly = false;
+} else {
+  initialPlayOnly = (initialPlayOnly === "true");
+}
+
+var InitialStreamId = getRootAttribute("data-publish-stream-id");
+if (!InitialStreamId) {
+  InitialStreamId = getUrlParameter("streamId");
+}
+
+var admin = getRootAttribute("admin");
+if (!admin) {
+  admin = getUrlParameter("admin");
+}
+
+if (admin == null || typeof admin === "undefined") {
+  admin = false;
+} else {
+  admin = (admin === "true");
+}
+
+function getToken() {
+  const dataToken = document.getElementById("root")?.getAttribute("data-token");
+  let token = (dataToken) ? dataToken : getUrlParameter("token");
+  if (token === null || typeof token === "undefined") {
+    token = "";
+  }
+  return token;
+}
+
+var token = getToken();
 var mcuEnabled = getUrlParameter("mcuEnabled");
-var InitialStreamId = getUrlParameter("streamId");
-var playOnly = getUrlParameter("playOnly");
 var enterDirectly = getUrlParameter("enterDirectly");
 if (enterDirectly == null || typeof enterDirectly === "undefined") {
   enterDirectly = false;
@@ -150,7 +189,7 @@ if (localStorage.getItem('selectedMicrophone')) {
 }
 
 
-if (playOnly) {
+if (initialPlayOnly) {
   mediaConstraints = {
     video: false,
     audio: false,
@@ -189,22 +228,6 @@ if (mcuEnabled == null) {
   mcuEnabled = false;
 }
 
-if (playOnly == null) {
-  playOnly = false;
-}
-
-if (playToken == null || typeof playToken === "undefined") {
-  playToken = "";
-}
-
-if (publishToken == null || typeof publishToken === "undefined") {
-  publishToken = "";
-}
-
-if (token == null || typeof token === "undefined") {
-  token = "";
-}
-
 var roomOfStream = [];
 
 var audioListenerIntervalJob = null;
@@ -235,7 +258,7 @@ function AntMedia(props) {
 
 
   // this is my own name when i enter the room.
-  const [streamName, setStreamName] = useState("");
+  const [streamName, setStreamName] = useState(streamNameInit);
 
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
@@ -331,7 +354,8 @@ function AntMedia(props) {
 
   const [devices, setDevices] = React.useState([]);
 
-  const [isPlayOnly] = React.useState(playOnly);
+  const [isPlayOnly, setIsPlayOnly] = React.useState(initialPlayOnly);
+
 
   const [isEnterDirectly] = React.useState(enterDirectly);
 
@@ -344,9 +368,23 @@ function AntMedia(props) {
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
+  // open or close the mute participant dialog.
+  const [isBecomePublisherConfirmationDialogOpen, setBecomePublisherConfirmationDialogOpen] = React.useState(false);
+
   const {t} = useTranslation();
 
   const theme = useTheme();
+
+  function handleStartBecomePublisher() {
+
+    console.log("handleStartBecomePublisher");
+
+    webRTCAdaptor?.stop(roomName);
+    // remove listener string from the room name
+    let mainRoomName = roomName.endsWith(listenerRoomPostfix) ? roomName.substring(0, roomName.length - 8) : roomName;
+    setIsPlayOnly(false);
+    setRoomName(mainRoomName);
+  }
 
 
   function handleUnauthorizedDialogExitClicked(){
@@ -435,18 +473,8 @@ function AntMedia(props) {
     globals.maxVideoTrackCount = 6; //FIXME
     setPublishStreamId(generatedStreamId);
 
-    token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
-
-    if (!playOnly && token === undefined) {
-      token = publishToken;
-    }
-
-    if (!playOnly) {
+    if (!isPlayOnly) {
       handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
-    }
-
-    if (token === undefined) {
-      token = playToken;
     }
 
     webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
@@ -649,13 +677,6 @@ function AntMedia(props) {
   }
 
   function startScreenSharing(){
-
-    var token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
-
-    if (token === undefined) {
-      token = publishToken;
-    }
-
     var metaData = {
       isMicMuted: false,
       isCameraOn: true,
@@ -895,7 +916,7 @@ function AntMedia(props) {
         setTimeout(() => {
           handlePublish(
             publishStreamId,
-            publishToken,
+            token,
             subscriberId,
             subscriberCode
           );
@@ -2001,7 +2022,10 @@ function AntMedia(props) {
               setDevices,
               getSelectedDevices,
               setIsJoining,
-              isJoining
+              isJoining,
+              isBecomePublisherConfirmationDialogOpen,
+              setBecomePublisherConfirmationDialogOpen,
+              handleStartBecomePublisher
             }}
           >
             {props.children}
