@@ -18,6 +18,8 @@ import {getRootAttribute, isComponentMode} from 'utils';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactionsButton from "./Components/ReactionsButton";
 import MoreOptionsButton from "./Components/MoreOptionsButton";
+import RequestPublishButton from "./Components/RequestPublishButton";
+import PublisherRequestListButton from "./Components/PublisherRequestListButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -64,7 +66,6 @@ function Footer(props) {
   }, []);
 
   React.useEffect(() => {
-    //debugger;
     if (conference.isRecordPluginActive === true && conference.isEnterDirectly === false && conference.isPlayOnly === false) {
       setIsRecordingTextVisible(true);
     } else {
@@ -80,10 +81,12 @@ function Footer(props) {
         >
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <Grid container alignItems={"center"}>
-              <a href={process.env.REACT_APP_FOOTER_LOGO_ON_CLICK_URL} alt="Circle" target="_blank" rel="noreferrer">
-                <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
-              </a>
-              <Typography color="#ffffff" variant="body1">
+              {process.env.REACT_APP_FOOTER_APP_LOGO_VISIBILITY === "true" ?
+                <a href={process.env.REACT_APP_FOOTER_LOGO_ON_CLICK_URL} alt="Circle" target="_blank" rel="noreferrer">
+                  <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
+                </a>
+                : null}
+              <Typography color={theme.palette.textColor} variant="body1">
                 {id}
               </Typography>
               <InfoButton/>
@@ -140,6 +143,18 @@ function Footer(props) {
                     </Grid>)
                     : null}
 
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ?
+                    <Grid item xs={0}>
+                      <PublisherRequestListButton footer />
+                    </Grid>
+                    : null}
+
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isPlayOnly === true) ?
+                    <Grid item xs={0}>
+                      <RequestPublishButton footer />
+                    </Grid>
+                    : null}
+
                   {process.env.REACT_APP_FOOTER_END_CALL_BUTTON_VISIBILITY === 'true' ?
                     <Grid item xs={0}>
                       <EndCallButton footer/>
@@ -147,7 +162,6 @@ function Footer(props) {
                    : null}
 
                   {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
-
                   <Grid item xs={0}>
                     <FakeParticipantButton
                       footer
