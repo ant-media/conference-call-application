@@ -177,7 +177,6 @@ function VideoCard(props) {
                                                 participant.streamId=props.trackAssignment.streamId;
                                                 participant.streamName=props.name;
                                                 conference?.setParticipantIdMuted(participant);
-                                                conference?.turnOffYourCamNotification(participant.streamId);
                                             }}
                                             color="primary"
                                             aria-label="add"
@@ -252,7 +251,6 @@ function VideoCard(props) {
                                                 participant.streamId=props.trackAssignment.streamId;
                                                 participant.streamName=props.name;
                                                 conference?.setParticipantIdMuted(participant);
-                                                conference?.turnOnYourMicNotification(participant.streamId);
                                             }}
                                             color="error"
                                             aria-label="add"
