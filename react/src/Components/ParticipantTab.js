@@ -9,7 +9,7 @@ import { ConferenceContext } from "pages/AntMedia";
 import {CircularProgress} from "@mui/material";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
-  color: "#ffffff",
+  color: theme.palette.textColor,
   fontWeight: 500,
   fontSize: 14,
 }));
@@ -28,6 +28,7 @@ function ParticipantTab(props) {
       <div id={'admin-button-group-'+streamId}>
       {(streamId === "localVideo" ? conference?.presenters.includes(conference.publishStreamId) : conference?.presenters.includes(streamId) )&& conference?.isAdmin === true ? (
       <PinBtn
+        id={"remove-presenter-"+streamId}
         disabled={conference?.presenterButtonDisabled}
         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
         onClick={() => {
@@ -40,11 +41,12 @@ function ParticipantTab(props) {
         }
       >
         { conference?.presenterButtonStreamIdInProcess === streamId ? <CircularProgress size={28} /> :
-          <SvgIcon size={28} name="unpresenter" color="black" />}
+          <SvgIcon size={28} name="unpresenter" color="#000" />}
       </PinBtn>
     ) : null}
   {(streamId === "localVideo" ? !conference?.presenters.includes(conference.publishStreamId) : !conference?.presenters.includes(streamId) ) && ( !conference?.approvedSpeakerRequestList.includes(streamId) ) && conference?.isAdmin === true ?(
     <PinBtn
+      id={"add-presenter-"+streamId}
       disabled={conference?.presenterButtonDisabled}
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => {
@@ -58,7 +60,7 @@ function ParticipantTab(props) {
     >
       {/* this icon for publish speaker */}
       { conference?.presenterButtonStreamIdInProcess === streamId ? <CircularProgress size={28} /> :
-        <SvgIcon size={28} name="presenter" color="black" />}
+        <SvgIcon size={28} name="presenter" color="#000" />}
     </PinBtn>
   ) : null}
   {conference?.approvedSpeakerRequestList.includes(streamId) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ?(
@@ -66,7 +68,7 @@ function ParticipantTab(props) {
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => conference?.makeListenerAgain(streamId)}
     >
-      <SvgIcon size={28} name="close" color="black" />
+      <SvgIcon size={28} name="close" color="#000" />
     </PinBtn>
   ) : null}
       </div>

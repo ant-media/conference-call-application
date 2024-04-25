@@ -9,7 +9,7 @@ function DrawerButton(props) {
 
   return (
     <Button sx={{ minWidth: 30 }} onClick={() => {conference?.handleMessageDrawerOpen(false); conference?.handleParticipantListOpen(false); conference?.handleEffectsOpen(false); conference?.setPublisherRequestListDrawerOpen(false);}}>
-      <SvgIcon size={24} name={'close'} color={'white'} />
+      <SvgIcon size={24} name={'close'} color={'#fff'} />
     </Button>
   );
 }

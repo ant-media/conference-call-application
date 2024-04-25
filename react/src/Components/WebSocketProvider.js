@@ -8,27 +8,28 @@ export const WebSocketProvider = ({ children }) => {
     const [latestMessage, setLatestMessage] = useState(null);
     const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
 
-    var websocketUrlTemp = process.env.REACT_APP_WEBSOCKET_URL;
+    var websocketUrlTemp = getRootAttribute("data-websocket-url");
     if (!websocketUrlTemp) {
-        websocketUrlTemp = getRootAttribute("data-websocket-url");
-        if (!websocketUrlTemp) {
-            const appName = window.location.pathname.substring(
-                0,
-                window.location.pathname.lastIndexOf("/") + 1
-            );
-            const path =
-                window.location.hostname +
-                ":" +
-                window.location.port +
-                appName +
-                "websocket";
+      websocketUrlTemp = process.env.REACT_APP_WEBSOCKET_URL;
+      if (!websocketUrlTemp) {
+          const appName = window.location.pathname.substring(
+            0,
+            window.location.pathname.lastIndexOf("/") + 1
+          );
+          const path =
+            window.location.hostname +
+            ":" +
+            window.location.port +
+            appName +
+            "websocket";
 
-            websocketUrlTemp = "ws://" + path;
+          websocketUrlTemp = "ws://" + path;
 
-            if (window.location.protocol.startsWith("https")) {
-                websocketUrlTemp = "wss://" + path;
-            }
-        }
+          if (window.location.protocol.startsWith("https")) {
+            websocketUrlTemp = "wss://" + path;
+          }
+
+      }
     }
 
     const webSocketUrl = websocketUrlTemp

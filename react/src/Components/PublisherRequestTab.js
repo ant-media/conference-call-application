@@ -8,15 +8,15 @@ import { SvgIcon } from "./SvgIcon";
 import {ConferenceContext} from "../pages/AntMedia";
 
 const PublisherRequestName = styled(Typography)(({ theme }) => ({
-    color: "black",
+    color: "#000",
     fontWeight: 500,
     fontSize: 14,
 }));
-//hover color of allow or denay
+//hover color of allow or deny
 const PinBtn = styled(Button)(({ theme }) => ({
     "&:hover": {
-        backgroundColor: theme.palette.green[50],
-        color: "white",
+        backgroundColor: theme.palette.themeColor[50],
+        color: "#fff",
     },
 }));
 
@@ -39,14 +39,14 @@ function PublisherRequestTab(props) {
                 <Grid item>
                     <PinBtn
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference.approveBecomeSpeakerRequest(videoId); conference.setRequestSpeakerList(conference.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {conference?.approveBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
                     >
                         Allow
                     </PinBtn>
 
                     <PinBtn
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference.rejectSpeakerRequest(videoId); conference.setRequestSpeakerList(conference.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {conference?.rejectSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
                     >
                         Deny
                     </PinBtn>
@@ -59,16 +59,16 @@ function PublisherRequestTab(props) {
         <div style={{width: "100%", overflowY: "auto"}}>
             <Stack sx={{width: "100%",}} spacing={2}>
                 <Grid container>
-                    <SvgIcon size={28} name="participants" color="black"/>
+                    <SvgIcon size={28} name="participants" color="#000"/>
                     <PublisherRequestName
                         variant="body2"
                         style={{marginLeft: 8, fontWeight: 500}}
                     >
-                        {conference.requestSpeakerList.length}
+                        {conference?.requestSpeakerList.length}
                     </PublisherRequestName>
                 </Grid>
-                {conference.requestSpeakerList.map(({streamId}, index) => {
-                    if (conference.publishStreamId !== streamId) {
+                {conference?.requestSpeakerList.map(({streamId}, index) => {
+                    if (conference?.publishStreamId !== streamId) {
                         return getPublisherRequestItem(streamId);
                     } else {
                         return "";

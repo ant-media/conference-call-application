@@ -440,7 +440,7 @@ function VideoCard(props) {
     return (
       props.name && (
         <div className="name-indicator">
-          <Typography color="white" align="left" className="name">
+          <Typography color="#fff" align="left" className="name">
             {props.name}{" "}
             {process.env.NODE_ENV === "development"
               ? `${props?.trackAssignment.isMine

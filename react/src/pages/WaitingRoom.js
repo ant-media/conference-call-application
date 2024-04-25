@@ -163,7 +163,7 @@ function WaitingRoom(props) {
                       sx={roundStyle}
                       onClick={() => handleDialogOpen()}
                     >
-                      <SvgIcon size={40} name={"settings"} color={"white"}/>
+                      <SvgIcon size={40} name={"settings"} color={"#fff"}/>
                     </CustomizedBtn>
                   </Tooltip>
                 </Grid>
