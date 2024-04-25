@@ -381,9 +381,10 @@ function AntMedia(props) {
 
     webRTCAdaptor?.stop(roomName);
     // remove listener string from the room name
-    let mainRoomName = roomName.endsWith(listenerRoomPostfix) ? roomName.substring(0, roomName.length - 8) : roomName;
+    // TODO: Check again
+    //let mainRoomName = roomName.endsWith(listenerRoomPostfix) ? roomName.substring(0, roomName.length - 8) : roomName;
     setIsPlayOnly(false);
-    setRoomName(mainRoomName);
+    //setRoomName(mainRoomName);
   }
 
 
@@ -610,8 +611,8 @@ function AntMedia(props) {
         setWebRTCAdaptor(new WebRTCAdaptor({
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
-          isPlayMode: playOnly,
-          // onlyDataChannel: playOnly,
+          isPlayMode: isPlayOnly,
+          // onlyDataChannel: isPlayOnly,
           debug: true,
           callback: infoCallback,
           callbackError: errorCallback
@@ -699,7 +700,7 @@ function AntMedia(props) {
   }
 
   React.useEffect(() => {
-    if (playOnly && enterDirectly && initialized) {
+    if (isPlayOnly && enterDirectly && initialized) {
       let streamId = makeid(10);
       setStreamName("Anonymous");
 
@@ -931,7 +932,7 @@ function AntMedia(props) {
       if(!isJoining && roomName && publishStreamId){
         setTimeout(() => {
           webRTCAdaptor?.closeWebSocket();
-          if (!playOnly) {
+          if (!isPlayOnly) {
             webRTCAdaptor?.stop(publishStreamId);
           }
           webRTCAdaptor?.stop(roomName);
@@ -1432,7 +1433,7 @@ function AntMedia(props) {
       isMicMuted: isMicMuted === null ? null : isMicMuted,
       isCameraOn: isCameraOn,
       isScreenShared: isScreenShareActive,
-      playOnly: playOnly
+      playOnly: isPlayOnly
     }
 
     return metadata;
@@ -1464,12 +1465,12 @@ function AntMedia(props) {
     clearInterval(audioListenerIntervalJob);
     audioListenerIntervalJob = null;
 
-    if (!playOnly) {
+    if (!isPlayOnly) {
       webRTCAdaptor?.stop(publishStreamId);
     }
     webRTCAdaptor?.stop(roomName);
 
-    if (!playOnly) {
+    if (!isPlayOnly) {
       webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
     }
 
@@ -1540,13 +1541,13 @@ function AntMedia(props) {
     };
 
     let tempVideoTrackAssignments = [];
-    if (!playOnly) {
+    if (!isPlayOnly) {
       tempVideoTrackAssignments.push(newVideoTrackAssignment);
     }
     setVideoTrackAssignments(tempVideoTrackAssignments);
 
     let allParticipantsTemp = {};
-    if (!playOnly) {
+    if (!isPlayOnly) {
       allParticipantsTemp[publishStreamId] = {name: "You"};
     }
     setAllParticipants(allParticipantsTemp);
@@ -1555,7 +1556,7 @@ function AntMedia(props) {
   function addMeAsParticipant(publishStreamId) {
     let isParticipantExist = videoTrackAssignments.find((vta) => vta.label === "localVideo");
 
-    if (isParticipantExist || playOnly) {
+    if (isParticipantExist || isPlayOnly) {
       return;
     }
 
