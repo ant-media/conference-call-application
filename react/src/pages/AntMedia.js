@@ -658,6 +658,10 @@ function AntMedia(props) {
 
     navigator.mediaDevices.getDisplayMedia(getMediaConstraints("screenConstraints", 20))
             .then((stream) => {
+              // it handles the stop screen sharing event
+              stream.getVideoTracks()[0].addEventListener('ended', () => {
+                handleStopScreenShare();
+              });
               screenShareWebRtcAdaptor.current =  new WebRTCAdaptor({
                 websocket_url: websocketURL,
                 localStream:stream,
