@@ -19,7 +19,7 @@ before_install:
 - git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git;
 - cd ant-media-server-parent;
 - git remote update;
-- git fetch;
+- git fetch --tags;
 - git switch --detach ams-v2.8.2;
 - mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
 - cd ..;
