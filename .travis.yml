@@ -18,7 +18,8 @@ before_install:
 - nvm install --lts
 - git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git;
 - cd ant-media-server-parent;
-- git checkout 'ams-v2.8.2';
+- git fetch;
+- git checkout ams-v2.8.2;
 - mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
 - cd ..;
 cache:
