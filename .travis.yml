@@ -20,7 +20,7 @@ before_install:
 - cd ant-media-server-parent;
 - git remote update;
 - git fetch;
-- git checkout --track origin/ams-v2.8.2;
+- git switch --detach ams-v2.8.2;
 - mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
 - cd ..;
 cache:
