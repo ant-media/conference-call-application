@@ -268,6 +268,62 @@ describe('AntMedia Component', () => {
 
     });
 
+  it('handle video track assignment remove mechanism', async () => {
+    const {container} = render(
+      <ThemeProvider theme={theme(ThemeList.Green)}>
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    var obj = {};
+    let broadcastObject = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
+    let broadcastObjectMessage = JSON.stringify(broadcastObject);
+
+    obj.broadcast = broadcastObjectMessage;
+    obj.streamId = "p1";
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("broadcastObject", obj);
+    });
+
+    await act(async () => {
+      currentConference.setVideoTrackAssignments([
+        {videoLabel:"videoTrack0", trackId:"tracka0"},
+        {videoLabel:"videoTrack1", trackId:"tracka1"},
+        {videoLabel:"videoTrack2", trackId:"tracka2"}]);
+    });
+
+    var notificationEvent = {
+      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+      streamId: "stream1",
+      payload: [
+        {videoLabel:"videoTrack1", trackId:"tracka1"},
+        {videoLabel:"videoTrack2", trackId:"tracka2"},
+      ]
+    };
+    var json = JSON.stringify(notificationEvent);
+
+    obj = {};
+    obj.data = json;
+
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("data_received", obj);
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith("---> Removed video track assignment: videoTrack0");
+    expect(currentConference.videoTrackAssignments["stream0"]).toBe(undefined);
+
+    consoleSpy.mockRestore();
+
+  });
+
     it('handle sharing on', async () => {
       const { container } = render(
         <AntMedia isTest={true}>
