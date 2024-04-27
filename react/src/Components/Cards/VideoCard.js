@@ -44,44 +44,6 @@ function VideoCard(props) {
     [props.trackAssignment.track]
   );
 
-  React.useEffect(() => {
-    if (props.trackAssignment.track?.kind === "video" && !props.trackAssignment.track.onended) {
-      props.trackAssignment.track.onended = (event) => {
-        conference?.globals?.trackEvents.push({ track: props.trackAssignment.track.id, event: "removed" });
-        /*
-         * I've commented out the following if statement because
-         * when there is less participants than the maxVideoTrackCount,
-         * so the video is not removed.
-         *
-         * Reproduce scenario
-         * - Publish 3 streams(participants) to the room
-         * - Remove one of the streams(participant) from the room. Make one participant left
-         * - The other participants in the room sees the video is black
-         *
-         * mekya
-         */
-        //if (conference.videoTrackAssignments.length > conference?.globals?.maxVideoTrackCount)
-        //{
-        console.log("video before:" + JSON.stringify(conference?.videoTrackAssignments));
-        conference.setVideoTrackAssignments((oldParts) => {
-          return oldParts.filter(
-            /*
-           * the meaning of the following line is that it does not render the video track that videolabel equals the id in the list
-           * because the video track is not assigned.
-           *
-           *
-           */
-            (p) => !(p.streamId === props.trackAssignment.streamId || p.videoLabel === props.trackAssignment.streamId)
-          );
-        });
-        console.log("video after:" + JSON.stringify(conference.videoTrackAssignments));
-
-        //}
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.trackAssignment.track]);
-
   let useAvatar = true;
   if(props?.trackAssignment.isMine) {
     useAvatar = conference?.isMyCamTurnedOff;
