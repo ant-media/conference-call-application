@@ -749,6 +749,12 @@ function AntMedia(props) {
 
     navigator.mediaDevices.getDisplayMedia(getMediaConstraints("screenConstraints", 20))
             .then((stream) => {
+              if (stream !== null && stream !== undefined && stream.getVideoTracks().length > 0) {
+                // it handles the stop screen sharing event
+                stream.getVideoTracks()[0].addEventListener('ended', () => {
+                  handleStopScreenShare();
+                });
+              }
               screenShareWebRtcAdaptor.current =  new WebRTCAdaptor({
                 websocket_url: websocketURL,
                 localStream:stream,
@@ -784,7 +790,7 @@ function AntMedia(props) {
     }
 
     let currentStreamName = streamName + " - Screen Share";
-    
+
     screenShareStreamId.current = publishStreamId + "_presentation"
 
     screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
@@ -1061,45 +1067,47 @@ function AntMedia(props) {
     let videoLabel;
     let broadcastObject = allParticipants[streamId];
 
-    if (streamId === publishStreamId) {
-      videoLabel = "localVideo";
-    }
-    if (videoLabel === undefined || videoLabel === "") {
-      // if videoLabel is missing try to find it from participants.
-      videoLabel = videoTrackAssignments.find((vta) => streamId === vta.streamId)?.videoLabel;
+    if (broadcastObject === undefined) {
+      console.error("Cannot find broadcast object for streamId: " + streamId);
+      return;
     }
 
     // if we already pin the targeted user then we are going to remove it from pinned video.
     if ((typeof broadcastObject.isPinned !== "undefined") && (broadcastObject.isPinned === true)) {
-      broadcastObject.isPinned = false; // false means user unpin manually
-      allParticipants[streamId] = broadcastObject;
-      handleNotifyUnpinUser(streamId !== publishStreamId ? streamId : publishStreamId);
+        broadcastObject.isPinned = false; // false means user unpin manually
+        allParticipants[streamId] = broadcastObject;
+        handleNotifyUnpinUser(streamId !== publishStreamId ? streamId : publishStreamId);
+        setParticipantUpdated(!participantUpdated);
+        return;
     }
-      // if there is no pinned video we are gonna pin the targeted user.
+
+    // if there is no pinned video we are going to pin the targeted user.
     // and we need to inform pinned user.
-    else {
+    if (streamId === publishStreamId) {
+      videoLabel = "localVideo";
+    }
 
-      if ((videoLabel === undefined || videoLabel === "") && (streamId !== undefined)) {
-        // if videoLabel is still missing get the firs one if it exist, this may happen when one join while someone is sharing screen
-        videoLabel = videoTrackAssignments[1]?.videoLabel;
-        webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
-      }
+    if (videoLabel !== "localVideo" && videoTrackAssignments.length > 0) {
+      videoLabel = videoTrackAssignments[1]?.videoLabel;
+      webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
+    }
 
-      Object.keys(allParticipants).forEach(id => {
-        let participant = allParticipants[id];
-        if (typeof participant.isPinned !== 'undefined'
+    Object.keys(allParticipants).forEach(id => {
+      let participant = allParticipants[id];
+      if (typeof participant.isPinned !== 'undefined'
           && participant.isPinned === true) {
 
-          participant.isPinned = false;
-          allParticipants[id] = participant;
-        }
-      });
+        participant.isPinned = false;
+        allParticipants[id] = participant;
+      }
+    });
 
-      broadcastObject.isPinned = true;
-      allParticipants[streamId] = broadcastObject;
+    broadcastObject.isPinned = true;
+    allParticipants[streamId] = broadcastObject;
 
-      handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
-    }
+    handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
+
+
     setParticipantUpdated(!participantUpdated);
   }
 
@@ -1460,11 +1468,25 @@ function AntMedia(props) {
 
         let tempVideoTrackAssignments = videoTrackAssignments;
 
-        //remove not available videotracks if exist
-        tempVideoTrackAssignments = tempVideoTrackAssignments.filter((oldVTA) => {
-          let assignment = videoTrackAssignmentList.find((vta) => oldVTA.videoLabel === vta.videoLabel);
-          return oldVTA.isMine || assignment !== undefined;
+        let tempVideoTrackAssignmentsNew = [];
+
+        tempVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
+          let assignment;
+
+          videoTrackAssignmentList.forEach(videoTrackAssignment => {
+            if (tempVideoTrackAssignment.videoLabel === videoTrackAssignment.videoLabel) {
+              assignment = videoTrackAssignment;
+            }
+          });
+
+          if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
+            tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
+          } else {
+            console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
+          }
         });
+
+        tempVideoTrackAssignments = tempVideoTrackAssignmentsNew;
 
         //add and/or update participants according to current assignments
         videoTrackAssignmentList.forEach((vta) => {
@@ -2115,6 +2137,7 @@ function AntMedia(props) {
               setSpeedTestObject,
               speedTestStreamId,
               startSpeedTest
+              setParticipantUpdated
             }}
           >
             {props.children}
