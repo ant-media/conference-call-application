@@ -5,8 +5,6 @@ import AntMedia from 'pages/AntMedia';
 import { useWebSocket } from 'Components/WebSocketProvider';
 import { useSnackbar} from "notistack";
 import { ConferenceContext } from "pages/AntMedia";
-import { assert, timeout } from 'workbox-core/_private';
-import exp from 'constants';
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
@@ -65,6 +63,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       devices: [],
       updateStreamMetaData: jest.fn(),
       assignVideoTrack: jest.fn(),
+      setParticipantUpdated: jest.fn(),
     }
 
     for (var key in params) {
@@ -233,7 +232,7 @@ describe('AntMedia Component', () => {
       var obj = {};
       let broadcastObject = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
       let broadcastObjectMessage = JSON.stringify(broadcastObject);
-      
+
       obj.broadcast = broadcastObjectMessage;
       obj.streamId = "p1";
 
@@ -268,6 +267,62 @@ describe('AntMedia Component', () => {
       consoleSpy.mockRestore();
 
     });
+
+  it('handle video track assignment remove mechanism', async () => {
+    const {container} = render(
+      <ThemeProvider theme={theme(ThemeList.Green)}>
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    var obj = {};
+    let broadcastObject = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
+    let broadcastObjectMessage = JSON.stringify(broadcastObject);
+
+    obj.broadcast = broadcastObjectMessage;
+    obj.streamId = "p1";
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("broadcastObject", obj);
+    });
+
+    await act(async () => {
+      currentConference.setVideoTrackAssignments([
+        {videoLabel:"videoTrack0", trackId:"tracka0"},
+        {videoLabel:"videoTrack1", trackId:"tracka1"},
+        {videoLabel:"videoTrack2", trackId:"tracka2"}]);
+    });
+
+    var notificationEvent = {
+      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+      streamId: "stream1",
+      payload: [
+        {videoLabel:"videoTrack1", trackId:"tracka1"},
+        {videoLabel:"videoTrack2", trackId:"tracka2"},
+      ]
+    };
+    var json = JSON.stringify(notificationEvent);
+
+    obj = {};
+    obj.data = json;
+
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("data_received", obj);
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith("---> Removed video track assignment: videoTrack0");
+    expect(currentConference.videoTrackAssignments["stream0"]).toBe(undefined);
+
+    consoleSpy.mockRestore();
+
+  });
 
     it('handle sharing on', async () => {
       const { container } = render(
@@ -612,7 +667,7 @@ describe('AntMedia Component', () => {
           </AntMedia>
         </ThemeProvider>);
 
-      
+
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
@@ -637,7 +692,7 @@ describe('AntMedia Component', () => {
 
 
       expect(currentConference.isJoining).toBe(false);
-      
+
       consoleSpy.mockRestore();
 
     });
@@ -670,7 +725,7 @@ describe('AntMedia Component', () => {
           </AntMedia>
         </ThemeProvider>);
 
-      
+
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
@@ -694,7 +749,7 @@ describe('AntMedia Component', () => {
           </AntMedia>
         </ThemeProvider>);
 
-      
+
 
       expect(currentConference.isScreenShared).toBe(false);
 
@@ -717,5 +772,58 @@ describe('AntMedia Component', () => {
         expect(container).toContain("Starting Screen Share...");
       });
     });
-  
+
+    it('screen sharing test', async () => {
+      const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      currentConference.setParticipantUpdated = jest.fn();
+
+      currentConference.allParticipants["participant0"] = {videoTrackId: "participant0", isPinned: false};
+      currentConference.allParticipants["participant1"] = {videoTrackId: "participant1", isPinned: false};
+      currentConference.allParticipants["participant2"] = {videoTrackId: "participant2", isPinned: false};
+      currentConference.allParticipants["participant3"] = {videoTrackId: "participant3", isPinned: false};
+
+      currentConference.videoTrackAssignments["participant0"] = {streamId: "participant0", videoTrackId: "participant0", audioTrackId: "participant0"};
+      currentConference.videoTrackAssignments["participant1"] = {streamId: "participant1", videoTrackId: "participant1", audioTrackId: "participant1"};
+      currentConference.videoTrackAssignments["participant2"] = {streamId: "participant2", videoTrackId: "participant2", audioTrackId: "participant2"};
+      currentConference.videoTrackAssignments["participant3"] = {streamId: "participant3", videoTrackId: "participant3", audioTrackId: "participant3"};
+
+      // testing pinning
+      await act(async () => {
+        currentConference.pinVideo("participant3");
+      });
+
+      expect(currentConference.allParticipants['participant3'].isPinned).toBe(true);
+      expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+
+      // testing pinning while another participant is pinned
+      await act(async () => {
+        currentConference.pinVideo("participant2");
+      });
+
+      expect(currentConference.allParticipants['participant3'].isPinned).toBe(false);
+      expect(currentConference.allParticipants['participant2'].isPinned).toBe(true);
+
+      // testing unpinning
+      await act(async () => {
+        currentConference.pinVideo("participant2");
+      });
+
+      expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+
+      // testing pinning a non-existing participant
+      await act(async () => {
+        currentConference.pinVideo("non-exist-participant");
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith("Cannot find broadcast object for streamId: non-exist-participant");
+
+    });
+
 });
