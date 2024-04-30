@@ -49,6 +49,13 @@ function LayoutPinned (props) {
     )
   }
 
+  React.useEffect(() => {
+    if (conference.videoTrackAssignments.length === 0) {
+      // if there is no active publisher, unpin the pinned participant
+      conference.setVideoTrackAssignments(conference.videoTrackAssignments);
+    }
+  }, [conference.videoTrackAssignments, conference.participantUpdated]);
+
   const videoCards = () => {
     return (
       <>

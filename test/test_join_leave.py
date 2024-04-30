@@ -255,7 +255,7 @@ class TestJoinLeave(unittest.TestCase):
     allParticipants = conference["allParticipants"]
     videoTrackAssignments = conference["videoTrackAssignments"]
 
-    presenter2Exists = "participantB" + "_presentation" in allParticipants
+    presenter2Exists = videoTrackAssignments[1]["streamId"] + "_presentation" in allParticipants
 
     streamIdOfPresenter = videoTrackAssignments[2]["streamId"]
     print("streamIdOfPresenter: "+str(streamIdOfPresenter))
