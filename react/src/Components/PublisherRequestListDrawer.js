@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import CloseDrawerButton from './DrawerButton';
 import PublisherRequestTab from "./PublisherRequestTab";
 import {ConferenceContext} from "../pages/AntMedia";
+import {getAntDrawerStyle} from "../styles/themeUtil";
 
 const AntDrawer = styled(Drawer)(({ theme }) => (getAntDrawerStyle(theme)));
 

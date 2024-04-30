@@ -20,6 +20,7 @@ import ReactionsButton from "./Components/ReactionsButton";
 import MoreOptionsButton from "./Components/MoreOptionsButton";
 import RequestPublishButton from "./Components/RequestPublishButton";
 import PublisherRequestListButton from "./Components/PublisherRequestListButton";
+import {useTheme} from "@mui/material/styles";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -46,6 +47,8 @@ function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
   const conference = React.useContext(ConferenceContext);
+
+  const theme = useTheme();
 
   const mobileBreakpoint = 900;
 

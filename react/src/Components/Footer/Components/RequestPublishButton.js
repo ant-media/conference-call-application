@@ -51,10 +51,9 @@ function RequestPublishButton(props) {
 
 
     const handlePublisherRequest = (e) => {
-        return;
         e.preventDefault();
 
-        const baseUrl = conference.restBaseUrl;
+        const baseUrl = conference?.restBaseUrl;
         let participant = "";
         let participants = Object.keys(conference.allParticipants);
         for (let i = 0; i < participants.length; i++) {
