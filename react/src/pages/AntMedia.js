@@ -968,8 +968,22 @@ function AntMedia(props) {
     }
 
     if (videoLabel !== "localVideo" && videoTrackAssignments.length > 0) {
+      let oldVideoLabel = null;
+      let videoTrackAssignmentSecondElementStreamId = videoTrackAssignments[1]?.streamId;
+
+      // find the video label of the user.
+      videoTrackAssignments.forEach((videoTrackAssignment) => {
+        if (videoTrackAssignment.streamId === streamId) {
+          oldVideoLabel = videoTrackAssignment.videoLabel;
+        }
+      });
+
       videoLabel = videoTrackAssignments[1]?.videoLabel;
       webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
+
+      if (oldVideoLabel !== null) {
+        webRTCAdaptor?.assignVideoTrack(oldVideoLabel, videoTrackAssignmentSecondElementStreamId, false);
+      }
     }
 
     Object.keys(allParticipants).forEach(id => {
