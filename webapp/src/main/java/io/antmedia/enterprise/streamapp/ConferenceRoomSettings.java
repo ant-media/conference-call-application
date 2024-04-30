@@ -1,3 +1,4 @@
+
 package io.antmedia.enterprise.streamapp;
 
 
@@ -16,22 +17,22 @@ public class ConferenceRoomSettings {
 
 	protected static Logger logger = LoggerFactory.getLogger(ConferenceRoomSettings.class);
 
-	
-    @Value("${roomCreationPassword:#{null}}")
-    private String roomCreationPassword;
 
-    @Expose
-    private boolean roomCreationPasswordEnabled = false;
-    
-    @Expose
-    private boolean isRecordingFeatureAvailable = false;
-    
-    @PostConstruct
-    public void init() {
-        roomCreationPasswordEnabled = StringUtils.isNotBlank(roomCreationPassword);
-    	logger.info("roomCreationPasswordEnabled is {}", StringUtils.isNotBlank(roomCreationPassword));
-    	
-    	try {
+	@Value("${roomCreationPassword:#{null}}")
+	private String roomCreationPassword;
+
+	@Expose
+	private boolean roomCreationPasswordEnabled = false;
+
+	@Expose
+	private boolean isRecordingFeatureAvailable = false;
+
+	@PostConstruct
+	public void init() {
+		roomCreationPasswordEnabled = StringUtils.isNotBlank(roomCreationPassword);
+		logger.info("roomCreationPasswordEnabled is {}", StringUtils.isNotBlank(roomCreationPassword));
+
+		try {
 			Class.forName("io.antmedia.plugin.IMediaPushPlugin");
 			logger.info("Conference recording feature is available");
 			isRecordingFeatureAvailable = true;
@@ -41,18 +42,18 @@ public class ConferenceRoomSettings {
 			isRecordingFeatureAvailable = false;
 		}
 
-    }
+	}
 
 
-    public String getRoomCreationPassword() {
-        return roomCreationPassword;
-    }
+	public String getRoomCreationPassword() {
+		return roomCreationPassword;
+	}
 
-    public void setRoomCreationPassword(String roomCreationPassword) {
-    	
-        this.roomCreationPassword = roomCreationPassword;
-        this.roomCreationPasswordEnabled = StringUtils.isNotBlank(roomCreationPassword);
-    }
+	public void setRoomCreationPassword(String roomCreationPassword) {
+
+		this.roomCreationPassword = roomCreationPassword;
+		this.roomCreationPasswordEnabled = StringUtils.isNotBlank(roomCreationPassword);
+	}
 
 
 	public boolean isRecordingFeatureAvailable() {
@@ -67,6 +68,6 @@ public class ConferenceRoomSettings {
 	public boolean isRoomCreationPasswordEnabled() {
 		return roomCreationPasswordEnabled;
 	}
-	
+
 
 }

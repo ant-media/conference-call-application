@@ -37,9 +37,9 @@ public class WebSocketLocalHandler {
 		if(config.getUserProperties().containsKey(AMSEndpointConfigurator.USER_AGENT)) {
 			userAgent = (String) config.getUserProperties().get(AMSEndpointConfigurator.USER_AGENT);
 		}
-		
+
 		logger.info("Web Socket opened session:{} user-agent:{}", session.getId(), userAgent);
-		
+
 		//increase max text buffer size - Chrome 90 requires
 		session.setMaxTextMessageBufferSize(8192 * 10);
 	}
@@ -65,12 +65,12 @@ public class WebSocketLocalHandler {
 			ConfigurableWebApplicationContext ctxt = null;
 			try {
 				ApplicationContextFacade servletContext = (ApplicationContextFacade) FieldUtils.readField(session.getContainer(), "servletContext", true);
-				ctxt = (ConfigurableWebApplicationContext) WebApplicationContextUtils.getWebApplicationContext(servletContext); 
+				ctxt = (ConfigurableWebApplicationContext) WebApplicationContextUtils.getWebApplicationContext(servletContext);
 			} catch (Exception e) {
 				logger.error("Application context can not be set to WebSocket handler");
 				logger.error(ExceptionUtils.getMessage(e));
-			} 
-			
+			}
+
 			if(ctxt != null && ctxt.isRunning()) {
 				createHandler(ctxt, session);
 				handler.onMessage(session, message);
@@ -83,14 +83,14 @@ public class WebSocketLocalHandler {
 			handler.onMessage(session, message);
 		}
 	}
-	
+
 	private void createHandler(ApplicationContext context, Session session) {
 		try {
 
 			boolean rtmpForward;
-			
+
 			try {
-				rtmpForward = session.getRequestParameterMap().get("rtmpForward").get(0).contains("true");	
+				rtmpForward = session.getRequestParameterMap().get("rtmpForward").get(0).contains("true");
 			} catch (Exception e) {
 				rtmpForward = false;
 			}
@@ -103,12 +103,12 @@ public class WebSocketLocalHandler {
 			else {
 				handler = new WebSocketCommunityHandler(context, session);
 			}
-			
+
 			handler.setUserAgent(userAgent);
 		} catch (Exception e) {
 			logger.error("WebSocket handler cannot be created");
 			logger.error(ExceptionUtils.getMessage(e));
-		} 
+		}
 	}
 
 
