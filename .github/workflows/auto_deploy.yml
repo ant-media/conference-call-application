@@ -55,7 +55,6 @@ jobs:
         echo "$response"
         if [[ $response =~ "Conference" ]]; then
           echo "::set-output name=app_exists::true"
-          echo "True"
         else
           echo "::set-output name=app_exists::false"
         fi
@@ -64,21 +63,21 @@ jobs:
       with:
         kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
         
-#    - name: Delete pod if the conference app not exists
-#      if: steps.check-conference-app.outputs.app_exists == 'false'
-#      run: |
-#        POD_NAME=$(kubectl get pods -l app=ant-media-origin -n antmedia -o jsonpath='{.items[0].metadata.name}')
-#        kubectl delete pod $POD_NAME -n antmedia
-#        sleep 20
+    - name: Delete pod if the conference app not exists
+      if: steps.check-conference-app.outputs.app_exists == 'false'
+      run: |
+        POD_NAME=$(kubectl get pods -l app=ant-media-origin -n antmedia -o jsonpath='{.items[0].metadata.name}')
+        kubectl delete pod $POD_NAME -n antmedia
+        sleep 20
         
-#    - name: Login to server
-#      if: steps.check-conference-app.outputs.app_exists == 'false'
-#      run: |
-#        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
+    - name: Login to server
+      if: steps.check-conference-app.outputs.app_exists == 'false'
+      run: |
+        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
                 
-#    - name: Recreate Conference App
-#      if: steps.check-conference-app.outputs.app_exists == 'false'
-#      run: |
-#        export WAR_FILE_NAME="ConferenceCall.war"
-#        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+    - name: Recreate Conference App
+      if: steps.check-conference-app.outputs.app_exists == 'false'
+      run: |
+        export WAR_FILE_NAME="ConferenceCall.war"
+        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
   
