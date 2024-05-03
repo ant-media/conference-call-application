@@ -50,6 +50,7 @@ jobs:
     - name: Check if Conference app exists
       id: check-conference-app
       run: |
+        sleep 30
         response=$(curl -s "${{ secrets.SERVER_URL }}/rest/v2/applications" -b cookie.txt)
         echo "$response"
         echo $response | jq '. | any(. == "Conference")' | grep -c true
