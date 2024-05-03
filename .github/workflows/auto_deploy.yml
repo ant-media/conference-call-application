@@ -52,7 +52,7 @@ jobs:
       run: |
         response=$(curl -s "${{ secrets.SERVER_URL }}/rest/v2/applications" -b cookie.txt)
         echo "$response"
-        echo $response | jq '. | any(. == "Conference")' | grep -c true) -eq 0
+        echo $response | jq '. | any(. == "Conference")' | grep -c true
         if [[ $(echo "$response" | jq '. | any(. == "Conference")' | grep -c true) -eq 0 ]]; then
           echo "::set-output name=app_exists::false"
         else
