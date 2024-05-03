@@ -55,6 +55,7 @@ jobs:
         echo "$response"
         if [[ $response =~ "Conference" ]]; then
           echo "::set-output name=app_exists::true"
+          echo "True"
         else
           echo "::set-output name=app_exists::false"
         fi
