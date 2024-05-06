@@ -93,31 +93,35 @@ function ParticipantTab(props) {
           <ParticipantName variant="body1">{name}</ParticipantName>
         </Grid>
         <Grid item>
-          {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
-            <PinBtn
-              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => {conference.pinVideo(streamId);}}
-            >
-              <SvgIcon size={28} name="unpin" color="theme.palette.textColor" />
-            </PinBtn>
-          ) : (
-            <PinBtn
-              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => {
-                conference.pinVideo(streamId);
-              }}
-            >
-              <SvgIcon size={28} name="pin" color="theme.palette.textColor" />
-            </PinBtn>
-          )}
-          <div>
-          {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
-            getAdminButtons(streamId, assignedVideoCardId)
-        ) : null}
-        </div>
+          <div style={{display: 'flex'}}>
+            {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
+              <PinBtn
+                sx={{minWidth: "unset", pt: 1, pb: 1}}
+                onClick={() => {
+                  conference.pinVideo(streamId);
+                }}
+              >
+                <SvgIcon size={28} name="unpin" color="theme.palette.textColor"/>
+              </PinBtn>
+            ) : (
+              <PinBtn
+                sx={{minWidth: "unset", pt: 1, pb: 1}}
+                onClick={() => {
+                  conference.pinVideo(streamId);
+                }}
+              >
+                <SvgIcon size={28} name="pin" color="theme.palette.textColor"/>
+              </PinBtn>
+            )}
+            <div>
+              {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
+                getAdminButtons(streamId, assignedVideoCardId)
+              ) : null}
+            </div>
+          </div>
         </Grid>
       </Grid>
-    );
+  );
   };
 
   return (
