@@ -98,7 +98,7 @@ function ParticipantTab(props) {
               sx={{ minWidth: "unset", pt: 1, pb: 1 }}
               onClick={() => {conference.pinVideo(streamId);}}
             >
-              <SvgIcon size={28} name="unpin" color="#fff" />
+              <SvgIcon size={28} name="unpin" color="theme.palette.textColor" />
             </PinBtn>
           ) : (
             <PinBtn
@@ -107,7 +107,7 @@ function ParticipantTab(props) {
                 conference.pinVideo(streamId);
               }}
             >
-              <SvgIcon size={28} name="pin" color="#fff" />
+              <SvgIcon size={28} name="pin" color="theme.palette.textColor" />
             </PinBtn>
           )}
           <div>
@@ -124,7 +124,7 @@ function ParticipantTab(props) {
         <div style={{width: "100%", overflowY: "auto"}}>
           <Stack sx={{width: "100%",}} spacing={2}>
             <Grid container>
-              <SvgIcon size={28} name="participants" color="#fff"/>
+              <SvgIcon size={28} name="participants" color="theme.palette.textColor"/>
               <ParticipantName
                   variant="body2"
                   style={{marginLeft: 4, fontWeight: 500}}

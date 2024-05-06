@@ -197,7 +197,7 @@ if (initialPlayOnly) {
   };
 }
 
-let websocketURL = getWebSocketURLAttribute();
+let websocketURL = getRootAttribute("data-websocket-url");
 
 if (!websocketURL) {
 
@@ -298,7 +298,7 @@ function AntMedia(props) {
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
-  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [isAdmin, setIsAdmin] = React.useState(admin);
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [presenters, setPresenters] = React.useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
@@ -736,8 +736,10 @@ function AntMedia(props) {
         delete temp[trackId];
       }
     });
-    setAllParticipants(temp);
-    setParticipantUpdated(!participantUpdated);
+    if (!_.isEqual(temp, allParticipants)) {
+      setAllParticipants(temp);
+      setParticipantUpdated(!participantUpdated);
+    }
 
     //request broadcast object for new tracks
     participantIds.forEach(pid => {
@@ -753,8 +755,10 @@ function AntMedia(props) {
     let metaData = JSON.parse(broadcastObject.metaData);
     broadcastObject.isScreenShared = metaData.isScreenShared;
     allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
-    setAllParticipants(allParticipantsTemp);
-    setParticipantUpdated(!participantUpdated);
+    if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+      setAllParticipants(allParticipantsTemp);
+      setParticipantUpdated(!participantUpdated);
+    }
   }
 
   useEffect(() => {
@@ -1136,11 +1140,6 @@ function AntMedia(props) {
     let videoLabel;
     let broadcastObject = allParticipants[streamId];
 
-    if (broadcastObject === undefined) {
-      console.error("Cannot find broadcast object for streamId: " + streamId);
-      return;
-    }
-
     // if we already pin the targeted user then we are going to remove it from pinned video.
     if ((typeof broadcastObject.isPinned !== "undefined") && (broadcastObject.isPinned === true)) {
         broadcastObject.isPinned = false; // false means user unpin manually
@@ -1391,6 +1390,15 @@ function AntMedia(props) {
     }
   }
 
+  function handlePublisherRequestListOpen(open) {
+    setPublisherRequestListDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+      setParticipantListDrawerOpen(false);
+      setEffectsDrawerOpen(false);
+    }
+  }
+
   function handleParticipantListOpen(open) {
     setParticipantListDrawerOpen(open);
     if (open) {
@@ -1619,11 +1627,14 @@ function AntMedia(props) {
           });
         });
 
-        setVideoTrackAssignments(tempVideoTrackAssignments);
+        // check if there is any difference between old and new assignments
+        if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+          setVideoTrackAssignments(tempVideoTrackAssignments);
+          setParticipantUpdated(!participantUpdated);
+        }
 
         checkScreenSharingStatus();
 
-        setParticipantUpdated(!participantUpdated);
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
@@ -2436,8 +2447,17 @@ function AntMedia(props) {
               isJoining,
               isBecomePublisherConfirmationDialogOpen,
               setBecomePublisherConfirmationDialogOpen,
-              handleStartBecomePublisher
-              setParticipantUpdated
+              handleStartBecomePublisher,
+              makeParticipantPresenter,
+              rejectSpeakerRequest,
+              approveBecomeSpeakerRequest,
+              makeListenerAgain,
+              makeParticipantUndoPresenter,
+              handlePublisherRequest,
+              requestSpeakerList,
+              turnOnYourMicNotification,
+              turnOffYourCamNotification,
+              handlePublisherRequestListOpen
             }}
           >
             {props.children}

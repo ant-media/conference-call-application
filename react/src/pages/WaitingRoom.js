@@ -82,6 +82,10 @@ function WaitingRoom(props) {
     }
 
     conference.setIsJoining(true);
+    if (conference?.isPlayOnly) {
+      conference?.setWaitingOrMeetingRoom("meeting")
+      conference?.setIsJoining(false);
+    }
     conference.joinRoom(roomName, streamId, conference.roomJoinMode);
   }
 
