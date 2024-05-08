@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 
+import io.antmedia.AntMediaApplicationAdapter;
 import io.antmedia.rest.RestServiceBase;
 import org.apache.catalina.core.ApplicationContextFacade;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -145,7 +146,6 @@ public class WebSocketApplicationHandler
 			appSettings = (AppSettings)context.getBean(AppSettings.BEAN_NAME);
 		}
 	}
-
 
 	private void setApplicationContext(Session session) {
 		try {
@@ -425,10 +425,8 @@ public class WebSocketApplicationHandler
 				return;
 			}
 
-			// Fixme: This method is not implemented in AMSBroadcastManager
-			//RestServiceBase.removeFromPublisherRequestList(mainRoomName, participantId, getDataStore());
-			// Fixme: This method is not implemented in AMSBroadcastManager
-			//RestServiceBase.addIntoPublisherFromListenerList(mainRoomName, participantId, getDataStore());
+			RestServiceBase.removeFromPublisherRequestList(mainRoomName, participantId, getDataStore());
+			RestServiceBase.addIntoPublisherFromListenerList(mainRoomName, participantId, getDataStore());
 
 			JSONObject command = new JSONObject();
 			command.put("eventType", "GRANT_BECOME_PUBLISHER");
@@ -452,8 +450,7 @@ public class WebSocketApplicationHandler
 				return;
 			}
 
-			// Fixme: This method is not implemented in AMSBroadcastManager
-			//RestServiceBase.removeFromPublisherRequestList(mainRoomName, participantId, getDataStore());
+			RestServiceBase.removeFromPublisherRequestList(mainRoomName, participantId, getDataStore());
 
 			JSONObject command = new JSONObject();
 			command.put("eventType", "REJECT_SPEAKER_REQUEST");
@@ -476,8 +473,7 @@ public class WebSocketApplicationHandler
 				return;
 			}
 
-			// Fixme: This method is not implemented in AMSBroadcastManager
-			//RestServiceBase.removeFromPublisherFromListenerList(mainRoomName, participantId, getDataStore());
+			RestServiceBase.removeFromPublisherFromListenerList(mainRoomName, participantId, getDataStore());
 
 			JSONObject command = new JSONObject();
 			command.put("eventType", "MAKE_LISTENER_AGAIN");
@@ -680,18 +676,17 @@ public class WebSocketApplicationHandler
 			return true;
 		}
 
-		boolean result = getAMSBroadcastManager().addSubTrack(listenerRoom, participantId);
+		Result result = RestServiceBase.addSubTrack(listenerRoom, participantId, dataStore);
 
-		if (result) {
+		if (result.isSuccess()) {
 			logger.info("Participant {} is made presenter in listener room {}", participantId, listenerRoom);
-			// Fixme: This method is not implemented in AMSBroadcastManager
-			//RestServiceBase.addIntoPresenterList(mainRoom, participantId, dataStore);
-			sendUpdatedMainRoomBroadcast(mainRoom);
+			RestServiceBase.addIntoPresenterList(mainRoom, participantId, dataStore);
+			//sendUpdatedMainRoomBroadcast(mainRoom);
 		} else {
 			logger.error("Participant {} could not be made presenter in listener room {}", participantId, listenerRoom);
 		}
 
-		return result;
+		return result.isSuccess();
 	}
 
 	public boolean handleUndoPresenter(String participantId, String mainRoom, String listenerRoomName) {
@@ -708,19 +703,36 @@ public class WebSocketApplicationHandler
 			return true;
 		}
 
-		boolean result = getAMSBroadcastManager().removeSubTrack(listenerRoomName, participantId);
+		boolean result = removeSubTrack(listenerRoomName, participantId);
 
 		if (result) {
 			logger.info("Participant {} is removed from presenter in listener room {}", participantId, listenerRoomName);
-			// Fixme: This method is not implemented in AMSBroadcastManager
-			//RestServiceBase.removeFromPresenterList(mainRoom, participantId, dataStore);
-			getAMSBroadcastManager().updateMainTrackId(participantId, mainRoom, getDataStore());
+			RestServiceBase.removeFromPresenterList(mainRoom, participantId, dataStore);
+			updateMainTrackId(participantId, mainRoom, getDataStore());
 			sendUpdatedMainRoomBroadcast(mainRoom);
 		} else {
 			logger.error("Participant {} could not be removed from presenter in listener room {}", participantId, listenerRoomName);
 		}
 
 		return result;
+	}
+
+	public boolean updateMainTrackId(String participantId, String roomName, DataStore dataStore) {
+		Broadcast broadcast = dataStore.get(participantId);
+		broadcast.setMainTrackStreamId(roomName);
+		return dataStore.updateBroadcastFields(participantId, broadcast);
+	}
+
+	public boolean removeSubTrack(String mainTrackId, String subTrackId) {
+		Result result = RestServiceBase.removeSubTrack(mainTrackId, subTrackId, getDataStore());
+
+		if (!result.isSuccess()) {
+			return false;
+		}
+
+		RestServiceBase.removeStreamFromRoom(mainTrackId,subTrackId,getDataStore());
+
+		return result.isSuccess();
 	}
 
 	public void handleRequestPublish(String roomName, String streamId, String token) {
@@ -747,8 +759,7 @@ public class WebSocketApplicationHandler
 			return;
 		}
 
-		// Fixme: This method is not implemented in AMSBroadcastManager
-		//RestServiceBase.addIntoPublisherRequestList(mainRoomName, streamId, dataStore);
+		RestServiceBase.addIntoPublisherRequestList(mainRoomName, streamId, dataStore);
 		sendUpdatedMainRoomBroadcast(mainRoomName);
 		getAMSBroadcastManager().sendDataChannelMessage(mainRoomName, "{\"eventType\":\"PUBLISH_REQUEST\",\"streamId\":\"" + streamId + "\"}");
 	}

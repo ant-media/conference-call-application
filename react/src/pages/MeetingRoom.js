@@ -34,7 +34,7 @@ const MeetingRoom = React.memo((props) => {
   React.useEffect(() => {
     handleGalleryResize(false);
     window.conference = conference;
-  }, [conference.videoTrackAssignments, conference.participantUpdated]);
+  }, [conference.videoTrackAssignments, conference.allParticipants, conference.participantUpdated]);
 
   React.useEffect(() => {
     handleGalleryResize(true);

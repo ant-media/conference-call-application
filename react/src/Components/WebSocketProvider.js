@@ -47,6 +47,12 @@ export const WebSocketProvider = ({ children }) => {
             webSocket.current.onmessage = (event) => {
                 const newMessage = event.data;
                 setLatestMessage(newMessage);
+
+                let command = JSON.parse(newMessage).command;
+
+                if (command === 'pong') {
+                  console.log('Received pong from server');
+                }
             };
 
             webSocket.current.onclose = () => {
@@ -58,8 +64,21 @@ export const WebSocketProvider = ({ children }) => {
                 console.error('WebSocket Error:', error);
             };
 
+            const pingInterval = setInterval(() => {
+              if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
+                var jsCmd = {
+                  command: "ping"
+                }
+                webSocket.current.send(JSON.stringify(jsCmd));
+              } else if (webSocket.current && webSocket.current.readyState === WebSocket.CLOSED) {
+                console.log('WebSocket not connected, unable to send ping');
+                webSocket.current = new WebSocket(applicationWebSocketUrl);
+              }
+            }, 10000);
+
             return () => {
                 webSocket.current.close();
+                clearInterval(pingInterval);
             };
     },[applicationWebSocketUrl]);
 

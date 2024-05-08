@@ -1913,6 +1913,7 @@ function AntMedia(props) {
       tempVideoTrackAssignments.push(newVideoTrackAssignment);
       setVideoTrackAssignments(tempVideoTrackAssignments);
     }
+    setParticipantUpdated(!participantUpdated);
   }
 
   function setAndEnableVirtualBackgroundImage(imageUrl) {
@@ -2161,7 +2162,7 @@ function AntMedia(props) {
     if (isAdmin) {
       createListenerRoomIfNotExists();
     }
-  }, [isWebSocketConnected, sendMessage]);
+  }, [isWebSocketConnected]);
 
   React.useEffect(() => {
     if (!latestMessage) {
@@ -2192,9 +2193,15 @@ function AntMedia(props) {
       data.publisherRequestList = data.publisherRequestList || [];
       data.publisherFromListenerList = data.publisherFromListenerList || [];
 
-      setPresenters(data.presenterList);
-      setRequestSpeakerList(data.publisherRequestList);
-      setApprovedSpeakerRequestList(data.publisherFromListenerList);
+      if (!_.isEqual(data.presenterList, presenters)) {
+        setPresenters(data.presenterList);
+      }
+      if (!_.isEqual(data.publisherRequestList, requestSpeakerList)) {
+        setRequestSpeakerList(data.publisherRequestList);
+      }
+      if (!_.isEqual(data.publisherFromListenerList, approvedSpeakerRequestList)) {
+        setApprovedSpeakerRequestList(data.publisherFromListenerList);
+      }
     } else if (obj.command === "makePresenterResponse")
     {
       console.log("Incoming makePresenterResponse", obj);
@@ -2303,6 +2310,8 @@ function AntMedia(props) {
         console.log("Stop Recording is failed");
         displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
       }
+    } else if (obj.command === "pong") {
+      requestSyncAdministrativeFields();
     }
   }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);
 
@@ -2457,7 +2466,8 @@ function AntMedia(props) {
               requestSpeakerList,
               turnOnYourMicNotification,
               turnOffYourCamNotification,
-              handlePublisherRequestListOpen
+              handlePublisherRequestListOpen,
+              setRequestSpeakerList
             }}
           >
             {props.children}
