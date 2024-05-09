@@ -67,7 +67,7 @@ function PublisherRequestTab(props) {
                         {conference?.requestSpeakerList.length}
                     </PublisherRequestName>
                 </Grid>
-                {conference?.requestSpeakerList.map(({streamId}, index) => {
+                {conference?.requestSpeakerList.map((streamId) => {
                     if (conference?.publishStreamId !== streamId) {
                         return getPublisherRequestItem(streamId);
                     } else {

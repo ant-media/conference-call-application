@@ -1281,14 +1281,20 @@ function AntMedia(props) {
   }
 
   function sendReactions(reaction) {
-    handleSendNotificationEvent(
-      "REACTIONS",
-      publishStreamId,
-      {
-        reaction: reaction,
-        senderStreamId: publishStreamId,
-      }
-    );
+    let reactionEvent = {
+      streamId: streamName,
+      eventType: "REACTIONS",
+      reaction: reaction,
+      senderStreamId: streamName,
+    };
+
+    let roomId = roomName;
+    if (isPlayOnly && roomId.endsWith(listenerRoomPostfix)) {
+      roomId = roomId.substring(0, roomId.length - listenerRoomPostfix.length);
+    }
+
+    sendDataChannelMessage(roomId, JSON.stringify(reactionEvent));
+
     showReactions(publishStreamId, reaction);
   }
 
@@ -2063,6 +2069,8 @@ function AntMedia(props) {
       streamName = 'You';
     } else if (allParticipants[streamId]?.name !== undefined) {
       streamName = allParticipants[streamId].name;
+    } else {
+      streamName = streamId;
     }
 
     floating({
