@@ -2213,7 +2213,6 @@ function AntMedia(props) {
     } else if (obj.command === "makePresenterResponse")
     {
       console.log("Incoming makePresenterResponse", obj);
-
       let data = JSON.parse(obj.definition);
       let streamId = data.dataId;
 
@@ -2475,7 +2474,8 @@ function AntMedia(props) {
               turnOnYourMicNotification,
               turnOffYourCamNotification,
               handlePublisherRequestListOpen,
-              setRequestSpeakerList
+              setRequestSpeakerList,
+              requestSyncAdministrativeFields
             }}
           >
             {props.children}
