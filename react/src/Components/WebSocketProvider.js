@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import {getRootAttribute} from "../utils";
 import _ from "lodash";
-import {ConferenceContext} from "../pages/AntMedia";
 
 const WebSocketContext = createContext(null);
 
@@ -10,8 +9,6 @@ export const WebSocketProvider = ({ children }) => {
     const [latestMessage, setLatestMessage] = useState(null);
     const [latestSyncAdministrativeFieldsResponse, setLatestSyncAdministrativeFieldsResponse] = useState(null);
     const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
-
-    const conference = useContext(ConferenceContext);
 
     var websocketUrlTemp = getRootAttribute("data-websocket-url");
     if (!websocketUrlTemp) {
@@ -54,12 +51,12 @@ export const WebSocketProvider = ({ children }) => {
 
                 let command = JSON.parse(newMessage).command;
 
-                if (command === 'syncAdministrativeFields' && !_.isEqual(latestSyncAdministrativeFieldsResponse, newMessage)) {
+                if (command === 'syncAdministrativeFieldsResponse' && !_.isEqual(latestSyncAdministrativeFieldsResponse, newMessage)) {
                   setLatestSyncAdministrativeFieldsResponse(newMessage);
                   setLatestMessage(newMessage);
                 } else if (command === 'pong') {
                   console.log('Received pong from server');
-                  conference?.requestSyncAdministrativeFields();
+                  window.conference.requestSyncAdministrativeFields();
                 } else {
                   setLatestMessage(newMessage);
                 }

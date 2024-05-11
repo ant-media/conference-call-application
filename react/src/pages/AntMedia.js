@@ -1650,6 +1650,7 @@ function AntMedia(props) {
         }
 
         checkScreenSharingStatus();
+        requestSyncAdministrativeFields();
 
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
@@ -1713,6 +1714,7 @@ function AntMedia(props) {
 
   function checkScreenSharingStatus() {
 
+    setParticipantUpdated(!participantUpdated);
     const broadcastObjectsArray = Object.values(allParticipants);
     broadcastObjectsArray.forEach((broadcastObject) => {
         if (broadcastObject.isScreenShared === true && typeof broadcastObject.isPinned === "undefined") {
@@ -2228,15 +2230,11 @@ function AntMedia(props) {
 
       if (data.success) {
 
-        if (!presenterButtonStreamIdInProcess.includes(streamId)) {
-          let tempPresenterButtonStreamIdInProcess = presenterButtonStreamIdInProcess;
-          tempPresenterButtonStreamIdInProcess.splice(presenterButtonStreamIdInProcess.indexOf(streamId), 1);
-          setPresenterButtonStreamIdInProcess(tempPresenterButtonStreamIdInProcess);
+        if (presenterButtonStreamIdInProcess.includes(streamId)) {
+          setPresenterButtonStreamIdInProcess(prevState => prevState.filter(id => id !== streamId));
         }
         if (presenterButtonDisabled.includes(streamId)) {
-          let tempPresenterButtonDisabled = presenterButtonDisabled;
-          tempPresenterButtonDisabled.splice(presenterButtonDisabled.indexOf(streamId), 1);
-          setPresenterButtonDisabled(tempPresenterButtonDisabled);
+          setPresenterButtonDisabled(prevState => prevState.filter(id => id !== streamId));
         }
         presenters.push(streamId);
         let newPresenters = [...presenters];
@@ -2283,7 +2281,7 @@ function AntMedia(props) {
       let streamId = data.dataId;
 
       if (data.success) {
-        if (!presenterButtonStreamIdInProcess.includes(streamId)) {
+        if (presenterButtonStreamIdInProcess.includes(streamId)) {
           let tempPresenterButtonStreamIdInProcess = presenterButtonStreamIdInProcess;
           tempPresenterButtonStreamIdInProcess.splice(presenterButtonStreamIdInProcess.indexOf(streamId), 1);
           setPresenterButtonStreamIdInProcess(tempPresenterButtonStreamIdInProcess);
@@ -2518,8 +2516,9 @@ function AntMedia(props) {
               turnOffYourCamNotification,
               handlePublisherRequestListOpen,
               setRequestSpeakerList,
-              requestSyncAdministrativeFields,
-              presenterButtonStreamIdInProcess
+              presenterButtonStreamIdInProcess,
+              roomName,
+              requestSyncAdministrativeFields
             }}
           >
             {props.children}
