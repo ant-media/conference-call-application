@@ -90,7 +90,7 @@ export const WebSocketProvider = ({ children }) => {
                 webSocket.current.close();
                 clearInterval(pingInterval);
             };
-    },[applicationWebSocketUrl]);
+    },[applicationWebSocketUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const sendMessage = (message) => {
         if (webSocket.current && isWebSocketConnected) {

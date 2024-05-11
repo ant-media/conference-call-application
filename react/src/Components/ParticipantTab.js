@@ -29,7 +29,7 @@ function ParticipantTab(props) {
       {(streamId === "localVideo" ? conference?.presenters.includes(conference.publishStreamId) : conference?.presenters.includes(streamId) )&& conference?.isAdmin === true ? (
       <PinBtn
         id={"remove-presenter-"+streamId}
-        disabled={conference?.presenterButtonDisabled}
+        disabled={conference?.presenterButtonDisabled.includes(streamId)}
         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
         onClick={() => {
           let tempStreamId = streamId;
@@ -40,14 +40,14 @@ function ParticipantTab(props) {
         }
         }
       >
-        { conference?.presenterButtonStreamIdInProcess === streamId ? <CircularProgress size={28} /> :
+        { conference?.presenterButtonStreamIdInProcess.includes(streamId) ? <CircularProgress size={28} /> :
           <SvgIcon size={28} name="unpresenter" color="#000" />}
       </PinBtn>
     ) : null}
   {(streamId === "localVideo" ? !conference?.presenters.includes(conference.publishStreamId) : !conference?.presenters.includes(streamId) ) && ( !conference?.approvedSpeakerRequestList.includes(streamId) ) && conference?.isAdmin === true ?(
     <PinBtn
       id={"add-presenter-"+streamId}
-      disabled={conference?.presenterButtonDisabled}
+      disabled={conference?.presenterButtonDisabled.includes(streamId)}
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => {
         let tempStreamId = streamId;
@@ -59,7 +59,7 @@ function ParticipantTab(props) {
       }
     >
       {/* this icon for publish speaker */}
-      { conference?.presenterButtonStreamIdInProcess === streamId ? <CircularProgress size={28} /> :
+      { conference?.presenterButtonStreamIdInProcess.includes(streamId) ? <CircularProgress size={28} /> :
         <SvgIcon size={28} name="presenter" color="#000" />}
     </PinBtn>
   ) : null}
@@ -125,7 +125,7 @@ function ParticipantTab(props) {
   };
 
   return (
-        <div style={{width: "100%", overflowY: "auto"}}>
+        <div style={{width: "100%", overflow: "hidden"}}>
           <Stack sx={{width: "100%",}} spacing={2}>
             <Grid container>
               <SvgIcon size={28} name="participants" color="theme.palette.textColor"/>

@@ -301,9 +301,9 @@ function AntMedia(props) {
   const [isAdmin, setIsAdmin] = React.useState(admin);
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [presenters, setPresenters] = React.useState([]);
-  const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
+  const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState([]);
   // presenterButtonStreamIdInProcess keeps the streamId of the participant who is in the process of becoming presenter/unpresenter.
-  const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState(null);
+  const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState([]);
   const [microphoneButtonDisabled, setMicrophoneButtonDisabled] = React.useState(false);
   const [cameraButtonDisabled, setCameraButtonDisabled] = React.useState(false);
 
@@ -377,19 +377,25 @@ function AntMedia(props) {
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
   React.useEffect(() => {
-    if (presenterButtonStreamIdInProcess !== null) {
+    setParticipantUpdated(!participantUpdated);
+    if (presenterButtonStreamIdInProcess.length > 0) {
       setTimeout(() => {
-        if (presenterButtonStreamIdInProcess !== null) {
-          setPresenterButtonStreamIdInProcess(null);
-          setPresenterButtonDisabled(false);
+        if (presenterButtonStreamIdInProcess.length > 0) {
+          setPresenterButtonStreamIdInProcess([]);
+          setPresenterButtonDisabled([]);
+          setParticipantUpdated(!participantUpdated);
         }
-      }, 3000);
+      }, 5000);
     }
   }, [presenterButtonStreamIdInProcess]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function makeParticipantPresenter(id) {
-    setPresenterButtonStreamIdInProcess(id);
-    setPresenterButtonDisabled(true);
+    if (!presenterButtonStreamIdInProcess.includes(id)) {
+      setPresenterButtonStreamIdInProcess(presenterButtonStreamIdInProcess => [...presenterButtonStreamIdInProcess, id]);
+    }
+    if (!presenterButtonDisabled.includes(id)) {
+      setPresenterButtonDisabled(presenterButtonDisabled => [...presenterButtonDisabled, id]);
+    }
     let streamId = id;
     if (streamId === 'localVideo' && publishStreamId !== null) {
       streamId = publishStreamId;
@@ -454,8 +460,12 @@ function AntMedia(props) {
   }
 
   function makeParticipantUndoPresenter(id) {
-    setPresenterButtonStreamIdInProcess(id);
-    setPresenterButtonDisabled(true);
+    if (!presenterButtonStreamIdInProcess.includes(id)) {
+      setPresenterButtonStreamIdInProcess(presenterButtonStreamIdInProcess => [...presenterButtonStreamIdInProcess, id]);
+    }
+    if (!presenterButtonDisabled.includes(id)) {
+      setPresenterButtonDisabled(presenterButtonDisabled => [...presenterButtonDisabled, id]);
+    }
     let streamId = id;
     if (streamId === 'localVideo') {
       streamId = publishStreamId;
@@ -2170,7 +2180,7 @@ function AntMedia(props) {
     if (isAdmin) {
       createListenerRoomIfNotExists();
     }
-  }, [isWebSocketConnected]);
+  }, [isWebSocketConnected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   React.useEffect(() => {
     if (!latestMessage) {
@@ -2218,8 +2228,16 @@ function AntMedia(props) {
 
       if (data.success) {
 
-        setPresenterButtonStreamIdInProcess(null);
-        setPresenterButtonDisabled(false);
+        if (!presenterButtonStreamIdInProcess.includes(streamId)) {
+          let tempPresenterButtonStreamIdInProcess = presenterButtonStreamIdInProcess;
+          tempPresenterButtonStreamIdInProcess.splice(presenterButtonStreamIdInProcess.indexOf(streamId), 1);
+          setPresenterButtonStreamIdInProcess(tempPresenterButtonStreamIdInProcess);
+        }
+        if (presenterButtonDisabled.includes(streamId)) {
+          let tempPresenterButtonDisabled = presenterButtonDisabled;
+          tempPresenterButtonDisabled.splice(presenterButtonDisabled.indexOf(streamId), 1);
+          setPresenterButtonDisabled(tempPresenterButtonDisabled);
+        }
         presenters.push(streamId);
         let newPresenters = [...presenters];
         setPresenters(newPresenters);
@@ -2238,8 +2256,17 @@ function AntMedia(props) {
 
         sendDataChannelMessage(roomName, JSON.stringify(command))
       } else {
-        setPresenterButtonStreamIdInProcess(null);
-        setPresenterButtonDisabled(false);
+        if (!presenterButtonStreamIdInProcess.includes(streamId)) {
+          let tempPresenterButtonStreamIdInProcess = presenterButtonStreamIdInProcess;
+          tempPresenterButtonStreamIdInProcess.splice(presenterButtonStreamIdInProcess.indexOf(streamId), 1);
+          setPresenterButtonStreamIdInProcess(tempPresenterButtonStreamIdInProcess);
+        }
+        if (presenterButtonDisabled.includes(streamId)) {
+          let tempPresenterButtonDisabled = presenterButtonDisabled;
+          tempPresenterButtonDisabled.splice(presenterButtonDisabled.indexOf(streamId), 1);
+          setPresenterButtonDisabled(tempPresenterButtonDisabled);
+        }
+
 
         enqueueSnackbar({
           message: t('Speaker cannot joined to the presenter room. The error is "' + data.message + "'"),
@@ -2256,8 +2283,16 @@ function AntMedia(props) {
       let streamId = data.dataId;
 
       if (data.success) {
-        setPresenterButtonStreamIdInProcess(null);
-        setPresenterButtonDisabled(false);
+        if (!presenterButtonStreamIdInProcess.includes(streamId)) {
+          let tempPresenterButtonStreamIdInProcess = presenterButtonStreamIdInProcess;
+          tempPresenterButtonStreamIdInProcess.splice(presenterButtonStreamIdInProcess.indexOf(streamId), 1);
+          setPresenterButtonStreamIdInProcess(tempPresenterButtonStreamIdInProcess);
+        }
+        if (presenterButtonDisabled.includes(streamId)) {
+          let tempPresenterButtonDisabled = presenterButtonDisabled;
+          tempPresenterButtonDisabled.splice(presenterButtonDisabled.indexOf(streamId), 1);
+          setPresenterButtonDisabled(tempPresenterButtonDisabled);
+        }
         presenters.splice(presenters.indexOf(streamId), 1);
         let newPresenters = [...presenters];
         setPresenters(newPresenters);
@@ -2276,8 +2311,16 @@ function AntMedia(props) {
 
         sendDataChannelMessage(roomName, JSON.stringify(command2))
       } else {
-        setPresenterButtonStreamIdInProcess(null);
-        setPresenterButtonDisabled(false);
+        if (!presenterButtonStreamIdInProcess.includes(streamId)) {
+          let tempPresenterButtonStreamIdInProcess = presenterButtonStreamIdInProcess;
+          tempPresenterButtonStreamIdInProcess.splice(presenterButtonStreamIdInProcess.indexOf(streamId), 1);
+          setPresenterButtonStreamIdInProcess(tempPresenterButtonStreamIdInProcess);
+        }
+        if (presenterButtonDisabled.includes(streamId)) {
+          let tempPresenterButtonDisabled = presenterButtonDisabled;
+          tempPresenterButtonDisabled.splice(presenterButtonDisabled.indexOf(streamId), 1);
+          setPresenterButtonDisabled(tempPresenterButtonDisabled);
+        }
       }
     }
     else if (obj.command === "createRoomResponse")
@@ -2320,7 +2363,7 @@ function AntMedia(props) {
     } else if (obj.command === "pong") {
       requestSyncAdministrativeFields();
     }
-  }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);
+  }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const makeFullScreen = (divId) => {
     if (fullScreenId === divId) {
@@ -2475,7 +2518,8 @@ function AntMedia(props) {
               turnOffYourCamNotification,
               handlePublisherRequestListOpen,
               setRequestSpeakerList,
-              requestSyncAdministrativeFields
+              requestSyncAdministrativeFields,
+              presenterButtonStreamIdInProcess
             }}
           >
             {props.children}
