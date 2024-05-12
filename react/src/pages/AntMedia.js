@@ -925,6 +925,7 @@ function AntMedia(props) {
     } else if (info === "publish_started") {
       setIsPublished(true);
       console.log("**** publish started:" + reconnecting);
+      webRTCAdaptor?.enableStats(publishStreamId);
 
       if (reconnecting) {
         // we need to set the local video again after the reconnection
@@ -939,7 +940,6 @@ function AntMedia(props) {
       }
       console.log("publish started");
       //stream is being published
-      webRTCAdaptor?.enableStats(publishStreamId);
     } else if (info === "publish_finished") {
       setIsPublished(false);
       //stream is being finished
@@ -1030,6 +1030,7 @@ function AntMedia(props) {
       setIsScreenShared(true);
       //webRTCAdaptor?.assignVideoTrack("videoTrack0", screenShareStreamId.current, true);
       //pinVideo(screenShareStreamId.current);
+      screenShareWebRtcAdaptor.current.enableStats(screenShareStreamId.current);
 
     } else if (info === "updated_stats") {
       checkConnectionQuality(obj);
@@ -1311,7 +1312,7 @@ function AntMedia(props) {
   const displayPoorNetworkConnectionWarning = () => {
     console.log("displayPoorNetworkConnectionWarning");
 
-    if (last_warning_time == null || Date.now() - last_warning_time > 1000 * 30) {
+    if (last_warning_time == null || Date.now() - last_warning_time > 1000 * 10) {
       last_warning_time = Date.now();
       displayWarning("Your connection is not stable. Please check your internet connection!");
     }

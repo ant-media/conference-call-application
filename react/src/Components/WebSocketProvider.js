@@ -56,7 +56,9 @@ export const WebSocketProvider = ({ children }) => {
                   setLatestMessage(newMessage);
                 } else if (command === 'pong') {
                   console.log('Received pong from server');
-                  window.conference.requestSyncAdministrativeFields();
+                  if (window.conference && window.conference.requestSyncAdministrativeFields) {
+                    window.conference.requestSyncAdministrativeFields();
+                  }
                 } else {
                   setLatestMessage(newMessage);
                 }
