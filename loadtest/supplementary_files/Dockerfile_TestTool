@@ -1,0 +1,14 @@
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y unzip openjdk-17-jre-headless iproute2 libva-drm2 libva-x11-2 libvdpau-dev
+
+ADD ./webrtc-load-test-tool-2.9.1-SNAPSHOT.zip /home
+
+RUN cd home && unzip webrtc-load-test-tool-2.9.1-SNAPSHOT.zip
+
+WORKDIR /home/webrtc-load-test
+
+COPY ./participants.sh ./
+RUN chmod +x ./participants.sh
+
+ENTRYPOINT ["./participants.sh"]
