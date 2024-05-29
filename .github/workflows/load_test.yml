@@ -3,7 +3,7 @@ name: Selenium Grid on Kubernetes
 on:
   push:
     branches:
-      - loadTests
+      - repeatLoadTests
 
 jobs:
   build:
