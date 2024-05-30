@@ -77,6 +77,7 @@ export function GeneralSettingsDialog(props) {
       <AntDialogTitle onClose={handleClose}>{t('General Settings')}</AntDialogTitle>
       <DialogContent>
         <Box component="form" sx={{display: 'flex', flexWrap: 'wrap'}}>
+          {process.env.REACT_APP_GENERAL_SETTINGS_LANGUAGE_VISIBILITY === 'true' ?
           <Grid container>
             <Grid container>
               <InputLabel>{t('Language')}</InputLabel>
@@ -101,6 +102,8 @@ export function GeneralSettingsDialog(props) {
               </Grid>
             </Grid>
           </Grid>
+              : null}
+          {process.env.REACT_APP_GENERAL_SETTINGS_THEME_VISIBILITY === 'true' ?
           <Grid container sx={{mt: 4}}>
             <Grid container>
               <InputLabel>{t('Theme')}</InputLabel>
@@ -111,7 +114,7 @@ export function GeneralSettingsDialog(props) {
                   fullWidth
                   id="demo-dialog-native"
                   variant="outlined"
-                  value={themeContext.currentTheme}
+                  value={themeContext?.currentTheme ? themeContext?.currentTheme : ThemeList.Green}
                   onChange={e => switchTheme(e.target.value)}
                   sx={{color: 'white'}}
                 >
@@ -125,6 +128,7 @@ export function GeneralSettingsDialog(props) {
               </Grid>
             </Grid>
           </Grid>
+                : null}
         </Box>
       </DialogContent>
     </Dialog>

@@ -28,10 +28,15 @@ export function urlify(text) {
 
 export function getRoomNameAttribute() {
    // if it returns data-room-name element, it means that we are using conference app in component mode
-  return document.getElementById("root").getAttribute("data-room-name");
+  return document.getElementById("root")?.getAttribute("data-room-name");
 }
 
 export function getWebSocketURLAttribute() {
     //if it exists, it means it is in component mode
-    return document.getElementById("root").getAttribute("data-websocket-url")
+    return document.getElementById("root")?.getAttribute("data-websocket-url")
+}
+
+export function isComponentMode() {
+    //if it exists, it means it is in component mode
+    return (document.getElementById("root")?.getAttribute("usage-mode") === "component");
 }

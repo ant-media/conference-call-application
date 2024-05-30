@@ -9,6 +9,8 @@ import {ReactionBarSelector} from "@charkour/react-reactions";
 import MuteParticipantDialog from "../Components/MuteParticipantDialog";
 import {useTheme} from "@mui/material/styles";
 import {t} from "i18next";
+import {isComponentMode} from "../utils";
+import { isMobile, isTablet } from "react-device-detect";
 
 
 function debounce(fn, ms) {
@@ -32,12 +34,11 @@ const MeetingRoom = React.memo((props) => {
   React.useEffect(() => {
     handleGalleryResize(false);
     window.conference = conference;
-
-  }, [conference.participants, conference.pinnedVideoId, conference.participantUpdated]);
+  }, [conference.videoTrackAssignments, conference.participantUpdated]);
 
   React.useEffect(() => {
     handleGalleryResize(true);
-  }, [conference.messageDrawerOpen, conference.participantListDrawerOpen]);
+  }, [conference.messageDrawerOpen, conference.participantListDrawerOpen, conference.effectsDrawerOpen]);
 
   React.useEffect(() => {
     const debouncedHandleResize = debounce(handleGalleryResize, 500);
@@ -71,7 +72,7 @@ const MeetingRoom = React.memo((props) => {
 
     if (gallery) {
       if (calcDrawer) {
-        if (conference.messageDrawerOpen || conference.participantListDrawerOpen) {
+        if (conference.messageDrawerOpen || conference.participantListDrawerOpen || conference.effectsDrawerOpen) {
           gallery.classList.add("drawer-open");
         } else {
           gallery.classList.remove("drawer-open");
@@ -84,15 +85,33 @@ const MeetingRoom = React.memo((props) => {
     }
   }
 
-  const pinLayout = conference.pinnedVideoId !== undefined;
+  function getPinnedParticipant() {
+    let firstPinnedParticipant;
+    conference.allParticipants = conference.allParticipants || {};
+    Object.keys(conference.allParticipants).forEach(streamId => {
+      let participant = conference.allParticipants[streamId];
+      if (typeof participant.isPinned !== 'undefined'
+        && participant.isPinned === true
+        && typeof firstPinnedParticipant === 'undefined') {
+
+        firstPinnedParticipant = conference.allParticipants[streamId];
+        return firstPinnedParticipant;
+      }
+    });
+    return firstPinnedParticipant;
+  }
+
+  const firstPinnedParticipant = getPinnedParticipant();
+
+  const pinLayout = (typeof firstPinnedParticipant !== "undefined") && !isMobile && !isTablet
+
   return (
     <>
       <MuteParticipantDialog/>
-      {conference.audioTracks.map((audio, index) => (
+      {conference.audioTracks.map((audioTrackAssignment, index) => (
         <VideoCard
           key={index}
-          id={audio.streamId}
-          track={audio.track}
+          trackAssignment={audioTrackAssignment}
           autoPlay
           name={""}
           style={{display: "none"}}
@@ -102,6 +121,7 @@ const MeetingRoom = React.memo((props) => {
         <>
           {pinLayout ?
             (<LayoutPinned
+              pinnedParticipant={firstPinnedParticipant}
               width={gallerySize.w}
               height={gallerySize.h}
             />)
@@ -116,7 +136,7 @@ const MeetingRoom = React.memo((props) => {
 
       {conference.showEmojis && (
         <div id="meeting-reactions" style={{
-          position: "fixed",
+          position: isComponentMode() ? "absolute" : "fixed",
           bottom: 80,
           display: "flex",
           alignItems: "center",
@@ -124,7 +144,7 @@ const MeetingRoom = React.memo((props) => {
           zIndex: 666,
           height: 46,
         }}>
-          <ReactionBarSelector reactions={reactionList} iconSize={32}
+          <ReactionBarSelector reactions={reactionList} iconSize={28}
                                style={{backgroundColor: theme.palette.themeColor[70]}} onSelect={sendEmoji}/>
         </div>)
       }
