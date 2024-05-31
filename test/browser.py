@@ -96,7 +96,7 @@ class Browser:
     except TimeoutException:
       print("Timed out waiting for element to be clickable")
       
-    return self.driver.find_element(By.ID, value)
+    return self.driver.find_element(by, value)
 
 
   def get_element_in_element(self, element, by, value, timeout=15):
@@ -106,7 +106,7 @@ class Browser:
     except TimeoutException:
       print("Timed out waiting for nested element to be clickable")
 
-    return element.find_elements(By.ID, value)
+    return element.find_elements(by, value)
 
 
   def is_element_exist(self, by, value):
