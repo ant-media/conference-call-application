@@ -12,9 +12,12 @@ REST_URL="/rest/v2"
 class RestHelper:
   def __init__(self, url, user, password):
     self.url = url
+    if(url.endswith("localhost:3000")):
+      self.url = "http://localhost:5080"
+    print("rest url: "+self.url)
     self.user = user
     self.password = password
-    self.rest_url = url+REST_URL
+    self.rest_url = self.url+REST_URL
     self.session = requests.Session()
 
   def login(self):
@@ -32,6 +35,15 @@ class RestHelper:
       total += viewer
     print("total publishers:"+str(size))
     print("total players:"+str(total))
+
+  def getVoDFor(self, streamId):
+    resp = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/vods/list/0/5")
+    json_data = json.loads(resp.text)
+    
+    for item in json_data:
+      if item["streamId"] == streamId:
+        return item
+  
 
   def call_get_app_settings(self, app_name):
     resp = self.session.get(self.rest_url+"/applications/settings/"+app_name)

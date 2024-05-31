@@ -9,10 +9,11 @@ from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import StaleElementReferenceException
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, JavascriptException
 
 from selenium.webdriver import ActionChains
 
+import time
 
 class Browser:
   def init(self, is_headless):
@@ -26,13 +27,18 @@ class Browser:
     browser_options.add_argument('--disable-gpu')
     browser_options.add_argument('--disable-dev-shm-usage')
     browser_options.add_argument('--disable-setuid-sandbox')
+
+    #is_headless = False #for local testing in windows
+    
     if is_headless:
       browser_options.add_argument("--headless")
+      service = Service(executable_path='/tmp/chromedriver')
+    else:
+      service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
+
     
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
-    #service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
-    service = Service(executable_path='/tmp/chromedriver')
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
   def open_in_new_tab(self, url):
@@ -51,54 +57,72 @@ class Browser:
       return self.driver.execute_script(script)
     except StaleElementReferenceException as e:
       return None
+  
+
+  def execute_script_with_retry(self, script, retries=3, wait_time=2):
+    for attempt in range(retries):
+        try:
+            result_json = self.driver.execute_script(script)
+            return result_json
+        except (JavascriptException, StaleElementReferenceException) as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+            if attempt < retries - 1:
+                # Wait before retrying
+                time.sleep(wait_time)
+            else:
+                raise
+            
+  def get_element_with_retry(self, by, value, retries=5, wait_time=2):
+    print(f"Looking for element by {by} with value {value}")
+    for attempt in range(retries):
+        try:
+            element = self.driver.find_element(by, value)
+            return element
+        except (NoSuchElementException, StaleElementReferenceException) as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+            if attempt < retries - 1:
+                # Wait before retrying
+                time.sleep(wait_time)
+            else:
+                raise
     
   def makeFullScreen(self):
     self.driver.maximize_window()
     
-
-  def get_element_by_id(self, id):
-    timeout = 15
+  def get_element(self, by, value, timeout=15):
     try:
-      element_present = EC.element_to_be_clickable((By.ID, id))
+      element_present = EC.element_to_be_clickable((by, value))
       WebDriverWait(self.driver, timeout).until(element_present)
     except TimeoutException:
-      print ("Timed out waiting for page to load")
+      print("Timed out waiting for element to be clickable")
+      
+    return self.driver.find_element(By.ID, value)
 
-    element = self.driver.find_element(By.ID, id)
-    return element
-  
-  def is_element_exist_by_id(self, id):
+
+  def get_element_in_element(self, element, by, value, timeout=15):
     try:
-      element = self.driver.find_elements(By.ID, id)
-      return len(element) != 0
-    except NoSuchElementException:
-      print("element not exist")
-      return False
-  
-  def is_element_exist_by_class_name(self, id):
-    try:
-      element = self.driver.find_elements(By.CLASS_NAME, id)
-      return len(element) != 0
-    except NoSuchElementException:
-      print("element not exist")
-      return False
-    
-  def get_elements_of_an_element_by_class_name(self, element, class_name):
-    timeout = 15
-    try:
-      element_present = EC.element_to_be_clickable((By.CLASS_NAME, class_name))
-      WebDriverWait(self.driver, timeout).until(element_present)
+      element_present = EC.element_to_be_clickable((by, value))
+      WebDriverWait(element, timeout).until(element_present)
     except TimeoutException:
-      print ("Timed out waiting for page to load")
+      print("Timed out waiting for nested element to be clickable")
 
-    elemnets = element.find_elements(By.CLASS_NAME, class_name)
-    return elemnets
-  
-  def is_element_of_element_exist_by_class_name(self, element, class_name):
+    return element.find_elements(By.ID, value)
+
+
+  def is_element_exist(self, by, value):
     try:
-      subs = element.find_elements(By.CLASS_NAME, class_name)
-      return len(subs) != 0
+      elements = self.driver.find_elements(by, value)
+      return len(elements) != 0
     except NoSuchElementException:
+      print("Element not exist")
+      return False
+
+  def is_nested_element_exist(self, element, by, value):
+    try:
+      elements = element.find_elements(by, value)
+      return len(elements) != 0
+    except NoSuchElementException:
+      print("Nested element not exist")
       return False
       
   def mouse_click_on(self, element):
