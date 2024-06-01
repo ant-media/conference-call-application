@@ -88,6 +88,10 @@ class Browser:
     
   def makeFullScreen(self):
     self.driver.maximize_window()
+
+  def print_console_logs(self):
+    for entry in self.driver.get_log('browser'):
+      print(entry)
     
   def get_element(self, by, value, timeout=15):
     try:
@@ -95,9 +99,6 @@ class Browser:
       WebDriverWait(self.driver, timeout).until(element_present)
     except TimeoutException:
       print("Timed out waiting for element to be clickable by "+str(by)+" with value "+str(value))
-
-    html_content = self.driver.page_source
-    print(html_content)
       
     return self.driver.find_element(by, value)
 
