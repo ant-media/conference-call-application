@@ -55,7 +55,7 @@ class RestHelper:
     headers = {
         'Content-Type': 'application/json'
     }
-    response = self.session.put(url, headers=headers, data=json.dumps(settings_data))
+    response = self.session.post(url, headers=headers, data=json.dumps(settings_data))
     
     if response.status_code == 200:
         return json.loads(response.text)
