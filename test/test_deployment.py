@@ -21,6 +21,14 @@ class TestDeployment(unittest.TestCase):
     print(response)
     assert(response["success"])
     time.sleep(20)
+    app_settings = self.rest_helper.call_get_app_settings(self.test_app_name)
+    app_settings["stunServerURI"] = "turn:coturn"
+    app_settings["turnServerUsername"] = "ovh36"
+    app_settings["turnServerCredential"] = "ovh36"
+    response = self.rest_helper.call_put_app_settings(self.test_app_name, app_settings)
+    assert(response["success"])
+
+
 
   def test_delete_app(self):
     response = self.rest_helper.call_delete_app(self.test_app_name)
