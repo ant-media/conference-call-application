@@ -94,7 +94,10 @@ class Browser:
       element_present = EC.element_to_be_clickable((by, value))
       WebDriverWait(self.driver, timeout).until(element_present)
     except TimeoutException:
-      print("Timed out waiting for element to be clickable")
+      print("Timed out waiting for element to be clickable by "+str(by)+" with value "+str(value))
+
+    html_content = self.driver.page_source
+    print(html_content)
       
     return self.driver.find_element(by, value)
 
@@ -104,7 +107,7 @@ class Browser:
       element_present = EC.element_to_be_clickable((by, value))
       WebDriverWait(element, timeout).until(element_present)
     except TimeoutException:
-      print("Timed out waiting for nested element to be clickable")
+      print("Timed out waiting for nested element to be clickable by "+str(by)+" with value "+str(value))
 
     return element.find_elements(by, value)
 
