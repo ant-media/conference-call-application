@@ -49,6 +49,18 @@ class RestHelper:
     resp = self.session.get(self.rest_url+"/applications/settings/"+app_name)
     json_data = json.loads(resp.text)
     return json_data
+  
+  def call_put_app_settings(self, app_name, settings_data):
+    url = self.rest_url + "/applications/settings/" + app_name
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    response = self.session.put(url, headers=headers, data=json.dumps(settings_data))
+    
+    if response.status_code == 200:
+        return json.loads(response.text)
+    else:
+        response.raise_for_status()
 
   def call_get_cluster_nodes(self):
     response = self.session.get(self.rest_url+"/cluster/nodes/0/10")
