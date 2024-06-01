@@ -32,6 +32,7 @@ class TestDeployment(unittest.TestCase):
     print("App Settings before:" + str(app_settings))
     response = self.rest_helper.call_set_app_settings(self.test_app_name, app_settings)
     assert(response["success"])
+    time.sleep(20)
 
 
 
