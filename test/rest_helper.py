@@ -50,12 +50,12 @@ class RestHelper:
     json_data = json.loads(resp.text)
     return json_data
   
-  def call_put_app_settings(self, app_name, settings_data):
+  def call_set_app_settings(self, app_name, settings_data):
     url = self.rest_url + "/applications/settings/" + app_name
     headers = {
         'Content-Type': 'application/json'
     }
-    response = self.session.post(url, headers=headers, data=json.dumps(settings_data))
+    response = self.session.post(url, headers=headers, json=settings_data)
     
     if response.status_code == 200:
         return json.loads(response.text)
