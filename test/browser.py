@@ -27,6 +27,8 @@ class Browser:
     browser_options.add_argument('--disable-gpu')
     browser_options.add_argument('--disable-dev-shm-usage')
     browser_options.add_argument('--disable-setuid-sandbox')
+    browser_options.add_argument('--enable-logging')
+    browser_options.add_argument('--v=1')
 
     #is_headless = False #for local testing in windows
     
