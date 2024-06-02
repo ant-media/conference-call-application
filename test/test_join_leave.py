@@ -40,6 +40,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.print_ss_as_base64()
     self.chrome.click_element(join_button)
  
+    time.sleep(20)
     self.chrome.print_console_logs()
     meeting_gallery = self.chrome.get_element(By.ID, "meeting-gallery")
 
