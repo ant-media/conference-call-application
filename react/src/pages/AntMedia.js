@@ -588,7 +588,6 @@ function AntMedia(props) {
           callback: infoCallback,
           callbackError: errorCallback
         });
-        window.log.setLevel("trace");
         setWebRTCAdaptor(adaptor)
 
         setRecreateAdaptor(false);
@@ -702,6 +701,10 @@ function AntMedia(props) {
 
   function infoCallback(info, obj) {
     if (info === "initialized") {
+      console.log("current ams log level:"+window.log.getLevel());
+      window.log.setLevel("trace");
+      console.log("current ams log level 2:"+window.log.getLevel());
+
       enableDisableMCU(mcuEnabled);
       setInitialized(true);
     } else if (info === "broadcastObject") {
