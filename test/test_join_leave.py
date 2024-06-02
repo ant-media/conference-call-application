@@ -33,6 +33,10 @@ class TestJoinLeave(unittest.TestCase):
     name_text_box = self.chrome.get_element(By.ID, "participant_name")
     self.chrome.write_to_element(name_text_box, participant)
 
+    script = "window.log.setLevel('trace')"
+    self.chrome.execute_script(script)
+
+
     join_button = self.chrome.get_element(By.ID, "room_join_button")
     self.chrome.click_element(join_button)
  
