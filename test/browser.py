@@ -90,6 +90,7 @@ class Browser:
     self.driver.maximize_window()
 
   def print_console_logs(self):
+    self.driver.execute_script('console.log("INFO log"); console.debug("DEBUG log"); console.warn("WARNING log"); console.error("SEVERE log");')
     for entry in self.driver.get_log('browser'):
       print(entry)
     
@@ -99,8 +100,8 @@ class Browser:
       WebDriverWait(self.driver, timeout).until(element_present)
     except TimeoutException:
       print("Timed out waiting for element to be clickable by "+str(by)+" with value "+str(value))
-      self.print_console_logs()
       
+    self.print_console_logs()
     return self.driver.find_element(by, value)
 
 
