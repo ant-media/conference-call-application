@@ -42,7 +42,7 @@ class TestJoinLeave(unittest.TestCase):
 
     time.sleep(30)
  
-    self.chrome.print_log_file()
+    self.chrome.print_console_logs()
     meeting_gallery = self.chrome.get_element(By.ID, "meeting-gallery", 50)
 
 
