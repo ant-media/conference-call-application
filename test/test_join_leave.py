@@ -119,7 +119,7 @@ class TestJoinLeave(unittest.TestCase):
   def test_join_room(self):
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)   
-    self.chrome.close_all()
+    #self.chrome.close_all()
 
   def set_and_test_track_limit(self, limit):
       self.change_video_track_count(limit)
