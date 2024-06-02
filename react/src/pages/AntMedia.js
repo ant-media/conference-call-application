@@ -449,7 +449,7 @@ function AntMedia(props) {
       token = playToken;
     }
 
-    webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
+    //webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
   }
 
   function requestVideoTrackAssignmentsInterval() {
