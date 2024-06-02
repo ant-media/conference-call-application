@@ -32,7 +32,7 @@ class Browser:
     
     if is_headless:
       browser_options.add_argument("--headless")
-      service = Service(executable_path='/tmp/chromedriver')
+      service = Service(executable_path='/tmp/chromedriver', service_args=["--verbose"])
     else:
       service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
     
@@ -88,7 +88,6 @@ class Browser:
     self.driver.maximize_window()
 
   def print_console_logs(self):
-    self.driver.execute_script('console.log("INFO log"); console.debug("DEBUG log"); console.warn("WARNING log"); console.error("SEVERE log");')
     for entry in self.driver.get_log('browser'):
       print(entry)
     
