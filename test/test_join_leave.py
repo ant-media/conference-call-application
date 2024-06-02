@@ -32,7 +32,7 @@ class TestJoinLeave(unittest.TestCase):
     
     name_text_box = self.chrome.get_element(By.ID, "participant_name")
 
-    script = "window.log.setLevel('trace')"
+    script = 'window.log.setLevel("trace");'
     self.chrome.execute_script(script)
 
     self.chrome.write_to_element(name_text_box, participant)
