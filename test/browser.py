@@ -21,7 +21,7 @@ class Browser:
     browser_options.add_experimental_option("detach", True)
     browser_options.add_argument("--use-fake-ui-for-media-stream") 
     browser_options.add_argument("--use-fake-device-for-media-stream")
-    browser_options.add_argument('--log-level=3')
+    browser_options.add_argument('--log-level=0')
     browser_options.add_argument('--no-sandbox')
     browser_options.add_argument('--disable-extensions')
     browser_options.add_argument('--disable-gpu')
