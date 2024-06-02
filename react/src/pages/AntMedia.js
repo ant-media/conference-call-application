@@ -710,7 +710,7 @@ function AntMedia(props) {
       //according to the result we modify mediaConstraints
       await checkDevices();
       if (recreateAdaptor && webRTCAdaptor == null) {
-        setWebRTCAdaptor(new WebRTCAdaptor({
+        var adaptor = new WebRTCAdaptor({
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
           isPlayMode: isPlayOnly,
@@ -718,7 +718,9 @@ function AntMedia(props) {
           debug: true,
           callback: infoCallback,
           callbackError: errorCallback
-        }))
+        });
+        window.log.setLevel("trace");
+        setWebRTCAdaptor(adaptor)
 
         setRecreateAdaptor(false);
       }
