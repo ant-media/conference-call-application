@@ -43,15 +43,6 @@ class Browser:
 
   def open_in_new_tab(self, url):
     self.driver.switch_to.new_window('tab')
-
-    print( "before")
-    amsLogLevel = self.driver.execute_script('return window.log.getLevel();')
-    print("amsLogLevel: "+str(amsLogLevel))
-    self.driver.execute_script('window.log.setLevel("trace");')
-    amsLogLevel = self.driver.execute_script('return window.log.getLevel();')
-    print("amsLogLevel: "+str(amsLogLevel))
-    print( "after")
-    
     self.driver.get(url)
     return self.driver.current_window_handle
 
