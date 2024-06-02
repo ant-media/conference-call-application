@@ -29,11 +29,11 @@ class TestJoinLeave(unittest.TestCase):
     if self.url.endswith("localhost:3000"):
       app = ""
     handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
-    
-    name_text_box = self.chrome.get_element(By.ID, "participant_name")
 
     script = 'window.log.setLevel("trace");'
     self.chrome.execute_script(script)
+    
+    name_text_box = self.chrome.get_element(By.ID, "participant_name")
 
     self.chrome.write_to_element(name_text_box, participant)
 
