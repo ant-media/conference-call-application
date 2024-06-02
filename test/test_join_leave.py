@@ -19,14 +19,6 @@ class TestJoinLeave(unittest.TestCase):
     self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
     self.chrome.init(True)
-    
-    print( "before")
-    amsLogLevel = self.chrome.execute_script('return window.log.getLevel();')
-    print("amsLogLevel: "+str(amsLogLevel))
-    self.chrome.execute_script('window.log.setLevel("trace");')
-    amsLogLevel = self.chrome.execute_script('return window.log.getLevel();')
-    print("amsLogLevel: "+str(amsLogLevel))
-    print( "after")
 
 
   def tearDown(self):
