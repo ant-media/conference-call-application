@@ -1,0 +1,811 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Ant Media Server AutoScaling CloudFormation Templates.
+  If you have any questions, please just drop a line to contact (at) antmedia.io
+Parameters:
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances. If there is no value here, you must create an ssh key (EC2 > Key Pairs).
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    MinLength: '1'
+    MaxLength: '255'
+    AllowedPattern: '[\x20-\x7E]*'
+    ConstraintDescription: can contain only ASCII characters.
+
+Resources:
+  DescribeImagesRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DescribeImages
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action: ec2:DescribeImages
+                Effect: Allow
+                Resource: "*"
+  AMSGetLatestAMI:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.8
+      Handler: index.handler
+      Role: !Sub ${DescribeImagesRole.Arn}
+      Timeout: 60
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import json
+          import traceback
+
+          def handler(event, context):
+            try:
+              response = boto3.client('ec2').describe_images(
+                  Filters=[
+                    {'Name': 'product-code', 'Values': [event['ResourceProperties']['ProductId']]},
+                    {'Name': 'name', 'Values': [event['ResourceProperties']['Name']]},
+                    {'Name': 'architecture', 'Values': [event['ResourceProperties']['Architecture']]},
+                    {'Name': 'root-device-type', 'Values': ['ebs']},
+                  ],
+              )
+
+              amis = sorted(response['Images'],
+                            key=lambda x: x['CreationDate'],
+                            reverse=True)
+              id = amis[0]['ImageId']
+
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, id)
+            except:
+              traceback.print_last()
+              cfnresponse.send(event, context, cfnresponse.FAIL, {}, "ok")
+  UbuntuGetLatestAMI:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !Sub ${DescribeImagesRole.Arn}
+      Timeout: 60
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import json
+          import traceback
+
+          def handler(event, context):
+            try:
+              response = boto3.client('ec2').describe_images(
+                  Owners=[event['ResourceProperties']['Owner']],
+                  Filters=[
+                    {'Name': 'name', 'Values': [event['ResourceProperties']['Name']]},
+                    {'Name': 'architecture', 'Values': [event['ResourceProperties']['Architecture']]},
+                    {'Name': 'root-device-type', 'Values': ['ebs']},
+                  ],
+              )
+
+              amis = sorted(response['Images'],
+                            key=lambda x: x['CreationDate'],
+                            reverse=True)
+              id = amis[0]['ImageId']
+
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, id)
+            except:
+              traceback.print_last()
+              cfnresponse.send(event, context, cfnresponse.FAIL, {}, "ok")
+  ACMCertificateImportFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+
+          def lambda_handler(event, context):
+              try:
+                  acm_client = boto3.client('acm')
+                  response = acm_client.import_certificate(
+                      Certificate=event['ResourceProperties']['CertificateBody'],
+                      PrivateKey=event['ResourceProperties']['PrivateKey'],
+                      CertificateChain=event['ResourceProperties']['CertificateChain']
+                  )
+                  certificate_arn = response['CertificateArn']
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {'CertificateArn': certificate_arn})
+              except Exception as e:
+                  print("Error:", e)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+
+      Handler: index.lambda_handler
+      Role: !Sub '${AcmCertificateImportLambdaExecutionRole.Arn}'
+      Runtime: python3.12
+  AcmCertificateImportLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: ['sts:AssumeRole']
+      ManagedPolicyArns: [!Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole']
+      Policies:
+        - PolicyName: main
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: Acm
+                Effect: Allow
+                Action:
+                  - 'acm:AddTagsToCertificate'
+                  - 'acm:ImportCertificate'
+                Resource: '*'
+                
+  CertificateImportCustomResource:
+    Type: Custom::ACMCertificateImport
+    Properties:
+      ServiceToken: !GetAtt ACMCertificateImportFunction.Arn
+      CertificateBody: |
+        -----BEGIN CERTIFICATE-----
+        MIIFADCCA+igAwIBAgISA55gGymfer3Xm1wMa2vZY8qHMA0GCSqGSIb3DQEBCwUA
+        MDIxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQD
+        EwJSMzAeFw0yNDA0MDQxNzA5NDFaFw0yNDA3MDMxNzA5NDBaMCUxIzAhBgNVBAMT
+        GmFtcy1jZi00NjEwLmFudG1lZGlhLmNsb3VkMIIBIjANBgkqhkiG9w0BAQEFAAOC
+        AQ8AMIIBCgKCAQEAvf9q8HX9d5sQpxV+bJZxgwZQ02UcZx+3JqLO/xX8pNHP+AWX
+        uMoqQ+Ko4h1WSdAleqEb+G2nXymUYaykxKqum5qNw4g1/lZA72uLTNHgwqKq5p1u
+        x19VMFR0BoyhoLzH60c1cn12acKCI1HiNTqFdjTIPkWfZqHuCPNhjBYiHcxI6DR9
+        RMxYcdZBwTmf/yX9g108pC4TLX3J8hAV8+bA09bRK2/f1A/fm2gJtWQ9P/hVB6e6
+        c0WHzVx0Zv8RvoOc00S02p8Q23vqa3ZuWQvPcpqwIO9tgPXDmHJgjKn7ppjKb7iU
+        YnKQ6Dd1v1fv5wFkaTn+ZIY27h5cfw9M7NhBywIDAQABo4ICGzCCAhcwDgYDVR0P
+        AQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAMBgNVHRMB
+        Af8EAjAAMB0GA1UdDgQWBBSq7q6tA6KYe0bpsgZ4rjA5d3cshDAfBgNVHSMEGDAW
+        gBQULrMXt1hWy65QCUDmH6+dixTCxjBVBggrBgEFBQcBAQRJMEcwIQYIKwYBBQUH
+        MAGGFWh0dHA6Ly9yMy5vLmxlbmNyLm9yZzAiBggrBgEFBQcwAoYWaHR0cDovL3Iz
+        LmkubGVuY3Iub3JnLzAlBgNVHREEHjAcghphbXMtY2YtNDYxMC5hbnRtZWRpYS5j
+        bG91ZDATBgNVHSAEDDAKMAgGBmeBDAECATCCAQMGCisGAQQB1nkCBAIEgfQEgfEA
+        7wB2AHb/iD8KtvuVUcJhzPWHujS0pM27KdxoQgqf5mdMWjp0AAABjqpNYFcAAAQD
+        AEcwRQIhANERtizX9DOp7lhzkxHCCxjAQIvsGuUKtOQfGGI99BN3AiAn8D/q3ro0
+        puJQAO0Z3HgaLOAh9PPP8ANjqhrTxUQMtgB1ABmYEHEJ8NZSLjCA0p4/ZLuDbijM
+        +Q9Sju7fzko/FrTKAAABjqpNYDQAAAQDAEYwRAIgVm3JD7Z/Q/AJomD/r/Dud7d5
+        i6HIZ+9Ytsmc8UuAGl4CIAR0S4iwJViDBPawze90o53Wt4kexI8Ns/dpjyYHy9jo
+        MA0GCSqGSIb3DQEBCwUAA4IBAQB+zpNCe1ucmaf7RUoAQSi3gO/6EeH/79MFXOgF
+        Ah5vhPJbdyo0vtPnnEzDa3QmZN4Xsoq9R4Y19eZehJIeZzMDmGTp5G3ozFuUZJ9q
+        rHwWrWxzmV2m/qA9lWuu6+6mWEFkgFKG8oiAzVMluGxn4rFZOGVSJJgrWYg8Pcmb
+        GYXj5/S2A3nyF5kFzzv42Dw7ma/u1VzzXCJmGi3a0W26w8lJZw0FpxHY2Q5sqATO
+        rr5nc9sisrOLfGiDQwRE9+RmfBdzj1uhlziqotHbVgMv+65M+AzlKQZVVFmNbCrD
+        wgqiIkTgsRLM26I1hJ+Yzuh33vp91I2e84nNhiY5WdQheX2M
+        -----END CERTIFICATE-----
+        
+
+      PrivateKey: |
+        -----BEGIN PRIVATE KEY-----
+        MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC9/2rwdf13mxCn
+        FX5slnGDBlDTZRxnH7cmos7/Ffyk0c/4BZe4yipD4qjiHVZJ0CV6oRv4badfKZRh
+        rKTEqq6bmo3DiDX+VkDva4tM0eDCoqrmnW7HX1UwVHQGjKGgvMfrRzVyfXZpwoIj
+        UeI1OoV2NMg+RZ9moe4I82GMFiIdzEjoNH1EzFhx1kHBOZ//Jf2DXTykLhMtfcny
+        EBXz5sDT1tErb9/UD9+baAm1ZD0/+FUHp7pzRYfNXHRm/xG+g5zTRLTanxDbe+pr
+        dm5ZC89ymrAg722A9cOYcmCMqfummMpvuJRicpDoN3W/V+/nAWRpOf5khjbuHlx/
+        D0zs2EHLAgMBAAECggEAb6cWwAKGlnAQxC+UYNm0ESx3+RKVM2Dm75SDklHoay9F
+        SNp4g8aCOeyMFHzrBWuFauAcoMxHrFux8AhVt6EaBSU5I+v61uD3Pft0HAvGSnrv
+        daCUxiMW29T1bhfcr6ngzjnFheeG27XLZlgrV95xKbrw5e9iMhz81lO4QmuLVvh9
+        x3JZ9XH1xsHRDZXyjxJOW+3aeQkJMcBlWT4wBlMIae0VISAEySS2b4FRxQJhCKoo
+        zjtqVyFRQvoelfu5hW7BVFzsiKIZtTVbuQZ5dkvPHGVipUHbE8abrO1ChmfOOl7z
+        KL/XQbjN+D2ih2Ldjc04uA4YJwjrRkZNM+Qj33wIgQKBgQD5Kdp+EVIUGjQPghTV
+        cmYmMRM7fldVMElQIAiWDVwMsjqhUbYlZweVOIpTm3sOXYTmNxU+zIOgGuTq9sj+
+        BFM5Hi4jiAhAnRBv03m/wPF0iBqT7xdjtj0J52RDq9b69Ryaat0A6qaKiJisUhIa
+        CprBvMof/3qZ+yB+HssR9Hi7QQKBgQDDNfqI+9C2Cv7CLHw7oVfPn14VLSCYu8RW
+        qN3p3YV0RCN2ONaEdq/0DViUzb2eIwvT9FojagFSj4pe+4oG0wA2fH/pZKAJkQDH
+        rXnPf7TN+d80D2iXNHImaHuCBCNa+R6qeVW/9AtVgBgQlzM7BNEa9uR4jADqdAIX
+        0a1bHIi2CwKBgDSRiwKcHugU2zUGaeTavQiDxB4COuTDSkR4bbdS3D/lfo84kSh1
+        A1mNU0nufNj8DCUSLA5S0dZ+thuIs8E8Il7jqjJe6fbP7H7bbE1zpL3EVW8uu42T
+        Dm+/fRz17WaHPmCp+TTPTRHfXe7FZgJOiHYlobN8kF5aaHGTh56jKLHBAoGBALcP
+        nZxsGPM+KF3K/c2lpgUr/Dx7jz/rhVmHDmPLuuSnKWIqNvENpD+HbHRO4+yyDNt9
+        IDJprEfSF/6ugGeZ4281HXavSGzwL/0Qr1Ro/BLUqf3WHUz+f7WI8Zmha85aI+nV
+        0xYpM5/AedDFGePUxos00FhDYnB6zaOsm5b/kSy1AoGBAKPdxPjE83Ueb5bxZii9
+        XM2SSgcUjgwYVIi7h+UIWjbr16JS9wGC0m/Z5zyc3hJJJMezF+7soyfSAJtshbs5
+        baDeSSGnVPQrPkGd6NExQ7En9cgwrGiPqVvhIMzgHIQcMT1dLwiJ927zwQaIw6eS
+        HXqlKmPtmKeeVJd5dUUXE5Ok
+        -----END PRIVATE KEY-----
+        
+
+      CertificateChain: |
+        -----BEGIN CERTIFICATE-----
+        MIIFFjCCAv6gAwIBAgIRAJErCErPDBinU/bWLiWnX1owDQYJKoZIhvcNAQELBQAw
+        TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh
+        cmNoIEdyb3VwMRUwEwYDVQQDEwxJU1JHIFJvb3QgWDEwHhcNMjAwOTA0MDAwMDAw
+        WhcNMjUwOTE1MTYwMDAwWjAyMQswCQYDVQQGEwJVUzEWMBQGA1UEChMNTGV0J3Mg
+        RW5jcnlwdDELMAkGA1UEAxMCUjMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+        AoIBAQC7AhUozPaglNMPEuyNVZLD+ILxmaZ6QoinXSaqtSu5xUyxr45r+XXIo9cP
+        R5QUVTVXjJ6oojkZ9YI8QqlObvU7wy7bjcCwXPNZOOftz2nwWgsbvsCUJCWH+jdx
+        sxPnHKzhm+/b5DtFUkWWqcFTzjTIUu61ru2P3mBw4qVUq7ZtDpelQDRrK9O8Zutm
+        NHz6a4uPVymZ+DAXXbpyb/uBxa3Shlg9F8fnCbvxK/eG3MHacV3URuPMrSXBiLxg
+        Z3Vms/EY96Jc5lP/Ooi2R6X/ExjqmAl3P51T+c8B5fWmcBcUr2Ok/5mzk53cU6cG
+        /kiFHaFpriV1uxPMUgP17VGhi9sVAgMBAAGjggEIMIIBBDAOBgNVHQ8BAf8EBAMC
+        AYYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMBIGA1UdEwEB/wQIMAYB
+        Af8CAQAwHQYDVR0OBBYEFBQusxe3WFbLrlAJQOYfr52LFMLGMB8GA1UdIwQYMBaA
+        FHm0WeZ7tuXkAXOACIjIGlj26ZtuMDIGCCsGAQUFBwEBBCYwJDAiBggrBgEFBQcw
+        AoYWaHR0cDovL3gxLmkubGVuY3Iub3JnLzAnBgNVHR8EIDAeMBygGqAYhhZodHRw
+        Oi8veDEuYy5sZW5jci5vcmcvMCIGA1UdIAQbMBkwCAYGZ4EMAQIBMA0GCysGAQQB
+        gt8TAQEBMA0GCSqGSIb3DQEBCwUAA4ICAQCFyk5HPqP3hUSFvNVneLKYY611TR6W
+        PTNlclQtgaDqw+34IL9fzLdwALduO/ZelN7kIJ+m74uyA+eitRY8kc607TkC53wl
+        ikfmZW4/RvTZ8M6UK+5UzhK8jCdLuMGYL6KvzXGRSgi3yLgjewQtCPkIVz6D2QQz
+        CkcheAmCJ8MqyJu5zlzyZMjAvnnAT45tRAxekrsu94sQ4egdRCnbWSDtY7kh+BIm
+        lJNXoB1lBMEKIq4QDUOXoRgffuDghje1WrG9ML+Hbisq/yFOGwXD9RiX8F6sw6W4
+        avAuvDszue5L3sz85K+EC4Y/wFVDNvZo4TYXao6Z0f+lQKc0t8DQYzk1OXVu8rp2
+        yJMC6alLbBfODALZvYH7n7do1AZls4I9d1P4jnkDrQoxB3UqQ9hVl3LEKQ73xF1O
+        yK5GhDDX8oVfGKF5u+decIsH4YaTw7mP3GFxJSqv3+0lUFJoi5Lc5da149p90Ids
+        hCExroL1+7mryIkXPeFM5TgO9r0rvZaBFOvV2z0gp35Z0+L4WPlbuEjN/lxPFin+
+        HlUjr8gRsI3qfJOQFy/9rKIJR0Y/8Omwt/8oTWgy1mdeHmmjk7j1nYsvC9JSQ6Zv
+        MldlTTKB3zhThV1+XWYp6rjd5JW1zbVWEkLNxE7GJThEUG3szgBVGP7pSWTUTsqX
+        nLRbwHOoq7hHwg==
+        -----END CERTIFICATE-----
+        
+
+  AntMediaAmi:
+    Type: Custom::FindAMI
+    Properties:
+      ServiceToken: !Sub ${AMSGetLatestAMI.Arn}
+      ProductId: "4wh7rhpic3wfwamyp5905tsbt"
+      Name: "AntMedia-AWS-Marketplace-EE-*"
+      Architecture: "x86_64"
+
+  UbuntuAmi:
+    Type: Custom::FindAMI
+    Properties:
+      ServiceToken: !Sub ${UbuntuGetLatestAMI.Arn}
+      Owner: "099720109477"
+      Name: "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+      Architecture: "x86_64"
+
+  AntMediaVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-AntMedia-VPC
+
+  OriginZone:
+    Type: AWS::EC2::Subnet
+    DependsOn: AntMediaVPC
+    Properties:
+      VpcId: !Ref AntMediaVPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-AntMedia-Origin-Subnet
+
+  EdgeZone:
+    Type: AWS::EC2::Subnet
+    DependsOn: AntMediaVPC
+    Properties:
+      VpcId: !Ref AntMediaVPC
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: 
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-AntMedia-Edge-Subnet
+
+  DefaultGateway:
+    Type: AWS::EC2::InternetGateway
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref DefaultGateway
+      VpcId: !Ref AntMediaVPC
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref AntMediaVPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-AntMedia-Route-Table
+
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref RouteTable
+      GatewayId: !Ref DefaultGateway
+      DestinationCidrBlock: 0.0.0.0/0
+
+  SubnetRouteTableAssociationOrigin:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref OriginZone
+
+  SubnetRouteTableAssociationEdge:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref EdgeZone
+
+  RTMPLoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    DependsOn:
+      - InternetGatewayAttachment
+    Properties:
+      Subnets:
+      - !Ref OriginZone
+      Type: 'network'
+  RTMPListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref RTMPTargetGroup
+      LoadBalancerArn: !Ref RTMPLoadBalancer
+      Port: '1935'
+      Protocol: TCP
+  RTMPTargetGroup:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthyThresholdCount: 3
+      Port: 1935
+      Protocol: TCP
+      UnhealthyThresholdCount: 3
+      VpcId: !Ref AntMediaVPC
+  RTMPSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Ant Media Server RTMP Load Balancer Security Group'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '1935'
+          ToPort: '1935'
+          CidrIp: '0.0.0.0/0'
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: '0.0.0.0/0'
+      VpcId: !Ref AntMediaVPC
+
+  OriginGroup:
+      Type: 'AWS::AutoScaling::AutoScalingGroup'
+      DependsOn:
+      - LaunchTemplateOrigin
+      Properties:
+        VPCZoneIdentifier: 
+          - !Ref OriginZone
+        LaunchTemplate:
+          LaunchTemplateName: !Sub ${AWS::StackName}-AntMedia-LaunchTemplateOrigin
+          Version: !GetAtt 'LaunchTemplateOrigin.LatestVersionNumber'
+        MinSize: 1
+        MaxSize: 100
+        DesiredCapacity: 1
+        TargetGroupARNs:
+          - !Ref ALBTargetGroupOrigin
+          - !Ref RTMPTargetGroup
+        Tags:
+        - Key: Name
+          Value: Antmedia-Origin
+          PropagateAtLaunch: 'true'
+      CreationPolicy:
+        ResourceSignal:
+          Timeout: PT15M
+          Count: 1
+      UpdatePolicy:
+        AutoScalingRollingUpdate:
+          MinInstancesInService: '1'
+          MaxBatchSize: '1'
+          PauseTime: PT15M
+          WaitOnResourceSignals: 'true'
+
+  LaunchTemplateOrigin:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+      LaunchTemplateName: !Sub ${AWS::StackName}-AntMedia-LaunchTemplateOrigin
+      LaunchTemplateData:
+        InstanceType: c5.xlarge
+        KeyName: !Ref KeyName
+        ImageId: !Ref AntMediaAmi
+        SecurityGroupIds:
+          - !GetAtt "InstanceSecurityGroup.GroupId"
+        BlockDeviceMappings:
+          - DeviceName: /dev/sda1
+            Ebs:
+              VolumeSize: 10
+              VolumeType: gp2
+              DeleteOnTermination: true
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            touch /usr/local/antmedia/conf/initialized
+            bash /usr/local/antmedia/change_server_mode.sh cluster ${DBInstance.PrivateIp}
+            apt-get update 
+            apt-get install -y python3-pip
+            apt-get install -y python3-setuptools
+            mkdir -p /opt/aws/bin
+            wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
+            python3 -m easy_install --script-dir /opt/aws/bin aws-cfn-bootstrap-py3-latest.tar.gz
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource OriginGroup --region ${AWS::Region}
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: OriginInstance
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: Name
+              Value: !Sub ${AWS::StackName}-AntMedia-LaunchTemplateOrigin
+
+  EdgeGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    DependsOn:
+      - LaunchTemplateEdge
+    Properties:
+      VPCZoneIdentifier: 
+        - !Ref EdgeZone
+      LaunchTemplate:
+        LaunchTemplateName: !Sub ${AWS::StackName}-AntMedia-LaunchTemplateEdge
+        Version: !GetAtt 'LaunchTemplateEdge.LatestVersionNumber'
+      MinSize: 1
+      MaxSize: 100
+      DesiredCapacity: 1
+      TargetGroupARNs:
+        - !Ref ALBTargetGroupEdge
+      Tags:
+        - Key: Name
+          Value: Antmedia-Edge
+          PropagateAtLaunch: 'true'
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
+        Count: 1
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: '1'
+        MaxBatchSize: '1'
+        PauseTime: PT15M
+        WaitOnResourceSignals: 'true'
+
+  LaunchTemplateEdge:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+      LaunchTemplateName: !Sub ${AWS::StackName}-AntMedia-LaunchTemplateEdge
+      LaunchTemplateData:
+        InstanceType: c5.xlarge
+        KeyName: !Ref KeyName
+        ImageId: !Ref AntMediaAmi
+        SecurityGroupIds:
+          - !GetAtt "InstanceSecurityGroup.GroupId"
+        BlockDeviceMappings:
+          - DeviceName: /dev/sda1
+            Ebs:
+              VolumeSize: 10
+              VolumeType: gp2
+              DeleteOnTermination: true
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            touch /usr/local/antmedia/conf/initialized
+            bash /usr/local/antmedia/change_server_mode.sh cluster ${DBInstance.PrivateIp}
+            apt-get update 
+            apt-get install -y python3-pip
+            apt-get install -y python3-setuptools
+            mkdir -p /opt/aws/bin
+            wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
+            python3 -m easy_install --script-dir /opt/aws/bin aws-cfn-bootstrap-py3-latest.tar.gz
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource EdgeGroup --region ${AWS::Region}
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: EdgeInstance
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: Name
+              Value: !Sub ${AWS::StackName}-AntMedia-LaunchTemplateEdge
+
+  ELBSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Allows access
+        VpcId: !Ref AntMediaVPC
+        SecurityGroupIngress:
+          - CidrIp: 0.0.0.0/0
+            IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            Description: Allow 80. Port for Origin Instances 
+          - CidrIp: 0.0.0.0/0
+            IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            Description: Allow 443. Port for Origin Instances
+          - CidrIp: 0.0.0.0/0
+            IpProtocol: tcp
+            FromPort: 5080
+            ToPort: 5080
+            Description: Allow 5080. Port for Edge Instances
+          - CidrIp: 0.0.0.0/0
+            IpProtocol: tcp
+            FromPort: 5443
+            ToPort: 5443
+            Description: Allow 5443. Port for Edge Instances
+
+  ApplicationLoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    DependsOn:
+      - DBInstance
+    Properties:
+      Subnets:
+      - !Ref OriginZone
+      - !Ref EdgeZone
+      SecurityGroups:
+        - !GetAtt [ ELBSecurityGroup, GroupId ]
+  ALBListener443:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      Certificates:
+        - CertificateArn: !GetAtt CertificateImportCustomResource.CertificateArn
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupOrigin
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: '443'
+      Protocol: HTTPS
+  ALBListener5443:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      Certificates:
+        - CertificateArn: !GetAtt CertificateImportCustomResource.CertificateArn
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupEdge
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: '5443'
+      Protocol: HTTPS
+  ALBListener5080:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupEdge
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: '5080'
+      Protocol: HTTP
+  ALBListener80:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupOrigin
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: '80'
+      Protocol: HTTP
+  ALBTargetGroupOrigin:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    DependsOn:
+      - DBInstance
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 3
+      Port: 5080
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: !Ref AntMediaVPC
+      TargetGroupAttributes:
+        - Key: stickiness.enabled
+          Value: 'true'
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: '30'
+        - Key: load_balancing.algorithm.type
+          Value: least_outstanding_requests
+  ALBTargetGroupEdge:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    DependsOn:
+      - DBInstance
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 3
+      Port: 5080
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: !Ref AntMediaVPC
+      TargetGroupAttributes:
+        - Key: stickiness.enabled
+          Value: 'true'
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: '30'
+        - Key: load_balancing.algorithm.type
+          Value: least_outstanding_requests
+  OriginRule:
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupOrigin
+      Conditions:
+        - Field: query-string
+          QueryStringConfig:
+            Values:
+              - Key: target
+                Value: origin
+      ListenerArn: !Ref ALBListener443
+      Priority: 1
+  EdgeRule:
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupEdge
+      Conditions:
+        - Field: query-string
+          QueryStringConfig:
+            Values:
+              - Key: target
+                Value: edge
+      ListenerArn: !Ref ALBListener443
+      Priority: 2
+  InstanceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access and HTTP access on the configured port
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '5080'
+          ToPort: '5080'
+          CidrIp: 10.0.0.0/16
+        - IpProtocol: tcp
+          FromPort: '1935'
+          ToPort: '1935'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: udp
+          FromPort: '50000'
+          ToPort: '60000'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '5000'
+          ToPort: '5000'
+          CidrIp: 10.0.0.0/16
+      VpcId: !Ref AntMediaVPC
+
+  OriginCPUPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref OriginGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 60.0
+
+  EdgeCPUPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref EdgeGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 60.0
+
+  DBEC2SecurityGroup:
+      Type: 'AWS::EC2::SecurityGroup'
+      Properties:
+        VpcId: !Ref AntMediaVPC
+        GroupDescription: MongoDB SecurityGroup
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: '27017'
+            ToPort: '27017'
+            CidrIp: 10.0.0.0/16
+          - IpProtocol: tcp
+            FromPort: '22'
+            ToPort: '22'
+            CidrIp: 0.0.0.0/0
+  DBInstance:
+      Type: 'AWS::EC2::Instance'
+      DependsOn:
+        - AMSGetLatestAMI
+        - UbuntuAmi
+        - DescribeImagesRole
+      Properties:
+        KeyName: !Ref KeyName
+        ImageId: !Ref UbuntuAmi
+        InstanceType: c5.xlarge
+        SubnetId: !Ref OriginZone
+        SecurityGroupIds:
+          - !GetAtt "DBEC2SecurityGroup.GroupId"
+        Tags:
+        - Key: Name
+          Value: Antmedia-MongoDB
+        UserData:
+         Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
+            echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
+            sudo apt-get update
+            sudo apt-get install -y mongodb-org python3-pip python3-setuptools
+            sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
+            systemctl enable mongod
+            systemctl restart mongod
+
+Outputs:
+
+  OriginHTTPS:
+    Description: HTTPS URL of the Ant Media Origin Servers
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - ApplicationLoadBalancer
+          - DNSName
+    
+  EdgeHTTPS:
+    Description: HTTPS URL of the Ant Media Edge Servers
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - ApplicationLoadBalancer
+          - DNSName
+        - ':5443'
+
+  OriginHTTP:
+    Description: HTTP URL of the Ant Media Origin Servers
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt 
+          - ApplicationLoadBalancer
+          - DNSName
+
+  EdgeHTTP:
+    Description: HTTP URL of the Ant Media Edge Servers
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt 
+          - ApplicationLoadBalancer
+          - DNSName
+        - ':5080'       
+
+  RTMP:
+    Description: RTMP URL of the Ant Media Server
+    Value: !Join 
+      - ''
+      - - 'rtmp://'
+        - !GetAtt 
+          - RTMPLoadBalancer
+          - DNSName 
+
+
+
