@@ -20,6 +20,13 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome = Browser()
     self.chrome.init(True)
 
+    amsLogLevel = self.chrome.execute_script('return window.log.getLevel();')
+    print("amsLogLevel: "+str(amsLogLevel))
+    self.chrome.execute_script('window.log.setLevel("trace");')
+    amsLogLevel = self.chrome.execute_script('return window.log.getLevel();')
+    print("amsLogLevel: "+str(amsLogLevel))
+
+
   def tearDown(self):
     print(self._testMethodName, " ending...")
 
@@ -29,9 +36,6 @@ class TestJoinLeave(unittest.TestCase):
     if self.url.endswith("localhost:3000"):
       app = ""
     handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
-
-    script = 'window.log.setLevel("trace");'
-    self.chrome.execute_script(script)
     
     name_text_box = self.chrome.get_element(By.ID, "participant_name")
 
