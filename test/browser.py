@@ -39,7 +39,7 @@ class Browser:
     
     dc = DesiredCapabilities.CHROME.copy()
     dc['goog:loggingPrefs'] = { 'browser':'ALL' }
-    self.driver = webdriver.Chrome(service=service, options=browser_options)
+    self.driver = webdriver.Chrome(service=service, options=browser_options, desired_capabilities=dc)
 
   def open_in_new_tab(self, url):
     self.driver.switch_to.new_window('tab')
