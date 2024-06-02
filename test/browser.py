@@ -111,7 +111,7 @@ class Browser:
     except TimeoutException:
       print("Timed out waiting for element to be clickable by "+str(by)+" with value "+str(value))
       
-    self.print_console_logs()
+    #self.print_console_logs()
     return self.driver.find_element(by, value)
 
 
