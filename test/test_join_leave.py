@@ -22,6 +22,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
   def tearDown(self):
+    self.chrome.print_log_file()
     print(self._testMethodName, " ending...")
 
   def join_room_in_new_tab(self, participant, room):
@@ -36,9 +37,14 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.write_to_element(name_text_box, participant)
 
     join_button = self.chrome.get_element(By.ID, "room_join_button")
+    print("before click")
+    self.chrome.print_ss_as_base64()
     self.chrome.click_element(join_button)
  
     meeting_gallery = self.chrome.get_element(By.ID, "meeting-gallery")
+
+    print("after click")
+    self.chrome.print_ss_as_base64()
 
     assert(meeting_gallery.is_displayed())
 

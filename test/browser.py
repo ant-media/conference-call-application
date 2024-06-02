@@ -32,7 +32,7 @@ class Browser:
     
     if is_headless:
       browser_options.add_argument("--headless")
-      service = Service(executable_path='/tmp/chromedriver', service_args=["--verbose"])
+      service = Service(executable_path='/tmp/chromedriver', service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
     else:
       service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
     
@@ -55,6 +55,17 @@ class Browser:
       return self.driver.execute_script(script)
     except StaleElementReferenceException as e:
       return None
+    
+  def print_ss_as_base64(self):
+    print(self.driver.get_screenshot_as_base64()) 
+
+  def print_log_file(self):
+    file_path = "/tmp/chromedriver.log"
+    print("Printing log file: "+file_path)
+    with open(file_path, 'r') as file:
+      print(file.read())
+    print("End of log file")
+    
   
 
   def execute_script_with_retry(self, script, retries=3, wait_time=2):
