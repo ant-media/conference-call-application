@@ -45,7 +45,7 @@ script:
 - export AMS_USER=$AMS_USER_NAME
 - export AMS_PASSWORD=$AMS_PASSWORD
 - export SERVER_URL=$SERVER_URL
-- export TEST_APP_NAME=Conference
+- export TEST_APP_NAME=TestAPP686
 - python3 -m unittest -k test_join_room test_join_leave.py
 - ifconfig
 
