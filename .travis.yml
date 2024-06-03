@@ -39,6 +39,7 @@ script:
 #- npm test
 #- npm run upload-coverage
 # run functional tests
+- pwd
 - cd test
 - export AMS_USER=$AMS_USER_NAME
 - export AMS_PASSWORD=$AMS_PASSWORD
