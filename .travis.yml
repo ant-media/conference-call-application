@@ -19,7 +19,7 @@ before_install:
 #- git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git;
 #- cd ant-media-server-parent;
 #- mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
-- cd ..;
+#- cd ..;
 cache:
   directories:
   - react/node_modules
@@ -40,6 +40,7 @@ script:
 #- npm run upload-coverage
 # run functional tests
 - pwd
+- ls
 - cd test
 - export AMS_USER=$AMS_USER_NAME
 - export AMS_PASSWORD=$AMS_PASSWORD
