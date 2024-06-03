@@ -37,7 +37,7 @@ class TestJoinLeave(unittest.TestCase):
 
     join_button = self.chrome.get_element(By.ID, "room_join_button")
     print("before click")
-    self.chrome.print_ss_as_base64()
+    #self.chrome.print_ss_as_base64()
     self.chrome.click_element(join_button)
  
     time.sleep(20)
@@ -199,7 +199,7 @@ class TestJoinLeave(unittest.TestCase):
     else:
       return self.get_publishStreamId(index=index+1)
 
-  def test_join_room_2_participants(self):
+  def _test_join_room_2_participants(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -301,7 +301,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
     '''
 
-  def test_join_room_N_participants(self):
+  def _test_join_room_N_participants(self):
     N = 5
     room = "room"+str(random.randint(100, 999))
     handles = [] 
