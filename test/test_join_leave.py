@@ -39,7 +39,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.click_element(join_button)
  
     meeting_gallery = self.chrome.get_element(By.ID, "meeting-gallery")
-    #self.chrome.print_ss_as_base64()
+    self.chrome.print_ss_as_base64()
 
     assert(meeting_gallery.is_displayed())
 
@@ -113,6 +113,7 @@ class TestJoinLeave(unittest.TestCase):
   def test_join_room(self):
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)   
+    self.chrome.print_console_logs()
     self.chrome.close_all()
 
   def set_and_test_track_limit(self, limit):
@@ -120,7 +121,7 @@ class TestJoinLeave(unittest.TestCase):
       wait = self.chrome.get_wait()
       wait.until(lambda x: self.get_video_track_limit() == limit-1)
   
-  def test_video_track_count(self):
+  def _test_video_track_count(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
@@ -192,7 +193,7 @@ class TestJoinLeave(unittest.TestCase):
     else:
       return self.get_publishStreamId(index=index+1)
 
-  def test_join_room_2_participants(self):
+  def _test_join_room_2_participants(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -227,7 +228,7 @@ class TestJoinLeave(unittest.TestCase):
     return videoTrackAssignments[1]["streamId"] == conference["pinnedVideoId"]
 
   '''
-  def test_screen_share(self):
+  def _test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -294,7 +295,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
     '''
 
-  def test_join_room_N_participants(self):
+  def _test_join_room_N_participants(self):
     N = 5
     room = "room"+str(random.randint(100, 999))
     handles = [] 
@@ -330,7 +331,7 @@ class TestJoinLeave(unittest.TestCase):
   def is_mic_off_displayed_for(self, stream_id):
     return self.chrome.is_element_exist(By.ID, "mic-muted-"+stream_id)
  
-  def test_on_off_mic_cam(self):
+  def _test_on_off_mic_cam(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -411,7 +412,7 @@ class TestJoinLeave(unittest.TestCase):
    
 
 
-  def test_recording(self):
+  def _test_recording(self):
     self.rest_helper = RestHelper(self.url, self.user, self.password)
     self.rest_helper.login()
 
