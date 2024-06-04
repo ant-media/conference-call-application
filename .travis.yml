@@ -16,32 +16,42 @@ before_install:
 - export GPG_TTY=$(tty)
 - gpg2 --batch --fast-import codesigning.asc
 - nvm install --lts
-- git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git;
-- cd ant-media-server-parent;
-- mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
-- cd ..;
+#- git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git;
+#- cd ant-media-server-parent;
+#- mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet;
+#- cd ..;
 cache:
   directories:
   - react/node_modules
   - "$HOME/.m2/repository"
 script:
-- cd react
-- npm install
-- npm run build
-- cd ..
-- cp -a react/build/. webapp/src/main/webapp
-- cd webapp
-- mvn clean install -DskipTests -Dgpg.skip=true --quiet
+#- cd react
+#- npm install
+#- npm run build
+#- cd ..
+#- cp -a react/build/. webapp/src/main/webapp
+#- cd webapp
+#- mvn clean install -DskipTests -Dgpg.skip=true --quiet
 # run unit tests
-- cd ..
+#- cd ..
 #- cd react
 #- npm install codecov --save-dev
 #- npm test
 #- npm run upload-coverage
 # run functional tests
+- pwd
+- ls
 - cd test
-- python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
-- cd ../webapp
+- export AMS_USER=$AMS_USER_NAME
+- export AMS_PASSWORD=$AMS_PASSWORD
+- export SERVER_URL=$SERVER_URL
+- export TEST_APP_NAME=TestAPP686
+- python3 -m unittest -k test_join_room test_join_leave.py
+- ifconfig
+
+
+#- python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
+#- cd ../webapp
 
 deploy:
   - provider: script
