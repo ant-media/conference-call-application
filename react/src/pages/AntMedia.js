@@ -572,6 +572,12 @@ function AntMedia(props) {
     setParticipantUpdated(!participantUpdated);
   }
 
+  var peerconnection_config = {
+    'iceServers': [
+    {'urls':'turn:51.75.89.145:3478','username':'ovh36','credential':'ovh36'}],
+    sdpSemantics: 'unified-plan'
+  };
+
   useEffect(() => {
     async function createWebRTCAdaptor() {
       console.log("----------------- createWebRTCAdaptor");
@@ -582,6 +588,7 @@ function AntMedia(props) {
         var adaptor = new WebRTCAdaptor({
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
+          peerconnection_config: peerconnection_config,
           isPlayMode: playOnly,
           // onlyDataChannel: playOnly,
           debug: true,
