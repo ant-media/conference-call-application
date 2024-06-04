@@ -449,7 +449,7 @@ function AntMedia(props) {
       token = playToken;
     }
 
-    //webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
+    webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
   }
 
   function requestVideoTrackAssignmentsInterval() {
@@ -708,10 +708,6 @@ function AntMedia(props) {
 
   function infoCallback(info, obj) {
     if (info === "initialized") {
-      console.log("current ams log level:"+window.log.getLevel());
-      window.log.setLevel("trace");
-      console.log("current ams log level 2:"+window.log.getLevel());
-
       enableDisableMCU(mcuEnabled);
       setInitialized(true);
     } else if (info === "broadcastObject") {
