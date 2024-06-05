@@ -703,12 +703,6 @@ function AntMedia(props) {
     return tempBroadcastObject;
   }
 
-  var peerconnection_config = {
-    'iceServers': [
-    {'urls':'turn:51.75.89.145:3478','username':'ovh36','credential':'ovh36'}],
-    sdpSemantics: 'unified-plan'
-  };
-
   useEffect(() => {
     async function createWebRTCAdaptor() {
       console.log("----------------- createWebRTCAdaptor");

@@ -26,6 +26,7 @@ cache:
   - "$HOME/.m2/repository"
 script:
 - cd react
+- sed -i 's|//placeholder for peerconnection_config|peerconnection_config: {"iceServers": [{"urls":"turn:$TURN_URL","username":"$TURN_USER","credential":"$TURN_PASSWORD"}],"sdpSemantics": "unified-plan"},|' src/pages/AntMedia.js
 - npm install
 - npm run build
 - cd ..
