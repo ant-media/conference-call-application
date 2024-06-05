@@ -38,7 +38,7 @@ class TestJoinLeave(unittest.TestCase):
     join_button = self.chrome.get_element(By.ID, "room_join_button")
     self.chrome.click_element(join_button)
  
-    time.sleep(15)
+    time.sleep(25)
     self.chrome.print_console_logs()
 
     meeting_gallery = self.chrome.get_element(By.ID, "meeting-gallery")
