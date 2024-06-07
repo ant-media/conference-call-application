@@ -1348,6 +1348,8 @@ function AntMedia(props) {
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
         let videoTrackAssignmentList = notificationEvent.payload;
 
+        console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", videoTrackAssignmentList);
+
         let tempVideoTrackAssignments = videoTrackAssignments;
 
         let tempVideoTrackAssignmentsNew = [];
@@ -1401,7 +1403,7 @@ function AntMedia(props) {
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
       } else if (eventType === "TRACK_LIST_UPDATED") {
-        console.debug("TRACK_LIST_UPDATED -> ", obj);
+        console.info("TRACK_LIST_UPDATED -> ", obj);
 
         webRTCAdaptor?.getBroadcastObject(roomName);
       }

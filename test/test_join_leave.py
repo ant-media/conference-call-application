@@ -53,11 +53,8 @@ class TestJoinLeave(unittest.TestCase):
     if result_json is None:
       return []
     
-    print("----------------------\n c:\n" + str(result_json))
-
-
     vtas = result_json["videoTrackAssignments"]
-    print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
     return vtas
   
   def get_conference(self):
