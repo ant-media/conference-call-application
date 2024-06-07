@@ -209,7 +209,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.assertLocalVideoAvailable()
 
-    wait = self.chrome.get_wait(30)
+    wait = self.chrome.get_wait()
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
