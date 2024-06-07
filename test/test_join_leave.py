@@ -232,6 +232,14 @@ class TestJoinLeave(unittest.TestCase):
     print("switched to tab 1")
     self.chrome.print_ss_as_base64()
 
+    time.sleep(5)
+
+    print("----------------------")
+
+    self.chrome.print_console_logs()
+
+    print("----------------------")
+
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
 
