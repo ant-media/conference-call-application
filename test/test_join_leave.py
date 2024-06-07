@@ -49,12 +49,13 @@ class TestJoinLeave(unittest.TestCase):
     
   def get_videoTrackAssignments(self):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return []
-    #print("result_json:" + str(result_json))
-    #print ("videoTrackAssignments count:" + str(len(result_json["videoTrackAssignments"])))
-    return result_json["videoTrackAssignments"]
+
+    vtas = result_json["videoTrackAssignments"]
+    print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    return vtas
   
   def get_conference(self):
     script = "return window.conference;"
@@ -67,7 +68,7 @@ class TestJoinLeave(unittest.TestCase):
   
   def get_video_track_limit(self):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return -1
     return result_json["globals"]["desiredMaxVideoTrackCount"]
@@ -122,7 +123,7 @@ class TestJoinLeave(unittest.TestCase):
       wait = self.chrome.get_wait()
       wait.until(lambda x: self.get_video_track_limit() == limit-1)
   
-  def _test_video_track_count(self):
+  def test_video_track_count(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
@@ -171,12 +172,15 @@ class TestJoinLeave(unittest.TestCase):
         handler = self.join_room_in_new_tab("participant" + str(i), room)
         self.assertLocalVideoAvailable()
         self.chrome.switch_to_tab(handler)
-        wait.until(lambda x: len(self.get_videoTrackAssignments()) == i)
 
-        if i==6:
-            assert(self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
-            break
-        assert(not self.chrome.is_element_exist(By.CLASS_NAME, "others-tile-inner"))
+        expected_vta_count = min(i+1, 5) #+1 for screen share
+        print("wait for vta count: "+str(expected_vta_count))
+        wait.until(lambda x: len(self.get_videoTrackAssignments()) == expected_vta_count) 
+
+        if i>=5:
+          assert(self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
+        else:
+          assert(not self.chrome.is_element_exist(By.CLASS_NAME, "others-tile-inner"))
     self.chrome.close_all()
 
   # it tooks too long to get videoTrackAssignments so we need to wait for it
@@ -323,7 +327,7 @@ class TestJoinLeave(unittest.TestCase):
 
   def is_avatar_displayed_for(self, stream_id):
     video_card = self.chrome.get_element(By.ID, "card-"+stream_id)
-    return self.chrome.is_element_exist(By.CLASS_NAME, video_card, "MuiAvatar-root")
+    return self.chrome.is_nested_element_exist(video_card, By.CLASS_NAME, "MuiAvatar-root")
   
   def is_video_displayed_for(self, stream_id):
     video_tag = self.chrome.get_element(By.ID, stream_id)
