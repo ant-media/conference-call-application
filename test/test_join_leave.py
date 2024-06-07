@@ -223,6 +223,10 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_1)
 
+    time.sleep(20)
+
+    self.chrome.print_console_logs()
+
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
 
     self.chrome.close_all()
