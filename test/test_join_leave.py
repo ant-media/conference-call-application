@@ -52,6 +52,9 @@ class TestJoinLeave(unittest.TestCase):
     result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return []
+    
+    print("----------------------\n c:\n" + str(result_json))
+
 
     vtas = result_json["videoTrackAssignments"]
     print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
@@ -219,31 +222,11 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_2)
 
-    self.chrome.print_ss_as_base64()
-
     self.leave_room()
-
-    print("leaving room")
-
-    self.chrome.print_ss_as_base64()
 
     self.chrome.switch_to_tab(handle_1)
 
-    print("switched to tab 1")
-    self.chrome.print_ss_as_base64()
-
-    time.sleep(25)
-
-    print("----------------------")
-
-    self.chrome.print_console_logs()
-
-    print("----------------------")
-
-
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
-
-    self.chrome.print_ss_as_base64()
 
     self.chrome.close_all()
 
