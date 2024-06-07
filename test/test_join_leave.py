@@ -219,9 +219,19 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_2)
 
+    self.chrome.print_ss_as_base64()
+
     self.leave_room()
 
+    print("leaving room")
+
+    self.chrome.print_ss_as_base64()
+
     self.chrome.switch_to_tab(handle_1)
+
+    print("switched to tab 1")
+    self.chrome.print_ss_as_base64()
+
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
 
