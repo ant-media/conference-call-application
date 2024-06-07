@@ -225,6 +225,8 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
 
+    self.chrome.print_ss_as_base64()
+
     self.chrome.close_all()
 
   def is_first_participant_pinned(self):

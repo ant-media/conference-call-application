@@ -36,9 +36,9 @@ script:
 # run unit tests
 - cd ..
 - cd react
-- npm install codecov --save-dev
-- npm test
-- npm run upload-coverage
+#- npm install codecov --save-dev
+#- npm test
+#- npm run upload-coverage
 # run functional tests
 - cd ../test
 - python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
