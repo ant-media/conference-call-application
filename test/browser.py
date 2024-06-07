@@ -102,7 +102,7 @@ class Browser:
 
   def print_console_logs(self):
     for entry in self.driver.get_log('browser'):
-      print("#####\n"+entry+"\n#####")
+      print("#####\n"+str(entry)+"\n#####")
     
   def get_element(self, by, value, timeout=15):
     try:
