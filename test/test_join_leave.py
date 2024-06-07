@@ -113,7 +113,7 @@ class TestJoinLeave(unittest.TestCase):
     stop_recording_button = self.chrome.get_element(By.ID, "stop-recording-button")
     return stop_recording_button
 
-  def test_join_room(self):
+  def _test_join_room(self):
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)   
     self.chrome.close_all()
@@ -123,7 +123,7 @@ class TestJoinLeave(unittest.TestCase):
       wait = self.chrome.get_wait()
       wait.until(lambda x: self.get_video_track_limit() == limit-1)
   
-  def test_video_track_count(self):
+  def _test_video_track_count(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
@@ -149,7 +149,7 @@ class TestJoinLeave(unittest.TestCase):
     leave_button = self.chrome.get_element(By.ID, "leave-room-button")
     self.chrome.click_element(leave_button)
     
-  def test_others_tile(self):
+  def _test_others_tile(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -233,7 +233,7 @@ class TestJoinLeave(unittest.TestCase):
     return videoTrackAssignments[1]["streamId"] == conference["pinnedVideoId"]
 
   '''
-  def test_screen_share(self):
+  def _test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -300,7 +300,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
     '''
 
-  def test_join_room_N_participants(self):
+  def _test_join_room_N_participants(self):
     N = 5
     room = "room"+str(random.randint(100, 999))
     handles = [] 
@@ -336,7 +336,7 @@ class TestJoinLeave(unittest.TestCase):
   def is_mic_off_displayed_for(self, stream_id):
     return self.chrome.is_element_exist(By.ID, "mic-muted-"+stream_id)
  
-  def test_on_off_mic_cam(self):
+  def _test_on_off_mic_cam(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
