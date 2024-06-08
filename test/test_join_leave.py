@@ -53,6 +53,9 @@ class TestJoinLeave(unittest.TestCase):
     if result_json is None:
       return []
     
+    self.chrome.print_console_logs()
+
+
     vtas = result_json["videoTrackAssignments"]
     #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
     return vtas
@@ -223,9 +226,6 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_1)
 
-    time.sleep(20)
-
-    self.chrome.print_console_logs()
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
 
