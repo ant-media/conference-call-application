@@ -1348,7 +1348,7 @@ function AntMedia(props) {
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
         let videoTrackAssignmentList = notificationEvent.payload;
 
-        console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", videoTrackAssignmentList);
+        console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(videoTrackAssignmentList));
 
         let tempVideoTrackAssignments = videoTrackAssignments;
 
