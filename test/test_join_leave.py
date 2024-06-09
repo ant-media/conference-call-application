@@ -87,17 +87,17 @@ class TestJoinLeave(unittest.TestCase):
     elif count == 30:
       index = 4
 
-    settings_button = self.chrome.get_element(By.ID, "settings-button")
+    settings_button = self.chrome.get_element_with_retry(By.ID, "settings-button")
     self.chrome.click_element(settings_button)
 
-    change_layout_button = self.chrome.get_element(By.ID, "change-layout-button")
+    change_layout_button = self.chrome.get_element_with_retry(By.ID, "change-layout-button")
     self.chrome.click_element(change_layout_button)
 
-    tile_count_slider = self.chrome.get_element(By.ID, "tile-count-slider")
+    tile_count_slider = self.chrome.get_element_with_retry(By.ID, "tile-count-slider")
     points = self.chrome.get_element_in_element(tile_count_slider, By.CLASS_NAME, "MuiSlider-mark")
     self.chrome.mouse_click_on(points[index])
 
-    layout_dialog_close_button = self.chrome.get_element(By.ID, "layout-dialog-close-button")
+    layout_dialog_close_button = self.chrome.get_element_with_retry(By.ID, "layout-dialog-close-button")
     self.chrome.click_element(layout_dialog_close_button)
 
   def get_start_recording_button(self):
