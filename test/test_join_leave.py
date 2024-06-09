@@ -125,16 +125,16 @@ class TestJoinLeave(unittest.TestCase):
       wait.until(lambda x: self.get_video_track_limit() == limit-1)
   
   def test_video_track_count(self):
-    self.chrome.makeFullScreen()
+    #self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
 
     self.set_and_test_track_limit(2)
-    time.sleep(2)
+    time.sleep(5)
     self.set_and_test_track_limit(4)
-    time.sleep(2)
+    time.sleep(5)
     self.set_and_test_track_limit(6)
-    time.sleep(2)
+    time.sleep(5)
     self.set_and_test_track_limit(12)
 
     self.chrome.close_all()
