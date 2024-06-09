@@ -222,6 +222,9 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_2)
 
+    
+    time.sleep(5)
+
     self.leave_room()
 
     self.chrome.switch_to_tab(handle_1)
