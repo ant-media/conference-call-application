@@ -163,7 +163,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_1)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
     
-    if(self.chrome.is_element_exist("share-screen-button")):
+    if(self.chrome.is_element_exist(By.ID, "share-screen-button")):
       ss_button = self.chrome.get_element(By.ID, "share-screen-button")
     else:
       more_button = self.chrome.get_element(By.ID, "more-button")
