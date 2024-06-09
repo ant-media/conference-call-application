@@ -53,9 +53,7 @@ class TestJoinLeave(unittest.TestCase):
     if result_json is None:
       return []
     
-    self.chrome.print_console_logs()
-
-
+    #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
     #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
     return vtas
