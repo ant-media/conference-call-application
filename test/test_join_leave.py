@@ -163,7 +163,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_1)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
     
-    ss_button = self.chrome.get_element(By.ID, "share-screen-button")
+    ss_button = self.chrome.get_element_with_retry(By.ID, "share-screen-button")
     self.chrome.click_element(ss_button)
     self.chrome.switch_to_tab(handle_2)
     assert(self.chrome.get_element(By.ID, "unpinned-gallery").is_displayed())
