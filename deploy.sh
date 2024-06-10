@@ -3,8 +3,10 @@
 # Set SERVER_URL based on the branch name
 if [[ "$BRANCH_NAME" == "main" ]]; then
   SERVER_URL="https://meet.antmedia.io"
+  K8S_NAMESPACE="antmedia"
 else
   SERVER_URL="https://circle.antmedia.io"
+  K8S_NAMESPACE="circle"
 fi
 
 # Get versions data from repo
@@ -48,7 +50,7 @@ export KUBECONFIG=kubeconfig
 
 # Delete pod if the conference app not exists
 if [[ "$app_exists" == false ]]; then
-  POD_NAME=$(kubectl get pods -l app=ant-media-origin -n antmedia -o jsonpath='{.items[0].metadata.name}')
+  POD_NAME=$(kubectl get pods -l app=ant-media-origin -n $K8S_NAMESPACE -o jsonpath='{.items[0].metadata.name}')
   kubectl delete pod $POD_NAME -n circle
   sleep 20
 
