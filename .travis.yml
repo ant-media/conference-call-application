@@ -24,42 +24,29 @@ cache:
   directories:
   - react/node_modules
   - "$HOME/.m2/repository"
-env:
-  global:
-    - USER_NAME=${USER_NAME}
-    - PASSWORD=${PASSWORD}
-    - KUBE_CONFIG_DATA=${KUBE_CONFIG_DATA}
-jobs:
-  include:
-    - stage: test
-      script:
-        - cd react
-        - npm install
-        - npm run build
-        - cd ..
-        - cp -a react/build/. webapp/src/main/webapp
-        - cd webapp
-        - mvn clean install -DskipTests -Dgpg.skip=true --quiet
-        # run unit tests
-        - cd ..
-        - cd react
-        - npm install codecov --save-dev
-        - npm test
-        - npm run upload-coverage
+script:
+- cd react
+- npm install
+- npm run build
+- cd ..
+- cp -a react/build/. webapp/src/main/webapp
+- cd webapp
+- mvn clean install -DskipTests -Dgpg.skip=true --quiet
+# run unit tests
+- cd ..
+- cd react
+- npm install codecov --save-dev
+- npm test
+- npm run upload-coverage
+# run functional tests
+- cd ../test
+- python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
+- cd ../webapp
 
-    - stage: deploy-to-maven-repo
-      script:
-        - mvn deploy -DskipTests --quiet --settings mvn-settings.xml
-
-    - stage: deploy-to-circle-server
-      script:
-        - bash deploy.sh
-
-    - stage: deploy-to-meet-server
-      if: branch = main
-      script:
-        - bash deploy.sh
-
-      on:
-        tags: false
-        branch: main
+deploy:
+  - provider: script
+    script: "mvn deploy -DskipTests --quiet --settings mvn-settings.xml"
+    skip_cleanup: true
+    on:
+      tags: false
+      branch: main
