@@ -32,6 +32,7 @@ script:
 - cp -a react/build/. webapp/src/main/webapp
 - cd webapp
 - mvn clean install -DskipTests -Dgpg.skip=true --quiet
+- echo "test"
 - ls -alh
 - ls -alh ..
 # run unit tests
