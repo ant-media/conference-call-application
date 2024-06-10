@@ -175,6 +175,8 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_2)
     assert(self.chrome.get_element(By.ID, "unpinned-gallery").is_displayed())
 
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
+
     assert(not self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
     for i in range(3,7):
         handler = self.join_room_in_new_tab("participant" + str(i), room)
