@@ -35,7 +35,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.write_to_element(name_text_box, participant)
 
-    join_button = self.chrome.get_element(By.ID, "room_join_button")
+    join_button = self.chrome.get_element_with_retry(By.ID, "room_join_button")
     self.chrome.click_element(join_button)
  
     #self.chrome.print_console_logs()
