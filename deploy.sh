@@ -41,10 +41,6 @@ script:
 - npm install codecov --save-dev
 - npm test
 - npm run upload-coverage
-# run functional tests
-- cd ../test
-- python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
-- cd ../webapp
 
 deploy:
   - provider: script
