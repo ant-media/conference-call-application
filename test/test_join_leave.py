@@ -31,7 +31,7 @@ class TestJoinLeave(unittest.TestCase):
       app = ""
     handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
     
-    name_text_box = self.chrome.get_element(By.ID, "participant_name")
+    name_text_box = self.chrome.get_element_with_retry(By.ID, "participant_name")
 
     self.chrome.write_to_element(name_text_box, participant)
 
@@ -40,7 +40,7 @@ class TestJoinLeave(unittest.TestCase):
  
     #self.chrome.print_console_logs()
 
-    meeting_gallery = self.chrome.get_element(By.ID, "meeting-gallery")
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
     #self.chrome.print_ss_as_base64()
 
     assert(meeting_gallery.is_displayed())
