@@ -235,7 +235,11 @@ public class WebSocketApplicationHandler
 
 
 				String url = websocketURLObject.getScheme().contains("wss") ? "https://" : "http://";
-				url += websocketURLObject.getHost() + ":" + websocketURLObject.getPort();
+				int port = websocketURLObject.getPort();
+				if (port == -1) {
+					port = websocketURLObject.getScheme().contains("wss") ? 443 : 80;
+				}
+				url += websocketURLObject.getHost() + ":" + port;
 				String path = websocketURLObject.getPath();
 
 				url += path.substring(0, path.lastIndexOf("/")+1);
