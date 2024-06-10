@@ -1,5 +1,9 @@
 #!/bin/bash
 
+export USER_NAME="${USER_NAME}"
+export PASSWORD="${PASSWORD}"
+export KUBE_CONFIG_DATA="${KUBE_CONFIG_DATA}"
+
 # Set SERVER_URL based on the branch name
 if [[ "$BRANCH_NAME" == "main" ]]; then
   SERVER_URL="https://meet.antmedia.io"
