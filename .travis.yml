@@ -34,6 +34,7 @@ script:
 - mvn clean install -DskipTests -Dgpg.skip=true --quiet
 - echo "test"
 - ls -alh
+- ls -alh target/
 - ls -alh ..
 - echo "test"
 # run unit tests
