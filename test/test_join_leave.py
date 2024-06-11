@@ -12,7 +12,7 @@ import time
 
 class TestJoinLeave(unittest.TestCase):
   def setUp(self):
-    print(self._testMethodName, " starting...")
+    print("----------------\n", self._testMethodName, " starting...")
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.user = os.environ.get('AMS_USER')
@@ -28,7 +28,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
   def tearDown(self):
-    print(self._testMethodName, " ending...")
+    print(self._testMethodName, " ending...\n","----------------")
 
   def join_room_in_new_tab(self, participant, room):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
