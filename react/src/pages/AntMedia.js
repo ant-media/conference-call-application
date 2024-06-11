@@ -206,6 +206,10 @@ if (token == null || typeof token === "undefined") {
   token = "";
 }
 
+if (roleInit == null || typeof roleInit === "undefined") {
+  roleInit = "default";
+}
+
 var roomOfStream = [];
 
 var audioListenerIntervalJob = null;
