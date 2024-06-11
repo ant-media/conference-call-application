@@ -90,11 +90,12 @@ class Browser:
             element = self.driver.find_element(by, value)
             return element
         except (NoSuchElementException, StaleElementReferenceException) as e:
-            print(f"Attempt {attempt + 1} failed: {e}")
+            print(f"Attempt {attempt + 1} failed")
             if attempt < retries - 1:
                 # Wait before retrying
                 time.sleep(wait_time)
             else:
+                print(f"Element not found by {by} with value {value} after {retries} attempts: {e}")
                 raise
     
   def makeFullScreen(self):
