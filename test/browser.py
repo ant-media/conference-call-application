@@ -76,11 +76,13 @@ class Browser:
             result_json = self.driver.execute_script(script)
             return result_json
         except (JavascriptException, StaleElementReferenceException) as e:
-            print(f"Attempt {attempt + 1} failed: {e}")
+            print(f"Attempt {attempt + 1} failed for script: {script}")
             if attempt < retries - 1:
                 # Wait before retrying
                 time.sleep(wait_time)
             else:
+                print(f"Script {script} failed after {retries} attempts: {e}")
+                print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
                 raise
             
   def get_element_with_retry(self, by, value, retries=5, wait_time=2):
@@ -96,6 +98,7 @@ class Browser:
                 time.sleep(wait_time)
             else:
                 print(f"Element not found by {by} with value {value} after {retries} attempts: {e}")
+                print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
                 raise
     
   def makeFullScreen(self):

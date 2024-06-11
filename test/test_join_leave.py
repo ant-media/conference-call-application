@@ -193,7 +193,8 @@ class TestJoinLeave(unittest.TestCase):
 
         expected_vta_count = min(i+1, 5) #+1 for screen share
         print("wait for vta count: "+str(expected_vta_count))
-        wait.until(lambda x: len(self.get_videoTrackAssignments()) == expected_vta_count) 
+        wait.until(lambda x: len(self.get_videoTrackAssignments()) == expected_vta_count
+                   , "vta count is not "+str(expected_vta_count)+"\nss:\n"+self.chrome.get_screenshot_as_base64())
 
         if i>=5:
           assert(self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
