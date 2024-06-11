@@ -149,7 +149,9 @@ class TestJoinLeave(unittest.TestCase):
     publishStreamId = self.get_publishStreamId()
     print("assertLocalVideoAvailable -> publishStreamId: "+publishStreamId)
 
-    assert(self.chrome.get_element_with_retry(By.ID, publishStreamId).is_displayed())
+    localVideo = self.chrome.get_element_with_retry(By.ID, publishStreamId)
+
+    assert(localVideo.is_displayed())
 
 
   def leave_room(self):
