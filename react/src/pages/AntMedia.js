@@ -1441,6 +1441,10 @@ function AntMedia(props) {
     updateUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
   }, [role]);
 
+  function getStats() {
+    
+  }
+
   function handleNotificationEvent(obj) {
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
@@ -2270,7 +2274,8 @@ function AntMedia(props) {
               presenterButtonStreamIdInProcess,
               roomName,
               requestSyncAdministrativeFields,
-              role
+              role,
+              getStats
             }}
           >
             {props.children}

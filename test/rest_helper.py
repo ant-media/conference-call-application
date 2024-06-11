@@ -27,14 +27,7 @@ class RestHelper:
   def get_broadcasts(self):
     resp = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/broadcasts/list/0/50")
     json_data = json.loads(resp.text)
-    size = len(json_data)
-    total = 0
-    for item in json_data:
-      viewer = item["webRTCViewerCount"]
-      #print viewer
-      total += viewer
-    print("total publishers:"+str(size))
-    print("total players:"+str(total))
+    return json_data
 
   def getVoDFor(self, streamId):
     resp = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/vods/list/0/5")

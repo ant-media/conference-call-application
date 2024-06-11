@@ -19,6 +19,12 @@ class TestJoinLeave(unittest.TestCase):
     self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
     self.chrome.init(True)
+    self.rest_helper = RestHelper(self.url, self.user, self.password)
+    self.rest_helper.login()
+
+    wait = self.chrome.get_wait()
+    wait.until(lambda x: len(self.rest_helper.get_broadcasts()) == 0)
+
 
 
   def tearDown(self):
@@ -432,9 +438,6 @@ class TestJoinLeave(unittest.TestCase):
 
 
   def _test_recording(self):
-    self.rest_helper = RestHelper(self.url, self.user, self.password)
-    self.rest_helper.login()
-
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
