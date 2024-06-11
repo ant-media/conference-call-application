@@ -111,6 +111,7 @@ class Browser:
       WebDriverWait(self.driver, timeout).until(element_present)
     except TimeoutException:
       print("Timed out waiting for element to be clickable by "+str(by)+" with value "+str(value))
+      print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
       
     return self.driver.find_element(by, value)
 
