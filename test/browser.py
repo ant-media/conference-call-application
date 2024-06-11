@@ -71,8 +71,6 @@ class Browser:
       print(file.read())
     print("End of log file")
     
-  
-
   def execute_script_with_retry(self, script, retries=3, wait_time=2):
     for attempt in range(retries):
         try:
