@@ -297,10 +297,10 @@ public class WebSocketApplicationHandler
 
 	private void responseRoomSettings(Session session) {
 
-		String avTrackSelectionMap = appSettings.getAvTrackSelectionMap();
+		String participantVisibilityMatrix = appSettings.getParticipantVisibilityMatrix();
 
-		if (avTrackSelectionMap != null) {
-			conferenceRoomSettings.setAvTrackSelectionMap(avTrackSelectionMap);
+		if (participantVisibilityMatrix != null) {
+			conferenceRoomSettings.setParticipantVisibilityMatrix(participantVisibilityMatrix);
 		}
 
 		JSONObject jsonResponse = new JSONObject();

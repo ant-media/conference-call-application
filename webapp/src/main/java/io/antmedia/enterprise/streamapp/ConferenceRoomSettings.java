@@ -26,8 +26,8 @@ public class ConferenceRoomSettings {
     @Expose
     private boolean isRecordingFeatureAvailable = false;
 
-	@Expose
-	private String avTrackSelectionMap;
+    @Expose
+    private String participantVisibilityMatrix;
     
     @PostConstruct
     public void init() {
@@ -71,12 +71,12 @@ public class ConferenceRoomSettings {
 		return roomCreationPasswordEnabled;
 	}
 
-	public String setAvTrackSelectionMap(String avTrackSelectionMap) {
-		return this.avTrackSelectionMap = avTrackSelectionMap;
+	public void setParticipantVisibilityMatrix(String participantVisibilityMatrix) {
+		this.participantVisibilityMatrix = participantVisibilityMatrix;
 	}
 
-	public String getAvTrackSelectionMap() {
-		return avTrackSelectionMap;
+	public String getParticipantVisibilityMatrix() {
+		return participantVisibilityMatrix;
 	}
 
 }

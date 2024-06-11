@@ -287,7 +287,7 @@ function AntMedia(props) {
 
   const [screenSharingInProgress, setScreenSharingInProgress] = React.useState(false);
 
-  const [avTrackSelectionMap, setAvTrackSelectionMap] = React.useState({});
+  const [participantVisibilityMatrix, setParticipantVisibilityMatrix] = React.useState({});
 
   const [reactions] = useState({
     'sparkling_heart': '💖',
@@ -602,7 +602,7 @@ function AntMedia(props) {
   function handleSubtrackBroadcastObject(broadcastObject) {
     let metaData = JSON.parse(broadcastObject.metaData);
 
-    if (metaData.role != null && !avTrackSelectionMap[role].includes(metaData.role)) {
+    if (metaData.role != null && !participantVisibilityMatrix[role].includes(metaData.role)) {
       return;
     }
 
@@ -1896,7 +1896,7 @@ function AntMedia(props) {
       var localSettings = JSON.parse(obj.settings);
       console.log("--isRecordingFeatureAvailable: ", localSettings?.isRecordingFeatureAvailable);
       setIsRecordPluginInstalled(localSettings?.isRecordingFeatureAvailable);
-      setAvTrackSelectionMap(JSON.parse(localSettings?.avTrackSelectionMap));
+      setParticipantVisibilityMatrix(JSON.parse(localSettings?.participantVisibilityMatrix));
     } else if (obj.command === "startRecordingResponse") {
       console.log("Incoming startRecordingResponse:", obj);
       definition = JSON.parse(obj.definition);
