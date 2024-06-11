@@ -297,6 +297,12 @@ public class WebSocketApplicationHandler
 
 	private void responseRoomSettings(Session session) {
 
+		String avTrackSelectionMap = appSettings.getAvTrackSelectionMap();
+
+		if (avTrackSelectionMap != null) {
+			conferenceRoomSettings.setAvTrackSelectionMap(avTrackSelectionMap);
+		}
+
 		JSONObject jsonResponse = new JSONObject();
 		jsonResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.SET_SETTINGS_COMMAND);
 		jsonResponse.put(WebSocketApplicationConstants.SETTINGS, gsonOnlyExposedFields.toJson(conferenceRoomSettings));

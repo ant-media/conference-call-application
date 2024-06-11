@@ -106,6 +106,7 @@ function getPublishToken() {
 var playToken = getPlayToken();
 var publishToken = getPublishToken();
 var token = getUrlParameter("token")
+var roleInit = getUrlParameter("role")
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var InitialStreamId = getUrlParameter("streamId");
 var playOnly = getUrlParameter("playOnly");
@@ -222,6 +223,8 @@ function AntMedia(props) {
   const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
   const roomName = id;
 
+  const [role, setRole] = useState(roleInit);
+
   // drawerOpen for message components.
   const [messageDrawerOpen, setMessageDrawerOpen] = useState(false);
 
@@ -271,7 +274,7 @@ function AntMedia(props) {
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
-  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [isAdmin, setIsAdmin] = React.useState(role === "admin");
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [presenters, setPresenters] = React.useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
@@ -279,6 +282,8 @@ function AntMedia(props) {
   const [cameraButtonDisabled, setCameraButtonDisabled] = React.useState(false);
 
   const [screenSharingInProgress, setScreenSharingInProgress] = React.useState(false);
+
+  const [avTrackSelectionMap, setAvTrackSelectionMap] = React.useState({});
 
   const [reactions] = useState({
     'sparkling_heart': '💖',
@@ -415,6 +420,34 @@ function AntMedia(props) {
     if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
       webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
     }
+  }
+
+  function makeParticipantPresenter(streamId) {
+    let notEvent = {
+      streamId: streamId,
+      eventType: "UPDATE_PARTICIPANT_ROLE",
+      role: "speaker"
+    };
+    console.info("send notification event", notEvent);
+    webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
+
+    let temp = presenters;
+    temp.push(streamId);
+    setPresenters(temp);
+  }
+
+  function makeParticipantUndoPresenter(streamId) {
+    let notEvent = {
+      streamId: streamId,
+      eventType: "UPDATE_PARTICIPANT_ROLE",
+      role: "publisher"
+    };
+    console.info("send notification event", notEvent);
+    webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
+
+    let temp = presenters;
+    temp = temp.filter(item => item !== streamId);
+    setPresenters(temp);
   }
 
   function reconnectionInProgress() {
@@ -562,10 +595,14 @@ function AntMedia(props) {
     });
   }
 
-
   function handleSubtrackBroadcastObject(broadcastObject) {
-    let allParticipantsTemp = allParticipants;
     let metaData = JSON.parse(broadcastObject.metaData);
+
+    if (metaData.role != null && !avTrackSelectionMap[role].includes(metaData.role)) {
+      return;
+    }
+
+    let allParticipantsTemp = allParticipants;
     broadcastObject.isScreenShared = metaData.isScreenShared;
     allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
     setAllParticipants(allParticipantsTemp);
@@ -711,6 +748,9 @@ function AntMedia(props) {
 
       if (obj.streamId === roomName) { //maintrack object
         handleMainTrackBroadcastObject(broadcastObject);
+        setTimeout(() => {
+          webRTCAdaptor?.getBroadcastObject(roomName);
+        }, 10000);
       } else { //subtrack object
         handleSubtrackBroadcastObject(broadcastObject);
       }
@@ -1259,6 +1299,10 @@ function AntMedia(props) {
     }
   }
 
+  React.useEffect(() => {
+    updateUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
+  }, [role]);
+
   function handleNotificationEvent(obj) {
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
@@ -1402,6 +1446,12 @@ function AntMedia(props) {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
         webRTCAdaptor?.getBroadcastObject(roomName);
+      } else if (eventType === "UPDATE_PARTICIPANT_ROLE") {
+        if (publishStreamId === notificationEvent.streamId) {
+          setRole(notificationEvent.role);
+        } else {
+          webRTCAdaptor?.getBroadcastObject(roomName);
+        }
       }
     }
   }
@@ -1422,7 +1472,8 @@ function AntMedia(props) {
       isMicMuted: isMicMuted === null ? null : isMicMuted,
       isCameraOn: isCameraOn,
       isScreenShared: isScreenShareActive,
-      playOnly: playOnly
+      playOnly: playOnly,
+      role: role
     }
 
     return metadata;
@@ -1839,8 +1890,9 @@ function AntMedia(props) {
     var definition;
     if (obj.command === "setSettings") {
       var localSettings = JSON.parse(obj.settings);
-      console.log("--isRecordingFeatureAvailable: ", localSettings.isRecordingFeatureAvailable);
-      setIsRecordPluginInstalled(localSettings.isRecordingFeatureAvailable);
+      console.log("--isRecordingFeatureAvailable: ", localSettings?.isRecordingFeatureAvailable);
+      setIsRecordPluginInstalled(localSettings?.isRecordingFeatureAvailable);
+      setAvTrackSelectionMap(JSON.parse(localSettings?.avTrackSelectionMap));
     } else if (obj.command === "startRecordingResponse") {
       console.log("Incoming startRecordingResponse:", obj);
       definition = JSON.parse(obj.definition);
@@ -2013,7 +2065,9 @@ function AntMedia(props) {
               getSelectedDevices,
               setIsJoining,
               isJoining,
-              setParticipantUpdated
+              setParticipantUpdated,
+              makeParticipantPresenter,
+              makeParticipantUndoPresenter
             }}
           >
             {props.children}
