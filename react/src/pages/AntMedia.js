@@ -1261,10 +1261,6 @@ function AntMedia(props) {
     }
   }
 
-  function getStats() {
-    
-  }
-
   function handleNotificationEvent(obj) {
     var notificationEvent = JSON.parse(obj.data);
     if (notificationEvent != null && typeof notificationEvent == "object") {
@@ -2021,8 +2017,7 @@ function AntMedia(props) {
               getSelectedDevices,
               setIsJoining,
               isJoining,
-              setParticipantUpdated,
-              getStats
+              setParticipantUpdated
             }}
           >
             {props.children}
