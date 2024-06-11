@@ -278,7 +278,7 @@ function AntMedia(props) {
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
-  const [isAdmin, setIsAdmin] = React.useState(role === "admin");
+  const [isAdmin, setIsAdmin] = React.useState(role === "host");
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [presenters, setPresenters] = React.useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
@@ -444,7 +444,7 @@ function AntMedia(props) {
     let notEvent = {
       streamId: streamId,
       eventType: "UPDATE_PARTICIPANT_ROLE",
-      role: "publisher"
+      role: "panelist"
     };
     console.info("send notification event", notEvent);
     webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
@@ -493,6 +493,7 @@ function AntMedia(props) {
     if (videoTrackAssignmentsIntervalJob === null) {
       videoTrackAssignmentsIntervalJob = setInterval(() => {
         webRTCAdaptor?.requestVideoTrackAssignments(roomName);
+        webRTCAdaptor?.getBroadcastObject(roomName);
       }, 3000);
     }
   }
@@ -586,8 +587,14 @@ function AntMedia(props) {
         console.log("stream removed:" + trackId);
 
         delete temp[trackId];
+      } else if (allParticipants[trackId] !== undefined && allParticipants[trackId] !== null && allParticipants[trackId].metaData !== undefined && allParticipants[trackId].metaData !== null) {
+          let metaData = JSON.parse(allParticipants[trackId].metaData);
+          if (metaData.role != null && !participantVisibilityMatrix[role].includes(metaData.role)) {
+            delete temp[trackId];
+          }
       }
     });
+
     setAllParticipants(temp);
     setParticipantUpdated(!participantUpdated);
 
@@ -660,7 +667,7 @@ function AntMedia(props) {
   }
 
   React.useEffect(() => {
-    if((isPublished || isPlayOnly) && isPlayed){
+    if(isPublished || isPlayOnly){
       setWaitingOrMeetingRoom("meeting")
       setIsJoining(false);
     }
@@ -752,9 +759,6 @@ function AntMedia(props) {
 
       if (obj.streamId === roomName) { //maintrack object
         handleMainTrackBroadcastObject(broadcastObject);
-        setTimeout(() => {
-          webRTCAdaptor?.getBroadcastObject(roomName);
-        }, 10000);
       } else { //subtrack object
         handleSubtrackBroadcastObject(broadcastObject);
       }
