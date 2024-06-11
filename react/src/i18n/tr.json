@@ -87,5 +87,7 @@
   "Others": "Diger Katılımcı",
   "Virtual Effects": "Sanal Efektler",
   "Image is uploaded successfully.": "Resim başarıyla yüklendi.",
-  "Image size cannot exceed more than 1MB.": "Resim boyutu 1MB'dan fazla olamaz."
+  "Image size cannot exceed more than 1MB.": "Resim boyutu 1MB'dan fazla olamaz.",
+  "Publisher Request List": "Yayıncı İstek Listesi",
+  "Request becoming publisher": "Yayıncı olma isteği"
 }

@@ -14,10 +14,13 @@ import FakeParticipantButton from "./Components/FakeParticipantButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
 import { ConferenceContext } from 'pages/AntMedia';
-import {getRoomNameAttribute, isComponentMode} from 'utils';
+import {getRootAttribute, isComponentMode} from 'utils';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactionsButton from "./Components/ReactionsButton";
 import MoreOptionsButton from "./Components/MoreOptionsButton";
+import RequestPublishButton from "./Components/RequestPublishButton";
+import PublisherRequestListButton from "./Components/PublisherRequestListButton";
+import {useTheme} from "@mui/material/styles";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -42,8 +45,10 @@ const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme
 
 function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
+  const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
   const conference = React.useContext(ConferenceContext);
+
+  const theme = useTheme();
 
   const mobileBreakpoint = 900;
 
@@ -64,7 +69,6 @@ function Footer(props) {
   }, []);
 
   React.useEffect(() => {
-    //debugger;
     if (conference.isRecordPluginActive === true && conference.isEnterDirectly === false && conference.isPlayOnly === false) {
       setIsRecordingTextVisible(true);
     } else {
@@ -80,10 +84,12 @@ function Footer(props) {
         >
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
             <Grid container alignItems={"center"}>
+              {process.env.REACT_APP_FOOTER_APP_LOGO_VISIBILITY === "true" ?
               <a href={process.env.REACT_APP_FOOTER_LOGO_ON_CLICK_URL} alt="Circle" target="_blank" rel="noreferrer">
                 <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
               </a>
-              <Typography color="#ffffff" variant="body1">
+                : null}
+              <Typography color={theme.palette.textColor} variant="body1">
                 {id}
               </Typography>
               <InfoButton/>
@@ -138,6 +144,18 @@ function Footer(props) {
                     <Grid item xs={0}>
                         <ParticipantListButton footer />
                     </Grid>)
+                    : null}
+
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ?
+                    <Grid item xs={0}>
+                      <PublisherRequestListButton footer />
+                    </Grid>
+                    : null}
+
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isPlayOnly === true) ?
+                    <Grid item xs={0}>
+                      <RequestPublishButton footer />
+                    </Grid>
                     : null}
 
                   {process.env.REACT_APP_FOOTER_END_CALL_BUTTON_VISIBILITY === 'true' ?

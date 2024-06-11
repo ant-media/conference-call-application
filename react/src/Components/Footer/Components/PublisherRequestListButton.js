@@ -34,7 +34,7 @@ function PublisherRequestListButton({ footer, ...props }) {
                 className={footer ? 'footer-icon-button' : ''}
                 color={conference?.publisherRequestListDrawerOpen ? 'primary' : 'secondary'}
             >
-                <SvgIcon size={32} color={conference?.publisherRequestListDrawerOpen ? 'black' : 'white'} name={'raise-hand'} />
+                <SvgIcon size={32} color={conference?.publisherRequestListDrawerOpen ? '#000' : '#fff'} name={'raise-hand'} />
                 {conference.requestSpeakerList.length}
             </CustomizedBtn>
         </Tooltip>

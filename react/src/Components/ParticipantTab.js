@@ -9,7 +9,7 @@ import { ConferenceContext } from "pages/AntMedia";
 import {CircularProgress} from "@mui/material";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
-  color: "#ffffff",
+  color: theme.palette.textColor,
   fontWeight: 500,
   fontSize: 14,
 }));
@@ -28,7 +28,8 @@ function ParticipantTab(props) {
       <div id={'admin-button-group-'+streamId}>
       {(streamId === "localVideo" ? conference?.presenters.includes(conference.publishStreamId) : conference?.presenters.includes(streamId) )&& conference?.isAdmin === true ? (
       <PinBtn
-        disabled={conference?.presenterButtonDisabled}
+        id={"remove-presenter-"+streamId}
+        disabled={conference?.presenterButtonDisabled.includes(streamId)}
         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
         onClick={() => {
           let tempStreamId = streamId;
@@ -39,13 +40,14 @@ function ParticipantTab(props) {
         }
         }
       >
-        { conference?.presenterButtonStreamIdInProcess === streamId ? <CircularProgress size={28} /> :
-          <SvgIcon size={28} name="unpresenter" color="black" />}
+        { conference?.presenterButtonStreamIdInProcess.includes(streamId) ? <CircularProgress size={28} /> :
+          <SvgIcon size={28} name="unpresenter" color="#000" />}
       </PinBtn>
     ) : null}
   {(streamId === "localVideo" ? !conference?.presenters.includes(conference.publishStreamId) : !conference?.presenters.includes(streamId) ) && ( !conference?.approvedSpeakerRequestList.includes(streamId) ) && conference?.isAdmin === true ?(
     <PinBtn
-      disabled={conference?.presenterButtonDisabled}
+      id={"add-presenter-"+streamId}
+      disabled={conference?.presenterButtonDisabled.includes(streamId)}
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => {
         let tempStreamId = streamId;
@@ -57,8 +59,8 @@ function ParticipantTab(props) {
       }
     >
       {/* this icon for publish speaker */}
-      { conference?.presenterButtonStreamIdInProcess === streamId ? <CircularProgress size={28} /> :
-        <SvgIcon size={28} name="presenter" color="black" />}
+      { conference?.presenterButtonStreamIdInProcess.includes(streamId) ? <CircularProgress size={28} /> :
+        <SvgIcon size={28} name="presenter" color="#000" />}
     </PinBtn>
   ) : null}
   {conference?.approvedSpeakerRequestList.includes(streamId) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ?(
@@ -66,7 +68,7 @@ function ParticipantTab(props) {
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => conference?.makeListenerAgain(streamId)}
     >
-      <SvgIcon size={28} name="close" color="black" />
+      <SvgIcon size={28} name="close" color="#000" />
     </PinBtn>
   ) : null}
       </div>
@@ -91,57 +93,61 @@ function ParticipantTab(props) {
           <ParticipantName variant="body1">{name}</ParticipantName>
         </Grid>
         <Grid item>
-          {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
-            <PinBtn
-              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => {conference.pinVideo(streamId);}}
-            >
-              <SvgIcon size={28} name="unpin" color="#fff" />
-            </PinBtn>
-          ) : (
-            <PinBtn
-              sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-              onClick={() => {
-                conference.pinVideo(streamId);
-              }}
-            >
-              <SvgIcon size={28} name="pin" color="#fff" />
-            </PinBtn>
-          )}
-          <div>
-          {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
-            getAdminButtons(streamId, assignedVideoCardId)
-        ) : null}
-        </div>
+          <div style={{display: 'flex'}}>
+            {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
+              <PinBtn
+                sx={{minWidth: "unset", pt: 1, pb: 1}}
+                onClick={() => {
+                  conference.pinVideo(streamId);
+                }}
+              >
+                <SvgIcon size={28} name="unpin" color="theme.palette.textColor"/>
+              </PinBtn>
+            ) : (
+              <PinBtn
+                sx={{minWidth: "unset", pt: 1, pb: 1}}
+                onClick={() => {
+                  conference.pinVideo(streamId);
+                }}
+              >
+                <SvgIcon size={28} name="pin" color="theme.palette.textColor"/>
+              </PinBtn>
+            )}
+            <div>
+              {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
+                getAdminButtons(streamId, assignedVideoCardId)
+              ) : null}
+            </div>
+          </div>
         </Grid>
       </Grid>
-    );
+  );
   };
 
   return (
-        <div style={{width: "100%", overflowY: "auto"}}>
-          <Stack sx={{width: "100%",}} spacing={2}>
-            <Grid container>
-              <SvgIcon size={28} name="participants" color="#fff"/>
-              <ParticipantName
-                  variant="body2"
-                  style={{marginLeft: 4, fontWeight: 500}}
-              >
-                {Object.keys(conference.allParticipants).length}
-              </ParticipantName>
-            </Grid>
-            {conference.isPlayOnly === false ? getParticipantItem(conference.publishStreamId, "You") : ""}
-            {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
-              if (conference.publishStreamId !== streamId) {
-                var assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
-                return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
-              } else {
-                return "";
-              }
-            })}
-          </Stack>
-        </div>
-    );
+    <div style={{width: "100%", overflow: "hidden"}}>
+      <Stack sx={{width: "100%",}} spacing={2}>
+        <Grid container>
+          <SvgIcon size={28} name="participants" color="theme.palette.textColor"/>
+          <ParticipantName
+            variant="body2"
+            style={{marginLeft: 4, fontWeight: 500}}
+          >
+            {Object.keys(conference.allParticipants).length}
+          </ParticipantName>
+        </Grid>
+        {conference.isPlayOnly === false ? getParticipantItem(conference.publishStreamId, "You") : ""}
+        {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
+          if (conference.publishStreamId !== streamId) {
+            var assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
+            return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
+          } else {
+            return "";
+          }
+        })}
+      </Stack>
+    </div>
+  );
 
 }
 

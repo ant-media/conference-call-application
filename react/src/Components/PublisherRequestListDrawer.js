@@ -6,33 +6,14 @@ import { useTranslation } from 'react-i18next';
 import CloseDrawerButton from './DrawerButton';
 import PublisherRequestTab from "./PublisherRequestTab";
 import {ConferenceContext} from "../pages/AntMedia";
+import {getAntDrawerStyle} from "../styles/themeUtil";
 
-const AntDrawer = styled(Drawer)(({ theme }) => ({
-    '& .MuiDrawer-root': {
-        position: 'absolute'
-    },
-    '& .MuiBackdrop-root': {
-        backgroundColor: 'transparent',
-    },
-    '& .MuiPaper-root': {
-        padding: 12,
-        backgroundColor: 'transparent',
-        position: 'absolute',
-        boxShadow: 'unset',
-        width: 360,
-        border: 'unset',
-        [theme.breakpoints.down('sm')]: {
-            width: '100%',
-            padding: 0,
-            backgroundColor: theme.palette.green70,
-        },
-    },
-}));
+const AntDrawer = styled(Drawer)(({ theme }) => (getAntDrawerStyle(theme)));
 
 const PublisherRequestListGrid = styled(Grid)(({ theme }) => ({
     position: 'relative',
     padding: 16,
-    background: theme.palette.green[70],
+    background: theme.palette.themeColor[70],
     borderRadius: 10,
 }));
 const TabGrid = styled(Grid)(({ theme }) => ({
@@ -82,7 +63,7 @@ const PublisherRequestListDrawer = React.memo(props => {
                         }}
                         value={value}
                         onChange={handleChange}
-                        aria-label="participant tab"
+                        aria-label="publisher request tab"
                     >
                         <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Publisher Requests')} {...a11yProps(0)} />
                     </Tabs>
