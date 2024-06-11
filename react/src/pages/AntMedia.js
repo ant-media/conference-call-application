@@ -2275,7 +2275,8 @@ function AntMedia(props) {
               roomName,
               requestSyncAdministrativeFields,
               role,
-              getStats
+              getStats,
+              setParticipantUpdated
             }}
           >
             {props.children}
