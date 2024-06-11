@@ -13,11 +13,12 @@ import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import EffectsDrawer from "../Components/EffectsDrawer";
 import {useTranslation} from "react-i18next";
 
-import {getRoomNameAttribute, getWebSocketURLAttribute, isComponentMode} from "../utils";
+import {getRootAttribute, isComponentMode} from "../utils";
 import floating from "../external/floating.js";
 import {UnauthrorizedDialog} from "Components/Footer/Components/UnauthorizedDialog";
 import {useWebSocket} from 'Components/WebSocketProvider';
 import {useTheme} from "@mui/material/styles";
+import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -93,23 +94,62 @@ function getMediaConstraints(videoSendResolution, frameRate) {
   return constraint;
 }
 
-function getPlayToken() {
-  const dataPlayToken = document.getElementById("root")?.getAttribute("data-play-token");
-  return (dataPlayToken) ? dataPlayToken : getUrlParameter("playToken");
+var streamNameInit = getRootAttribute("stream-name");
+
+if (!streamNameInit) {
+  streamNameInit = getUrlParameter("streamName");
 }
 
-function getPublishToken() {
-  const dataPublishToken = document.getElementById("root")?.getAttribute("data-publish-token");
-  return (dataPublishToken) ? dataPublishToken : getUrlParameter("publishToken");
+var onlyDataChannel = getRootAttribute("only-data-channel");
+if (!onlyDataChannel) {
+  onlyDataChannel = getUrlParameter("onlyDataChannel");
 }
 
-var playToken = getPlayToken();
-var publishToken = getPublishToken();
-var token = getUrlParameter("token")
+if (onlyDataChannel == null || typeof onlyDataChannel === "undefined") {
+  onlyDataChannel = false;
+} else {
+  onlyDataChannel = (onlyDataChannel === "true");
+}
+
+var initialPlayOnly = getRootAttribute("play-only");
+if (!initialPlayOnly) {
+  initialPlayOnly = getUrlParameter("playOnly");
+}
+
+if (initialPlayOnly == null || typeof initialPlayOnly === "undefined") {
+  initialPlayOnly = false;
+} else {
+  initialPlayOnly = (initialPlayOnly === "true");
+}
+
+var initialStreamId = getRootAttribute("data-publish-stream-id");
+if (!initialStreamId) {
+  initialStreamId = getUrlParameter("streamId");
+}
+
+var admin = getRootAttribute("admin");
+if (!admin) {
+  admin = getUrlParameter("admin");
+}
+
+if (admin == null || typeof admin === "undefined") {
+  admin = false;
+} else {
+  admin = (admin === "true");
+}
+
+function getToken() {
+  const dataToken = document.getElementById("root")?.getAttribute("data-token");
+  let token = (dataToken) ? dataToken : getUrlParameter("token");
+  if (token === null || typeof token === "undefined") {
+    token = "";
+  }
+  return token;
+}
+
+var token = getToken();
 var roleInit = getUrlParameter("role")
 var mcuEnabled = getUrlParameter("mcuEnabled");
-var InitialStreamId = getUrlParameter("streamId");
-var playOnly = getUrlParameter("playOnly");
 var enterDirectly = getUrlParameter("enterDirectly");
 if (enterDirectly == null || typeof enterDirectly === "undefined") {
   enterDirectly = false;
@@ -151,18 +191,18 @@ if (localStorage.getItem('selectedMicrophone')) {
 }
 
 
-if (playOnly) {
+if (initialPlayOnly) {
   mediaConstraints = {
     video: false,
     audio: false,
   };
 }
 
-let websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
+let websocketURL = getRootAttribute("data-websocket-url");
 
 if (!websocketURL) {
 
-  websocketURL = getWebSocketURLAttribute();
+  websocketURL = process.env.REACT_APP_WEBSOCKET_URL;
 
   if (!websocketURL) {
     const appName = window.location.pathname.substring(
@@ -190,26 +230,6 @@ if (mcuEnabled == null) {
   mcuEnabled = false;
 }
 
-if (playOnly == null) {
-  playOnly = false;
-}
-
-if (playToken == null || typeof playToken === "undefined") {
-  playToken = "";
-}
-
-if (publishToken == null || typeof publishToken === "undefined") {
-  publishToken = "";
-}
-
-if (token == null || typeof token === "undefined") {
-  token = "";
-}
-
-if (roleInit == null || typeof roleInit === "undefined") {
-  roleInit = "default";
-}
-
 var roomOfStream = [];
 
 var audioListenerIntervalJob = null;
@@ -224,8 +244,8 @@ var playReconnected;
 function AntMedia(props) {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
-  const roomName = id;
+  const initialRoomName = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
+  const [roomName, setRoomName] = useState(initialRoomName);
 
   const [role, setRole] = useState(roleInit);
 
@@ -238,11 +258,10 @@ function AntMedia(props) {
   // drawerOpen for effects components.
   const [effectsDrawerOpen, setEffectsDrawerOpen] = useState(false);
 
-  const [publishStreamId, setPublishStreamId] = useState(InitialStreamId);
-
+  const [publishStreamId, setPublishStreamId] = useState(initialStreamId);
 
   // this is my own name when i enter the room.
-  const [streamName, setStreamName] = useState("");
+  const [streamName, setStreamName] = useState(streamNameInit);
 
   // this is for checking if i am sharing my screen with other participants.
   const [isScreenShared, setIsScreenShared] = useState(false);
@@ -278,14 +297,20 @@ function AntMedia(props) {
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
-  const [isAdmin, setIsAdmin] = React.useState(role === "host");
+  const [isAdmin, setIsAdmin] = React.useState(admin);
   const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
   const [presenters, setPresenters] = React.useState([]);
+  // presenterButtonStreamIdInProcess keeps the streamId of the participant who is in the process of becoming presenter/unpresenter.
+  const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
   const [microphoneButtonDisabled, setMicrophoneButtonDisabled] = React.useState(false);
   const [cameraButtonDisabled, setCameraButtonDisabled] = React.useState(false);
 
   const [screenSharingInProgress, setScreenSharingInProgress] = React.useState(false);
+
+  const [requestSpeakerList, setRequestSpeakerList] = React.useState([]);
+
+  const [isBroadcasting, setIsBroadcasting] = React.useState(false);
 
   const [participantVisibilityMatrix, setParticipantVisibilityMatrix] = React.useState({});
 
@@ -300,6 +325,19 @@ function AntMedia(props) {
     'thinking_face': '🤔',
     'thumbs_down': '👎🏼'
   });
+
+  React.useEffect(() => {
+    setParticipantUpdated(!participantUpdated);
+    if (presenterButtonStreamIdInProcess.length > 0) {
+      setTimeout(() => {
+        if (presenterButtonStreamIdInProcess.length > 0) {
+          setPresenterButtonStreamIdInProcess([]);
+          setPresenterButtonDisabled([]);
+          setParticipantUpdated(!participantUpdated);
+        }
+      }, 5000);
+    }
+  }, [presenterButtonStreamIdInProcess]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {sendMessage, latestMessage, isWebSocketConnected} = useWebSocket();
 
@@ -340,7 +378,7 @@ function AntMedia(props) {
 
   const [devices, setDevices] = React.useState([]);
 
-  const [isPlayOnly] = React.useState(playOnly);
+  const [isPlayOnly] = React.useState(initialPlayOnly);
 
   const [isEnterDirectly] = React.useState(enterDirectly);
 
@@ -352,6 +390,8 @@ function AntMedia(props) {
   const [initialized, setInitialized] = React.useState(!!props.isTest);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
+  // open or close the mute participant dialog.
+  const [isBecomePublisherConfirmationDialogOpen, setBecomePublisherConfirmationDialogOpen] = React.useState(false);
 
   const {t} = useTranslation();
 
@@ -472,18 +512,8 @@ function AntMedia(props) {
     globals.maxVideoTrackCount = 6; //FIXME
     setPublishStreamId(generatedStreamId);
 
-    token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
-
-    if (!playOnly && token === undefined) {
-      token = publishToken;
-    }
-
-    if (!playOnly) {
+    if (!isPlayOnly) {
       handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
-    }
-
-    if (token === undefined) {
-      token = playToken;
     }
 
     webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
@@ -630,8 +660,8 @@ function AntMedia(props) {
         setWebRTCAdaptor(new WebRTCAdaptor({
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
-          isPlayMode: playOnly,
-          // onlyDataChannel: playOnly,
+          isPlayMode: isPlayOnly,
+          // onlyDataChannel: isPlayOnly,
           debug: true,
           callback: infoCallback,
           callbackError: errorCallback
@@ -641,7 +671,9 @@ function AntMedia(props) {
       }
     }
 
-    createWebRTCAdaptor();
+    createWebRTCAdaptor().then(r => {
+      console.log("createWebRTCAdaptor is done");
+    });
   }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -704,17 +736,12 @@ function AntMedia(props) {
 
   function startScreenSharing(){
 
-    var token = getUrlParameter("token") || publishToken; // can be used for both publish and play. at the moment only used on room creation password scenario
-
-    if (token === undefined) {
-      token = publishToken;
-    }
-
     var metaData = {
       isMicMuted: false,
       isCameraOn: true,
       isScreenShared: true,
-      playOnly: false
+      playOnly: false,
+      role: role,
     }
 
     let currentStreamName = streamName + " - Screen Share";
@@ -732,7 +759,7 @@ function AntMedia(props) {
   }
 
   React.useEffect(() => {
-    if (playOnly && enterDirectly && initialized) {
+    if (isPlayOnly && enterDirectly && initialized) {
       let streamId = makeid(10);
       setStreamName("Anonymous");
 
@@ -949,7 +976,7 @@ function AntMedia(props) {
         setTimeout(() => {
           handlePublish(
             publishStreamId,
-            publishToken,
+            token,
             subscriberId,
             subscriberCode
           );
@@ -964,7 +991,7 @@ function AntMedia(props) {
       if(!isJoining && roomName && publishStreamId){
         setTimeout(() => {
           webRTCAdaptor?.closeWebSocket();
-          if (!playOnly) {
+          if (!isPlayOnly) {
             webRTCAdaptor?.stop(publishStreamId);
           }
           webRTCAdaptor?.stop(roomName);
@@ -994,11 +1021,6 @@ function AntMedia(props) {
     // id is for pinning user.
     let videoLabel;
     let broadcastObject = allParticipants[streamId];
-
-    if (broadcastObject === undefined) {
-      console.error("Cannot find broadcast object for streamId: " + streamId);
-      return;
-    }
 
     // if we already pin the targeted user then we are going to remove it from pinned video.
     if ((typeof broadcastObject.isPinned !== "undefined") && (broadcastObject.isPinned === true)) {
@@ -1037,6 +1059,28 @@ function AntMedia(props) {
 
 
     setParticipantUpdated(!participantUpdated);
+  }
+
+  function turnOffYourCamNotification(participantId) {
+    handleSendNotificationEvent(
+      "TURN_YOUR_CAM_OFF",
+      publishStreamId,
+      {
+        streamId: participantId,
+        senderStreamId: publishStreamId
+      }
+    );
+  }
+
+  function turnOnYourMicNotification(participantId) {
+    handleSendNotificationEvent(
+      "TURN_YOUR_MIC_ON",
+      publishStreamId,
+      {
+        streamId: participantId,
+        senderStreamId: publishStreamId
+      }
+    );
   }
 
   function handleNotifyPinUser(id) {
@@ -1212,6 +1256,7 @@ function AntMedia(props) {
     if (open) {
       setParticipantListDrawerOpen(false);
       setEffectsDrawerOpen(false);
+      setPublisherRequestListDrawerOpen(false);
     }
   }
 
@@ -1220,6 +1265,7 @@ function AntMedia(props) {
     if (open) {
       setMessageDrawerOpen(false);
       setEffectsDrawerOpen(false);
+      setPublisherRequestListDrawerOpen(false);
     }
   }
 
@@ -1228,6 +1274,16 @@ function AntMedia(props) {
     if (open) {
       setMessageDrawerOpen(false);
       setParticipantListDrawerOpen(false);
+      setPublisherRequestListDrawerOpen(false);
+    }
+  }
+
+  function handlePublisherRequestListOpen(open) {
+    setPublisherRequestListDrawerOpen(open);
+    if (open) {
+      setMessageDrawerOpen(false);
+      setParticipantListDrawerOpen(false);
+      setEffectsDrawerOpen(false);
     }
   }
 
@@ -1326,6 +1382,12 @@ function AntMedia(props) {
         setIsRecordPluginActive(true);
       } else if (eventType === "RECORDING_TURNED_OFF") {
         setIsRecordPluginActive(false);
+      } else if (eventType === "BROADCAST_ON" && eventStreamId === publishStreamId) {
+        setIsBroadcasting(true);
+        console.log("BROADCAST_ON");
+      } else if (eventType === "BROADCAST_OFF" && eventStreamId === publishStreamId) {
+        setIsBroadcasting(false);
+        console.log("BROADCAST_OFF");
       } else if (eventType === "MESSAGE_RECEIVED") {
         // if message arrives from myself or footer message button is disabled then we are not going to show it.
         if (notificationEvent.senderId === publishStreamId
@@ -1376,12 +1438,21 @@ function AntMedia(props) {
         });
       } else if (eventType === "REACTIONS" && notificationEvent.senderStreamId !== publishStreamId) {
         showReactions(notificationEvent.senderStreamId, notificationEvent.reaction);
-      } else if (eventType === "TURN_YOUR_MIC_OFF") {
+      } else if (eventType === "TURN_YOUR_CAM_OFF") {
+        if (publishStreamId === notificationEvent.streamId) {
+          console.warn(notificationEvent.senderStreamId, "closed your cam");
+          checkAndTurnOffLocalCamera(publishStreamId);
+        }
+      } else if (eventType === "TURN_YOUR_MIC_ON") {
+        if (publishStreamId === notificationEvent.streamId) {
+          console.warn(notificationEvent.senderStreamId, "turns your mic on");
+          unmuteLocalMic();
+        } else if (eventType === "TURN_YOUR_MIC_OFF") {
         if (publishStreamId === notificationEvent.streamId) {
           console.warn(notificationEvent.senderStreamId, "muted you");
           muteLocalMic();
         }
-      } else if (eventType === "PIN_USER") {
+      } }else if (eventType === "PIN_USER") {
         if (
           notificationEvent.streamId === publishStreamId &&
           !isScreenShared
@@ -1429,9 +1500,14 @@ function AntMedia(props) {
           });
         });
 
-        setVideoTrackAssignments(tempVideoTrackAssignments);
+        // check if there is any difference between old and new assignments
+        if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+          setVideoTrackAssignments(tempVideoTrackAssignments);
+          setParticipantUpdated(!participantUpdated);
+        }
 
         checkScreenSharingStatus();
+        requestSyncAdministrativeFields();
 
         setParticipantUpdated(!participantUpdated);
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
@@ -1466,6 +1542,7 @@ function AntMedia(props) {
 
   function checkScreenSharingStatus() {
 
+    setParticipantUpdated(!participantUpdated);
     const broadcastObjectsArray = Object.values(allParticipants);
     broadcastObjectsArray.forEach((broadcastObject) => {
         if (broadcastObject.isScreenShared === true && typeof broadcastObject.isPinned === "undefined") {
@@ -1480,7 +1557,7 @@ function AntMedia(props) {
       isMicMuted: isMicMuted === null ? null : isMicMuted,
       isCameraOn: isCameraOn,
       isScreenShared: isScreenShareActive,
-      playOnly: playOnly,
+      playOnly: isPlayOnly,
       role: role
     }
 
@@ -1513,12 +1590,12 @@ function AntMedia(props) {
     clearInterval(audioListenerIntervalJob);
     audioListenerIntervalJob = null;
 
-    if (!playOnly) {
+    if (!isPlayOnly) {
       webRTCAdaptor?.stop(publishStreamId);
     }
     webRTCAdaptor?.stop(roomName);
 
-    if (!playOnly) {
+    if (!isPlayOnly) {
       webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
     }
 
@@ -1589,13 +1666,13 @@ function AntMedia(props) {
     };
 
     let tempVideoTrackAssignments = [];
-    if (!playOnly) {
+    if (!isPlayOnly) {
       tempVideoTrackAssignments.push(newVideoTrackAssignment);
     }
     setVideoTrackAssignments(tempVideoTrackAssignments);
 
     let allParticipantsTemp = {};
-    if (!playOnly) {
+    if (!isPlayOnly) {
       allParticipantsTemp[publishStreamId] = {name: "You"};
     }
     setAllParticipants(allParticipantsTemp);
@@ -1604,7 +1681,7 @@ function AntMedia(props) {
   function addMeAsParticipant(publishStreamId) {
     let isParticipantExist = videoTrackAssignments.find((vta) => vta.label === "localVideo");
 
-    if (isParticipantExist || playOnly) {
+    if (isParticipantExist || isPlayOnly) {
       return;
     }
 
@@ -1808,6 +1885,17 @@ function AntMedia(props) {
     }
   }
 
+  function requestSyncAdministrativeFields() {
+    var jsCmd = {
+      command: "syncAdministrativeFields",
+      roomName: roomName,
+      streamId: publishStreamId,
+      websocketURL: websocketURL,
+      token: token
+    };
+    sendMessage(JSON.stringify(jsCmd));
+  }
+
   function showReactions(streamId, reactionRequest) {
     let reaction = '😀';
     let streamName = '';
@@ -1820,6 +1908,8 @@ function AntMedia(props) {
       streamName = 'You';
     } else if (allParticipants[streamId]?.name !== undefined) {
       streamName = allParticipants[streamId].name;
+    } else {
+      streamName = streamId;
     }
 
     floating({
@@ -1888,7 +1978,7 @@ function AntMedia(props) {
       };
       sendMessage(JSON.stringify(jsCmd));
     }
-  }, [isWebSocketConnected, sendMessage]);
+  }, [isWebSocketConnected]);
 
   React.useEffect(() => {
     if (!latestMessage) {
@@ -1931,8 +2021,10 @@ function AntMedia(props) {
         console.log("Stop Recording is failed");
         displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
       }
+    } else if (obj.command === "pong") {
+      requestSyncAdministrativeFields();
     }
-  }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);
+  }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const makeFullScreen = (divId) => {
     if (fullScreenId === divId) {
@@ -2075,7 +2167,17 @@ function AntMedia(props) {
               isJoining,
               setParticipantUpdated,
               makeParticipantPresenter,
-              makeParticipantUndoPresenter
+              makeParticipantUndoPresenter,
+              isBecomePublisherConfirmationDialogOpen,
+              setBecomePublisherConfirmationDialogOpen,
+              requestSpeakerList,
+              turnOnYourMicNotification,
+              turnOffYourCamNotification,
+              handlePublisherRequestListOpen,
+              setRequestSpeakerList,
+              presenterButtonStreamIdInProcess,
+              roomName,
+              requestSyncAdministrativeFields
             }}
           >
             {props.children}
@@ -2130,6 +2232,7 @@ function AntMedia(props) {
                   <MessageDrawer/>
                   <ParticipantListDrawer/>
                   <EffectsDrawer/>
+                  <PublisherRequestListDrawer/>
                 </>
               )}
           </ConferenceContext.Provider>
