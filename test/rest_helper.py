@@ -12,9 +12,12 @@ REST_URL="/rest/v2"
 class RestHelper:
   def __init__(self, url, user, password):
     self.url = url
+    if(url.endswith("localhost:3000")):
+      self.url = "http://localhost:5080"
+    print("rest url: "+self.url)
     self.user = user
     self.password = password
-    self.rest_url = url+REST_URL
+    self.rest_url = self.url+REST_URL
     self.session = requests.Session()
 
   def login(self):
@@ -24,19 +27,33 @@ class RestHelper:
   def get_broadcasts(self):
     resp = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/broadcasts/list/0/50")
     json_data = json.loads(resp.text)
-    size = len(json_data)
-    total = 0
+    return json_data
+
+  def getVoDFor(self, streamId):
+    resp = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/vods/list/0/5")
+    json_data = json.loads(resp.text)
+    
     for item in json_data:
-      viewer = item["webRTCViewerCount"]
-      #print viewer
-      total += viewer
-    print("total publishers:"+str(size))
-    print("total players:"+str(total))
+      if item["streamId"] == streamId:
+        return item
+  
 
   def call_get_app_settings(self, app_name):
     resp = self.session.get(self.rest_url+"/applications/settings/"+app_name)
     json_data = json.loads(resp.text)
     return json_data
+  
+  def call_set_app_settings(self, app_name, settings_data):
+    url = self.rest_url + "/applications/settings/" + app_name
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    response = self.session.post(url, headers=headers, json=settings_data)
+    
+    if response.status_code == 200:
+        return json.loads(response.text)
+    else:
+        response.raise_for_status()
 
   def call_get_cluster_nodes(self):
     response = self.session.get(self.rest_url+"/cluster/nodes/0/10")

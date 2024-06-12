@@ -579,15 +579,17 @@ function AntMedia(props) {
       //according to the result we modify mediaConstraints
       await checkDevices();
       if (recreateAdaptor && webRTCAdaptor == null) {
-        setWebRTCAdaptor(new WebRTCAdaptor({
+        var adaptor = new WebRTCAdaptor({
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
+          //placeholder for peerconnection_config
           isPlayMode: playOnly,
           // onlyDataChannel: playOnly,
           debug: true,
           callback: infoCallback,
           callbackError: errorCallback
-        }))
+        });
+        setWebRTCAdaptor(adaptor)
 
         setRecreateAdaptor(false);
       }
@@ -1346,6 +1348,8 @@ function AntMedia(props) {
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
         let videoTrackAssignmentList = notificationEvent.payload;
 
+        console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(videoTrackAssignmentList));
+
         let tempVideoTrackAssignments = videoTrackAssignments;
 
         let tempVideoTrackAssignmentsNew = [];
@@ -1399,7 +1403,7 @@ function AntMedia(props) {
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
       } else if (eventType === "TRACK_LIST_UPDATED") {
-        console.debug("TRACK_LIST_UPDATED -> ", obj);
+        console.info("TRACK_LIST_UPDATED -> ", obj);
 
         webRTCAdaptor?.getBroadcastObject(roomName);
       }
