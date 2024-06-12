@@ -96,8 +96,12 @@ class TestJoinLeave(unittest.TestCase):
     settings_button = self.chrome.get_element_with_retry(By.ID, "settings-button")
     self.chrome.click_element(settings_button)
 
+    time.sleep(1)
+
     change_layout_button = self.chrome.get_element_with_retry(By.ID, "change-layout-button")
     self.chrome.click_element(change_layout_button)
+
+    time.sleep(1)
 
     tile_count_slider = self.chrome.get_element_with_retry(By.ID, "tile-count-slider")
     points = self.chrome.get_element_in_element(tile_count_slider, By.CLASS_NAME, "MuiSlider-mark")
