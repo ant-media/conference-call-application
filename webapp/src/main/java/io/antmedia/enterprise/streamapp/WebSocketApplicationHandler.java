@@ -167,15 +167,17 @@ public class WebSocketApplicationHandler
 		return result;
 	}
 
-	public Result stopRecording(String streamId) {
+	public Result stopRecording(String streamId, String webURI) {
 		Result result = new Result(false);
 		try {
-			Method stopBroadcastingMethod = getMediaPushPlugin().getClass().getMethod("stopMediaPush", String.class);
-
+			URI websocketURLObject = new URI(webURI);
+			Method stopBroadcastingMethod = getMediaPushPlugin().getClass().getMethod("stopMediaPush", String.class,URI.class);
+			
 			// Invoke stopBroadcasting
-			result = (Result) stopBroadcastingMethod.invoke(getMediaPushPlugin(), streamId);
+			result = (Result) stopBroadcastingMethod.invoke(getMediaPushPlugin(), streamId,websocketURLObject);
+
 		}
-		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) 
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | URISyntaxException e) 
 		{
 			logger.error(ExceptionUtils.getStackTrace(e));
 			result.setMessage(e.getMessage());
@@ -276,11 +278,11 @@ public class WebSocketApplicationHandler
 		else if (cmd.equals(WebSocketApplicationConstants.STOP_RECORDING_COMMAND)) 
 		{
 			String streamId = (String)jsonObject.get(WebSocketConstants.STREAM_ID);
+			String websocketUrl = (String) jsonObject.get(WebSocketApplicationConstants.WEBSOCKET_URL_FIELD);
 
 			logger.info("stop recording for {}", streamId);
 
-			String streamIdRecording = streamId + SUFFIX;
-			Result result = stopRecording(streamIdRecording);
+			String streamIdRecording = streamId + SUFFIX;Result result = stopRecording(streamIdRecording, websocketUrl);
 			
 			JSONObject jsonObjectResponse = new JSONObject();
 			jsonObjectResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.STOP_RECORDING_RESPONSE);
