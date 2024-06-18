@@ -346,7 +346,7 @@ function AntMedia(props) {
   /*
    * allParticipants: is a dictionary of (streamId, broadcastObject) for all participants in the room.
    * It determines the participants list in the participants drawer.
-   * broadcastObject callback (which is return of getBroadcastObject request) for roomName has subtrackList and
+   * subtrackList callback (which is return of getSubtracks request) for roomName has subtrackList and
    * we use it to fill this dictionary.
    */
   const [allParticipants, setAllParticipants] = useState({});
@@ -516,14 +516,14 @@ function AntMedia(props) {
       handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
     }
 
-    webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
+    webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode, '{}', role);
   }
 
   function requestVideoTrackAssignmentsInterval() {
     if (videoTrackAssignmentsIntervalJob === null) {
       videoTrackAssignmentsIntervalJob = setInterval(() => {
         webRTCAdaptor?.requestVideoTrackAssignments(roomName);
-        webRTCAdaptor?.getBroadcastObject(roomName);
+        webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
       }, 3000);
     }
   }
@@ -606,42 +606,10 @@ function AntMedia(props) {
         setIsRecordPluginActive(brodcastStatusMetadata.isRecording);
       }
     }
-
-    let participantIds = broadcastObject.subTrackStreamIds;
-
-    //find and remove not available tracks
-    const temp = allParticipants;
-    let currentTracks = Object.keys(temp);
-    currentTracks.forEach(trackId => {
-      if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
-        console.log("stream removed:" + trackId);
-
-        delete temp[trackId];
-      } else if (allParticipants[trackId] !== undefined && allParticipants[trackId] !== null && allParticipants[trackId].metaData !== undefined && allParticipants[trackId].metaData !== null) {
-          let metaData = JSON.parse(allParticipants[trackId].metaData);
-          if (metaData.role != null && !participantVisibilityMatrix[role].includes(metaData.role)) {
-            delete temp[trackId];
-          }
-      }
-    });
-
-    setAllParticipants(temp);
-    setParticipantUpdated(!participantUpdated);
-
-    //request broadcast object for new tracks
-    participantIds.forEach(pid => {
-      if (allParticipants[pid] === undefined) {
-        webRTCAdaptor?.getBroadcastObject(pid);
-      }
-    });
   }
 
   function handleSubtrackBroadcastObject(broadcastObject) {
     let metaData = JSON.parse(broadcastObject.metaData);
-
-    if (metaData.role != null && !participantVisibilityMatrix[role].includes(metaData.role)) {
-      return;
-    }
 
     let allParticipantsTemp = allParticipants;
     broadcastObject.isScreenShared = metaData.isScreenShared;
@@ -749,7 +717,7 @@ function AntMedia(props) {
     screenShareStreamId.current = publishStreamId + "_presentation"
 
     screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
-      subscriberCode, currentStreamName, roomName, JSON.stringify(metaData))
+      subscriberCode, currentStreamName, roomName, JSON.stringify(metaData), role)
 
     setScreenSharingInProgress(true);
 
@@ -769,7 +737,6 @@ function AntMedia(props) {
       joinRoom(roomName, streamId, roomJoinMode);
     }
 
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialized]);
 
@@ -777,6 +744,22 @@ function AntMedia(props) {
     if (info === "initialized") {
       enableDisableMCU(mcuEnabled);
       setInitialized(true);
+    } else if (info === "subtrackList") {
+        let subtrackList = obj.subtrackList;
+        let allParticipantsTemp = {};
+        if (!isPlayOnly) {
+          allParticipantsTemp[publishStreamId] = {name: "You"};
+        }
+        subtrackList.forEach(subTrack => {
+            let broadcastObject = JSON.parse(subTrack);
+
+            let metaData = JSON.parse(broadcastObject.metaData);
+            broadcastObject.isScreenShared = metaData.isScreenShared;
+
+            allParticipantsTemp[broadcastObject.streamId] = broadcastObject;
+        });
+        setAllParticipants(allParticipantsTemp);
+        setParticipantUpdated(!participantUpdated);
     } else if (info === "broadcastObject") {
       if (obj.broadcast === undefined) {
         return;
@@ -804,7 +787,7 @@ function AntMedia(props) {
         localVideoCreate(newLocalVideo);
         // we need to set the setVideoCameraSource to be able to update sender source after the reconnection
         webRTCAdaptor.mediaManager.setVideoCameraSource(publishStreamId, webRTCAdaptor.mediaManager.mediaConstraints, null, true);
-        webRTCAdaptor?.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
+        webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
@@ -828,6 +811,7 @@ function AntMedia(props) {
       console.log("**** play started:" + reconnecting);
       setIsPlayed(true);
       webRTCAdaptor?.getBroadcastObject(roomName);
+      webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
       requestVideoTrackAssignmentsInterval();
 
       if (reconnecting) {
@@ -1529,12 +1513,12 @@ function AntMedia(props) {
       } else if (eventType === "TRACK_LIST_UPDATED") {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
-        webRTCAdaptor?.getBroadcastObject(roomName);
+        webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
       } else if (eventType === "UPDATE_PARTICIPANT_ROLE") {
         if (publishStreamId === notificationEvent.streamId) {
           setRole(notificationEvent.role);
         } else {
-          webRTCAdaptor?.getBroadcastObject(roomName);
+          webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
         }
       }
     }
@@ -1718,7 +1702,8 @@ function AntMedia(props) {
       subscriberCode,
       currentStreamName,
       roomName,
-      JSON.stringify(userStatusMetadata)
+      JSON.stringify(userStatusMetadata),
+      role
     );
   }
 
