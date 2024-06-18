@@ -148,7 +148,10 @@ function getToken() {
 }
 
 var token = getToken();
-var roleInit = getUrlParameter("role")
+var roleInit = getUrlParameter("role");
+if (roleInit == null || typeof roleInit === "undefined") {
+  roleInit = "default";
+}
 var mcuEnabled = getUrlParameter("mcuEnabled");
 var enterDirectly = getUrlParameter("enterDirectly");
 if (enterDirectly == null || typeof enterDirectly === "undefined") {
