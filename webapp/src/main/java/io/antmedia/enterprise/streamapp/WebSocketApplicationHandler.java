@@ -61,6 +61,7 @@ public class WebSocketApplicationHandler
 	protected static Logger logger = LoggerFactory.getLogger(WebSocketApplicationHandler.class);
 
 	ConfigurableWebApplicationContext context;
+	AMSBroadcastManager amsBroadcastManager;
 	ConferenceRoomSettings conferenceRoomSettings;
 
 	private Gson gsonOnlyExposedFields = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
@@ -113,7 +114,12 @@ public class WebSocketApplicationHandler
 		}
 	}
 	
-	
+	private AMSBroadcastManager getAMSBroadcastManager() {
+		if (amsBroadcastManager == null && context != null) {
+			amsBroadcastManager = (AMSBroadcastManager) context.getBean("amsBroadcastManager");
+		}
+		return amsBroadcastManager;
+	}
 
 	private void setConferenceRoomSettings(){
 		if(context != null){
@@ -220,7 +226,13 @@ public class WebSocketApplicationHandler
 		else if (cmd.equals(WebSocketApplicationConstants.GET_SETTINGS_COMMAND)) 
 		{	
 			responseRoomSettings(session);
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.SEND_DATA_CHANNEL_COMMAND))
+		{
+			String receiverStreamId = (String)jsonObject.get(WebSocketApplicationConstants.RECEIVER_STREAM_ID_FIELD);
+			String messageData = (String)jsonObject.get(WebSocketApplicationConstants.MESSAGE_FIELD);
 
+			handleSendDataChannelMessage(receiverStreamId, messageData);
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.START_RECORDING_COMMAND)) {
 			//start recording
@@ -308,6 +320,16 @@ public class WebSocketApplicationHandler
 		jsonResponse.put(WebSocketApplicationConstants.SETTINGS, gsonOnlyExposedFields.toJson(conferenceRoomSettings));
 
 		sendMessage(session, jsonResponse.toJSONString());
+	}
+
+	public void handleSendDataChannelMessage(String receiverStreamId, String messageData) {
+		boolean result = getAMSBroadcastManager().sendDataChannelMessage(receiverStreamId, messageData);
+
+		if (result) {
+			logger.info("Data channel message is sent to {}", receiverStreamId);
+		} else {
+			logger.error("Data channel message could not be sent to {}", receiverStreamId);
+		}
 	}
 
 	private void handlePasswordRequiredCommand(Session session) {

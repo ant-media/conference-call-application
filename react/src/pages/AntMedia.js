@@ -315,7 +315,7 @@ function AntMedia(props) {
   const [presenters, setPresenters] = React.useState([]);
   // presenterButtonStreamIdInProcess keeps the streamId of the participant who is in the process of becoming presenter/unpresenter.
   const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState([]);
-  const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState(false);
+  const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState([]);
   const [microphoneButtonDisabled, setMicrophoneButtonDisabled] = React.useState(false);
   const [cameraButtonDisabled, setCameraButtonDisabled] = React.useState(false);
 
@@ -480,27 +480,59 @@ function AntMedia(props) {
   }
 
   function makeParticipantPresenter(streamId) {
-    let notEvent = {
-      streamId: streamId,
-      eventType: "UPDATE_PARTICIPANT_ROLE",
-      role: "speaker"
-    };
-    console.info("send notification event", notEvent);
-    webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
+    let participantsRole = "";
+    let participantsNewRole = "";
+    let broadcastObject = allParticipants[streamId];
 
-    let temp = presenters;
-    temp.push(streamId);
-    setPresenters(temp);
+    if (broadcastObject !== null && broadcastObject !== undefined) {
+      participantsRole = broadcastObject.role;
+    }
+
+    if (participantsRole === "host") {
+        participantsNewRole = "active_host";
+    } else if (participantsRole === "speaker") {
+        participantsNewRole = "active_speaker";
+    } else if (participantsRole === "temp_listener") {
+        participantsNewRole = "active_temp_listener";
+    } else {
+      console.error("Invalid role for participant to make presenter", participantsRole);
+      return;
+    }
+
+    updateParticipantRole(streamId, participantsNewRole);
   }
 
   function makeParticipantUndoPresenter(streamId) {
+    let participantsRole = "";
+    let participantsNewRole = "";
+    let broadcastObject = allParticipants[streamId];
+
+    if (broadcastObject !== null && broadcastObject !== undefined) {
+      participantsRole = broadcastObject.role;
+    }
+
+    if (participantsRole === "active_host") {
+      participantsNewRole = "host";
+    } else if (participantsRole === "active_speaker") {
+      participantsNewRole = "speaker";
+    } else if (participantsRole === "active_temp_listener") {
+      participantsNewRole = "temp_listener";
+    } else {
+      console.error("Invalid role for participant to make presenter", participantsRole);
+      return;
+    }
+
+    updateParticipantRole(streamId, participantsNewRole);
+  }
+
+  function updateParticipantRole(streamId, role) {
     let notEvent = {
       streamId: streamId,
       eventType: "UPDATE_PARTICIPANT_ROLE",
-      role: "panelist"
+      role: role
     };
     console.info("send notification event", notEvent);
-    webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
+    webRTCAdaptor?.sendData(roomName, JSON.stringify(notEvent));
 
     let temp = presenters;
     temp = temp.filter(item => item !== streamId);
@@ -536,7 +568,7 @@ function AntMedia(props) {
     if (videoTrackAssignmentsIntervalJob === null) {
       videoTrackAssignmentsIntervalJob = setInterval(() => {
         webRTCAdaptor?.requestVideoTrackAssignments(roomName);
-        webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
+        webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
       }, 3000);
     }
   }
@@ -800,7 +832,7 @@ function AntMedia(props) {
         localVideoCreate(newLocalVideo);
         // we need to set the setVideoCameraSource to be able to update sender source after the reconnection
         webRTCAdaptor.mediaManager.setVideoCameraSource(publishStreamId, webRTCAdaptor.mediaManager.mediaConstraints, null, true);
-        webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
+        webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
         return;
@@ -824,7 +856,7 @@ function AntMedia(props) {
       console.log("**** play started:" + reconnecting);
       setIsPlayed(true);
       webRTCAdaptor?.getBroadcastObject(roomName);
-      webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
+      webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
       requestVideoTrackAssignmentsInterval();
 
       if (reconnecting) {
@@ -1526,12 +1558,15 @@ function AntMedia(props) {
       } else if (eventType === "TRACK_LIST_UPDATED") {
         console.debug("TRACK_LIST_UPDATED -> ", obj);
 
-        webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
+        webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
       } else if (eventType === "UPDATE_PARTICIPANT_ROLE") {
+
+        console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
+
         if (publishStreamId === notificationEvent.streamId) {
           setRole(notificationEvent.role);
         } else {
-          webRTCAdaptor?.getSubtracks(roomName, role, 0, 15);
+          webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
         }
       }
     }
@@ -2175,7 +2210,8 @@ function AntMedia(props) {
               setRequestSpeakerList,
               presenterButtonStreamIdInProcess,
               roomName,
-              requestSyncAdministrativeFields
+              requestSyncAdministrativeFields,
+              role
             }}
           >
             {props.children}
