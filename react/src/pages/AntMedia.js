@@ -148,15 +148,25 @@ function getToken() {
 }
 
 var token = getToken();
-var roleInit = getUrlParameter("role");
-if (roleInit == null || typeof roleInit === "undefined") {
-  roleInit = "default";
+
+function getRole() {
+  const dataRole = document.getElementById("root")?.getAttribute("data-role");
+  let role = (dataRole) ? dataRole : getUrlParameter("role");
+  if (role === null || typeof role === "undefined") {
+    role = "default";
+  }
+  return role;
 }
+
+var roleInit = getRole();
+
 var mcuEnabled = getUrlParameter("mcuEnabled");
+
 var enterDirectly = getUrlParameter("enterDirectly");
 if (enterDirectly == null || typeof enterDirectly === "undefined") {
   enterDirectly = false;
 }
+
 var subscriberId = getUrlParameter("subscriberId");
 var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
