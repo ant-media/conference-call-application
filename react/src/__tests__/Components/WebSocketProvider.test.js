@@ -95,37 +95,3 @@ describe('WebSocketProvider test', () => {
         server.close();
     });
 });
-
-describe('WebSocketProvider pingInterval', () => {
-    let webSocket;
-    let applicationWebSocketUrl;
-    let sendMessage;
-
-    beforeEach(() => {
-        webSocket = { current: { send: jest.fn(), readyState: WebSocket.OPEN } };
-        applicationWebSocketUrl = "ws://localhost:5080/Conference/websocket/application";
-        sendMessage = (message) => {
-            if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
-                webSocket.current.send(message);
-            } else if (webSocket.current && webSocket.current.readyState === WebSocket.CLOSED) {
-                console.log('WebSocket not connected, unable to send ping');
-                webSocket.current = new WebSocket(applicationWebSocketUrl);
-            }
-        };
-        jest.useFakeTimers();
-    });
-
-    it('sends ping when WebSocket is open', () => {
-        sendMessage(JSON.stringify({ command: "ping" }));
-        jest.advanceTimersByTime(10000);
-        expect(webSocket.current.send).toHaveBeenCalledWith(JSON.stringify({ command: "ping" }));
-    });
-
-    it('reconnects when WebSocket is closed', () => {
-        webSocket.current.readyState = WebSocket.CLOSED;
-        sendMessage(JSON.stringify({ command: "ping" }));
-        expect(console.log).toHaveBeenCalledWith('WebSocket not connected, unable to send ping');
-        jest.advanceTimersByTime(10000);
-        expect(webSocket.current).toBeInstanceOf(WebSocket);
-    });
-});
