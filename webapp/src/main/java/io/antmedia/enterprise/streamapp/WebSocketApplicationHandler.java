@@ -420,5 +420,19 @@ public class WebSocketApplicationHandler
 		}
 	}
 
+	// Modular method to send a JSON response
+	private void sendResponse(Session session, String command, Result result) {
+		JSONObject response = new JSONObject();
+		response.put(WebSocketConstants.COMMAND, command);
+		response.put(WebSocketConstants.DEFINITION, gson.toJson(result));
+		sendMessage(session, response.toJSONString());
+	}
+
+	private void sendResponse(Session session, String command, JSONObject result) {
+		JSONObject response = new JSONObject();
+		response.put(WebSocketConstants.COMMAND, command);
+		response.put(WebSocketConstants.DEFINITION, result);
+		sendMessage(session, response.toJSONString());
+	}
 
 }
