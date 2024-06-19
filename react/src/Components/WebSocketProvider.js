@@ -101,12 +101,8 @@ export const WebSocketProvider = ({ children }) => {
         }
     };
 
-    const getWebSocket = () => {
-        return webSocket.current;
-    }
-
     return (
-        <WebSocketContext.Provider value={{ sendMessage, latestMessage, isWebSocketConnected, getWebSocket}}>
+        <WebSocketContext.Provider value={{ sendMessage, latestMessage, isWebSocketConnected}}>
             {children}
         </WebSocketContext.Provider>
     );
