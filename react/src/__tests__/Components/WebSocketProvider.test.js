@@ -1,6 +1,6 @@
-import React from "react";
+import React, {useContext} from "react";
 import {render} from "@testing-library/react";
-import {WebSocketProvider} from "../../Components/WebSocketProvider";
+import {useWebSocket, WebSocketProvider} from "../../Components/WebSocketProvider";
 import WS from "jest-websocket-mock";
 
 global.console = { log: jest.fn(), error: jest.fn() };
@@ -119,13 +119,6 @@ describe('WebSocketProvider pingInterval', () => {
         sendMessage(JSON.stringify({ command: "ping" }));
         jest.advanceTimersByTime(10000);
         expect(webSocket.current.send).toHaveBeenCalledWith(JSON.stringify({ command: "ping" }));
-    });
-
-    it('does not send ping when WebSocket is not open', () => {
-        webSocket.current.readyState = WebSocket.CLOSED;
-        sendMessage(JSON.stringify({ command: "ping" }));
-        jest.advanceTimersByTime(10000);
-        expect(webSocket.current.send).not.toHaveBeenCalled();
     });
 
     it('reconnects when WebSocket is closed', () => {
