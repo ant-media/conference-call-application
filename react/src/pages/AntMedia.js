@@ -321,7 +321,6 @@ function AntMedia(props) {
   const screenShareStreamId = React.useRef(null)
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
-  const leaveRoomWithError = useRef(false);
 
   // video send resolution for publishing
   // possible values: "auto", "highDefinition", "standartDefinition", "lowDefinition"
@@ -338,11 +337,20 @@ function AntMedia(props) {
   const [localVideo, setLocalVideo] = React.useState(null);
 
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
+  const [leaveRoomWithError, setLeaveRoomWithError] = React.useState(null);
+
 
 
   const [initialized, setInitialized] = React.useState(!!props.isTest);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
+
+  const [publishStats, setPublishStats] = React.useState(null);
+
+  const [isReconnectionInProgress, setIsReconnectionInProgress] = React.useState(false);
+
+  const [highResourceUsageWarningCount, setHighResourceUsageWarningCount] = React.useState(0);
+
 
   const {t} = useTranslation();
 
@@ -421,6 +429,7 @@ function AntMedia(props) {
     //reset UI releated states
     removeAllRemoteParticipants();
 
+    setIsReconnectionInProgress(true);
     reconnecting = true;
     publishReconnected = false;
     playReconnected = false;
@@ -734,6 +743,8 @@ function AntMedia(props) {
         webRTCAdaptor?.getBroadcastObject(roomName); // FIXME: maybe this is not needed, check it
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
+        setIsReconnectionInProgress(reconnecting);
+
         return;
       }
       console.log("publish started");
@@ -750,6 +761,7 @@ function AntMedia(props) {
       if (reconnecting) {
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
+        setIsReconnectionInProgress(reconnecting);
       }
     } else if (info === "play_started") {
       console.log("**** play started:" + reconnecting);
@@ -760,6 +772,7 @@ function AntMedia(props) {
       if (reconnecting) {
         playReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
+        setIsReconnectionInProgress(reconnecting);
       }
     } else if (info === "play_finished") {
       clearInterval(requestVideoTrackAssignmentsInterval);
@@ -804,16 +817,30 @@ function AntMedia(props) {
 
     let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
     let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
+
     let packageLostPercentage = 0;
-    if (packageLost > 0) {
-      packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
+    if (publishStats !== null) {
+      let deltaPackageLost = packageLost - publishStats.packageLost;
+      let deltaPackageSent = packageSent - publishStats.packageSent;
+
+      if (deltaPackageLost > 0) {
+        packageLostPercentage = ((deltaPackageLost / parseInt(deltaPackageSent)) * 100).toPrecision(3);
+      }
     }
 
-    if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate) {
-      console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
-      displayPoorNetworkConnectionWarning();
+    if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 ) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
+      console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
+      displayPoorNetworkConnectionWarning("Network connection is weak. Please check your connection!");
     }
+    else if (rtt >= 100 || packageLostPercentage >= 1.5 || jitter >= 50) {
+      console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); 
+      displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
+    }
+
+    setPublishStats({packageLost: packageLost, packageSent: packageSent});
   }
+
+  //TODO : add receive stats  
 
   function screenShareWebRtcAdaptorInfoCallback(info, obj) {
     if (info === "initialized") {
@@ -915,7 +942,13 @@ function AntMedia(props) {
       setUnAuthorizedDialogOpen(true)
     }
     else if(error.indexOf("highResourceUsage") !== -1){
+      setHighResourceUsageWarningCount(highResourceUsageWarningCount + 1);
+
+      if(highResourceUsageWarningCount % 3 === 0){
+        displayMessage("All servers are busy. Retrying to connect...", "white");
+      }
       if(!isJoining && roomName && publishStreamId){
+
         setTimeout(() => {
           webRTCAdaptor?.closeWebSocket();
           if (!playOnly) {
@@ -929,17 +962,21 @@ function AntMedia(props) {
     }
     else if ((error === "publishTimeoutError") && (!reconnecting)){
       console.error(error , "Firewall might be blocking the connection Please setup a TURN Server");
-      leaveRoomWithError.current = true;
+      setLeaveRoomWithError("Firewall might be blocking your connection. Please report this.");
       setLeftTheRoom(true);
+      setIsJoining(false);
     }
     else if (error === "license_suspended_please_renew_license"){
       console.error(error , "Licence is Expired please renew the licence");
-      leaveRoomWithError.current = true;
+      setLeaveRoomWithError("Licence error. Please report this.");
       setLeftTheRoom(true);
+      setIsJoining(false);
     } else if (error === "notSetRemoteDescription"){
       console.error(error , "Not set remote description");
-      leaveRoomWithError.current = true;
+      setLeaveRoomWithError("System is not compatible to connect. Please report this.");
       setLeftTheRoom(true);
+      setIsJoining(false);
+
     }
     console.log("***** " + error)
   }
@@ -1084,12 +1121,12 @@ function AntMedia(props) {
     showReactions(publishStreamId, reaction);
   }
 
-  const displayPoorNetworkConnectionWarning = () => {
+  const displayPoorNetworkConnectionWarning = (message) => {
     console.log("displayPoorNetworkConnectionWarning");
 
     if (last_warning_time == null || Date.now() - last_warning_time > 1000 * 30) {
       last_warning_time = Date.now();
-      displayWarning("Your connection is not stable. Please check your internet connection!");
+      displayWarning(message);
     }
   }
 
@@ -2045,6 +2082,23 @@ function AntMedia(props) {
               </Backdrop>
             ):null}
 
+            {isReconnectionInProgress ? (
+              <Backdrop
+                      sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                      open={isReconnectionInProgress}
+                      //onClick={handleClose}
+                    >
+                <Grid container alignItems='center' justify='center' alignContent='center'>
+                  <Grid item xs={12} align='center'>
+                      <CircularProgress/>
+                  </Grid>
+                  <Grid item xs={12} align='center'>
+                      <Typography style={{color: theme.palette.themeColor10}}><b>{t("Reconnecting...")}</b></Typography>
+                  </Grid>
+                </Grid>
+              </Backdrop>
+            ):null}
+
             {screenSharingInProgress ? (
               <Backdrop
                       sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -2063,7 +2117,7 @@ function AntMedia(props) {
             ):null}
 
               {leftTheRoom ? (
-               <LeftTheRoom isError={leaveRoomWithError.current} />
+               <LeftTheRoom withError={leaveRoomWithError} />
               ) : waitingOrMeetingRoom === "waiting" ? (
                 <WaitingRoom/>
               ) : (
