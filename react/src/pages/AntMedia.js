@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
-import _ from "lodash";
+import _, { cond } from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
 import {useSnackbar} from "notistack";
@@ -255,7 +255,6 @@ var publishReconnected;
 var playReconnected;
 
 function AntMedia(props) {
-
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const initialRoomName = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
   const [roomName, setRoomName] = useState(initialRoomName);
@@ -960,12 +959,13 @@ function AntMedia(props) {
   function checkConnectionQuality(obj) {
     let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
     let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
-    let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
+    //let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
 
     let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
     let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
 
     let packageLostPercentage = 0;
+    console.log("publishStats:", publishStats);
     if (publishStats !== null) {
       let deltaPackageLost = packageLost - publishStats.packageLost;
       let deltaPackageSent = packageSent - publishStats.packageSent;
@@ -977,7 +977,7 @@ function AntMedia(props) {
 
     if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 ) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
       console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
-      displayPoorNetworkConnectionWarning("Network connection is weak. Please check your connection!");
+      displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
     }
     else if (rtt >= 100 || packageLostPercentage >= 1.5 || jitter >= 50) {
       console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); 
@@ -1005,7 +1005,7 @@ function AntMedia(props) {
       //pinVideo(screenShareStreamId.current);
 
     } else if (info === "updated_stats") {
-      checkConnectionQuality(obj);
+      //checkConnectionQuality(obj);
     } else if (info === "ice_connection_state_changed") {
       //FIXME: handle reconnection
     }
@@ -1108,18 +1108,15 @@ function AntMedia(props) {
       }
     }
     else if ((error === "publishTimeoutError") && (!reconnecting)){
-      console.error(error , "Firewall might be blocking the connection Please setup a TURN Server");
       setLeaveRoomWithError("Firewall might be blocking your connection. Please report this.");
       setLeftTheRoom(true);
       setIsJoining(false);
     }
     else if (error === "license_suspended_please_renew_license"){
-      console.error(error , "Licence is Expired please renew the licence");
       setLeaveRoomWithError("Licence error. Please report this.");
       setLeftTheRoom(true);
       setIsJoining(false);
     } else if (error === "notSetRemoteDescription"){
-      console.error(error , "Not set remote description");
       setLeaveRoomWithError("System is not compatible to connect. Please report this.");
       setLeftTheRoom(true);
       setIsJoining(false);
@@ -1286,7 +1283,7 @@ function AntMedia(props) {
   }
 
   const displayPoorNetworkConnectionWarning = (message) => {
-    console.log("displayPoorNetworkConnectionWarning");
+    console.warn("Poor Network Connection Warning:"+message);
 
     if (last_warning_time == null || Date.now() - last_warning_time > 1000 * 30) {
       last_warning_time = Date.now();
