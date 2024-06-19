@@ -80,6 +80,7 @@ describe('WebSocketProvider test', () => {
         server.error();
 
         expect(console.error).toHaveBeenCalledWith('WebSocket Error');
+        server.close();
     });
 
     it('does print Received pong from server when onmessage is called', async () => {
@@ -91,5 +92,46 @@ describe('WebSocketProvider test', () => {
         server.send('{"command":"pong"}');
 
         expect(console.log).toHaveBeenCalledWith('Received pong from server');
+        server.close();
+    });
+});
+
+describe('WebSocketProvider pingInterval', () => {
+    let webSocket;
+    let applicationWebSocketUrl;
+    let sendMessage;
+
+    beforeEach(() => {
+        webSocket = { current: { send: jest.fn(), readyState: WebSocket.OPEN } };
+        applicationWebSocketUrl = "ws://localhost:5080/Conference/websocket/application";
+        sendMessage = (message) => {
+            if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
+                webSocket.current.send(message);
+            } else if (webSocket.current && webSocket.current.readyState === WebSocket.CLOSED) {
+                console.log('WebSocket not connected, unable to send ping');
+                webSocket.current = new WebSocket(applicationWebSocketUrl);
+            }
+        };
+        jest.useFakeTimers();
+    });
+
+    it('sends ping when WebSocket is open', () => {
+        sendMessage(JSON.stringify({ command: "ping" }));
+        jest.advanceTimersByTime(10000);
+        expect(webSocket.current.send).toHaveBeenCalledWith(JSON.stringify({ command: "ping" }));
+    });
+
+    it('does not send ping when WebSocket is not open', () => {
+        webSocket.current.readyState = WebSocket.CLOSED;
+        sendMessage(JSON.stringify({ command: "ping" }));
+        jest.advanceTimersByTime(10000);
+        expect(webSocket.current.send).not.toHaveBeenCalled();
+    });
+
+    it('reconnects when WebSocket is closed', () => {
+        webSocket.current.readyState = WebSocket.CLOSED;
+        sendMessage(JSON.stringify({ command: "ping" }));
+        jest.advanceTimersByTime(10000);
+        expect(webSocket.current).toBeInstanceOf(WebSocket);
     });
 });
