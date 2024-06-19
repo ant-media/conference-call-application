@@ -75,7 +75,7 @@ export const WebSocketProvider = ({ children }) => {
                     console.log('WebSocket not connected, unable to send ping');
                     webSocket.current = new WebSocket(applicationWebSocketUrl);
                 }
-            }, 10000);
+            }, 5000);
 
             return () => {
                 webSocket.current.close();
