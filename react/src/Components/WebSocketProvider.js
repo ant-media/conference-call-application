@@ -70,11 +70,7 @@ export const WebSocketProvider = ({ children }) => {
 
             const pingInterval = setInterval(() => {
                 if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
-                    var jsCmd = {
-                      command: "ping"
-                    };
-
-                    webSocket.current.send(JSON.stringify(jsCmd));
+                    webSocket.current.send(JSON.stringify({command: "ping"}));
                 } else if (webSocket.current && webSocket.current.readyState === WebSocket.CLOSED) {
                     console.log('WebSocket not connected, unable to send ping');
                     webSocket.current = new WebSocket(applicationWebSocketUrl);
