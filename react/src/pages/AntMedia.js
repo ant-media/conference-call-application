@@ -500,6 +500,10 @@ function AntMedia(props) {
     }
 
     updateParticipantRole(streamId, participantsNewRole);
+
+    let temp = presenters;
+    temp.push(streamId);
+    setPresenters(temp);
   }
 
   function makeParticipantUndoPresenter(streamId) {
@@ -523,6 +527,10 @@ function AntMedia(props) {
     }
 
     updateParticipantRole(streamId, participantsNewRole);
+
+    let temp = presenters;
+    temp = temp.filter(item => item !== streamId);
+    setPresenters(temp);
   }
 
   function updateParticipantRole(streamId, role) {
@@ -533,10 +541,6 @@ function AntMedia(props) {
     };
     console.info("send notification event", notEvent);
     sendDataChannelMessage(roomName, JSON.stringify(notEvent));
-
-    let temp = presenters;
-    temp = temp.filter(item => item !== streamId);
-    setPresenters(temp);
   }
 
   function sendDataChannelMessage(receiverStreamId, message) {
