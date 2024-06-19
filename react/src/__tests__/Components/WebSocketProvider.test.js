@@ -124,6 +124,7 @@ describe('WebSocketProvider pingInterval', () => {
     it('reconnects when WebSocket is closed', () => {
         webSocket.current.readyState = WebSocket.CLOSED;
         sendMessage(JSON.stringify({ command: "ping" }));
+        expect(console.log).toHaveBeenCalledWith('WebSocket not connected, unable to send ping');
         jest.advanceTimersByTime(10000);
         expect(webSocket.current).toBeInstanceOf(WebSocket);
     });
