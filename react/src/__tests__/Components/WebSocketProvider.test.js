@@ -94,4 +94,15 @@ describe('WebSocketProvider test', () => {
         expect(console.log).toHaveBeenCalledWith('Received pong from server');
         server.close();
     });
+
+    it('Check sending ping when WebSocket is closed', async () => {
+        jest.useFakeTimers();
+
+        render(<WebSocketProvider/>);
+
+        jest.advanceTimersByTime(10000);
+
+        expect(console.log).toHaveBeenCalledWith('WebSocket not connected, unable to send ping');
+        expect(webSocket.current).toBeInstanceOf(Object);
+    });
 });
