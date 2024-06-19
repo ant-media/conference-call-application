@@ -399,7 +399,6 @@ function AntMedia(props) {
 
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
 
-
   const [initialized, setInitialized] = React.useState(!!props.isTest);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
@@ -727,7 +726,7 @@ function AntMedia(props) {
   }
 
   React.useEffect(() => {
-    if(isPublished || isPlayOnly){
+    if((isPublished || isPlayOnly) && isPlayed){
       setWaitingOrMeetingRoom("meeting")
       setIsJoining(false);
     }
