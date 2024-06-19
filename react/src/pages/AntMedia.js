@@ -532,11 +532,22 @@ function AntMedia(props) {
       role: role
     };
     console.info("send notification event", notEvent);
-    webRTCAdaptor?.sendData(roomName, JSON.stringify(notEvent));
+    sendDataChannelMessage(roomName, JSON.stringify(notEvent));
 
     let temp = presenters;
     temp = temp.filter(item => item !== streamId);
     setPresenters(temp);
+  }
+
+  function sendDataChannelMessage(receiverStreamId, message) {
+    const jsCmd = {
+      command: "sendData",
+      streamId: publishStreamId,
+      receiverStreamId: receiverStreamId,
+      message: message,
+    };
+
+    sendMessage(JSON.stringify(jsCmd));
   }
 
   function reconnectionInProgress() {
