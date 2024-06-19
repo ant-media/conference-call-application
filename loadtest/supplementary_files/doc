@@ -1,0 +1,5 @@
+Create a docker image for test tool by using the Dockerfile_TestTool, participants.sh and also test tool zip file (I didn't add it ro repo because of size). 
+Run:
+sudo docker build --file=Dockerfile_TestTool -t testtool .
+
+Then upload image to a publisc repo to use in testtool_deployment.yaml
