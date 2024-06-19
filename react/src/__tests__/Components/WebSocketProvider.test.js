@@ -1,46 +1,9 @@
 import React from "react";
-import {ConferenceContext} from "../../pages/AntMedia";
-import {render, act} from "@testing-library/react";
-import WaitingRoom from "../../pages/WaitingRoom";
-import {WebSocketProvider, useWebSocket} from "../../Components/WebSocketProvider";
+import {render} from "@testing-library/react";
+import {WebSocketProvider} from "../../Components/WebSocketProvider";
+import WS from "jest-websocket-mock";
 
-// Mock the WebSocket class
-global.WebSocket = class {
-    constructor(url) {
-        this.url = url;
-        this.onopen = null;
-        this.onmessage = null;
-        this.onclose = null;
-        this.onerror = null;
-        this.readyState = WebSocket.OPEN;
-        this.send = jest.fn();
-        this.close = jest.fn();
-    }
-
-    addEventListener(event, callback) {
-        if (event === 'message') {
-            this.onmessage = callback;
-        } else if (event === 'close') {
-            this.onclose = callback;
-        } else if (event === 'error') {
-            this.onerror = callback;
-        } else if (event === 'open') {
-            this.onopen = callback;
-        }
-    }
-
-    removeEventListener(event, callback) {
-        if (event === 'message') {
-            this.onmessage = null;
-        } else if (event === 'close') {
-            this.onclose = null;
-        } else if (event === 'error') {
-            this.onerror = null;
-        } else if (event === 'open') {
-            this.onopen = null;
-        }
-    }
-};
+global.console = { log: jest.fn(), error: jest.fn() };
 
 describe('WebSocketProvider test', () => {
 
@@ -84,5 +47,49 @@ describe('WebSocketProvider test', () => {
         const message = 'Test message';
         sendMessage(message);
         expect(webSocket.current).toBeNull();
+    });
+
+    it('does print WebSocket Connected when onopen is called', async () => {
+        const server = new WS("ws://localhost:5080/Conference/websocket/application", { jsonProtocol: true });
+
+        render(<WebSocketProvider/>);
+
+        await server.connected;
+        server.close();
+
+        expect(console.log).toHaveBeenCalledWith('WebSocket Connected');
+    });
+
+    it('does print WebSocket Disconnected when onclose is called', async () => {
+        const server = new WS("ws://localhost:5080/Conference/websocket/application", { jsonProtocol: true });
+
+        render(<WebSocketProvider/>);
+
+        await server.connected;
+        server.close();
+
+        expect(console.log).toHaveBeenCalledWith('WebSocket Disconnected');
+    });
+
+    it('does print WebSocket Error when onerror is called', async () => {
+        const server = new WS("ws://localhost:5080/Conference/websocket/application", { jsonProtocol: true });
+
+        render(<WebSocketProvider/>);
+
+        await server.connected;
+        server.error();
+
+        expect(console.error).toHaveBeenCalledWith('WebSocket Error');
+    });
+
+    it('does print Received pong from server when onmessage is called', async () => {
+        const server = new WS("ws://localhost:5080/Conference/websocket/application", { jsonProtocol: true });
+
+        render(<WebSocketProvider/>);
+
+        await server.connected;
+        server.send('{"command":"pong"}');
+
+        expect(console.log).toHaveBeenCalledWith('Received pong from server');
     });
 });

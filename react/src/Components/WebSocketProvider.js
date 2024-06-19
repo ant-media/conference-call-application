@@ -47,7 +47,12 @@ export const WebSocketProvider = ({ children }) => {
                 const newMessage = event.data;
                 setLatestMessage(newMessage);
 
-                let command = JSON.parse(newMessage).command;
+                let command = '';
+                let parsedMessage = JSON.parse(newMessage);
+                if (typeof parsedMessage === 'string') {
+                    parsedMessage = JSON.parse(parsedMessage);
+                }
+                command = parsedMessage.command;
 
                 if (command === 'pong') {
                     console.log('Received pong from server');
@@ -60,7 +65,7 @@ export const WebSocketProvider = ({ children }) => {
             };
 
             webSocket.current.onerror = (error) => {
-                console.error('WebSocket Error:', error);
+                console.error('WebSocket Error');
             };
 
             const pingInterval = setInterval(() => {
@@ -88,8 +93,12 @@ export const WebSocketProvider = ({ children }) => {
         }
     };
 
+    const getWebSocket = () => {
+        return webSocket.current;
+    }
+
     return (
-        <WebSocketContext.Provider value={{ sendMessage, latestMessage, isWebSocketConnected}}>
+        <WebSocketContext.Provider value={{ sendMessage, latestMessage, isWebSocketConnected, getWebSocket}}>
             {children}
         </WebSocketContext.Provider>
     );
