@@ -713,7 +713,7 @@ function AntMedia(props) {
 
   useEffect(() => {
     async function createWebRTCAdaptor() {
-      console.log("----------------- createWebRTCAdaptor");
+      console.log("++ createWebRTCAdaptor");
       //here we check if audio or video device available and wait result
       //according to the result we modify mediaConstraints
       await checkDevices();
