@@ -409,6 +409,9 @@ function AntMedia(props) {
 
   const theme = useTheme();
 
+  useEffect(() => {
+    setParticipantUpdated(!participantUpdated);
+  }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleUnauthorizedDialogExitClicked(){
 
@@ -680,11 +683,23 @@ function AntMedia(props) {
 
     let allParticipantsTemp = allParticipants;
     broadcastObject.isScreenShared = metaData.isScreenShared;
-    allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
+    let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
+    allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject; //TODO: optimize
     if (!_.isEqual(allParticipantsTemp, allParticipants)) {
       setAllParticipants(allParticipantsTemp);
       setParticipantUpdated(!participantUpdated);
     }
+  }
+
+  function filterBroadcastObject(broadcastObject) {
+    let tempBroadcastObject = broadcastObject;
+    if (tempBroadcastObject !== null && tempBroadcastObject !== undefined) {
+      tempBroadcastObject.receivedBytes = -1;
+      tempBroadcastObject.duration = -1;
+      tempBroadcastObject.bitrate = -1;
+      tempBroadcastObject.updateTime = -1;
+    }
+    return tempBroadcastObject;
   }
 
   useEffect(() => {
@@ -825,7 +840,8 @@ function AntMedia(props) {
             let metaData = JSON.parse(broadcastObject.metaData);
             broadcastObject.isScreenShared = metaData.isScreenShared;
 
-            allParticipantsTemp[broadcastObject.streamId] = broadcastObject;
+            let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
+            allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
         });
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
           setAllParticipants(allParticipantsTemp);
@@ -1598,7 +1614,6 @@ function AntMedia(props) {
 
   function checkScreenSharingStatus() {
 
-    setParticipantUpdated(!participantUpdated);
     const broadcastObjectsArray = Object.values(allParticipants);
     broadcastObjectsArray.forEach((broadcastObject) => {
         if (broadcastObject.isScreenShared === true && typeof broadcastObject.isPinned === "undefined") {
@@ -1736,6 +1751,7 @@ function AntMedia(props) {
     if (!_.isEqual(allParticipantsTemp, allParticipants)) {
       setAllParticipants(allParticipantsTemp);
     }
+    setParticipantUpdated(!participantUpdated);
   }
 
   function addMeAsParticipant(publishStreamId) {
@@ -1755,12 +1771,14 @@ function AntMedia(props) {
     tempVideoTrackAssignments.push(newVideoTrackAssignment);
     if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
       setVideoTrackAssignments(tempVideoTrackAssignments);
+      setParticipantUpdated(!participantUpdated);
     }
 
     let allParticipantsTemp = allParticipants;
     allParticipantsTemp[publishStreamId] = {streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false};
     if (!_.isEqual(allParticipantsTemp, allParticipants)) {
       setAllParticipants(allParticipantsTemp);
+      setParticipantUpdated(!participantUpdated);
     }
   }
 
@@ -1813,6 +1831,7 @@ function AntMedia(props) {
       tempVideoTrackAssignments.push(newVideoTrackAssignment);
       if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
         setVideoTrackAssignments(tempVideoTrackAssignments);
+        setParticipantUpdated(!participantUpdated);
       }
     }
   }
