@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from rest_helper import RestHelper 
 
 
+import subprocess
 import sys
 import unittest
 import os
@@ -29,6 +30,29 @@ class TestJoinLeave(unittest.TestCase):
 
   def tearDown(self):
     print(self._testMethodName, " ending...\n","----------------")
+
+  def create_participants_with_test_tool(self, participant_name, room, count):
+    directory = os.path.expanduser("~/test/webrtc-load-test")
+    script = "run.sh"
+    parameters = ["-m", "publisher", "-s", self.url, "-p", "443", "-q", "true", "-f", "test.mp4", "-a", self.test_app_name, "-i", participant_name, "-t", room, "-n", count]  
+    
+    print("test tool is running with parameters: "+str(parameters))
+    # Full path to the script
+    script_path = os.path.join(directory, script)
+
+    # Run the script silently with parameters
+    process = subprocess.Popen(
+        ["bash", script_path] + parameters,
+        cwd=directory,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+    return process
+
+  def kill_participants_with_test_tool(self, process):
+    process.kill()
+
 
   def join_room_in_new_tab(self, participant, room):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
@@ -330,13 +354,11 @@ class TestJoinLeave(unittest.TestCase):
   def test_join_room_N_participants(self):
     N = 5
     room = "room"+str(random.randint(100, 999))
-    handles = [] 
     wait = self.chrome.get_wait()
 
-    for i in range(N):
-      handles.append(self.join_room_in_new_tab("participant"+str(i), room))
+    self.create_participants_with_test_tool("participant", room, N-1)
 
-    assert(handles[N-1] == self.chrome.get_current_tab_id())
+    handle = self.join_room_in_new_tab("participant"+str(N-1, room))     
 
     time.sleep(5)
     self.assertLocalVideoAvailable()
