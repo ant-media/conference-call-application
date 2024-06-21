@@ -27,7 +27,7 @@ class RestHelper:
   def get_broadcasts(self):
     resp = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/broadcasts/list/0/50")
     json_data = json.loads(resp.text)
-    print("broadcasts:" + resp.text)
+    print("broadcasts:" + str(json_data))
     return json_data
 
   def getVoDFor(self, streamId):
