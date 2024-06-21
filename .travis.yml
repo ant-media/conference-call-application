@@ -8,7 +8,7 @@ before_install:
 - curl -L "https://drive.usercontent.google.com/download?id=1Gp3LTFvG4arbXWFiGrQTPYw2CUEuKhf5&export=download&confirm=t" -o "webrtc-load-test-tool-2.9.1-SNAPSHOT.zip"
 - unzip webrtc-load-test-tool-2.9.1-SNAPSHOT.zip
 - mkdir ~/test
-- mv -r webrtc-load-test ~/test
+- mv webrtc-load-test ~/test
 - wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/119.0.6045.105/linux64/chromedriver-linux64.zip
 - unzip chromedriver-linux64.zip
 - sudo cp chromedriver-linux64/chromedriver /tmp
