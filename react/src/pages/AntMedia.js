@@ -1502,7 +1502,7 @@ function AntMedia(props) {
             //group the messages *sent back to back in the same timeframe by the same user* by joinig the new message text with new line
             lastMessage.message =
               lastMessage.message + "\n" + notificationEvent.message;
-            return [...oldMessages]; // dont make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
+            return [...oldMessages]; // don't make this "return oldMessages;" this is to trigger the useEffect for scroll bottom and get over showing the last prev state do
           } else {
             return [...oldMessages, notificationEvent];
           }
