@@ -624,7 +624,9 @@ function AntMedia(props) {
       isFake: true
     };
     allParticipantsTemp["streamId_" + suffix] = broadcastObject;
-    setAllParticipants(allParticipantsTemp);
+    if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+      setAllParticipants(allParticipantsTemp);
+    }
 
     if (Object.keys(allParticipantsTemp).length <= globals.maxVideoTrackCount) {
       let newVideoTrackAssignment = {
@@ -634,7 +636,9 @@ function AntMedia(props) {
       };
       let temp = videoTrackAssignments;
       temp.push(newVideoTrackAssignment);
-      setVideoTrackAssignments(temp);
+      if (!_.isEqual(temp, videoTrackAssignments)) {
+        setVideoTrackAssignments(temp);
+      }
     }
 
     console.log("fake participant added");
@@ -647,11 +651,15 @@ function AntMedia(props) {
     setFakeParticipantCounter(tempCount);
 
     let tempVideoTrackAssignments = videoTrackAssignments.filter(el => el.streamId !== "streamId_" + suffix)
-    setVideoTrackAssignments(tempVideoTrackAssignments);
+    if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+      setVideoTrackAssignments(tempVideoTrackAssignments);
+    }
 
     let allParticipantsTemp = allParticipants;
     delete allParticipantsTemp["streamId_" + suffix];
-    setAllParticipants(allParticipantsTemp);
+    if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+      setAllParticipants(allParticipantsTemp);
+    }
 
     console.log("fake participant removed");
     setParticipantUpdated(!participantUpdated);
@@ -673,8 +681,10 @@ function AntMedia(props) {
     let allParticipantsTemp = allParticipants;
     broadcastObject.isScreenShared = metaData.isScreenShared;
     allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
-    setAllParticipants(allParticipantsTemp);
-    setParticipantUpdated(!participantUpdated);
+    if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+      setAllParticipants(allParticipantsTemp);
+      setParticipantUpdated(!participantUpdated);
+    }
   }
 
   useEffect(() => {
@@ -817,8 +827,10 @@ function AntMedia(props) {
 
             allParticipantsTemp[broadcastObject.streamId] = broadcastObject;
         });
-        setAllParticipants(allParticipantsTemp);
-        setParticipantUpdated(!participantUpdated);
+        if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+          setAllParticipants(allParticipantsTemp);
+          setParticipantUpdated(!participantUpdated);
+        }
     } else if (info === "broadcastObject") {
       if (obj.broadcast === undefined) {
         return;
@@ -1551,8 +1563,6 @@ function AntMedia(props) {
 
         checkScreenSharingStatus();
         requestSyncAdministrativeFields();
-
-        setParticipantUpdated(!participantUpdated);
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
@@ -1715,13 +1725,17 @@ function AntMedia(props) {
     if (!isPlayOnly) {
       tempVideoTrackAssignments.push(newVideoTrackAssignment);
     }
-    setVideoTrackAssignments(tempVideoTrackAssignments);
+    if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+      setVideoTrackAssignments(tempVideoTrackAssignments);
+    }
 
     let allParticipantsTemp = {};
     if (!isPlayOnly) {
       allParticipantsTemp[publishStreamId] = {name: "You"};
     }
-    setAllParticipants(allParticipantsTemp);
+    if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+      setAllParticipants(allParticipantsTemp);
+    }
   }
 
   function addMeAsParticipant(publishStreamId) {
@@ -1739,11 +1753,15 @@ function AntMedia(props) {
     };
     let tempVideoTrackAssignments = videoTrackAssignments;
     tempVideoTrackAssignments.push(newVideoTrackAssignment);
-    setVideoTrackAssignments(tempVideoTrackAssignments);
+    if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+      setVideoTrackAssignments(tempVideoTrackAssignments);
+    }
 
     let allParticipantsTemp = allParticipants;
     allParticipantsTemp[publishStreamId] = {streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false};
-    setAllParticipants(allParticipantsTemp);
+    if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+      setAllParticipants(allParticipantsTemp);
+    }
   }
 
 
@@ -1793,7 +1811,9 @@ function AntMedia(props) {
       };
       let tempVideoTrackAssignments = videoTrackAssignments;
       tempVideoTrackAssignments.push(newVideoTrackAssignment);
-      setVideoTrackAssignments(tempVideoTrackAssignments);
+      if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+        setVideoTrackAssignments(tempVideoTrackAssignments);
+      }
     }
   }
 
@@ -1992,6 +2012,7 @@ function AntMedia(props) {
   }
 
   const setAudioLevelListener = (listener, period) => {
+    
     if (audioListenerIntervalJob == null) {
       audioListenerIntervalJob = setInterval(() => {
         if (webRTCAdaptor?.remotePeerConnection[publishStreamId] !== undefined && webRTCAdaptor?.remotePeerConnection[publishStreamId] !== null) {
