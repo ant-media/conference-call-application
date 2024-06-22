@@ -1,8 +1,8 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
-import _, { cond } from "lodash";
+import _ from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
 import {useSnackbar} from "notistack";
