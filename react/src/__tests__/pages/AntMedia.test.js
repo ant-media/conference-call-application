@@ -12,6 +12,7 @@ import theme from "styles/theme";
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
+var websocketURL = "ws://localhost:5080/Conference/websocket";
 
 jest.mock('Components/WebSocketProvider', () => ({
   ...jest.requireActual('Components/WebSocketProvider'),
@@ -1046,10 +1047,74 @@ describe('AntMedia Component', () => {
     });
   });
 
-});
+  describe('createSpeedTestForPublishWebRtcAdaptorPlayOnly', () => {
+    let originalCreateElement;
+    let mockCreateElement;
+    let mockVideoElement;
+    let mockCaptureStream;
+    let appendChildSpy;
 
-/*
-webRTCAdaptorPublishSpeedTestPlayOnlyConstructor
-webRTCAdaptorPublishSpeedTestConstructor
-webRTCAdaptorPlaySpeedTestConstructor
- */
+    beforeEach(() => {
+      originalCreateElement = document.createElement;
+      mockCaptureStream = jest.fn();
+      mockVideoElement = {
+        id: '',
+        style: {},
+        autoplay: false,
+        muted: false,
+        playsInline: false,
+        controls: false,
+        width: 0,
+        height: 0,
+        loop: false,
+        crossOrigin: '',
+        src: '',
+        captureStream: mockCaptureStream,
+      };
+      mockCreateElement = jest.fn().mockReturnValue(mockVideoElement);
+      document.createElement = mockCreateElement;
+      appendChildSpy = jest.spyOn(document.body, 'appendChild');
+      appendChildSpy.mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      document.createElement = originalCreateElement;
+      appendChildSpy.mockRestore();
+    });
+
+    it('should create a video element with correct properties', () => {
+      conference.createSpeedTestForPublishWebRtcAdaptorPlayOnly();
+      expect(mockCreateElement).toHaveBeenCalledWith('video');
+      expect(mockVideoElement.id).toBe('speedTestVideoElement');
+      expect(mockVideoElement.style.display).toBe('none');
+      expect(mockVideoElement.autoplay).toBe(true);
+      expect(mockVideoElement.muted).toBe(true);
+      expect(mockVideoElement.playsInline).toBe(true);
+      expect(mockVideoElement.controls).toBe(false);
+      expect(mockVideoElement.width).toBe(640);
+      expect(mockVideoElement.height).toBe(360);
+      expect(mockVideoElement.loop).toBe(true);
+      expect(mockVideoElement.crossOrigin).toBe('anonymous');
+    });
+
+    it('should set the video element source correctly', () => {
+      conference.createSpeedTestForPublishWebRtcAdaptorPlayOnly();
+      expect(mockVideoElement.src).toBe(conference.parseWebSocketURL(websocketURL) + "/speed-test-sample-video.mp4");
+    });
+
+    it('should append the video element to the body', () => {
+      const appendChildSpy = jest.spyOn(document.body, 'appendChild');
+      conference.createSpeedTestForPublishWebRtcAdaptorPlayOnly();
+      expect(appendChildSpy).toHaveBeenCalledWith(mockVideoElement);
+    });
+
+    it('should call captureStream on the video element after a delay', async () => {
+      jest.useFakeTimers();
+      conference.createSpeedTestForPublishWebRtcAdaptorPlayOnly();
+      jest.advanceTimersByTime(3000);
+      expect(mockCaptureStream).toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+  });
+
+});
