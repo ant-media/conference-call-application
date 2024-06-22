@@ -360,7 +360,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.create_participants_with_test_tool("participant", room, N-1)
 
-    handle = self.join_room_in_new_tab("participant"+str(N-1, room))     
+    self.join_room_in_new_tab("participant"+str(N-1), room)     
 
     time.sleep(5)
     self.assertLocalVideoAvailable()
