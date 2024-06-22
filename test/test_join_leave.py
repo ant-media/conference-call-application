@@ -10,6 +10,8 @@ import os
 import random
 import json
 import time
+import psutil
+
 
 class TestJoinLeave(unittest.TestCase):
   def setUp(self):
@@ -89,6 +91,8 @@ class TestJoinLeave(unittest.TestCase):
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
     #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    cpu_usage = psutil.cpu_percent(interval=0)
+    print(f"Instant CPU Usage: {cpu_usage}%")
     return vtas
   
   def get_conference(self):
