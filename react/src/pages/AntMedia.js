@@ -374,6 +374,11 @@ function AntMedia(props) {
 
   function parseWebSocketURL(url) {
     // sample url: ws://localhost:5080/WebRTCAppEE/websocket
+
+    if (!url) {
+      return '';
+    }
+
     let parsedURL = url.split("/");
     let protocol = parsedURL[0];
     if (protocol === "wss:") {
@@ -2183,7 +2188,8 @@ function AntMedia(props) {
               speedTestObject,
               setSpeedTestObject,
               speedTestStreamId,
-              startSpeedTest
+              startSpeedTest,
+              parseWebSocketURL
             }}
           >
             {props.children}

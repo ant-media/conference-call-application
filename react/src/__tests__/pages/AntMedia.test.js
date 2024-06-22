@@ -834,4 +834,61 @@ describe('AntMedia Component', () => {
 
     });
 
+  describe('parseWebSocketURL', () => {
+    it('should correctly parse WebSocket URL with wss protocol', () => {
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>);
+
+      const url = 'wss://localhost:5080/WebRTCAppEE/websocket';
+      const result = currentConference.parseWebSocketURL(url);
+      expect(result).toEqual('https://localhost:5080/WebRTCAppEE');
+    });
+
+    it('should correctly parse WebSocket URL with ws protocol', () => {
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>);
+
+      const url = 'ws://localhost:5080/WebRTCAppEE/websocket';
+      const result = currentConference.parseWebSocketURL(url);
+      expect(result).toEqual('http://localhost:5080/WebRTCAppEE');
+    });
+
+    it('should return empty string when URL is not provided', () => {
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>);
+
+      const url = '';
+      const result = currentConference.parseWebSocketURL(url);
+      expect(result).toEqual('');
+    });
+
+    it('should return empty string when URL is null', () => {
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>);
+
+      const url = null;
+      const result = currentConference.parseWebSocketURL(url);
+      expect(result).toEqual('');
+    });
+
+    it('should return empty string when URL is undefined', () => {
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>);
+
+      const url = undefined;
+      const result = currentConference.parseWebSocketURL(url);
+      expect(result).toEqual('');
+    });
+  });
+
 });
