@@ -87,7 +87,7 @@ class TestJoinLeave(unittest.TestCase):
     
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
     return vtas
   
   def get_conference(self):
