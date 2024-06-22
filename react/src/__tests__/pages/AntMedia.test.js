@@ -895,7 +895,34 @@ describe('AntMedia Component', () => {
   });
 
   describe('startSpeedTest', () => {
-    it('should call createSpeedTestForPublishWebRtcAdaptorPlayOnly when isPlayOnly is true', async () => {
+    it('should call createSpeedTestForPublishWebRtcAdaptorPlayOnly when isPlayOnly is true and string', async () => {
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+      );
+
+      currentConference.isPlayOnly = "true";
+      currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly = jest.fn();
+      currentConference.createSpeedTestForPublishWebRtcAdaptor = jest.fn();
+      currentConference.createSpeedTestForPlayWebRtcAdaptor = jest.fn();
+
+      await act(async () => {
+        currentConference.startSpeedTest();
+      });
+
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly).toHaveBeenCalled();
+      });
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPublishWebRtcAdaptor).not.toHaveBeenCalled();
+      });
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPlayWebRtcAdaptor).toHaveBeenCalled();
+      });
+    });
+
+    it('should call createSpeedTestForPublishWebRtcAdaptorPlayOnly when isPlayOnly is true and boolean', async () => {
       const { container } = render(
           <AntMedia isTest={true}>
             <MockChild/>
