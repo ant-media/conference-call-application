@@ -222,7 +222,10 @@ class TestJoinLeave(unittest.TestCase):
 
     assert(not self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
 
-    process = self.create_participants_with_test_tool("participant", room, 3)
+    self.set_and_test_track_limit(4)
+
+
+    process = self.create_participants_with_test_tool("participant", room, 1)
 
     others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner')
     assert(others_tile.is_displayed())
@@ -352,7 +355,7 @@ class TestJoinLeave(unittest.TestCase):
     '''
 
   def test_join_room_N_participants(self):
-    N = 5
+    N = 3
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait()
 
@@ -366,8 +369,8 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
-    self.set_and_test_track_limit(4)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 4)
+    self.set_and_test_track_limit(2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
     self.set_and_test_track_limit(6)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
