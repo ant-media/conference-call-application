@@ -416,7 +416,8 @@ function AntMedia(props) {
         },
         debug: true,
         callback: speedTestForPublishWebRtcAdaptorInfoCallback,
-        callbackError: speedTestForPublishWebRtcAdaptorErrorCallback
+        callbackError: speedTestForPublishWebRtcAdaptorErrorCallback,
+        purposeForTest: "publish-speed-test-play-only"
       })
     }, 3000);
 
@@ -432,7 +433,8 @@ function AntMedia(props) {
       },
       debug: true,
       callback: speedTestForPublishWebRtcAdaptorInfoCallback,
-      callbackError: speedTestForPublishWebRtcAdaptorErrorCallback
+      callbackError: speedTestForPublishWebRtcAdaptorErrorCallback,
+        purposeForTest: "publish-speed-test"
     })
 
   }
@@ -500,7 +502,8 @@ function AntMedia(props) {
       },
       debug: true,
       callback: speedTestForPlayWebRtcAdaptorInfoCallback,
-      callbackError: speedTestForPlayWebRtcAdaptorErrorCallback
+      callbackError: speedTestForPlayWebRtcAdaptorErrorCallback,
+      purposeForTest: "play-speed-test"
     })
 
   }
@@ -754,7 +757,8 @@ function AntMedia(props) {
           // onlyDataChannel: playOnly,
           debug: true,
           callback: infoCallback,
-          callbackError: errorCallback
+          callbackError: errorCallback,
+          purposeForTest: "main-adaptor"
         });
         setWebRTCAdaptor(adaptor)
 
@@ -814,7 +818,8 @@ function AntMedia(props) {
                 },
                 debug: true,
                 callback: screenShareWebRtcAdaptorInfoCallback,
-                callbackError: screenShareWebRtcAdaptorErrorCallback
+                callbackError: screenShareWebRtcAdaptorErrorCallback,
+                purposeForTest: "screen-share"
               })
 
             }).catch(error => {

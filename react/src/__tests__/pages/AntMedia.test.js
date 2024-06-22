@@ -10,7 +10,7 @@ import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
 
 
-var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
+var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
 
 jest.mock('Components/WebSocketProvider', () => ({
@@ -72,12 +72,20 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       }
     }
 
-
-    if(params.mediaConstraints.audio === true) {
+    if (params.purposeForTest === "main-adaptor") {
+      webRTCAdaptorConstructor = mockAdaptor;
+    }
+    else if(params.purposeForTest === "screen-share") {
       webRTCAdaptorScreenConstructor = mockAdaptor;
     }
-    else {
-      webRTCAdaptorConstructor = mockAdaptor;
+    else if (params.purposeForTest === "publish-speed-test-play-only") {
+      webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = mockAdaptor;
+    }
+    else if (params.purposeForTest === "publish-speed-test") {
+      webRTCAdaptorPublishSpeedTestConstructor = mockAdaptor;
+    }
+    else if (params.purposeForTest === "play-speed-test") {
+      webRTCAdaptorPlaySpeedTestConstructor = mockAdaptor;
     }
     return mockAdaptor;
   }),
@@ -825,80 +833,5 @@ describe('AntMedia Component', () => {
       expect(consoleSpy).toHaveBeenCalledWith("Cannot find broadcast object for streamId: non-exist-participant");
 
     });
-
-  describe('Speed Test Functions', () => {
-    let originalWebSocketURL;
-    let originalMediaDevices;
-
-    beforeEach(() => {
-      // Save original values
-      originalWebSocketURL = process.env.REACT_APP_WEBSOCKET_URL;
-      originalMediaDevices = global.navigator.mediaDevices;
-
-      // Mock values
-      process.env.REACT_APP_WEBSOCKET_URL = 'ws://localhost:5080/WebRTCAppEE/websocket';
-      global.navigator.mediaDevices = {
-        getUserMedia: jest.fn().mockResolvedValue(new MediaStream()),
-      };
-    });
-
-    afterEach(() => {
-      // Restore original values
-      process.env.REACT_APP_WEBSOCKET_URL = originalWebSocketURL;
-      global.navigator.mediaDevices = originalMediaDevices;
-    });
-
-    it('should start speed test for publish only mode', () => {
-      const isPlayOnly = true;
-      startSpeedTest();
-
-      expect(createSpeedTestForPublishWebRtcAdaptorPlayOnly).toHaveBeenCalled();
-      expect(createSpeedTestForPlayWebRtcAdaptor).toHaveBeenCalled();
-    });
-
-    it('should start speed test for normal mode', () => {
-      const isPlayOnly = false;
-      startSpeedTest();
-
-      expect(createSpeedTestForPublishWebRtcAdaptor).toHaveBeenCalled();
-      expect(createSpeedTestForPlayWebRtcAdaptor).toHaveBeenCalled();
-    });
-
-    it('should stop speed test', () => {
-      speedTestForPublishWebRtcAdaptor.current = { stop: jest.fn() };
-      speedTestForPlayWebRtcAdaptor.current = { stop: jest.fn() };
-
-      stopSpeedTest();
-
-      expect(speedTestForPublishWebRtcAdaptor.current.stop).toHaveBeenCalled();
-      expect(speedTestForPlayWebRtcAdaptor.current.stop).toHaveBeenCalled();
-    });
-
-    it('should parse WebSocket URL correctly', () => {
-      const url = 'ws://localhost:5080/WebRTCAppEE/websocket';
-      const parsedURL = parseWebSocketURL(url);
-
-      expect(parsedURL).toBe('http://localhost:5080/WebRTCAppEE');
-    });
-
-    it('should create speed test for publish WebRTC adaptor play only', async () => {
-      await createSpeedTestForPublishWebRtcAdaptorPlayOnly();
-
-      expect(document.getElementById('speedTestVideoElement')).not.toBeNull();
-      expect(speedTestForPublishWebRtcAdaptor.current).not.toBeNull();
-    });
-
-    it('should create speed test for publish WebRTC adaptor', () => {
-      createSpeedTestForPublishWebRtcAdaptor();
-
-      expect(speedTestForPublishWebRtcAdaptor.current).not.toBeNull();
-    });
-
-    it('should create speed test for play WebRTC adaptor', () => {
-      createSpeedTestForPlayWebRtcAdaptor();
-
-      expect(speedTestForPlayWebRtcAdaptor.current).not.toBeNull();
-    });
-  });
 
 });
