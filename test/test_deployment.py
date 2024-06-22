@@ -14,7 +14,7 @@ class TestDeployment(unittest.TestCase):
     password = os.environ.get('AMS_PASSWORD')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.war_file=os.environ.get('WAR_FILE')
-    self.rest_helper = RestHelper(url, user, password)
+    self.rest_helper = RestHelper(url, user, password, None)
     self.rest_helper.login()
 
   def tearDown(self):
