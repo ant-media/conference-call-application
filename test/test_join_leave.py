@@ -225,7 +225,8 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == expected_vta_count
                    , "vta count is not "+str(expected_vta_count)+"\nss:\n"+self.chrome.get_screenshot_as_base64())
 
-    assert(self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
+    others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner')
+    assert(others_tile.is_displayed())
 
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
