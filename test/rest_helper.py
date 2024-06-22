@@ -10,7 +10,7 @@ import random
 REST_URL="/rest/v2"
 
 class RestHelper:
-  def __init__(self, url, user, password, app_name):
+  def __init__(self, url, user, password, app_name = ""):
     self.url = url
     if(url.endswith("localhost:3000")):
       self.url = "http://localhost:5080"
