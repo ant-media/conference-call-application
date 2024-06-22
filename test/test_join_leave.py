@@ -88,7 +88,7 @@ class TestJoinLeave(unittest.TestCase):
     
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
     return vtas
   
   def get_conference(self):
@@ -217,20 +217,17 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
 
     assert(not self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
-    for i in range(3,6):
-        handler = self.join_room_in_new_tab("participant" + str(i), room)
-        self.assertLocalVideoAvailable()
-        self.chrome.switch_to_tab(handler)
 
-        expected_vta_count = min(i+1, 5) #+1 for screen share
-        print("wait for vta count: "+str(expected_vta_count))
-        wait.until(lambda x: len(self.get_videoTrackAssignments()) == expected_vta_count
+    process = self.create_participants_with_test_tool("participant", room, 3)
+
+    expected_vta_count = 5
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == expected_vta_count
                    , "vta count is not "+str(expected_vta_count)+"\nss:\n"+self.chrome.get_screenshot_as_base64())
 
-        if i>=5:
-          assert(self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
-        else:
-          assert(not self.chrome.is_element_exist(By.CLASS_NAME, "others-tile-inner"))
+    assert(self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
+
+    self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
 
   # it tooks too long to get videoTrackAssignments so we need to wait for it
