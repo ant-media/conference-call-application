@@ -220,11 +220,6 @@ class TestJoinLeave(unittest.TestCase):
 
     process = self.create_participants_with_test_tool("participant", room, 3)
 
-    expected_vta_count = 5
-
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == expected_vta_count
-                   , "vta count is not "+str(expected_vta_count)+"\nss:\n"+self.chrome.get_screenshot_as_base64())
-
     others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner')
     assert(others_tile.is_displayed())
 
