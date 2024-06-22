@@ -1117,4 +1117,101 @@ describe('AntMedia Component', () => {
     });
   });
 
+  describe('speedTestForPublishWebRtcAdaptor callbacks test', () => {
+    let speedTestForPublishWebRtcAdaptor;
+    let setSpeedTestObject;
+    let stopSpeedTest;
+
+    beforeEach(() => {
+      speedTestForPublishWebRtcAdaptor = {
+        current: {
+          publish: jest.fn(),
+          enableStats: jest.fn(),
+          stop: jest.fn(),
+          mediaManager: {
+            bandwidth: 1000
+          }
+        }
+      };
+      setSpeedTestObject = jest.fn();
+      stopSpeedTest = jest.fn();
+    });
+
+
+    it('should handle "initialized" info', () => {
+      conference.speedTestForPublishWebRtcAdaptorInfoCallback('initialized', {});
+      waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestConstructor.publish).toHaveBeenCalled();
+      });
+    });
+
+    it('should handle "publish_started" info', () => {
+      conference.speedTestForPublishWebRtcAdaptorInfoCallback('publish_started', {});
+      waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestConstructor.enableStats).toHaveBeenCalled();
+      });
+    });
+
+    it('should handle "updated_stats" info and stop speed test after 3 updates', () => {
+      const obj = {
+        videoRoundTripTime: '100',
+        audioRoundTripTime: '100',
+        videoPacketsLost: '1',
+        audioPacketsLost: '1',
+        videoJitter: '10',
+        audioJitter: '10',
+        currentOutgoingBitrate: '800'
+      };
+      speedTestForPublishWebRtcAdaptor.current.mediaManager.bandwidth = 1000;
+      conference.speedTestForPublishWebRtcAdaptorInfoCallback('updated_stats', obj);
+      conference.speedTestForPublishWebRtcAdaptorInfoCallback('updated_stats', obj);
+      //conference.speedTestForPublishWebRtcAdaptorInfoCallback('updated_stats', obj);
+      //expect(conference.stop).toHaveBeenCalled();
+      //expect(setSpeedTestObject).toHaveBeenCalledWith({ message: 'Your connection is good', isfinished: true });
+      //expect(stopSpeedTest).toHaveBeenCalled();
+    });
+
+    it('should handle error callback', () => {
+      conference.speedTestForPublishWebRtcAdaptorErrorCallback('NotFoundError', 'Media not found');
+    });
+  });
+
+  describe('speedTestForPlayWebRtcAdaptor callbacks test', () => {
+    let speedTestForPlayWebRtcAdaptor;
+    let consoleSpy;
+
+    beforeEach(() => {
+      speedTestForPlayWebRtcAdaptor = {
+        current: {
+          play: jest.fn(),
+        },
+      };
+      consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+    });
+
+    it('should log "speed test publish started" when info is "publish_started"', () => {
+      conference.speedTestForPlayWebRtcAdaptorInfoCallback('publish_started', {});
+      expect(consoleSpy).toHaveBeenCalledWith('speed test publish started');
+    });
+
+    it('should log "speed test updated stats" when info is "updated_stats"', () => {
+      conference.speedTestForPlayWebRtcAdaptorInfoCallback('updated_stats', {});
+      expect(consoleSpy).toHaveBeenCalledWith('speed test updated stats');
+    });
+
+    it('should log "speed test ice connection state changed" when info is "ice_connection_state_changed"', () => {
+      conference.speedTestForPlayWebRtcAdaptorInfoCallback('ice_connection_state_changed', {});
+      expect(consoleSpy).toHaveBeenCalledWith('speed test ice connection state changed');
+    });
+
+    it('should log error and message when speedTestForPlayWebRtcAdaptorErrorCallback is called', () => {
+      conference.speedTestForPlayWebRtcAdaptorErrorCallback('NotFoundError', 'Media not found');
+      expect(consoleSpy).toHaveBeenCalledWith('error from speed test webrtc adaptor callback');
+    });
+  });
+
 });

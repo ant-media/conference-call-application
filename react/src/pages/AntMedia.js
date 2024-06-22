@@ -2198,7 +2198,11 @@ function AntMedia(props) {
               parseWebSocketURL,
               createSpeedTestForPublishWebRtcAdaptorPlayOnly,
               createSpeedTestForPublishWebRtcAdaptor,
-              createSpeedTestForPlayWebRtcAdaptor
+              createSpeedTestForPlayWebRtcAdaptor,
+              speedTestForPlayWebRtcAdaptorInfoCallback,
+              speedTestForPlayWebRtcAdaptorErrorCallback,
+              speedTestForPublishWebRtcAdaptorInfoCallback,
+              speedTestForPublishWebRtcAdaptorErrorCallback
             }}
           >
             {props.children}
