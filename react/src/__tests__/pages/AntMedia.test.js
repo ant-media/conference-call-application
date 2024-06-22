@@ -64,6 +64,9 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       updateStreamMetaData: jest.fn(),
       assignVideoTrack: jest.fn(),
       setParticipantUpdated: jest.fn(),
+      createSpeedTestForPublishWebRtcAdaptorPlayOnly: jest.fn(),
+      createSpeedTestForPublishWebRtcAdaptor: jest.fn(),
+      createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
     }
 
     for (var key in params) {
@@ -891,4 +894,135 @@ describe('AntMedia Component', () => {
     });
   });
 
+  describe('startSpeedTest', () => {
+    it('should call createSpeedTestForPublishWebRtcAdaptorPlayOnly when isPlayOnly is true', async () => {
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+      );
+
+      currentConference.isPlayOnly = true;
+      currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly = jest.fn();
+      currentConference.createSpeedTestForPublishWebRtcAdaptor = jest.fn();
+      currentConference.createSpeedTestForPlayWebRtcAdaptor = jest.fn();
+
+      await act(async () => {
+        currentConference.startSpeedTest();
+      });
+
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly).toHaveBeenCalled();
+      });
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPublishWebRtcAdaptor).not.toHaveBeenCalled();
+      });
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPlayWebRtcAdaptor).toHaveBeenCalled();
+      });
+    });
+
+    it('should call createSpeedTestForPublishWebRtcAdaptor when isPlayOnly is false', async () => {
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+      );
+
+      currentConference.isPlayOnly = false;
+      currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly = jest.fn();
+      currentConference.createSpeedTestForPublishWebRtcAdaptor = jest.fn();
+      currentConference.createSpeedTestForPlayWebRtcAdaptor = jest.fn();
+
+      await act(async () => {
+        currentConference.startSpeedTest();
+      });
+
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly).not.toHaveBeenCalled();
+      });
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPublishWebRtcAdaptor).toHaveBeenCalled();
+      });
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPlayWebRtcAdaptor).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('stopSpeedTest function', () => {
+    it('should stop and nullify speedTestForPublishWebRtcAdaptor when it is defined', async () => {
+      // Arrange
+      const mockStop = jest.fn();
+      webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = { stop: mockStop };
+      webRTCAdaptorPublishSpeedTestConstructor = { stop: mockStop };
+
+      // Act
+      await act(async () => {
+        currentConference.stopSpeedTest();
+      });
+
+      // Assert
+      waitFor(() => {
+        expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+      });
+      waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestPlayOnlyConstructor).toBeNull();
+      });
+      waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestConstructor).toBeNull();
+      });
+    });
+
+    it('should not throw error when speedTestForPublishWebRtcAdaptor is not defined', async () => {
+      // Arrange
+      webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = null;
+      webRTCAdaptorPublishSpeedTestConstructor = null;
+
+      // Act and Assert
+      await expect(async () => {
+        await act(async () => {
+          currentConference.stopSpeedTest();
+        });
+      }).not.toThrow();
+    });
+
+    it('should stop and nullify speedTestForPlayWebRtcAdaptor when it is defined', async () => {
+      // Arrange
+      const mockStop = jest.fn();
+      webRTCAdaptorPlaySpeedTestConstructor = { stop: mockStop };
+
+      // Act
+      await act(async () => {
+        currentConference.stopSpeedTest();
+      });
+
+      // Assert
+      waitFor(() => {
+        expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+      });
+      waitFor(() => {
+        expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
+      });
+    });
+
+    it('should not throw error when speedTestForPlayWebRtcAdaptor is not defined', async () => {
+      // Arrange
+      webRTCAdaptorPlaySpeedTestConstructor = null;
+
+      // Act and Assert
+      await expect(async () => {
+        await act(async () => {
+          currentConference.stopSpeedTest();
+        });
+      }).not.toThrow();
+    });
+  });
+
 });
+
+/*
+webRTCAdaptorPublishSpeedTestPlayOnlyConstructor
+webRTCAdaptorPublishSpeedTestConstructor
+webRTCAdaptorPlaySpeedTestConstructor
+ */

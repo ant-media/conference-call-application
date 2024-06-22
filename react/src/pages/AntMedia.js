@@ -351,6 +351,11 @@ function AntMedia(props) {
 
   }
 
+  /*
+    * This function performs the following tasks:
+    * 1. It creates two new WebRTCAdaptor instances for publish and play.
+    * 2. If the user is in playOnly mode, instead of using camera and microphone, it uses the video element for publish.
+   */
   function startSpeedTest(){
     if (isPlayOnly === "true" || isPlayOnly === true) {
       createSpeedTestForPublishWebRtcAdaptorPlayOnly();
@@ -2189,7 +2194,11 @@ function AntMedia(props) {
               setSpeedTestObject,
               speedTestStreamId,
               startSpeedTest,
-              parseWebSocketURL
+              stopSpeedTest,
+              parseWebSocketURL,
+              createSpeedTestForPublishWebRtcAdaptorPlayOnly,
+              createSpeedTestForPublishWebRtcAdaptor,
+              createSpeedTestForPlayWebRtcAdaptor
             }}
           >
             {props.children}
