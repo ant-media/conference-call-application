@@ -20,7 +20,7 @@ class TestJoinLeave(unittest.TestCase):
     self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
     self.chrome.init(True)
-    self.rest_helper = RestHelper(self.url, self.user, self.password)
+    self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
     self.rest_helper.login()
 
     wait = self.chrome.get_wait()
