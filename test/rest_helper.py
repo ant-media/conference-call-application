@@ -25,10 +25,13 @@ class RestHelper:
     print("login resp:"+str(resp))
 
   def get_broadcasts(self):
-    resp = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/broadcasts/list/0/50")
-    json_data = json.loads(resp.text)
-    print("broadcasts:" + str(json_data))
-    return json_data
+    response = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/broadcasts/list/0/50")
+    if response.status_code == 200:
+        json_data = json.loads(response.text)
+        print("broadcasts:" + str(json_data))
+        return json_data
+    else:
+        response.raise_for_status()
 
   def getVoDFor(self, streamId):
     resp = self.session.get(self.rest_url +"/request?_path=Conference/rest/v2/vods/list/0/5")
