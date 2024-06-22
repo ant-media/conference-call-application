@@ -227,7 +227,7 @@ class TestJoinLeave(unittest.TestCase):
 
     process = self.create_participants_with_test_tool("participant", room, 1)
 
-    others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner')
+    others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner', retries=10, wait_time=3)
     assert(others_tile.is_displayed())
 
     self.kill_participants_with_test_tool(process)
