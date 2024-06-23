@@ -222,15 +222,12 @@ class TestJoinLeave(unittest.TestCase):
 
     assert(not self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
 
-    self.set_and_test_track_limit(4)
+    self.set_and_test_track_limit(2)
 
-
-    process = self.create_participants_with_test_tool("participant", room, 1)
 
     others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner', retries=10, wait_time=3)
     assert(others_tile.is_displayed())
 
-    self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
 
   # it tooks too long to get videoTrackAssignments so we need to wait for it
