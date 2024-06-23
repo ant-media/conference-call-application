@@ -691,6 +691,7 @@ function AntMedia(props) {
     }
   }
 
+  // TODO: instead of filterBroadcastObject, we can implement eqivalent function instead of _.isEqual
   function filterBroadcastObject(broadcastObject) {
     let tempBroadcastObject = broadcastObject;
     if (tempBroadcastObject !== null && tempBroadcastObject !== undefined) {
