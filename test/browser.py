@@ -14,6 +14,7 @@ from selenium.common.exceptions import NoSuchElementException, JavascriptExcepti
 from selenium.webdriver import ActionChains
 
 import time
+import subprocess
 
 class Browser:
   def init(self, is_headless):
@@ -173,3 +174,11 @@ class Browser:
     for handle in self.driver.window_handles:
       self.driver.switch_to.window(handle)
       self.driver.close()
+
+    try:
+        subprocess.run(['pkill', 'chrome'], check=True)
+        print("Successfully killed all Chrome processes.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e}")
+    except FileNotFoundError:
+        print("The pkill command is not available on this system.")
