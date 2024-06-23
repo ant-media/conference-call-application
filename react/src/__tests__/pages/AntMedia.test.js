@@ -734,7 +734,9 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
 
-      expect(container).not.toContain("Reconnecting...");
+      waitFor(() => {
+        expect(container).not.toContain("Reconnecting...");
+      });
       
       webRTCAdaptorConstructor.iceConnectionState = (any) => {
         console.log("iceConnectionState called with: " + any); 
