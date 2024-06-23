@@ -10,6 +10,7 @@ name: Java CI with Maven
 
 on: 
 #[push]
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
 
@@ -49,11 +50,13 @@ jobs:
     - name: Check if Conference app exists
       id: check-conference-app
       run: |
+        sleep 30
         response=$(curl -s "${{ secrets.SERVER_URL }}/rest/v2/applications" -b cookie.txt)
-        if [[ $(echo "$response" | jq '. | any(. == "Conference")' | grep -c true) -eq 0 ]]; then
-          echo "::set-output name=app_exists::false"
-        else
+        echo "$response"
+        if [[ $response =~ "Conference" ]]; then
           echo "::set-output name=app_exists::true"
+        else
+          echo "::set-output name=app_exists::false"
         fi
     - name: Setup kubectl
       uses: azure/k8s-set-context@v1
@@ -73,6 +76,7 @@ jobs:
         curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
                 
     - name: Recreate Conference App
+      if: steps.check-conference-app.outputs.app_exists == 'false'
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
         curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
