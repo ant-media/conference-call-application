@@ -1265,6 +1265,8 @@ describe('AntMedia Component', () => {
     });
 
     it('high resource usage', async () => {
+      jest.fakeTimers();
+
       const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
@@ -1282,6 +1284,8 @@ describe('AntMedia Component', () => {
       await act(async () => {
         webRTCAdaptorConstructor.callbackError("highResourceUsage", {});
       });
+
+      jest.advanceTimersByTime(10000);
 
       waitFor(() => {
         expect(webRTCAdaptorConstructor.checkWebSocketConnection).toHaveBeenCalled();
