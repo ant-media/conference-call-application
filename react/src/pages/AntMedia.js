@@ -482,14 +482,14 @@ function AntMedia(props) {
         let speedTestResult = {};
 
         if (rtt >= 150 || packetLost >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
-          console.log("-> Your Connection is bad");
-          speedTestResult.message = "Your Connection is bad";
+          console.log("-> Your connection quality is poor. You may experience interruptions");
+          speedTestResult.message = "Your connection quality is poor. You may experience interruptions";
         } else if (rtt >= 50 || packetLost >= 1 || jitter >= 30 || outgoingBitrate >= bandwidth) {
-          console.log("-> Your connection is fair");
-          speedTestResult.message = "Your connection is fair";
+          console.log("-> Your connection is fair, but you may experience interruptions");
+          speedTestResult.message = "Your connection is fair, but you may experience interruptions";
         } else {
           console.log("-> Your connection is good");
-          speedTestResult.message = "Your connection is good";
+          speedTestResult.message = "Your connection is optimal";
         }
 
         speedTestResult.isfinished = true;

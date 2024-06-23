@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import {Box, Button, Container, Grid, Modal, TextField, Tooltip, Typography,} from "@mui/material";
+import {Box, Button, CircularProgress, Container, Grid, Modal, TextField, Tooltip, Typography,} from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
 import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
@@ -177,6 +177,7 @@ function WaitingRoom(props) {
           pt: 2,
           px: 4,
           pb: 3,
+          textAlign: "center",
         }}>
           <Typography id="modal-modal-title" variant="h6" component="h2" sx={{position: "center"}}>
             Connection Test
@@ -184,6 +185,9 @@ function WaitingRoom(props) {
           <Typography id="modal-modal-description" sx={{ mt: 2, color: "white" }}>
             {conference?.speedTestObject?.message}
           </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <CircularProgress sx={(speedTestModalButtonVisibility) ? {visibility: "hidden", mt: 2} : {visibility: "visible", mt: 2}} size="2rem"/>
+          </Box>
           <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}} onClick={()=>{
             speedTestModalCloseButton();
           }}>Close</Button>
