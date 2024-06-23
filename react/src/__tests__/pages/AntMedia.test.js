@@ -950,7 +950,6 @@ describe('AntMedia Component', () => {
     });
   });
 
-  describe('startSpeedTest', () => {
     it('should call createSpeedTestForPublishWebRtcAdaptorPlayOnly when isPlayOnly is true and string', async () => {
       const { container } = render(
           <AntMedia isTest={true}>
@@ -1031,9 +1030,7 @@ describe('AntMedia Component', () => {
         expect(currentConference.createSpeedTestForPlayWebRtcAdaptor).toHaveBeenCalled();
       });
     });
-  });
-
-  describe('stopSpeedTest function', () => {
+  
     it('should stop and nullify speedTestForPublishWebRtcAdaptor when it is defined', async () => {
       // Arrange
       const mockStop = jest.fn();
@@ -1100,7 +1097,6 @@ describe('AntMedia Component', () => {
         });
       }).not.toThrow();
     });
-  });
 
   describe('createSpeedTestForPublishWebRtcAdaptorPlayOnly', () => {
     let originalCreateElement;
