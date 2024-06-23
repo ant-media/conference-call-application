@@ -47,16 +47,23 @@ export const WebSocketProvider = ({ children }) => {
 
             webSocket.current.onmessage = (event) => {
                 const newMessage = event.data;
-                let command = JSON.parse(newMessage).command;
+                let command = '';
+                let parsedMessage = JSON.parse(newMessage);
+                if (typeof parsedMessage === 'string') {
+                    parsedMessage = JSON.parse(parsedMessage);
+                }
+                command = parsedMessage.command;
 
               if (command === 'syncAdministrativeFieldsResponse' && !_.isEqual(latestSyncAdministrativeFieldsResponse, newMessage)) {
                 setLatestSyncAdministrativeFieldsResponse(newMessage);
                 setLatestMessage(newMessage);
               } else if (command === 'pong') {
                 console.log('Received pong from server');
+                /*
                 if (window.conference && window.conference.requestSyncAdministrativeFields) {
                   window.conference.requestSyncAdministrativeFields();
                 }
+                  */
               } else {
                 setLatestMessage(newMessage);
               }
@@ -68,20 +75,17 @@ export const WebSocketProvider = ({ children }) => {
             };
 
             webSocket.current.onerror = (error) => {
-                console.error('WebSocket Error:', error);
+                console.error('WebSocket Error');
             };
 
             const pingInterval = setInterval(() => {
-              if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
-                var jsCmd = {
-                  command: "ping"
+                if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
+                    webSocket.current.send(JSON.stringify({command: "ping"}));
+                } else if (webSocket.current && webSocket.current.readyState === WebSocket.CLOSED) {
+                    console.log('WebSocket not connected, unable to send ping');
+                    webSocket.current = new WebSocket(applicationWebSocketUrl);
                 }
-                webSocket.current.send(JSON.stringify(jsCmd));
-              } else if (webSocket.current && webSocket.current.readyState === WebSocket.CLOSED) {
-                console.log('WebSocket not connected, unable to send ping');
-                webSocket.current = new WebSocket(applicationWebSocketUrl);
-              }
-            }, 10000);
+            }, 5000);
 
             return () => {
                 webSocket.current.close();

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
@@ -255,7 +255,6 @@ var publishReconnected;
 var playReconnected;
 
 function AntMedia(props) {
-
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const initialRoomName = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
   const [roomName, setRoomName] = useState(initialRoomName);
@@ -381,7 +380,6 @@ function AntMedia(props) {
   const screenShareStreamId = React.useRef(null)
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const [fakeParticipantCounter, setFakeParticipantCounter] = React.useState(1);
-  const leaveRoomWithError = useRef(false);
 
   // video send resolution for publishing
   // possible values: "auto", "highDefinition", "standartDefinition", "lowDefinition"
@@ -398,12 +396,21 @@ function AntMedia(props) {
   const [localVideo, setLocalVideo] = React.useState(null);
 
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
+  const [leaveRoomWithError, setLeaveRoomWithError] = React.useState(null);
+
 
   const [initialized, setInitialized] = React.useState(!!props.isTest);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
   // open or close the mute participant dialog.
   const [isBecomePublisherConfirmationDialogOpen, setBecomePublisherConfirmationDialogOpen] = React.useState(false);
+
+  const [publishStats, setPublishStats] = React.useState(null);
+
+  const [isReconnectionInProgress, setIsReconnectionInProgress] = React.useState(false);
+
+  const [highResourceUsageWarningCount, setHighResourceUsageWarningCount] = React.useState(0);
+
 
   const {t} = useTranslation();
 
@@ -560,6 +567,7 @@ function AntMedia(props) {
     //reset UI releated states
     removeAllRemoteParticipants();
 
+    setIsReconnectionInProgress(true);
     reconnecting = true;
     publishReconnected = false;
     playReconnected = false;
@@ -705,20 +713,22 @@ function AntMedia(props) {
 
   useEffect(() => {
     async function createWebRTCAdaptor() {
-      console.log("----------------- createWebRTCAdaptor");
+      console.log("++ createWebRTCAdaptor");
       //here we check if audio or video device available and wait result
       //according to the result we modify mediaConstraints
       await checkDevices();
       if (recreateAdaptor && webRTCAdaptor == null) {
-        setWebRTCAdaptor(new WebRTCAdaptor({
+        var adaptor = new WebRTCAdaptor({
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
+          //placeholder for peerconnection_config
           isPlayMode: isPlayOnly,
           // onlyDataChannel: isPlayOnly,
           debug: true,
           callback: infoCallback,
           callbackError: errorCallback
-        }))
+        });
+        setWebRTCAdaptor(adaptor)
 
         setRecreateAdaptor(false);
       }
@@ -878,6 +888,8 @@ function AntMedia(props) {
         webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
+        setIsReconnectionInProgress(reconnecting);
+
         return;
       }
       console.log("publish started");
@@ -894,6 +906,7 @@ function AntMedia(props) {
       if (reconnecting) {
         publishReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
+        setIsReconnectionInProgress(reconnecting);
       }
     } else if (info === "play_started") {
       console.log("**** play started:" + reconnecting);
@@ -905,6 +918,7 @@ function AntMedia(props) {
       if (reconnecting) {
         playReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
+        setIsReconnectionInProgress(reconnecting);
       }
     } else if (info === "play_finished") {
       clearInterval(requestVideoTrackAssignmentsInterval);
@@ -945,20 +959,35 @@ function AntMedia(props) {
   function checkConnectionQuality(obj) {
     let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
     let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
-    let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
+    //let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
 
     let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
     let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
+
     let packageLostPercentage = 0;
-    if (packageLost > 0) {
-      packageLostPercentage = ((packageLost / parseInt(packageSent)) * 100).toPrecision(3);
+    console.log("publishStats:", publishStats);
+    if (publishStats !== null) {
+      let deltaPackageLost = packageLost - publishStats.packageLost;
+      let deltaPackageSent = packageSent - publishStats.packageSent;
+
+      if (deltaPackageLost > 0) {
+        packageLostPercentage = ((deltaPackageLost / parseInt(deltaPackageSent)) * 100).toPrecision(3);
+      }
     }
 
-    if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate) {
-      console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
-      displayPoorNetworkConnectionWarning();
+    if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80 ) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
+      console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
+      displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
     }
+    else if (rtt >= 100 || packageLostPercentage >= 1.5 || jitter >= 50) {
+      console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); 
+      displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
+    }
+
+    setPublishStats({packageLost: packageLost, packageSent: packageSent});
   }
+
+  //TODO : add receive stats  
 
   function screenShareWebRtcAdaptorInfoCallback(info, obj) {
     if (info === "initialized") {
@@ -976,7 +1005,7 @@ function AntMedia(props) {
       //pinVideo(screenShareStreamId.current);
 
     } else if (info === "updated_stats") {
-      checkConnectionQuality(obj);
+      //checkConnectionQuality(obj);
     } else if (info === "ice_connection_state_changed") {
       //FIXME: handle reconnection
     }
@@ -1060,7 +1089,13 @@ function AntMedia(props) {
       setUnAuthorizedDialogOpen(true)
     }
     else if(error.indexOf("highResourceUsage") !== -1){
+      setHighResourceUsageWarningCount(highResourceUsageWarningCount + 1);
+
+      if(highResourceUsageWarningCount % 3 === 0){
+        displayMessage("All servers are busy. Retrying to connect...", "white");
+      }
       if(!isJoining && roomName && publishStreamId){
+
         setTimeout(() => {
           webRTCAdaptor?.closeWebSocket();
           if (!isPlayOnly) {
@@ -1073,18 +1108,19 @@ function AntMedia(props) {
       }
     }
     else if ((error === "publishTimeoutError") && (!reconnecting)){
-      console.error(error , "Firewall might be blocking the connection Please setup a TURN Server");
-      leaveRoomWithError.current = true;
+      setLeaveRoomWithError("Firewall might be blocking your connection. Please report this.");
       setLeftTheRoom(true);
+      setIsJoining(false);
     }
     else if (error === "license_suspended_please_renew_license"){
-      console.error(error , "Licence is Expired please renew the licence");
-      leaveRoomWithError.current = true;
+      setLeaveRoomWithError("Licence error. Please report this.");
       setLeftTheRoom(true);
+      setIsJoining(false);
     } else if (error === "notSetRemoteDescription"){
-      console.error(error , "Not set remote description");
-      leaveRoomWithError.current = true;
+      setLeaveRoomWithError("System is not compatible to connect. Please report this.");
       setLeftTheRoom(true);
+      setIsJoining(false);
+
     }
     console.log("***** " + error)
   }
@@ -1246,12 +1282,12 @@ function AntMedia(props) {
     showReactions(publishStreamId, reaction);
   }
 
-  const displayPoorNetworkConnectionWarning = () => {
-    console.log("displayPoorNetworkConnectionWarning");
+  const displayPoorNetworkConnectionWarning = (message) => {
+    console.warn("Poor Network Connection Warning:"+message);
 
     if (last_warning_time == null || Date.now() - last_warning_time > 1000 * 30) {
       last_warning_time = Date.now();
-      displayWarning("Your connection is not stable. Please check your internet connection!");
+      displayWarning(message);
     }
   }
 
@@ -1541,6 +1577,8 @@ function AntMedia(props) {
       } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
         let videoTrackAssignmentList = notificationEvent.payload;
 
+        console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(videoTrackAssignmentList));
+
         let tempVideoTrackAssignments = videoTrackAssignments;
 
         let tempVideoTrackAssignmentsNew = [];
@@ -1597,7 +1635,7 @@ function AntMedia(props) {
           return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
         });
       } else if (eventType === "TRACK_LIST_UPDATED") {
-        console.debug("TRACK_LIST_UPDATED -> ", obj);
+        console.info("TRACK_LIST_UPDATED -> ", obj);
 
         webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
       } else if (eventType === "UPDATE_PARTICIPANT_ROLE") {
@@ -2294,6 +2332,23 @@ function AntMedia(props) {
               </Backdrop>
             ):null}
 
+            {isReconnectionInProgress ? (
+              <Backdrop
+                      sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                      open={isReconnectionInProgress}
+                      //onClick={handleClose}
+                    >
+                <Grid container alignItems='center' justify='center' alignContent='center'>
+                  <Grid item xs={12} align='center'>
+                      <CircularProgress/>
+                  </Grid>
+                  <Grid item xs={12} align='center'>
+                      <Typography style={{color: theme.palette.themeColor10}}><b>{t("Reconnecting...")}</b></Typography>
+                  </Grid>
+                </Grid>
+              </Backdrop>
+            ):null}
+
             {screenSharingInProgress ? (
               <Backdrop
                       sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -2312,7 +2367,7 @@ function AntMedia(props) {
             ):null}
 
               {leftTheRoom ? (
-               <LeftTheRoom isError={leaveRoomWithError.current} />
+               <LeftTheRoom withError={leaveRoomWithError} />
               ) : waitingOrMeetingRoom === "waiting" ? (
                 <WaitingRoom/>
               ) : (

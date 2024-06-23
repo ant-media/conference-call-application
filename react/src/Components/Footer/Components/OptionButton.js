@@ -167,7 +167,7 @@ function OptionButton({footer, ...props}) {
         {process.env.REACT_APP_RECORDING_MANAGED_BY_ADMIN === 'false' || conference.isAdmin === true ?
           [
             (conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true) &&
-            (<MenuItem onClick={() => { conference.startRecord(); handleClose(); } }
+            (<MenuItem onClick={() => { conference.startRecord(); handleClose(); } } id="start-recording-button"
             >
               <ListItemIcon>
                 <SvgIcon size={36} name={"camera"} color={"#fff"} />
@@ -177,7 +177,7 @@ function OptionButton({footer, ...props}) {
             ),
 
             (conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true) &&
-            (<MenuItem onClick={() => { conference.stopRecord(); handleClose(); }}
+            (<MenuItem onClick={() => { conference.stopRecord(); handleClose(); }} id="stop-recording-button"
               >
                 <ListItemIcon>
                   <SvgIcon size={36} name={"camera"} color={"#fff"} />
