@@ -13,6 +13,7 @@ const contextValue = {
   joinRoom: jest.fn(),
   localVideo: {},
   setSpeedTestObject: jest.fn(),
+  makeId: jest.fn(),
 };
 
 // Mock the useContext hook
@@ -123,5 +124,29 @@ describe('Waiting Room Component', () => {
       expect(contextValue.startSpeedTest).toHaveBeenCalled();
     });
   });
+
+    it('should start joining the room when speedTestModalJoinButton is clicked', () => {
+      const { getByText } = render(<WaitingRoom isSpeedTestModalVisibleForTestPurposes={true} speedTestModalButtonVisibilityForTestPurposes={true} />);
+      const joinButton = getByText("Join");
+      fireEvent.click(joinButton);
+      waitFor(() => {
+        expect(conference.setSpeedTestObject).toHaveBeenCalledWith({message: "Please wait while we are testing your connection speed", isfinished: false});
+        expect(setSpeedTestModalButtonVisibility).toHaveBeenCalledWith(false);
+        expect(setSpeedTestModelVisibility).toHaveBeenCalledWith(false);
+        expect(conference.setIsJoining).toHaveBeenCalledWith(true);
+        expect(conference.joinRoom).toHaveBeenCalledWith(roomName, conference.speedTestStreamId.current);
+      });
+    });
+
+    it('should close the speed test modal when speedTestModalCloseButton is clicked', () => {
+      const { getByText } = render(<WaitingRoom isSpeedTestModalVisibleForTestPurposes={true} speedTestModalButtonVisibilityForTestPurposes={true} />);
+      const closeButton = getByText("Close");
+      fireEvent.click(closeButton);
+      waitFor(() => {
+        expect(conference.setSpeedTestObject).toHaveBeenCalledWith({message: "Please wait while we are testing your connection speed", isfinished: false});
+        expect(setSpeedTestModalButtonVisibility).toHaveBeenCalledWith(false);
+        expect(setSpeedTestModelVisibility).toHaveBeenCalledWith(false);
+      });
+    });
 
 });

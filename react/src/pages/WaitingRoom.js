@@ -29,9 +29,9 @@ function WaitingRoom(props) {
 
   const [selectFocus, setSelectFocus] = React.useState(null);
 
-  const [isSpeedTestModalVisible, setSpeedTestModelVisibility] = React.useState(false);
+  const [isSpeedTestModalVisible, setSpeedTestModelVisibility] = React.useState(props.isSpeedTestModalVisibleForTestPurposes ? props.isSpeedTestModalVisibleForTestPurposes : false);
 
-  const [speedTestModalButtonVisibility, setSpeedTestModalButtonVisibility] = React.useState(false);
+  const [speedTestModalButtonVisibility, setSpeedTestModalButtonVisibility] = React.useState(props.speedTestModalButtonVisibilityForTestPurposes ? props.speedTestModalButtonVisibilityForTestPurposes : false);
 
   const theme = useTheme();
 
@@ -132,6 +132,23 @@ function WaitingRoom(props) {
     setDialogOpen(false);
   };
 
+  const speedTestModalJoinButton = () => {
+    conference?.setSpeedTestObject({message: "Please wait while we are testing your connection speed", isfinished: false});
+    setSpeedTestModalButtonVisibility(false);
+    setSpeedTestModelVisibility(false);
+    conference?.setIsJoining(true);
+    if (conference?.speedTestStreamId) {
+      conference?.joinRoom(roomName, conference?.speedTestStreamId.current);
+    } else {
+        conference?.joinRoom(roomName, conference?.makeId(10));
+    }
+  }
+
+  const speedTestModalCloseButton = () => {
+    conference?.setSpeedTestObject({message: "Please wait while we are testing your connection speed", isfinished: false});
+    setSpeedTestModalButtonVisibility(false);
+    setSpeedTestModelVisibility(false);
+  }
 
   return (
     <Container>
@@ -168,16 +185,10 @@ function WaitingRoom(props) {
             {conference?.speedTestObject?.message}
           </Typography>
           <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}} onClick={()=>{
-            conference?.setSpeedTestObject({message: "Please wait while we are testing your connection speed", isfinished: false});
-            setSpeedTestModalButtonVisibility(false);
-            setSpeedTestModelVisibility(false);
+            speedTestModalCloseButton();
           }}>Close</Button>
           <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}} onClick={()=>{
-            conference?.setSpeedTestObject({message: "Please wait while we are testing your connection speed", isfinished: false});
-            setSpeedTestModalButtonVisibility(false);
-            setSpeedTestModelVisibility(false);
-            conference?.setIsJoining(true);
-            conference?.joinRoom(roomName, conference?.speedTestStreamId.current);
+            speedTestModalJoinButton();
           }}>Join</Button>
         </Box>
       </Modal>
