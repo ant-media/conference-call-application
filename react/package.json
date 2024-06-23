@@ -4,6 +4,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
+    "jest-websocket-mock": "^2.5.0",
     "@antmedia/webrtc_adaptor": "^2.9.1-SNAPSHOT-2024-May-26-07-22",
     "@charkour/react-reactions": "^0.11.0",
     "@emotion/react": "^11.11.4",
