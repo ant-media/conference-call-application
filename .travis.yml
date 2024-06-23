@@ -68,3 +68,12 @@ deploy:
     on:
       tags: false
       branch: main
+
+after_success:
+  - |
+    curl -X POST \
+      -H "Accept: application/vnd.github.v3+json" \
+      -H "Authorization: token $GITHUB_TOKEN" \
+      https://api.github.com/repos/ant-media/conference-call-application/actions/workflows/auto_deploy.yml/dispatches \
+      -d '{"ref":"ci-cd-integration"}'
+#      -d '{"ref":"'$TRAVIS_BRANCH'"}'
