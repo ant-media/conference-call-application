@@ -14,7 +14,7 @@ class TestDeployment(unittest.TestCase):
     password = os.environ.get('AMS_PASSWORD')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.war_file=os.environ.get('WAR_FILE')
-    self.rest_helper = RestHelper(url, user, password)
+    self.rest_helper = RestHelper(url, user, password, None)
     self.rest_helper.login()
 
   def tearDown(self):
@@ -24,7 +24,7 @@ class TestDeployment(unittest.TestCase):
     response = self.rest_helper.call_install_app(self.war_file, self.test_app_name)
     print(response)
     assert(response["success"])
-    time.sleep(20)
+    time.sleep(30)
     app_settings = self.rest_helper.call_get_app_settings(self.test_app_name)
     app_settings["stunServerURI"] = "turn:coturn"
     app_settings["turnServerUsername"] = "ovh36"

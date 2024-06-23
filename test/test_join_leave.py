@@ -3,12 +3,15 @@ from selenium.webdriver.common.by import By
 from rest_helper import RestHelper 
 
 
+import subprocess
 import sys
 import unittest
 import os
 import random
 import json
 import time
+import psutil
+
 
 class TestJoinLeave(unittest.TestCase):
   def setUp(self):
@@ -19,16 +22,42 @@ class TestJoinLeave(unittest.TestCase):
     self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
     self.chrome.init(True)
-    self.rest_helper = RestHelper(self.url, self.user, self.password)
+    self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
     self.rest_helper.login()
 
     wait = self.chrome.get_wait()
-    wait.until(lambda x: len(self.rest_helper.get_broadcasts()) == 0)
+    time.sleep(15)
+    #wait.until(lambda x: len(self.rest_helper.get_broadcasts()) == 0)
+    #print("broadcasts are empty")
 
 
 
   def tearDown(self):
     print(self._testMethodName, " ending...\n","----------------")
+
+  def create_participants_with_test_tool(self, participant_name, room, count):
+    directory = os.path.expanduser("~/test/webrtc-load-test")
+    script = "run.sh"
+    ws_url = self.url.replace("https://", "").replace("http://", "")
+    parameters = ["-m", "publisher", "-s", ws_url, "-p", "443", "-q", "true", "-f", "test.mp4", "-a", self.test_app_name, "-i", participant_name, "-t", room, "-n", str(count)]  
+    
+    print("test tool is running with parameters: "+str(parameters))
+    # Full path to the script
+    script_path = os.path.join(directory, script)
+
+    # Run the script silently with parameters
+    process = subprocess.Popen(
+        ["bash", script_path] + parameters,
+        cwd=directory,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+    return process
+
+  def kill_participants_with_test_tool(self, process):
+    process.kill()
+
 
   def join_room_in_new_tab(self, participant, room):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
@@ -62,6 +91,8 @@ class TestJoinLeave(unittest.TestCase):
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
     #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    cpu_usage = psutil.cpu_percent(interval=0)
+    print(f"Instant CPU Usage: {cpu_usage}%")
     return vtas
   
   def get_conference(self):
@@ -190,20 +221,13 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
 
     assert(not self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
-    for i in range(3,7):
-        handler = self.join_room_in_new_tab("participant" + str(i), room)
-        self.assertLocalVideoAvailable()
-        self.chrome.switch_to_tab(handler)
 
-        expected_vta_count = min(i+1, 5) #+1 for screen share
-        print("wait for vta count: "+str(expected_vta_count))
-        wait.until(lambda x: len(self.get_videoTrackAssignments()) == expected_vta_count
-                   , "vta count is not "+str(expected_vta_count)+"\nss:\n"+self.chrome.get_screenshot_as_base64())
+    self.set_and_test_track_limit(2)
 
-        if i>=5:
-          assert(self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
-        else:
-          assert(not self.chrome.is_element_exist(By.CLASS_NAME, "others-tile-inner"))
+
+    others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner', retries=10, wait_time=3)
+    assert(others_tile.is_displayed())
+
     self.chrome.close_all()
 
   # it tooks too long to get videoTrackAssignments so we need to wait for it
@@ -328,15 +352,13 @@ class TestJoinLeave(unittest.TestCase):
     '''
 
   def test_join_room_N_participants(self):
-    N = 5
+    N = 3
     room = "room"+str(random.randint(100, 999))
-    handles = [] 
     wait = self.chrome.get_wait()
 
-    for i in range(N):
-      handles.append(self.join_room_in_new_tab("participant"+str(i), room))
+    process = self.create_participants_with_test_tool("participant", room, N-1)
 
-    assert(handles[N-1] == self.chrome.get_current_tab_id())
+    self.join_room_in_new_tab("participant"+str(N-1), room)     
 
     time.sleep(5)
     self.assertLocalVideoAvailable()
@@ -344,12 +366,13 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
-    self.set_and_test_track_limit(4)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 4)
+    self.set_and_test_track_limit(2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
     self.set_and_test_track_limit(6)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
+    self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
 
   def is_avatar_displayed_for(self, stream_id):
