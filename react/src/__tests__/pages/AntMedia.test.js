@@ -1267,9 +1267,6 @@ describe('AntMedia Component', () => {
       conference.speedTestForPlayWebRtcAdaptorErrorCallback('NotFoundError', 'Media not found');
       expect(consoleSpy).toHaveBeenCalledWith('error from speed test webrtc adaptor callback');
     });
-  });
-
-});
 
     it('high resource usage', async () => {
       const { container } = render(
@@ -1393,14 +1390,8 @@ describe('AntMedia Component', () => {
 
 
       });
-    
-    
-      
-    
-    
-      consoleWarnSpy.mockRestore();
-      
     });
 
+  });
    
 });
