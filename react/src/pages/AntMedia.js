@@ -417,7 +417,9 @@ function AntMedia(props) {
   const theme = useTheme();
 
   useEffect(() => {
-    setParticipantUpdated(!participantUpdated);
+    setTimeout(() => {
+      setParticipantUpdated(!participantUpdated);
+    }, 5000);
   }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleUnauthorizedDialogExitClicked(){
@@ -1588,6 +1590,8 @@ function AntMedia(props) {
 
         console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(videoTrackAssignmentList));
 
+        videoTrackAssignmentList = videoTrackAssignmentList.filter((vta) => vta.trackId !== "");
+
         let tempVideoTrackAssignments = videoTrackAssignments;
 
         let tempVideoTrackAssignmentsNew = [];
@@ -1622,11 +1626,11 @@ function AntMedia(props) {
         // check if there is any difference between old and new assignments
         if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
           setVideoTrackAssignments(tempVideoTrackAssignments);
+          requestSyncAdministrativeFields();
           setParticipantUpdated(!participantUpdated);
         }
 
         //checkScreenSharingStatus();
-        requestSyncAdministrativeFields();
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
@@ -1652,6 +1656,7 @@ function AntMedia(props) {
         console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
 
         if (publishStreamId === notificationEvent.streamId) {
+          allParticipants[publishStreamId].role = notificationEvent.role;
           setRole(notificationEvent.role);
         } else {
           webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
