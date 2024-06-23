@@ -35,22 +35,22 @@ jobs:
         
     - name: Login to server
       run: |
-        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
+        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.STAGING_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
         
     - name: Delete Old App
       run: |
-        curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+        curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
         sleep 10
         
     - name: Create New App
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
-        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
   
     - name: Check if Conference app exists
       id: check-conference-app
       run: |
-        response=$(curl -s "${{ secrets.SERVER_URL }}/rest/v2/applications" -b cookie.txt)
+        response=$(curl -s "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications" -b cookie.txt)
         if [[ $(echo "$response" | jq '. | any(. == "Conference")' | grep -c true) -eq 0 ]]; then
           echo "::set-output name=app_exists::false"
         else
@@ -71,10 +71,10 @@ jobs:
     - name: Login to server
       if: steps.check-conference-app.outputs.app_exists == 'false'
       run: |
-        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
+        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.STAGING_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
                 
     - name: Recreate Conference App
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
-        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
   
