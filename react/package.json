@@ -4,7 +4,6 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "jest-when": "^3.6.0",
     "jest-websocket-mock": "^2.5.0",
     "@antmedia/webrtc_adaptor": "^2.9.1-SNAPSHOT-2024-May-26-07-22",
     "@charkour/react-reactions": "^0.11.0",
@@ -45,7 +44,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build && node custom-post-build.js",
     "eject": "react-scripts eject",
-    "test": "jest",
+    "test": "jest --verbose",
     "upload-coverage": "codecov"
   },
   "eslintConfig": {

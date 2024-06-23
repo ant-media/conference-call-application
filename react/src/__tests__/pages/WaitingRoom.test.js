@@ -2,8 +2,6 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import WaitingRoom from 'pages/WaitingRoom';
 import React from "react";
 import { ConferenceContext } from 'pages/AntMedia';
-import { when } from "jest-when";
-import { waitUntil } from "workbox-core/_private";
 
 const contextValue = {
   initialized: true,
