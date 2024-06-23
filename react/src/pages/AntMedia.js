@@ -1624,7 +1624,7 @@ function AntMedia(props) {
           setParticipantUpdated(!participantUpdated);
         }
 
-        checkScreenSharingStatus();
+        //checkScreenSharingStatus();
         requestSyncAdministrativeFields();
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
