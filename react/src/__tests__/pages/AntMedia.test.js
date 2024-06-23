@@ -743,10 +743,12 @@ describe('AntMedia Component', () => {
       //global.setTimeout = (callback) => callback();
       await act(async () => {
         webRTCAdaptorConstructor.callback("ice_connection_state_changed", {state: "disconnected"});
-        jest.useFakeTimers();
-        jest.runAllTimers();
-        jest.useRealTimers();
       });
+
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(10000);
+      jest.runAllTimers();
+      jest.useRealTimers();
 
       waitFor(() => {
         expect(container).toContain("Reconnecting...");
@@ -1247,7 +1249,6 @@ describe('AntMedia Component', () => {
             <MockChild/>
           </AntMedia>
         </ThemeProvider>);
-
 
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
