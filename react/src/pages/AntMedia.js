@@ -1130,6 +1130,11 @@ function AntMedia(props) {
     let videoLabel;
     let broadcastObject = allParticipants[streamId];
 
+    if (broadcastObject === null || broadcastObject === undefined) {
+      console.error("Cannot find broadcast object for streamId: " + streamId);
+      return;
+    }
+
     // if we already pin the targeted user then we are going to remove it from pinned video.
     if ((typeof broadcastObject.isPinned !== "undefined") && (broadcastObject.isPinned === true)) {
         broadcastObject.isPinned = false; // false means user unpin manually
@@ -2310,7 +2315,6 @@ function AntMedia(props) {
               requestSyncAdministrativeFields,
               role,
               getStats,
-              setParticipantUpdated
             }}
           >
             {props.children}

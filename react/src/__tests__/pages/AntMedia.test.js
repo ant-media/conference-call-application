@@ -64,6 +64,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       updateStreamMetaData: jest.fn(),
       assignVideoTrack: jest.fn(),
       setParticipantUpdated: jest.fn(),
+      getSubtracks: jest.fn(),
     }
 
     for (var key in params) {
