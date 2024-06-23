@@ -1563,12 +1563,13 @@ function AntMedia(props) {
         if (publishStreamId === notificationEvent.streamId) {
           console.warn(notificationEvent.senderStreamId, "turns your mic on");
           unmuteLocalMic();
-        } else if (eventType === "TURN_YOUR_MIC_OFF") {
+        }
+      } else if (eventType === "TURN_YOUR_MIC_OFF") {
         if (publishStreamId === notificationEvent.streamId) {
           console.warn(notificationEvent.senderStreamId, "muted you");
           muteLocalMic();
         }
-      } }else if (eventType === "PIN_USER") {
+      } else if (eventType === "PIN_USER") {
         if (
           notificationEvent.streamId === publishStreamId &&
           !isScreenShared
