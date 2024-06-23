@@ -649,6 +649,7 @@ function AntMedia(props) {
                 websocket_url: websocketURL,
                 localStream:stream,
                 mediaConstraints: getMediaConstraints("screenConstraints", 20),
+                //placeholder for peerconnection_config
                 sdp_constraints: {
                     OfferToReceiveAudio : false,
                     OfferToReceiveVideo : false,
