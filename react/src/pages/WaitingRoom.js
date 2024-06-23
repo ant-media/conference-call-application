@@ -91,7 +91,9 @@ function WaitingRoom(props) {
       speedTestObjectDefault.isfinished = false;
 
       conference?.setSpeedTestObject(speedTestObjectDefault);
-      conference.speedTestStreamId.current = streamId;
+      if (conference.speedTestStreamId) {
+        conference.speedTestStreamId.current = streamId;
+      }
 
       setSpeedTestModelVisibility(true);
       conference?.startSpeedTest();
@@ -229,7 +231,7 @@ function WaitingRoom(props) {
                 </Grid>
               </Grid>
             </Grid>
-            <Typography align="center" color={theme.palette.chatText} sx={{mt: 2}}>
+            <Typography align="center" color={theme.palette?.chatText} sx={{mt: 2}}>
               {t(
                 "You can choose whether to open your camera and microphone before you get into room"
               )}
