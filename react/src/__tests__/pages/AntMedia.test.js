@@ -896,7 +896,6 @@ describe('AntMedia Component', () => {
 
     });
 
-  describe('parseWebSocketURL', () => {
     it('should correctly parse WebSocket URL with wss protocol', () => {
       const { container } = render(
           <AntMedia isTest={true}>
@@ -951,7 +950,6 @@ describe('AntMedia Component', () => {
       const result = currentConference.parseWebSocketURL(url);
       expect(result).toEqual('');
     });
-  });
 
     it('should call createSpeedTestForPublishWebRtcAdaptorPlayOnly when isPlayOnly is true and boolean', async () => {
       const { container } = render(
@@ -968,6 +966,11 @@ describe('AntMedia Component', () => {
       await act(async () => {
         currentConference.startSpeedTest();
       });
+
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
 
       waitFor(() => {
         expect(currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly).toHaveBeenCalled();
@@ -996,6 +999,11 @@ describe('AntMedia Component', () => {
         currentConference.startSpeedTest();
       });
 
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
+
       waitFor(() => {
         expect(currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly).not.toHaveBeenCalled();
       });
@@ -1017,6 +1025,11 @@ describe('AntMedia Component', () => {
       await act(async () => {
         currentConference.stopSpeedTest();
       });
+
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
 
       // Assert
       waitFor(() => {
@@ -1262,6 +1275,7 @@ describe('AntMedia Component', () => {
 
       jest.useFakeTimers();
       jest.advanceTimersByTime(10000);
+      jest.runAllTimers();
       jest.useRealTimers();
 
       waitFor(() => {
@@ -1321,6 +1335,11 @@ describe('AntMedia Component', () => {
         //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
       });
 
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
+
       await act(async () => {
 
         mockStats.videoRoundTripTime = '0';
@@ -1340,6 +1359,11 @@ describe('AntMedia Component', () => {
         expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
       });
 
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
+
       await act(async () => {
 
         mockStats.videoJitter = '0';
@@ -1354,6 +1378,11 @@ describe('AntMedia Component', () => {
         expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
 
       });
+
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
 
       await act(async () => {
 
