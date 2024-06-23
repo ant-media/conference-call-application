@@ -310,8 +310,6 @@ function AntMedia(props) {
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
   const [isAdmin, setIsAdmin] = React.useState(admin);
-  const [approvedSpeakerRequestList, setApprovedSpeakerRequestList] = React.useState([]);
-  const [presenters, setPresenters] = React.useState([]);
   // presenterButtonStreamIdInProcess keeps the streamId of the participant who is in the process of becoming presenter/unpresenter.
   const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState([]);
@@ -511,10 +509,6 @@ function AntMedia(props) {
     }
 
     updateParticipantRole(streamId, participantsNewRole);
-
-    let temp = presenters;
-    temp.push(streamId);
-    setPresenters(temp);
   }
 
   function makeParticipantUndoPresenter(streamId) {
@@ -538,10 +532,6 @@ function AntMedia(props) {
     }
 
     updateParticipantRole(streamId, participantsNewRole);
-
-    let temp = presenters;
-    temp = temp.filter(item => item !== streamId);
-    setPresenters(temp);
   }
 
   function updateParticipantRole(streamId, role) {
@@ -2285,10 +2275,6 @@ function AntMedia(props) {
               setPublisherRequestListDrawerOpen,
               isAdmin,
               setIsAdmin,
-              approvedSpeakerRequestList,
-              setApprovedSpeakerRequestList,
-              presenters,
-              setPresenters,
               presenterButtonDisabled,
               setPresenterButtonDisabled,
               effectsDrawerOpen,
