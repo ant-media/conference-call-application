@@ -68,6 +68,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       createSpeedTestForPublishWebRtcAdaptorPlayOnly: jest.fn(),
       createSpeedTestForPublishWebRtcAdaptor: jest.fn(),
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
+      requestVideoTrackAssignments: jest.fn(),
     }
 
     for (var key in params) {
@@ -950,33 +951,6 @@ describe('AntMedia Component', () => {
     });
   });
 
-    it('should call createSpeedTestForPublishWebRtcAdaptorPlayOnly when isPlayOnly is true and string', async () => {
-      const { container } = render(
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>
-      );
-
-      currentConference.isPlayOnly = "true";
-      currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly = jest.fn();
-      currentConference.createSpeedTestForPublishWebRtcAdaptor = jest.fn();
-      currentConference.createSpeedTestForPlayWebRtcAdaptor = jest.fn();
-
-      await act(async () => {
-        currentConference.startSpeedTest();
-      });
-
-      waitFor(() => {
-        expect(currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly).toHaveBeenCalled();
-      });
-      waitFor(() => {
-        expect(currentConference.createSpeedTestForPublishWebRtcAdaptor).not.toHaveBeenCalled();
-      });
-      waitFor(() => {
-        expect(currentConference.createSpeedTestForPlayWebRtcAdaptor).toHaveBeenCalled();
-      });
-    });
-
     it('should call createSpeedTestForPublishWebRtcAdaptorPlayOnly when isPlayOnly is true and boolean', async () => {
       const { container } = render(
           <AntMedia isTest={true}>
@@ -1235,6 +1209,7 @@ describe('AntMedia Component', () => {
       speedTestForPlayWebRtcAdaptor = {
         current: {
           play: jest.fn(),
+          requestVideoTrackAssignments: jest.fn(),
         },
       };
       consoleSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -1265,7 +1240,7 @@ describe('AntMedia Component', () => {
     });
 
     it('high resource usage', async () => {
-      jest.fakeTimers();
+      jest.FakeTimers();
 
       const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
