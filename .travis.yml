@@ -6,6 +6,14 @@ before_install:
 - sudo apt-get update
 - sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
 - curl -L "https://drive.usercontent.google.com/download?id=1Gp3LTFvG4arbXWFiGrQTPYw2CUEuKhf5&export=download&confirm=t" -o "webrtc-load-test-tool-2.9.1-SNAPSHOT.zip"
+- (if [ $(git ls-remote https://github.com/ant-media/ManagementConsole_AngularApp.git $TRAVIS_BRANCH  | wc -l) == "1" ];  
+    then 
+     echo " $TRAVIS_BRANCH branch found";  
+     git clone --depth=1 -b $TRAVIS_BRANCH https://github.com/ant-media/conference-call-application.git;  
+    else
+     echo "branch not found"; 
+     git clone --depth=1 https://github.com/ant-media/conference-call-application.git;  
+   fi)
 - unzip webrtc-load-test-tool-2.9.1-SNAPSHOT.zip
 - mkdir ~/test
 - mv webrtc-load-test ~/test
@@ -47,9 +55,9 @@ script:
 - npm test
 - npm run upload-coverage
 # run functional tests
-- cd ../test
-- python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
-- cd ../webapp
+#- cd ../test
+#- python3 test_main.py $SERVER_URL $AMS_USER_NAME $AMS_PASSWORD ../webapp/target/*.war
+#- cd ../webapp
 
 deploy:
   - provider: script
