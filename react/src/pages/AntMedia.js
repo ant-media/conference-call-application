@@ -19,6 +19,7 @@ import {UnauthrorizedDialog} from "Components/Footer/Components/UnauthorizedDial
 import {useWebSocket} from 'Components/WebSocketProvider';
 import {useTheme} from "@mui/material/styles";
 import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
+import {WebinarRoles} from "../WebinarRoles";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -153,7 +154,7 @@ function getRole() {
   const dataRole = document.getElementById("root")?.getAttribute("data-role");
   let role = (dataRole) ? dataRole : getUrlParameter("role");
   if (role === null || typeof role === "undefined") {
-    role = "default";
+    role = WebinarRoles.Default;
   }
   return role;
 }
@@ -309,7 +310,7 @@ function AntMedia(props) {
   const [leftTheRoom, setLeftTheRoom] = useState(false);
   const [unAuthorizedDialogOpen, setUnAuthorizedDialogOpen] = useState(false);
 
-  const [isAdmin, setIsAdmin] = React.useState(admin);
+  const [isAdmin, setIsAdmin] = React.useState(admin === true || role === WebinarRoles.Host || role === WebinarRoles.ActiveHost);
   // presenterButtonStreamIdInProcess keeps the streamId of the participant who is in the process of becoming presenter/unpresenter.
   const [presenterButtonStreamIdInProcess, setPresenterButtonStreamIdInProcess] = useState([]);
   const [presenterButtonDisabled, setPresenterButtonDisabled] = React.useState([]);
@@ -497,12 +498,12 @@ function AntMedia(props) {
       participantsRole = broadcastObject.role;
     }
 
-    if (participantsRole === "host") {
-        participantsNewRole = "active_host";
-    } else if (participantsRole === "speaker") {
-        participantsNewRole = "active_speaker";
-    } else if (participantsRole === "temp_listener") {
-        participantsNewRole = "active_temp_listener";
+    if (participantsRole === WebinarRoles.Host) {
+        participantsNewRole = WebinarRoles.ActiveHost;
+    } else if (participantsRole === WebinarRoles.Speaker) {
+        participantsNewRole = WebinarRoles.ActiveSpeaker;
+    } else if (participantsRole === WebinarRoles.TempListener) {
+        participantsNewRole = WebinarRoles.ActiveTempListener;
     } else {
       console.error("Invalid role for participant to make presenter", participantsRole);
       return;
@@ -520,12 +521,12 @@ function AntMedia(props) {
       participantsRole = broadcastObject.role;
     }
 
-    if (participantsRole === "active_host") {
-      participantsNewRole = "host";
-    } else if (participantsRole === "active_speaker") {
-      participantsNewRole = "speaker";
-    } else if (participantsRole === "active_temp_listener") {
-      participantsNewRole = "temp_listener";
+    if (participantsRole === WebinarRoles.ActiveHost) {
+      participantsNewRole = WebinarRoles.Host;
+    } else if (participantsRole === WebinarRoles.ActiveSpeaker) {
+      participantsNewRole = WebinarRoles.Speaker;
+    } else if (participantsRole === WebinarRoles.ActiveTempListener) {
+      participantsNewRole = WebinarRoles.TempListener;
     } else {
       console.error("Invalid role for participant to make presenter", participantsRole);
       return;

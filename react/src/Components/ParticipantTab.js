@@ -7,6 +7,7 @@ import { styled } from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import {CircularProgress} from "@mui/material";
+import {WebinarRoles} from "../WebinarRoles";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: theme.palette.textColor,
@@ -29,7 +30,7 @@ function ParticipantTab(props) {
 
     return (
       <div id={'admin-button-group-'+streamId}>
-      {( role === "active_host" || role === "active_speaker" || role === "active_temp_listener" ) && conference?.isAdmin === true ? (
+      {( role === WebinarRoles.ActiveHost || role === WebinarRoles.ActiveSpeaker || role === WebinarRoles.ActiveTempListener ) && conference?.isAdmin === true ? (
       <PinBtn
         id={"remove-presenter-"+streamId}
         disabled={conference?.presenterButtonDisabled.includes(publishStreamId)}
@@ -41,7 +42,7 @@ function ParticipantTab(props) {
           <SvgIcon size={28} name="unpresenter" color="#000" />}
       </PinBtn>
     ) : null}
-  { ( role === "host" || role === "speaker" || role === "temp_listener" ) && conference?.isAdmin === true ?(
+  { ( role === WebinarRoles.Host || role === WebinarRoles.Speaker || role === WebinarRoles.TempListener ) && conference?.isAdmin === true ?(
     <PinBtn
       id={"add-presenter-"+streamId}
       disabled={conference?.presenterButtonDisabled.includes(streamId)}
@@ -54,7 +55,7 @@ function ParticipantTab(props) {
         <SvgIcon size={28} name="presenter" color="#000" />}
     </PinBtn>
   ) : null}
-  { ( role === "temp_listener" || role === "active_temp_listener" ) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ? (
+  { ( role === WebinarRoles.TempListener || role === WebinarRoles.ActiveTempListener ) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ? (
     <PinBtn
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => conference?.makeListenerAgain(publishStreamId)}
