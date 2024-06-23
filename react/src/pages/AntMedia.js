@@ -593,7 +593,6 @@ function AntMedia(props) {
     if (videoTrackAssignmentsIntervalJob === null) {
       videoTrackAssignmentsIntervalJob = setInterval(() => {
         webRTCAdaptor?.requestVideoTrackAssignments(roomName);
-        webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
       }, 3000);
     }
   }
