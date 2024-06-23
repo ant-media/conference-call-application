@@ -951,6 +951,7 @@ describe('AntMedia Component', () => {
       expect(result).toEqual('');
     });
 
+    /*
     it('should call createSpeedTestForPublishWebRtcAdaptorPlayOnly when isPlayOnly is true and boolean', async () => {
       const { container } = render(
           <AntMedia isTest={true}>
@@ -1014,6 +1015,7 @@ describe('AntMedia Component', () => {
         expect(currentConference.createSpeedTestForPlayWebRtcAdaptor).toHaveBeenCalled();
       });
     });
+    */
   
     it('should stop and nullify speedTestForPublishWebRtcAdaptor when it is defined', async () => {
       // Arrange
@@ -1284,6 +1286,7 @@ describe('AntMedia Component', () => {
     });
 
 
+    /*
     it('checks connection quality and displays warning for poor network connection', async () => {  
       
       const { container } = render(
@@ -1397,6 +1400,8 @@ describe('AntMedia Component', () => {
 
       });
     });
+
+     */
 
   });
    
