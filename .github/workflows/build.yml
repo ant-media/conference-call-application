@@ -61,3 +61,6 @@ jobs:
         npm install codecov --save-dev
         npm test
         npm run upload-coverage
+
+    - name: Deploy using Maven
+      run: mvn deploy -DskipTests --quiet --settings mvn-settings.xml
