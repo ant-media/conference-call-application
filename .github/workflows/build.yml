@@ -24,5 +24,38 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2-
 
-    - name: Build with Maven
-      run: mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet
+    - name: Cache Node.js modules
+      uses: actions/cache@v3
+      with:
+        path: react/node_modules
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('react/package-lock.json') }}
+        restore-keys: ${{ runner.os }}-node-modules-
+
+    - name: Clone ant-media-server-parent
+      run: |
+        git clone --depth=1 https://github.com/ant-media/ant-media-server-parent.git
+        cd ant-media-server-parent
+        mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet
+        cd ..
+
+    - name: Build React application
+      run: |
+        cd react
+        sed -i "s#//placeholder for peerconnection_config#peerconnection_config:{\"iceServers\":[{\"urls\":\"turn:${{ secrets.TURN_URL }}\",\"username\":\"${{ secrets.TURN_USER }}\",\"credential\":\"${{ secrets.TURN_PASSWORD }}\"}],\"sdpSemantics\":\"unified-plan\"},#" src/pages/AntMedia.js
+        npm install
+        npm run build
+        cd ..
+        cp -a react/build/. webapp/src/main/webapp
+
+    - name: Build Maven project
+      run: |
+        cd webapp
+        mvn clean install -DskipTests -Dgpg.skip=true --quiet
+        cd ..
+
+    - name: Run unit tests
+      run: |
+        cd react
+        npm install codecov --save-dev
+        npm test
+        npm run upload-coverage
