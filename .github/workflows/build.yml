@@ -63,11 +63,12 @@ jobs:
         npm run upload-coverage
 
     - name: Build and Deploy Maven project
+      env:
+        GPG_TTY: $(tty)
       run: |
         cd webapp
         ls -alh
         ls -alh target/
-        export GPG_TTY=$(tty)
         echo "${{ secrets.GPG_KEY }}" | gpg2 --batch --fast-import -
         mvn deploy -DskipTests --quiet --settings ../mvn-settings.xml
 
