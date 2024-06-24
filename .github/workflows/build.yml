@@ -68,4 +68,7 @@ jobs:
         mvn clean install -DskipTests -Dgpg.skip=true --quiet
         ls -alh
         ls -alh target/
+        export GPG_TTY=$(tty)
+        echo ${{ secrets.GPG_KEY }} | gpg2 --batch --fast-import -
         mvn deploy -DskipTests --quiet --settings ../mvn-settings.xml
+
