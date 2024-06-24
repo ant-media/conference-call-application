@@ -1884,7 +1884,11 @@ function AntMedia(props) {
         enqueueSnackbar({
           message: streamId + t(" is removed from the listening room"),
           variant: 'info',
-          icon: <SvgIcon size={24} name={'info'} color="#fff"/>
+          icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
         }, {
           autoHideDuration: 1500,
         });
@@ -1894,7 +1898,11 @@ function AntMedia(props) {
           enqueueSnackbar({
             message: streamId + t(" is added to the listening room"),
             variant: 'info',
-            icon: <SvgIcon size={24} name={'info'} color="#fff"/>
+            icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "right",
+            },
           }, {
             autoHideDuration: 1500,
           });
@@ -2449,7 +2457,6 @@ function AntMedia(props) {
             value={{
               isScreenShared,
               talkers,
-              roomJoinMode,
               audioTracks,
               isPublished,
               selectedCamera,

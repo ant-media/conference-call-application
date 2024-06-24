@@ -93,27 +93,21 @@ function WaitingRoom(props) {
       conference?.setSpeedTestObject(speedTestObjectDefault);
       if (conference.speedTestStreamId) {
         conference.speedTestStreamId.current = streamId;
-        setSpeedTestModelVisibility(true);
-        conference?.startSpeedTest();
-      } else {
-        conference?.setIsJoining(true);
-        conference?.joinRoom(roomName, streamId);
       }
-    }
 
-    React.useEffect(() => {
-      if (conference?.speedTestObject?.isfinished === true) {
-        setSpeedTestModalButtonVisibility(true);
-      }
-    }, [conference?.speedTestObject]);
-
-    conference.setIsJoining(true);
-    if (conference?.isPlayOnly) {
-      conference?.setWaitingOrMeetingRoom("meeting")
-      conference?.setIsJoining(false);
+      setSpeedTestModelVisibility(true);
+      conference?.startSpeedTest();
+    } else {
+      conference?.setIsJoining(true);
+      conference?.joinRoom(roomName, streamId);
     }
-    conference.joinRoom(roomName, streamId, conference.roomJoinMode);
   }
+
+  React.useEffect(() => {
+    if (conference?.speedTestObject?.isfinished === true) {
+      setSpeedTestModalButtonVisibility(true);
+    }
+  }, [conference?.speedTestObject]);
 
 
   const handleDialogOpen = (focus) => {
@@ -189,7 +183,7 @@ function WaitingRoom(props) {
           <Typography id="modal-modal-title" variant="h6" component="h2" sx={{position: "center"}}>
             Connection Test
           </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2, color: "white" }}>
+          <Typography id="modal-modal-description" sx={{ mt: 2, color: "black" }}>
             {conference?.speedTestObject?.message}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
