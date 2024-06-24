@@ -62,5 +62,10 @@ jobs:
         npm test
         npm run upload-coverage
 
-    - name: Deploy using Maven
-      run: mvn deploy -DskipTests --quiet --settings mvn-settings.xml
+    - name: Build and Deploy Maven project
+      run: |
+        cd webapp
+        mvn clean install -DskipTests -Dgpg.skip=true --quiet
+        ls -alh
+        ls -alh target/
+        mvn deploy -DskipTests --quiet --settings ../mvn-settings.xml
