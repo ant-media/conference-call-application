@@ -78,3 +78,9 @@ jobs:
         export WAR_FILE_NAME="ConferenceCall.war"
         curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
   
+    - name: Change Settings
+      run: |
+        curl "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/settings/Conference" -b cookie.txt -o settings.json
+        jq '.stunServerURI = "turn:${{ secrets.STAGING_TURN_URL }}" | .turnServerUsername = "${{ secrets.STAGING_TURN_USERNAME }}" | .turnServerCredential = "${{ secrets.STAGING_TURN_PASSWORD }}"' settings.json > updated_settings.json
+        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" -d @updated_settings.json -b cookie.txt "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/settings/Conference"
+   
