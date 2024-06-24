@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import {Button, Container, Grid, TextField, Tooltip, Typography,} from "@mui/material";
+import {Box, Button, CircularProgress, Container, Grid, Modal, TextField, Tooltip, Typography,} from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
 import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
@@ -28,6 +28,10 @@ function WaitingRoom(props) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const [selectFocus, setSelectFocus] = React.useState(null);
+
+  const [isSpeedTestModalVisible, setSpeedTestModelVisibility] = React.useState(props.isSpeedTestModalVisibleForTestPurposes ? props.isSpeedTestModalVisibleForTestPurposes : false);
+
+  const [speedTestModalButtonVisibility, setSpeedTestModalButtonVisibility] = React.useState(props.speedTestModalButtonVisibilityForTestPurposes ? props.speedTestModalButtonVisibilityForTestPurposes : false);
 
   const theme = useTheme();
 
@@ -81,6 +85,28 @@ function WaitingRoom(props) {
       streamId = publishStreamId;
     }
 
+    if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true') {
+      let speedTestObjectDefault = {};
+      speedTestObjectDefault.message = "Please wait while we are testing your connection speed";
+      speedTestObjectDefault.isfinished = false;
+
+      conference?.setSpeedTestObject(speedTestObjectDefault);
+      if (conference.speedTestStreamId) {
+        conference.speedTestStreamId.current = streamId;
+        setSpeedTestModelVisibility(true);
+        conference?.startSpeedTest();
+      } else {
+        conference?.setIsJoining(true);
+        conference?.joinRoom(roomName, streamId);
+      }
+    }
+
+    React.useEffect(() => {
+      if (conference?.speedTestObject?.isfinished === true) {
+        setSpeedTestModalButtonVisibility(true);
+      }
+    }, [conference?.speedTestObject]);
+
     conference.setIsJoining(true);
     if (conference?.isPlayOnly) {
       conference?.setWaitingOrMeetingRoom("meeting")
@@ -113,6 +139,23 @@ function WaitingRoom(props) {
     setDialogOpen(false);
   };
 
+  const speedTestModalJoinButton = () => {
+    conference?.setSpeedTestObject({message: "Please wait while we are testing your connection speed", isfinished: false});
+    setSpeedTestModalButtonVisibility(false);
+    setSpeedTestModelVisibility(false);
+    conference?.setIsJoining(true);
+    if (conference?.speedTestStreamId) {
+      conference?.joinRoom(roomName, conference?.speedTestStreamId.current);
+    } else {
+      conference?.joinRoom(roomName, conference?.makeId(10));
+    }
+  }
+
+  const speedTestModalCloseButton = () => {
+    conference?.setSpeedTestObject({message: "Please wait while we are testing your connection speed", isfinished: false});
+    setSpeedTestModalButtonVisibility(false);
+    setSpeedTestModelVisibility(false);
+  }
 
   return (
     <Container>
@@ -123,6 +166,43 @@ function WaitingRoom(props) {
         handleBackgroundReplacement={conference.handleBackgroundReplacement}
       />
 
+      <Modal
+          open={isSpeedTestModalVisible}
+          onClose={()=>{}}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+      >
+        <Box sx = {{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'themeColor.70',
+          border: '2px solid #000',
+          boxShadow: 24,
+          pt: 2,
+          px: 4,
+          pb: 3,
+          textAlign: "center",
+        }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{position: "center"}}>
+            Connection Test
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2, color: "white" }}>
+            {conference?.speedTestObject?.message}
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <CircularProgress sx={(speedTestModalButtonVisibility) ? {visibility: "hidden", mt: 2} : {visibility: "visible", mt: 2}} size="2rem"/>
+          </Box>
+          <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}} onClick={()=>{
+            speedTestModalCloseButton();
+          }}>Close</Button>
+          <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}} onClick={()=>{
+            speedTestModalJoinButton();
+          }}>Join</Button>
+        </Box>
+      </Modal>
 
       <Grid
         container
@@ -173,7 +253,7 @@ function WaitingRoom(props) {
                 </Grid>
               </Grid>
             </Grid>
-            <Typography align="center" color={theme.palette.chatText} sx={{mt: 2}}>
+            <Typography align="center" color={theme.palette?.chatText} sx={{mt: 2}}>
               {t(
                 "You can choose whether to open your camera and microphone before you get into room"
               )}
