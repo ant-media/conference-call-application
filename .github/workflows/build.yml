@@ -70,5 +70,5 @@ jobs:
         ls -alh target/
         export GPG_TTY=$(tty)
         echo ${{ secrets.GPG_KEY }} | gpg2 --batch --fast-import -
-        mvn deploy -DskipTests --quiet --settings ../mvn-settings.xml
+    #    mvn deploy -DskipTests --quiet --settings ../mvn-settings.xml
 
