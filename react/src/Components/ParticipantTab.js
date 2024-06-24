@@ -38,7 +38,7 @@ function ParticipantTab(props) {
         onClick={() => { conference?.makeParticipantUndoPresenter(publishStreamId) }
         }
       >
-        { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={28} /> :
+        { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={20} /> :
           <SvgIcon size={28} name="unpresenter" color="#000" />}
       </PinBtn>
     ) : null}
@@ -51,7 +51,7 @@ function ParticipantTab(props) {
       }
     >
       {/* this icon for publish speaker */}
-      { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={28} /> :
+      { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={20} /> :
         <SvgIcon size={28} name="presenter" color="#000" />}
     </PinBtn>
   ) : null}

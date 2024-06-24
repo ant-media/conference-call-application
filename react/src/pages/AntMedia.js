@@ -333,7 +333,7 @@ function AntMedia(props) {
           setPresenterButtonDisabled([]);
           setParticipantUpdated(!participantUpdated);
         }
-      }, 5000);
+      }, 1000);
     }
   }, [presenterButtonStreamIdInProcess]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1892,7 +1892,7 @@ function AntMedia(props) {
         }, {
           autoHideDuration: 1500,
         });
-      }, 2000);
+      }, 1000);
     } else if (!oldRole.includes("active") && newRole.includes("active")) {
         setTimeout(() => {
           enqueueSnackbar({
@@ -1906,7 +1906,7 @@ function AntMedia(props) {
           }, {
             autoHideDuration: 1500,
           });
-        }, 2000);
+        }, 1000);
     }
   }
 
