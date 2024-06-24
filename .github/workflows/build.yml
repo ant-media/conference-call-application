@@ -70,5 +70,4 @@ jobs:
         ls -alh
         ls -alh target/
         echo "${{ secrets.GPG_KEY }}" | gpg2 --batch --fast-import -
-        mvn deploy -DskipTests --quiet --settings ../mvn-settings.xml
-
+        mvn -e -X deploy -DskipTests --quiet --settings ../mvn-settings.xml
