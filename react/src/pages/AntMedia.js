@@ -489,6 +489,19 @@ function AntMedia(props) {
     }
   }
 
+  React.useEffect(() => {
+    setParticipantUpdated(!participantUpdated);
+    if (presenterButtonStreamIdInProcess.length > 0) {
+      setTimeout(() => {
+        if (presenterButtonStreamIdInProcess.length > 0) {
+          setPresenterButtonStreamIdInProcess([]);
+          setPresenterButtonDisabled([]);
+          setParticipantUpdated(!participantUpdated);
+        }
+      }, 3000);
+    }
+  }, [presenterButtonStreamIdInProcess]); // eslint-disable-line react-hooks/exhaustive-deps
+
   function makeParticipantPresenter(streamId) {
     let participantsRole = "";
     let participantsNewRole = "";
@@ -507,6 +520,14 @@ function AntMedia(props) {
     } else {
       console.error("Invalid role for participant to make presenter", participantsRole);
       return;
+    }
+
+    if (!presenterButtonStreamIdInProcess.includes(streamId)) {
+      setPresenterButtonStreamIdInProcess(presenterButtonStreamIdInProcess => [...presenterButtonStreamIdInProcess, streamId]);
+    }
+
+    if (!presenterButtonDisabled.includes(streamId)) {
+      setPresenterButtonDisabled(presenterButtonDisabled => [...presenterButtonDisabled, streamId]);
     }
 
     updateParticipantRole(streamId, participantsNewRole);
@@ -530,6 +551,14 @@ function AntMedia(props) {
     } else {
       console.error("Invalid role for participant to make presenter", participantsRole);
       return;
+    }
+
+    if (!presenterButtonStreamIdInProcess.includes(streamId)) {
+      setPresenterButtonStreamIdInProcess(presenterButtonStreamIdInProcess => [...presenterButtonStreamIdInProcess, streamId]);
+    }
+
+    if (!presenterButtonDisabled.includes(streamId)) {
+      setPresenterButtonDisabled(presenterButtonDisabled => [...presenterButtonDisabled, streamId]);
     }
 
     updateParticipantRole(streamId, participantsNewRole);
@@ -1622,7 +1651,7 @@ function AntMedia(props) {
           setParticipantUpdated(!participantUpdated);
         }
 
-        //checkScreenSharingStatus();
+        checkScreenSharingStatus();
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
@@ -1647,13 +1676,53 @@ function AntMedia(props) {
 
         console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
 
+        let updatedParticipant = allParticipants[notificationEvent.streamId];
+
+        if (updatedParticipant === null || updatedParticipant === undefined) {
+          console.warn("Cannot find broadcast object for streamId: " + notificationEvent.streamId, " in allParticipants. Updated participant list request is sent.");
+          webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+          return;
+        }
+
+        displayRoleUpdateMessage(notificationEvent.streamId, updatedParticipant.role, notificationEvent.role);
+
+        updatedParticipant.role = notificationEvent.role;
+
         if (publishStreamId === notificationEvent.streamId) {
-          allParticipants[publishStreamId].role = notificationEvent.role;
           setRole(notificationEvent.role);
         } else {
           webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
         }
       }
+    }
+  }
+
+  function displayRoleUpdateMessage(streamId, oldRole, newRole) {
+    if (isAdmin !== true || oldRole === null || oldRole === undefined || newRole === null || newRole === undefined || oldRole === newRole) {
+        console.log("Role update message is not displayed. Admin: ", isAdmin, " Old Role: ", oldRole, " New Role: ", newRole);
+        return;
+    }
+
+    if (oldRole.includes("active") && !newRole.includes("active")) {
+      setTimeout(() => {
+        enqueueSnackbar({
+          message: streamId + t(" is removed from the listening room"),
+          variant: 'info',
+          icon: <SvgIcon size={24} name={'info'} color="#fff"/>
+        }, {
+          autoHideDuration: 1500,
+        });
+      }, 2000);
+    } else if (!oldRole.includes("active") && newRole.includes("active")) {
+        setTimeout(() => {
+          enqueueSnackbar({
+            message: streamId + t(" is added to the listening room"),
+            variant: 'info',
+            //icon: <SvgIcon size={24} name={'unmuted-microphone'} color="#fff"/>
+          }, {
+            autoHideDuration: 1500,
+          });
+        }, 2000);
     }
   }
 
