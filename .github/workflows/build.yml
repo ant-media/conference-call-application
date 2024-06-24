@@ -65,7 +65,6 @@ jobs:
     - name: Build and Deploy Maven project
       run: |
         cd webapp
-        mvn clean install -DskipTests -Dgpg.skip=true --quiet
         ls -alh
         ls -alh target/
         export GPG_TTY=$(tty)
