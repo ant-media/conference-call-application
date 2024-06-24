@@ -103,7 +103,7 @@ const MeetingRoom = React.memo((props) => {
 
   const firstPinnedParticipant = getPinnedParticipant();
 
-  const pinLayout = (typeof firstPinnedParticipant !== "undefined") && !isMobile && !isTablet
+  const pinLayout = (typeof firstPinnedParticipant !== "undefined");
 
   return (
     <>
