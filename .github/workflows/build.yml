@@ -51,6 +51,8 @@ jobs:
       run: |
         cd webapp
         mvn clean install -DskipTests -Dgpg.skip=true --quiet
+        ls -alh
+        ls -alh target/
         cd ..
 
     - name: Run unit tests
