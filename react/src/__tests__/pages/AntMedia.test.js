@@ -413,6 +413,54 @@ describe('AntMedia Component', () => {
 
     });
 
+  it('renders video cards when not on mobile', () => {
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <LayoutPinned />
+        </ThemeProvider>
+    );
+
+    expect(getByTestId('unpinned-gallery')).toBeInTheDocument();
+    expect(getByTestId('mocked-video-card')).toBeInTheDocument();
+  });
+
+  it('does not render video cards when on mobile', () => {
+    isMobile = true;
+
+    const { getByTestId, queryByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <LayoutPinned />
+        </ThemeProvider>
+    );
+
+    expect(getByTestId('unpinned-gallery')).toBeInTheDocument();
+    expect(queryByTestId('mocked-video-card')).toBeNull();
+  });
+
+  it('renders others card when visibility is true', () => {
+    process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY = 'true';
+
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <LayoutPinned />
+        </ThemeProvider>
+    );
+
+    expect(getByTestId('mocked-others-card')).toBeInTheDocument();
+  });
+
+  it('does not render others card when visibility is false', () => {
+    process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY = 'false';
+
+    const { queryByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <LayoutPinned />
+        </ThemeProvider>
+    );
+
+    expect(queryByTestId('mocked-others-card')).toBeNull();
+  });
+
   it('notSetRemoteDescription error callback', async () => {
     const { container } = render(
       <AntMedia isTest={true}>
@@ -1001,12 +1049,7 @@ describe('AntMedia Component', () => {
         webRTCAdaptorConstructor.callback("updated_stats", mockStats);
         expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
 
-
       });
-    
-    
-      
-    
     
       consoleWarnSpy.mockRestore();
       
