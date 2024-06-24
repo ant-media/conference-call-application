@@ -1012,6 +1012,72 @@ describe('AntMedia Component', () => {
       
     });
 
+  describe('Screen render test', () => {
+    let currentConference;
+
+    const MockChild = () => {
+      const conference = React.useContext(ConferenceContext);
+      currentConference = conference;
+      return <div>Mock Child</div>;
+    };
+
+    it('should update participantUpdated state every 5 seconds', async () => {
+      jest.useFakeTimers();
+
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>
+      );
+
+      expect(currentConference.participantUpdated).toBe(false);
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(false);
+
+      jest.useRealTimers();
+    });
+
+    it('should not update participantUpdated state if videoTrackAssignments and allParticipants are not changed', async () => {
+      jest.useFakeTimers();
+
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>
+      );
+
+      expect(currentConference.participantUpdated).toBe(false);
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(false);
+
+      jest.useRealTimers();
+    });
+  });
+
    
 });
 

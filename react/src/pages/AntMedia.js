@@ -460,6 +460,12 @@ function AntMedia(props) {
     webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode);
   }
 
+  useEffect(() => {
+    setTimeout(() => {
+      setParticipantUpdated(!participantUpdated);
+    }, 5000);
+  }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
+
   function requestVideoTrackAssignmentsInterval() {
     if (videoTrackAssignmentsIntervalJob === null) {
       videoTrackAssignmentsIntervalJob = setInterval(() => {
