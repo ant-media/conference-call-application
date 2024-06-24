@@ -828,6 +828,14 @@ function AntMedia(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialized]);
 
+  function checkAndSetIsPinned(streamId, broadcastObject) {
+    let existingBroadcastObject = allParticipants[streamId];
+    if (existingBroadcastObject !== null && existingBroadcastObject !== undefined && existingBroadcastObject.isPinned === true) {
+        broadcastObject.isPinned = existingBroadcastObject.isPinned;
+    }
+    return broadcastObject;
+  }
+
   function infoCallback(info, obj) {
     if (info === "initialized") {
       enableDisableMCU(mcuEnabled);
@@ -845,6 +853,7 @@ function AntMedia(props) {
             broadcastObject.isScreenShared = metaData.isScreenShared;
 
             let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
+            filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
             allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
         });
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
