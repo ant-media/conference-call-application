@@ -1718,7 +1718,7 @@ function AntMedia(props) {
           enqueueSnackbar({
             message: streamId + t(" is added to the listening room"),
             variant: 'info',
-            //icon: <SvgIcon size={24} name={'unmuted-microphone'} color="#fff"/>
+            icon: <SvgIcon size={24} name={'info'} color="#fff"/>
           }, {
             autoHideDuration: 1500,
           });
