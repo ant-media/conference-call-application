@@ -1614,7 +1614,6 @@ function AntMedia(props) {
           return;
         }
 
-
         webRTCAdaptor?.sendData(
           publishStreamId,
           JSON.stringify({
@@ -1827,7 +1826,7 @@ function AntMedia(props) {
           setParticipantUpdated(!participantUpdated);
         }
 
-        checkScreenSharingStatus();
+        //checkScreenSharingStatus();
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {

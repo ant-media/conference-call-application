@@ -100,6 +100,11 @@ function WaitingRoom(props) {
     } else {
       conference?.setIsJoining(true);
       conference?.joinRoom(roomName, streamId);
+      if (conference?.isPlayOnly) {
+        conference?.setWaitingOrMeetingRoom("meeting");
+        setDialogOpen(false);
+        conference?.setIsJoining(false);
+      }
     }
   }
 
@@ -142,6 +147,11 @@ function WaitingRoom(props) {
       conference?.joinRoom(roomName, conference?.speedTestStreamId.current);
     } else {
       conference?.joinRoom(roomName, conference?.makeId(10));
+    }
+    if (conference?.isPlayOnly) {
+      conference?.setWaitingOrMeetingRoom("meeting");
+      setDialogOpen(false);
+      conference?.setIsJoining(false);
     }
   }
 
