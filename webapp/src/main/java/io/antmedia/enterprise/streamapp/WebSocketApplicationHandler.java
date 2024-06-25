@@ -306,6 +306,12 @@ public class WebSocketApplicationHandler
 
 			sendMessage(session, jsonObjectResponse.toJSONString());
 		}
+		else if (cmd.equals(WebSocketApplicationConstants.UPDATE_BROADCAST_ROLE_COMMAND)) {
+			String streamId = (String)jsonObject.get(WebSocketConstants.STREAM_ID);
+			String role = (String)jsonObject.get(WebSocketConstants.ROLE);
+
+			handleUpdateBroadcastRole(streamId, role);
+		}
 	}
 
 
@@ -329,6 +335,17 @@ public class WebSocketApplicationHandler
 		jsonResponse.put(WebSocketApplicationConstants.SETTINGS, gsonOnlyExposedFields.toJson(conferenceRoomSettings));
 
 		sendMessage(session, jsonResponse.toJSONString());
+	}
+
+	public void handleUpdateBroadcastRole(String streamId, String role) {
+
+		boolean result = getAMSBroadcastManager().updateBroadcastRole(streamId, role);
+
+		if (result) {
+			logger.info("Broadcast role is updated to {} for {}", role, streamId);
+		} else {
+			logger.error("Broadcast role could not be updated to {} for {}", role, streamId);
+		}
 	}
 
 	public void handleSendDataChannelMessage(String receiverStreamId, String messageData) {

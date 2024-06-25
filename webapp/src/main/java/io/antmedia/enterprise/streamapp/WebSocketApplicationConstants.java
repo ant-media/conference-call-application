@@ -80,5 +80,7 @@ public class WebSocketApplicationConstants {
 
     public static final String PONG_RESPONSE = "pong";
 
+    public static final String UPDATE_BROADCAST_ROLE_COMMAND = "updateBroadcastRole";
+
     public static final String MAIN_ROOM_BROADCAST_UPDATED_EVENT = "MAIN_ROOM_BROADCAST_UPDATED";
 }

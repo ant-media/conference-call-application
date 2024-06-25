@@ -749,6 +749,17 @@ function AntMedia(props) {
     };
     console.info("send notification event", notEvent);
     sendDataChannelMessage(roomName, JSON.stringify(notEvent));
+    updateBroadcastRole(streamId, role);
+  }
+
+  function updateBroadcastRole(streamId, role) {
+    const jsCmd = {
+      command: "updateBroadcastRole",
+      streamId: streamId,
+      role: role,
+    };
+
+    sendMessage(JSON.stringify(jsCmd));
   }
 
   function sendDataChannelMessage(receiverStreamId, message) {
@@ -1345,7 +1356,7 @@ function AntMedia(props) {
     if ((typeof broadcastObject.isPinned !== "undefined") && (broadcastObject.isPinned === true)) {
         broadcastObject.isPinned = false; // false means user unpin manually
         allParticipants[streamId] = broadcastObject;
-        handleNotifyUnpinUser(streamId !== publishStreamId ? streamId : publishStreamId);
+        handleNotifyUnpinUser(streamId);
         setParticipantUpdated(!participantUpdated);
         return;
     }
@@ -1356,7 +1367,7 @@ function AntMedia(props) {
       videoLabel = "localVideo";
     }
 
-    if (videoLabel !== "localVideo" && videoTrackAssignments.length > 0) {
+    if (videoLabel !== "localVideo" && videoTrackAssignments.length > 1) {
       videoLabel = videoTrackAssignments[1]?.videoLabel;
       webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
     }

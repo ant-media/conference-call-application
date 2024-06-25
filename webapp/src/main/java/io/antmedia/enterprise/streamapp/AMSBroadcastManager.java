@@ -4,6 +4,7 @@ import io.antmedia.AntMediaApplicationAdapter;
 import io.antmedia.datastore.db.DataStore;
 import io.antmedia.datastore.db.DataStoreFactory;
 import io.antmedia.datastore.db.IDataStoreFactory;
+import io.antmedia.datastore.db.types.Broadcast;
 import io.antmedia.rest.model.Result;
 import io.antmedia.rest.RestServiceBase;
 import org.jetbrains.annotations.NotNull;
@@ -52,5 +53,22 @@ public class AMSBroadcastManager implements ApplicationContextAware {
         Result result = RestServiceBase.sendDataChannelMessage(id, message, application, getDataStore());
 
         return result.isSuccess();
+    }
+
+    public boolean updateBroadcastRole(String streamId, String role) {
+        AntMediaApplicationAdapter application = getApplication();
+        boolean result = false;
+
+        if(application == null) {
+            return false;
+        }
+
+        Broadcast broadcast = getDataStore().get(streamId);
+        if (broadcast != null) {
+            broadcast.setRole(role);
+            result = getDataStore().updateBroadcastFields(streamId, broadcast);
+        }
+
+        return result;
     }
 }
