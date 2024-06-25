@@ -34,11 +34,11 @@ function ParticipantTab(props) {
       <PinBtn
         id={"remove-presenter-"+streamId}
         disabled={conference?.presenterButtonDisabled.includes(publishStreamId)}
-        sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+        sx={{ width: 28, pt: 1, pb: 1 }}
         onClick={() => { conference?.makeParticipantUndoPresenter(publishStreamId) }
         }
       >
-        { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={20} /> :
+        { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={15} /> :
           <SvgIcon size={28} name="unpresenter" color="#000" />}
       </PinBtn>
     ) : null}
@@ -46,12 +46,12 @@ function ParticipantTab(props) {
     <PinBtn
       id={"add-presenter-"+streamId}
       disabled={conference?.presenterButtonDisabled.includes(streamId)}
-      sx={{ minWidth: "unset", pt: 1, pb: 1 }}
+      sx={{ width: 28, pt: 1, pb: 1 }}
       onClick={() => { conference?.makeParticipantPresenter(publishStreamId) }
       }
     >
       {/* this icon for publish speaker */}
-      { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={20} /> :
+      { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={15} /> :
         <SvgIcon size={28} name="presenter" color="#000" />}
     </PinBtn>
   ) : null}
