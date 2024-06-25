@@ -71,7 +71,7 @@ jobs:
         cd webapp
         ls -alh
         ls -alh target/
-        mvn -e deploy -DskipTests --quiet --settings ../mvn-settings.xml
+        mvn -e deploy -DskipTests -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} --settings ../mvn-settings.xml
       env:
         MAVEN_USERNAME: ${{ secrets.CI_DEPLOY_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.CI_DEPLOY_PASSWORD }}
