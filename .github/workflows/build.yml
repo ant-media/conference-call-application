@@ -63,7 +63,7 @@ jobs:
     - name: Install gpg secret key
       run: |
         # Install gpg secret key
-        cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
+        cat <(echo -e "${{ secrets.GPG_KEY }}") | gpg --batch --import
         # Verify gpg secret key
         gpg --list-secret-keys --keyid-format LONG
     - name: Publish to Maven Central
