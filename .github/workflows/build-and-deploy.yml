@@ -80,7 +80,7 @@ jobs:
         
     - name: Install Selenium
       run: |
-        wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/119.0.6045.105/linux64/chromedriver-linux64.zip
+        wget https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.126/linux64/chromedriver-linux64.zip
         unzip chromedriver-linux64.zip
         sudo cp chromedriver-linux64/chromedriver /tmp
         ls -al /tmp
