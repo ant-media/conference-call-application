@@ -60,18 +60,13 @@ jobs:
         ls -alh
         ls -alh target/
         cd ..
-    - name: Install gpg secret key
-      run: |
-        # Install gpg secret key
-        cat <(echo -e "${{ secrets.GPG_KEY }}") | gpg --batch --import
-        # Verify gpg secret key
-        gpg --list-secret-keys --keyid-format LONG
+        
     - name: Publish to Maven Central
       run: |
         cd webapp
         ls -alh
         ls -alh target/
-        mvn -e deploy -DskipTests --quiet --settings ../mvn-settings.xml
+        mvn -e -X deploy -DskipTests --quiet --settings ../mvn-settings.xml
       env:
         MAVEN_USERNAME: ${{ secrets.CI_DEPLOY_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.CI_DEPLOY_PASSWORD }}
