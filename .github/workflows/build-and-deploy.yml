@@ -2,6 +2,7 @@ name: Build Maven Project
 
 on:
   push:
+  workflow_dispatch:
 
 jobs:
   build:
