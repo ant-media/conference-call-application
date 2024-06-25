@@ -21,7 +21,6 @@ jobs:
         server-password: MAVEN_PASSWORD # env variable for token in deploy
         gpg-private-key: ${{ secrets.MVN_GPG_KEY }} # Value of the GPG private key to import
         gpg-passphrase: MAVEN_GPG_PASSPHRASE # env variable for GPG private key passphrase
-        GPG_TTY: /dev/tty
 
     - name: Cache Maven repository
       uses: actions/cache@v3
@@ -71,6 +70,5 @@ jobs:
         MAVEN_USERNAME: ${{ secrets.MVN_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.MVN_PASSWORD }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MVN_GPG_PASSPHRASE }}
-        GPG_TTY: /dev/tty
 
 
