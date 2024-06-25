@@ -47,7 +47,7 @@ jobs:
     - name: Build React application
       run: |
         cd react
-        sed -i "s#//placeholder for peerconnection_config#peerconnection_config:{\"iceServers\":[{\"urls\":\"turn:${{ secrets.STAGING_TURN_URL }}\",\"username\":\"${{ secrets.STAGING_TURN_USER }}\",\"credential\":\"${{ secrets.STAGING_TURN_PASSWORD }}\"}],\"sdpSemantics\":\"unified-plan\"},#" src/pages/AntMedia.js
+        sed -i "s#//placeholder for peerconnection_config#peerconnection_config:{\"iceServers\":[{\"urls\":\"turn:${{ secrets.STAGING_TURN_URL }}\",\"username\":\"${{ secrets.STAGING_TURN_USERNAME }}\",\"credential\":\"${{ secrets.STAGING_TURN_PASSWORD }}\"}],\"sdpSemantics\":\"unified-plan\"},#" src/pages/AntMedia.js
         npm install
         npm run build
         cd ..
