@@ -73,7 +73,7 @@ jobs:
         cd webapp
         ls -alh
         ls -alh target/
-        mvn -e -X deploy -DskipTests --quiet --settings ../mvn-settings.xml
+        mvn -e deploy -DskipTests --quiet --settings ../mvn-settings.xml
       env:
         MAVEN_USERNAME: ${{ secrets.MVN_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.MVN_PASSWORD }}
