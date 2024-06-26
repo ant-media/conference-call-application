@@ -1,6 +1,6 @@
 // src/Button.test.js
 import React from 'react';
-import { render, act, waitFor } from '@testing-library/react';
+import { render, act, waitFor, screen } from '@testing-library/react';
 import AntMedia from 'pages/AntMedia';
 import { useWebSocket } from 'Components/WebSocketProvider';
 import { useSnackbar} from "notistack";
@@ -721,34 +721,33 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
 
-      expect(container).not.toContain("Reconnecting...");
+      expect(container.outerHTML).not.toContain("Reconnecting...");
       
-      webRTCAdaptorConstructor.iceConnectionState = (any) => {
-        console.log("iceConnectionState called with: " + any); 
-        return "disconnected";
-      };
-      //global.setTimeout = (callback) => callback();
+      
+
       await act(async () => {
-        webRTCAdaptorConstructor.callback("ice_connection_state_changed", {state: "disconnected"});
-        jest.useFakeTimers();
-        jest.runAllTimers();
-        jest.useRealTimers();
+        webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
       });
 
-      waitFor(() => {
-        expect(container).toContain("Reconnecting...");
+
+      await waitFor(() => {
+        expect(container.outerHTML).toContain("Reconnecting...");
       });
+
 
       await act(async () => {
         webRTCAdaptorConstructor.callback("play_started");
       });
+
+      webRTCAdaptorConstructor.mediaManager = {};
+      webRTCAdaptorConstructor.mediaManager.setVideoCameraSource = jest.fn();
 
       await act(async () => {
         webRTCAdaptorConstructor.callback("publish_started");
       });
 
       await waitFor(() => {
-        expect(container).not.toContain("Reconnecting...");
+        expect(container.outerHTML).not.toContain("Reconnecting...");
       });
     });
 
