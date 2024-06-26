@@ -13,7 +13,7 @@ echo "building circle for talentis"
 # Save the current branch name
 current_branch=$(git symbolic-ref --short HEAD)
 
-copy_cleanup() {
+script_cleanup() {
   git reset --hard HEAD
   git clean -fd
   git checkout "$current_branch"
@@ -40,3 +40,6 @@ cp -a react/build/. webapp/src/main/webapp
 cd webapp
 mvn clean install -DskipTests -Dgpg.skip=true --quiet
 ### original createwar.sh above (cupy upstream updates above) ###
+
+# cleanup
+script_cleanup
