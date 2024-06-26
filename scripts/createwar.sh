@@ -37,5 +37,5 @@ mvn clean install -DskipTests -Dgpg.skip=true --quiet
 
 # cleanup
 git reset --hard HEAD
-git clean -fd
 git checkout "$current_branch"
+git clean -fd
