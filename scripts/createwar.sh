@@ -5,9 +5,19 @@ check_for_changes() {
         exit 1
     fi
 }
+
 echo "Checking for changes in the current branch..."
 check_for_changes
 echo "building circle for talentis"
+
+# Save the current branch name
+current_branch=$(git symbolic-ref --short HEAD)
+
+copy_cleanup() {
+  git reset --hard HEAD
+  git clean -fd
+  git checkout "$current_branch"
+}
 
 if [ "$(basename "$PWD")" != "scripts" ]; then
   cd ./scripts || { echo "Failed to change directory to ./scripts"; exit 1; }
@@ -15,9 +25,9 @@ fi
 
 cp -r ./build_replace/* ../
 
-cd ,,
+cd ..
 
-# original createwar.sh below (cupy upstream updates below)
+### original createwar.sh below (cupy upstream updates below) ###
 cd react
 npm install
 npm run build
@@ -29,3 +39,4 @@ cp -a react/build/. webapp/src/main/webapp
 
 cd webapp
 mvn clean install -DskipTests -Dgpg.skip=true --quiet
+### original createwar.sh above (cupy upstream updates above) ###
