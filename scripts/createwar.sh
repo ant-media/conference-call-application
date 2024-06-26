@@ -9,7 +9,10 @@ echo "Checking for changes in the current branch..."
 # check_for_changes
 echo "building circle for talentis"
 
-cp './build_replace/*' ../
+if [ "$(basename "$PWD")" != "scripts" ]; then
+  cd ./scripts || { echo "Failed to change directory to ./scripts"; exit 1; }
+fi
+cp -r ./build_replace/* ../
 
 exit 1
 cd ,,
