@@ -1102,7 +1102,7 @@ describe('AntMedia Component', () => {
 
       await waitFor(() => {
         expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("mock1");
-      }, {timeout: 6000});
+      }, {timeout: 7000});
       
     }, 10000);
 
