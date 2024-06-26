@@ -734,7 +734,6 @@ describe('AntMedia Component', () => {
         expect(container.outerHTML).toContain("Reconnecting...");
       });
 
-
       await act(async () => {
         webRTCAdaptorConstructor.callback("play_started");
       });
@@ -749,6 +748,70 @@ describe('AntMedia Component', () => {
       await waitFor(() => {
         expect(container.outerHTML).not.toContain("Reconnecting...");
       });
+    });
+
+
+    it('test fix for duplicated tile after reconnection', async () => {
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+      
+      
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+      });
+
+
+      await waitFor(() => {
+        expect(container.outerHTML).toContain("Reconnecting...");
+      });
+
+      expect(currentConference.videoTrackAssignments).toHaveLength(1);
+
+      expect(currentConference.videoTrackAssignments[0].isMine).toBe(true);
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("newStreamAvailable", {"trackId" : "ARDAMSvvideoTrack0", "streamId":"room1", "track": {id: "someId", kind: "video"}});
+      });
+
+      expect(currentConference.videoTrackAssignments).toHaveLength(2);
+
+      expect(currentConference.videoTrackAssignments[1].videoLabel).toBe("videoTrack0");
+      expect(currentConference.videoTrackAssignments[1].streamId).toBe("room1");
+
+
+      var notificationEvent = {
+        eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+        streamId: "stream1",
+        payload: [
+          {videoLabel:"videoTrack0", trackId:"participant1"},
+        ]
+      };
+      var json = JSON.stringify(notificationEvent);
+
+      let obj = {data: json};
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("data_received", obj);
+      });
+
+      expect(currentConference.videoTrackAssignments).toHaveLength(2);
+
+      expect(currentConference.videoTrackAssignments[1].videoLabel).toBe("videoTrack0");
+      expect(currentConference.videoTrackAssignments[1].streamId).toBe("participant1");
+
     });
 
     it('calls removeAllRemoteParticipants without crashing', () => {
