@@ -1402,7 +1402,12 @@ function AntMedia(props) {
           });
 
           if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
-            tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
+            if(isVideoLabelExsist(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)){
+              console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
+            }
+            else{
+              tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
+            }
 
           } else {
             console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
@@ -1653,9 +1658,24 @@ function AntMedia(props) {
       };
 
       let tempVideoTrackAssignments = videoTrackAssignments;
-      tempVideoTrackAssignments.push(newVideoTrackAssignment);
+      if(isVideoLabelExsist(newVideoTrackAssignment.videoLabel, tempVideoTrackAssignments)){
+        console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
+      }
+      else{
+        tempVideoTrackAssignments.push(newVideoTrackAssignment);
+      }
       setVideoTrackAssignments(tempVideoTrackAssignments);
     }
+  }
+
+  function isVideoLabelExsist(videoLabel, assignments){
+    let isExist = false;
+    assignments.forEach((vta) => {
+      if(vta.videoLabel === videoLabel){
+        isExist = true;
+      }
+    });
+    return isExist;
   }
 
   function setAndEnableVirtualBackgroundImage(imageUrl) {
