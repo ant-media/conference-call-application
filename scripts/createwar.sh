@@ -13,12 +13,6 @@ echo "building circle for talentis"
 # Save the current branch name
 current_branch=$(git symbolic-ref --short HEAD)
 
-script_cleanup() {
-  git reset --hard HEAD
-  git clean -fd
-  git checkout "$current_branch"
-}
-
 if [ "$(basename "$PWD")" != "scripts" ]; then
   cd ./scripts || { echo "Failed to change directory to ./scripts"; exit 1; }
 fi
@@ -42,4 +36,6 @@ mvn clean install -DskipTests -Dgpg.skip=true --quiet
 ### original createwar.sh above (cupy upstream updates above) ###
 
 # cleanup
-script_cleanup
+git reset --hard HEAD
+git clean -fd
+git checkout "$current_branch"
