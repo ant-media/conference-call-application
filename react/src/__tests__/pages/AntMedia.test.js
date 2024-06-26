@@ -8,6 +8,7 @@ import { ConferenceContext } from "pages/AntMedia";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
+import { times } from 'lodash';
 
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
@@ -1073,6 +1074,37 @@ describe('AntMedia Component', () => {
       consoleWarnSpy.mockRestore();
       
     });
+
+    it('fake reconnection', async () => {  
+      
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+    
+    
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      webRTCAdaptorConstructor.reconnectIfRequired = jest.fn();
+      
+
+      webRTCAdaptorConstructor.iceConnectionState = () => "mock1";
+
+      expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("mock1");
+
+      currentConference.fakeReconnect();
+
+      expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("disconnected");
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("mock1");
+      }, {timeout: 6000});
+      
+    }, 10000);
 
    
 });
