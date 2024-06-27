@@ -826,6 +826,18 @@ function AntMedia(props) {
       mediaConstraints.video = false;
     }
   }
+  
+  function fakeReconnect() {
+    console.log("************* fake reconnect");
+    let orginal = webRTCAdaptor.iceConnectionState;
+    webRTCAdaptor.iceConnectionState = () => "disconnected";
+  
+    webRTCAdaptor.reconnectIfRequired();
+
+    setTimeout(() => {
+      webRTCAdaptor.iceConnectionState = orginal;
+    }, 5000);
+  }
 
   function addFakeParticipant() {
     displayMessage("Fake participant added");
@@ -1158,18 +1170,9 @@ function AntMedia(props) {
       handleDebugInfo(obj.debugInfo);
     } else if (info === "ice_connection_state_changed") {
       console.log("iceConnectionState Changed: ", JSON.stringify(obj))
-      var iceState = obj.state;
-      if (iceState === "failed" || iceState === "disconnected" || iceState === "closed") {
-
-        setTimeout(() => {
-          if (webRTCAdaptor?.iceConnectionState(publishStreamId) !== "checking" &&
-            webRTCAdaptor?.iceConnectionState(publishStreamId) !== "connected" &&
-            webRTCAdaptor?.iceConnectionState(publishStreamId) !== "completed") {
-            reconnectionInProgress();
-          }
-        }, 5000);
-
-      }
+    }
+    else if (info === "reconnection_attempt_for_player") {
+      reconnectionInProgress();
     }
   }
 
@@ -1813,7 +1816,13 @@ function AntMedia(props) {
           });
 
           if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
-            tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
+            if(isVideoLabelExsist(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)){
+              console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
+            }
+            else{
+              tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
+            }
+
           } else {
             console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
           }
@@ -2135,13 +2144,30 @@ function AntMedia(props) {
         track: obj.track,
         streamId: obj.streamId
       };
+
       let tempVideoTrackAssignments = videoTrackAssignments;
-      tempVideoTrackAssignments.push(newVideoTrackAssignment);
+
+      if(isVideoLabelExsist(newVideoTrackAssignment.videoLabel, tempVideoTrackAssignments)){
+        console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
+      }
+      else{
+        tempVideoTrackAssignments.push(newVideoTrackAssignment);
+      }
       if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
         setVideoTrackAssignments(tempVideoTrackAssignments);
         setParticipantUpdated(!participantUpdated);
       }
     }
+  }
+
+  function isVideoLabelExsist(videoLabel, assignments){
+    let isExist = false;
+    assignments.forEach((vta) => {
+      if(vta.videoLabel === videoLabel){
+        isExist = true;
+      }
+    });
+    return isExist;
   }
 
   function setAndEnableVirtualBackgroundImage(imageUrl) {
@@ -2521,6 +2547,7 @@ function AntMedia(props) {
               turnOffYourMicNotification,
               addFakeParticipant,
               removeFakeParticipant,
+              fakeReconnect,
               showEmojis,
               setShowEmojis,
               isMuteParticipantDialogOpen,
