@@ -391,7 +391,6 @@ function AntMedia(props) {
   const [webRTCAdaptor, setWebRTCAdaptor] = React.useState();
   const [leaveRoomWithError, setLeaveRoomWithError] = React.useState(null);
 
-
   const [initialized, setInitialized] = React.useState(!!props.isTest);
   const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
   const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
@@ -991,6 +990,7 @@ function AntMedia(props) {
                 websocket_url: websocketURL,
                 localStream:stream,
                 mediaConstraints: getMediaConstraints("screenConstraints", 20),
+                //placeholder for peerconnection_config
                 sdp_constraints: {
                     OfferToReceiveAudio : false,
                     OfferToReceiveVideo : false,
