@@ -36,6 +36,9 @@ mvn clean install -DskipTests -Dgpg.skip=true --quiet
 ### original createwar.sh above (cupy upstream updates above) ###
 
 # cleanup
+sleep 2
 git reset --hard HEAD
-git checkout "$current_branch"
 git clean -fd
+git status > /dev/null
+git clean -fd
+git checkout "$current_branch"
