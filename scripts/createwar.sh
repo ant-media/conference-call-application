@@ -37,8 +37,18 @@ mvn clean install -DskipTests -Dgpg.skip=true --quiet
 
 # cleanup
 sleep 2
+
+# Reset back to the original branch state including untracked files
 git reset --hard HEAD
+
+# Clean untracked files
 git clean -fd
+git clean -fdx
+
+# Ensure the cleanup by forcing the refresh of the working directory
 git status > /dev/null
 git clean -fd
+git clean -fdx
+
+# Checkout the original branch
 git checkout "$current_branch"
