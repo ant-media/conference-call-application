@@ -880,8 +880,6 @@ describe('AntMedia Component', () => {
           </AntMedia>
         </ThemeProvider>);
 
-
-
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
