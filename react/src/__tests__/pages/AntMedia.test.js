@@ -753,6 +753,81 @@ describe('AntMedia Component', () => {
 
     });
 
+    it('is joining state for playonly', async () => {
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      expect(currentConference.isJoining).toBe(false);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      await act(async () => {
+        currentConference.setIsJoining(true);
+        currentConference.setIsPlayOnly(true);
+      });
+
+      expect(currentConference.isJoining).toBe(true);
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("play_started");
+      });
+
+
+      expect(currentConference.isJoining).toBe(false);
+
+      consoleSpy.mockRestore();
+
+    });
+
+    it('playonly join when noone in the room', async () => {
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      expect(currentConference.isJoining).toBe(false);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      await act(async () => {
+        currentConference.setIsJoining(true);
+        currentConference.setIsPlayOnly(true);
+        webRTCAdaptorConstructor.callbackError("no_stream_exist");
+      });
+
+      expect(currentConference.isJoining).toBe(true);
+
+      await waitFor(() => {
+        expect(container.outerHTML).toContain("The room is currently empty");
+      });
+      
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("play_started");
+      });
+
+
+      expect(currentConference.isJoining).toBe(false);
+
+      consoleSpy.mockRestore();
+
+    });
+
     it('is reconnection in progress state test', async () => {
       const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
@@ -790,6 +865,46 @@ describe('AntMedia Component', () => {
       await act(async () => {
         webRTCAdaptorConstructor.callback("publish_started");
       });
+
+      await waitFor(() => {
+        expect(container.outerHTML).not.toContain("Reconnecting...");
+      });
+    });
+
+
+    it('is reconnection in progress state for playonly', async () => {
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+      
+      await act(async () => {
+        currentConference.setIsPlayOnly(true);
+      });
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+      });
+
+
+      await waitFor(() => {
+        expect(container.outerHTML).toContain("Reconnecting...");
+      });
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("play_started");
+      });
+
 
       await waitFor(() => {
         expect(container.outerHTML).not.toContain("Reconnecting...");
