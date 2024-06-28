@@ -14,7 +14,7 @@ let roomName = getRoomNameAttribute();
 
 if (process.env.NODE_ENV !== 'development' && !roomName) {
   appName = "/" + window.location.pathname.split("/")[1];
-  console.log = function () { };
+  //console.log = function () { };
 }
 
 root.render(

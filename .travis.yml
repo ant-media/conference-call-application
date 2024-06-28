@@ -3,13 +3,20 @@ language: java
 jdk:
 - openjdk17
 before_install:
-- wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/119.0.6045.105/linux64/chromedriver-linux64.zip
+- sudo apt-get update
+- sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
+- curl -L "https://drive.usercontent.google.com/download?id=1Gp3LTFvG4arbXWFiGrQTPYw2CUEuKhf5&export=download&confirm=t" -o "webrtc-load-test-tool-2.9.1-SNAPSHOT.zip"
+- unzip webrtc-load-test-tool-2.9.1-SNAPSHOT.zip
+- mkdir ~/test
+- mv webrtc-load-test ~/test
+- wget https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.126/linux64/chromedriver-linux64.zip
 - unzip chromedriver-linux64.zip
 - sudo cp chromedriver-linux64/chromedriver /tmp
 - ls -al /tmp
 - pip3 install selenium==4.14
 - pip3 install requests
 - pip3 show selenium 
+- pip3 install psutil
 - openssl aes-256-cbc -K $encrypted_fb8a77c74dbd_key -iv $encrypted_fb8a77c74dbd_iv
   -in codesigning.asc.enc -out ./codesigning.asc -d
 - sudo apt-get update
@@ -26,6 +33,7 @@ cache:
   - "$HOME/.m2/repository"
 script:
 - cd react
+- sed -i "s#//placeholder for peerconnection_config#peerconnection_config:{\"iceServers\":[{\"urls\":\"turn:$TURN_URL\",\"username\":\"$TURN_USER\",\"credential\":\"$TURN_PASSWORD\"}],\"sdpSemantics\":\"unified-plan\"},#" src/pages/AntMedia.js
 - npm install
 - npm run build
 - cd ..
