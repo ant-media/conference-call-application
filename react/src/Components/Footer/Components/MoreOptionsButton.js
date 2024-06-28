@@ -136,7 +136,7 @@ function MoreOptionsButton({ footer, ...props }) {
               </MenuItem>
               : null}
 
-            {(conference.isPlayOnly === false) && (process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'true') ?
+            {/*(conference.isPlayOnly === false) &&*/ (process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'true') ?
               <MenuItem onClick={() => {
                 if (!conference?.messageDrawerOpen) {
                   conference?.toggleSetNumberOfUnreadMessages(0);

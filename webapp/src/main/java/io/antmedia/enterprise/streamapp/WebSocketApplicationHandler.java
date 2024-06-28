@@ -330,6 +330,10 @@ public class WebSocketApplicationHandler
 			conferenceRoomSettings.setParticipantVisibilityMatrix(participantVisibilityMatrix);
 		}
 
+		int maxVideoTrackCount = appSettings.getMaxVideoTrackCount();
+
+		conferenceRoomSettings.setMaxVideoTrackCount(maxVideoTrackCount);
+
 		JSONObject jsonResponse = new JSONObject();
 		jsonResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.SET_SETTINGS_COMMAND);
 		jsonResponse.put(WebSocketApplicationConstants.SETTINGS, gsonOnlyExposedFields.toJson(conferenceRoomSettings));

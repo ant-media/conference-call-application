@@ -17,6 +17,7 @@ export function getPinkTheme() {
   const themeColor80 = "#AD1457";
   const themeColor85 = "#880E4F";
   const themeColor90 = "#FF80AB";
+  const themeColor99 = "#FFFFFF";
   const chatText = "#FCE4EC";
   const darkGray = "#37474F";
 
@@ -336,6 +337,7 @@ export function getPinkTheme() {
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
+        99: themeColor99,
       },
       gray: {
         90: darkGray,

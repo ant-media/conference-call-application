@@ -17,6 +17,7 @@ export function getPurpleTheme() {
   const themeColor80 = "#6A1B9A";
   const themeColor85 = "#4A148C";
   const themeColor90 = "#EA80FC";
+  const themeColor99 = "#FFFFFF";
   const chatText = "#F3E5F5";
   const darkGray = "#37474F";
 
@@ -336,6 +337,7 @@ export function getPurpleTheme() {
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
+        99: themeColor99,
       },
       gray: {
         90: darkGray,

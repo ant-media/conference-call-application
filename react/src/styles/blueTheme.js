@@ -17,6 +17,7 @@ export function getBlueTheme() {
   const themeColor80 = "#00838F";
   const themeColor85 = "#006064";
   const themeColor90 = "#84FFFF";
+  const themeColor99 = "#FFFFFF";
   const chatText = "#E0F7FA";
   const darkGray = "#37474F";
 
@@ -336,6 +337,7 @@ export function getBlueTheme() {
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
+        99: themeColor99,
       },
       gray: {
         90: darkGray,

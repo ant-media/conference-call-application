@@ -22,6 +22,8 @@ export function getWhiteTheme() {
     const themeColor80 = "#fff";
     const themeColor85 = "#3D7AB1";
     const themeColor90 = "#6BCBC3";
+    const themeColor99 = "#FFFFFF";
+
     const chatText = "#DDFFFC";
     const darkGray = "#222B2A";
     const textColor = "#000000";
@@ -346,6 +348,7 @@ export function getWhiteTheme() {
                 80: themeColor80,
                 85: themeColor85,
                 90: themeColor90,
+                99: themeColor99,
             },
             gray: {
                 90: darkGray,

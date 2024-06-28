@@ -28,6 +28,9 @@ public class ConferenceRoomSettings {
 
     @Expose
     private String participantVisibilityMatrix;
+
+	@Expose
+	private int maxVideoTrackCount = 6;
     
     @PostConstruct
     public void init() {
@@ -77,6 +80,14 @@ public class ConferenceRoomSettings {
 
 	public String getParticipantVisibilityMatrix() {
 		return participantVisibilityMatrix;
+	}
+
+	public int getMaxVideoTrackCount() {
+		return maxVideoTrackCount;
+	}
+
+	public void setMaxVideoTrackCount(int maxVideoTrackCount) {
+		this.maxVideoTrackCount = maxVideoTrackCount;
 	}
 
 }

@@ -312,6 +312,8 @@ function AntMedia(props) {
 
   const [participantVisibilityMatrix, setParticipantVisibilityMatrix] = React.useState({});
 
+  const [appSettingsMaxVideoTrackCount, setAppSettingsMaxVideoTrackCount] = React.useState(6);
+
   const [reactions] = useState({
     'sparkling_heart': '💖',
     'thumbs_up': '👍🏼',
@@ -411,6 +413,7 @@ function AntMedia(props) {
   useEffect(() => {
     setTimeout(() => {
       setParticipantUpdated(!participantUpdated);
+      console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
     }, 5000);
   }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -494,6 +497,7 @@ function AntMedia(props) {
           OfferToReceiveAudio: false,
           OfferToReceiveVideo: false,
         },
+        // peerconnection_config: peerconnection_config
         debug: true,
         callback: speedTestForPublishWebRtcAdaptorInfoCallback,
         callbackError: speedTestForPublishWebRtcAdaptorErrorCallback,
@@ -511,6 +515,7 @@ function AntMedia(props) {
         OfferToReceiveAudio : false,
         OfferToReceiveVideo : false,
       },
+      // peerconnection_config: peerconnection_config
       debug: true,
       callback: speedTestForPublishWebRtcAdaptorInfoCallback,
       callbackError: speedTestForPublishWebRtcAdaptorErrorCallback,
@@ -578,6 +583,7 @@ function AntMedia(props) {
         OfferToReceiveAudio : false,
         OfferToReceiveVideo : false,
       },
+      // peerconnection_config: peerconnection_config
       debug: true,
       callback: speedTestForPlayWebRtcAdaptorInfoCallback,
       callbackError: speedTestForPlayWebRtcAdaptorErrorCallback,
@@ -749,6 +755,18 @@ function AntMedia(props) {
     console.info("send notification event", notEvent);
     sendDataChannelMessage(roomName, JSON.stringify(notEvent));
     updateBroadcastRole(streamId, role);
+
+    /*
+    handleSendNotificationEvent(
+        "UPDATE_PARTICIPANT_ROLE",
+        publishStreamId,
+        {
+          streamId: streamId,
+          senderStreamId: publishStreamId,
+          role: role
+        }
+    );
+     */
   }
 
   function updateBroadcastRole(streamId, role) {
@@ -778,7 +796,9 @@ function AntMedia(props) {
 
     setIsReconnectionInProgress(true);
     reconnecting = true;
-    publishReconnected = false;
+
+    publishReconnected = isPlayOnly === true;
+
     playReconnected = false;
 
     displayWarning("Connection lost. Trying reconnect...");
@@ -788,7 +808,8 @@ function AntMedia(props) {
     room = roomName;
     roomOfStream[generatedStreamId] = room;
 
-    globals.maxVideoTrackCount = 6; //FIXME
+    globals.maxVideoTrackCount = appSettingsMaxVideoTrackCount;
+    globals.desiredMaxVideoTrackCount = appSettingsMaxVideoTrackCount;
     setPublishStreamId(generatedStreamId);
 
     if (!isPlayOnly) {
@@ -1025,7 +1046,7 @@ function AntMedia(props) {
       isCameraOn: true,
       isScreenShared: true,
       playOnly: false,
-      role: role,
+      role: roleInit,
     }
 
     let currentStreamName = streamName + " - Screen Share";
@@ -1033,7 +1054,7 @@ function AntMedia(props) {
     screenShareStreamId.current = publishStreamId + "_presentation"
 
     screenShareWebRtcAdaptor.current.publish(screenShareStreamId.current, token, subscriberId,
-      subscriberCode, currentStreamName, roomName, JSON.stringify(metaData), roleInit)
+      subscriberCode, currentStreamName, roomName, JSON.stringify(metaData), roleInit);
 
     setScreenSharingInProgress(true);
 
@@ -1107,6 +1128,7 @@ function AntMedia(props) {
     } else if (info === "publish_started") {
       setIsPublished(true);
       console.log("**** publish started:" + reconnecting);
+      updateMaxVideoTrackCount(appSettingsMaxVideoTrackCount);
 
       if (reconnecting) {
         // we need to set the local video again after the reconnection
@@ -1282,6 +1304,7 @@ function AntMedia(props) {
     } else if (error.indexOf("WebSocketNotSupported") !== -1) {
       errorMessage = "Fatal Error: WebSocket not supported in this browser";
     } else if (error.indexOf("no_stream_exist") !== -1) {
+      setIsPlayed(true);
       //TODO: removeRemoteVideo(error.streamId);
     } else if (error.indexOf("data_channel_error") !== -1) {
       errorMessage = "There was a error during data channel communication";
@@ -1370,7 +1393,7 @@ function AntMedia(props) {
       videoLabel = "localVideo";
     }
 
-    if (videoLabel !== "localVideo" && videoTrackAssignments.length > 1) {
+    if (videoLabel !== "localVideo" && videoTrackAssignments.length > 1 && globals.desiredMaxVideoTrackCount < videoTrackAssignments.length) {
       videoLabel = videoTrackAssignments[1]?.videoLabel;
       webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
     }
@@ -1530,6 +1553,7 @@ function AntMedia(props) {
   function handleStopScreenShare() {
     setIsScreenShared(false);
     screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
+    screenShareStreamId.current = null;
   }
 
   function handleSetMessages(newMessage) {
@@ -1614,19 +1638,21 @@ function AntMedia(props) {
 
   function handleSendMessage(message) {
     if (publishStreamId) {
+
+      if (message === "debugme") {
+        webRTCAdaptor?.getDebugInfo(publishStreamId);
+        return;
+      } else if (message === "clearme") {
+        setMessages([]);
+        return;
+      }
+
       let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
       if (
         iceState !== null &&
         iceState !== "failed" &&
         iceState !== "disconnected"
       ) {
-        if (message === "debugme") {
-          webRTCAdaptor?.getDebugInfo(publishStreamId);
-          return;
-        } else if (message === "clearme") {
-          setMessages([]);
-          return;
-        }
 
         webRTCAdaptor?.sendData(
           publishStreamId,
@@ -1848,6 +1874,9 @@ function AntMedia(props) {
 
         //checkScreenSharingStatus();
       } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
+        if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
+          return;
+        }
         clearInterval(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
           setTalkers([]);
@@ -1888,6 +1917,7 @@ function AntMedia(props) {
         } else {
           webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
         }
+        setParticipantUpdated(!participantUpdated);
       }
     }
   }
@@ -1909,7 +1939,7 @@ function AntMedia(props) {
             horizontal: "right",
           },
         }, {
-          autoHideDuration: 1500,
+          autoHideDuration: 1000,
         });
       }, 1000);
     } else if (!oldRole.includes("active") && newRole.includes("active")) {
@@ -1923,7 +1953,7 @@ function AntMedia(props) {
               horizontal: "right",
             },
           }, {
-            autoHideDuration: 1500,
+            autoHideDuration: 1000,
           });
         }, 1000);
     }
@@ -1969,6 +1999,10 @@ function AntMedia(props) {
   }
 
   function handleLeaveFromRoom() {
+
+    if (screenShareWebRtcAdaptor.current !== null) {
+      handleStopScreenShare();
+    }
 
 
     // we need to empty participant array. if we are going to leave it in the first place.
@@ -2411,7 +2445,13 @@ function AntMedia(props) {
       var localSettings = JSON.parse(obj.settings);
       console.log("--isRecordingFeatureAvailable: ", localSettings?.isRecordingFeatureAvailable);
       setIsRecordPluginInstalled(localSettings?.isRecordingFeatureAvailable);
-      setParticipantVisibilityMatrix(JSON.parse(localSettings?.participantVisibilityMatrix));
+      if (localSettings?.participantVisibilityMatrix !== undefined && localSettings?.participantVisibilityMatrix !== null) {
+        setParticipantVisibilityMatrix(JSON.parse(localSettings?.participantVisibilityMatrix));
+      }
+      if (localSettings?.maxVideoTrackCount !== undefined && localSettings?.maxVideoTrackCount !== null) {
+        console.log("--maxVideoTrackCountFromAppSettings: ", localSettings?.maxVideoTrackCount);
+        setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount);
+      }
     } else if (obj.command === "startRecordingResponse") {
       console.log("Incoming startRecordingResponse:", obj);
       definition = JSON.parse(obj.definition);
@@ -2631,11 +2671,15 @@ function AntMedia(props) {
                       <CircularProgress/>
                   </Grid>
                   <Grid item xs={12} align='center'>
-                      <Typography style={{color: theme.palette.themeColor10}}><b>{t("Joining the room...")}</b></Typography>
+                    <Typography style={{color: theme.palette.themeColor[99]}}>
+                        <span style={{backgroundColor: '#2B6596', color: '#fff', padding: 2, textAlign: 'center', borderRadius: 5}}>
+                          <b>{t("Joining the room...")}</b>
+                        </span>
+                    </Typography>
                   </Grid>
                 </Grid>
               </Backdrop>
-            ):null}
+              ):null}
 
             {isReconnectionInProgress ? (
               <Backdrop
@@ -2648,11 +2692,15 @@ function AntMedia(props) {
                       <CircularProgress/>
                   </Grid>
                   <Grid item xs={12} align='center'>
-                      <Typography style={{color: theme.palette.themeColor10}}><b>{t("Reconnecting...")}</b></Typography>
+                      <Typography style={{color: theme.palette.themeColor[99]}}>
+                        <span style={{backgroundColor: '#2B6596', color: '#fff', padding: 2, textAlign: 'center', borderRadius: 5}}>
+                          <b>{t("Reconnecting...")}</b>
+                        </span>
+                      </Typography>
                   </Grid>
                 </Grid>
               </Backdrop>
-            ):null}
+              ):null}
 
             {screenSharingInProgress ? (
               <Backdrop
@@ -2665,11 +2713,15 @@ function AntMedia(props) {
                       <CircularProgress/>
                   </Grid>
                   <Grid item xs={12} align='center'>
-                      <Typography style={{color: theme.palette.themeColor10}}><b>{t("Starting Screen Share...")}</b></Typography>
+                      <Typography style={{color: theme.palette.themeColor[99]}}>
+                        <span style={{backgroundColor: '#2B6596', color: '#fff', padding: 2, textAlign: 'center', borderRadius: 5}}>
+                          <b>{t("Starting Screen Share...")}</b>
+                        </span>
+                      </Typography>
                   </Grid>
                 </Grid>
               </Backdrop>
-            ):null}
+              ):null}
 
               {leftTheRoom ? (
                <LeftTheRoom withError={leaveRoomWithError} />
