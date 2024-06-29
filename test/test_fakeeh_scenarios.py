@@ -159,7 +159,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     participants = self.get_participants()
     for participant in participants:
       if participants[participant]["name"] == name:
-        return participant["streamId"]
+        return participants[participant]["streamId"]
     return None
   
   def leave_room(self):
@@ -221,7 +221,7 @@ class TestTestFakeehScenario(unittest.TestCase):
 
 
     # playerA joins to listener room
-    handle_player_A = self.join_room_as_player("playerA", room+"listener")
+    handle_player_A = self.join_room_as_player("playerA", room)
     # there should be no video in listener room
     wait.until(lambda x: len(self.get_participants()) == 0)
 
