@@ -9,7 +9,8 @@
 name: Java CI with Maven
 
 on: 
-#[push]
+# [push]
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
 
@@ -34,46 +35,22 @@ jobs:
         
     - name: Login to server
       run: |
-        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
+        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
         
     - name: Delete Old App
       run: |
-        curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+        curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
         sleep 10
         
     - name: Create New App
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
-        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
-  
-    - name: Check if Conference app exists
-      id: check-conference-app
-      run: |
-        response=$(curl -s "${{ secrets.SERVER_URL }}/rest/v2/applications" -b cookie.txt)
-        if [[ $(echo "$response" | jq '. | any(. == "Conference")' | grep -c true) -eq 0 ]]; then
-          echo "::set-output name=app_exists::false"
-        else
-          echo "::set-output name=app_exists::true"
-        fi
-    - name: Setup kubectl
-      uses: azure/k8s-set-context@v1
-      with:
-        kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
+        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+        sleep 10
         
-    - name: Delete pod if the conference app not exists
-      if: steps.check-conference-app.outputs.app_exists == 'false'
+    - name: Change Settings
       run: |
-        POD_NAME=$(kubectl get pods -l app=ant-media-origin -n antmedia -o jsonpath='{.items[0].metadata.name}')
-        kubectl delete pod $POD_NAME -n antmedia
-        sleep 20
-        
-    - name: Login to server
-      if: steps.check-conference-app.outputs.app_exists == 'false'
-      run: |
-        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
-                
-    - name: Recreate Conference App
-      run: |
-        export WAR_FILE_NAME="ConferenceCall.war"
-        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
-  
+        curl "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/settings/Conference" -b cookie.txt -o settings.json
+        jq '.stunServerURI = "turn:${{ secrets.PRODUCTION_TURN_URL }}" | .turnServerUsername = "${{ secrets.PRODUCTION_TURN_USERNAME }}" | .turnServerCredential = "${{ secrets.PRODUCTION_TURN_PASSWORD }}"' settings.json > updated_settings.json
+        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" -d @updated_settings.json -b cookie.txt "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/settings/Conference"
+   
