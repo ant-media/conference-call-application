@@ -1,5 +1,6 @@
 from browser import Browser
 from selenium.webdriver.common.by import By
+from selenium.common import exceptions  
 
 import sys
 import unittest
@@ -83,23 +84,23 @@ class TestTestFakeehScenario(unittest.TestCase):
     return handle
   
   def add_presenter_to_listener_room(self, presenter):
-    add_button = self.chrome.get_element_with_retry(By.ID,"add-presenter-"+presenter)
+    add_button = self.chrome.get_element(By.ID,"add-presenter-"+presenter)
     self.chrome.click_element(add_button)
 
   def remove_presenter_from_listener_room(self, presenter):
-    remove_button = self.chrome.get_element_with_retry(By.ID,"remove-presenter-"+presenter)
-    self.chrome.click_element(remove_button)
+    remove_speaker_button = self.chrome.get_element(By.ID,"remove-presenter-"+presenter)
+    self.chrome.click_element(remove_speaker_button)
 
   def remove_temporary_speaker_from_presenter_room(self, presenter):
-    remove_speaker_button = self.chrome.get_element_with_retry(By.ID,"remove-speaker-"+presenter)
+    remove_speaker_button = self.chrome.get_element(By.ID,"remove-speaker-"+presenter)
     self.chrome.click_element(remove_speaker_button)
 
   def open_close_participant_list_drawer(self):
-    participant_list_button = self.chrome.get_element_with_retry(By.ID,"participant-list-button")
+    participant_list_button = self.chrome.get_element(By.ID,"participant-list-button")
     self.chrome.click_element(participant_list_button)
 
   def open_close_publisher_request_list_drawer(self):
-    open_participant_list_button = self.chrome.get_element_with_retry(By.ID,"publisher-request-list-button")
+    open_participant_list_button = self.chrome.get_element(By.ID,"publisher-request-list-button")
     self.chrome.click_element(open_participant_list_button)
 
   def get_participants(self):
@@ -108,9 +109,19 @@ class TestTestFakeehScenario(unittest.TestCase):
     if result_json is None:
       return []
     #print("result_json:" + str(result_json))
-    print ("participant count:" + str(len(result_json["allParticipants"])))
+    print ("all participant count:" + str(len(result_json["allParticipants"])))
     print("allParticipants: "+str(result_json["allParticipants"]))
     return result_json["allParticipants"]
+  
+  def get_video_track_assignments(self):
+    script = "return window.conference;"
+    result_json = self.chrome.execute_script(script)
+    if result_json is None:
+      return []
+    #print("result_json:" + str(result_json))
+    print ("videoTrackAssignments count:" + str(len(result_json["videoTrackAssignments"])))
+    print("videoTrackAssignments: "+str(result_json["videoTrackAssignments"]))
+    return result_json["videoTrackAssignments"]
   
   def get_request_publisher_list(self):
     script = "return window.conference;"
@@ -223,7 +234,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     # playerA joins to listener room
     handle_player_A = self.join_room_as_player("playerA", room)
     # there should be no video in listener room
-    wait.until(lambda x: len(self.get_participants()) == 0)
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
 
 
     # switch to admin and add presenter to listener room
@@ -238,7 +249,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     # switch to playerA and check if presenter is added to listener room
     self.chrome.switch_to_tab(handle_player_A)
 
-    wait.until(lambda x: len(self.get_participants()) == 1)
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
 
 
     # switch to admin and remove presenter from listener room
@@ -249,7 +260,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     # switch to playerA and check if presenter is removed from listener room
     self.chrome.switch_to_tab(handle_player_A)
 
-    wait.until(lambda x: len(self.get_participants()) == 0)
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
 
 
     self.chrome.close_all()
