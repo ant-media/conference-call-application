@@ -7,9 +7,14 @@ import {getPinkTheme} from "./pinkTheme";
 import {getRedTheme} from "./redTheme";
 import {getOrangeTheme} from "./orangeTheme";
 import {getGrayTheme} from "./grayTheme";
+import {getWhiteTheme} from "./whiteTheme";
 
 const getTheme = (theme) => {
   let themeObject;
+
+  if(process.env.REACT_APP_FORCE_THEME !== undefined && process.env.REACT_APP_FORCE_THEME !== "") {
+    theme = process.env.REACT_APP_FORCE_THEME;
+  }
 
   switch (theme) {
     case ThemeList.Green:
@@ -32,6 +37,9 @@ const getTheme = (theme) => {
       break;
     case ThemeList.Gray:
       themeObject = getGrayTheme();
+      break;
+    case ThemeList.White:
+      themeObject = getWhiteTheme();
       break;
     default:
       themeObject = getGreenTheme();

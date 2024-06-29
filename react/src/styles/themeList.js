@@ -6,4 +6,5 @@ export const ThemeList = {
   Red: "red",
   Orange: "orange",
   Gray: "gray",
+  White: "white",
 };

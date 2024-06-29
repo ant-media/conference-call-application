@@ -23,6 +23,7 @@ export function getPurpleTheme() {
   const error = "#D50000";
   const primaryColor = themeColor10;
   const secondaryColor = themeColor60;
+  const textColor = "#FFFFFF";
   let themeObject = {
     typography: {
       allVariants: {

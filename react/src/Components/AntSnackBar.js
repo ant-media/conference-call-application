@@ -50,7 +50,7 @@ const SnackMessage = forwardRef((props, ref) => {
           }}
         >
           <Grid container alignItems="center">
-            <SvgIcon size={32} color={'white'} name={'message-off'}/>
+            <SvgIcon size={32} color={'#fff'} name={'message-off'}/>
             <Typography sx={{ml: 0.5}} variant="subtitle2"
                         color={theme.palette.themeColor[0]}>{`${sender}`}</Typography>
           </Grid>

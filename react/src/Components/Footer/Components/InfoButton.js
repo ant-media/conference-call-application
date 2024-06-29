@@ -102,7 +102,7 @@ function InfoButton(props) {
                         );
                       }}
                   >
-                    <SvgIcon size={14} viewBox="0 0 500 1000" name={'copy'} color={'white'}/>
+                    <SvgIcon size={14} viewBox="0 0 500 1000" name={'copy'} color={'#fff'}/>
                   </Button>
                 </Tooltip>
               </ListItemIcon>
