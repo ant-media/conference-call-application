@@ -1241,7 +1241,7 @@ function AntMedia(props) {
       console.log("iceConnectionState Changed: ", JSON.stringify(obj))
     }
     else if (info === "reconnection_attempt_for_player") {
-      if(playOnly && isNoSreamExist){
+      if(isPlayOnly && isNoSreamExist){
         console.log("reconnection_attempt_for_player but no stream exist")
       }
       else{
