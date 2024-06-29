@@ -20,6 +20,7 @@ import {useWebSocket} from 'Components/WebSocketProvider';
 import {useTheme} from "@mui/material/styles";
 import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 import {WebinarRoles} from "../WebinarRoles";
+import Stack from "@mui/material/Stack";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -372,7 +373,7 @@ function AntMedia(props) {
   // speed test related states
   const speedTestStreamId = React.useRef(makeid(20));
   const speedTestForPublishWebRtcAdaptor = React.useRef(null);
-  const [speedTestObject, setSpeedTestObject] = React.useState({message: "Please wait while we are testing your connection speed", isfinished: false});
+  const [speedTestObject, setSpeedTestObject] = React.useState({message: "Please wait while we are testing your connection speed", isfinished: false, isfailed: false, errorMessage: "", progressValue: 10});
   const speedTestCounter = React.useRef(0);
   const speedTestForPlayWebRtcAdaptor = React.useRef(null);
 
@@ -526,12 +527,37 @@ function AntMedia(props) {
 
   function speedTestForPublishWebRtcAdaptorInfoCallback(info, obj) {
     if (info === "initialized") {
+      speedTestCounter.current = 0;
+      let tempSpeedTestObject = {};
+      tempSpeedTestObject.message = speedTestObject.message;
+      tempSpeedTestObject.isfinished = speedTestObject.isfinished;
+      tempSpeedTestObject.isfailed = speedTestObject.isfailed;
+      tempSpeedTestObject.errorMessage = speedTestObject.errorMessage;
+      tempSpeedTestObject.progressValue = 10;
+      setSpeedTestObject(tempSpeedTestObject);
       speedTestForPublishWebRtcAdaptor.current.publish("speedTestStream"+speedTestStreamId.current, token, subscriberId, subscriberCode, "speedTestStream"+speedTestStreamId.current, "", "")
     } else if (info === "publish_started") {
-      console.log("speed test publish started")
+      speedTestCounter.current = 0;
+      console.log("speed test publish started");
+      let tempSpeedTestObject = {};
+      tempSpeedTestObject.message = speedTestObject.message;
+      tempSpeedTestObject.isfinished = speedTestObject.isfinished;
+      tempSpeedTestObject.isfailed = speedTestObject.isfailed;
+      tempSpeedTestObject.errorMessage = speedTestObject.errorMessage;
+      tempSpeedTestObject.progressValue = 20;
+      setSpeedTestObject(tempSpeedTestObject);
       speedTestForPublishWebRtcAdaptor.current.enableStats("speedTestStream"+speedTestStreamId.current);
     } else if (info === "updated_stats") {
       speedTestCounter.current = speedTestCounter.current + 1;
+
+      let tempSpeedTestObject = {};
+      tempSpeedTestObject.message = speedTestObject.message;
+      tempSpeedTestObject.isfinished = speedTestObject.isfinished;
+      tempSpeedTestObject.isfailed = speedTestObject.isfailed;
+      tempSpeedTestObject.errorMessage = speedTestObject.errorMessage;
+      tempSpeedTestObject.progressValue = 20 + (speedTestCounter.current * 30);
+      setSpeedTestObject(tempSpeedTestObject);
+
       if(speedTestCounter.current > 2) {
         speedTestForPublishWebRtcAdaptor.current?.stop("speedTestStream" + speedTestStreamId.current);
         let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
@@ -572,6 +598,14 @@ function AntMedia(props) {
     console.log("error from speed test webrtc adaptor callback")
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
     console.log("error:" + error + " message:" + message);
+
+    let tempSpeedTestObject = {};
+    tempSpeedTestObject.message = speedTestObject.message;
+    tempSpeedTestObject.isfinished = speedTestObject.isfinished;
+    tempSpeedTestObject.isfailed = true;
+    tempSpeedTestObject.errorMessage = "Error occurred while testing your connection speed.";
+    tempSpeedTestObject.progressValue = 0;
+    setSpeedTestObject(tempSpeedTestObject);
   }
 
   function createSpeedTestForPlayWebRtcAdaptor(){
@@ -608,6 +642,16 @@ function AntMedia(props) {
     console.log("error from speed test webrtc adaptor callback")
     //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
     console.log("error:" + error + " message:" + message);
+
+    if (speedTestCounter.current > 0) {
+      let tempSpeedTestObject = {};
+      tempSpeedTestObject.message = speedTestObject.message;
+      tempSpeedTestObject.isfinished = speedTestObject.isfinished;
+      tempSpeedTestObject.isfailed = true;
+      tempSpeedTestObject.errorMessage = "Error occurred while testing your connection speed.";
+      tempSpeedTestObject.progressValue = 0;
+      setSpeedTestObject(tempSpeedTestObject);
+    }
   }
 
   function checkAndUpdateVideoAudioSources() {
@@ -2666,40 +2710,24 @@ function AntMedia(props) {
                       open={isJoining}
                       //onClick={handleClose}
                     >
-                <Grid container alignItems='center' justify='center' alignContent='center'>
-                  <Grid item xs={12} align='center'>
-                      <CircularProgress/>
-                  </Grid>
-                  <Grid item xs={12} align='center'>
-                    <Typography style={{color: theme.palette.themeColor[99]}}>
-                        <span style={{backgroundColor: '#2B6596', color: '#fff', padding: 2, textAlign: 'center', borderRadius: 5}}>
-                          <b>{t("Joining the room...")}</b>
-                        </span>
-                    </Typography>
-                  </Grid>
-                </Grid>
+                <Stack item alignItems='center' justify='center' alignContent='center'>
+                  <CircularProgress size={52} color="inherit"/>
+                  <span style={{margin: '27px', fontSize: 18, fontWeight: 'normal'}}>{t("Joining the room...")}</span>
+                </Stack>
               </Backdrop>
               ):null}
 
             {isReconnectionInProgress ? (
-              <Backdrop
-                      sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                <Backdrop
+                    sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                       open={isReconnectionInProgress}
                       //onClick={handleClose}
                     >
-                <Grid container alignItems='center' justify='center' alignContent='center'>
-                  <Grid item xs={12} align='center'>
-                      <CircularProgress/>
-                  </Grid>
-                  <Grid item xs={12} align='center'>
-                      <Typography style={{color: theme.palette.themeColor[99]}}>
-                        <span style={{backgroundColor: '#2B6596', color: '#fff', padding: 2, textAlign: 'center', borderRadius: 5}}>
-                          <b>{t("Reconnecting...")}</b>
-                        </span>
-                      </Typography>
-                  </Grid>
-                </Grid>
-              </Backdrop>
+                  <Stack item alignItems='center' justify='center' alignContent='center'>
+                    <CircularProgress size={52} color="inherit"/>
+                    <span style={{margin: '27px', fontSize: 18, fontWeight: 'normal'}}>{t("Reconnecting...")}</span>
+                  </Stack>
+                </Backdrop>
               ):null}
 
             {screenSharingInProgress ? (
@@ -2708,18 +2736,10 @@ function AntMedia(props) {
                       open={screenSharingInProgress}
                       //onClick={handleClose}
                     >
-                <Grid container alignItems='center' justify='center' alignContent='center'>
-                  <Grid item xs={12} align='center'>
-                      <CircularProgress/>
-                  </Grid>
-                  <Grid item xs={12} align='center'>
-                      <Typography style={{color: theme.palette.themeColor[99]}}>
-                        <span style={{backgroundColor: '#2B6596', color: '#fff', padding: 2, textAlign: 'center', borderRadius: 5}}>
-                          <b>{t("Starting Screen Share...")}</b>
-                        </span>
-                      </Typography>
-                  </Grid>
-                </Grid>
+                <Stack item alignItems='center' justify='center' alignContent='center'>
+                  <CircularProgress size={52} color="inherit"/>
+                  <span style={{margin: '27px', fontSize: 18, fontWeight: 'normal'}}>{t("Starting Screen Share...")}</span>
+                </Stack>
               </Backdrop>
               ):null}
 
