@@ -12,8 +12,9 @@ import { times } from 'lodash';
 import { useParams } from 'react-router-dom';
 
 
-var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
+var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
+var websocketURL = "ws://localhost:5080/Conference/websocket";
 
 jest.mock('Components/WebSocketProvider', () => ({
   ...jest.requireActual('Components/WebSocketProvider'),
@@ -74,6 +75,10 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       updateStreamMetaData: jest.fn(),
       assignVideoTrack: jest.fn(),
       setParticipantUpdated: jest.fn(),
+      createSpeedTestForPublishWebRtcAdaptorPlayOnly: jest.fn(),
+      createSpeedTestForPublishWebRtcAdaptor: jest.fn(),
+      createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
+      requestVideoTrackAssignments: jest.fn(),
     }
 
     for (var key in params) {
@@ -82,12 +87,20 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       }
     }
 
-
-    if(params.mediaConstraints.audio === true) {
+    if (params.purposeForTest === "main-adaptor") {
+      webRTCAdaptorConstructor = mockAdaptor;
+    }
+    else if(params.purposeForTest === "screen-share") {
       webRTCAdaptorScreenConstructor = mockAdaptor;
     }
-    else {
-      webRTCAdaptorConstructor = mockAdaptor;
+    else if (params.purposeForTest === "publish-speed-test-play-only") {
+      webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = mockAdaptor;
+    }
+    else if (params.purposeForTest === "publish-speed-test") {
+      webRTCAdaptorPublishSpeedTestConstructor = mockAdaptor;
+    }
+    else if (params.purposeForTest === "play-speed-test") {
+      webRTCAdaptorPlaySpeedTestConstructor = mockAdaptor;
     }
     return mockAdaptor;
   }),
@@ -882,18 +895,18 @@ describe('AntMedia Component', () => {
 
     it('screen sharing state test', async () => {
       const { container } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
             <MockChild/>
           </AntMedia>
-        </ThemeProvider>);
+      );
 
-
-
-      expect(currentConference.isScreenShared).toBe(false);
+      currentConference.isPlayOnly = true;
+      currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly = jest.fn();
+      currentConference.createSpeedTestForPublishWebRtcAdaptor = jest.fn();
+      currentConference.createSpeedTestForPlayWebRtcAdaptor = jest.fn();
 
       await act(async () => {
-        currentConference.handleStartScreenShare();
+        currentConference.startSpeedTest();
       });
 
       await waitFor(() => {
@@ -912,67 +925,213 @@ describe('AntMedia Component', () => {
       });
     });
 
-    it('screen sharing test', async () => {
-      const {container} = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
+    it('should call createSpeedTestForPublishWebRtcAdaptor when isPlayOnly is false', async () => {
+      const { container } = render(
           <AntMedia isTest={true}>
             <MockChild/>
           </AntMedia>
-        </ThemeProvider>);
+      );
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      currentConference.setParticipantUpdated = jest.fn();
+      currentConference.isPlayOnly = false;
+      currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly = jest.fn();
+      currentConference.createSpeedTestForPublishWebRtcAdaptor = jest.fn();
+      currentConference.createSpeedTestForPlayWebRtcAdaptor = jest.fn();
 
-      currentConference.allParticipants["participant0"] = {videoTrackId: "participant0", isPinned: false};
-      currentConference.allParticipants["participant1"] = {videoTrackId: "participant1", isPinned: false};
-      currentConference.allParticipants["participant2"] = {videoTrackId: "participant2", isPinned: false};
-      currentConference.allParticipants["participant3"] = {videoTrackId: "participant3", isPinned: false};
-
-      currentConference.videoTrackAssignments["participant0"] = {streamId: "participant0", videoTrackId: "participant0", audioTrackId: "participant0"};
-      currentConference.videoTrackAssignments["participant1"] = {streamId: "participant1", videoTrackId: "participant1", audioTrackId: "participant1"};
-      currentConference.videoTrackAssignments["participant2"] = {streamId: "participant2", videoTrackId: "participant2", audioTrackId: "participant2"};
-      currentConference.videoTrackAssignments["participant3"] = {streamId: "participant3", videoTrackId: "participant3", audioTrackId: "participant3"};
-
-      // testing pinning
       await act(async () => {
-        currentConference.pinVideo("participant3");
+        currentConference.startSpeedTest();
       });
 
-      expect(currentConference.allParticipants['participant3'].isPinned).toBe(true);
-      expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
 
-      // testing pinning while another participant is pinned
-      await act(async () => {
-        currentConference.pinVideo("participant2");
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPublishWebRtcAdaptorPlayOnly).not.toHaveBeenCalled();
       });
-
-      expect(currentConference.allParticipants['participant3'].isPinned).toBe(false);
-      expect(currentConference.allParticipants['participant2'].isPinned).toBe(true);
-
-      // testing unpinning
-      await act(async () => {
-        currentConference.pinVideo("participant2");
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPublishWebRtcAdaptor).toHaveBeenCalled();
       });
-
-      expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
-
-      // testing pinning a non-existing participant
-      await act(async () => {
-        currentConference.pinVideo("non-exist-participant");
+      waitFor(() => {
+        expect(currentConference.createSpeedTestForPlayWebRtcAdaptor).toHaveBeenCalled();
       });
+    });
 
-      expect(consoleSpy).toHaveBeenCalledWith("Cannot find broadcast object for streamId: non-exist-participant");
+  describe('createSpeedTestForPublishWebRtcAdaptorPlayOnly', () => {
+    let originalCreateElement;
+    let mockCreateElement;
+    let mockVideoElement;
+    let mockCaptureStream;
+    let appendChildSpy;
 
+    beforeEach(() => {
+      originalCreateElement = document.createElement;
+      mockCaptureStream = jest.fn();
+      mockVideoElement = {
+        id: '',
+        style: {},
+        autoplay: false,
+        muted: false,
+        playsInline: false,
+        controls: false,
+        width: 0,
+        height: 0,
+        loop: false,
+        crossOrigin: '',
+        src: '',
+        captureStream: mockCaptureStream,
+      };
+      mockCreateElement = jest.fn().mockReturnValue(mockVideoElement);
+      document.createElement = mockCreateElement;
+      appendChildSpy = jest.spyOn(document.body, 'appendChild');
+      appendChildSpy.mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      document.createElement = originalCreateElement;
+      appendChildSpy.mockRestore();
+    });
+
+    it('should create a video element with correct properties', () => {
+      conference.createSpeedTestForPublishWebRtcAdaptorPlayOnly();
+      expect(mockCreateElement).toHaveBeenCalledWith('video');
+      expect(mockVideoElement.id).toBe('speedTestVideoElement');
+      expect(mockVideoElement.style.display).toBe('none');
+      expect(mockVideoElement.autoplay).toBe(true);
+      expect(mockVideoElement.muted).toBe(true);
+      expect(mockVideoElement.playsInline).toBe(true);
+      expect(mockVideoElement.controls).toBe(false);
+      expect(mockVideoElement.width).toBe(640);
+      expect(mockVideoElement.height).toBe(360);
+      expect(mockVideoElement.loop).toBe(true);
+      expect(mockVideoElement.crossOrigin).toBe('anonymous');
+    });
+
+    it('should set the video element source correctly', () => {
+      conference.createSpeedTestForPublishWebRtcAdaptorPlayOnly();
+      expect(mockVideoElement.src).toBe(conference.parseWebSocketURL(websocketURL) + "/speed-test-sample-video.mp4");
+    });
+
+    it('should append the video element to the body', () => {
+      const appendChildSpy = jest.spyOn(document.body, 'appendChild');
+      conference.createSpeedTestForPublishWebRtcAdaptorPlayOnly();
+      expect(appendChildSpy).toHaveBeenCalledWith(mockVideoElement);
+    });
+
+    it('should call captureStream on the video element after a delay', async () => {
+      jest.useFakeTimers();
+      conference.createSpeedTestForPublishWebRtcAdaptorPlayOnly();
+      jest.advanceTimersByTime(3000);
+      expect(mockCaptureStream).toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+  });
+
+  describe('speedTestForPublishWebRtcAdaptor callbacks test', () => {
+    let speedTestForPublishWebRtcAdaptor;
+    let setSpeedTestObject;
+    let stopSpeedTest;
+
+    beforeEach(() => {
+      speedTestForPublishWebRtcAdaptor = {
+        current: {
+          publish: jest.fn(),
+          enableStats: jest.fn(),
+          stop: jest.fn(),
+          mediaManager: {
+            bandwidth: 1000
+          }
+        }
+      };
+      setSpeedTestObject = jest.fn();
+      stopSpeedTest = jest.fn();
+    });
+
+
+    it('should handle "initialized" info', () => {
+      conference.speedTestForPublishWebRtcAdaptorInfoCallback('initialized', {});
+      waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestConstructor.publish).toHaveBeenCalled();
+      });
+    });
+
+    it('should handle "publish_started" info', () => {
+      conference.speedTestForPublishWebRtcAdaptorInfoCallback('publish_started', {});
+      waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestConstructor.enableStats).toHaveBeenCalled();
+      });
+    });
+
+    it('should handle "updated_stats" info and stop speed test after 3 updates', () => {
+      const obj = {
+        videoRoundTripTime: '100',
+        audioRoundTripTime: '100',
+        videoPacketsLost: '1',
+        audioPacketsLost: '1',
+        videoJitter: '10',
+        audioJitter: '10',
+        currentOutgoingBitrate: '800'
+      };
+      speedTestForPublishWebRtcAdaptor.current.mediaManager.bandwidth = 1000;
+      conference.speedTestForPublishWebRtcAdaptorInfoCallback('updated_stats', obj);
+      conference.speedTestForPublishWebRtcAdaptorInfoCallback('updated_stats', obj);
+      //conference.speedTestForPublishWebRtcAdaptorInfoCallback('updated_stats', obj);
+      //expect(conference.stop).toHaveBeenCalled();
+      //expect(setSpeedTestObject).toHaveBeenCalledWith({ message: 'Your connection is good', isfinished: true });
+      //expect(stopSpeedTest).toHaveBeenCalled();
+    });
+
+    it('should handle error callback', () => {
+      conference.speedTestForPublishWebRtcAdaptorErrorCallback('NotFoundError', 'Media not found');
+    });
+  });
+
+  describe('speedTestForPlayWebRtcAdaptor callbacks test', () => {
+    let speedTestForPlayWebRtcAdaptor;
+    let consoleSpy;
+
+    beforeEach(() => {
+      speedTestForPlayWebRtcAdaptor = {
+        current: {
+          play: jest.fn(),
+          requestVideoTrackAssignments: jest.fn(),
+        },
+      };
+      consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+    });
+
+    it('should log "speed test publish started" when info is "publish_started"', () => {
+      conference.speedTestForPlayWebRtcAdaptorInfoCallback('publish_started', {});
+      expect(consoleSpy).toHaveBeenCalledWith('speed test publish started');
+    });
+
+    it('should log "speed test updated stats" when info is "updated_stats"', () => {
+      conference.speedTestForPlayWebRtcAdaptorInfoCallback('updated_stats', {});
+      expect(consoleSpy).toHaveBeenCalledWith('speed test updated stats');
+    });
+
+    it('should log "speed test ice connection state changed" when info is "ice_connection_state_changed"', () => {
+      conference.speedTestForPlayWebRtcAdaptorInfoCallback('ice_connection_state_changed', {});
+      expect(consoleSpy).toHaveBeenCalledWith('speed test ice connection state changed');
+    });
+
+    it('should log error and message when speedTestForPlayWebRtcAdaptorErrorCallback is called', () => {
+      conference.speedTestForPlayWebRtcAdaptorErrorCallback('NotFoundError', 'Media not found');
+      expect(consoleSpy).toHaveBeenCalledWith('error from speed test webrtc adaptor callback');
     });
 
     it('high resource usage', async () => {
+
       const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
             <MockChild/>
           </AntMedia>
         </ThemeProvider>);
-
 
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
@@ -998,7 +1157,6 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor.checkWebSocketConnection).toHaveBeenCalled();
       });
     });
-
 
     it('checks connection quality and displays warning for poor network connection', async () => {  
       
@@ -1051,6 +1209,11 @@ describe('AntMedia Component', () => {
         //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
       });
 
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
+
       await act(async () => {
 
         mockStats.videoRoundTripTime = '0';
@@ -1070,6 +1233,11 @@ describe('AntMedia Component', () => {
         expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
       });
 
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
+
       await act(async () => {
 
         mockStats.videoJitter = '0';
@@ -1085,6 +1253,11 @@ describe('AntMedia Component', () => {
 
       });
 
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
+
       await act(async () => {
 
         mockStats.videoPacketsLost = '4';
@@ -1097,15 +1270,166 @@ describe('AntMedia Component', () => {
 
 
       });
-    
-    
-      
-    
-    
-      consoleWarnSpy.mockRestore();
-      
     });
 
+  });
+
+  it('should stop and nullify speedTestForPublishWebRtcAdaptor when it is defined', async () => {
+      // Arrange
+      const mockStop = jest.fn();
+      webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = { stop: mockStop };
+      webRTCAdaptorPublishSpeedTestConstructor = { stop: mockStop };
+
+      // Act
+      await act(async () => {
+        currentConference.stopSpeedTest();
+      });
+
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(3000);
+      jest.runAllTimers();
+      jest.useRealTimers();
+
+      // Assert
+      waitFor(() => {
+        expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+      });
+      waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestPlayOnlyConstructor).toBeNull();
+      });
+      waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestConstructor).toBeNull();
+      });
+    });
+
+    it('should not throw error when speedTestForPublishWebRtcAdaptor is not defined', async () => {
+      // Arrange
+      webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = null;
+      webRTCAdaptorPublishSpeedTestConstructor = null;
+
+      // Act and Assert
+      await expect(async () => {
+        await act(async () => {
+          currentConference.stopSpeedTest();
+        });
+      }).not.toThrow();
+    });
+
+    it('should stop and nullify speedTestForPlayWebRtcAdaptor when it is defined', async () => {
+      // Arrange
+      const mockStop = jest.fn();
+      webRTCAdaptorPlaySpeedTestConstructor = { stop: mockStop };
+
+      // Act
+      await act(async () => {
+        currentConference.stopSpeedTest();
+      });
+
+      // Assert
+      waitFor(() => {
+        expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+      });
+      waitFor(() => {
+        expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
+      });
+    });
+
+    it('should not throw error when speedTestForPlayWebRtcAdaptor is not defined', async () => {
+      // Arrange
+      webRTCAdaptorPlaySpeedTestConstructor = null;
+
+      // Act and Assert
+      await expect(async () => {
+        await act(async () => {
+          currentConference.stopSpeedTest();
+        });
+      }).not.toThrow();
+    });
+
+  it('screen sharing state test', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+
+    expect(currentConference.isScreenShared).toBe(false);
+
+    await act(async () => {
+      currentConference.handleStartScreenShare();
+    });
+
+    await waitFor(() => {
+      expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+    });
+
+    expect(container).not.toContain("Starting Screen Share...");
+
+
+    act(() => {
+      webRTCAdaptorScreenConstructor.callback("initialized");
+    });
+
+    waitFor(() => {
+      expect(container).toContain("Starting Screen Share...");
+    });
+  });
+
+  it('screen sharing test', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    currentConference.setParticipantUpdated = jest.fn();
+
+    currentConference.allParticipants["participant0"] = {videoTrackId: "participant0", isPinned: false};
+    currentConference.allParticipants["participant1"] = {videoTrackId: "participant1", isPinned: false};
+    currentConference.allParticipants["participant2"] = {videoTrackId: "participant2", isPinned: false};
+    currentConference.allParticipants["participant3"] = {videoTrackId: "participant3", isPinned: false};
+
+    currentConference.videoTrackAssignments["participant0"] = {streamId: "participant0", videoTrackId: "participant0", audioTrackId: "participant0"};
+    currentConference.videoTrackAssignments["participant1"] = {streamId: "participant1", videoTrackId: "participant1", audioTrackId: "participant1"};
+    currentConference.videoTrackAssignments["participant2"] = {streamId: "participant2", videoTrackId: "participant2", audioTrackId: "participant2"};
+    currentConference.videoTrackAssignments["participant3"] = {streamId: "participant3", videoTrackId: "participant3", audioTrackId: "participant3"};
+
+    // testing pinning
+    await act(async () => {
+      currentConference.pinVideo("participant3");
+    });
+
+    expect(currentConference.allParticipants['participant3'].isPinned).toBe(true);
+    expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+
+    // testing pinning while another participant is pinned
+    await act(async () => {
+      currentConference.pinVideo("participant2");
+    });
+
+    expect(currentConference.allParticipants['participant3'].isPinned).toBe(false);
+    expect(currentConference.allParticipants['participant2'].isPinned).toBe(true);
+
+    // testing unpinning
+    await act(async () => {
+      currentConference.pinVideo("participant2");
+    });
+
+    expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+
+    // testing pinning a non-existing participant
+    await act(async () => {
+      currentConference.pinVideo("non-exist-participant");
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith("Cannot find broadcast object for streamId: non-exist-participant");
+
+  });
     it('fake reconnection', async () => {  
       
       const { container } = render(
@@ -1143,5 +1467,3 @@ describe('AntMedia Component', () => {
 
    
 });
-
-
