@@ -26,7 +26,7 @@ class TestDeployment(unittest.TestCase):
     assert(response["success"])
     time.sleep(30)
     app_settings = self.rest_helper.call_get_app_settings(self.test_app_name)
-    app_settings["stunServerURI"] = "turn:coturn"
+    app_settings["stunServerURI"] = "turn:coturn.antmedia.svc.cluster.local"
     app_settings["turnServerUsername"] = "ovh36"
     app_settings["turnServerCredential"] = "ovh36"
     response = self.rest_helper.call_set_app_settings(self.test_app_name, app_settings)
