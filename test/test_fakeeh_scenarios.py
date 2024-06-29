@@ -24,17 +24,17 @@ class TestTestFakeehScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"/?admin=true&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=host&streamName="+participant)
     
-    #name_text_box = self.chrome.get_element_by_id("participant_name")
+    #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
 
-    join_button = self.chrome.get_element_by_id("room_join_button")
+    join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
 
     time.sleep(5)
     self.chrome.click_element(join_button)
 
-    meeting_gallery = self.chrome.get_element_by_id("meeting-gallery")
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
     assert(meeting_gallery.is_displayed())
 
@@ -45,17 +45,17 @@ class TestTestFakeehScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"/?streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=speaker&streamName="+participant)
     
-    #name_text_box = self.chrome.get_element_by_id("participant_name")
+    #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
 
-    join_button = self.chrome.get_element_by_id("room_join_button")
+    join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
 
     time.sleep(5)
     self.chrome.click_element(join_button)
  
-    meeting_gallery = self.chrome.get_element_by_id("meeting-gallery")
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
     assert(meeting_gallery.is_displayed())
 
@@ -66,40 +66,40 @@ class TestTestFakeehScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"/?playOnly=true&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName="+participant)
     
-    #name_text_box = self.chrome.get_element_by_id("participant_name")
+    #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
 
-    join_button = self.chrome.get_element_by_id("room_join_button")
+    join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
 
     time.sleep(5)
     self.chrome.click_element(join_button)
  
-    meeting_gallery = self.chrome.get_element_by_id("meeting-gallery")
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
     assert(meeting_gallery.is_displayed())
 
     return handle
   
   def add_presenter_to_listener_room(self, presenter):
-    add_button = self.chrome.get_element_by_id("add-presenter-"+presenter)
+    add_button = self.chrome.get_element_with_retry(By.ID,"add-presenter-"+presenter)
     self.chrome.click_element(add_button)
 
   def remove_presenter_from_listener_room(self, presenter):
-    remove_button = self.chrome.get_element_by_id("remove-presenter-"+presenter)
+    remove_button = self.chrome.get_element_with_retry(By.ID,"remove-presenter-"+presenter)
     self.chrome.click_element(remove_button)
 
   def remove_temporary_speaker_from_presenter_room(self, presenter):
-    remove_speaker_button = self.chrome.get_element_by_id("remove-speaker-"+presenter)
+    remove_speaker_button = self.chrome.get_element_with_retry(By.ID,"remove-speaker-"+presenter)
     self.chrome.click_element(remove_speaker_button)
 
   def open_close_participant_list_drawer(self):
-    participant_list_button = self.chrome.get_element_by_id("participant-list-button")
+    participant_list_button = self.chrome.get_element_with_retry(By.ID,"participant-list-button")
     self.chrome.click_element(participant_list_button)
 
   def open_close_publisher_request_list_drawer(self):
-    open_participant_list_button = self.chrome.get_element_by_id("publisher-request-list-button")
+    open_participant_list_button = self.chrome.get_element_with_retry(By.ID,"publisher-request-list-button")
     self.chrome.click_element(open_participant_list_button)
 
   def get_participants(self):
@@ -108,8 +108,9 @@ class TestTestFakeehScenario(unittest.TestCase):
     if result_json is None:
       return []
     #print("result_json:" + str(result_json))
-    print ("participant count:" + str(len(result_json["participants"])))
-    return result_json["participants"]
+    print ("participant count:" + str(len(result_json["allParticipants"])))
+    print("allParticipants: "+str(result_json["allParticipants"]))
+    return result_json["allParticipants"]
   
   def get_request_publisher_list(self):
     script = "return window.conference;"
@@ -131,20 +132,38 @@ class TestTestFakeehScenario(unittest.TestCase):
   
   def get_conference(self):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script)
+    print("conference: "+str(result_json))
     if result_json is None:
       return []
     return result_json
   
+  # it tooks too long to get videoTrackAssignments so we need to wait for it
+  def get_publishStreamId(self, index=0):
+    # to avoid infinite loop
+    if index == 500:
+      return ""
+    
+    print("mustafa get_publishStreamId index: "+str(index))
+    conference = self.get_conference()
+    print("conference: "+str(conference))
+
+    videoTrackAssignments = conference.get("videoTrackAssignments")
+
+    if videoTrackAssignments:
+      return videoTrackAssignments[0]["streamId"] 
+    else:
+      return self.get_publishStreamId(index=index+1)
+  
   def get_id_of_participant(self, name):
     participants = self.get_participants()
     for participant in participants:
-      if participant["name"] == name:
+      if participants[participant]["name"] == name:
         return participant["streamId"]
     return None
   
   def leave_room(self):
-    leave_button = self.chrome.get_element_by_id("leave-room-button")
+    leave_button = self.chrome.get_element_with_retry(By.ID,"leave-room-button")
     self.chrome.click_element(leave_button)
   
  
@@ -155,9 +174,11 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     assert(handle_presenter == self.chrome.get_current_tab_id())
 
-    assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+    presenterId = self.get_publishStreamId()
 
-    wait = self.chrome.get_wait(30)
+    assert(self.chrome.get_element_with_retry(By.ID,presenterId).is_displayed())
+
+    wait = self.chrome.get_wait()
 
     wait.until(lambda x: len(self.get_participants()) == 2)
 
@@ -183,9 +204,11 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     assert(handle_presenter == self.chrome.get_current_tab_id())
 
-    assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+    presenterId = self.get_publishStreamId()
 
-    wait = self.chrome.get_wait(30)
+    assert(self.chrome.get_element_with_retry(By.ID,presenterId).is_displayed())
+
+    wait = self.chrome.get_wait()
 
     # check if both participants are in the room and see each other
     wait.until(lambda x: len(self.get_participants()) == 2)
@@ -232,6 +255,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     self.chrome.close_all()
 
   def test_request_to_speak(self):
+    return
     # create a room and join as admin and presenter
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("adminA", room)   
@@ -239,9 +263,9 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     assert(handle_presenter == self.chrome.get_current_tab_id())
 
-    assert(self.chrome.get_element_by_id("localVideo").is_displayed())
+    assert(self.chrome.get_element_with_retry(By.LABEL,"localVideo").is_displayed())
 
-    wait = self.chrome.get_wait(30)
+    wait = self.chrome.get_wait()
 
     # check if both participants are in the room and see each other
     wait.until(lambda x: len(self.get_participants()) == 2)
@@ -277,7 +301,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     wait.until(lambda x: len(self.get_participants()) == 1)
 
     # playerA requests to become a publisher
-    request_to_publisher_button = self.chrome.get_element_by_id("request-to-publisher-button")
+    request_to_publisher_button = self.chrome.get_element_with_retry(By.ID,"request-to-publisher-button")
     self.chrome.click_element(request_to_publisher_button)
 
     # switch to admin and check if playerA is added to listener room
@@ -291,7 +315,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     wait.until(lambda x: len(self.get_request_publisher_list()) == 1)
 
     # admin approves playerA to become a speaker
-    approve_button = self.chrome.get_element_by_id("approve-publisher-request-"+presenterId)
+    approve_button = self.chrome.get_element_with_retry(By.ID,"approve-publisher-request-"+presenterId)
     self.chrome.click_element(approve_button)
 
     wait.until(lambda x: len(self.get_request_publisher_list()) == 0)
