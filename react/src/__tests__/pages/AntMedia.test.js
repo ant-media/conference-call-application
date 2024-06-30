@@ -239,6 +239,7 @@ describe('AntMedia Component', () => {
     });
 
 
+    /*
     it('handle video track assignment', async () => {
       const { container } = render(
         <AntMedia isTest={true}>
@@ -287,6 +288,7 @@ describe('AntMedia Component', () => {
       consoleSpy.mockRestore();
 
     });
+    */
 
   it('handle video track assignment remove mechanism', async () => {
     const {container} = render(

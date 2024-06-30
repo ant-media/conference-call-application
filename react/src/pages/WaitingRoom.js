@@ -255,7 +255,7 @@ function WaitingRoom(props) {
                     } : {visibility: "visible", display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                         <CircularProgressWithLabel sx={(speedTestModalButtonVisibility) ? {
                             visibility: "hidden"
-                        } : {visibility: "visible"}} value={conference?.speedTestObject.progressValue}/>
+                        } : {visibility: "visible"}} value={conference?.speedTestObject?.progressValue}/>
                     </Box>
                     <Typography id="modal-modal-description" sx={{mt: 2, color: "black", marginTop: '12px', marginBottom: '21px', visibility: conference?.speedTestObject?.isfailed ? "visible" : "hidden"}}>
                         {conference?.speedTestObject?.errorMessage}
