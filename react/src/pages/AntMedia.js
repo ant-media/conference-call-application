@@ -1413,6 +1413,13 @@ function AntMedia(props) {
           if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
             if(isVideoLabelExsist(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)){
               console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
+              let existedVideoTrackAssignment = tempVideoTrackAssignmentsNew.find(vta => vta.videoLabel === tempVideoTrackAssignment.videoLabel);
+              if(existedVideoTrackAssignment.streamId === "" || existedVideoTrackAssignment.streamId === null || existedVideoTrackAssignment.streamId === undefined){
+                existedVideoTrackAssignment.streamId = tempVideoTrackAssignment.streamId;
+              }
+              if(existedVideoTrackAssignment.track === "" || existedVideoTrackAssignment.track === null || existedVideoTrackAssignment.track === undefined){
+                existedVideoTrackAssignment.track = tempVideoTrackAssignment.track;
+              }
             }
             else{
               tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
@@ -1668,7 +1675,7 @@ function AntMedia(props) {
 
       let tempVideoTrackAssignments = videoTrackAssignments;
       if(isVideoLabelExsist(newVideoTrackAssignment.videoLabel, tempVideoTrackAssignments)){
-        console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
+        console.error("Fatal Error: Video label with an existed name is created: " + newVideoTrackAssignment.videoLabel);
       }
       else{
         tempVideoTrackAssignments.push(newVideoTrackAssignment);
