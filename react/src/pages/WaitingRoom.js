@@ -31,6 +31,12 @@ function getPublishStreamId() {
     return (dataRoomName) ? dataRoomName : getUrlParameter("streamId");
 }
 
+var isSpeedTestInTestPurposes = getUrlParameter("speedTestInTestPurposes");
+
+if (isSpeedTestInTestPurposes === null || isSpeedTestInTestPurposes === undefined) {
+    isSpeedTestInTestPurposes = "true";
+}
+
 function WaitingRoom(props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
@@ -96,7 +102,7 @@ function WaitingRoom(props) {
             streamId = publishStreamId;
         }
 
-        if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true') {
+        if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true' && isSpeedTestInTestPurposes === 'true') {
             let speedTestObjectDefault = {};
             speedTestObjectDefault.message = "Please wait while we are testing your connection speed";
             speedTestObjectDefault.isfinished = false;
