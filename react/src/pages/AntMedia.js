@@ -533,9 +533,9 @@ function AntMedia(props) {
       speedTestCounter.current = 0;
       let tempSpeedTestObject = {};
       tempSpeedTestObject.message = speedTestObject.message;
-      tempSpeedTestObject.isfinished = speedTestObject.isfinished;
-      tempSpeedTestObject.isfailed = speedTestObject.isfailed;
-      tempSpeedTestObject.errorMessage = speedTestObject.errorMessage;
+      tempSpeedTestObject.isfinished = false;
+      tempSpeedTestObject.isfailed = false;
+      tempSpeedTestObject.errorMessage = "";
       tempSpeedTestObject.progressValue = 10;
       setSpeedTestObject(tempSpeedTestObject);
       speedTestForPublishWebRtcAdaptor.current.publish("speedTestStream"+speedTestStreamId.current, token, subscriberId, subscriberCode, "speedTestStream"+speedTestStreamId.current, "", "")
@@ -544,9 +544,9 @@ function AntMedia(props) {
       console.log("speed test publish started");
       let tempSpeedTestObject = {};
       tempSpeedTestObject.message = speedTestObject.message;
-      tempSpeedTestObject.isfinished = speedTestObject.isfinished;
-      tempSpeedTestObject.isfailed = speedTestObject.isfailed;
-      tempSpeedTestObject.errorMessage = speedTestObject.errorMessage;
+      tempSpeedTestObject.isfinished = false;
+      tempSpeedTestObject.isfailed = false;
+      tempSpeedTestObject.errorMessage = "";
       tempSpeedTestObject.progressValue = 20;
       setSpeedTestObject(tempSpeedTestObject);
       speedTestForPublishWebRtcAdaptor.current.enableStats("speedTestStream"+speedTestStreamId.current);
@@ -555,9 +555,9 @@ function AntMedia(props) {
 
       let tempSpeedTestObject = {};
       tempSpeedTestObject.message = speedTestObject.message;
-      tempSpeedTestObject.isfinished = speedTestObject.isfinished;
-      tempSpeedTestObject.isfailed = speedTestObject.isfailed;
-      tempSpeedTestObject.errorMessage = speedTestObject.errorMessage;
+      tempSpeedTestObject.isfinished = false;
+      tempSpeedTestObject.isfailed = false;
+      tempSpeedTestObject.errorMessage = "";
       tempSpeedTestObject.progressValue = 20 + (speedTestCounter.current * 30);
       setSpeedTestObject(tempSpeedTestObject);
 
@@ -587,10 +587,22 @@ function AntMedia(props) {
           speedTestResult.message = "Your connection is optimal";
         }
 
+        speedTestResult.isfailed = false;
+        speedTestResult.errorMessage = "";
+        speedTestResult.progressValue = 100;
+
         speedTestResult.isfinished = true;
         setSpeedTestObject(speedTestResult);
 
         stopSpeedTest();
+      } else {
+        let tempSpeedTestObject = {};
+        tempSpeedTestObject.message = speedTestObject.message;
+        tempSpeedTestObject.isfinished = false;
+        tempSpeedTestObject.isfailed = false;
+        tempSpeedTestObject.errorMessage = "";
+        tempSpeedTestObject.progressValue = 20 + (speedTestCounter.current * 30);
+        setSpeedTestObject(tempSpeedTestObject);
       }
     } else if (info === "ice_connection_state_changed") {
       console.log("speed test ice connection state changed")
