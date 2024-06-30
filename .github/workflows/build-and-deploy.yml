@@ -46,6 +46,7 @@ jobs:
 
     - name: Clone Ant-Media-Server
       run: |
+        CI_COMMIT_REF_NAME=$(echo $GITHUB_REF | cut -d'/' -f 3)
         (if [ $(git ls-remote https://github.com/ant-media/Ant-Media-Server.git $CI_COMMIT_REF_NAME  | wc -l) == "1" ];  
           then 
             echo "$CI_COMMIT_REF_NAME branch found in Ant-Media-Server";  
