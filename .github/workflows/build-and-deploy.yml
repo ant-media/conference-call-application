@@ -61,6 +61,7 @@ jobs:
 
     - name: Build React application
       env:
+        CI: false
         NODE_OPTIONS: '--max-old-space-size=4096'
       run: |
         cd react
