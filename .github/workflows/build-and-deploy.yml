@@ -62,6 +62,7 @@ jobs:
     - name: Build React application
       run: |
         cd react
+        NODE_OPTIONS: '--max-old-space-size=4096'
         sed -i "s#//placeholder for peerconnection_config#peerconnection_config:{\"iceServers\":[{\"urls\":\"turn:${{ secrets.STAGING_TURN_URL }}\",\"username\":\"${{ secrets.STAGING_TURN_USERNAME }}\",\"credential\":\"${{ secrets.STAGING_TURN_PASSWORD }}\"}],\"sdpSemantics\":\"unified-plan\"},#" src/pages/AntMedia.js
         npm install
         npm run build
