@@ -44,6 +44,20 @@ jobs:
         mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet
         cd ..
 
+    - name: Clone Ant-Media-Server
+      run: |
+        (if [ $(git ls-remote https://github.com/ant-media/Ant-Media-Server.git $CI_COMMIT_REF_NAME  | wc -l) == "1" ];  
+          then 
+            echo "$CI_COMMIT_REF_NAME branch found in Ant-Media-Server";  
+            git clone --depth=1 -b $CI_COMMIT_REF_NAME https://github.com/ant-media/Ant-Media-Server.git;  
+          else 
+            echo "$CI_COMMIT_REF_NAME branch not. Checking out master";
+            git clone --depth=1 https://github.com/ant-media/Ant-Media-Server.git;   
+          fi)
+        cd Ant-Media-Server
+        mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet
+        cd ..
+
     - name: Build React application
       run: |
         cd react
