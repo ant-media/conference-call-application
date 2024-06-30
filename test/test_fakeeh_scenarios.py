@@ -25,7 +25,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=host&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=host&speedTestInTestPurposes=false&streamName="+participant)
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
@@ -46,7 +46,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=speaker&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=speaker&speedTestInTestPurposes=false&streamName="+participant)
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
@@ -67,7 +67,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&speedTestInTestPurposes=false&streamName="+participant)
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
