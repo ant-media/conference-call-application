@@ -265,6 +265,68 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
+  def test_pin_scenario(self):
+    # create a room and join as admin and 3 presenters
+    room = "room"+str(random.randint(100, 999))
+    handle_admin = self.join_room_as_admin("adminA", room)   
+    handle_presenter1 = self.join_room_as_presenter("presenterA", room)
+    handle_presenter2 = self.join_room_as_presenter("presenterB", room)
+    handle_presenter3 = self.join_room_as_presenter("presenterC", room)
+
+    assert(handle_presenter3 == self.chrome.get_current_tab_id())
+
+    presenterId = self.get_publishStreamId()
+
+    assert(self.chrome.get_element_with_retry(By.ID,presenterId).is_displayed())
+
+    wait = self.chrome.get_wait()
+
+    # check if participants are in the room and see each other
+    self.chrome.switch_to_tab(handle_admin)
+
+    wait.until(lambda x: len(self.get_participants()) == 4)
+
+    self.chrome.switch_to_tab(handle_presenter1)
+
+    wait.until(lambda x: len(self.get_participants()) == 4)
+
+    self.chrome.switch_to_tab(handle_presenter2)
+
+    wait.until(lambda x: len(self.get_participants()) == 4)
+
+    self.chrome.switch_to_tab(handle_presenter3)
+
+    wait.until(lambda x: len(self.get_participants()) == 4)
+
+    # switch to admin and pin presenterC
+    self.chrome.switch_to_tab(handle_admin)
+
+    presenterId = self.get_id_of_participant("presenterC")
+
+    self.open_close_participant_list_drawer()
+
+    # pin presenterC
+
+    pin_button = self.chrome.get_element_with_retry(By.ID,"pin-"+presenterId)
+
+    self.chrome.click_element(pin_button)
+
+    # unpin presenterC
+
+    pin_button = self.chrome.get_element_with_retry(By.ID,"unpin-"+presenterId)
+
+    self.chrome.click_element(pin_button)
+
+    # pin presenterC again
+
+    pin_button = self.chrome.get_element_with_retry(By.ID,"pin-"+presenterId)
+
+    self.chrome.click_element(pin_button)
+
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 4)
+
+    self.chrome.close_all()
+
   def test_request_to_speak(self):
     return
     # create a room and join as admin and presenter

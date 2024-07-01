@@ -88,6 +88,7 @@ function ParticipantTab(props) {
           <div style={{display: 'flex'}}>
             {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
               <PinBtn
+                id={"unpin-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
                 onClick={() => {
                   conference.pinVideo(streamId);
@@ -97,6 +98,7 @@ function ParticipantTab(props) {
               </PinBtn>
             ) : (
               <PinBtn
+                id={"pin-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
                 onClick={() => {
                   conference.pinVideo(streamId);
