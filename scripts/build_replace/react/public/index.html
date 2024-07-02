@@ -58,11 +58,6 @@
           }
         }
   
-        const shareScreenButton = document.querySelector("#share-screen-button");
-        if (shareScreenButton && shareScreenButton.style.display !== 'none') {
-          shareScreenButton.style.display = 'none';
-        }
-  
         const rejoinMeetingButton = document.querySelector("#root > div > div > div > div > div.MuiGrid-root.MuiGrid-container.MuiGrid-spacing-xs-2.css-gl43ya > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-8.MuiGrid-grid-sm-6.MuiGrid-grid-md-5.MuiGrid-grid-lg-2.css-1kglrs6");
         if (rejoinMeetingButton && rejoinMeetingButton.style.display !== 'none') {
           rejoinMeetingButton.style.flexBasis = '0';
@@ -89,12 +84,14 @@
       setParticipantName();
       setInterval(() => {setParticipantName()}, 100);
   
-      setInterval(function() {
-        fetch('https://live-v2-scheduler.beehire.com/api/server-ping', { mode: 'no-cors' })
-          .then(response => console.log(response))
-          .catch(error => console.error(error));
-      }, 30000);
-    </script> 
+      if (new URLSearchParams(window.location.search).get('iframe') !== 'true') {
+        setInterval(function() {
+          fetch('https://live-v2-scheduler.beehire.com/api/server-ping', { mode: 'no-cors' })
+            .then(response => console.log(response))
+            .catch(error => console.error(error));
+        }, 30000);
+      }
+    </script>
 </head>
 <body>
 <noscript>You need to enable JavaScript to run this app.</noscript>
