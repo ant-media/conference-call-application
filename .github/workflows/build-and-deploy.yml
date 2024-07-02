@@ -153,8 +153,14 @@ jobs:
     - name: Create New App
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
-        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
+        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
         sleep 5
+        success=$(echo $response | jq -r '.success')
+        if [ "$success" != "true" ]; then
+          echo "Conference app creation is failed"
+          exit 1
+        fi
+        sleep 10
         
     - name: Update Turn Settings
       run: |
