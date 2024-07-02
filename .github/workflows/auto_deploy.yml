@@ -68,7 +68,7 @@ jobs:
         export WAR_FILE_NAME="ConferenceCall.war"
         response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
         success=$(echo $response | jq -r '.success')
-        echo $success
+        echo $response
         if [ "$success" != "true" ]; then
           echo "Conference app creation is failed"
           exit 1
