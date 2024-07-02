@@ -46,10 +46,12 @@ jobs:
           exit 1
         fi
 
-    - name: Check if App Exists
+    - name: Check if Conference App Exists
       run: |
-        response=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
-        if [ $response -eq 200 ]; then
+        response=$(curl -s -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications" -b cookie.txt)
+        echo $response | jq .
+        app_exists=$(echo $response | jq -r '.applications | index("Conference")')
+        if [ "$app_exists" != "null" ]; then
           echo "App exists, proceeding to delete it."
           response=$(curl -s -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
           success=$(echo $response | jq -r '.success')
@@ -61,7 +63,6 @@ jobs:
         else
           echo "App does not exist, proceeding to create a new one."
         fi
-          
         
     - name: Create New App
       run: |
