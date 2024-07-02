@@ -36,7 +36,10 @@ jobs:
     - name: Login to server
       run: |
         curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
-        
+        if [ $? -ne 0 ]; then
+          echo "Login failed"
+          exit 1
+        fi
     - name: Delete Old App
       run: |
         curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
@@ -46,6 +49,10 @@ jobs:
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
         curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+        if [ $? -ne 0 ]; then
+          echo "App creation is failed"
+          exit 1
+        fi
         sleep 10
         
     - name: Change Settings
@@ -53,4 +60,7 @@ jobs:
         curl "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/settings/Conference" -b cookie.txt -o settings.json
         jq '.stunServerURI = "turn:${{ secrets.PRODUCTION_TURN_URL }}" | .turnServerUsername = "${{ secrets.PRODUCTION_TURN_USERNAME }}" | .turnServerCredential = "${{ secrets.PRODUCTION_TURN_PASSWORD }}"' settings.json > updated_settings.json
         curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" -d @updated_settings.json -b cookie.txt "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/settings/Conference"
-   
+          if [ $? -ne 0 ]; then
+          echo "Importing config file is failed"
+          exit 1
+        fi
