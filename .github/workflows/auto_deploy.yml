@@ -36,11 +36,6 @@ jobs:
           echo "War file not found."
           exit 1
         fi
-
-    - name: Set variables
-      run: |
-        export WAR_FILE_NAME="ConferenceCall.war"
-        export APP_URL="${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference"
         
     - name: Setup kubectl
       uses: azure/setup-kubectl@v3
@@ -83,7 +78,7 @@ jobs:
       id: create_app
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
-        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${APP_URL}" -b cookie.txt)
+        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
         success=$(echo $response | jq -r '.success')
         echo $response
         if [ "$success" != "true" ]; then
@@ -102,7 +97,7 @@ jobs:
       if: steps.create_app.outcome == 'failure'
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
-        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${APP_URL}" -b cookie.txt)
+        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
         success=$(echo $response | jq -r '.success')
         echo $response
         if [ "$success" != "true" ]; then
