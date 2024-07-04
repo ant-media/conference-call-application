@@ -49,6 +49,7 @@ jobs:
 
     - name: Create kubeconfig file
       run: |
+        mkdir $HOME/.kube
         echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
         
     - name: Login to server
