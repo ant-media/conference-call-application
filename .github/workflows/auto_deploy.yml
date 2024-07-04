@@ -37,6 +37,16 @@ jobs:
           exit 1
         fi
         
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Create kubeconfig file
+      run: |
+        mkdir $HOME/.kube
+        echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
+        
     - name: Login to server
       run: |
         response=$(curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt) 
@@ -54,17 +64,18 @@ jobs:
         if [ "$app_exists" != "null" ]; then
           echo "App exists, proceeding to delete it."
           response=$(curl -s -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
+          sleep 10
           success=$(echo $response | jq -r '.success')
           if [ "$success" != "true" ]; then
             echo "Conference app deletion failed"
             exit 1
           fi
-          sleep 10
         else
           echo "App does not exist, proceeding to create a new one."
         fi
         
-    - name: Create New App
+    - name: Create New Conference App
+      id: create_app
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
         response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
@@ -74,7 +85,25 @@ jobs:
           echo "Conference app creation is failed"
           exit 1
         fi
-        sleep 10
+      continue-on-error: true
+
+    - name: Rollout restart deployment if Create Conference App failed
+      if: steps.create_app.outcome == 'failure'
+      run: |
+        echo "Create New App failed, performing kubectl rollout restart..."
+        kubectl rollout restart deployment ant-media-server-origin -n antmedia
+
+    - name: Retry Create New Conference App
+      if: steps.create_app.outcome == 'failure'
+      run: |
+        export WAR_FILE_NAME="ConferenceCall.war"
+        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
+        success=$(echo $response | jq -r '.success')
+        echo $response
+        if [ "$success" != "true" ]; then
+          echo "Conference app creation failed again"
+          exit 1
+        fi
         
     - name: Change Settings
       run: |
