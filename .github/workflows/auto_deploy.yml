@@ -36,6 +36,20 @@ jobs:
           echo "War file not found."
           exit 1
         fi
+
+    - name: Set variables
+      run: |
+        export WAR_FILE_NAME="ConferenceCall.war"
+        export APP_URL="${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference"
+        
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Create kubeconfig file
+      run: |
+        echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
         
     - name: Login to server
       run: |
@@ -64,17 +78,36 @@ jobs:
           echo "App does not exist, proceeding to create a new one."
         fi
         
-    - name: Create New App
+    - name: Create New Conference App
+      id: create_app
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
-        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
+        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${APP_URL}" -b cookie.txt)
         success=$(echo $response | jq -r '.success')
         echo $response
         if [ "$success" != "true" ]; then
           echo "Conference app creation is failed"
           exit 1
         fi
-        
+      continue-on-error: true
+
+    - name: Rollout restart deployment if Create Conference App failed
+      if: steps.create_app.outcome == 'failure'
+      run: |
+        echo "Create New App failed, performing kubectl rollout restart..."
+        kubectl rollout restart deployment ant-media-server-origin -n antmedia
+
+    - name: Retry Create New Conference App
+      if: steps.create_app.outcome == 'failure'
+      run: |
+        export WAR_FILE_NAME="ConferenceCall.war"
+        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${APP_URL}" -b cookie.txt)
+        success=$(echo $response | jq -r '.success')
+        echo $response
+        if [ "$success" != "true" ]; then
+          echo "Conference app creation failed again"
+          exit 1
+        fi
         
     - name: Change Settings
       run: |
