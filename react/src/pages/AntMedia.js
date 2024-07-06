@@ -388,7 +388,7 @@ function AntMedia(props) {
 
   const [devices, setDevices] = React.useState([]);
 
-  const [isPlayOnly] = React.useState(initialPlayOnly);
+  const [isPlayOnly, setIsPlayOnly] = React.useState(initialPlayOnly);
 
   const [isEnterDirectly] = React.useState(enterDirectly);
 
@@ -409,6 +409,9 @@ function AntMedia(props) {
   const [isReconnectionInProgress, setIsReconnectionInProgress] = React.useState(false);
 
   const [highResourceUsageWarningCount, setHighResourceUsageWarningCount] = React.useState(0);
+
+  const [isNoSreamExist, setIsNoSreamExist] = React.useState(false);
+
 
 
   const {t} = useTranslation();
@@ -591,7 +594,7 @@ function AntMedia(props) {
 
     setIsReconnectionInProgress(true);
     reconnecting = true;
-    publishReconnected = false;
+    publishReconnected = isPlayOnly;
     playReconnected = false;
 
     displayWarning("Connection lost. Trying reconnect...");
@@ -955,6 +958,7 @@ function AntMedia(props) {
     } else if (info === "play_started") {
       console.log("**** play started:" + reconnecting);
       setIsPlayed(true);
+      setIsNoSreamExist(false);
       webRTCAdaptor?.getBroadcastObject(roomName);
       webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
       requestVideoTrackAssignmentsInterval();
@@ -987,7 +991,12 @@ function AntMedia(props) {
       console.log("iceConnectionState Changed: ", JSON.stringify(obj))
     }
     else if (info === "reconnection_attempt_for_player") {
-      reconnectionInProgress();
+      if(playOnly && isNoSreamExist){
+        console.log("reconnection_attempt_for_player but no stream exist")
+      }
+      else{
+        reconnectionInProgress();
+      }
     }
   }
 
@@ -1097,7 +1106,7 @@ function AntMedia(props) {
     } else if (error.indexOf("WebSocketNotSupported") !== -1) {
       errorMessage = "Fatal Error: WebSocket not supported in this browser";
     } else if (error.indexOf("no_stream_exist") !== -1) {
-      //TODO: removeRemoteVideo(error.streamId);
+      setIsNoSreamExist(true);
     } else if (error.indexOf("data_channel_error") !== -1) {
       errorMessage = "There was a error during data channel communication";
     } else if (error.indexOf("ScreenSharePermissionDenied") !== -1) {
@@ -2313,6 +2322,7 @@ function AntMedia(props) {
               allParticipants,
               globals,
               isPlayOnly,
+              setIsPlayOnly,
               localVideo,
               streamName,
               initialized,
@@ -2422,7 +2432,12 @@ function AntMedia(props) {
                       <CircularProgress/>
                   </Grid>
                   <Grid item xs={12} align='center'>
+                      {isNoSreamExist && isPlayOnly? 
+                      <Typography style={{color: theme.palette.themeColor10}}><b>{t("The room is currently empty.")}</b><br></br><b>{t("You will automatically join the room once it is ready.")}</b>
+                      </Typography>
+                      :
                       <Typography style={{color: theme.palette.themeColor10}}><b>{t("Joining the room...")}</b></Typography>
+                      }
                   </Grid>
                 </Grid>
               </Backdrop>
