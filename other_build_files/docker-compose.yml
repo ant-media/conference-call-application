@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  antmedia:
+    build: 
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: antmedia
+    restart: unless-stopped
+    entrypoint: /usr/local/antmedia/start.sh
+    network_mode: host
+#   volumes:
+#      - antmedia_vol:/usr/local/antmedia/
+#volumes:
+#  antmedia_vol:
+#    external: true
+#    name:
+#      antmedia_volume
