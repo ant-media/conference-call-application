@@ -125,24 +125,57 @@ jobs:
         echo $LATEST_SNAPSHOT
         wget -O ConferenceCall.war "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=io.antmedia.webrtc&a=ConferenceCall&v=${LATEST_SNAPSHOT}&e=war"
         ls -al
+        if [ ! -f ConferenceCall.war ]; then
+          echo "War file not found."
+          exit 1
+        fi
         
     - name: Login to server
       run: |
-        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.STAGING_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
+        response=$(curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.STAGING_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt)
+        success=$(echo $response | jq -r '.success')
+        if [ "$success" != "true" ]; then
+          echo "Login failed"
+          exit 1
+        fi
         
-    - name: Delete Old App
+    - name: Check if Conference App Exists
       run: |
-        curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
-        sleep 10
-        
+        response=$(curl -s -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications" -b cookie.txt)
+        echo $response | jq .
+        app_exists=$(echo $response | jq -r '.applications | index("Conference")')
+        if [ "$app_exists" != "null" ]; then
+          echo "App exists, proceeding to delete it."
+          response=$(curl -s -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
+          success=$(echo $response | jq -r '.success')
+          if [ "$success" != "true" ]; then
+            echo "Conference app deletion failed"
+            exit 1
+          fi
+          sleep 10
+        else
+          echo "App does not exist, proceeding to create a new one."
+        fi
+                  
     - name: Create New App
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
-        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
+        response=$(curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
         sleep 5
+        success=$(echo $response | jq -r '.success')
+        if [ "$success" != "true" ]; then
+          echo "Conference app creation is failed"
+          exit 1
+        fi
+        sleep 10
         
-    - name: Add Turn Settings
+    - name: Update Turn Settings
       run: |
         curl "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/settings/Conference" -b cookie.txt -o settings.json
         jq '.stunServerURI = "turn:${{ secrets.STAGING_TURN_URL }}" | .turnServerUsername = "${{ secrets.STAGING_TURN_USERNAME }}" | .turnServerCredential = "${{ secrets.STAGING_TURN_PASSWORD }}"' settings.json > updated_settings.json
-        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" -d @updated_settings.json -b cookie.txt "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/settings/Conference"
+        response=$(curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" -d @updated_settings.json -b cookie.txt "${{ secrets.STAGING_SERVER_URL }}/rest/v2/applications/settings/Conference")
+        success=$(echo $response | jq -r '.success')
+        if [ "$success" != "true" ]; then
+          echo "Importing setting is failed."
+          exit 1
+        fi
