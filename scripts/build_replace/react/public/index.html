@@ -60,7 +60,7 @@
 
         const shouldJoinMeeting = getQueryParam('wait');
         if (shouldJoinMeeting !== null && shouldJoinMeeting !== undefined) {
-          const text = window.translate("You've been accepted to the meeting. The recruiter is waiting for you to join.");
+          const text = (window.translate) ? window.translate("You've been accepted to the meeting. The recruiter is waiting for you to join.") : null;
           const waitingRoomSubtitleText = document.querySelector("#root > div > div > div > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-md-4.css-1yg725n > div > div.MuiGrid-root.MuiGrid-container.css-eiccwj > h6");
           if (text && waitingRoomSubtitleText && waitingRoomSubtitleText.innerText !== text) {
             waitingRoomSubtitleText.innerText = text;
