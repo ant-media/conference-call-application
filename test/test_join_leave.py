@@ -214,7 +214,7 @@ class TestJoinLeave(unittest.TestCase):
       ss_button = self.chrome.get_element(By.ID, "more-options-share-screen-button")
 
     print("ss_button: "+str(ss_button))
-    print("image:"+self.chrome.print_ss_as_base64())
+    self.chrome.print_ss_as_base64()
 
     self.chrome.click_element(ss_button)
 
