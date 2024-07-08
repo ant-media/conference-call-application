@@ -12,6 +12,7 @@ import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate } from 'workbox-strategies';
+import {CacheableResponsePlugin} from "workbox-cacheable-response";
 
 clientsClaim();
 
@@ -68,5 +69,17 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+registerRoute(
+    /\.(?:js|css|html)$/,
+    new StaleWhileRevalidate({
+        cacheName: 'static-resources',
+        plugins: [
+            new CacheableResponsePlugin({
+                maxFileSize: 20 * 1024 * 1024, // 10MB
+            }),
+        ],
+    })
+);
 
 // Any other custom service worker logic can go here.
