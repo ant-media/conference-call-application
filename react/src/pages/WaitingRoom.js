@@ -25,6 +25,7 @@ function WaitingRoom(props) {
   const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
   const publishStreamId = getPublishStreamId()
   const {t} = useTranslation();
+  window.translate = t;
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const [selectFocus, setSelectFocus] = React.useState(null);

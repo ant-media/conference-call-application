@@ -57,6 +57,15 @@
             conference.setStreamName(participantName);
           }
         }
+
+        const shouldJoinMeeting = getQueryParam('wait');
+        if (shouldJoinMeeting !== null && shouldJoinMeeting !== undefined) {
+          const text = window.translate("You've been accepted to the meeting. The recruiter is waiting for you to join.");
+          const waitingRoomSubtitleText = document.querySelector("#root > div > div > div > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-md-4.css-1yg725n > div > div.MuiGrid-root.MuiGrid-container.css-eiccwj > h6");
+          if (text && waitingRoomSubtitleText && waitingRoomSubtitleText.innerText !== text) {
+            waitingRoomSubtitleText.innerText = text;
+          }
+        }
   
         const rejoinMeetingButton = document.querySelector("#root > div > div > div > div > div.MuiGrid-root.MuiGrid-container.MuiGrid-spacing-xs-2.css-gl43ya > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-8.MuiGrid-grid-sm-6.MuiGrid-grid-md-5.MuiGrid-grid-lg-2.css-1kglrs6");
         if (rejoinMeetingButton && rejoinMeetingButton.style.display !== 'none') {
