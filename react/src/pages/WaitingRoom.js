@@ -245,7 +245,7 @@ function WaitingRoom(props) {
                         Connection Test
                     </Typography>
                     <Typography id="modal-modal-description"
-                                sx={{mt: 2, color: "black", marginTop: '12px', marginBottom: '21px'}}>
+                                sx={{mt: 2, color: "white", marginTop: '12px', marginBottom: '21px'}}>
                         {conference?.speedTestObject?.message}
                     </Typography>
                     <Box sx={conference?.speedTestObject?.isfailed ? {
@@ -257,7 +257,7 @@ function WaitingRoom(props) {
                     </Box>
                     <Typography id="modal-modal-description" sx={{
                         mt: 2,
-                        color: "black",
+                        color: "white",
                         marginTop: '12px',
                         marginBottom: '21px',
                         visibility: conference?.speedTestObject?.isfailed ? "visible" : "hidden"
