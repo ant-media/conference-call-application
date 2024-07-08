@@ -1,17 +1,17 @@
 import React from "react";
 import Button from "@mui/material/Button";
-import {SvgIcon} from "Components/SvgIcon";
+import { SvgIcon } from "Components/SvgIcon";
 import Menu from "@mui/material/Menu";
-import {styled} from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
-import SettingsDialog from "./SettingsDialog";
-import {LayoutSettingsDialog} from "./LayoutSettingsDialog";
-import {ListItemIcon, ListItemText, Tooltip} from "@mui/material";
-import {useTranslation} from "react-i18next";
-import {ConferenceContext} from 'pages/AntMedia';
+import { SettingsDialog } from "./SettingsDialog";
+import { LayoutSettingsDialog } from "./LayoutSettingsDialog";
+import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { ConferenceContext } from 'pages/AntMedia';
 import {GeneralSettingsDialog} from "./GeneralSettingsDialog";
 
-const CustomizedBtn = styled(Button)(({theme}) => ({
+const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
     height: "100%",
     [theme.breakpoints.down("sm")]: {
@@ -25,9 +25,9 @@ const CustomizedBtn = styled(Button)(({theme}) => ({
   },
 }));
 
-function OptionButton({footer, ...props}) {
+function OptionButton({ footer, ...props }) {
   const conference = React.useContext(ConferenceContext);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -72,94 +72,84 @@ function OptionButton({footer, ...props}) {
     setGeneralSettingsDialogOpen(false);
   }
 
-  return (
-    <>
-      <SettingsDialog
-        open={dialogOpen}
-        onClose={handleDialogClose}
-        selectFocus={selectFocus}
-      />
-      <LayoutSettingsDialog
-        open={layoutDialogOpen}
-        onClose={handleLayoutDialogClose}
-        selectFocus={selectFocus}
-      />
-      <GeneralSettingsDialog
-        open={generalSettingsDialogOpen}
-        onClose={handleGeneralSettingsDialogClose}
-        selectFocus={selectFocus}
-      />
-      <Tooltip title={t("More options")} placement="top">
-        <CustomizedBtn
-          className={footer ? "footer-icon-button" : ""}
-          id="settings-button"
-          variant="contained"
-          color={open ? "primary" : "secondary"}
-          aria-controls={open ? "demo-positioned-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
-          onClick={handleClick}
-        >
-          <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'white'}/>
-        </CustomizedBtn>
-      </Tooltip>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-      >
-        {process.env.REACT_APP_OPTION_MENU_GENERAL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
-        <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
-          <ListItemIcon>
-            <SvgIcon size={36} name={"settings"} color={"white"}/>
-          </ListItemIcon>
-          <ListItemText
-            id="general-button"
+    return (
+        <>
+          <SettingsDialog
+              open={dialogOpen}
+              onClose={handleDialogClose}
+              selectFocus={selectFocus}
+          />
+          <LayoutSettingsDialog
+              open={layoutDialogOpen}
+              onClose={handleLayoutDialogClose}
+              selectFocus={selectFocus}
+          />
+          <GeneralSettingsDialog
+            open={generalSettingsDialogOpen}
+            onClose={handleGeneralSettingsDialogClose}
+            selectFocus={selectFocus}
+          />
+          <Tooltip title={t("More options")} placement="top">
+            <CustomizedBtn
+                className={footer ? "footer-icon-button" : ""}
+                id="settings-button"
+                variant="contained"
+                color={open ? "primary" : "secondary"}
+                aria-controls={open ? "demo-positioned-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+                onClick={handleClick}
+            >
+              <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'white'} />
+            </CustomizedBtn>
+          </Tooltip>
+          <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                "aria-labelledby": "basic-button",
+              }}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              transformOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
           >
-            {t("General")}
-          </ListItemText>
-        </MenuItem>
-            : null}
-
-        {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
-        <MenuItem onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
-          <ListItemIcon>
-            <SvgIcon size={36} name={"layout"} color={"white"}/>
-          </ListItemIcon>
-          <ListItemText>
-            {t("Change Layout")}
-          </ListItemText>
-        </MenuItem>
-            : null}
-
-        {conference.isPlayOnly === false
-        && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
-          <MenuItem onClick={() => handleDialogOpen()}>
-            <ListItemIcon>
-              <SvgIcon size={36} name={"call-settings"} color={"white"}/>
-            </ListItemIcon>
-            <ListItemText>{t("Call Settings")}</ListItemText>
-          </MenuItem>
-          : null}
-
-            <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }}>
+            <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
               <ListItemIcon>
-                <SvgIcon size={36} name={"background-replacement"} color={"white"} />
+                <SvgIcon size={36} name={"settings"} color={"white"} />
               </ListItemIcon>
-              <ListItemText>{t("Virtual Effects")}</ListItemText>
+              <ListItemText
+                id="general-button"
+              >
+                {t("General")}
+              </ListItemText>
             </MenuItem>
+
+            <MenuItem onClick={() => handleLayoutDialogOpen()}>
+              <ListItemIcon>
+                <SvgIcon size={36} name={"layout"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText
+                id="change-layout-button"
+              >
+                {t("Change Layout")}
+              </ListItemText>
+            </MenuItem>
+
+              {conference.isPlayOnly === false ?
+            <MenuItem onClick={() => handleDialogOpen()}>
+              <ListItemIcon>
+                <SvgIcon size={36} name={"call-settings"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Call Settings")}</ListItemText>
+            </MenuItem>
+                    : null}
 
             {conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true ?
             <MenuItem onClick={() => { conference.startRecord(); handleClose(); } }
@@ -171,32 +161,30 @@ function OptionButton({footer, ...props}) {
             </MenuItem>
                 : null}
 
-        {conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true ?
-          <MenuItem onClick={() => { conference.stopRecord(); handleClose(); }}
-          >
-            <ListItemIcon>
-              <SvgIcon size={36} name={"camera"} color={"white"} />
-            </ListItemIcon>
-            <ListItemText>{t("Stop Record")}</ListItemText>
-          </MenuItem>
-          : null}
+            {conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true ?
+            <MenuItem onClick={() => { conference.stopRecord(); handleClose(); }}
+            >
+              <ListItemIcon>
+                <SvgIcon size={36} name={"camera"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Stop Record")}</ListItemText>
+            </MenuItem>
+                : null}
 
-        {process.env.REACT_APP_OPTION_MENU_REPORT_PROBLEM_BUTTON_VISIBILITY === 'true' ?
-          <MenuItem
-            component={"a"}
-            href={process.env.REACT_APP_REPORT_PROBLEM_URL}
-            target={"_blank"}
-            rel="noopener noreferrer"
-          >
-            <ListItemIcon>
-              <SvgIcon size={36} name={"report"} color={"white"}/>
-            </ListItemIcon>
-            <ListItemText>{t("Report Problem")}</ListItemText>
-          </MenuItem>
-          : null}
-      </Menu>
-    </>
-  );
+            <MenuItem
+                component={"a"}
+                href="https://github.com/ant-media/conference-call-application/issues"
+                target={"_blank"}
+                rel="noopener noreferrer"
+            >
+              <ListItemIcon>
+                <SvgIcon size={36} name={"report"} color={"white"} />
+              </ListItemIcon>
+              <ListItemText>{t("Report Problem")}</ListItemText>
+            </MenuItem>
+          </Menu>
+        </>
+    );
 }
 
 export default OptionButton;

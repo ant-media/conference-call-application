@@ -52,9 +52,6 @@ class Browser:
     except StaleElementReferenceException as e:
       return None
     
-  def makeFullScreen(self):
-    self.driver.maximize_window()
-    
 
   def get_element_by_id(self, id):
     timeout = 15
@@ -75,14 +72,6 @@ class Browser:
       print("element not exist")
       return False
   
-  def is_element_exist_by_class_name(self, id):
-    try:
-      element = self.driver.find_elements(By.CLASS_NAME, id)
-      return len(element) != 0
-    except NoSuchElementException:
-      print("element not exist")
-      return False
-    
   def get_elements_of_an_element_by_class_name(self, element, class_name):
     timeout = 15
     try:
@@ -115,7 +104,7 @@ class Browser:
     move.click_and_hold(element).move_by_offset(value, 0).release().perform()
 
   def get_wait(self):
-    return WebDriverWait(self.driver, 25)
+    return WebDriverWait(self.driver, 15)
 
   def close(self):
     self.driver.close()

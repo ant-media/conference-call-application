@@ -70,11 +70,16 @@ export function LayoutSettingsDialog(props) {
   const [value, setValue] = React.useState(
     conference.globals.maxVideoTrackCount ? conference.globals.maxVideoTrackCount : 4
   );
-  const [layout, setLayout] = React.useState( "sidebar"); //just for radioo buttons
+  const [layout, setLayout] = React.useState(
+    conference.pinnedVideoId !== null ? "sidebar" : "tiled"
+  ); //just for radioo buttons
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
+  React.useEffect(() => {
+    setLayout(conference.pinnedVideoId !== null ? "sidebar" : "tiled");
+  }, [conference.pinnedVideoId]);
   const handleClose = () => {
     onClose(selectedValue);
   };
@@ -85,13 +90,7 @@ export function LayoutSettingsDialog(props) {
 
     if (mode === "tiled") {
       //unpin the pinned video
-      conference.allParticipants = conference.allParticipants || {};
-      Object.keys(conference.allParticipants).forEach(streamId => {
-        if (typeof conference.allParticipants[streamId].pinned === 'undefined'
-          && conference.allParticipants[streamId].pinned === true) {
-          conference.pinVideo(streamId);
-        }
-      });
+      conference.pinVideo(conference.pinnedVideoId);
     } else if (mode === "sidebar") {
       const participants = document.querySelectorAll(
         ".single-video-container.not-pinned video"
@@ -100,7 +99,7 @@ export function LayoutSettingsDialog(props) {
         participants.length > 1 ? participants[1] : participants[0];
 
       //pin the first participant
-      conference.pinVideo(firstParticipant?.id ? firstParticipant.streamId : "localVideo");
+      conference.pinVideo(firstParticipant?.id ? firstParticipant.id : "localVideo");
     }
   };
   const radioLabel = (label, icon) => {
@@ -161,7 +160,7 @@ export function LayoutSettingsDialog(props) {
             <FormControl sx={{width: "100%"}}>
               <RadioGroup
                 aria-labelledby="layout-radio-buttons"
-                defaultValue={"sidebar"}
+                defaultValue={conference.pinnedVideoId !== null ? "sidebar" : "tiled"}
                 value={layout}
                 onChange={changeLayout}
                 name="layout-radio-buttons-group"
@@ -208,12 +207,9 @@ export function LayoutSettingsDialog(props) {
                 id="tile-count-slider"
                 defaultValue={value}
                 step={null}
-                min={2}
+                min={3}
                 max={30}
                 marks={[
-                  {
-                    value: 2,
-                  },
                   {
                     value: 4,
                   },

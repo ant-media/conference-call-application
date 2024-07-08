@@ -4,10 +4,10 @@ import {Route, Routes} from "react-router-dom";
 import {Grid} from "@mui/material";
 import Home from "pages/Home";
 import AntMedia from "pages/AntMedia";
-import {isComponentMode} from "utils";
+import {getRoomNameAttribute} from "utils";
 
 function isComponent() {
-  return isComponentMode();
+  return getRoomNameAttribute();
 }
 
 function CustomRoutes(props) {
@@ -19,7 +19,7 @@ function CustomRoutes(props) {
     return (
       <Grid container style={{background: theme.palette.background}}>
         <Routes>
-          <Route path="*" element={<AntMedia/>}/>
+          <Route path="/" element={<AntMedia/>}/>
         </Routes>
       </Grid>
     );

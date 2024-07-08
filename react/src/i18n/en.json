@@ -37,8 +37,6 @@
   "Messages can only be seen by people in the call and are deleted when the call ends.": "Messages can only be seen by people in the call and are deleted when the call ends.",
   "Please enter your name. This will be visible to the host and other participants.": "Please enter your name. This will be visible to the host and other participants.",
   "Emoji reactions": "Emoji reactions",
-  "Reactions": "Reactions",
-  "Chat": "Chat",
   "Participant List": "Participant List",
   "Send a message": "Send a message",
   "Participants": "Participants",
@@ -86,8 +84,5 @@
   "Thinking": "Thinking",
   "Dislike": "Dislike",
   "Other": "Other",
-  "Others": "Others",
-  "Virtual Effects": "Virtual Effects",
-  "Image is uploaded successfully.": "Image is uploaded successfully.",
-  "Image size cannot exceed more than 1MB.": "Image size cannot exceed more than 1MB."
+  "Others": "Others"
 }

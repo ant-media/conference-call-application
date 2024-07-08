@@ -18,7 +18,7 @@ const AntSnackMessage = styled(Grid)(({theme}) => ({
 }));
 const AntSnackContent = styled(SnackbarContent)(({theme}) => ({}));
 const SnackMessage = forwardRef((props, ref) => {
-  const {variant, message, icon, onClick, sender} = props;
+  const {notificationData} = props;
   const {closeSnackbar} = useSnackbar();
 
   const theme = useTheme();
@@ -29,30 +29,30 @@ const SnackMessage = forwardRef((props, ref) => {
 
   return (
     <AntSnackContent ref={ref}>
-      {variant === 'info' && (
+      {notificationData.variant === 'info' && (
         <AntSnackInfo container justifyContent={'center'} alignItems={'center'}>
-          {icon && (
+          {notificationData.icon && (
             <Grid item sx={{mr: 0.5}}>
-              {icon}
+              {notificationData.icon}
             </Grid>
           )}
           <Typography variant="subtitle2" color={theme.palette.themeColor[0]}>
-            {message}
+            {notificationData.message}
           </Typography>
         </AntSnackInfo>
       )}
-      {variant === 'message' && (
+      {notificationData.variant === 'message' && (
         <AntSnackMessage
           container
           onClick={() => {
-            onClick();
+            notificationData.onClick();
             handleDismiss();
           }}
         >
           <Grid container alignItems="center">
             <SvgIcon size={32} color={'white'} name={'message-off'}/>
             <Typography sx={{ml: 0.5}} variant="subtitle2"
-                        color={theme.palette.themeColor[0]}>{`${sender}`}</Typography>
+                        color={theme.palette.themeColor[0]}>{`${notificationData.sender}`}</Typography>
           </Grid>
           <Grid container sx={{mt: 1}} style={{marginLeft: 6}}>
             <Typography
@@ -67,7 +67,7 @@ const SnackMessage = forwardRef((props, ref) => {
               }}
               color={theme.palette.themeColor[0]}
             >
-              {message}
+              {notificationData.message}
             </Typography>
           </Grid>
         </AntSnackMessage>

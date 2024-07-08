@@ -19,7 +19,7 @@ function useWidth() {
   );
 }
 
-function LeftTheRoom({ isError : leaveRoomWithError }) {
+function LeftTheRoom(props) {
   const conference = React.useContext(ConferenceContext);
 
   const width = useWidth();
@@ -29,15 +29,13 @@ function LeftTheRoom({ isError : leaveRoomWithError }) {
   React.useEffect(() => {
     conference.handleLeaveFromRoom();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const message = leaveRoomWithError ? t('Something Went Wrong') : t('You have left the meeting');
-
+  }, [])
   return (
     <>
       <Grid container justifyContent={"center"} sx={{mt: layouts[width]}}>
         <Box>
           <Typography variant="h5" align="center">
-            {message}
+            {t('You have left the meeting')}
           </Typography>
           <Box py={2}>
             <Typography variant="h6" align="center">

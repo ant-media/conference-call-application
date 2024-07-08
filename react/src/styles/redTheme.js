@@ -2,7 +2,7 @@ import OpenSansRegular from "../static/Fonts/OpenSans/OpenSans-Regular.ttf";
 import OpenSansMedium from "../static/Fonts/OpenSans/OpenSans-Medium.ttf";
 import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
-import {isComponentMode} from "../utils";
+import {getRoomNameAttribute} from "../utils";
 
 export function getRedTheme() {
   const themeColor0 = "#FFEBEE";
@@ -346,7 +346,7 @@ export function getRedTheme() {
       },
     },
   };
-  if (!isComponentMode()) {
+  if (!getRoomNameAttribute()) {
     themeObject.palette.background = {};
     themeObject.palette.background.default = themeColor80;
   }
