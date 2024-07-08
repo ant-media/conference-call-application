@@ -44,17 +44,6 @@ function Footer(props) {
   const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const conference = React.useContext(ConferenceContext);
 
-  const [isRecordingTextVisible, setIsRecordingTextVisible] = React.useState(false);
-
-  React.useEffect(() => {
-    //debugger;
-    if (conference.isRecordPluginActive === true && conference.isEnterDirectly === false && conference.isPlayOnly === false) {
-      setIsRecordingTextVisible(true);
-    } else {
-      setIsRecordingTextVisible(false);
-    }
-  }, [conference.isRecordPluginActive, conference.isEnterDirectly, conference.isPlayOnly]);
-
     return (
         <CustomizedGrid
             container
@@ -72,7 +61,6 @@ function Footer(props) {
               <InfoButton/>
             </Grid>
           </Grid>
-          {conference.isPlayOnly === false || conference.isEnterDirectly === false ?
               <Grid item>
                 <Grid
                     container
@@ -135,14 +123,8 @@ function Footer(props) {
 
                 </Grid>
               </Grid>
-        : null}
 
           <Grid item sx={{display: {xs: "none", sm: "block"}}}>
-            <>
-              { isRecordingTextVisible === true ?
-              <p style={{color: 'red'}}>Recording</p>
-              : ""}
-            </>
             <TimeZone/>
           </Grid>
         </CustomizedGrid>
