@@ -213,9 +213,6 @@ class TestJoinLeave(unittest.TestCase):
       self.chrome.click_element(more_button)
       ss_button = self.chrome.get_element(By.ID, "more-options-share-screen-button")
 
-    print("ss_button: "+str(ss_button))
-    self.chrome.print_ss_as_base64()
-
     self.chrome.click_element(ss_button)
 
     self.chrome.switch_to_tab(handle_2)
@@ -225,8 +222,13 @@ class TestJoinLeave(unittest.TestCase):
 
     assert(not self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
 
+    print("before limit change:")
+    self.chrome.print_ss_as_base64()
+
     self.set_and_test_track_limit(2)
 
+    print("after limit change:")
+    self.chrome.print_ss_as_base64()
 
     others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner', retries=10, wait_time=3)
     assert(others_tile.is_displayed())
