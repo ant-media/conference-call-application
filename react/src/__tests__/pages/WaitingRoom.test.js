@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import WaitingRoom from 'pages/WaitingRoom';
 import React from "react";
 import { ConferenceContext } from 'pages/AntMedia';
@@ -7,6 +7,11 @@ const contextValue = {
   initialized: true,
   setLocalVideo: jest.fn(),
   localVideoCreate: jest.fn(),
+  setIsJoining: jest.fn(),
+  joinRoom: jest.fn(),
+  localVideo: {},
+  setSpeedTestObject: jest.fn(),
+  makeId: jest.fn(),
 };
 
 // Mock the useContext hook
@@ -32,7 +37,7 @@ jest.mock('Components/Cards/VideoCard', () => ({ value }) => <div data-testid="m
 jest.mock('Components/Footer/Components/MicButton', () => ({ value }) => <div data-testid="mocked-mic-button">{value}</div>);
 jest.mock('Components/Footer/Components/CameraButton', () => ({ value }) => <div data-testid="mocked-camera-button">{value}</div>);
 jest.mock('Components/Footer/Components/SettingsDialog', () => ({ value }) => <div data-testid="mocked-settings-dialog">{value}</div>);
-jest.mock('pages/AntMedia', () =>({ value }) => <div data-testid="mocked-ant-media">{value}</div>);
+jest.mock('pages/AntMedia', () => ({ value }) => <div data-testid="mocked-ant-media">{value}</div>);
 
 describe('Waiting Room Component', () => {
 
@@ -50,7 +55,7 @@ describe('Waiting Room Component', () => {
 
 
   it('renders WaitingRoom component without crashing', () => {
-    render(<WaitingRoom/>);
+    render(<WaitingRoom />);
     const linkElement = screen.getByText(/What's your name?/i);
     expect(linkElement).toBeInTheDocument();
   });
