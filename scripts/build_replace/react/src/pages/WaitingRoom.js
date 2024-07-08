@@ -5,24 +5,24 @@ import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Component
 import CameraButton from "Components/Footer/Components/CameraButton";
 import {useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
-import SettingsDialog from "Components/Footer/Components/SettingsDialog";
+import {SettingsDialog} from "Components/Footer/Components/SettingsDialog";
 
 import {SvgIcon} from "Components/SvgIcon";
 import {useSnackbar} from "notistack";
 import {ConferenceContext} from "./AntMedia";
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
-import {isComponentMode, getRoomNameAttribute} from "utils";
+import {getRoomNameAttribute} from "utils";
 import {useTheme} from "@mui/material/styles";
 
 
 function getPublishStreamId() {
-  const dataRoomName = document.getElementById("root")?.getAttribute("data-publish-stream-id");
+  const dataRoomName = document.getElementById("root").getAttribute("data-publish-stream-id");
   return (dataRoomName) ? dataRoomName : getUrlParameter("streamId");
 }
 
 function WaitingRoom(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
+  const id = (getRoomNameAttribute()) ? getRoomNameAttribute() : useParams().id;
   const publishStreamId = getPublishStreamId()
   const {t} = useTranslation();
   window.translate = t;
@@ -38,20 +38,10 @@ function WaitingRoom(props) {
   window.conference = conference;
   const {enqueueSnackbar} = useSnackbar();
 
-  // This is a temporary video track assignment for local video
-  // It is used to show local video in the waiting room
-  // After we get publish stream id, we will create real video track assignment
-  const tempVTA = {
-    videoLabel: "localVideo",
-    track: null,
-    streamId: "localVideo",
-    isMine: true
-  };
 
   React.useEffect(() => {
     if (!conference.isPlayOnly && conference.initialized) {
-      const tempLocalVideo = document.getElementById("localVideo");
-      conference?.localVideoCreate(tempLocalVideo);
+      conference.setLocalVideo(document.getElementById("localVideo"));
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,14 +71,13 @@ function WaitingRoom(props) {
     } else {
       streamId = publishStreamId;
     }
-    
-    conference.setIsJoining(true);
+
     conference.joinRoom(roomName, streamId, conference.roomJoinMode);
+    conference.setWaitingOrMeetingRoom("meeting");
   }
-  
 
   const handleDialogOpen = (focus) => {
-    if (conference.localVideo === null) {
+    if (false && conference.localVideo === null) {
       enqueueSnackbar(
         {
           message: t(
@@ -135,7 +124,7 @@ function WaitingRoom(props) {
               className="waiting-room-video"
               sx={{position: "relative"}}
             >
-              <VideoCard trackAssignment={tempVTA} autoPlay muted hidePin={true}/>
+              <VideoCard id="localVideo" autoPlay muted hidePin={true}/>
 
               <Grid
                 container
@@ -204,34 +193,21 @@ function WaitingRoom(props) {
 
             <form
               onSubmit={(e) => {
-                e.preventDefault();
                 joinRoom(e);
               }}
             >
               <Grid item xs={12} sx={{mt: 3, mb: 4}}>
-                {process.env.REACT_APP_WAITING_ROOM_PARTICIPANT_NAME_READONLY === 'true' ?
-                  <TextField
-                    autoFocus
-                    required
-                    fullWidth
-                    color="primary"
-                    value={conference.streamName}
-                    variant="outlined"
-                    placeholder={t("Your name")}
-                    readOnly={true}
-                    id="participant_name"
-                  />
-                  : <TextField
-                    autoFocus
-                    required
-                    fullWidth
-                    color="primary"
-                    value={conference.streamName}
-                    variant="outlined"
-                    onChange={(e) => conference.setStreamName(e.target.value)}
-                    placeholder={t("Your name")}
-                    id="participant_name"
-                  />}
+                <TextField
+                  autoFocus
+                  required
+                  fullWidth
+                  color="primary"
+                  value={conference.streamName}
+                  variant="outlined"
+                  onChange={(e) => conference.setStreamName(e.target.value)}
+                  placeholder={t("Your name")}
+                  id="participant_name"
+                />
               </Grid>
               <Grid container justifyContent={"center"}>
                 <Grid item sm={6} xs={12}>
