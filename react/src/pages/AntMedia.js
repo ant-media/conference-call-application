@@ -340,6 +340,11 @@ function AntMedia(props) {
 
     const theme = useTheme();
 
+    useEffect(() => {
+        setTimeout(() => {
+            setParticipantUpdated(!participantUpdated);
+        }, 5000);
+    }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleUnauthorizedDialogExitClicked() {
 
