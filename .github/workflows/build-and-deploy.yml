@@ -97,7 +97,7 @@ jobs:
 #        python3 test_main.py ${{ secrets.STAGING_SERVER_URL }} ${{ secrets.USER_NAME }} ${{ secrets.PASSWORD }} ../webapp/target/*.war
           
     - name: Publish to Maven Central
-      if: github.ref == 'refs/heads/main'
+#      if: github.ref == 'refs/heads/main'
       run: |
         cd webapp
         ls -alh
