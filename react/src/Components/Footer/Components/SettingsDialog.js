@@ -36,7 +36,7 @@ const AntDialogTitle = props => {
   );
 };
 
-export function SettingsDialog(props) {
+export default function SettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
   const conference = React.useContext(ConferenceContext);
@@ -53,11 +53,6 @@ export function SettingsDialog(props) {
 
   function switchAudioMode(value) {
     conference.microphoneSelected(value);
-  }
-
-  function setBackground(value) {
-    conference.setSelectedBackgroundMode(value);
-    conference.handleBackgroundReplacement(value);
   }
 
   React.useEffect(() => {
@@ -154,31 +149,6 @@ export function SettingsDialog(props) {
               <Hidden xsDown>
                 <Grid item>
                   <SvgIcon size={36} name={'microphone'} color={'white'} />
-                </Grid>
-              </Hidden>
-            </Grid>
-          </Grid>
-          <Grid container sx={{ mt: 4 }}>
-            <Grid container>
-              <InputLabel>{t('Background')}</InputLabel>
-            </Grid>
-            <Grid container alignItems={'center'} spacing={2}>
-              <Grid item xs={10}>
-                <Select variant="outlined" fullWidth value={conference.selectedBackgroundMode} onChange={e => setBackground(e.target.value)} sx={{ color: 'white' }}>
-                  <MenuItem key="none" value="none">
-                    {t('No Effect')}
-                  </MenuItem>
-                  <MenuItem key="blur" value="blur">
-                    {t('Blur Background')}
-                  </MenuItem>
-                  <MenuItem key="background" value="background">
-                    {t('Virtual Background')}
-                  </MenuItem>
-                </Select>
-              </Grid>
-              <Hidden xsDown>
-                <Grid item>
-                  <SvgIcon size={36} name={'background-replacement'} color={'white'} />
                 </Grid>
               </Hidden>
             </Grid>

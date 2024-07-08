@@ -48,14 +48,16 @@ function calculateLayout(
 function LayoutTiled(props) {
   const conference = React.useContext(ConferenceContext);
 
+  conference.updateMaxVideoTrackCount(conference.globals.desiredMaxVideoTrackCount);
+
   const aspectRatio = 16 / 9;
   const [cardWidth, setCardWidth] = React.useState(500*aspectRatio);
   const [cardHeight, setCardHeight] = React.useState(500);
 
   React.useEffect(() => {
-    const videoCount = Object.keys(conference.participants).length+1
+    const videoCount = conference.videoTrackAssignments.length+1
 
-    
+
     const {width, height} = calculateLayout(
         props.width,
         props.height,
@@ -67,19 +69,32 @@ function LayoutTiled(props) {
     setCardHeight(height - 8);
 
     //console.log("***** W:"+cardWidth+" H:"+cardHeight+" props.width:"+props.width+" width:"+width+" cols:"+cols+" vc:"+videoCount);
-  }, [conference.participants, props.width, props.height, conference.participantUpdated]);
+  }, [conference.videoTrackAssignments, props.width, props.height, conference.participantUpdated]);
 
-  const showOthers = Object.keys(conference.allParticipants).length > conference.globals.maxVideoTrackCount; 
+  const showOthers = Object.keys(conference.allParticipants).length > conference.globals.maxVideoTrackCount;
 
   //if we need to show others card, then we don't show the last video to hold place for the others card
-  const playingParticipantsCount = showOthers ? conference.participants.length - 1 : conference.participants.length;
-  const playingParticipants = conference.participants.slice(0, playingParticipantsCount);
-  
+  const playingParticipantsCount = showOthers ? conference.videoTrackAssignments.length - 1 : conference.videoTrackAssignments.length;
+  const playingParticipants = conference.videoTrackAssignments.slice(0, playingParticipantsCount);
+
   const videoCards = () => {
     return (
       <>
         {
           playingParticipants.map((element, index) => {
+            let isPlayOnly
+            try {
+              isPlayOnly = JSON.parse(conference?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
+            } catch (e) {
+              isPlayOnly = false;
+            }
+
+            let participantName = conference?.allParticipants[element?.streamId]?.name;
+
+            if (participantName === "" || typeof participantName === 'undefined' || isPlayOnly || participantName === "Anonymous") {
+              return null;
+            }
+
             //console.log("cw:"+cardWidth+" ch:"+cardHeight);
             return (
               <div
@@ -91,15 +106,12 @@ function LayoutTiled(props) {
                   }}
               >
                 <VideoCard
-                    id={element.id}
-                    streamId={element.streamId}
-                    track={element.track}
-                    label={element.label}
+                    trackAssignment={element}
                     autoPlay
-                    name={element.name}
+                    name={participantName}
                 />
-              </div>    
-              )     
+              </div>
+              )
           })
         }
       </>
@@ -128,10 +140,11 @@ function LayoutTiled(props) {
     );
   }
 
-  return (                           
+  return (
       <>
+        {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
         {videoCards()}
-        {othersCard()}
+        {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
       </>
     )
 };
