@@ -18,6 +18,7 @@ import {getRoomNameAttribute, isComponentMode} from 'utils';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactionsButton from "./Components/ReactionsButton";
 import MoreOptionsButton from "./Components/MoreOptionsButton";
+import FakeReconnectButton from "./Components/FakeReconnectButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
@@ -161,6 +162,14 @@ function Footer(props) {
                     <FakeParticipantButton
                       footer
                       increment={false}
+                    />
+                  </Grid>
+                  : null}
+
+                  {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
+                  <Grid item xs={0}>
+                    <FakeReconnectButton
+                      footer
                     />
                   </Grid>
                   : null}

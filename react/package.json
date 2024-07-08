@@ -18,13 +18,13 @@
     "nanoid": "^5.0.6",
     "notistack": "^3.0.1",
     "react": "^18.2.0",
+    "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
     "react-i18next": "^14.0.5",
     "react-router-dom": "^6.22.2",
     "react-scripts": "^5.0.1",
     "react-slick": "^0.30.2",
     "slick-carousel": "^1.8.1",
-    "react-device-detect": "^2.2.3",
     "url": "^0.11.3",
     "web-vitals": "^3.5.2",
     "workbox-background-sync": "^7.0.0",
@@ -44,7 +44,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build && node custom-post-build.js",
     "eject": "react-scripts eject",
-    "test": "jest",
+    "test": "jest --verbose",
     "upload-coverage": "codecov"
   },
   "eslintConfig": {
