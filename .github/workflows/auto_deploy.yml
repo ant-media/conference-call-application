@@ -28,7 +28,7 @@ jobs:
       run: sudo apt-get install jq -y
     - name: Download war File
       run: |
-        export LATEST_SNAPSHOT=$(cat maven-metadata.xml | grep "<version>" | tail -n 1 |  xargs | cut -c 10-23)
+        export LATEST_SNAPSHOT=$(grep -oP '(?<=<version>)[^<]+' maven-metadata.xml| tail -1)
         echo $LATEST_SNAPSHOT
         wget -O ConferenceCall.war "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=io.antmedia.webrtc&a=ConferenceCall&v=${LATEST_SNAPSHOT}&e=war"
         ls -al
