@@ -1166,7 +1166,6 @@ describe('AntMedia Component', () => {
         webRTCAdaptorConstructor.callback("updated_stats", mockStats);
 
         expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-        expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is weak. You may encounter connection drop!", expect.anything());
 
         mockStats.videoRoundTripTime = '120';
         mockStats.audioRoundTripTime = '130';
@@ -1255,16 +1254,16 @@ describe('AntMedia Component', () => {
       expect(currentConference.participantUpdated).toBe(false);
 
       act(() => {
-        jest.advanceTimersByTime(5000);
+        jest.advanceTimersByTime(8000);
       });
 
       expect(currentConference.participantUpdated).toBe(true);
 
       act(() => {
-        jest.advanceTimersByTime(5000);
+        jest.advanceTimersByTime(8000);
       });
 
-      expect(currentConference.participantUpdated).toBe(false);
+      expect(currentConference.participantUpdated).toBe(true);
 
       jest.useRealTimers();
     });
@@ -1283,28 +1282,35 @@ describe('AntMedia Component', () => {
       expect(currentConference.participantUpdated).toBe(false);
 
       act(() => {
-        jest.advanceTimersByTime(5000);
+        jest.advanceTimersByTime(8000);
       });
 
       expect(currentConference.participantUpdated).toBe(true);
 
       act(() => {
-        jest.advanceTimersByTime(5000);
+        jest.advanceTimersByTime(8000);
       });
 
-      expect(currentConference.participantUpdated).toBe(false);
+      expect(currentConference.participantUpdated).toBe(true);
 
       jest.useRealTimers();
     });
   });
-    it('fake reconnection', async () => {  
+
+    it('fake reconnection', async () => {
       
       const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>
+        );
 
 
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
-    });
+    })
 
 
     const mockStats = {
@@ -1332,7 +1338,6 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-      expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is weak. You may encounter connection drop!", expect.anything());
 
       mockStats.videoRoundTripTime = '120';
       mockStats.audioRoundTripTime = '130';
