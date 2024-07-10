@@ -203,6 +203,10 @@ class TestJoinLeave(unittest.TestCase):
 
     wait = self.chrome.get_wait()
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    print("before ss:")
+    self.chrome.print_ss_as_base64()
+
     self.chrome.switch_to_tab(handle_1)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
     
