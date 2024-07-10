@@ -650,8 +650,6 @@ function AntMedia(props) {
 
         setIsReconnectionInProgress(true);
         reconnecting = true;
-        publishReconnected = isPlayOnly;
-        playReconnected = false;
 
         displayWarning("Connection lost. Trying reconnect...");
     }
@@ -1021,8 +1019,16 @@ function AntMedia(props) {
             console.log("iceConnectionState Changed: ", JSON.stringify(obj))
         } else if (info === "reconnection_attempt_for_player") {
             if (playOnly && isNoSreamExist) {
-                console.log("reconnection_attempt_for_player but no stream exist")
+                console.log("Reconnection attempt for player with no stream existmfor play only mode.")
             } else {
+                playReconnected = false;
+                if (!reconnecting) {
+                    reconnectionInProgress();
+                }
+            }
+        } else if (info === "reconnection_attempt_for_publisher") {
+            publishReconnected = isPlayOnly;
+            if (!reconnecting) {
                 reconnectionInProgress();
             }
         }

@@ -885,6 +885,124 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('is reconnection in progress state test because of publisher', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+
+
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+    });
+
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("play_started");
+    });
+
+    webRTCAdaptorConstructor.mediaManager = {};
+    webRTCAdaptorConstructor.mediaManager.setVideoCameraSource = jest.fn();
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("publish_started");
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+    });
+  });
+
+
+  /*
+   * This test check the following scenario:
+   * Reconnection attempt received
+   * Publisher reconnects (or restores session) first
+   * After some seconds since player doesn't reconnect yet we get play reconnect attemp again
+   * This was causing that publisher screen stucks on reconnecting progress
+  */
+
+  it('check publisher stucks on reconnection issue', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    
+    //no reconnection
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+
+
+    //send reconnection attemp for publisher
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+    });
+
+    //send reconnection attemp for player
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+
+    //see reconnecting progress
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+
+    //send publish_started
+    webRTCAdaptorConstructor.mediaManager = {};
+    webRTCAdaptorConstructor.mediaManager.setVideoCameraSource = jest.fn();
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("publish_started");
+    });
+
+
+    //now send reconnection attempt for player again
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+    //see reconnecting progress
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    //send play started
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("play_started");
+    });
+
+    //you shouldn't see reconnecting progress, because publish reconnected before
+    await waitFor(() => {
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+    });
+  });
+
 
   it('is reconnection in progress state for playonly', async () => {
     const { container } = render(
