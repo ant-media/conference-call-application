@@ -259,7 +259,9 @@ function WaitingRoom(props) {
                     <Box sx={conference?.speedTestObject?.isfailed ? {
                         visibility: "hidden", display: 'flex', justifyContent: 'center', alignItems: 'center'
                     } : {visibility: "visible", display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        <CircularProgressWithLabel sx={(speedTestModalButtonVisibility) ? {
+                        <CircularProgressWithLabel
+                            id={"speed-test-modal-circle-progress-bar"}
+                            sx={(speedTestModalButtonVisibility) ? {
                             visibility: "hidden"
                         } : {visibility: "visible"}} value={conference?.speedTestObject?.progressValue}/>
                     </Box>
@@ -267,15 +269,18 @@ function WaitingRoom(props) {
                         {conference?.speedTestObject?.errorMessage}
                     </Typography>
                     <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}}
+                            id={"speed-test-modal-close-button"}
                             onClick={() => {
                                 speedTestModalCloseButton();
                             }}>Close</Button>
                     <Button sx={(conference?.speedTestObject?.isfailed) ? {visibility: "visible"} : {visibility: "hidden"}}
+                            id={"speed-test-modal-failed-close-button"}
                             onClick={() => {
                                 //conference?.startSpeedTest();
                                 speedTestModalCloseButton();
                             }}>Close</Button>
                     <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}}
+                            id={"speed-test-modal-join-button"}
                             onClick={() => {
                                 speedTestModalJoinButton();
                             }}>Join</Button>

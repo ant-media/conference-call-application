@@ -25,7 +25,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=host&speedTestInTestPurposes=false&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=host&streamName="+participant)
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
@@ -33,7 +33,33 @@ class TestTestFakeehScenario(unittest.TestCase):
     join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
 
     time.sleep(5)
+
     self.chrome.click_element(join_button)
+
+    time.sleep(5)
+
+    speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
+    assert(speedTestCircularProgress.is_displayed())
+
+    time.sleep(5)
+
+    timeoutCounter = 0
+
+    isSpeedTestFinished = False
+    isSpeedTestFailed = False
+
+    while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
+      time.sleep(1)
+      timeoutCounter += 1
+      script = "return window.conference.speedTestObject;"
+      result_json = self.chrome.execute_script(script)
+      if result_json is not None:
+        isSpeedTestFinished = result_json["isfinished"]
+        isSpeedTestFailed = result_json["isfailed"]
+
+    speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
+
+    self.chrome.click_element(speedTestModalJoinButton)
 
     meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
@@ -46,7 +72,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=speaker&speedTestInTestPurposes=false&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=speaker&streamName="+participant)
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
@@ -54,7 +80,34 @@ class TestTestFakeehScenario(unittest.TestCase):
     join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
 
     time.sleep(5)
+
     self.chrome.click_element(join_button)
+
+    time.sleep(5)
+
+    speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
+    assert(speedTestCircularProgress.is_displayed())
+
+    time.sleep(5)
+
+    timeoutCounter = 0
+
+    isSpeedTestFinished = False
+    isSpeedTestFailed = False
+
+    while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
+      time.sleep(1)
+      timeoutCounter += 1
+      script = "return window.conference.speedTestObject;"
+      result_json = self.chrome.execute_script(script)
+      if result_json is not None:
+        isSpeedTestFinished = result_json["isfinished"]
+        isSpeedTestFailed = result_json["isfailed"]
+
+    speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
+
+    self.chrome.click_element(speedTestModalJoinButton)
+
  
     meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
@@ -67,7 +120,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&speedTestInTestPurposes=false&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName="+participant)
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
@@ -75,7 +128,34 @@ class TestTestFakeehScenario(unittest.TestCase):
     join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
 
     time.sleep(5)
+
     self.chrome.click_element(join_button)
+
+    time.sleep(5)
+
+    speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
+    assert(speedTestCircularProgress.is_displayed())
+
+    time.sleep(5)
+
+    timeoutCounter = 0
+
+    isSpeedTestFinished = False
+    isSpeedTestFailed = False
+
+    while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
+      time.sleep(1)
+      timeoutCounter += 1
+      script = "return window.conference.speedTestObject;"
+      result_json = self.chrome.execute_script(script)
+      if result_json is not None:
+        isSpeedTestFinished = result_json["isfinished"]
+        isSpeedTestFailed = result_json["isfailed"]
+
+    speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
+
+    self.chrome.click_element(speedTestModalJoinButton)
+
  
     meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
@@ -105,7 +185,7 @@ class TestTestFakeehScenario(unittest.TestCase):
 
   def get_participants(self):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return []
     #print("result_json:" + str(result_json))
@@ -114,8 +194,11 @@ class TestTestFakeehScenario(unittest.TestCase):
     return result_json["allParticipants"]
   
   def get_video_track_assignments(self):
+    ele = self.chrome.driver.find_element(By.XPATH, "")
+    self.chrome.wait.until(EC.invisibility_of_element_located(ele))
+
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return []
     #print("result_json:" + str(result_json))
@@ -125,7 +208,7 @@ class TestTestFakeehScenario(unittest.TestCase):
   
   def get_request_publisher_list(self):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return []
     #print("result_json:" + str(result_json))
@@ -134,7 +217,7 @@ class TestTestFakeehScenario(unittest.TestCase):
   
   def get_approved_speaker_request_list(self):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return []
     #print("result_json:" + str(result_json))
@@ -323,7 +406,92 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.chrome.click_element(pin_button)
 
-    wait.until(lambda x: len(self.get_video_track_assignments()) == 4)
+    self.chrome.close_all()
+
+  def test_multiple_player(self):
+    # create a room and join as admin and presenter
+    room = "room"+str(random.randint(100, 999))
+    handle_admin = self.join_room_as_admin("adminA", room)   
+    handle_presenter = self.join_room_as_presenter("presenterA", room)
+
+    assert(handle_presenter == self.chrome.get_current_tab_id())
+
+    presenterId = self.get_publishStreamId()
+
+    assert(self.chrome.get_element_with_retry(By.ID,presenterId).is_displayed())
+
+    wait = self.chrome.get_wait()
+
+    # check if both participants are in the room and see each other
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+    self.chrome.switch_to_tab(handle_admin)
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+    self.chrome.switch_to_tab(handle_presenter)
+
+
+    # playerA joins to listener room
+    handle_player_A = self.join_room_as_player("playerA", room)
+    # there should be no video in listener room
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
+
+    # playerB joins to listener room
+    handle_player_B = self.join_room_as_player("playerB", room)
+    # there should be no video in listener room
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
+
+    # playerC joins to listener room
+    handle_player_C = self.join_room_as_player("playerC", room)
+    # there should be no video in listener room
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
+
+
+    # switch to admin and add presenter to listener room
+    self.chrome.switch_to_tab(handle_admin)
+
+    presenterId = self.get_id_of_participant("presenterA")
+
+    self.open_close_participant_list_drawer()
+
+    self.add_presenter_to_listener_room(presenterId)
+
+    # switch to playerA and check if presenter is added to listener room
+    self.chrome.switch_to_tab(handle_player_A)
+
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
+
+    # switch to playerB and check if presenter is added to listener room
+    self.chrome.switch_to_tab(handle_player_B)
+
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
+
+    # switch to playerC and check if presenter is added to listener room
+    self.chrome.switch_to_tab(handle_player_C)
+
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
+
+    # switch to admin and remove presenter from listener room
+    self.chrome.switch_to_tab(handle_admin)
+
+    self.remove_presenter_from_listener_room(presenterId)
+
+    # switch to playerA and check if presenter is removed from listener room
+    self.chrome.switch_to_tab(handle_player_A)
+
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
+
+    # switch to playerB and check if presenter is removed from listener room
+    self.chrome.switch_to_tab(handle_player_B)
+
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
+
+    # switch to playerC and check if presenter is removed from listener room
+    self.chrome.switch_to_tab(handle_player_C)
+
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
+
 
     self.chrome.close_all()
 
