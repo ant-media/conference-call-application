@@ -176,11 +176,25 @@ class TestTestFakeehScenario(unittest.TestCase):
     self.chrome.click_element(remove_speaker_button)
 
   def open_close_participant_list_drawer(self):
-    participant_list_button = self.chrome.get_element(By.ID,"participant-list-button")
+    participant_list_button = None
+    try:
+      participant_list_button = self.chrome.get_element(By.ID,"participant-list-button")
+    except exceptions.NoSuchElementException:
+      more_button = self.chrome.get_element(By.ID, "more-button")
+      self.chrome.click_element(more_button)
+      participant_list_button = self.chrome.get_element(By.ID,"more-options-participant-list-button")
     self.chrome.click_element(participant_list_button)
 
   def open_close_publisher_request_list_drawer(self):
-    open_participant_list_button = self.chrome.get_element(By.ID,"publisher-request-list-button")
+    open_participant_list_button = None
+
+    try:
+      open_participant_list_button = self.chrome.get_element(By.ID,"publisher-request-list-button")
+    except exceptions.NoSuchElementException:
+      more_button = self.chrome.get_element(By.ID, "more-button")
+      self.chrome.click_element(more_button)
+      open_participant_list_button = self.chrome.get_element(By.ID,"more-options-publisher-request-list-button")
+
     self.chrome.click_element(open_participant_list_button)
 
   def get_participants(self):
