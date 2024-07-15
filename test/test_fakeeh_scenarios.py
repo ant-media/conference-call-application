@@ -194,9 +194,6 @@ class TestTestFakeehScenario(unittest.TestCase):
     return result_json["allParticipants"]
   
   def get_video_track_assignments(self):
-    ele = self.chrome.driver.find_element(By.XPATH, "")
-    self.chrome.wait.until(EC.invisibility_of_element_located(ele))
-
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
