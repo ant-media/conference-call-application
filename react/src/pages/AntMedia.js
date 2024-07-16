@@ -801,7 +801,18 @@ function AntMedia(props) {
 
     function handleSubtrackBroadcastObject(broadcastObject) {
         let allParticipantsTemp = allParticipants;
+        let streamName = broadcastObject.name;
+        let metaDataStr = broadcastObject.metaData;
+        // Handle adding external stream as subtrack via REST case. If this is not done tile is not rendered by circle.
+        if(!streamName){
+          broadcastObject.name = broadcastObject.streamId
+        }
+        if(metaDataStr === ""){
+          broadcastObject.metaData = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
+        }
+
         let metaData = JSON.parse(broadcastObject.metaData);
+
         broadcastObject.isScreenShared = metaData.isScreenShared;
         allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
         setAllParticipants(allParticipantsTemp);
