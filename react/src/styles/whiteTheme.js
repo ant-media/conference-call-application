@@ -4,7 +4,7 @@ import OpenSansSemiBold from "../static/Fonts/OpenSans/OpenSans-SemiBold.ttf";
 import OpenSansBold from "../static/Fonts/OpenSans/OpenSans-Bold.ttf";
 import {isComponentMode} from "../utils";
 
-export function getBlueTheme() {
+export function getWhiteTheme() {
     const themeColor0 = "#ffffff";
     //camera mic color
     const themeColor10 = "#3D7AB1";
@@ -16,13 +16,17 @@ export function getBlueTheme() {
     //button
     const themeColor60 = "#2B6197";
     //participant list background
-    const themeColor70 = "white";
+    const themeColor70 = "#fff";
+    const themeColor75 = "#2B6197";
     //footer background
-    const themeColor80 = "white";
+    const themeColor80 = "#fff";
     const themeColor85 = "#3D7AB1";
     const themeColor90 = "#6BCBC3";
+    const themeColor99 = "#FFFFFF";
+
     const chatText = "#DDFFFC";
     const darkGray = "#222B2A";
+    const textColor = "#000000";
 
     const error = "#DF0515";
     const primaryColor = themeColor10;
@@ -30,7 +34,7 @@ export function getBlueTheme() {
     let themeObject = {
         typography: {
             allVariants: {
-                color: textColor ? textColor : "#FFFFFF",
+                color: textColor,
                 fontFamily: "'OpenSans'",
             },
             h1: {
@@ -75,11 +79,11 @@ export function getBlueTheme() {
                 styleOverrides: {
                     root: {
                         "& fieldset": {
-                            borderColor: "white",
+                            borderColor: "#fff",
                         },
                     },
                     icon: {
-                        color: "white",
+                        color: "#fff",
                     },
                 },
             },
@@ -115,7 +119,7 @@ export function getBlueTheme() {
             MuiDialogTitle: {
                 styleOverrides: {
                     root: {
-                        color: "white",
+                        color: "#fff",
                         padding: "24px 0",
                         fontSize: 24,
                     },
@@ -135,7 +139,7 @@ export function getBlueTheme() {
                     root: {
                         paddingTop: 16,
                         paddingBottom: 16,
-                        color: "white",
+                        color: "#fff",
                     },
                 },
             },
@@ -149,7 +153,7 @@ export function getBlueTheme() {
             MuiListItemText: {
                 styleOverrides: {
                     primary: {
-                        color: "white",
+                        color: "#fff",
                     },
                 },
             },
@@ -340,16 +344,18 @@ export function getBlueTheme() {
                 50: themeColor50,
                 60: themeColor60,
                 70: themeColor70,
+                75: themeColor75,
                 80: themeColor80,
                 85: themeColor85,
                 90: themeColor90,
+                99: themeColor99,
             },
             gray: {
                 90: darkGray,
             },
             text: {
-                primary: "#FFFFFF",
-                default: "#FFFFFF",
+                primary: "#000000",
+                default: "#000000",
                 secondary: chatText, // dark4
             },
         },

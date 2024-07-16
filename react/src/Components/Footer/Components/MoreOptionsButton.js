@@ -81,7 +81,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 aria-expanded={open ? "true" : undefined}
                 onClick={handleClick}
             >
-              <SvgIcon size={40} name={'option'} color={open ? 'black' : 'white'} />
+              <SvgIcon size={40} name={'option'} color={open ? '#000' : '#fff'} />
             </CustomizedBtn>
           </Tooltip>
           <Menu
@@ -113,7 +113,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 handleClose();
               }}>
                 <ListItemIcon>
-                  <SvgIcon size={36} name={"share-screen-off"} color={"white"} />
+                  <SvgIcon size={36} name={"share-screen-off"} color={"#fff"} />
                 </ListItemIcon>
                 <ListItemText
                   id="more-options-share-screen-button"
@@ -126,7 +126,7 @@ function MoreOptionsButton({ footer, ...props }) {
             {process.env.REACT_APP_FOOTER_REACTIONS_BUTTON_VISIBILITY === 'true' ?
               <MenuItem onClick={() => {conference.setShowEmojis(!conference.showEmojis); handleClose();}}>
                 <ListItemIcon>
-                  <SvgIcon size={36} name={'smiley-face'} color={"white"} />
+                  <SvgIcon size={36} name={'smiley-face'} color={"#fff"} />
                 </ListItemIcon>
                 <ListItemText
                   id="more-options-reactions-button"
@@ -145,7 +145,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 handleClose();
               }}>
                 <ListItemIcon>
-                  <SvgIcon size={36} name={"message-off"} color={"white"} />
+                  <SvgIcon size={36} name={"message-off"} color={"#fff"} />
                 </ListItemIcon>
                 <ListItemText id={"more-options-chat-button"}>{t("Chat")}</ListItemText>
               </MenuItem>
@@ -156,11 +156,33 @@ function MoreOptionsButton({ footer, ...props }) {
                   onClick={() => {conference?.handleParticipantListOpen(!conference?.participantListDrawerOpen); handleClose();}}
               >
                 <ListItemIcon>
-                  <SvgIcon size={36} name={"participants"} color={"white"} />
+                  <SvgIcon size={36} name={"participants"} color={"#fff"} />
                 </ListItemIcon>
                 <ListItemText id={"more-options-participant-list-button"}>{t("Participant List")}</ListItemText>
               </MenuItem>
               : null}
+
+              {(process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ?
+                  <MenuItem
+                      onClick={() => {conference?.handlePublisherRequestListOpen(!conference?.publisherRequestListDrawerOpen); handleClose();}}
+                  >
+                      <ListItemIcon>
+                          <SvgIcon size={36} name={"raise-hand"} color={"white"} />
+                      </ListItemIcon>
+                      <ListItemText id={"publisher-request-list-button"}>{t("Publisher Request List")}</ListItemText>
+                  </MenuItem>
+                  : null}
+
+              {(process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isPlayOnly === true) ?
+                  <MenuItem
+                      onClick={() => {conference?.handlePublisherRequest(); handleClose();}}
+                  >
+                      <ListItemIcon>
+                          <SvgIcon size={36} name={"raise-hand"} color={"white"} />
+                      </ListItemIcon>
+                      <ListItemText id={"request-to-publisher-button"}>{t("Request becoming publisher")}</ListItemText>
+                  </MenuItem>
+                  : null}
           </Menu>
         </>
     );

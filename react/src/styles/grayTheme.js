@@ -17,11 +17,14 @@ export function getGrayTheme() {
   const themeColor80 = "#424242";
   const themeColor85 = "#212121";
   const themeColor90 = "#000000";
+  const themeColor99 = "#FFFFFF";
   const chatText = "#FAFAFA";
+  const darkGray = "#222B2A";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
   const secondaryColor = themeColor60;
+  const textColor = "#FFFFFF";
   let themeObject = {
     typography: {
       allVariants: {
@@ -334,6 +337,7 @@ export function getGrayTheme() {
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
+        99: themeColor99,
       },
       gray: {
         90: "#37474F",
