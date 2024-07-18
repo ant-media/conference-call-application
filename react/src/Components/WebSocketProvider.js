@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { getRootAttribute } from "../utils";
+import _ from "lodash";
 
 const WebSocketContext = createContext(null);
 
 export const WebSocketProvider = ({ children }) => {
     const webSocket = useRef(null);
     const [latestMessage, setLatestMessage] = useState(null);
-    const [latestSyncAdministrativeFieldsResponse, setLatestSyncAdministrativeFieldsResponse] = useState(null);
     const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
 
     var websocketUrlTemp = getRootAttribute("data-websocket-url");
@@ -54,14 +54,8 @@ export const WebSocketProvider = ({ children }) => {
                 }
                 command = parsedMessage.command;
 
-                if (command === 'syncAdministrativeFieldsResponse' && !_.isEqual(latestSyncAdministrativeFieldsResponse, newMessage)) {
-                    setLatestSyncAdministrativeFieldsResponse(newMessage);
-                    setLatestMessage(newMessage);
-                } else if (command === 'pong') {
+                if (command === 'pong') {
                     console.log('Received pong from server');
-                    if (window.conference && window.conference.requestSyncAdministrativeFields) {
-                        window.conference.requestSyncAdministrativeFields();
-                    }
                 } else {
                     setLatestMessage(newMessage);
                 }
