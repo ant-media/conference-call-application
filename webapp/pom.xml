@@ -228,8 +228,7 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
-	<dependency>
+		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<version>5.10.2</version>
@@ -241,6 +240,7 @@
 			<version>${mockito-core.version}</version>
 			<scope>test</scope>
 		</dependency>
+	</dependencies>
 	<description>Circle for Ant Media Server</description>
 	<organization>
 		<name>Ant Media</name>
