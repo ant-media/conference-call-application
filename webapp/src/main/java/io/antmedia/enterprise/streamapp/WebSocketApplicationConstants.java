@@ -64,6 +64,12 @@ public class WebSocketApplicationConstants {
 
 	public static final String STOP_RECORDING_COMMAND = "stopRecording";
 
+    public static final String SEND_DATA_CHANNEL_COMMAND = "sendData";
+
+    public static final String MESSAGE_FIELD = "message";
+
+    public static final String RECEIVER_STREAM_ID_FIELD = "receiverStreamId";
+
 	public static final String WEBSOCKET_URL_FIELD = "websocketURL";
 
 	public static final String START_RECORDING_RESPONSE = "startRecordingResponse";

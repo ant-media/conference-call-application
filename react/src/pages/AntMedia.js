@@ -644,6 +644,17 @@ function AntMedia(props) {
         }
     }
 
+    function sendDataChannelMessage(receiverStreamId, message) {
+        const jsCmd = {
+            command: "sendData",
+            streamId: publishStreamId,
+            receiverStreamId: receiverStreamId,
+            message: message,
+        };
+
+        sendMessage(JSON.stringify(jsCmd));
+    }
+
     function reconnectionInProgress() {
         //reset UI releated states
         removeAllRemoteParticipants();
@@ -2170,6 +2181,7 @@ function AntMedia(props) {
                         handleEffectsOpen,
                         setAndEnableVirtualBackgroundImage,
                         localVideoCreate,
+                        sendDataChannelMessage,
                         microphoneButtonDisabled,
                         setMicrophoneButtonDisabled,
                         cameraButtonDisabled,
