@@ -1007,6 +1007,7 @@ function AntMedia(props) {
                 reconnecting = !(publishReconnected && playReconnected);
                 setIsReconnectionInProgress(reconnecting);
             }
+            webRTCAdaptor?.enableStats(roomName);
         } else if (info === "play_finished") {
             clearInterval(requestVideoTrackAssignmentsInterval);
             videoTrackAssignmentsIntervalJob = null;
@@ -1995,6 +1996,10 @@ function AntMedia(props) {
         }
     }
 
+    function getTrackStats() {
+        return webRTCAdaptor.remotePeerConnectionStats[roomName];
+    }
+
     React.useEffect(() => {
         //gets the setting from the server through websocket
         if (isWebSocketConnected) {
@@ -2193,7 +2198,9 @@ function AntMedia(props) {
                         speedTestForPlayWebRtcAdaptorInfoCallback,
                         speedTestForPlayWebRtcAdaptorErrorCallback,
                         speedTestForPublishWebRtcAdaptorInfoCallback,
-                        speedTestForPublishWebRtcAdaptorErrorCallback
+                        speedTestForPublishWebRtcAdaptorErrorCallback,
+                        getTrackStats,
+                        
                     }}
                 >
                     {props.children}
