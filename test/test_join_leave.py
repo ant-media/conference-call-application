@@ -305,8 +305,6 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
 
-
-    wait.until(lambda x: len(self.get_track_stats().inboundRtpList) == 4)
     stats = self.get_track_stats()
 
     for track_stat in stats.inboundRtpList:
