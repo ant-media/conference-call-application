@@ -25,6 +25,12 @@ public class ConferenceRoomSettings {
     
     @Expose
     private boolean isRecordingFeatureAvailable = false;
+
+	@Expose
+	private String participantVisibilityMatrix;
+
+	@Expose
+	private int maxVideoTrackCount = 6;
     
     @PostConstruct
     public void init() {
@@ -67,6 +73,21 @@ public class ConferenceRoomSettings {
 	public boolean isRoomCreationPasswordEnabled() {
 		return roomCreationPasswordEnabled;
 	}
-	
+
+	public void setParticipantVisibilityMatrix(String participantVisibilityMatrix) {
+		this.participantVisibilityMatrix = participantVisibilityMatrix;
+	}
+
+	public String getParticipantVisibilityMatrix() {
+		return participantVisibilityMatrix;
+	}
+
+	public int getMaxVideoTrackCount() {
+		return maxVideoTrackCount;
+	}
+
+	public void setMaxVideoTrackCount(int maxVideoTrackCount) {
+		this.maxVideoTrackCount = maxVideoTrackCount;
+	}
 
 }

@@ -6,6 +6,7 @@ import MeetingRoom from 'pages/MeetingRoom';
 import theme from "styles/theme";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
+import {getRootAttribute} from "../../utils";
 
 // Mock the context value
 const contextValue = {
@@ -24,7 +25,7 @@ jest.mock('react', () => ({
 jest.mock('utils', () => ({
   isComponentMode: jest.fn(),
   getRoomNameAttribute: jest.fn(),
-  getWebSocketURLAttribute: jest.fn(),
+  getRootAttribute: jest.fn(),
   urlify: jest.fn(),
 }));
 

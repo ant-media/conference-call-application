@@ -17,12 +17,14 @@ export function getRedTheme() {
   const themeColor80 = "#C62828";
   const themeColor85 = "#B71C1C";
   const themeColor90 = "#FF8A80";
+  const themeColor99 = "#FFFFFF";
   const chatText = "#FFEBEE";
   const darkGray = "#37474F";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
   const secondaryColor = themeColor60;
+  const textColor = "#FFFFFF";
   let themeObject = {
     typography: {
       allVariants: {
@@ -335,6 +337,7 @@ export function getRedTheme() {
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
+        99: themeColor99,
       },
       gray: {
         90: darkGray,

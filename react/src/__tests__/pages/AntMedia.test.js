@@ -79,6 +79,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
       requestVideoTrackAssignments: jest.fn(),
       stopSpeedTest: jest.fn().mockImplementation(() => console.log('stopSpeedTest')),
+      getSubtracks: jest.fn(),
     }
 
     for (var key in params) {
@@ -293,8 +294,7 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callback("data_received", obj);
     });
 
-    var event = {"eventType": "PIN_USER", "streamId": "p1"};
-    expect(consoleSpy).toHaveBeenCalledWith("send notification event", event);
+    expect(consoleSpy).toHaveBeenCalledWith("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(notificationEvent.payload));
 
 
     consoleSpy.mockRestore();

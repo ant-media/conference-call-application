@@ -24,7 +24,7 @@ const AntDialogTitle = props => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={'close'} color={'white'} />
+          <SvgIcon size={30} name={'close'} color={'#fff'} />
         </Button>
       ) : null}
     </DialogTitle>
@@ -62,7 +62,7 @@ export function GoToLobbyDialog(props) {
       href={url}
       title={url} // Tooltip showing the full URL on hover
       style={{
-        color: 'white',
+        color: '#fff',
         fontSize: '1em',
         cursor: 'pointer',
         display: 'inline-block',

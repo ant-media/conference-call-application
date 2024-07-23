@@ -24,7 +24,7 @@ const AntDialogTitle = props => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={'close'} color={'white'} />
+          <SvgIcon size={30} name={'close'} color={'#fff'} />
         </Button>
       ) : null}
     </DialogTitle>

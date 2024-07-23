@@ -22,7 +22,7 @@ jest.mock('react', () => ({
 
 jest.mock('utils', () => ({
   isComponentMode: jest.fn().mockImplementation(() => true),
-  getRoomNameAttribute: jest.fn().mockImplementation(() => 'roomName'),
+  getRootAttribute: jest.fn().mockImplementation(() => 'roomName'),
 }));
 
 jest.mock('react-i18next', () => ({
