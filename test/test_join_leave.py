@@ -193,7 +193,7 @@ class TestJoinLeave(unittest.TestCase):
     leave_button = self.chrome.get_element(By.ID, "leave-room-button")
     self.chrome.click_element(leave_button)
     
-  def _test_others_tile(self):
+  def test_others_tile(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -467,7 +467,7 @@ class TestJoinLeave(unittest.TestCase):
    
 
 
-  def _test_recording(self):
+  def test_recording(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)

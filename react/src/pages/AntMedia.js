@@ -340,6 +340,11 @@ function AntMedia(props) {
 
     const theme = useTheme();
 
+    useEffect(() => {
+        setTimeout(() => {
+            setParticipantUpdated(!participantUpdated);
+        }, 5000);
+    }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleUnauthorizedDialogExitClicked() {
 
@@ -650,8 +655,6 @@ function AntMedia(props) {
 
         setIsReconnectionInProgress(true);
         reconnecting = true;
-        publishReconnected = isPlayOnly;
-        playReconnected = false;
 
         displayWarning("Connection lost. Trying reconnect...");
     }
@@ -803,7 +806,18 @@ function AntMedia(props) {
 
     function handleSubtrackBroadcastObject(broadcastObject) {
         let allParticipantsTemp = allParticipants;
+        let streamName = broadcastObject.name;
+        let metaDataStr = broadcastObject.metaData;
+        // Handle adding external stream as subtrack via REST case. If this is not done tile is not rendered by circle.
+        if(!streamName){
+          broadcastObject.name = broadcastObject.streamId
+        }
+        if(metaDataStr === ""){
+          broadcastObject.metaData = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
+        }
+
         let metaData = JSON.parse(broadcastObject.metaData);
+
         broadcastObject.isScreenShared = metaData.isScreenShared;
         allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
         setAllParticipants(allParticipantsTemp);
@@ -811,7 +825,10 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-        async function createWebRTCAdaptor() {
+        async function createWebRTCAdaptor() { 
+            reconnecting = false;
+            publishReconnected = false;
+            playReconnected = false;
             console.log("++ createWebRTCAdaptor");
             //here we check if audio or video device available and wait result
             //according to the result we modify mediaConstraints
@@ -995,7 +1012,7 @@ function AntMedia(props) {
 
             if (reconnecting) {
                 playReconnected = true;
-                reconnecting = !(publishReconnected && playReconnected);
+                reconnecting = !((publishReconnected || isPlayOnly) && playReconnected);
                 setIsReconnectionInProgress(reconnecting);
             }
         } else if (info === "play_finished") {
@@ -1020,9 +1037,19 @@ function AntMedia(props) {
         } else if (info === "ice_connection_state_changed") {
             console.log("iceConnectionState Changed: ", JSON.stringify(obj))
         } else if (info === "reconnection_attempt_for_player") {
+            console.log("Reconnection attempt for player")
             if (playOnly && isNoSreamExist) {
-                console.log("reconnection_attempt_for_player but no stream exist")
+                console.log("Reconnection attempt for player with no stream existmfor play only mode.")
             } else {
+                playReconnected = false;
+                if (!reconnecting) {
+                    reconnectionInProgress();
+                }
+            }
+        } else if (info === "reconnection_attempt_for_publisher") {
+            console.log("Reconnection attempt for publisher")
+            publishReconnected = isPlayOnly;
+            if (!reconnecting) {
                 reconnectionInProgress();
             }
         }
@@ -1165,11 +1192,12 @@ function AntMedia(props) {
             setLeaveRoomWithError("Licence error. Please report this.");
             setLeftTheRoom(true);
             setIsJoining(false);
+            setIsReconnectionInProgress(false);
         } else if (error === "notSetRemoteDescription") {
             setLeaveRoomWithError("System is not compatible to connect. Please report this.");
             setLeftTheRoom(true);
             setIsJoining(false);
-
+            setIsReconnectionInProgress(false);
         }
         console.log("***** " + error)
     }
