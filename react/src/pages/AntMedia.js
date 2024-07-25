@@ -825,7 +825,10 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-        async function createWebRTCAdaptor() {
+        async function createWebRTCAdaptor() { 
+            reconnecting = false;
+            publishReconnected = false;
+            playReconnected = false;
             console.log("++ createWebRTCAdaptor");
             //here we check if audio or video device available and wait result
             //according to the result we modify mediaConstraints
@@ -1009,7 +1012,7 @@ function AntMedia(props) {
 
             if (reconnecting) {
                 playReconnected = true;
-                reconnecting = !(publishReconnected && playReconnected);
+                reconnecting = !((publishReconnected || isPlayOnly) && playReconnected);
                 setIsReconnectionInProgress(reconnecting);
             }
         } else if (info === "play_finished") {
@@ -1034,6 +1037,7 @@ function AntMedia(props) {
         } else if (info === "ice_connection_state_changed") {
             console.log("iceConnectionState Changed: ", JSON.stringify(obj))
         } else if (info === "reconnection_attempt_for_player") {
+            console.log("Reconnection attempt for player")
             if (playOnly && isNoSreamExist) {
                 console.log("Reconnection attempt for player with no stream existmfor play only mode.")
             } else {
@@ -1043,6 +1047,7 @@ function AntMedia(props) {
                 }
             }
         } else if (info === "reconnection_attempt_for_publisher") {
+            console.log("Reconnection attempt for publisher")
             publishReconnected = isPlayOnly;
             if (!reconnecting) {
                 reconnectionInProgress();
@@ -1187,11 +1192,12 @@ function AntMedia(props) {
             setLeaveRoomWithError("Licence error. Please report this.");
             setLeftTheRoom(true);
             setIsJoining(false);
+            setIsReconnectionInProgress(false);
         } else if (error === "notSetRemoteDescription") {
             setLeaveRoomWithError("System is not compatible to connect. Please report this.");
             setLeftTheRoom(true);
             setIsJoining(false);
-
+            setIsReconnectionInProgress(false);
         }
         console.log("***** " + error)
     }

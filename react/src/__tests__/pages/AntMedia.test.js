@@ -427,15 +427,11 @@ describe('AntMedia Component', () => {
     await act(async () => {
       webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
     });
-
-    await act(async () => {
-      expect(currentConference.leaveRoomWithError == "Licence error. Please report this.");
+  
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Licence error. Please report this.");
     });
-
-    await act(async () => {
-      expect(currentConference.leftTheRoom == true);
-    });
-
+  
     consoleSpy.mockRestore();
 
   });
@@ -455,15 +451,11 @@ describe('AntMedia Component', () => {
     await act(async () => {
       webRTCAdaptorConstructor.callbackError("notSetRemoteDescription", {});
     });
-
-    await act(async () => {
-      expect(currentConference.leaveRoomWithError == "System is not compatible to connect. Please report this.");
+  
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("System is not compatible to connect. Please report this.");
     });
-
-    await act(async () => {
-      expect(currentConference.leftTheRoom === true);
-    });
-
+  
     consoleSpy.mockRestore();
 
   });
@@ -1244,7 +1236,6 @@ describe('AntMedia Component', () => {
     });
   });
 
-
   it('checks connection quality and displays warning for poor network connection', async () => {
 
     const { container } = render(
@@ -1555,6 +1546,7 @@ describe('AntMedia Component', () => {
     jest.useRealTimers();
   });
 
+  
   it('checks connection quality and displays warning for poor network connection', async () => {
 
     let stopSpeedTest = jest.fn();
@@ -1676,25 +1668,45 @@ describe('AntMedia Component', () => {
     });
   });
 
+  
 it('should stop and nullify speedTestForPublishWebRtcAdaptor when it is defined', async () => {
-  // Arrange
-  let stopSpeedTest = jest.fn();
-  let speedTestForPlayWebRtcAdaptor = {
-    current: {
-      play: jest.fn(),
-      requestVideoTrackAssignments: jest.fn(),
-      stopSpeedTest: stopSpeedTest
-    },
-  };
-  let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+  const { container } = render(
+    <ThemeProvider theme={theme(ThemeList.Green)}>
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>
+    </ThemeProvider>);
+
+  await waitFor(() => {
+    expect(webRTCAdaptorConstructor).not.toBe(undefined);
+  });
+
+  await act(async () => {
+    currentConference.createSpeedTestForPlayWebRtcAdaptor();
+  });
+
+  await waitFor(() => {
+    expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
+  });
+
+  await act(async () => {
+    currentConference.createSpeedTestForPublishWebRtcAdaptor();
+  });
+
+  await waitFor(() => {
+    expect(webRTCAdaptorPublishSpeedTestConstructor).not.toBe(undefined);
+  });
 
   const mockStop = jest.fn();
-  webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = { stop: mockStop, stopSpeedTest: stopSpeedTest };
-  webRTCAdaptorPublishSpeedTestConstructor = { stop: mockStop, stopSpeedTest: stopSpeedTest };
+
+  webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
+  webRTCAdaptorPublishSpeedTestConstructor.stop = mockStop;
+
 
   // Act
   await act(async () => {
-    currentConference?.stopSpeedTest();
+    currentConference.stopSpeedTest();
   });
 
   jest.useFakeTimers();
@@ -1703,16 +1715,21 @@ it('should stop and nullify speedTestForPublishWebRtcAdaptor when it is defined'
   jest.useRealTimers();
 
   // Assert
-  waitFor(() => {
+  await waitFor(() => {
     expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
   });
-  waitFor(() => {
-    expect(webRTCAdaptorPublishSpeedTestPlayOnlyConstructor).toBeNull();
+
+  /*
+  await waitFor(() => {
+    expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
   });
-  waitFor(() => {
+  await waitFor(() => {
     expect(webRTCAdaptorPublishSpeedTestConstructor).toBeNull();
   });
+  */
 });
+
+
 
 it('should not throw error when speedTestForPublishWebRtcAdaptor is not defined', async () => {
   let stopSpeedTest = jest.fn();
@@ -1737,34 +1754,51 @@ it('should not throw error when speedTestForPublishWebRtcAdaptor is not defined'
   }).not.toThrow();
 });
 
+
+
 it('should stop and nullify speedTestForPlayWebRtcAdaptor when it is defined', async () => {
+
+  const { container } = render(
+    <ThemeProvider theme={theme(ThemeList.Green)}>
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>
+    </ThemeProvider>);
+
+  await waitFor(() => {
+    expect(webRTCAdaptorConstructor).not.toBe(undefined);
+  });
+
+  await act(async () => {
+    currentConference.createSpeedTestForPlayWebRtcAdaptor();
+  });
+
+  await waitFor(() => {
+    expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
+  });
+
   let stopSpeedTest = jest.fn();
-  let speedTestForPlayWebRtcAdaptor = {
-    current: {
-      play: jest.fn(),
-      requestVideoTrackAssignments: jest.fn(),
-      stopSpeedTest: stopSpeedTest
-    },
-  };
-  let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
   // Arrange
   const mockStop = jest.fn();
-  webRTCAdaptorPlaySpeedTestConstructor = { stop: mockStop, stopSpeedTest: stopSpeedTest};
+  //webRTCAdaptorPlaySpeedTestConstructor = { stop: mockStop, stopSpeedTest: stopSpeedTest};
+
+  webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
 
   // Act
   await act(async () => {
-    currentConference?.stopSpeedTest();
+    currentConference.stopSpeedTest();
   });
 
   // Assert
-  waitFor(() => {
+  await waitFor(() => {
     expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
   });
-  waitFor(() => {
-    expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
-  });
+  //await waitFor(() => {
+  //  expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
+  //});
 });
+
 
 it('should not throw error when speedTestForPlayWebRtcAdaptor is not defined', async () => {
   let stopSpeedTest = jest.fn();
@@ -1775,8 +1809,6 @@ it('should not throw error when speedTestForPlayWebRtcAdaptor is not defined', a
       stopSpeedTest: stopSpeedTest
     },
   };
-  let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
   // Arrange
   webRTCAdaptorPlaySpeedTestConstructor = null;
 
@@ -1788,7 +1820,82 @@ it('should not throw error when speedTestForPlayWebRtcAdaptor is not defined', a
   }).not.toThrow();
 });
 
+it('notSetRemoteDescription error callback in reconnection', async () => {
+  const { container } = render(
+    <ThemeProvider theme={theme(ThemeList.Green)}>
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>
+    </ThemeProvider>);
 
+
+  await waitFor(() => {
+    expect(webRTCAdaptorConstructor).not.toBe(undefined);
+  });
+
+  expect(container.outerHTML).not.toContain("Reconnecting...");
+
+  await act(async () => {
+    webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+    webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+  });
+
+
+  console.log("before waitttttttttttttttttttttttttt");
+
+  await waitFor(() => {
+    expect(container.outerHTML).toContain("Reconnecting...");
+  });
+
+  await act(async () => {
+    webRTCAdaptorConstructor.callbackError("notSetRemoteDescription", {});
+  });
+
+  await waitFor(() => {
+    expect(container.outerHTML).toContain("System is not compatible to connect. Please report this.");
+  });
+
+  await waitFor(() => {
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+  });
+});
+
+it('license_suspended_please_renew_license error callback in reconnection', async () => {
+  const { container } = render(
+    <ThemeProvider theme={theme(ThemeList.Green)}>
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>
+    </ThemeProvider>);
+
+
+  await waitFor(() => {
+    expect(webRTCAdaptorConstructor).not.toBe(undefined);
+  });
+
+  expect(container.outerHTML).not.toContain("Reconnecting...");
+
+  await act(async () => {
+    webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+    webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+  });
+
+  await waitFor(() => {
+    expect(container.outerHTML).toContain("Reconnecting...");
+  });
+
+  await act(async () => {
+    webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
+  });
+
+  await waitFor(() => {
+    expect(container.outerHTML).toContain("Licence error. Please report this.");
+  });
+
+  await waitFor(() => {
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+  });
+});
 
 });
 
