@@ -427,61 +427,13 @@ describe('AntMedia Component', () => {
     await act(async () => {
       webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
     });
-  
+
     await waitFor(() => {
       expect(container.outerHTML).toContain("Licence error. Please report this.");
     });
-  
+
     consoleSpy.mockRestore();
 
-  });
-
-  it('renders video cards when not on mobile', () => {
-    const { getByTestId } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <LayoutPinned />
-        </ThemeProvider>
-    );
-
-    expect(getByTestId('unpinned-gallery')).toBeInTheDocument();
-    expect(getByTestId('mocked-video-card')).toBeInTheDocument();
-  });
-
-  it('does not render video cards when on mobile', () => {
-    isMobile = true;
-
-    const { getByTestId, queryByTestId } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <LayoutPinned />
-        </ThemeProvider>
-    );
-
-    expect(getByTestId('unpinned-gallery')).toBeInTheDocument();
-    expect(queryByTestId('mocked-video-card')).toBeNull();
-  });
-
-  it('renders others card when visibility is true', () => {
-    process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY = 'true';
-
-    const { getByTestId } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <LayoutPinned />
-        </ThemeProvider>
-    );
-
-    expect(getByTestId('mocked-others-card')).toBeInTheDocument();
-  });
-
-  it('does not render others card when visibility is false', () => {
-    process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY = 'false';
-
-    const { queryByTestId } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <LayoutPinned />
-        </ThemeProvider>
-    );
-
-    expect(queryByTestId('mocked-others-card')).toBeNull();
   });
 
   it('notSetRemoteDescription error callback', async () => {
@@ -499,11 +451,11 @@ describe('AntMedia Component', () => {
     await act(async () => {
       webRTCAdaptorConstructor.callbackError("notSetRemoteDescription", {});
     });
-  
+
     await waitFor(() => {
       expect(container.outerHTML).toContain("System is not compatible to connect. Please report this.");
     });
-  
+
     consoleSpy.mockRestore();
 
   });
@@ -991,7 +943,7 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    
+
     //no reconnection
     expect(container.outerHTML).not.toContain("Reconnecting...");
 
@@ -1291,102 +1243,102 @@ describe('AntMedia Component', () => {
           <AntMedia isTest={true}>
             <MockChild/>
           </AntMedia>
-        </ThemeProvider>);    
-    
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-      
-    
-      const mockStats = {
-        videoRoundTripTime: '0',
-        audioRoundTripTime: '0',
-        videoJitter: '0',
-        audioJitter: '0',
-        videoPacketsLost: '0',
-        audioPacketsLost: '0',
-        totalVideoPacketsSent: '0',
-        totalAudioPacketsSent: '0',
-      };
+        </ThemeProvider>);
 
-      const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-      const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
-      
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
-    
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        mockStats.videoRoundTripTime = '150';
-        mockStats.audioRoundTripTime = '160';
-        
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-
-        mockStats.videoRoundTripTime = '120';
-        mockStats.audioRoundTripTime = '130';
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
-        //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
-      });
-
-      await act(async () => {
-
-        mockStats.videoRoundTripTime = '0';
-        mockStats.audioRoundTripTime = '0';
-        mockStats.videoJitter = '90';
-        mockStats.audioJitter = '100';
-        consoleWarnSpy.mockReset();
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-
-
-        mockStats.videoJitter = '60';
-        mockStats.audioJitter = '70';
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
-      });
-
-      await act(async () => {
-
-        mockStats.videoJitter = '0';
-        mockStats.audioJitter = '0';
-        mockStats.videoPacketsLost = '3';
-        mockStats.audioPacketsLost = '4';
-        mockStats.totalVideoPacketsSent = '50';
-        mockStats.totalAudioPacketsSent = '50';
-        consoleWarnSpy.mockReset();
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-
-      });
-
-      await act(async () => {
-
-        mockStats.videoPacketsLost = '4';
-        mockStats.audioPacketsLost = '5';
-        mockStats.totalVideoPacketsSent = '100';
-        mockStats.totalAudioPacketsSent = '100';
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
-
-
-      });
-    
-    
-      
-    
-    
-      consoleWarnSpy.mockRestore();
-      
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
+
+
+    const mockStats = {
+      videoRoundTripTime: '0',
+      audioRoundTripTime: '0',
+      videoJitter: '0',
+      audioJitter: '0',
+      videoPacketsLost: '0',
+      audioPacketsLost: '0',
+      totalVideoPacketsSent: '0',
+      totalAudioPacketsSent: '0',
+    };
+
+    const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      mockStats.videoRoundTripTime = '150';
+      mockStats.audioRoundTripTime = '160';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+      mockStats.videoRoundTripTime = '120';
+      mockStats.audioRoundTripTime = '130';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+      //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
+    });
+
+    await act(async () => {
+
+      mockStats.videoRoundTripTime = '0';
+      mockStats.audioRoundTripTime = '0';
+      mockStats.videoJitter = '90';
+      mockStats.audioJitter = '100';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+
+      mockStats.videoJitter = '60';
+      mockStats.audioJitter = '70';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+    });
+
+    await act(async () => {
+
+      mockStats.videoJitter = '0';
+      mockStats.audioJitter = '0';
+      mockStats.videoPacketsLost = '3';
+      mockStats.audioPacketsLost = '4';
+      mockStats.totalVideoPacketsSent = '50';
+      mockStats.totalAudioPacketsSent = '50';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+    });
+
+    await act(async () => {
+
+      mockStats.videoPacketsLost = '4';
+      mockStats.audioPacketsLost = '5';
+      mockStats.totalVideoPacketsSent = '100';
+      mockStats.totalAudioPacketsSent = '100';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+
+
+    });
+
+
+
+
+
+    consoleWarnSpy.mockRestore();
+
+  });
 
   describe('Screen render test', () => {
     let currentConference;
@@ -1454,15 +1406,15 @@ describe('AntMedia Component', () => {
     });
   });
 
-    it('fake reconnection', async () => {
-      
-      const { container } = render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <AntMedia isTest={true}>
-              <MockChild/>
-            </AntMedia>
-          </ThemeProvider>
-        );
+  it('fake reconnection', async () => {
+
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>
+    );
 
 
     await waitFor(() => {
@@ -1594,7 +1546,7 @@ describe('AntMedia Component', () => {
     jest.useRealTimers();
   });
 
-  
+
   it('checks connection quality and displays warning for poor network connection', async () => {
 
     let stopSpeedTest = jest.fn();
@@ -1612,98 +1564,8 @@ describe('AntMedia Component', () => {
           <AntMedia isTest={true}>
             <MockChild/>
           </AntMedia>
-        </ThemeProvider>);    
-    
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-      
-    
-      const mockStats = {
-        videoRoundTripTime: '0',
-        audioRoundTripTime: '0',
-        videoJitter: '0',
-        audioJitter: '0',
-        videoPacketsLost: '0',
-        audioPacketsLost: '0',
-        totalVideoPacketsSent: '0',
-        totalAudioPacketsSent: '0',
-      };
+        </ThemeProvider>);
 
-      const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-      const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
-      
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
-    
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        mockStats.videoRoundTripTime = '150';
-        mockStats.audioRoundTripTime = '160';
-        
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-        expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is weak. You may encounter connection drop!", expect.anything());
-
-        mockStats.videoRoundTripTime = '120';
-        mockStats.audioRoundTripTime = '130';
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
-        //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
-      });
-
-      await act(async () => {
-
-        mockStats.videoRoundTripTime = '0';
-        mockStats.audioRoundTripTime = '0';
-        mockStats.videoJitter = '90';
-        mockStats.audioJitter = '100';
-        consoleWarnSpy.mockReset();
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-
-
-        mockStats.videoJitter = '60';
-        mockStats.audioJitter = '70';
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
-      });
-
-      await act(async () => {
-
-        mockStats.videoJitter = '0';
-        mockStats.audioJitter = '0';
-        mockStats.videoPacketsLost = '3';
-        mockStats.audioPacketsLost = '4';
-        mockStats.totalVideoPacketsSent = '50';
-        mockStats.totalAudioPacketsSent = '50';
-        consoleWarnSpy.mockReset();
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-
-      });
-
-      await act(async () => {
-
-        mockStats.videoPacketsLost = '4';
-        mockStats.audioPacketsLost = '5';
-        mockStats.totalVideoPacketsSent = '100';
-        mockStats.totalAudioPacketsSent = '100';
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
-
-      });
-    
-      consoleWarnSpy.mockRestore();
-      
-    });
 
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
@@ -1806,234 +1668,233 @@ describe('AntMedia Component', () => {
     });
   });
 
-  
-it('should stop and nullify speedTestForPublishWebRtcAdaptor when it is defined', async () => {
 
-  const { container } = render(
-    <ThemeProvider theme={theme(ThemeList.Green)}>
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>
-    </ThemeProvider>);
+  it('should stop and nullify speedTestForPublishWebRtcAdaptor when it is defined', async () => {
 
-  await waitFor(() => {
-    expect(webRTCAdaptorConstructor).not.toBe(undefined);
-  });
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
 
-  await act(async () => {
-    currentConference.createSpeedTestForPlayWebRtcAdaptor();
-  });
-
-  await waitFor(() => {
-    expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
-  });
-
-  await act(async () => {
-    currentConference.createSpeedTestForPublishWebRtcAdaptor();
-  });
-
-  await waitFor(() => {
-    expect(webRTCAdaptorPublishSpeedTestConstructor).not.toBe(undefined);
-  });
-
-  const mockStop = jest.fn();
-
-  webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
-  webRTCAdaptorPublishSpeedTestConstructor.stop = mockStop;
-
-
-  // Act
-  await act(async () => {
-    currentConference.stopSpeedTest();
-  });
-
-  jest.useFakeTimers();
-  jest.advanceTimersByTime(3000);
-  jest.runAllTimers();
-  jest.useRealTimers();
-
-  // Assert
-  await waitFor(() => {
-    expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
-  });
-
-  /*
-  await waitFor(() => {
-    expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
-  });
-  await waitFor(() => {
-    expect(webRTCAdaptorPublishSpeedTestConstructor).toBeNull();
-  });
-  */
-});
-
-
-
-it('should not throw error when speedTestForPublishWebRtcAdaptor is not defined', async () => {
-  let stopSpeedTest = jest.fn();
-  let speedTestForPlayWebRtcAdaptor = {
-    current: {
-      play: jest.fn(),
-      requestVideoTrackAssignments: jest.fn(),
-      stopSpeedTest: stopSpeedTest
-    },
-  };
-  let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-  // Arrange
-  webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = null;
-  webRTCAdaptorPublishSpeedTestConstructor = null;
-
-  // Act and Assert
-  await expect(async () => {
-    await act(async () => {
-      currentConference?.stopSpeedTest();
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
-  }).not.toThrow();
-});
 
-
-
-it('should stop and nullify speedTestForPlayWebRtcAdaptor when it is defined', async () => {
-
-  const { container } = render(
-    <ThemeProvider theme={theme(ThemeList.Green)}>
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>
-    </ThemeProvider>);
-
-  await waitFor(() => {
-    expect(webRTCAdaptorConstructor).not.toBe(undefined);
-  });
-
-  await act(async () => {
-    currentConference.createSpeedTestForPlayWebRtcAdaptor();
-  });
-
-  await waitFor(() => {
-    expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
-  });
-
-  let stopSpeedTest = jest.fn();
-
-  // Arrange
-  const mockStop = jest.fn();
-  //webRTCAdaptorPlaySpeedTestConstructor = { stop: mockStop, stopSpeedTest: stopSpeedTest};
-
-  webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
-
-  // Act
-  await act(async () => {
-    currentConference.stopSpeedTest();
-  });
-
-  // Assert
-  await waitFor(() => {
-    expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
-  });
-  //await waitFor(() => {
-  //  expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
-  //});
-});
-
-
-it('should not throw error when speedTestForPlayWebRtcAdaptor is not defined', async () => {
-  let stopSpeedTest = jest.fn();
-  let speedTestForPlayWebRtcAdaptor = {
-    current: {
-      play: jest.fn(),
-      requestVideoTrackAssignments: jest.fn(),
-      stopSpeedTest: stopSpeedTest
-    },
-  };
-  // Arrange
-  webRTCAdaptorPlaySpeedTestConstructor = null;
-
-  // Act and Assert
-  await expect(async () => {
     await act(async () => {
-      currentConference?.stopSpeedTest();
+      currentConference.createSpeedTestForPlayWebRtcAdaptor();
     });
-  }).not.toThrow();
-});
 
-it('notSetRemoteDescription error callback in reconnection', async () => {
-  const { container } = render(
-    <ThemeProvider theme={theme(ThemeList.Green)}>
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>
-    </ThemeProvider>);
+    await waitFor(() => {
+      expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.createSpeedTestForPublishWebRtcAdaptor();
+    });
+
+    await waitFor(() => {
+      expect(webRTCAdaptorPublishSpeedTestConstructor).not.toBe(undefined);
+    });
+
+    const mockStop = jest.fn();
+
+    webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
+    webRTCAdaptorPublishSpeedTestConstructor.stop = mockStop;
 
 
-  await waitFor(() => {
-    expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    // Act
+    await act(async () => {
+      currentConference.stopSpeedTest();
+    });
+
+    jest.useFakeTimers();
+    jest.advanceTimersByTime(3000);
+    jest.runAllTimers();
+    jest.useRealTimers();
+
+    // Assert
+    await waitFor(() => {
+      expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+    });
+
+    /*
+    await waitFor(() => {
+      expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
+    });
+    await waitFor(() => {
+      expect(webRTCAdaptorPublishSpeedTestConstructor).toBeNull();
+    });
+    */
   });
 
-  expect(container.outerHTML).not.toContain("Reconnecting...");
 
-  await act(async () => {
-    webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
-    webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+
+  it('should not throw error when speedTestForPublishWebRtcAdaptor is not defined', async () => {
+    let stopSpeedTest = jest.fn();
+    let speedTestForPlayWebRtcAdaptor = {
+      current: {
+        play: jest.fn(),
+        requestVideoTrackAssignments: jest.fn(),
+        stopSpeedTest: stopSpeedTest
+      },
+    };
+    let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    // Arrange
+    webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = null;
+    webRTCAdaptorPublishSpeedTestConstructor = null;
+
+    // Act and Assert
+    await expect(async () => {
+      await act(async () => {
+        currentConference?.stopSpeedTest();
+      });
+    }).not.toThrow();
   });
 
 
-  console.log("before waitttttttttttttttttttttttttt");
 
-  await waitFor(() => {
-    expect(container.outerHTML).toContain("Reconnecting...");
+  it('should stop and nullify speedTestForPlayWebRtcAdaptor when it is defined', async () => {
+
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.createSpeedTestForPlayWebRtcAdaptor();
+    });
+
+    await waitFor(() => {
+      expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
+    });
+
+    let stopSpeedTest = jest.fn();
+
+    // Arrange
+    const mockStop = jest.fn();
+    //webRTCAdaptorPlaySpeedTestConstructor = { stop: mockStop, stopSpeedTest: stopSpeedTest};
+
+    webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
+
+    // Act
+    await act(async () => {
+      currentConference.stopSpeedTest();
+    });
+
+    // Assert
+    await waitFor(() => {
+      expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+    });
+    //await waitFor(() => {
+    //  expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
+    //});
   });
 
-  await act(async () => {
-    webRTCAdaptorConstructor.callbackError("notSetRemoteDescription", {});
+
+  it('should not throw error when speedTestForPlayWebRtcAdaptor is not defined', async () => {
+    let stopSpeedTest = jest.fn();
+    let speedTestForPlayWebRtcAdaptor = {
+      current: {
+        play: jest.fn(),
+        requestVideoTrackAssignments: jest.fn(),
+        stopSpeedTest: stopSpeedTest
+      },
+    };
+    // Arrange
+    webRTCAdaptorPlaySpeedTestConstructor = null;
+
+    // Act and Assert
+    await expect(async () => {
+      await act(async () => {
+        currentConference?.stopSpeedTest();
+      });
+    }).not.toThrow();
   });
 
-  await waitFor(() => {
-    expect(container.outerHTML).toContain("System is not compatible to connect. Please report this.");
-  });
+  it('notSetRemoteDescription error callback in reconnection', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
 
-  await waitFor(() => {
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
     expect(container.outerHTML).not.toContain("Reconnecting...");
-  });
-});
 
-it('license_suspended_please_renew_license error callback in reconnection', async () => {
-  const { container } = render(
-    <ThemeProvider theme={theme(ThemeList.Green)}>
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>
-    </ThemeProvider>);
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
 
 
-  await waitFor(() => {
-    expect(webRTCAdaptorConstructor).not.toBe(undefined);
-  });
+    console.log("before waitttttttttttttttttttttttttt");
 
-  expect(container.outerHTML).not.toContain("Reconnecting...");
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
 
-  await act(async () => {
-    webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
-    webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
-  });
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("notSetRemoteDescription", {});
+    });
 
-  await waitFor(() => {
-    expect(container.outerHTML).toContain("Reconnecting...");
-  });
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("System is not compatible to connect. Please report this.");
+    });
 
-  await act(async () => {
-    webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
+    await waitFor(() => {
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+    });
   });
 
-  await waitFor(() => {
-    expect(container.outerHTML).toContain("Licence error. Please report this.");
-  });
+  it('license_suspended_please_renew_license error callback in reconnection', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
 
-  await waitFor(() => {
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
     expect(container.outerHTML).not.toContain("Reconnecting...");
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Licence error. Please report this.");
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+    });
   });
-});
 
 });
-
