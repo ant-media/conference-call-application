@@ -148,6 +148,13 @@ class TestJoinLeave(unittest.TestCase):
     start_recording_button = self.chrome.get_element(By.ID, "start-recording-button")
     return start_recording_button
   
+  def get_share_screen_button(self):
+    settings_button = self.chrome.get_element(By.ID, "settings-button")
+    self.chrome.click_element(settings_button)
+
+    share_screen_button = self.chrome.get_element(By.ID, "share-screen-button")
+    return share_screen_button
+  
   def get_stop_recording_button(self):
     settings_button = self.chrome.get_element(By.ID, "settings-button")
     self.chrome.click_element(settings_button)
@@ -302,9 +309,9 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
+    share_screen_button = self.get_share_screen_button()
 
-
-    if(self.chrome.is_element_exist_by_id("share-screen-button")):
+    if(share_screen_button.is_displayed()):
       ss_button = self.chrome.get_element(By.ID, "share-screen-button")
     else:
       more_button = self.chrome.get_element(By.ID, "more-button")
@@ -317,7 +324,7 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
     
-    if(self.chrome.is_element_exist_by_id("share-screen-button")):
+    if(share_screen_button.is_displayed()):
       ss_button2 = self.chrome.get_element(By.ID, "share-screen-button")
     else:
       more_button = self.chrome.get_element(By.ID, "more-button")
