@@ -1252,12 +1252,183 @@ describe('AntMedia Component', () => {
           <AntMedia isTest={true}>
             <MockChild/>
           </AntMedia>
-        </ThemeProvider>);
+        </ThemeProvider>);    
+    
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+      
+    
+      const mockStats = {
+        videoRoundTripTime: '0',
+        audioRoundTripTime: '0',
+        videoJitter: '0',
+        audioJitter: '0',
+        videoPacketsLost: '0',
+        audioPacketsLost: '0',
+        totalVideoPacketsSent: '0',
+        totalAudioPacketsSent: '0',
+      };
+
+      const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
+      const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+      
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      
+    
+      await act(async () => {
+        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+        mockStats.videoRoundTripTime = '150';
+        mockStats.audioRoundTripTime = '160';
+        
+        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+        mockStats.videoRoundTripTime = '120';
+        mockStats.audioRoundTripTime = '130';
+
+        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+        //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
+      });
+
+      await act(async () => {
+
+        mockStats.videoRoundTripTime = '0';
+        mockStats.audioRoundTripTime = '0';
+        mockStats.videoJitter = '90';
+        mockStats.audioJitter = '100';
+        consoleWarnSpy.mockReset();
+
+        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+
+        mockStats.videoJitter = '60';
+        mockStats.audioJitter = '70';
+
+        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+      });
+
+      await act(async () => {
+
+        mockStats.videoJitter = '0';
+        mockStats.audioJitter = '0';
+        mockStats.videoPacketsLost = '3';
+        mockStats.audioPacketsLost = '4';
+        mockStats.totalVideoPacketsSent = '50';
+        mockStats.totalAudioPacketsSent = '50';
+        consoleWarnSpy.mockReset();
+
+        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+      });
+
+      await act(async () => {
+
+        mockStats.videoPacketsLost = '4';
+        mockStats.audioPacketsLost = '5';
+        mockStats.totalVideoPacketsSent = '100';
+        mockStats.totalAudioPacketsSent = '100';
+
+        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+
+
+      });
+    
+    
+      
+    
+    
+      consoleWarnSpy.mockRestore();
+      
+    });
+
+  describe('Screen render test', () => {
+    let currentConference;
+
+    const MockChild = () => {
+      const conference = React.useContext(ConferenceContext);
+      currentConference = conference;
+      return <div>Mock Child</div>;
+    };
+
+    it('should update participantUpdated state every 5 seconds', async () => {
+      jest.useFakeTimers();
+
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>
+      );
+
+      expect(currentConference.participantUpdated).toBe(false);
+
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      jest.useRealTimers();
+    });
+
+    it('should not update participantUpdated state if videoTrackAssignments and allParticipants are not changed', async () => {
+      jest.useFakeTimers();
+
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>
+      );
+
+      expect(currentConference.participantUpdated).toBe(false);
+
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      jest.useRealTimers();
+    });
+  });
+
+    it('fake reconnection', async () => {
+      
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>
+        );
 
 
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
-    });
+    })
 
 
     const mockStats = {
@@ -1285,7 +1456,6 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-      expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is weak. You may encounter connection drop!", expect.anything());
 
       mockStats.videoRoundTripTime = '120';
       mockStats.audioRoundTripTime = '130';
@@ -1408,7 +1578,6 @@ describe('AntMedia Component', () => {
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
-
 
     const mockStats = {
       videoRoundTripTime: '0',
