@@ -283,7 +283,6 @@ class TestJoinLeave(unittest.TestCase):
     videoTrackAssignments = conference["videoTrackAssignments"]
     return videoTrackAssignments[1]["streamId"] == conference["pinnedVideoId"]
 
-  '''
   def test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -349,7 +348,6 @@ class TestJoinLeave(unittest.TestCase):
     assert(presenter1Exists and presenter2Exists and presenterPinned)
 
     self.chrome.close_all()
-    '''
 
   def test_join_room_N_participants(self):
     N = 3
