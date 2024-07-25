@@ -3,7 +3,7 @@ import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
 import React from "react";
 import { ConferenceContext } from "./AntMedia";
-import {isMobile, isTablet} from "react-device-detect";
+import {isMobile} from "react-device-detect";
 
 
 function LayoutPinned (props) {
