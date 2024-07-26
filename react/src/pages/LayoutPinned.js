@@ -3,6 +3,7 @@ import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
 import React from "react";
 import { ConferenceContext } from "./AntMedia";
+import {isMobile} from "react-device-detect";
 
 
 function LayoutPinned (props) {
@@ -50,7 +51,7 @@ function LayoutPinned (props) {
     )
   }
 
-  const videoCards = () => {
+  const videoCards = (isMobileView) => {
     return (
       <>
       {
@@ -78,6 +79,7 @@ function LayoutPinned (props) {
               <div className="unpinned" key={index}>
                 <div className="single-video-container">
                   <VideoCard
+                      isMobileView={isMobileView}
                     trackAssignment={element}
                       autoPlay
                       name={participantName}
@@ -111,11 +113,18 @@ function LayoutPinned (props) {
   return (
     <>
       {pinnedVideo()}
-      <div id="unpinned-gallery">
-        {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
-        {videoCards()}
-        {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
-      </div>
+      { (!isMobile) ?
+          <div id="unpinned-gallery">
+            {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {videoCards(false)}
+            {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
+          </div>
+          : <><div id="unpinned-gallery">
+            {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
+          </div>
+            {videoCards(true)}
+          </>}
     </>
   );
 };
