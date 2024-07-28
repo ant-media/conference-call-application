@@ -1580,6 +1580,7 @@ function AntMedia(props) {
                     tempVideoTrackAssignments.forEach((oldVTA) => {
                         if (oldVTA.videoLabel === vta.videoLabel) {
                             oldVTA.streamId = vta.trackId;
+                            oldVTA.isReserved = vta.reserved;
                         }
                     });
                 });
@@ -1723,7 +1724,7 @@ function AntMedia(props) {
 
     function removeAllRemoteParticipants() {
         let newVideoTrackAssignment = {
-            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true
+            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true, isReserved: false
         };
 
         let tempVideoTrackAssignments = [];
@@ -1747,7 +1748,7 @@ function AntMedia(props) {
         }
 
         let newVideoTrackAssignment = {
-            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true
+            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true, isReserved: false
         };
         let tempVideoTrackAssignments = videoTrackAssignments;
         tempVideoTrackAssignments.push(newVideoTrackAssignment);
@@ -1790,7 +1791,7 @@ function AntMedia(props) {
             setAudioTracks(temp);
         } else if (obj.track.kind === "video") {
             let newVideoTrackAssignment = {
-                videoLabel: index, track: obj.track, streamId: obj.streamId
+                videoLabel: index, track: obj.track, streamId: obj.streamId, isReserved: false
             };
 
             let tempVideoTrackAssignments = videoTrackAssignments;
