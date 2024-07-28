@@ -497,6 +497,14 @@ function VideoCard(props) {
         <div
           className={`single-video-card`}
           id={'card-'+(props.trackAssignment.streamId !== undefined ? props?.trackAssignment.streamId : "")}
+          style={{
+            height: (props.isMobileView === true) ? "40%" : "100%",
+            width: (props.isMobileView === true) ? "20%" : "100%",
+            position: "relative",
+            borderRadius: 4,
+            margin: (props.isMobileView === true) ? 30 : 0,
+            overflow: "hidden",
+          }}
         >
           {avatarOrPlayer()}
 

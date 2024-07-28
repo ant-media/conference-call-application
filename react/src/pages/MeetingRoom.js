@@ -10,7 +10,6 @@ import MuteParticipantDialog from "../Components/MuteParticipantDialog";
 import {useTheme} from "@mui/material/styles";
 import {t} from "i18next";
 import {isComponentMode} from "../utils";
-import { isMobile, isTablet } from "react-device-detect";
 
 
 function debounce(fn, ms) {
@@ -103,7 +102,7 @@ const MeetingRoom = React.memo((props) => {
 
   const firstPinnedParticipant = getPinnedParticipant();
 
-  const pinLayout = (typeof firstPinnedParticipant !== "undefined") && !isMobile && !isTablet
+  const pinLayout = (typeof firstPinnedParticipant !== "undefined");
 
   return (
     <>
