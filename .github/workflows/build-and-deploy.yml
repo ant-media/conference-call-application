@@ -131,7 +131,22 @@ jobs:
           echo "War file not found."
           exit 1
         fi
+
+    - name: Tag Docker image
+      run: |
+        docker pull antmedia/snapshot:latest
+        docker tag antmedia/snapshot:latest antmedia/snapshot:latest-main
+        docker push antmedia/snapshot:latest-main
         
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+
+    - name: Configure kubectl and restart the deployment
+      run: |
+        echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig
+        export KUBECONFIG=./kubeconfig
+        kubectl rollout restart deployment ant-media-server-origin -n antmedia
+
     - name: Login to server
       run: |
         response=$(curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.STAGING_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt)
