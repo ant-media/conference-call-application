@@ -42,6 +42,16 @@
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
       }
+
+      function selectLanguage(value) {
+        const languages = ['en', 'fr', 'nl', 'de', 'pt'];
+        if (languages.includes(value)) {
+          const previousLanguage = localStorage.getItem("i18nextLng");
+          if (previousLanguage !== value) {
+            localStorage.setItem("i18nextLng", value);
+          }
+        }
+      }
     
       // Function to set participant name if it exists
       let participantNameValueSet = false;
@@ -56,6 +66,20 @@
           if (!participantNameValueSet && participantNameInput && participantNameInput.value.trim() === '') {
             conference.setStreamName(participantName);
           }
+        }
+
+        const shouldJoinMeeting = getQueryParam('wait');
+        if (shouldJoinMeeting === 'true') {
+          const text = (window.translate) ? window.translate("You've been accepted to the meeting. The recruiter is waiting for you to join.") : null;
+          const waitingRoomSubtitleText = document.querySelector("#root > div > div > div > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-md-4.css-1yg725n > div > div.MuiGrid-root.MuiGrid-container.css-eiccwj > h6");
+          if (text && waitingRoomSubtitleText && waitingRoomSubtitleText.innerText !== text) {
+            waitingRoomSubtitleText.innerText = text;
+          }
+        }
+
+        const selectedLanguage = getQueryParam('lang');
+        if (selectedLanguage !== null && selectedLanguage !== undefined) {
+          selectLanguage(selectedLanguage);
         }
   
         const rejoinMeetingButton = document.querySelector("#root > div > div > div > div > div.MuiGrid-root.MuiGrid-container.MuiGrid-spacing-xs-2.css-gl43ya > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-8.MuiGrid-grid-sm-6.MuiGrid-grid-md-5.MuiGrid-grid-lg-2.css-1kglrs6");

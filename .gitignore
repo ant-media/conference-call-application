@@ -4,4 +4,3 @@ webapp/src/main/webapp/
 .vscode/
 
 react/.env.development
-react/.idea/workspace.xml
