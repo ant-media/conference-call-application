@@ -1010,6 +1010,11 @@ function AntMedia(props) {
             webRTCAdaptor?.getBroadcastObject(roomName);
             requestVideoTrackAssignmentsInterval();
 
+            if (isPlayOnly) {
+                setWaitingOrMeetingRoom("meeting");
+                setIsJoining(false);
+            }
+
             if (reconnecting) {
                 playReconnected = true;
                 reconnecting = !((publishReconnected || isPlayOnly) && playReconnected);
