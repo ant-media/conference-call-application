@@ -1665,6 +1665,10 @@ function AntMedia(props) {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
 
+        if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
+            handleStopScreenShare();
+        }
+
         setWaitingOrMeetingRoom("waiting");
     }
 
