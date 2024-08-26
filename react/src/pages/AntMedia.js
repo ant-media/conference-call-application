@@ -1010,6 +1010,11 @@ function AntMedia(props) {
             webRTCAdaptor?.getBroadcastObject(roomName);
             requestVideoTrackAssignmentsInterval();
 
+            if (isPlayOnly) {
+                setWaitingOrMeetingRoom("meeting");
+                setIsJoining(false);
+            }
+
             if (reconnecting) {
                 playReconnected = true;
                 reconnecting = !((publishReconnected || isPlayOnly) && playReconnected);
@@ -2053,7 +2058,10 @@ function AntMedia(props) {
                 displayMessage("Recording is stopped successfully", "white")
             } else {
                 console.log("Stop Recording is failed");
-                displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
+                setIsRecordPluginActive(false);
+                updateRoomRecordingStatus(false);
+                handleSendNotificationEvent("RECORDING_TURNED_OFF", publishStreamId);
+                displayMessage("Recording stopped forcefully due to error: " + definition.message, "white")
             }
         }
     }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);
