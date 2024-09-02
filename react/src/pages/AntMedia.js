@@ -542,29 +542,31 @@ function AntMedia(props) {
         speedTestForPublishWebRtcAdaptor.current?.stop("speedTestStream" + speedTestStreamId.current);
         let rtt = ((parseFloat(updatedStats.videoRoundTripTime) + parseFloat(updatedStats.audioRoundTripTime)) / 2).toPrecision(3);
         let packetLost = parseInt(updatedStats.videoPacketsLost) + parseInt(updatedStats.audioPacketsLost);
+        let packetLostPercentage = (updatedStats.videoPacketsLost+updatedStats.audioPacketLost)/(statsList.current[statsList.current.length - 1].videoPacketsLost+statsList.current[statsList.current.length - 1].audioPacketsLost) * 100
         let jitter = ((parseFloat(updatedStats.videoJitter) + parseInt(updatedStats.audioJitter)) / 2).toPrecision(3);
         let outgoingBitrate = parseInt(updatedStats.currentOutgoingBitrate);
         let bandwidth = parseInt(speedTestForPublishWebRtcAdaptor.current.mediaManager.bandwidth);
         console.log("* rtt: " + rtt);
         console.log("* packetLost: " + packetLost);
+        console.log("* packetLostPercentage: " + packetLostPercentage);
         console.log("* jitter: " + jitter);
         console.log("* outgoingBitrate: " + outgoingBitrate);
         console.log("* bandwidth: " + bandwidth);
 
         let speedTestResult = {};
 
-        if (rtt >= 200 || packetLost >= 3.5 || jitter >= 100) {
+        if (rtt >= 200 || packetLostPercentage >= 3.5 || jitter >= 100) {
             console.log("-> Your connection quality is poor. You may experience interruptions");
             speedTestResult.message = "Your connection quality is poor. You may experience interruptions";
-        } else if (rtt >= 70 || packetLost >= 1.5 || jitter >= 40) {
-            console.log("-> Your connection is fair, but you may experience interruptions");
-            speedTestResult.message = "Your connection is fair, but you may experience interruptions";
-        } else if (rtt >= 30 || jitter >= 20 || packetLost >= 1) {
-            console.log("-> Your connection is good, but there could be slight issues.");
-            speedTestResult.message = "Your connection is good, but there could be slight issues.";
+        } else if (rtt >= 100 || packetLostPercentage >= 2 || jitter >= 80) {
+            console.log("-> Your connection is moderate, occasional disruptions may occur");
+            speedTestResult.message = "Your connection is moderate, occasional disruptions may occur";
+        } else if (rtt >= 30 || jitter >= 20 || packetLostPercentage >= 1) {
+            console.log("-> Your connection is good.");
+            speedTestResult.message = "Your connection is good.";
         } else {
-            console.log("-> Your connection is optimal");
-            speedTestResult.message = "Your connection is optimal";
+            console.log("-> Your connection is great");
+            speedTestResult.message = "Your connection is great";
         }
 
         speedTestResult.isfailed = false;
