@@ -8,6 +8,8 @@ import os
 import random
 import json
 import time
+import subprocess
+import threading
 
 class TestTestFakeehScenario(unittest.TestCase):
   def setUp(self):
@@ -16,9 +18,18 @@ class TestTestFakeehScenario(unittest.TestCase):
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.chrome = Browser()
     self.chrome.init(True)
+    self.startLoadTest()
 
   def tearDown(self):
     print(self._testMethodName, " ending...")
+
+  def startLoadTest(self):
+    def start_load_test():
+      subprocess.run(["./webrtc-load-test/run.sh", "-f", "test.mp4", "-m", "publisher", "-n", "12", "-s", self.url, "-q", "true", "-p", "5443", "-a", self.test_app_name])
+
+    # Create a new thread for running the load test
+    load_test_thread = threading.Thread(target=start_load_test)
+    load_test_thread.start()
 
   def join_room_as_admin(self, participant, room):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
@@ -235,6 +246,14 @@ class TestTestFakeehScenario(unittest.TestCase):
     print ("approved speaker request list count:" + str(len(result_json["approvedSpeakerRequestList"])))
     return result_json["approvedSpeakerRequestList"]
   
+  def get_track_stats(self):
+    script = "return window.conference.getTrackStats();"
+    result_json = self.chrome.execute_script_with_retry(script)
+    if result_json is None:
+      return []
+
+    return result_json
+  
   def get_conference(self):
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
@@ -356,6 +375,38 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
 
+
+    self.chrome.close_all()
+
+  def test_with_stats(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+    handle_3 = self.join_room_in_new_tab("participantB", room)
+
+
+    assert(handle_3 == self.chrome.get_current_tab_id())
+
+    self.assertLocalVideoAvailable()
+
+    wait = self.chrome.get_wait()
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
+
+    self.chrome.switch_to_tab(handle_1)
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
+
+    wait.until(lambda x: len(self.get_track_stats()['inboundRtpList']) == 4)
+    stats = self.get_track_stats()
+
+    for track_stat in stats['inboundRtpList']:
+      assert(track_stat['bytesReceived'] > 0)
+
+
+    print("stats: "+str(stats))
+
+    assert(stats is not None)
 
     self.chrome.close_all()
 
