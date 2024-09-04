@@ -13,7 +13,7 @@ function LayoutPinned (props) {
 
   let MAX_VIDEO_AT_SIDE = 4;
 
-  let trackCount = Math.min(conference.globals.desiredMaxVideoTrackCount, MAX_VIDEO_AT_SIDE);
+  let trackCount = Math.min(conference.globals.desiredMaxVideoTrackCount-1, MAX_VIDEO_AT_SIDE);
 
   const showOthers = Object.keys(conference.allParticipants).length > trackCount + 1; //one video is pinned
 
