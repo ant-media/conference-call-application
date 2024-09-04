@@ -13,15 +13,17 @@ function LayoutPinned (props) {
 
   let MAX_VIDEO_AT_SIDE = 4;
 
-  let trackCount = Math.min(conference.globals.desiredMaxVideoTrackCount, MAX_VIDEO_AT_SIDE);
-  conference.updateMaxVideoTrackCount(trackCount);
+  let trackCount = Math.min(conference.globals.desiredMaxVideoTrackCount-1, MAX_VIDEO_AT_SIDE);
 
   const showOthers = Object.keys(conference.allParticipants).length > trackCount + 1; //one video is pinned
+
+  conference.updateMaxVideoTrackCount(showOthers ? trackCount - 1 : trackCount);
+
 
   let playingParticipantsCount = 0;
 
   //if we need to show others card, then we don't show the last video to hold place for the others card. but should show you.
-  const maxPlayingParticipantsCount = showOthers ? Math.max(2, trackCount-1) : Math.min(conference.videoTrackAssignments.length, MAX_VIDEO_AT_SIDE);
+  const maxPlayingParticipantsCount = showOthers ? Math.max(2, trackCount) : Math.min(conference.videoTrackAssignments.length, MAX_VIDEO_AT_SIDE);
   const playingParticipants = [];
 
   const pinnedVideo = () => {
