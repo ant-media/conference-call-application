@@ -18,6 +18,8 @@ import floating from "../external/floating.js";
 import {UnauthrorizedDialog} from "Components/Footer/Components/UnauthorizedDialog";
 import {useWebSocket} from 'Components/WebSocketProvider';
 import {useTheme} from "@mui/material/styles";
+import useSound from 'use-sound';
+import joinRoomSound from 'static/sounds/join-sound.mp3';
 
 export const ConferenceContext = React.createContext(null);
 
@@ -261,6 +263,11 @@ function AntMedia(props) {
         'thinking_face': '🤔',
         'thumbs_down': '👎🏼'
     });
+
+    const [playJoinRoomSound, { stopJoinRoomSound }] = useSound(
+        joinRoomSound,
+        { volume: 0.5 }
+    );
 
     const {sendMessage, latestMessage, isWebSocketConnected} = useWebSocket();
 
@@ -741,6 +748,7 @@ function AntMedia(props) {
         };
         allParticipantsTemp["streamId_" + suffix] = broadcastObject;
         setAllParticipants(allParticipantsTemp);
+        playJoinRoomSound();
 
         if (Object.keys(allParticipantsTemp).length <= globals.maxVideoTrackCount) {
             let newVideoTrackAssignment = {
@@ -1767,6 +1775,7 @@ function AntMedia(props) {
             streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false
         };
         setAllParticipants(allParticipantsTemp);
+        playJoinRoomSound();
     }
 
 
@@ -1807,6 +1816,9 @@ function AntMedia(props) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
                 tempVideoTrackAssignments.push(newVideoTrackAssignment);
+            }
+            if (! _.isEqual(videoTrackAssignments, tempVideoTrackAssignments)) {
+                playJoinRoomSound();
             }
             setVideoTrackAssignments(tempVideoTrackAssignments);
         }
