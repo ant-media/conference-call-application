@@ -264,7 +264,7 @@ function AntMedia(props) {
         'thumbs_down': '👎🏼'
     });
 
-    const [playJoinRoomSound, { stopJoinRoomSound }] = useSound(
+    const [playJoinRoomSound /*, { stopJoinRoomSound }*/] = useSound(
         joinRoomSound,
         { volume: 0.5 }
     );
