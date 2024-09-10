@@ -1190,10 +1190,11 @@ function AntMedia(props) {
                     joinRoom(roomName, publishStreamId);
                 }, 3000);
             }
-        } else if ((error === "publishTimeoutError") && (!reconnecting)) {
+        } else if (error === "publishTimeoutError") {
             setLeaveRoomWithError("Firewall might be blocking your connection. Please report this.");
             setLeftTheRoom(true);
             setIsJoining(false);
+            setIsReconnectionInProgress(false);
         } else if (error === "license_suspended_please_renew_license") {
             setLeaveRoomWithError("Licence error. Please report this.");
             setLeftTheRoom(true);
