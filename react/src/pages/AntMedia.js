@@ -1061,13 +1061,29 @@ function AntMedia(props) {
         }
     }
 
+    function parseIntAndRound(value) {
+        let parsedValue = parseInt(value);
+        if (isNaN(parsedValue) || parsedValue === -1) {
+            return 0;
+        }
+        return parsedValue;
+    }
+
+    function parseFloatAndRound(value) {
+        let parsedValue = parseFloat(value);
+        if (isNaN(parsedValue) || parsedValue === -1) {
+            return 0;
+        }
+        return parsedValue;
+    }
+
     function checkConnectionQuality(obj) {
-        let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
-        let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
+        let rtt = ((parseFloatAndRound(obj.videoRoundTripTime) + parseFloatAndRound(obj.audioRoundTripTime)) / 2).toPrecision(3);
+        let jitter = ((parseFloatAndRound(obj.videoJitter) + parseIntAndRound(obj.audioJitter)) / 2).toPrecision(3);
         //let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
 
-        let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
-        let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
+        let packageLost = parseIntAndRound(obj.videoPacketsLost) + parseIntAndRound(obj.audioPacketsLost);
+        let packageSent = parseIntAndRound(obj.totalVideoPacketsSent) + parseIntAndRound(obj.totalAudioPacketsSent);
 
         let packageLostPercentage = 0;
         console.log("publishStats:", publishStats);
@@ -1076,7 +1092,7 @@ function AntMedia(props) {
             let deltaPackageSent = packageSent - publishStats.packageSent;
 
             if (deltaPackageLost > 0) {
-                packageLostPercentage = ((deltaPackageLost / parseInt(deltaPackageSent)) * 100).toPrecision(3);
+                packageLostPercentage = ((deltaPackageLost / parseIntAndRound(deltaPackageSent)) * 100).toPrecision(3);
             }
         }
 
