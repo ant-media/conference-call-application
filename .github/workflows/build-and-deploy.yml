@@ -63,14 +63,6 @@ jobs:
         ls -alh target/
         cd ..
         
-    - name: Run unit tests
-      run: |
-        cd react
-        npm install codecov --save-dev
-        npm test
-        npm run upload-coverage
-        cd ..
-        
     - name: Install Test Tool
       run: |
         sudo apt-get update
@@ -181,3 +173,19 @@ jobs:
           echo "Importing setting is failed."
           exit 1
         fi
+
+  RunUnitTests:
+    runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-node@v3
+          with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+        - run: cd react
+        - run: npm install --include=dev
+        - run: npm test
+        - name: Upload coverage to Codecov
+          uses: codecov/codecov-action@v4
+          with:
+            token: ${{ secrets.CODECOV_TOKEN }}
