@@ -516,6 +516,9 @@ function AntMedia(props) {
                 setSpeedTestObject(speedTestResult);
 
                 stopSpeedTest();
+            } else if (info === "available_devices") {
+                setDevices(obj);
+
             } else {
                 let tempSpeedTestObject = {};
                 tempSpeedTestObject.message = speedTestObject.message;
@@ -569,6 +572,8 @@ function AntMedia(props) {
             console.log("speed test updated stats")
         } else if (info === "ice_connection_state_changed") {
             console.log("speed test ice connection state changed")
+        } else if (info === "available_devices") {
+            setDevices(obj);
         }
     }
 
@@ -1106,6 +1111,9 @@ function AntMedia(props) {
             setIsScreenShared(true);
             //webRTCAdaptor?.assignVideoTrack("videoTrack0", screenShareStreamId.current, true);
             //pinVideo(screenShareStreamId.current);
+
+        } else if (info === "available_devices") {
+            setDevices(obj);
 
         } else if (info === "updated_stats") {
             //checkConnectionQuality(obj);
