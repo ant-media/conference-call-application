@@ -45,7 +45,7 @@
     "build": "react-scripts build && node custom-post-build.js",
     "eject": "react-scripts eject",
     "test": "jest --verbose",
-    "upload-coverage": "codecov"
+    "upload-coverage": "codecov --disable=gcov"
   },
   "eslintConfig": {
     "extends": [
