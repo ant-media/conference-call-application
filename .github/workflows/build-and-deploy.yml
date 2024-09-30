@@ -9,21 +9,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Run Unit Test
+    - name: Checkout repository
       uses: actions/checkout@v3
+
+    - name: Set up Node.js
       uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-          registry-url: 'https://registry.npmjs.org'
-      - run:  |
-          cd react
-          npm install --include=dev
-          npm test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-  
+      with:
+        node-version: '16.x'
+        registry-url: 'https://registry.npmjs.org'
+        
+    - name: Run Unit Test
+      run: |
+        cd react
+        npm install --include=dev
+        npm test
+        
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+
     - name: Checkout repository
       uses: actions/checkout@v2
 
