@@ -531,10 +531,6 @@ function AntMedia(props) {
         } else if (info === "ice_connection_state_changed") {
             console.log("speed test ice connection state changed")
         }
-        else if (info === "available_devices") {
-          console.log("aaaaaaaaaaaavailable_devices")
-
-      }
     }
 
     function speedTestForPublishWebRtcAdaptorErrorCallback(error, message) {
