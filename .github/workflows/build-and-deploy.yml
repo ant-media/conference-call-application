@@ -29,9 +29,6 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
