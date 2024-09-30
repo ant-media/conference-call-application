@@ -379,7 +379,7 @@ function AntMedia(props) {
         speedTestForPlayWebRtcAdaptor.current = null;
 
         //we need to listen device changes with main webRTCAdaptor
-        webRTCAdaptor.mediaManager.trackDeviceChange();
+        webRTCAdaptor.mediaManager?.trackDeviceChange();
     }
 
     function parseWebSocketURL(url) {
