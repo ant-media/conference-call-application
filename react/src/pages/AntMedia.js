@@ -1010,6 +1010,11 @@ function AntMedia(props) {
             webRTCAdaptor?.getBroadcastObject(roomName);
             requestVideoTrackAssignmentsInterval();
 
+            if (isPlayOnly) {
+                setWaitingOrMeetingRoom("meeting");
+                setIsJoining(false);
+            }
+
             if (reconnecting) {
                 playReconnected = true;
                 reconnecting = !((publishReconnected || isPlayOnly) && playReconnected);
@@ -1185,10 +1190,11 @@ function AntMedia(props) {
                     joinRoom(roomName, publishStreamId);
                 }, 3000);
             }
-        } else if ((error === "publishTimeoutError") && (!reconnecting)) {
+        } else if (error === "publishTimeoutError") {
             setLeaveRoomWithError("Firewall might be blocking your connection. Please report this.");
             setLeftTheRoom(true);
             setIsJoining(false);
+            setIsReconnectionInProgress(false);
         } else if (error === "license_suspended_please_renew_license") {
             setLeaveRoomWithError("Licence error. Please report this.");
             setLeftTheRoom(true);
@@ -1665,6 +1671,10 @@ function AntMedia(props) {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
 
+        if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
+            handleStopScreenShare();
+        }
+
         setWaitingOrMeetingRoom("waiting");
     }
 
@@ -2053,7 +2063,10 @@ function AntMedia(props) {
                 displayMessage("Recording is stopped successfully", "white")
             } else {
                 console.log("Stop Recording is failed");
-                displayMessage("Recording cannot be stoped due to error: " + definition.message, "white")
+                setIsRecordPluginActive(false);
+                updateRoomRecordingStatus(false);
+                handleSendNotificationEvent("RECORDING_TURNED_OFF", publishStreamId);
+                displayMessage("Recording stopped forcefully due to error: " + definition.message, "white")
             }
         }
     }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]);

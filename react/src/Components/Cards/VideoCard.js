@@ -386,7 +386,7 @@ function VideoCard(props) {
             style={{ objectFit: "contain" }}
             ref={refVideo}
             playsInline
-            muted={props?.trackAssignment.isMine}
+            muted={true} // mute the video because we are playing the audio separately
           />
         </Grid>
       </>
