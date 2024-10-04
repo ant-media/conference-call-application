@@ -63,7 +63,7 @@ describe('Pinned Layout Component', () => {
         </ThemeProvider>
       );
 
-      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(10);
+      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(9);
 
   });
 });

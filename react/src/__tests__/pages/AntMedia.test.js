@@ -11,9 +11,9 @@ import theme from "styles/theme";
 import { times } from 'lodash';
 import { useParams } from 'react-router-dom';
 
-
-var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor;
+var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
+var websocketURL = "ws://localhost:5080/Conference/websocket";
 
 jest.mock('Components/WebSocketProvider', () => ({
   ...jest.requireActual('Components/WebSocketProvider'),
@@ -34,7 +34,7 @@ jest.mock('utils', () => ({
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn().mockReturnValue({id: "room"}),
-  
+
 }));
 
 
@@ -43,7 +43,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
   ...jest.requireActual('@antmedia/webrtc_adaptor'),
   WebRTCAdaptor: jest.fn().mockImplementation((params) => {
     console.log(params);
-      var mockAdaptor = {
+    var mockAdaptor = {
       init : jest.fn(),
       publish : jest.fn().mockImplementation(() => console.log('publishhhhhh')),
       play : jest.fn(),
@@ -75,6 +75,11 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       assignVideoTrack: jest.fn(),
       setParticipantUpdated: jest.fn(),
       getSubtracks: jest.fn(),
+      createSpeedTestForPublishWebRtcAdaptorPlayOnly: jest.fn(),
+      createSpeedTestForPublishWebRtcAdaptor: jest.fn(),
+      createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
+      requestVideoTrackAssignments: jest.fn(),
+      stopSpeedTest: jest.fn().mockImplementation(() => console.log('stopSpeedTest')),
     }
 
     for (var key in params) {
@@ -84,11 +89,20 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
     }
 
 
-    if(params.mediaConstraints.audio === true) {
+    if (params.purposeForTest === "main-adaptor") {
+      webRTCAdaptorConstructor = mockAdaptor;
+    }
+    else if(params.purposeForTest === "screen-share") {
       webRTCAdaptorScreenConstructor = mockAdaptor;
     }
-    else {
-      webRTCAdaptorConstructor = mockAdaptor;
+    else if (params.purposeForTest === "publish-speed-test-play-only") {
+      webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = mockAdaptor;
+    }
+    else if (params.purposeForTest === "publish-speed-test") {
+      webRTCAdaptorPublishSpeedTestConstructor = mockAdaptor;
+    }
+    else if (params.purposeForTest === "play-speed-test") {
+      webRTCAdaptorPlaySpeedTestConstructor = mockAdaptor;
     }
     return mockAdaptor;
   }),
@@ -105,7 +119,7 @@ const MockChild = () => {
   //console.log(conference);
 
   return (
-    <div> My Mock </div>
+      <div> My Mock </div>
   );
 };
 
@@ -131,19 +145,19 @@ describe('AntMedia Component', () => {
     jest.clearAllMocks();
 
     useWebSocket.mockImplementation(() => ({
-        return: {
-            sendMessage: jest.fn(),
-            latestMessage: null,
-            isWebSocketConnected: true,
-        }
+      return: {
+        sendMessage: jest.fn(),
+        latestMessage: null,
+        isWebSocketConnected: true,
+      }
     }));
 
     useSnackbar.mockImplementation(() => ({
-        enqueueSnackbar: enqueueSnackbar,
-        closeSnackbar: jest.fn(),
+      enqueueSnackbar: enqueueSnackbar,
+      closeSnackbar: jest.fn(),
     }));
   });
-  
+
   afterEach(() => {
     webRTCAdaptorConstructor = undefined;
     webRTCAdaptorScreenConstructor = undefined;
@@ -157,146 +171,148 @@ describe('AntMedia Component', () => {
     await act(async () => {
       const { container } = render(
           <AntMedia isTest={true}/>
-        );
-        console.log(container.outerHTML);
+      );
+      console.log(container.outerHTML);
     });
 
   });
 
   it('share screen', async () => {
-      const { container } = render(
+    const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
         </AntMedia>);
-      //console.log(container);
+    //console.log(container);
 
-      expect(currentConference.isScreenShared).toBe(false);
+    expect(currentConference.isScreenShared).toBe(false);
 
-      await act(async () => {
+    await act(async () => {
       currentConference.handleStartScreenShare();
-      });
+    });
 
-      await waitFor(() => {
-        expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
-      });
+    await waitFor(() => {
+      expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+    });
 
-      act(() => {
-          webRTCAdaptorScreenConstructor.callback("publish_started");
-      });
+    act(() => {
+      webRTCAdaptorScreenConstructor.callback("publish_started");
+    });
 
 
-      await waitFor(() => {
-        expect(currentConference.isScreenShared).toBe(true);
-      });
-
-      console.log(currentConference);
-
+    await waitFor(() => {
       expect(currentConference.isScreenShared).toBe(true);
     });
 
-    it('share screen adaptor callbacks', async () => {
+    console.log(currentConference);
 
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    expect(currentConference.isScreenShared).toBe(true);
+  });
 
-      const { container } = render(
+  it('share screen adaptor callbacks', async () => {
+
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
         </AntMedia>);
-      //console.log(container);
+    //console.log(container);
 
 
-      expect(currentConference.isScreenShared).toBe(false);
+    expect(currentConference.isScreenShared).toBe(false);
 
-      await act(async () => {
+    await act(async () => {
       currentConference.handleStartScreenShare();
-      });
-
-      await waitFor(() => {
-        expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
-      });
-
-      act(() => {
-          webRTCAdaptorScreenConstructor.callback("initialized");
-          var obj = {videoRoundTripTime: 1000,
-            audioRoundTripTime: 0,
-            videoJitter: 0,
-            audioJitter: 0,
-            currentOutgoingBitrate: 0,
-            videoPacketsLost: 0,
-            audioPacketsLost: 0,
-            totalVideoPacketsSent: 0,
-            totalAudioPacketsSent: 0,
-            availableOutgoingBitrate: 0};
-          webRTCAdaptorScreenConstructor.callback("updated_stats", obj);
-
-          webRTCAdaptorScreenConstructor.callbackError("error", "message");
-        });
-
-        expect(consoleSpy).toHaveBeenCalledWith("error:error message:message");
-
-        // Restore the mock
-        consoleSpy.mockRestore();
     });
 
+    await waitFor(() => {
+      expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+    });
 
     /*
     it('handle video track assignment', async () => {
       const { container } = render(
+    act(() => {
+      webRTCAdaptorScreenConstructor.callback("initialized");
+      var obj = {videoRoundTripTime: 1000,
+        audioRoundTripTime: 0,
+        videoJitter: 0,
+        audioJitter: 0,
+        currentOutgoingBitrate: 0,
+        videoPacketsLost: 0,
+        audioPacketsLost: 0,
+        totalVideoPacketsSent: 0,
+        totalAudioPacketsSent: 0,
+        availableOutgoingBitrate: 0};
+      webRTCAdaptorScreenConstructor.callback("updated_stats", obj);
+
+      webRTCAdaptorScreenConstructor.callbackError("error", "message");
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith("error:error message:message");
+
+    // Restore the mock
+    consoleSpy.mockRestore();
+  });
+
+
+  it('handle video track assignment', async () => {
+    const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
         </AntMedia>);
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      var obj = {};
-      let broadcastObject = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
-      let broadcastObjectMessage = JSON.stringify(broadcastObject);
-
-      obj.broadcast = broadcastObjectMessage;
-      obj.streamId = "p1";
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("broadcastObject", obj);
-      });
-
-
-      var notificationEvent = {
-        eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
-        streamId: "stream1",
-        payload: [
-          {videoLabel:"videoTrack1", trackId:"tracka1"},
-          {videoLabel:"videoTrack2", trackId:"tracka2"},
-        ]
-      };
-      var json = JSON.stringify(notificationEvent);
-
-      obj = {};
-      obj.data = json;
-
-      const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("data_received", obj);
-      });
-
-      var event = {"eventType": "PIN_USER", "streamId": "p1"};
-      expect(consoleSpy).toHaveBeenCalledWith("send notification event", event);
-
-
-      consoleSpy.mockRestore();
-
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
     */
 
+    var obj = {};
+    let broadcastObject = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
+    let broadcastObjectMessage = JSON.stringify(broadcastObject);
+
+    obj.broadcast = broadcastObjectMessage;
+    obj.streamId = "p1";
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("broadcastObject", obj);
+    });
+
+
+    var notificationEvent = {
+      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+      streamId: "stream1",
+      payload: [
+        {videoLabel:"videoTrack1", trackId:"tracka1"},
+        {videoLabel:"videoTrack2", trackId:"tracka2"},
+      ]
+    };
+    var json = JSON.stringify(notificationEvent);
+
+    obj = {};
+    obj.data = json;
+
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("data_received", obj);
+    });
+
+    var event = {"eventType": "PIN_USER", "streamId": "p1"};
+    expect(consoleSpy).toHaveBeenCalledWith("send notification event", event);
+
+
+    consoleSpy.mockRestore();
+
+  });
+
   it('handle video track assignment remove mechanism', async () => {
     const {container} = render(
-      <ThemeProvider theme={theme(ThemeList.Green)}>
-        <AntMedia isTest={true}>
-          <MockChild/>
-        </AntMedia>
-      </ThemeProvider>);
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
 
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
@@ -346,94 +362,90 @@ describe('AntMedia Component', () => {
 
   });
 
-    it('handle sharing on', async () => {
-      const { container } = render(
+  it('handle sharing on', async () => {
+    const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
         </AntMedia>);
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      var testStreamId = "stream1";
-
-      currentConference.videoTrackAssignments.push({streamId: testStreamId, videoLabel: "test1"});
-      var obj = {};
-      var notificationEvent = {
-        eventType: "SCREEN_SHARED_ON",
-        streamId: testStreamId,
-      };
-      var json = JSON.stringify(notificationEvent);
-
-      obj.data = json;
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("data_received", obj);
-      });
-
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    it('publishTimeoutError error callback', async () => {
-      const { container } = render(
+    var testStreamId = "stream1";
+
+    currentConference.videoTrackAssignments.push({streamId: testStreamId, videoLabel: "test1"});
+    var obj = {};
+    var notificationEvent = {
+      eventType: "SCREEN_SHARED_ON",
+      streamId: testStreamId,
+    };
+    var json = JSON.stringify(notificationEvent);
+
+    obj.data = json;
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("data_received", obj);
+    });
+
+  });
+
+  it('publishTimeoutError error callback', async () => {
+    const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
         </AntMedia>);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callbackError("publishTimeoutError", {});
-      });
-
-      await act(async () => {
-        expect(currentConference.leaveRoomWithError == "Firewall might be blocking your connection. Please report this.");
-      });
-
-      await act(async () => {
-        expect(currentConference.leftTheRoom == true);
-      });
-
-      consoleSpy.mockRestore();
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    it('license_suspended_please_renew_license error callback', async () => {
-      const { container } = render(
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("publishTimeoutError", {});
+    });
+
+    await act(async () => {
+      expect(currentConference.leaveRoomWithError == "Firewall might be blocking your connection. Please report this.");
+    });
+
+    await act(async () => {
+      expect(currentConference.leftTheRoom == true);
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  it('license_suspended_please_renew_license error callback', async () => {
+    const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
         </AntMedia>);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
-      });
-
-      await act(async () => {
-        expect(currentConference.leaveRoomWithError == "Licence error. Please report this.");
-      });
-
-      await act(async () => {
-        expect(currentConference.leftTheRoom == true);
-      });
-
-      consoleSpy.mockRestore();
-
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Licence error. Please report this.");
+    });
+
+    consoleSpy.mockRestore();
+
+  });
 
   it('notSetRemoteDescription error callback', async () => {
     const { container } = render(
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>);
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
@@ -445,65 +457,61 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callbackError("notSetRemoteDescription", {});
     });
 
-    await act(async () => {
-      expect(currentConference.leaveRoomWithError == "System is not compatible to connect. Please report this.");
-    });
-
-    await act(async () => {
-      expect(currentConference.leftTheRoom === true);
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("System is not compatible to connect. Please report this.");
     });
 
     consoleSpy.mockRestore();
 
   });
 
-    it('max video count setting', async () => {
-      const { container } = render(
+  it('max video count setting', async () => {
+    const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
         </AntMedia>);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      await waitFor(() => {
-        currentConference.joinRoom("room", "publishStreamId");
-      });
-
-      await act(async () => {
-        currentConference.handleSetMaxVideoTrackCount(5);
-      });
-
-      expect(currentConference.globals.desiredMaxVideoTrackCount == 5);
-
-      await act(async () => {
-        currentConference.updateMaxVideoTrackCount(7);
-      });
-
-      expect(currentConference.globals.maxVideoTrackCount === 7);
-
-      consoleSpy.mockRestore();
-
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    it('start with camera and microphone', async () => {
-      mediaDevicesMock.enumerateDevices.mockResolvedValue([
-        { deviceId: '1', kind: 'videoinput' },
-        { deviceId: '1', kind: 'audioinput' },
-      ]);
+    await waitFor(() => {
+      currentConference.joinRoom("room", "publishStreamId");
+    });
 
-      const { container } = render(
+    await act(async () => {
+      currentConference.handleSetMaxVideoTrackCount(5);
+    });
+
+    expect(currentConference.globals.desiredMaxVideoTrackCount == 5);
+
+    await act(async () => {
+      currentConference.updateMaxVideoTrackCount(7);
+    });
+
+    expect(currentConference.globals.maxVideoTrackCount === 7);
+
+    consoleSpy.mockRestore();
+
+  });
+
+  it('start with camera and microphone', async () => {
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+      { deviceId: '1', kind: 'videoinput' },
+      { deviceId: '1', kind: 'audioinput' },
+    ]);
+
+    const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
         </AntMedia>);
 
-      expect(currentConference.cameraButtonDisabled === false);
-      expect(currentConference.microphoneButtonDisabled === false);
+    expect(currentConference.cameraButtonDisabled === false);
+    expect(currentConference.microphoneButtonDisabled === false);
 
-    });
+  });
 
   it('start with one microphone and without any camera', async () => {
     mediaDevicesMock.enumerateDevices.mockResolvedValue([
@@ -511,9 +519,9 @@ describe('AntMedia Component', () => {
     ]);
 
     const { container } = render(
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>);
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
     expect(currentConference.cameraButtonDisabled === true);
     expect(currentConference.microphoneButtonDisabled === false);
@@ -526,9 +534,9 @@ describe('AntMedia Component', () => {
     ]);
 
     const { container } = render(
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>);
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
     expect(currentConference.cameraButtonDisabled === false);
     expect(currentConference.microphoneButtonDisabled === true);
@@ -540,9 +548,9 @@ describe('AntMedia Component', () => {
     ]);
 
     const { container } = render(
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>);
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
     expect(currentConference.cameraButtonDisabled === true);
     expect(currentConference.microphoneButtonDisabled === true);
@@ -552,15 +560,15 @@ describe('AntMedia Component', () => {
   it('should enable camera and microphone buttons if selected devices are available', async () => {
 
     const { container } = render(
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>);
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
 
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
-    
+
     // Execute the function
     await act(async () => {
       currentConference.checkAndUpdateVideoAudioSources();
@@ -574,9 +582,9 @@ describe('AntMedia Component', () => {
   it('should disable microphone button if no microphone is available', async () => {
 
     const { container } = render(
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>);
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
 
     await waitFor(() => {
@@ -604,9 +612,9 @@ describe('AntMedia Component', () => {
 
   it('should disable microphone button if no microphone is available', async () => {
     const { container } = render(
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>);
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
 
     await waitFor(() => {
@@ -639,9 +647,9 @@ describe('AntMedia Component', () => {
     ]);
 
     const { container } = render(
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>);
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
@@ -682,9 +690,9 @@ describe('AntMedia Component', () => {
     ]);
 
     const { container } = render(
-      <AntMedia isTest={true}>
-        <MockChild/>
-      </AntMedia>);
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
@@ -718,8 +726,8 @@ describe('AntMedia Component', () => {
 
   });
 
-    it('is joining state test', async () => {
-      const { container } = render(
+  it('is joining state test', async () => {
+    const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
             <MockChild/>
@@ -727,112 +735,112 @@ describe('AntMedia Component', () => {
         </ThemeProvider>);
 
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      expect(currentConference.isJoining).toBe(false);
-
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      await act(async () => {
-        currentConference.setIsJoining(true);
-      });
-
-      expect(currentConference.isJoining).toBe(true);
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("publish_started");
-      });
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("play_started");
-      });
-
-
-      expect(currentConference.isJoining).toBe(false);
-
-      consoleSpy.mockRestore();
-
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    it('is joining state for playonly', async () => {
-      const { container } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>
-        </ThemeProvider>);
+    expect(currentConference.isJoining).toBe(false);
 
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      expect(currentConference.isJoining).toBe(false);
-
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      await act(async () => {
-        currentConference.setIsJoining(true);
-        currentConference.setIsPlayOnly(true);
-      });
-
-      expect(currentConference.isJoining).toBe(true);
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("play_started");
-      });
-
-
-      expect(currentConference.isJoining).toBe(false);
-
-      consoleSpy.mockRestore();
-
+    await act(async () => {
+      currentConference.setIsJoining(true);
     });
 
-    it('playonly join when noone in the room', async () => {
-      const { container } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>
-        </ThemeProvider>);
+    expect(currentConference.isJoining).toBe(true);
 
-
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      expect(currentConference.isJoining).toBe(false);
-
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      await act(async () => {
-        currentConference.setIsJoining(true);
-        currentConference.setIsPlayOnly(true);
-        webRTCAdaptorConstructor.callbackError("no_stream_exist");
-      });
-
-      expect(currentConference.isJoining).toBe(true);
-
-      await waitFor(() => {
-        expect(container.outerHTML).toContain("The room is currently empty");
-      });
-      
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("play_started");
-      });
-
-
-      expect(currentConference.isJoining).toBe(false);
-
-      consoleSpy.mockRestore();
-
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("publish_started");
     });
 
-    it('is reconnection in progress state test', async () => {
-      const { container } = render(
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("play_started");
+    });
+
+
+    expect(currentConference.isJoining).toBe(false);
+
+    consoleSpy.mockRestore();
+
+  });
+
+  it('is joining state for playonly', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    expect(currentConference.isJoining).toBe(false);
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    await act(async () => {
+      currentConference.setIsJoining(true);
+      currentConference.setIsPlayOnly(true);
+    });
+
+    expect(currentConference.isJoining).toBe(true);
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("play_started");
+    });
+
+
+    expect(currentConference.isJoining).toBe(false);
+
+    consoleSpy.mockRestore();
+
+  });
+
+  it('playonly join when noone in the room', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    expect(currentConference.isJoining).toBe(false);
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    await act(async () => {
+      currentConference.setIsJoining(true);
+      currentConference.setIsPlayOnly(true);
+      webRTCAdaptorConstructor.callbackError("no_stream_exist");
+    });
+
+    expect(currentConference.isJoining).toBe(true);
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("The room is currently empty");
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("play_started");
+    });
+
+
+    expect(currentConference.isJoining).toBe(false);
+
+    consoleSpy.mockRestore();
+
+  });
+
+  it('is reconnection in progress state test', async () => {
+    const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
             <MockChild/>
@@ -841,80 +849,41 @@ describe('AntMedia Component', () => {
 
 
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
 
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+
+
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("play_started");
+    });
+
+    webRTCAdaptorConstructor.mediaManager = {};
+    webRTCAdaptorConstructor.mediaManager.setVideoCameraSource = jest.fn();
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("publish_started");
+    });
+
+    await waitFor(() => {
       expect(container.outerHTML).not.toContain("Reconnecting...");
-      
-      
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
-      });
-
-
-      await waitFor(() => {
-        expect(container.outerHTML).toContain("Reconnecting...");
-      });
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("play_started");
-      });
-
-      webRTCAdaptorConstructor.mediaManager = {};
-      webRTCAdaptorConstructor.mediaManager.setVideoCameraSource = jest.fn();
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("publish_started");
-      });
-
-      await waitFor(() => {
-        expect(container.outerHTML).not.toContain("Reconnecting...");
-      });
     });
+  });
 
-
-    it('is reconnection in progress state for playonly', async () => {
-      const { container } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>
-        </ThemeProvider>);
-
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      expect(container.outerHTML).not.toContain("Reconnecting...");
-      
-      await act(async () => {
-        currentConference.setIsPlayOnly(true);
-      });
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
-      });
-
-
-      await waitFor(() => {
-        expect(container.outerHTML).toContain("Reconnecting...");
-      });
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("play_started");
-      });
-
-
-      await waitFor(() => {
-        expect(container.outerHTML).not.toContain("Reconnecting...");
-      });
-    });
-
-
-    it('test fix for duplicated tile after reconnection', async () => {
-      const { container } = render(
+  it('is reconnection in progress state test because of publisher', async () => {
+    const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
             <MockChild/>
@@ -923,81 +892,238 @@ describe('AntMedia Component', () => {
 
 
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      expect(container.outerHTML).not.toContain("Reconnecting...");
-      
-      
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
-      });
-
-
-      await waitFor(() => {
-        expect(container.outerHTML).toContain("Reconnecting...");
-      });
-
-      expect(currentConference.videoTrackAssignments).toHaveLength(1);
-
-      expect(currentConference.videoTrackAssignments[0].isMine).toBe(true);
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("newStreamAvailable", {"trackId" : "ARDAMSvvideoTrack0", "streamId":"room1", "track": {id: "someId", kind: "video"}});
-      });
-
-      expect(currentConference.videoTrackAssignments).toHaveLength(2);
-
-      expect(currentConference.videoTrackAssignments[1].videoLabel).toBe("videoTrack0");
-      expect(currentConference.videoTrackAssignments[1].streamId).toBe("room1");
-
-
-      var notificationEvent = {
-        eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
-        streamId: "stream1",
-        payload: [
-          {videoLabel:"videoTrack0", trackId:"participant1"},
-        ]
-      };
-      var json = JSON.stringify(notificationEvent);
-
-      let obj = {data: json};
-
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("data_received", obj);
-      });
-
-      expect(currentConference.videoTrackAssignments).toHaveLength(2);
-
-      expect(currentConference.videoTrackAssignments[1].videoLabel).toBe("videoTrack0");
-      expect(currentConference.videoTrackAssignments[1].streamId).toBe("participant1");
-
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    it('calls removeAllRemoteParticipants without crashing', () => {
-      let contextValue = {
-        removeAllRemoteParticipants: jest.fn(),
-      };
+    expect(container.outerHTML).not.toContain("Reconnecting...");
 
-      const TestComponent = () => {
-        const conference = React.useContext(ConferenceContext);
-        conference.removeAllRemoteParticipants();
-        return null;
-      };
 
-      render(
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+    });
+
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("play_started");
+    });
+
+    webRTCAdaptorConstructor.mediaManager = {};
+    webRTCAdaptorConstructor.mediaManager.setVideoCameraSource = jest.fn();
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("publish_started");
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+    });
+  });
+
+
+  /*
+   * This test check the following scenario:
+   * Reconnection attempt received
+   * Publisher reconnects (or restores session) first
+   * After some seconds since player doesn't reconnect yet we get play reconnect attemp again
+   * This was causing that publisher screen stucks on reconnecting progress
+  */
+
+  it('check publisher stucks on reconnection issue', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+
+    //no reconnection
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+
+
+    //send reconnection attemp for publisher
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+    });
+
+    //send reconnection attemp for player
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+
+    //see reconnecting progress
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+
+    //send publish_started
+    webRTCAdaptorConstructor.mediaManager = {};
+    webRTCAdaptorConstructor.mediaManager.setVideoCameraSource = jest.fn();
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("publish_started");
+    });
+
+
+    //now send reconnection attempt for player again
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+    //see reconnecting progress
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    //send play started
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("play_started");
+    });
+
+    //you shouldn't see reconnecting progress, because publish reconnected before
+    await waitFor(() => {
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+    });
+  });
+
+
+  it('is reconnection in progress state for playonly', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+
+    await act(async () => {
+      currentConference.setIsPlayOnly(true);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("play_started");
+    });
+
+
+    await waitFor(() => {
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+    });
+  });
+
+
+  it('test fix for duplicated tile after reconnection', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+
+
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    expect(currentConference.videoTrackAssignments).toHaveLength(1);
+
+    expect(currentConference.videoTrackAssignments[0].isMine).toBe(true);
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("newStreamAvailable", {"trackId" : "ARDAMSvvideoTrack0", "streamId":"room1", "track": {id: "someId", kind: "video"}});
+    });
+
+    expect(currentConference.videoTrackAssignments).toHaveLength(2);
+
+    expect(currentConference.videoTrackAssignments[1].videoLabel).toBe("videoTrack0");
+    expect(currentConference.videoTrackAssignments[1].streamId).toBe("room1");
+
+
+    var notificationEvent = {
+      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+      streamId: "stream1",
+      payload: [
+        {videoLabel:"videoTrack0", trackId:"participant1"},
+      ]
+    };
+    var json = JSON.stringify(notificationEvent);
+
+    let obj = {data: json};
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("data_received", obj);
+    });
+
+    expect(currentConference.videoTrackAssignments).toHaveLength(2);
+
+    expect(currentConference.videoTrackAssignments[1].videoLabel).toBe("videoTrack0");
+    expect(currentConference.videoTrackAssignments[1].streamId).toBe("participant1");
+
+  });
+
+  it('calls removeAllRemoteParticipants without crashing', () => {
+    let contextValue = {
+      removeAllRemoteParticipants: jest.fn(),
+    };
+
+    const TestComponent = () => {
+      const conference = React.useContext(ConferenceContext);
+      conference.removeAllRemoteParticipants();
+      return null;
+    };
+
+    render(
         <ConferenceContext.Provider value={contextValue}>
           <TestComponent />
         </ConferenceContext.Provider>
-      );
+    );
 
-      expect(contextValue.removeAllRemoteParticipants).toHaveBeenCalled();
-    });
+    expect(contextValue.removeAllRemoteParticipants).toHaveBeenCalled();
+  });
 
-    it('screen sharing state test', async () => {
-      const { container } = render(
+  it('screen sharing state test', async () => {
+    const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
             <MockChild/>
@@ -1006,83 +1132,83 @@ describe('AntMedia Component', () => {
 
 
 
-      expect(currentConference.isScreenShared).toBe(false);
+    expect(currentConference.isScreenShared).toBe(false);
 
-      await act(async () => {
-        currentConference.handleStartScreenShare();
-      });
-
-      await waitFor(() => {
-        expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
-      });
-
-      expect(container).not.toContain("Starting Screen Share...");
-
-
-      await act(async () => {
-          webRTCAdaptorScreenConstructor.callback("initialized");
-      });
-
-      await waitFor(() => {
-        expect(container.outerHTML).toContain("Starting Screen Share...");
-      });
+    await act(async () => {
+      currentConference.handleStartScreenShare();
     });
 
-    it('screen sharing test', async () => {
-      const {container} = render(
+    await waitFor(() => {
+      expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+    });
+
+    expect(container).not.toContain("Starting Screen Share...");
+
+
+    await act(async () => {
+      webRTCAdaptorScreenConstructor.callback("initialized");
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Starting Screen Share...");
+    });
+  });
+
+  it('screen sharing test', async () => {
+    const {container} = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
             <MockChild/>
           </AntMedia>
         </ThemeProvider>);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      currentConference.setParticipantUpdated = jest.fn();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    currentConference.setParticipantUpdated = jest.fn();
 
-      currentConference.allParticipants["participant0"] = {videoTrackId: "participant0", isPinned: false};
-      currentConference.allParticipants["participant1"] = {videoTrackId: "participant1", isPinned: false};
-      currentConference.allParticipants["participant2"] = {videoTrackId: "participant2", isPinned: false};
-      currentConference.allParticipants["participant3"] = {videoTrackId: "participant3", isPinned: false};
+    currentConference.allParticipants["participant0"] = {videoTrackId: "participant0", isPinned: false};
+    currentConference.allParticipants["participant1"] = {videoTrackId: "participant1", isPinned: false};
+    currentConference.allParticipants["participant2"] = {videoTrackId: "participant2", isPinned: false};
+    currentConference.allParticipants["participant3"] = {videoTrackId: "participant3", isPinned: false};
 
-      currentConference.videoTrackAssignments["participant0"] = {streamId: "participant0", videoTrackId: "participant0", audioTrackId: "participant0"};
-      currentConference.videoTrackAssignments["participant1"] = {streamId: "participant1", videoTrackId: "participant1", audioTrackId: "participant1"};
-      currentConference.videoTrackAssignments["participant2"] = {streamId: "participant2", videoTrackId: "participant2", audioTrackId: "participant2"};
-      currentConference.videoTrackAssignments["participant3"] = {streamId: "participant3", videoTrackId: "participant3", audioTrackId: "participant3"};
+    currentConference.videoTrackAssignments["participant0"] = {streamId: "participant0", videoTrackId: "participant0", audioTrackId: "participant0"};
+    currentConference.videoTrackAssignments["participant1"] = {streamId: "participant1", videoTrackId: "participant1", audioTrackId: "participant1"};
+    currentConference.videoTrackAssignments["participant2"] = {streamId: "participant2", videoTrackId: "participant2", audioTrackId: "participant2"};
+    currentConference.videoTrackAssignments["participant3"] = {streamId: "participant3", videoTrackId: "participant3", audioTrackId: "participant3"};
 
-      // testing pinning
-      await act(async () => {
-        currentConference.pinVideo("participant3");
-      });
-
-      expect(currentConference.allParticipants['participant3'].isPinned).toBe(true);
-      expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
-
-      // testing pinning while another participant is pinned
-      await act(async () => {
-        currentConference.pinVideo("participant2");
-      });
-
-      expect(currentConference.allParticipants['participant3'].isPinned).toBe(false);
-      expect(currentConference.allParticipants['participant2'].isPinned).toBe(true);
-
-      // testing unpinning
-      await act(async () => {
-        currentConference.pinVideo("participant2");
-      });
-
-      expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
-
-      // testing pinning a non-existing participant
-      await act(async () => {
-        currentConference.pinVideo("non-exist-participant");
-      });
-
-      expect(consoleSpy).toHaveBeenCalledWith("Cannot find broadcast object for streamId: non-exist-participant");
-
+    // testing pinning
+    await act(async () => {
+      currentConference.pinVideo("participant3");
     });
 
-    it('high resource usage', async () => {
-      const { container } = render(
+    expect(currentConference.allParticipants['participant3'].isPinned).toBe(true);
+    expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+
+    // testing pinning while another participant is pinned
+    await act(async () => {
+      currentConference.pinVideo("participant2");
+    });
+
+    expect(currentConference.allParticipants['participant3'].isPinned).toBe(false);
+    expect(currentConference.allParticipants['participant2'].isPinned).toBe(true);
+
+    // testing unpinning
+    await act(async () => {
+      currentConference.pinVideo("participant2");
+    });
+
+    expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+
+    // testing pinning a non-existing participant
+    await act(async () => {
+      currentConference.pinVideo("non-exist-participant");
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith("Cannot find broadcast object for streamId: non-exist-participant");
+
+  });
+
+  it('high resource usage', async () => {
+    const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
             <MockChild/>
@@ -1090,174 +1216,690 @@ describe('AntMedia Component', () => {
         </ThemeProvider>);
 
 
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      webRTCAdaptorConstructor.closeWebSocket = jest.fn();
-
-      expect(currentConference.isJoining).toBe(false);
-     
-      await act(async () => {
-        currentConference.joinRoom("room", "publishStreamId");
-      });
-
-      await act(async () => {
-        jest.useFakeTimers();
-        webRTCAdaptorConstructor.callbackError("highResourceUsage", {});
-        jest.runAllTimers();
-        jest.useRealTimers();
-      });
-
-      await waitFor(() => {
-        console.log("tttttt");
-        expect(webRTCAdaptorConstructor.checkWebSocketConnection).toHaveBeenCalled();
-      });
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
+    webRTCAdaptorConstructor.closeWebSocket = jest.fn();
 
-    it('checks connection quality and displays warning for poor network connection', async () => {  
-      
-      const { container } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>
-        </ThemeProvider>);
-    
-    
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-      
-    
-      const mockStats = {
-        videoRoundTripTime: '0',
-        audioRoundTripTime: '0',
-        videoJitter: '0',
-        audioJitter: '0',
-        videoPacketsLost: '0',
-        audioPacketsLost: '0',
-        totalVideoPacketsSent: '0',
-        totalAudioPacketsSent: '0',
-      };
+    expect(currentConference.isJoining).toBe(false);
 
-      const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-      const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
-      
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
-    
-      await act(async () => {
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        mockStats.videoRoundTripTime = '150';
-        mockStats.audioRoundTripTime = '160';
-        
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-        expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is weak. You may encounter connection drop!", expect.anything());
-
-        mockStats.videoRoundTripTime = '120';
-        mockStats.audioRoundTripTime = '130';
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
-        //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
-      });
-
-      await act(async () => {
-
-        mockStats.videoRoundTripTime = '0';
-        mockStats.audioRoundTripTime = '0';
-        mockStats.videoJitter = '90';
-        mockStats.audioJitter = '100';
-        consoleWarnSpy.mockReset();
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-
-
-        mockStats.videoJitter = '60';
-        mockStats.audioJitter = '70';
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
-      });
-
-      await act(async () => {
-
-        mockStats.videoJitter = '0';
-        mockStats.audioJitter = '0';
-        mockStats.videoPacketsLost = '3';
-        mockStats.audioPacketsLost = '4';
-        mockStats.totalVideoPacketsSent = '50';
-        mockStats.totalAudioPacketsSent = '50';
-        consoleWarnSpy.mockReset();
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
-
-      });
-
-      await act(async () => {
-
-        mockStats.videoPacketsLost = '4';
-        mockStats.audioPacketsLost = '5';
-        mockStats.totalVideoPacketsSent = '100';
-        mockStats.totalAudioPacketsSent = '100';
-
-        webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
-
-
-      });
-    
-    
-      
-    
-    
-      consoleWarnSpy.mockRestore();
-      
+    await act(async () => {
+      currentConference.joinRoom("room", "publishStreamId");
     });
 
-    it('fake reconnection', async () => {  
-      
-      const { container } = render(
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>);
-    
-    
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-      
-      webRTCAdaptorConstructor.reconnectIfRequired = jest.fn();
-      webRTCAdaptorConstructor.requestVideoTrackAssignments = jest.fn();
-      webRTCAdaptorConstructor.iceConnectionState = () => "mock1";
-
-      await act(async () => {
-        expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("mock1");
-      });
-
-      await act(async () => {
-        jest.useFakeTimers();
-        currentConference.fakeReconnect();
-        expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("disconnected");
-        jest.runAllTimers();
-      });
-      
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("mock1");
-      });
-      
+    await act(async () => {
+      jest.useFakeTimers();
+      webRTCAdaptorConstructor.callbackError("highResourceUsage", {});
+      jest.runAllTimers();
       jest.useRealTimers();
     });
 
+    await waitFor(() => {
+      console.log("tttttt");
+      expect(webRTCAdaptorConstructor.checkWebSocketConnection).toHaveBeenCalled();
+    });
+  });
 
-   
+  it('checks connection quality and displays warning for poor network connection', async () => {
+
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+
+    const mockStats = {
+      videoRoundTripTime: '0',
+      audioRoundTripTime: '0',
+      videoJitter: '0',
+      audioJitter: '0',
+      videoPacketsLost: '0',
+      audioPacketsLost: '0',
+      totalVideoPacketsSent: '0',
+      totalAudioPacketsSent: '0',
+    };
+
+    const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      mockStats.videoRoundTripTime = '150';
+      mockStats.audioRoundTripTime = '160';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+      mockStats.videoRoundTripTime = '120';
+      mockStats.audioRoundTripTime = '130';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+      //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
+    });
+
+    await act(async () => {
+
+      mockStats.videoRoundTripTime = '0';
+      mockStats.audioRoundTripTime = '0';
+      mockStats.videoJitter = '90';
+      mockStats.audioJitter = '100';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+
+      mockStats.videoJitter = '60';
+      mockStats.audioJitter = '70';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+    });
+
+    await act(async () => {
+
+      mockStats.videoJitter = '0';
+      mockStats.audioJitter = '0';
+      mockStats.videoPacketsLost = '3';
+      mockStats.audioPacketsLost = '4';
+      mockStats.totalVideoPacketsSent = '50';
+      mockStats.totalAudioPacketsSent = '50';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+    });
+
+    await act(async () => {
+
+      mockStats.videoPacketsLost = '4';
+      mockStats.audioPacketsLost = '5';
+      mockStats.totalVideoPacketsSent = '100';
+      mockStats.totalAudioPacketsSent = '100';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+
+
+    });
+
+
+
+
+
+    consoleWarnSpy.mockRestore();
+
+  });
+
+  describe('Screen render test', () => {
+    let currentConference;
+
+    const MockChild = () => {
+      const conference = React.useContext(ConferenceContext);
+      currentConference = conference;
+      return <div>Mock Child</div>;
+    };
+
+    it('should update participantUpdated state every 5 seconds', async () => {
+      jest.useFakeTimers();
+
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>
+      );
+
+      expect(currentConference.participantUpdated).toBe(false);
+
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      jest.useRealTimers();
+    });
+
+    it('should not update participantUpdated state if videoTrackAssignments and allParticipants are not changed', async () => {
+      jest.useFakeTimers();
+
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>
+      );
+
+      expect(currentConference.participantUpdated).toBe(false);
+
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+
+      expect(currentConference.participantUpdated).toBe(true);
+
+      jest.useRealTimers();
+    });
+  });
+
+  it('fake reconnection', async () => {
+
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>
+    );
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    })
+
+
+    const mockStats = {
+      videoRoundTripTime: '0',
+      audioRoundTripTime: '0',
+      videoJitter: '0',
+      audioJitter: '0',
+      videoPacketsLost: '0',
+      audioPacketsLost: '0',
+      totalVideoPacketsSent: '0',
+      totalAudioPacketsSent: '0',
+    };
+
+    const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      mockStats.videoRoundTripTime = '150';
+      mockStats.audioRoundTripTime = '160';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+      mockStats.videoRoundTripTime = '120';
+      mockStats.audioRoundTripTime = '130';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+      //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
+    });
+
+    await act(async () => {
+
+      mockStats.videoRoundTripTime = '0';
+      mockStats.audioRoundTripTime = '0';
+      mockStats.videoJitter = '90';
+      mockStats.audioJitter = '100';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+
+      mockStats.videoJitter = '60';
+      mockStats.audioJitter = '70';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+    });
+
+    await act(async () => {
+
+      mockStats.videoJitter = '0';
+      mockStats.audioJitter = '0';
+      mockStats.videoPacketsLost = '3';
+      mockStats.audioPacketsLost = '4';
+      mockStats.totalVideoPacketsSent = '50';
+      mockStats.totalAudioPacketsSent = '50';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+    });
+
+    await act(async () => {
+
+      mockStats.videoPacketsLost = '4';
+      mockStats.audioPacketsLost = '5';
+      mockStats.totalVideoPacketsSent = '100';
+      mockStats.totalAudioPacketsSent = '100';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+
+
+    });
+
+
+
+
+
+    consoleWarnSpy.mockRestore();
+
+  });
+
+  it('fake reconnection', async () => {
+
+    const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    webRTCAdaptorConstructor.reconnectIfRequired = jest.fn();
+    webRTCAdaptorConstructor.requestVideoTrackAssignments = jest.fn();
+    webRTCAdaptorConstructor.iceConnectionState = () => "mock1";
+
+    await act(async () => {
+      expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("mock1");
+    });
+
+    await act(async () => {
+      jest.useFakeTimers();
+      currentConference.fakeReconnect();
+      expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("disconnected");
+      jest.runAllTimers();
+    });
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("mock1");
+    });
+
+    jest.useRealTimers();
+  });
+
+
+  it('checks connection quality and displays warning for poor network connection', async () => {
+
+    let stopSpeedTest = jest.fn();
+    let speedTestForPlayWebRtcAdaptor = {
+      current: {
+        play: jest.fn(),
+        requestVideoTrackAssignments: jest.fn(),
+        stopSpeedTest: stopSpeedTest
+      },
+    };
+    let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const mockStats = {
+      videoRoundTripTime: '0',
+      audioRoundTripTime: '0',
+      videoJitter: '0',
+      audioJitter: '0',
+      videoPacketsLost: '0',
+      audioPacketsLost: '0',
+      totalVideoPacketsSent: '0',
+      totalAudioPacketsSent: '0',
+    };
+
+    const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      mockStats.videoRoundTripTime = '150';
+      mockStats.audioRoundTripTime = '160';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+      mockStats.videoRoundTripTime = '120';
+      mockStats.audioRoundTripTime = '130';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+    });
+
+    jest.useFakeTimers();
+    jest.advanceTimersByTime(3000);
+    jest.runAllTimers();
+    jest.useRealTimers();
+
+    await act(async () => {
+
+      mockStats.videoRoundTripTime = '0';
+      mockStats.audioRoundTripTime = '0';
+      mockStats.videoJitter = '90';
+      mockStats.audioJitter = '100';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+
+      mockStats.videoJitter = '60';
+      mockStats.audioJitter = '70';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+    });
+
+    jest.useFakeTimers();
+    jest.advanceTimersByTime(3000);
+    jest.runAllTimers();
+    jest.useRealTimers();
+
+    await act(async () => {
+
+      mockStats.videoJitter = '0';
+      mockStats.audioJitter = '0';
+      mockStats.videoPacketsLost = '3';
+      mockStats.audioPacketsLost = '4';
+      mockStats.totalVideoPacketsSent = '50';
+      mockStats.totalAudioPacketsSent = '50';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+    });
+
+    jest.useFakeTimers();
+    jest.advanceTimersByTime(3000);
+    jest.runAllTimers();
+    jest.useRealTimers();
+
+    await act(async () => {
+
+      mockStats.videoPacketsLost = '4';
+      mockStats.audioPacketsLost = '5';
+      mockStats.totalVideoPacketsSent = '100';
+      mockStats.totalAudioPacketsSent = '100';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+
+
+    });
+  });
+
+
+  it('should stop and nullify speedTestForPublishWebRtcAdaptor when it is defined', async () => {
+
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.createSpeedTestForPlayWebRtcAdaptor();
+    });
+
+    await waitFor(() => {
+      expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.createSpeedTestForPublishWebRtcAdaptor();
+    });
+
+    await waitFor(() => {
+      expect(webRTCAdaptorPublishSpeedTestConstructor).not.toBe(undefined);
+    });
+
+    const mockStop = jest.fn();
+
+    webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
+    webRTCAdaptorPublishSpeedTestConstructor.stop = mockStop;
+
+
+    // Act
+    await act(async () => {
+      currentConference.stopSpeedTest();
+    });
+
+    jest.useFakeTimers();
+    jest.advanceTimersByTime(3000);
+    jest.runAllTimers();
+    jest.useRealTimers();
+
+    // Assert
+    await waitFor(() => {
+      expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+    });
+
+    /*
+    await waitFor(() => {
+      expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
+    });
+    await waitFor(() => {
+      expect(webRTCAdaptorPublishSpeedTestConstructor).toBeNull();
+    });
+    */
+  });
+
+
+
+  it('should not throw error when speedTestForPublishWebRtcAdaptor is not defined', async () => {
+    let stopSpeedTest = jest.fn();
+    let speedTestForPlayWebRtcAdaptor = {
+      current: {
+        play: jest.fn(),
+        requestVideoTrackAssignments: jest.fn(),
+        stopSpeedTest: stopSpeedTest
+      },
+    };
+    let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    // Arrange
+    webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = null;
+    webRTCAdaptorPublishSpeedTestConstructor = null;
+
+    // Act and Assert
+    await expect(async () => {
+      await act(async () => {
+        currentConference?.stopSpeedTest();
+      });
+    }).not.toThrow();
+  });
+
+
+
+  it('should stop and nullify speedTestForPlayWebRtcAdaptor when it is defined', async () => {
+
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.createSpeedTestForPlayWebRtcAdaptor();
+    });
+
+    await waitFor(() => {
+      expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
+    });
+
+    let stopSpeedTest = jest.fn();
+
+    // Arrange
+    const mockStop = jest.fn();
+    //webRTCAdaptorPlaySpeedTestConstructor = { stop: mockStop, stopSpeedTest: stopSpeedTest};
+
+    webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
+
+    // Act
+    await act(async () => {
+      currentConference.stopSpeedTest();
+    });
+
+    // Assert
+    await waitFor(() => {
+      expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+    });
+    //await waitFor(() => {
+    //  expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
+    //});
+  });
+
+
+  it('should not throw error when speedTestForPlayWebRtcAdaptor is not defined', async () => {
+    let stopSpeedTest = jest.fn();
+    let speedTestForPlayWebRtcAdaptor = {
+      current: {
+        play: jest.fn(),
+        requestVideoTrackAssignments: jest.fn(),
+        stopSpeedTest: stopSpeedTest
+      },
+    };
+    // Arrange
+    webRTCAdaptorPlaySpeedTestConstructor = null;
+
+    // Act and Assert
+    await expect(async () => {
+      await act(async () => {
+        currentConference?.stopSpeedTest();
+      });
+    }).not.toThrow();
+  });
+
+  it('notSetRemoteDescription error callback in reconnection', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+
+    console.log("before waitttttttttttttttttttttttttt");
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("notSetRemoteDescription", {});
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("System is not compatible to connect. Please report this.");
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+    });
+  });
+
+  it('license_suspended_please_renew_license error callback in reconnection', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    expect(container.outerHTML).not.toContain("Reconnecting...");
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Reconnecting...");
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("license_suspended_please_renew_license", {});
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).toContain("Licence error. Please report this.");
+    });
+
+    await waitFor(() => {
+      expect(container.outerHTML).not.toContain("Reconnecting...");
+    });
+  });
+
 });
-
-

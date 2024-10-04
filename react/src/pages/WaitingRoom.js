@@ -1,16 +1,5 @@
 import React, {useContext} from "react";
-import {
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Grid,
-    LinearProgress,
-    Modal,
-    TextField,
-    Tooltip,
-    Typography,
-} from "@mui/material";
+import {Box, Button, CircularProgress, Container, Grid, Modal, TextField, Tooltip, Typography,} from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
 import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
@@ -134,6 +123,11 @@ function WaitingRoom(props) {
         }
     }, [conference?.speedTestObject]);
 
+    React.useEffect(() => {
+        if (conference?.speedTestObject?.isfinished === true) {
+            setSpeedTestModalButtonVisibility(true);
+        }
+    }, [conference?.speedTestObject]);
 
     const handleDialogOpen = (focus) => {
         if (conference.localVideo === null) {

@@ -95,6 +95,14 @@ class TestJoinLeave(unittest.TestCase):
     print(f"Instant CPU Usage: {cpu_usage}%")
     return vtas
   
+  def get_track_stats(self):
+    script = "return window.conference.getTrackStats();"
+    result_json = self.chrome.execute_script_with_retry(script)
+    if result_json is None:
+      return []
+
+    return result_json
+  
   def get_conference(self):
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
@@ -163,7 +171,7 @@ class TestJoinLeave(unittest.TestCase):
   def set_and_test_track_limit(self, limit):
       self.change_video_track_count(limit)
       wait = self.chrome.get_wait()
-      wait.until(lambda x: self.get_video_track_limit() == limit-1)
+      wait.until(lambda x: self.get_video_track_limit() == limit)
   
   def _test_video_track_count(self):
     #self.chrome.makeFullScreen()
@@ -193,7 +201,7 @@ class TestJoinLeave(unittest.TestCase):
     leave_button = self.chrome.get_element(By.ID, "leave-room-button")
     self.chrome.click_element(leave_button)
     
-  def _test_others_tile(self):
+  def test_others_tile(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -275,6 +283,39 @@ class TestJoinLeave(unittest.TestCase):
 
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
+
+    self.chrome.close_all()
+
+  def test_with_stats(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+    handle_3 = self.join_room_in_new_tab("participantB", room)
+
+
+    assert(handle_3 == self.chrome.get_current_tab_id())
+
+    self.assertLocalVideoAvailable()
+
+    wait = self.chrome.get_wait()
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
+
+    self.chrome.switch_to_tab(handle_1)
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
+
+
+    wait.until(lambda x: len(self.get_track_stats()['inboundRtpList']) == 4)
+    stats = self.get_track_stats()
+
+    for track_stat in stats['inboundRtpList']:
+      assert(track_stat['bytesReceived'] > 0)
+
+
+    print("stats: "+str(stats))
+
+    assert(stats is not None)
 
     self.chrome.close_all()
 
@@ -367,7 +408,7 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
     self.set_and_test_track_limit(2)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1) 
 
     self.set_and_test_track_limit(6)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
@@ -467,7 +508,7 @@ class TestJoinLeave(unittest.TestCase):
    
 
 
-  def _test_recording(self):
+  def test_recording(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -513,6 +554,10 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: self.rest_helper.getVoDFor(room+"_composite") is not None)
 
     self.chrome.close_all()
+
+
+
+
 
 
 if __name__ == '__main__':

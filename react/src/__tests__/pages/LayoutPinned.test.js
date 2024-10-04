@@ -95,7 +95,7 @@ describe('Pinned Layout Component', () => {
       );
 
     const videoCards = getAllByTestId('mocked-video-card');
-    expect(videoCards).toHaveLength(3);
+    expect(videoCards).toHaveLength(4);
 
     const otherCard = getByTestId('mocked-others-card');
     expect(otherCard).toBeTruthy();
@@ -113,7 +113,7 @@ describe('Pinned Layout Component', () => {
         </ThemeProvider>
       );
 
-      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(4);
+      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(3);
 
   });
   */
