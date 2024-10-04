@@ -91,6 +91,17 @@ function getMediaConstraints(videoSendResolution, frameRate) {
   return constraint;
 }
 
+var peerconnection_config = {
+  'iceServers': [
+    {
+      'urls': 'turn:turn.fakeeh.education:3478?transport=tcp',
+      'username': '-',
+      'credential': '-'
+    }
+  ],
+  sdpSemantics: 'unified-plan'
+};
+
 var streamNameInit = getRootAttribute("stream-name");
 
 if (!streamNameInit) {
@@ -501,7 +512,7 @@ function AntMedia(props) {
           OfferToReceiveAudio: false,
           OfferToReceiveVideo: false,
         },
-        // peerconnection_config: peerconnection_config
+        peerconnection_config: peerconnection_config,
         debug: true,
         callback: speedTestForPublishWebRtcAdaptorInfoCallback,
         callbackError: speedTestForPublishWebRtcAdaptorErrorCallback,
@@ -519,7 +530,7 @@ function AntMedia(props) {
         OfferToReceiveAudio : false,
         OfferToReceiveVideo : false,
       },
-      // peerconnection_config: peerconnection_config
+      peerconnection_config: peerconnection_config,
       debug: true,
       callback: speedTestForPublishWebRtcAdaptorInfoCallback,
       callbackError: speedTestForPublishWebRtcAdaptorErrorCallback,
@@ -577,14 +588,14 @@ function AntMedia(props) {
         let speedTestResult = {};
 
         if (rtt >= 150 || packetLost >= 2.5 || jitter >= 80 || ((outgoingBitrate / 100) * 80) >= bandwidth) {
-          console.log("-> Your connection quality is poor. You may experience interruptions");
-          speedTestResult.message = "Your connection quality is poor. You may experience interruptions";
+          console.log("-> Your connection is moderate, occasional disruptions may occur");
+          speedTestResult.message = "Your connection is moderate, occasional disruptions may occur";
         } else if (rtt >= 50 || packetLost >= 1 || jitter >= 30 || outgoingBitrate >= bandwidth) {
-          console.log("-> Your connection is fair, but you may experience interruptions");
-          speedTestResult.message = "Your connection is fair, but you may experience interruptions";
-        } else {
           console.log("-> Your connection is good");
-          speedTestResult.message = "Your connection is optimal";
+          speedTestResult.message = "Your connection is good";
+        } else {
+          console.log("-> Your connection is great");
+          speedTestResult.message = "Your connection is great";
         }
 
         speedTestResult.isfailed = false;
@@ -632,7 +643,7 @@ function AntMedia(props) {
         OfferToReceiveAudio : false,
         OfferToReceiveVideo : false,
       },
-      // peerconnection_config: peerconnection_config
+      peerconnection_config: peerconnection_config,
       debug: true,
       callback: speedTestForPlayWebRtcAdaptorInfoCallback,
       callbackError: speedTestForPlayWebRtcAdaptorErrorCallback,
@@ -815,7 +826,6 @@ function AntMedia(props) {
     sendDataChannelMessage(roomName, JSON.stringify(notEvent));
     updateBroadcastRole(streamId, role);
 
-    /*
     handleSendNotificationEvent(
         "UPDATE_PARTICIPANT_ROLE",
         publishStreamId,
@@ -825,7 +835,6 @@ function AntMedia(props) {
           role: role
         }
     );
-     */
   }
 
   function updateBroadcastRole(streamId, role) {
@@ -1020,7 +1029,7 @@ function AntMedia(props) {
         var adaptor = new WebRTCAdaptor({
           websocket_url: websocketURL,
           mediaConstraints: mediaConstraints,
-          //peerconnection_config: peerconnection_config,
+          peerconnection_config: peerconnection_config,
           isPlayMode: isPlayOnly,
           // onlyDataChannel: isPlayOnly,
           debug: true,
@@ -1081,7 +1090,7 @@ function AntMedia(props) {
                 websocket_url: websocketURL,
                 localStream:stream,
                 mediaConstraints: getMediaConstraints("screenConstraints", 20),
-                //placeholder for peerconnection_config
+                peerconnection_config: peerconnection_config,
                 sdp_constraints: {
                     OfferToReceiveAudio : false,
                     OfferToReceiveVideo : false,
