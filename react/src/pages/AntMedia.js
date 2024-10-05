@@ -384,7 +384,7 @@ function AntMedia(props) {
   // speed test related states
   const speedTestStreamId = React.useRef(makeid(20));
   const speedTestForPublishWebRtcAdaptor = React.useRef(null);
-  const [speedTestObject, setSpeedTestObject] = React.useState({message: "Please wait while we are testing your connection speed", isfinished: false, isfailed: false, errorMessage: "", progressValue: 10});
+  const [speedTestObject, setSpeedTestObject] = React.useState({message: "Please wait while we are testing your connection speed", isfinished: false, isfailed: false, errorMessage: "", progressValue: 0});
   const speedTestCounter = React.useRef(0);
   const speedTestForPlayWebRtcAdaptor = React.useRef(null);
 
@@ -463,6 +463,9 @@ function AntMedia(props) {
     }
     speedTestForPublishWebRtcAdaptor.current = null;
     speedTestForPlayWebRtcAdaptor.current = null;
+
+    //we need to listen device changes with main webRTCAdaptor
+    webRTCAdaptor.mediaManager?.trackDeviceChange();
   }
 
   function parseWebSocketURL(url) {
@@ -606,6 +609,8 @@ function AntMedia(props) {
         setSpeedTestObject(speedTestResult);
 
         stopSpeedTest();
+      } else if (info === "available_devices") {
+        setDevices(obj);
       } else {
         let tempSpeedTestObject = {};
         tempSpeedTestObject.message = speedTestObject.message;
@@ -661,6 +666,8 @@ function AntMedia(props) {
       console.log("speed test updated stats")
     } else if (info === "ice_connection_state_changed") {
       console.log("speed test ice connection state changed")
+    } else if (info === "available_devices") {
+      setDevices(obj);
     }
   }
 
@@ -1234,6 +1241,11 @@ function AntMedia(props) {
       webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
       requestVideoTrackAssignmentsInterval();
 
+      if (isPlayOnly) {
+        setWaitingOrMeetingRoom("meeting");
+        setIsJoining(false);
+      }
+
       if (reconnecting) {
         playReconnected = true;
         reconnecting = !(publishReconnected && playReconnected);
@@ -1262,22 +1274,48 @@ function AntMedia(props) {
       console.log("iceConnectionState Changed: ", JSON.stringify(obj))
     }
     else if (info === "reconnection_attempt_for_player") {
+      console.log("Reconnection attempt for player")
       if(isPlayOnly && isNoSreamExist){
-        console.log("reconnection_attempt_for_player but no stream exist")
+        console.log("Reconnection attempt for player with no stream existmfor play only mode.")
       }
       else{
+        playReconnected = false;
+        if (!reconnecting) {
+          reconnectionInProgress();
+        }
+      }
+    } else if (info === "reconnection_attempt_for_publisher") {
+      console.log("Reconnection attempt for publisher")
+      publishReconnected = isPlayOnly;
+      if (!reconnecting) {
         reconnectionInProgress();
       }
     }
   }
 
+  function parseIntAndRound(value) {
+    let parsedValue = parseInt(value);
+    if (isNaN(parsedValue) || parsedValue === -1) {
+      return 0;
+    }
+    return parsedValue;
+  }
+
+  function parseFloatAndRound(value) {
+    let parsedValue = parseFloat(value);
+    if (isNaN(parsedValue) || parsedValue === -1) {
+      return 0;
+    }
+    return parsedValue;
+  }
+
   function checkConnectionQuality(obj) {
-    let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
-    let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
+    let rtt = ((parseFloatAndRound(obj.videoRoundTripTime) + parseFloatAndRound(obj.audioRoundTripTime)) / 2).toPrecision(3);
+    let jitter = ((parseFloatAndRound(obj.videoJitter) + parseIntAndRound(obj.audioJitter)) / 2).toPrecision(3);
     //let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
 
-    let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
-    let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
+    let packageLost = parseIntAndRound(obj.videoPacketsLost) + parseIntAndRound(obj.audioPacketsLost);
+    let packageSent = parseIntAndRound(obj.totalVideoPacketsSent) + parseIntAndRound(obj.totalAudioPacketsSent);
 
     let packageLostPercentage = 0;
     console.log("publishStats:", publishStats);
@@ -1286,7 +1324,7 @@ function AntMedia(props) {
       let deltaPackageSent = packageSent - publishStats.packageSent;
 
       if (deltaPackageLost > 0) {
-        packageLostPercentage = ((deltaPackageLost / parseInt(deltaPackageSent)) * 100).toPrecision(3);
+        packageLostPercentage = ((deltaPackageLost / parseIntAndRound(deltaPackageSent)) * 100).toPrecision(3);
       }
     }
 
@@ -1319,6 +1357,8 @@ function AntMedia(props) {
       //webRTCAdaptor?.assignVideoTrack("videoTrack0", screenShareStreamId.current, true);
       //pinVideo(screenShareStreamId.current);
 
+    } else if (info === "available_devices") {
+      setDevices(obj);
     } else if (info === "updated_stats") {
       //checkConnectionQuality(obj);
     } else if (info === "ice_connection_state_changed") {
@@ -1426,16 +1466,18 @@ function AntMedia(props) {
       setLeaveRoomWithError("Firewall might be blocking your connection. Please report this.");
       setLeftTheRoom(true);
       setIsJoining(false);
+      setIsReconnectionInProgress(false);
     }
     else if (error === "license_suspended_please_renew_license"){
       setLeaveRoomWithError("Licence error. Please report this.");
       setLeftTheRoom(true);
       setIsJoining(false);
+      setIsReconnectionInProgress(false);
     } else if (error === "notSetRemoteDescription"){
       setLeaveRoomWithError("System is not compatible to connect. Please report this.");
       setLeftTheRoom(true);
       setIsJoining(false);
-
+      setIsReconnectionInProgress(false);
     }
     console.log("***** " + error)
   }
@@ -2497,6 +2539,10 @@ function AntMedia(props) {
       }
   }
 
+  function getTrackStats() {
+    return webRTCAdaptor.remotePeerConnectionStats[roomName];
+  }
+
   React.useEffect(() => {
     //gets the setting from the server through websocket
     if (isWebSocketConnected) {
@@ -2722,7 +2768,8 @@ function AntMedia(props) {
               speedTestForPlayWebRtcAdaptorInfoCallback,
               speedTestForPlayWebRtcAdaptorErrorCallback,
               speedTestForPublishWebRtcAdaptorInfoCallback,
-              speedTestForPublishWebRtcAdaptorErrorCallback
+              speedTestForPublishWebRtcAdaptorErrorCallback,
+              getTrackStats
             }}
           >
             {props.children}

@@ -97,7 +97,7 @@ function WaitingRoom(props) {
             speedTestObjectDefault.isfinished = false;
             speedTestObjectDefault.isfailed = false;
             speedTestObjectDefault.errorMessage = "";
-            speedTestObjectDefault.progressValue = 10;
+            speedTestObjectDefault.progressValue = 0;
 
             conference?.setSpeedTestObject(speedTestObjectDefault);
             if (conference.speedTestStreamId) {
@@ -166,9 +166,7 @@ function WaitingRoom(props) {
             conference?.joinRoom(roomName, conference?.makeId(10));
         }
         if (conference?.isPlayOnly) {
-            conference?.setWaitingOrMeetingRoom("meeting");
             setDialogOpen(false);
-            conference?.setIsJoining(false);
         }
     }
 
@@ -178,7 +176,7 @@ function WaitingRoom(props) {
             isfinished: false,
             isfailed: false,
             errorMessage: "",
-            progressValue: 10
+            progressValue: 0
         });
         setSpeedTestModalButtonVisibility(false);
         setSpeedTestModelVisibility(false);
