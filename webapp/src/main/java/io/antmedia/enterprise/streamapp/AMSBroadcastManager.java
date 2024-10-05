@@ -5,6 +5,7 @@ import io.antmedia.datastore.db.DataStore;
 import io.antmedia.datastore.db.DataStoreFactory;
 import io.antmedia.datastore.db.IDataStoreFactory;
 import io.antmedia.datastore.db.types.Broadcast;
+import io.antmedia.datastore.db.types.BroadcastUpdate;
 import io.antmedia.rest.model.Result;
 import io.antmedia.rest.RestServiceBase;
 import org.jetbrains.annotations.NotNull;
@@ -69,7 +70,7 @@ public class AMSBroadcastManager implements ApplicationContextAware {
 
         // if the result is false, there could be a problem or field is not updated so we need to get the broadcast again
         if (!result) {
-            broadcast = getDataStore().get(streamId);
+            Broadcast broadcast = getDataStore().get(streamId);
             if (broadcast != null) {
                 result = broadcast.getRole().equals(role);
             }
