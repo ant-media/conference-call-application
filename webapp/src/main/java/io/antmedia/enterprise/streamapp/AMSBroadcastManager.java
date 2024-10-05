@@ -63,11 +63,9 @@ public class AMSBroadcastManager implements ApplicationContextAware {
             return false;
         }
 
-        Broadcast broadcast = getDataStore().get(streamId);
-        if (broadcast != null) {
-            broadcast.setRole(role);
-            result = getDataStore().updateBroadcastFields(streamId, broadcast);
-        }
+        BroadcastUpdate broadcastUpdate = new BroadcastUpdate();
+        broadcastUpdate.setRole(role);
+        result = getDataStore().updateBroadcastFields(streamId, broadcastUpdate);
 
         // if the result is false, there could be a problem or field is not updated so we need to get the broadcast again
         if (!result) {
