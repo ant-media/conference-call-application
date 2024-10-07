@@ -85,6 +85,8 @@ class TestJoinLeave(unittest.TestCase):
   def get_videoTrackAssignments(self):
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
+    print("current time: "+str(time.time()))
+    print("result_json: "+str(result_json))
     if result_json is None:
       return []
     
@@ -405,6 +407,7 @@ class TestJoinLeave(unittest.TestCase):
 
     print("len(self.get_videoTrackAssignments()): "+str(len(self.get_videoTrackAssignments())))
     print("N: "+str(N))
+    print("**********************************************")
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
     self.set_and_test_track_limit(2)
