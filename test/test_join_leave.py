@@ -85,14 +85,13 @@ class TestJoinLeave(unittest.TestCase):
   def get_videoTrackAssignments(self):
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
-    print("current time: "+str(time.time()))
-    print("result_json: "+str(result_json))
+    
     if result_json is None:
       return []
     
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
     cpu_usage = psutil.cpu_percent(interval=0)
     print(f"Instant CPU Usage: {cpu_usage}%")
     return vtas
