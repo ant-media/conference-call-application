@@ -160,8 +160,8 @@ class Browser:
     move = ActionChains(self.driver)
     move.click_and_hold(element).move_by_offset(value, 0).release().perform()
 
-  def get_wait(self):
-    return WebDriverWait(self.driver, 25)
+  def get_wait(self, wait_time=25):
+    return WebDriverWait(self.driver, wait_time)
 
   def close(self):
     self.driver.close()
