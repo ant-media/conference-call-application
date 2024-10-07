@@ -405,7 +405,7 @@ class TestJoinLeave(unittest.TestCase):
     self.assertLocalVideoAvailable()
 
 
-    print("len(self.get_videoTrackAssignments()): "+len(self.get_videoTrackAssignments()))
+    print("len(self.get_videoTrackAssignments()): "+str(len(self.get_videoTrackAssignments())))
     print("N: "+str(N))
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
