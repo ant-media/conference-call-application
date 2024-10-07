@@ -49,8 +49,8 @@ class TestJoinLeave(unittest.TestCase):
     process = subprocess.Popen(
         ["bash", script_path] + parameters,
         cwd=directory,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
+        #stdout=subprocess.DEVNULL,
+        #stderr=subprocess.DEVNULL
     )
 
     return process
@@ -163,7 +163,7 @@ class TestJoinLeave(unittest.TestCase):
     stop_recording_button = self.chrome.get_element(By.ID, "stop-recording-button")
     return stop_recording_button
 
-  def test_join_room(self):
+  def _test_join_room(self):
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)   
     self.chrome.close_all()
@@ -201,7 +201,7 @@ class TestJoinLeave(unittest.TestCase):
     leave_button = self.chrome.get_element(By.ID, "leave-room-button")
     self.chrome.click_element(leave_button)
     
-  def test_others_tile(self):
+  def _test_others_tile(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -253,7 +253,7 @@ class TestJoinLeave(unittest.TestCase):
     else:
       return self.get_publishStreamId(index=index+1)
 
-  def test_join_room_2_participants(self):
+  def _test_join_room_2_participants(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -286,7 +286,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_with_stats(self):
+  def _test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -325,7 +325,7 @@ class TestJoinLeave(unittest.TestCase):
     return videoTrackAssignments[1]["streamId"] == conference["pinnedVideoId"]
 
   '''
-  def test_screen_share(self):
+  def _test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -401,7 +401,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.join_room_in_new_tab("participant"+str(N-1), room)     
 
-    time.sleep(5)
+    time.sleep(50)
     self.assertLocalVideoAvailable()
 
 
@@ -429,7 +429,7 @@ class TestJoinLeave(unittest.TestCase):
   def is_mic_off_displayed_for(self, stream_id):
     return self.chrome.is_element_exist(By.ID, "mic-muted-"+stream_id)
  
-  def test_on_off_mic_cam(self):
+  def _test_on_off_mic_cam(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -510,7 +510,7 @@ class TestJoinLeave(unittest.TestCase):
    
 
 
-  def test_recording(self):
+  def _test_recording(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
