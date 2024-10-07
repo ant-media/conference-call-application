@@ -91,7 +91,8 @@ class TestJoinLeave(unittest.TestCase):
     
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    print("\nget_videoTrackAssignments current time: "+str(time.time()))
+    print("vtas("+str(len(vtas))+"):\n" + str(vtas))
     cpu_usage = psutil.cpu_percent(interval=0)
     print(f"Instant CPU Usage: {cpu_usage}%")
     return vtas

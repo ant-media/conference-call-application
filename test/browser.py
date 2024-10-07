@@ -161,7 +161,7 @@ class Browser:
     move.click_and_hold(element).move_by_offset(value, 0).release().perform()
 
   def get_wait(self, wait_time=25):
-    return WebDriverWait(self.driver, wait_time)
+    return WebDriverWait(self.driver, wait_time, 1)
 
   def close(self):
     self.driver.close()
