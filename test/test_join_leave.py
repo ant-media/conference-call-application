@@ -171,9 +171,11 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
   def set_and_test_track_limit(self, limit):
+      print("set_track_limit -> count: "+str(limit))
       self.change_video_track_count(limit)
       wait = self.chrome.get_wait()
       wait.until(lambda x: self.get_video_track_limit() == limit)
+      print("video_track_limit: "+str(limit))
   
   def _test_video_track_count(self):
     #self.chrome.makeFullScreen()

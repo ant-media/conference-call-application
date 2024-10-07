@@ -1284,6 +1284,7 @@ function AntMedia(props) {
     function updateMaxVideoTrackCount(newCount) {
         if (publishStreamId && globals.maxVideoTrackCount !== newCount) {
             globals.maxVideoTrackCount = newCount;
+            console.log("maxVideoTrackCount updated to: " + newCount);
             webRTCAdaptor?.setMaxVideoTrackCount(publishStreamId, newCount);
         }
     }
