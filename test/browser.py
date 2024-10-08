@@ -102,6 +102,9 @@ class Browser:
                 print(f"Element not found by {by} with value {value} after {retries} attempts: {e}")
                 print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
                 raise
+            
+  def get_all_elements(self, by, value):
+    return self.driver.find_elements(by, value)
     
   def makeFullScreen(self):
     self.driver.maximize_window()

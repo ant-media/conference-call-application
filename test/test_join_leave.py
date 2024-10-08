@@ -93,6 +93,10 @@ class TestJoinLeave(unittest.TestCase):
     vtas = result_json["videoTrackAssignments"]
     print("\nget_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
     print("vtas("+str(len(vtas))+"):\n" + str(vtas))
+    self.call_debugme()
+    time.sleep(5)
+    self.print_message()
+    
     cpu_usage = psutil.cpu_percent(interval=0)
     print(f"Instant CPU Usage: {cpu_usage}%")
     return vtas
@@ -204,7 +208,24 @@ class TestJoinLeave(unittest.TestCase):
   def leave_room(self):
     leave_button = self.chrome.get_element(By.ID, "leave-room-button")
     self.chrome.click_element(leave_button)
-    
+
+  def call_debugme(self):
+    messages_button = self.chrome.get_element_with_retry(By.ID, "messages-button")
+    self.chrome.click_element(messages_button)
+
+    message_input = self.chrome.get_element_with_retry(By.ID, "message-input")
+    self.chrome.write_to_element(message_input, "debugme")
+
+    send_button = self.chrome.get_element_with_retry(By.ID, "message-send-button")
+    self.chrome.click_element(send_button)
+
+
+  def print_message(self):
+    messages = self.chrome.get_all_elements(By.ID, "message")
+    print("messages:"+str(len(messages)))
+    for message in messages:
+      print("message:" + message.get_attribute("innerHTML"))
+
   def test_others_tile(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -413,13 +434,31 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
     self.set_and_test_track_limit(4)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 4) 
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
 
     self.set_and_test_track_limit(6)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
+
+  def test_get_debugme_info(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+
+    print("current: "+self.chrome.get_current_tab_id())
+    assert(handle_2 == self.chrome.get_current_tab_id())
+    self.assertLocalVideoAvailable()
+    wait = self.chrome.get_wait()
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    self.call_debugme()
+    time.sleep(5)
+    self.print_message()
+
+    self.chrome.close_all()
+
 
   def is_avatar_displayed_for(self, stream_id):
     video_card = self.chrome.get_element(By.ID, "card-"+stream_id)
