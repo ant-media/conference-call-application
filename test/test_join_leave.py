@@ -82,7 +82,7 @@ class TestJoinLeave(unittest.TestCase):
 
     return handle
     
-  def get_videoTrackAssignments(self):
+  def get_videoTrackAssignments(self, print_logs=False):
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
     
@@ -91,8 +91,11 @@ class TestJoinLeave(unittest.TestCase):
     
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    print("\nget_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-    print("vtas("+str(len(vtas))+"):\n" + str(vtas))
+    if print_logs:
+      print("\nget_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
+      print("vtas("+str(len(vtas))+"):\n" + str(vtas))
+      self.call_debugme()
+      self.print_message()
    
     cpu_usage = psutil.cpu_percent(interval=0)
     print(f"Instant CPU Usage: {cpu_usage}%")
@@ -432,18 +435,14 @@ class TestJoinLeave(unittest.TestCase):
     print("len(self.get_videoTrackAssignments()): "+str(len(self.get_videoTrackAssignments())))
     print("N: "+str(N))
     print("**********************************************")
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
+    wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == N)
 
     self.set_and_test_track_limit(4)
-    self.call_debugme()
-    self.print_message()
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
+    wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == 3) 
     
 
     self.set_and_test_track_limit(6)
-    self.call_debugme()
-    self.print_message()
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
+    wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == N)
 
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
