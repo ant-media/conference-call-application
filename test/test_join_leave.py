@@ -397,9 +397,9 @@ class TestJoinLeave(unittest.TestCase):
     '''
 
   def test_join_room_N_participants(self):
-    N = 3
+    N = 5
     room = "room"+str(random.randint(100, 999))
-    wait = self.chrome.get_wait(50)
+    wait = self.chrome.get_wait()
 
     process = self.create_participants_with_test_tool("participant", room, N-1)
 
@@ -412,8 +412,8 @@ class TestJoinLeave(unittest.TestCase):
     print("**********************************************")
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
-    self.set_and_test_track_limit(2)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1) 
+    self.set_and_test_track_limit(4)
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
 
     self.set_and_test_track_limit(6)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
