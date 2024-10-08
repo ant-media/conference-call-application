@@ -94,7 +94,6 @@ class TestJoinLeave(unittest.TestCase):
     print("\nget_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
     print("vtas("+str(len(vtas))+"):\n" + str(vtas))
     self.call_debugme()
-    time.sleep(5)
     self.print_message()
 
     cpu_usage = psutil.cpu_percent(interval=0)
