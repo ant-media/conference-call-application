@@ -337,13 +337,11 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_track_stats()['inboundRtpList']) == 4)
     stats = self.get_track_stats()
 
-    for track_stat in stats['inboundRtpList']:
-      assert(track_stat['bytesReceived'] > 0)
-
-
+    assert(stats is not None)
     print("stats: "+str(stats))
 
-    assert(stats is not None)
+    for track_stat in stats['inboundRtpList']:
+      assert(track_stat['bytesReceived'] > 0)
 
     self.chrome.close_all()
 
