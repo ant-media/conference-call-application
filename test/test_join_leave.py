@@ -248,9 +248,9 @@ class TestJoinLeave(unittest.TestCase):
     if(self.chrome.is_element_exist(By.ID, "share-screen-button")):
       ss_button = self.chrome.get_element(By.ID, "share-screen-button")
     else:
-      more_button = self.chrome.get_element(By.ID, "more-button")
+      more_button = self.chrome.get_element_with_retry(By.ID, "more-button")
       self.chrome.click_element(more_button)
-      ss_button = self.chrome.get_element(By.ID, "more-options-share-screen-button")
+      ss_button = self.chrome.get_element_with_retry(By.ID, "more-options-share-screen-button")
 
     self.chrome.click_element(ss_button)
 
