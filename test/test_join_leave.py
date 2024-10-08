@@ -96,7 +96,7 @@ class TestJoinLeave(unittest.TestCase):
     self.call_debugme()
     time.sleep(5)
     self.print_message()
-    
+
     cpu_usage = psutil.cpu_percent(interval=0)
     print(f"Instant CPU Usage: {cpu_usage}%")
     return vtas
@@ -210,7 +210,13 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.click_element(leave_button)
 
   def call_debugme(self):
-    messages_button = self.chrome.get_element_with_retry(By.ID, "messages-button")
+    if(self.chrome.is_element_exist(By.ID, "messages-button")):
+      messages_button = self.chrome.get_element(By.ID, "messages-button")
+    else:
+      more_button = self.chrome.get_element(By.ID, "more-button")
+      self.chrome.click_element(more_button)
+      messages_button = self.chrome.get_element(By.ID, "more-options-chat-button")
+
     self.chrome.click_element(messages_button)
 
     message_input = self.chrome.get_element_with_retry(By.ID, "message-input")
