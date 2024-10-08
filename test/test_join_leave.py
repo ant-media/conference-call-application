@@ -443,7 +443,7 @@ class TestJoinLeave(unittest.TestCase):
     
 
     self.set_and_test_track_limit(6)
-     self.call_debugme()
+    self.call_debugme()
     self.print_message()
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
