@@ -413,7 +413,7 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
     self.set_and_test_track_limit(4)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 4) 
 
     self.set_and_test_track_limit(6)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
