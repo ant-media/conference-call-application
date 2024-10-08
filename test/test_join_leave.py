@@ -93,9 +93,7 @@ class TestJoinLeave(unittest.TestCase):
     vtas = result_json["videoTrackAssignments"]
     print("\nget_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
     print("vtas("+str(len(vtas))+"):\n" + str(vtas))
-    self.call_debugme()
-    self.print_message()
-
+   
     cpu_usage = psutil.cpu_percent(interval=0)
     print(f"Instant CPU Usage: {cpu_usage}%")
     return vtas
@@ -439,9 +437,14 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
     self.set_and_test_track_limit(4)
+    self.call_debugme()
+    self.print_message()
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
+    
 
     self.set_and_test_track_limit(6)
+     self.call_debugme()
+    self.print_message()
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
     self.kill_participants_with_test_tool(process)
