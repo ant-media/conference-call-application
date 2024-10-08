@@ -214,16 +214,16 @@ class TestJoinLeave(unittest.TestCase):
       messages_button = self.chrome.get_element(By.ID, "messages-button")
     else:
       more_button = self.chrome.get_element(By.ID, "more-button")
-      self.chrome.click_element(more_button)
+      self.chrome.click_element_as_script(more_button)
       messages_button = self.chrome.get_element(By.ID, "more-options-chat-button")
 
-    self.chrome.click_element(messages_button)
+    self.chrome.click_element_as_script(messages_button)
 
     message_input = self.chrome.get_element_with_retry(By.ID, "message-input")
     self.chrome.write_to_element(message_input, "debugme")
 
     send_button = self.chrome.get_element_with_retry(By.ID, "message-send-button")
-    self.chrome.click_element(send_button)
+    self.chrome.click_element_as_script(send_button)
 
 
   def print_message(self):

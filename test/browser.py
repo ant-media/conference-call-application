@@ -159,6 +159,10 @@ class Browser:
   def click_element(self, element):
     element.click()
 
+  def click_element_as_script(self, element):
+    self.driver.execute_script("arguments[0].click();", element)
+
+
   def move_slider_to(self, element, value):
     move = ActionChains(self.driver)
     move.click_and_hold(element).move_by_offset(value, 0).release().perform()
