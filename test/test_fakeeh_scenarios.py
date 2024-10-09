@@ -10,6 +10,7 @@ import json
 import time
 import subprocess
 import threading
+import psutil
 
 class TestTestFakeehScenario(unittest.TestCase):
   def setUp(self):
@@ -377,6 +378,27 @@ class TestTestFakeehScenario(unittest.TestCase):
 
 
     self.chrome.close_all()
+
+  def get_videoTrackAssignments(self):
+    script = "return window.conference;"
+    result_json = self.chrome.execute_script_with_retry(script)
+    if result_json is None:
+      return []
+
+    #self.chrome.print_console_logs()
+    vtas = result_json["videoTrackAssignments"]
+    #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    cpu_usage = psutil.cpu_percent(interval=0)
+    print(f"Instant CPU Usage: {cpu_usage}%")
+    return vtas
+  
+  def assertLocalVideoAvailable(self):
+    publishStreamId = self.get_publishStreamId()
+    print("assertLocalVideoAvailable -> publishStreamId: "+publishStreamId)
+
+    localVideo = self.chrome.get_element_with_retry(By.ID, publishStreamId)
+
+    assert(localVideo.is_displayed())
 
   def test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
