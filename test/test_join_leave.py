@@ -233,8 +233,9 @@ class TestJoinLeave(unittest.TestCase):
 
   def print_message(self):
     messages = self.chrome.get_all_elements(By.ID, "message")
-    print(">>>>>>>\nmessages:"+str(len(messages)))
-    for message in messages:
+    print(">>>>>>>\nlast 2 messages:"+str(len(messages)))
+    last_two_messages = messages[-2:]
+    for message in last_two_messages:
       print("message:" + message.get_attribute("innerHTML"))
     print("<<<<<<<\n")
 
