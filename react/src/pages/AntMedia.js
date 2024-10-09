@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
@@ -830,7 +830,7 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-        { 
+        
 
             reconnecting = false;
             publishReconnected = false;
@@ -851,9 +851,9 @@ function AntMedia(props) {
                     });
                     setWebRTCAdaptor(adaptor)
             });
-        }
-     
-    }, []);  //just run once when component is mounted
+        
+     //just run once when component is mounted 
+    }, []);  //eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (devices.length > 0) {
@@ -1292,9 +1292,7 @@ function AntMedia(props) {
     }
 
     function handleStartScreenShare() {
-
         createScreenShareWebRtcAdaptor()
-
     }
 
     function turnOffYourMicNotification(participantId) {
@@ -1913,14 +1911,14 @@ function AntMedia(props) {
         handleSendNotificationEvent("CAM_TURNED_OFF", publishStreamId);
     }
 
-    function getSelectedDevices() {
+    const getSelectedDevices = React.useCallback(()=> {
         let devices = {
             videoDeviceId: selectedCamera, audioDeviceId: selectedMicrophone
         }
         return devices;
-    }
+    },[selectedCamera, selectedMicrophone]);
 
-    function setSelectedDevices(devices) {
+    const setSelectedDevices = React.useCallback((devices) => {
         if (devices.videoDeviceId !== null && devices.videoDeviceId !== undefined) {
             setSelectedCamera(devices.videoDeviceId);
             localStorage.setItem("selectedCamera", devices.videoDeviceId);
@@ -1929,9 +1927,9 @@ function AntMedia(props) {
             setSelectedMicrophone(devices.audioDeviceId);
             localStorage.setItem("selectedMicrophone", devices.audioDeviceId);
         }
-    }
+    },[]);
 
-    function cameraSelected(value) {
+    const cameraSelected = React.useCallback((value) => {
         if (selectedCamera !== value) {
             setSelectedDevices({videoDeviceId: value});
             // When we first open home page, React will call this function and local stream is null at that time.
@@ -1942,9 +1940,9 @@ function AntMedia(props) {
                 console.log("Local stream is not ready yet.");
             }
         }
-    }
+    },[selectedCamera, webRTCAdaptor, publishStreamId, setSelectedDevices]);
 
-    function microphoneSelected(value) {
+    const microphoneSelected = React.useCallback((value) => {
         if (selectedMicrophone !== value) {
             setSelectedDevices({audioDeviceId: value});
             // When we first open home page, React will call this function and local stream is null at that time.
@@ -1955,7 +1953,7 @@ function AntMedia(props) {
                 console.log("Local stream is not ready yet.");
             }
         }
-    }
+    }, [selectedMicrophone, setSelectedDevices, webRTCAdaptor, publishStreamId]);
 
     function showReactions(streamId, reactionRequest) {
         let reaction = '😀';
@@ -2022,10 +2020,10 @@ function AntMedia(props) {
             webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
         }
     }
-
-    function getTrackStats() {
+    
+    const getTrackStats = React.useCallback(() => {
         return webRTCAdaptor.remotePeerConnectionStats[roomName];
-    }
+    },[webRTCAdaptor?.remotePeerConnectionStats, roomName]);
 
     React.useEffect(() => {
         //gets the setting from the server through websocket
