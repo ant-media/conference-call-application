@@ -70,6 +70,8 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
 
+    self.chrome.get_screenshot_as_base64()
+
     self.chrome.click_element(speedTestModalJoinButton)
 
     meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
