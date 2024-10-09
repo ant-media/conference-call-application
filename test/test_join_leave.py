@@ -233,9 +233,11 @@ class TestJoinLeave(unittest.TestCase):
 
   def print_message(self):
     messages = self.chrome.get_all_elements(By.ID, "message")
-    print("messages:"+str(len(messages)))
+    print(">>>>>>>\nmessages:"+str(len(messages)))
     for message in messages:
       print("message:" + message.get_attribute("innerHTML"))
+    print("<<<<<<<\n")
+
 
   def test_others_tile(self):
     room = "room"+str(random.randint(100, 999))
