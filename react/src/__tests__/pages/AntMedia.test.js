@@ -1125,7 +1125,7 @@ describe('AntMedia Component', () => {
     expect(contextValue.removeAllRemoteParticipants).toHaveBeenCalled();
   });
 
-  it.only('handleLeaveFromRoom#closeStream', async () => { 
+  it('handleLeaveFromRoom#closeStream', async () => { 
     const { container } = render(
       <AntMedia isTest={true}>
         <MockChild/>
