@@ -1,4 +1,4 @@
-import test_join_leave
+import test_fakeeh_scenarios
 from test_deployment import TestDeployment
 
 import unittest
@@ -14,7 +14,7 @@ os.environ['TEST_APP_NAME'] = "TestAPP"+str(random.randint(100, 999))
 
 suite = unittest.TestSuite()
 suite.addTest(TestDeployment('test_install_app'))
-suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
+suite2 = unittest.TestLoader().loadTestsFromModule(test_fakeeh_scenarios)
 suite.addTests(suite2)
 suite.addTest(TestDeployment('test_delete_app'))
 

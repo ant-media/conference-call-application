@@ -64,6 +64,12 @@ public class WebSocketApplicationConstants {
 
 	public static final String STOP_RECORDING_COMMAND = "stopRecording";
 
+    public static final String SEND_DATA_CHANNEL_COMMAND = "sendData";
+
+    public static final String MESSAGE_FIELD = "message";
+
+    public static final String RECEIVER_STREAM_ID_FIELD = "receiverStreamId";
+	
 	public static final String WEBSOCKET_URL_FIELD = "websocketURL";
 
 	public static final String START_RECORDING_RESPONSE = "startRecordingResponse";
@@ -73,6 +79,8 @@ public class WebSocketApplicationConstants {
     public static final String CHECK_IF_HAS_ADMIN_RIGHTS_RESPONSE = "checkIfHasAdminRightsResponse";
 
     public static final String PONG_RESPONSE = "pong";
+
+    public static final String UPDATE_BROADCAST_ROLE_COMMAND = "updateBroadcastRole";
 
     public static final String MAIN_ROOM_BROADCAST_UPDATED_EVENT = "MAIN_ROOM_BROADCAST_UPDATED";
 }

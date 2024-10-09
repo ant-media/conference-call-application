@@ -25,12 +25,18 @@ public class ConferenceRoomSettings {
     
     @Expose
     private boolean isRecordingFeatureAvailable = false;
+
+    @Expose
+    private String participantVisibilityMatrix;
+
+	@Expose
+	private int maxVideoTrackCount = 6;
     
     @PostConstruct
     public void init() {
         roomCreationPasswordEnabled = StringUtils.isNotBlank(roomCreationPassword);
     	logger.info("roomCreationPasswordEnabled is {}", StringUtils.isNotBlank(roomCreationPassword));
-    	
+
     	try {
 			Class.forName("io.antmedia.plugin.IMediaPushPlugin");
 			logger.info("Conference recording feature is available");
@@ -67,6 +73,21 @@ public class ConferenceRoomSettings {
 	public boolean isRoomCreationPasswordEnabled() {
 		return roomCreationPasswordEnabled;
 	}
-	
+
+	public void setParticipantVisibilityMatrix(String participantVisibilityMatrix) {
+		this.participantVisibilityMatrix = participantVisibilityMatrix;
+	}
+
+	public String getParticipantVisibilityMatrix() {
+		return participantVisibilityMatrix;
+	}
+
+	public int getMaxVideoTrackCount() {
+		return maxVideoTrackCount;
+	}
+
+	public void setMaxVideoTrackCount(int maxVideoTrackCount) {
+		this.maxVideoTrackCount = maxVideoTrackCount;
+	}
 
 }

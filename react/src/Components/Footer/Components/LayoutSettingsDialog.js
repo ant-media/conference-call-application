@@ -55,7 +55,7 @@ const AntDialogTitle = (props) => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={"close"} color={"white"}/>
+          <SvgIcon size={30} name={"close"} color={"#fff"}/>
         </Button>
       ) : null}
     </DialogTitle>
@@ -125,7 +125,7 @@ export function LayoutSettingsDialog(props) {
             borderRadius: 4,
           }}
         >
-          <SvgIcon size={42} name={icon} color={"white"}/>
+          <SvgIcon size={42} name={icon} color={"#fff"}/>
         </Grid>
       </Grid>
     );

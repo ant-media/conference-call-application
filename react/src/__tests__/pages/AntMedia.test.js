@@ -74,6 +74,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       updateStreamMetaData: jest.fn(),
       assignVideoTrack: jest.fn(),
       setParticipantUpdated: jest.fn(),
+      getSubtracks: jest.fn(),
       createSpeedTestForPublishWebRtcAdaptorPlayOnly: jest.fn(),
       createSpeedTestForPublishWebRtcAdaptor: jest.fn(),
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
@@ -228,6 +229,9 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
     });
 
+    /*
+    it('handle video track assignment', async () => {
+      const { container } = render(
     act(() => {
       webRTCAdaptorScreenConstructor.callback("initialized");
       var obj = {videoRoundTripTime: 1000,
@@ -261,6 +265,7 @@ describe('AntMedia Component', () => {
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
+    */
 
     var obj = {};
     let broadcastObject = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};

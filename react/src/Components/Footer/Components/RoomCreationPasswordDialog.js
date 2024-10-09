@@ -24,7 +24,7 @@ const AntDialogTitle = props => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={'close'} color={'white'} />
+          <SvgIcon size={30} name={'close'} color={'#fff'} />
         </Button>
       ) : null}
     </DialogTitle>
@@ -38,12 +38,12 @@ export function RoomCreationPasswordDialog(props) {
   const handleClose = (event, reason) => {
     onClose();
   };
- 
+
   const handlePasswordChange = (event) => {
     onPasswordChange(event.target.value); // Update password state in the parent
   };
 
-/* 
+/*
   const handleRoomNameChange = (event) =>{
     onRoomNameChange(event.target.value)
   } */
@@ -73,7 +73,7 @@ export function RoomCreationPasswordDialog(props) {
           autoComplete="off"
         />
         </div>
-   
+
 
         <Button
             style={{marginTop:'35px'}}

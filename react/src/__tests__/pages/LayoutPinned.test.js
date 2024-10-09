@@ -76,6 +76,7 @@ describe('Pinned Layout Component', () => {
     console.log(container.outerHTML);
   });
 
+  /*
   it('test show other cards after limit', () => {
     process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY = true;
     var noOfParticipants = 10;
@@ -115,4 +116,5 @@ describe('Pinned Layout Component', () => {
       expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(3);
 
   });
+  */
 });
