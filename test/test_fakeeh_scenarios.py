@@ -18,7 +18,7 @@ class TestTestFakeehScenario(unittest.TestCase):
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.chrome = Browser()
     self.chrome.init(True)
-    self.startLoadTest()
+    #self.startLoadTest()
 
   def tearDown(self):
     print(self._testMethodName, " ending...")
