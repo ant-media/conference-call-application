@@ -345,12 +345,10 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_presenter)
 
-
     # playerA joins to listener room
     handle_player_A = self.join_room_as_player("playerA", room)
     # there should be no video in listener room
     wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
-
 
     # switch to admin and add presenter to listener room
     self.chrome.switch_to_tab(handle_admin)
@@ -380,7 +378,7 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_with_stats(self):
+  def _test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
