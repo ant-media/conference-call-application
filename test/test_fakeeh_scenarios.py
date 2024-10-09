@@ -419,6 +419,8 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
 
+    print("self.get_track_stats()", self.get_track_stats())
+
     wait.until(lambda x: len(self.get_track_stats()['inboundRtpList']) == 4)
     stats = self.get_track_stats()
 
