@@ -378,11 +378,11 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_with_stats(self):
+  def test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
-    handle_1 = self.join_room_in_new_tab("participantA", room)
-    handle_2 = self.join_room_in_new_tab("participantB", room)
-    handle_3 = self.join_room_in_new_tab("participantB", room)
+    handle_1 = self.join_room_as_presenter("participantA", room)
+    handle_2 = self.join_room_as_presenter("participantB", room)
+    handle_3 = self.join_room_as_presenter("participantB", room)
 
 
     assert(handle_3 == self.chrome.get_current_tab_id())
