@@ -913,7 +913,7 @@ function AntMedia(props) {
         webRTCAdaptor.localStream = localVideo;
     }
 
-    function makeid(length) {
+    const makeid = React.useCallback((length) => {
         var result = '';
         var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         var charactersLength = characters.length;
@@ -921,7 +921,7 @@ function AntMedia(props) {
             result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
         return result;
-    }
+    },[]);
 
     React.useEffect(() => {
         if ((isPublished || isPlayOnly) && isPlayed) {
@@ -2264,14 +2264,6 @@ function AntMedia(props) {
                         startSpeedTest,
                         stopSpeedTest,
                         parseWebSocketURL,
-                        createSpeedTestForPublishWebRtcAdaptorPlayOnly,
-                        createSpeedTestForPublishWebRtcAdaptor,
-                        createSpeedTestForPlayWebRtcAdaptor,
-                        speedTestForPlayWebRtcAdaptorInfoCallback,
-                        speedTestForPlayWebRtcAdaptorErrorCallback,
-                        speedTestForPublishWebRtcAdaptorInfoCallback,
-                        speedTestForPublishWebRtcAdaptorErrorCallback,
-                        getTrackStats,
                         statsList
                     }}
                 >
