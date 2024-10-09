@@ -94,9 +94,9 @@ function getMediaConstraints(videoSendResolution, frameRate) {
 var peerconnection_config = {
   'iceServers': [
     {
-      'urls': 'turn:turn.fakeeh.education:3478?transport=tcp',
-      'username': '-',
-      'credential': '-'
+      'urls': 'turn:ovh36.antmedia.io:3478',
+      'username': 'ovh36',
+      'credential': 'ovh36'
     }
   ],
   sdpSemantics: 'unified-plan'
