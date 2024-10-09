@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
@@ -189,6 +189,7 @@ var reconnecting = false;
 var publishReconnected;
 var playReconnected;
 
+
 function AntMedia(props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
@@ -324,7 +325,6 @@ function AntMedia(props) {
 
 
     const [initialized, setInitialized] = React.useState(!!props.isTest);
-    const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
     const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
     const [publishStats, setPublishStats] = React.useState(null);
@@ -691,25 +691,30 @@ function AntMedia(props) {
         }
     }
 
-    async function checkDevices() {
-        let devices = await navigator.mediaDevices.enumerateDevices();
-        let audioDeviceAvailable = false
-        let videoDeviceAvailable = false
-        devices.forEach(device => {
-            if (device.kind === "audioinput") {
-                audioDeviceAvailable = true;
-            }
-            if (device.kind === "videoinput") {
-                videoDeviceAvailable = true;
-            }
-        });
+    function checkDevices() {
+        return navigator.mediaDevices.enumerateDevices().then(devices => {
+            let audioDeviceAvailable = false;
+            let videoDeviceAvailable = false;
+            
+            devices.forEach(device => {
+                if (device.kind === "audioinput") {
+                    audioDeviceAvailable = true;
+                }
+                if (device.kind === "videoinput") {
+                    videoDeviceAvailable = true;
+                }
+            });
 
-        if (!audioDeviceAvailable) {
-            mediaConstraints.audio = false;
-        }
-        if (!videoDeviceAvailable) {
-            mediaConstraints.video = false;
-        }
+            if (!audioDeviceAvailable) {
+                mediaConstraints.audio = false;
+            }
+            if (!videoDeviceAvailable) {
+                mediaConstraints.video = false;
+            }
+        }).catch(err => {
+            console.error("Error enumerating devices:", err);
+            return Promise.reject(err); // Reject the promise if an error occurs
+        });
     }
 
     function fakeReconnect() {
@@ -825,32 +830,30 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-        async function createWebRTCAdaptor() { 
+        { 
+
             reconnecting = false;
             publishReconnected = false;
             playReconnected = false;
             console.log("++ createWebRTCAdaptor");
             //here we check if audio or video device available and wait result
             //according to the result we modify mediaConstraints
-            await checkDevices();
-            if (recreateAdaptor && webRTCAdaptor == null) {
-                var adaptor = new WebRTCAdaptor({
-                    websocket_url: websocketURL,
-                    mediaConstraints: mediaConstraints, //placeholder for peerconnection_config
-                    isPlayMode: playOnly, // onlyDataChannel: playOnly,
-                    debug: true,
-                    callback: infoCallback,
-                    callbackError: errorCallback,
-                    purposeForTest: "main-adaptor"
-                });
-                setWebRTCAdaptor(adaptor)
 
-                setRecreateAdaptor(false);
-            }
+            checkDevices().then(() => {
+                    var adaptor = new WebRTCAdaptor({
+                        websocket_url: websocketURL,
+                        mediaConstraints: mediaConstraints, //placeholder for peerconnection_config
+                        isPlayMode: playOnly, // onlyDataChannel: playOnly,
+                        debug: true,
+                        callback: infoCallback,
+                        callbackError: errorCallback,
+                        purposeForTest: "main-adaptor"
+                    });
+                    setWebRTCAdaptor(adaptor)
+            });
         }
-
-        createWebRTCAdaptor();
-    }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
+     
+    }, []);  //just run once when component is mounted
 
     useEffect(() => {
         if (devices.length > 0) {
@@ -1354,6 +1357,8 @@ function AntMedia(props) {
     function handleStopScreenShare() {
         setIsScreenShared(false);
         screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
+        screenShareWebRtcAdaptor.current.closeStream();
+        screenShareWebRtcAdaptor.current.closeWebSocket();
     }
 
     function handleSetMessages(newMessage) {
@@ -1654,7 +1659,6 @@ function AntMedia(props) {
 
     function handleLeaveFromRoom() {
 
-
         // we need to empty participant array. if we are going to leave it in the first place.
         setVideoTrackAssignments([]);
         setAllParticipants({});
@@ -1670,6 +1674,8 @@ function AntMedia(props) {
         if (!playOnly) {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
+        //close streams fully to not encounter webcam light 
+        webRTCAdaptor?.closeStream();
 
         if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
             handleStopScreenShare();
