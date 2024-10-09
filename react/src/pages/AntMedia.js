@@ -1251,6 +1251,8 @@ function AntMedia(props) {
         reconnecting = !(publishReconnected && playReconnected);
         setIsReconnectionInProgress(reconnecting);
       }
+      
+      webRTCAdaptor?.enableStats(roomName);
     } else if (info === "play_finished") {
       clearInterval(requestVideoTrackAssignmentsInterval);
       videoTrackAssignmentsIntervalJob = null;
