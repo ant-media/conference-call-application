@@ -54,7 +54,7 @@ export const WebSocketProvider = ({ children }) => {
                 command = parsedMessage.command;
 
                 if (command === 'pong') {
-                    console.info('Received pong from server');
+                    console.log('Received pong from server');
                 }
             };
 
