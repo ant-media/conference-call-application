@@ -104,6 +104,12 @@ jobs:
       run: |
         cd test
         python3 test_main.py ${{ secrets.STAGING_SERVER_URL }} ${{ secrets.USER_NAME }} ${{ secrets.PASSWORD }} ../webapp/target/*.war
+
+    - name: Upload PNG files as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: png-files
+        path: ${{ github.workspace }}/test/**/*.png
           
     - name: Publish to Maven Central
       if: github.ref == 'refs/heads/main'
