@@ -189,6 +189,7 @@ var reconnecting = false;
 var publishReconnected;
 var playReconnected;
 
+
 function AntMedia(props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
@@ -324,7 +325,6 @@ function AntMedia(props) {
 
 
     const [initialized, setInitialized] = React.useState(!!props.isTest);
-    const [recreateAdaptor, setRecreateAdaptor] = React.useState(true);
     const [publisherRequestListDrawerOpen, setPublisherRequestListDrawerOpen] = React.useState(false);
 
     const [publishStats, setPublishStats] = React.useState(null);
@@ -691,25 +691,30 @@ function AntMedia(props) {
         }
     }
 
-    async function checkDevices() {
-        let devices = await navigator.mediaDevices.enumerateDevices();
-        let audioDeviceAvailable = false
-        let videoDeviceAvailable = false
-        devices.forEach(device => {
-            if (device.kind === "audioinput") {
-                audioDeviceAvailable = true;
-            }
-            if (device.kind === "videoinput") {
-                videoDeviceAvailable = true;
-            }
-        });
+    function checkDevices() {
+        return navigator.mediaDevices.enumerateDevices().then(devices => {
+            let audioDeviceAvailable = false;
+            let videoDeviceAvailable = false;
+            
+            devices.forEach(device => {
+                if (device.kind === "audioinput") {
+                    audioDeviceAvailable = true;
+                }
+                if (device.kind === "videoinput") {
+                    videoDeviceAvailable = true;
+                }
+            });
 
-        if (!audioDeviceAvailable) {
-            mediaConstraints.audio = false;
-        }
-        if (!videoDeviceAvailable) {
-            mediaConstraints.video = false;
-        }
+            if (!audioDeviceAvailable) {
+                mediaConstraints.audio = false;
+            }
+            if (!videoDeviceAvailable) {
+                mediaConstraints.video = false;
+            }
+        }).catch(err => {
+            console.error("Error enumerating devices:", err);
+            return Promise.reject(err); // Reject the promise if an error occurs
+        });
     }
 
     function fakeReconnect() {
@@ -825,32 +830,30 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-        async function createWebRTCAdaptor() { 
+        
+
             reconnecting = false;
             publishReconnected = false;
             playReconnected = false;
             console.log("++ createWebRTCAdaptor");
             //here we check if audio or video device available and wait result
             //according to the result we modify mediaConstraints
-            await checkDevices();
-            if (recreateAdaptor && webRTCAdaptor == null) {
-                var adaptor = new WebRTCAdaptor({
-                    websocket_url: websocketURL,
-                    mediaConstraints: mediaConstraints, //placeholder for peerconnection_config
-                    isPlayMode: playOnly, // onlyDataChannel: playOnly,
-                    debug: true,
-                    callback: infoCallback,
-                    callbackError: errorCallback,
-                    purposeForTest: "main-adaptor"
-                });
-                setWebRTCAdaptor(adaptor)
 
-                setRecreateAdaptor(false);
-            }
-        }
-
-        createWebRTCAdaptor();
-    }, [recreateAdaptor]);  // eslint-disable-line react-hooks/exhaustive-deps
+            checkDevices().then(() => {
+                    var adaptor = new WebRTCAdaptor({
+                        websocket_url: websocketURL,
+                        mediaConstraints: mediaConstraints, //placeholder for peerconnection_config
+                        isPlayMode: playOnly, // onlyDataChannel: playOnly,
+                        debug: true,
+                        callback: infoCallback,
+                        callbackError: errorCallback,
+                        purposeForTest: "main-adaptor"
+                    });
+                    setWebRTCAdaptor(adaptor)
+            });
+        
+     //just run once when component is mounted 
+    }, []);  //eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (devices.length > 0) {
@@ -1290,9 +1293,7 @@ function AntMedia(props) {
     }
 
     function handleStartScreenShare() {
-
         createScreenShareWebRtcAdaptor()
-
     }
 
     function turnOffYourMicNotification(participantId) {
@@ -1355,6 +1356,8 @@ function AntMedia(props) {
     function handleStopScreenShare() {
         setIsScreenShared(false);
         screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
+        screenShareWebRtcAdaptor.current.closeStream();
+        screenShareWebRtcAdaptor.current.closeWebSocket();
     }
 
     function handleSetMessages(newMessage) {
@@ -1655,7 +1658,6 @@ function AntMedia(props) {
 
     function handleLeaveFromRoom() {
 
-
         // we need to empty participant array. if we are going to leave it in the first place.
         setVideoTrackAssignments([]);
         setAllParticipants({});
@@ -1671,6 +1673,8 @@ function AntMedia(props) {
         if (!playOnly) {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
+        //close streams fully to not encounter webcam light 
+        webRTCAdaptor?.closeStream();
 
         if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
             handleStopScreenShare();
@@ -1908,14 +1912,14 @@ function AntMedia(props) {
         handleSendNotificationEvent("CAM_TURNED_OFF", publishStreamId);
     }
 
-    function getSelectedDevices() {
+    const getSelectedDevices = React.useCallback(()=> {
         let devices = {
             videoDeviceId: selectedCamera, audioDeviceId: selectedMicrophone
         }
         return devices;
-    }
+    },[selectedCamera, selectedMicrophone]);
 
-    function setSelectedDevices(devices) {
+    const setSelectedDevices = React.useCallback((devices) => {
         if (devices.videoDeviceId !== null && devices.videoDeviceId !== undefined) {
             setSelectedCamera(devices.videoDeviceId);
             localStorage.setItem("selectedCamera", devices.videoDeviceId);
@@ -1924,9 +1928,9 @@ function AntMedia(props) {
             setSelectedMicrophone(devices.audioDeviceId);
             localStorage.setItem("selectedMicrophone", devices.audioDeviceId);
         }
-    }
+    },[]);
 
-    function cameraSelected(value) {
+    const cameraSelected = React.useCallback((value) => {
         if (selectedCamera !== value) {
             setSelectedDevices({videoDeviceId: value});
             // When we first open home page, React will call this function and local stream is null at that time.
@@ -1937,9 +1941,9 @@ function AntMedia(props) {
                 console.log("Local stream is not ready yet.");
             }
         }
-    }
+    },[selectedCamera, webRTCAdaptor, publishStreamId, setSelectedDevices]);
 
-    function microphoneSelected(value) {
+    const microphoneSelected = React.useCallback((value) => {
         if (selectedMicrophone !== value) {
             setSelectedDevices({audioDeviceId: value});
             // When we first open home page, React will call this function and local stream is null at that time.
@@ -1950,7 +1954,7 @@ function AntMedia(props) {
                 console.log("Local stream is not ready yet.");
             }
         }
-    }
+    }, [selectedMicrophone, setSelectedDevices, webRTCAdaptor, publishStreamId]);
 
     function showReactions(streamId, reactionRequest) {
         let reaction = '😀';
@@ -2017,10 +2021,10 @@ function AntMedia(props) {
             webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
         }
     }
-
-    function getTrackStats() {
+    
+    const getTrackStats = React.useCallback(() => {
         return webRTCAdaptor.remotePeerConnectionStats[roomName];
-    }
+    },[webRTCAdaptor?.remotePeerConnectionStats, roomName]);
 
     React.useEffect(() => {
         //gets the setting from the server through websocket

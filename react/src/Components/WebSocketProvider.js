@@ -7,7 +7,6 @@ export const WebSocketProvider = ({ children }) => {
     const webSocket = useRef(null);
     const [latestMessage, setLatestMessage] = useState(null);
     const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
-
     var websocketUrlTemp = process.env.REACT_APP_WEBSOCKET_URL;
     if (!websocketUrlTemp) {
         websocketUrlTemp = getWebSocketURLAttribute();
@@ -83,11 +82,11 @@ export const WebSocketProvider = ({ children }) => {
             };
     },[applicationWebSocketUrl]);
 
-    const sendMessage = (message) => {
+    const sendMessage = React.useCallback((message) => {
         if (webSocket.current && isWebSocketConnected) {
             webSocket.current.send(message);
         }
-    };
+    },[isWebSocketConnected]);
 
     return (
         <WebSocketContext.Provider value={{ sendMessage, latestMessage, isWebSocketConnected}}>
