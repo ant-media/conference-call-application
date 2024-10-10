@@ -447,11 +447,22 @@ class TestJoinLeave(unittest.TestCase):
     print("**********************************************")
     wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == N)
 
+    print("screen when track limit is default")
+    self.chrome.print_ss_as_base64()
+
     self.set_and_test_track_limit(4)
+    time.sleep(5)
+    print("screen when track limit is 4")
+    self.chrome.print_ss_as_base64()
+  
     wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == 3) 
     
 
     self.set_and_test_track_limit(6)
+    time.sleep(5)
+    print("screen when track limit is 6")
+    self.chrome.print_ss_as_base64()
+
     wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == N)
 
     self.kill_participants_with_test_tool(process)
