@@ -82,7 +82,7 @@ class TestJoinLeave(unittest.TestCase):
 
     return handle
     
-  def get_videoTrackAssignments(self, print_logs=False, log_title=""):
+  def get_videoTrackAssignments(self, expected_value=None):
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
     
@@ -91,18 +91,19 @@ class TestJoinLeave(unittest.TestCase):
     
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    if print_logs:
-      print("\n ++++++++++++++++++++ "+log_title)
-      print("\n"+log_title+" get_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-      print(log_title+" vtas("+str(len(vtas))+"):\n" + str(vtas))
+    if expected_value is not None and len(vtas) != expected_value:
+      print("\n ++++++++++ start trial ++++++++++")
+      print("VTA expected: "+str(expected_value) + " but got: "+str(len(vtas)))
       self.call_debugme()
-      print(log_title+" print message:")
+      print("\n")
       self.print_message()
 
-      print("screen shot for:"+log_title)
+      print("\n screen shot")
       self.chrome.print_ss_as_base64()
 
       self.open_close_chat_drawer()
+      print("++++++++++ end trial ++++++++++\n")
+
 
    
     cpu_usage = psutil.cpu_percent(interval=0)
@@ -443,7 +444,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.makeFullScreen()
     N = 5
     room = "room"+str(random.randint(100, 999))
-    wait = self.chrome.get_wait()
+    wait = self.chrome.get_wait(25, 5)
 
     process = self.create_participants_with_test_tool("participant", room, N-1)
 
@@ -454,7 +455,7 @@ class TestJoinLeave(unittest.TestCase):
     print("len(self.get_videoTrackAssignments()): "+str(len(self.get_videoTrackAssignments())))
     print("N: "+str(N))
     print("**********************************************")
-    wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = default")) == N)
+    wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
 
 
     print("screen shot 1: default")
@@ -467,7 +468,7 @@ class TestJoinLeave(unittest.TestCase):
     time.sleep(5)
   
   
-    wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = 4")) == 3) 
+    wait.until(lambda x: len(self.get_videoTrackAssignments(3)) == 3) 
 
     print("screen shot 2: 4")
     self.chrome.print_ss_as_base64()
@@ -479,7 +480,7 @@ class TestJoinLeave(unittest.TestCase):
     time.sleep(5)
     
 
-    wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = 6")) == N)
+    wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
 
     print("screen shot 3: 6")
     self.chrome.print_ss_as_base64()
