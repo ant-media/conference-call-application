@@ -150,6 +150,8 @@ class TestJoinLeave(unittest.TestCase):
 
     time.sleep(1)
 
+    self.chrome.print_ss_as_base64()
+
     tile_count_slider = self.chrome.get_element_with_retry(By.ID, "tile-count-slider")
     points = self.chrome.get_element_in_element(tile_count_slider, By.CLASS_NAME, "MuiSlider-mark")
     self.chrome.mouse_click_on(points[index])
