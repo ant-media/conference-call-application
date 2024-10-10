@@ -890,6 +890,26 @@ function AntMedia(props) {
                     stream.getVideoTracks()[0].addEventListener('ended', () => {
                         handleStopScreenShare();
                     });
+
+                    // Event listener for 'change' (Safari specific for pause/resume)
+                    stream.getVideoTracks()[0].addEventListener('change', (event) => {
+                        if (event.target.readyState === 'ended') {
+                            // Screen share stopped
+                            handleStopScreenShare();
+                        } else if (event.target.readyState === 'live') {
+                            // Screen share started or resumed
+                            handleStartScreenShare();
+                        } else if (event.target.readyState === 'paused') {
+                            // Screen share paused
+                            handleStopScreenShare();
+                        }
+                        console.log('Screen share state changed: ' + event.target.readyState);
+                        // important note, in the case of Safari, there is a way to pause and resume screen sharing
+                        // when we don't stop in case of the paused state, we will have a problem with the video track
+                        // it says there is no active video track and fails to publish
+                        // so we stop and start again in the case of the paused/resume states
+                        // Mustafa BOLEKEN 30.09.2024
+                    });
                 }
                 screenShareWebRtcAdaptor.current = new WebRTCAdaptor({
                     websocket_url: websocketURL,
