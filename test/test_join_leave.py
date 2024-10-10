@@ -434,6 +434,7 @@ class TestJoinLeave(unittest.TestCase):
     '''
 
   def test_join_room_N_participants(self):
+    self.chrome.makeFullScreen()
     N = 5
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait()
