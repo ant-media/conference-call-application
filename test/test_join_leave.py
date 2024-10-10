@@ -348,6 +348,8 @@ class TestJoinLeave(unittest.TestCase):
 
 
     wait.until(lambda x: len(self.get_track_stats()['inboundRtpList']) == 4)
+
+    time.sleep(5)
     stats = self.get_track_stats()
 
     assert(stats is not None)
