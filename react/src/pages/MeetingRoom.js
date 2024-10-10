@@ -48,9 +48,10 @@ const MeetingRoom = React.memo((props) => {
     };
   });
 
+  //this trigger ReactionBarSelector to render everytime, useCallback by making sure about conference dependency - mekya
   function sendEmoji(emoji) {
     conference?.sendReactions(emoji);
-    conference.setShowEmojis(!conference.showEmojis);
+    conference?.setShowEmojis(!conference.showEmojis);
   }
 
   const reactionList = [
