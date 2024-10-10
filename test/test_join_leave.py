@@ -456,13 +456,23 @@ class TestJoinLeave(unittest.TestCase):
     print("**********************************************")
     wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = default")) == N)
 
-   
+
+    print("screen shot 1: default")
+    self.chrome.print_ss_as_base64()
+
+    time.sleep(5)
+
 
     self.set_and_test_track_limit(4)
     time.sleep(5)
   
   
     wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = 4")) == 3) 
+
+    print("screen shot 2: 4")
+    self.chrome.print_ss_as_base64()
+
+    time.sleep(5)
     
 
     self.set_and_test_track_limit(6)
@@ -470,6 +480,11 @@ class TestJoinLeave(unittest.TestCase):
     
 
     wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = 6")) == N)
+
+    print("screen shot 3: 6")
+    self.chrome.print_ss_as_base64()
+
+    time.sleep(5)
 
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
