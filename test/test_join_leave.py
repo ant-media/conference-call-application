@@ -82,7 +82,7 @@ class TestJoinLeave(unittest.TestCase):
 
     return handle
     
-  def get_videoTrackAssignments(self, print_logs=False):
+  def get_videoTrackAssignments(self, print_logs=False, log_title=""):
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
     
@@ -92,10 +92,16 @@ class TestJoinLeave(unittest.TestCase):
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
     if print_logs:
-      print("\nget_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-      print("vtas("+str(len(vtas))+"):\n" + str(vtas))
+      print("\n ++++++++++++++++++++ "+log_title)
+      print("\n"+log_title+" get_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
+      print(log_title+" vtas("+str(len(vtas))+"):\n" + str(vtas))
       self.call_debugme()
+      print(log_title+" print message:")
       self.print_message()
+
+      print("screen shot for:"+log_title)
+      self.chrome.print_ss_as_base64()
+
       self.open_close_chat_drawer()
 
    
@@ -448,25 +454,22 @@ class TestJoinLeave(unittest.TestCase):
     print("len(self.get_videoTrackAssignments()): "+str(len(self.get_videoTrackAssignments())))
     print("N: "+str(N))
     print("**********************************************")
-    wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == N)
+    wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = default")) == N)
 
-    print("screen when track limit is default")
-    self.chrome.print_ss_as_base64()
+   
 
     self.set_and_test_track_limit(4)
     time.sleep(5)
-    print("screen when track limit is 4")
-    self.chrome.print_ss_as_base64()
   
-    wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == 3) 
+  
+    wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = 4")) == 3) 
     
 
     self.set_and_test_track_limit(6)
     time.sleep(5)
-    print("screen when track limit is 6")
-    self.chrome.print_ss_as_base64()
+    
 
-    wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == N)
+    wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = 6")) == N)
 
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
