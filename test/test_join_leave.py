@@ -458,8 +458,9 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
 
 
-    print("screen shot 1: default")
+    print("screen shot 1 start: default")
     self.chrome.print_ss_as_base64()
+    print("screen shot 1 end: default")
 
     time.sleep(5)
 
@@ -470,8 +471,9 @@ class TestJoinLeave(unittest.TestCase):
   
     wait.until(lambda x: len(self.get_videoTrackAssignments(3)) == 3) 
 
-    print("screen shot 2: 4")
+    print("screen shot 2 start: 4")
     self.chrome.print_ss_as_base64()
+    print("screen shot 2 end: default")
 
     time.sleep(5)
     
@@ -482,8 +484,10 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
 
-    print("screen shot 3: 6")
+    print("screen shot 3 start: 6")
     self.chrome.print_ss_as_base64()
+    print("screen shot 3 end: 6")
+
 
     time.sleep(5)
 
