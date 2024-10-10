@@ -82,7 +82,7 @@ class TestJoinLeave(unittest.TestCase):
 
     return handle
     
-  def get_videoTrackAssignments(self, print_logs=False):
+  def get_videoTrackAssignments(self, print_logs=False, log_title=""):
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
     
@@ -92,10 +92,16 @@ class TestJoinLeave(unittest.TestCase):
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
     if print_logs:
-      print("\nget_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-      print("vtas("+str(len(vtas))+"):\n" + str(vtas))
+      print("\n ++++++++++++++++++++ "+log_title)
+      print("\n"+log_title+" get_videoTrackAssignments current time: "+ time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
+      print(log_title+" vtas("+str(len(vtas))+"):\n" + str(vtas))
       self.call_debugme()
+      print(log_title+" print message:")
       self.print_message()
+
+      print("screen shot for:"+log_title)
+      self.chrome.print_ss_as_base64()
+
       self.open_close_chat_drawer()
 
    
@@ -149,6 +155,8 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.click_element(change_layout_button)
 
     time.sleep(1)
+
+    self.chrome.print_ss_as_base64()
 
     tile_count_slider = self.chrome.get_element_with_retry(By.ID, "tile-count-slider")
     points = self.chrome.get_element_in_element(tile_count_slider, By.CLASS_NAME, "MuiSlider-mark")
@@ -346,6 +354,8 @@ class TestJoinLeave(unittest.TestCase):
 
 
     wait.until(lambda x: len(self.get_track_stats()['inboundRtpList']) == 4)
+
+    time.sleep(5)
     stats = self.get_track_stats()
 
     assert(stats is not None)
@@ -430,6 +440,7 @@ class TestJoinLeave(unittest.TestCase):
     '''
 
   def test_join_room_N_participants(self):
+    self.chrome.makeFullScreen()
     N = 5
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait()
@@ -443,14 +454,22 @@ class TestJoinLeave(unittest.TestCase):
     print("len(self.get_videoTrackAssignments()): "+str(len(self.get_videoTrackAssignments())))
     print("N: "+str(N))
     print("**********************************************")
-    wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == N)
+    wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = default")) == N)
+
+   
 
     self.set_and_test_track_limit(4)
-    wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == 3) 
+    time.sleep(5)
+  
+  
+    wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = 4")) == 3) 
     
 
     self.set_and_test_track_limit(6)
-    wait.until(lambda x: len(self.get_videoTrackAssignments(True)) == N)
+    time.sleep(5)
+    
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments(True, "tile count = 6")) == N)
 
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
