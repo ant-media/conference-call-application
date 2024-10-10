@@ -106,6 +106,7 @@ jobs:
         python3 test_main.py ${{ secrets.STAGING_SERVER_URL }} ${{ secrets.USER_NAME }} ${{ secrets.PASSWORD }} ../webapp/target/*.war
 
     - name: Upload PNG files as artifacts
+      if: always()
       uses: actions/upload-artifact@v3
       with:
         name: png-files
