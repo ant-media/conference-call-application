@@ -64,6 +64,9 @@ class Browser:
 
   def get_screenshot_as_base64(self):
     return self.driver.get_screenshot_as_base64()
+  
+  def save_ss_as_file(self, file_path):
+    self.driver.save_screenshot(file_path)
 
   def print_log_file(self):
     file_path = "/tmp/chromedriver.log"

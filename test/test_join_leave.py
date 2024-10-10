@@ -460,9 +460,15 @@ class TestJoinLeave(unittest.TestCase):
 
     print("screen shot 1 start: default")
     self.chrome.print_ss_as_base64()
+    self.chrome.save_ss_as_file("shot-1.png")
     print("screen shot 1 end: default")
 
-    time.sleep(5)
+    # Print the current working directory
+    print("Current Directory:", os.getcwd())
+
+    # List all files in the current directory
+    files = os.listdir()
+    print("Files in Directory:", files)
 
 
     self.set_and_test_track_limit(4)
@@ -473,10 +479,8 @@ class TestJoinLeave(unittest.TestCase):
 
     print("screen shot 2 start: 4")
     self.chrome.print_ss_as_base64()
-    print("screen shot 2 end: default")
-
-    time.sleep(5)
-    
+    self.chrome.save_ss_as_file("shot-2.png")
+    print("screen shot 2 end: default")  
 
     self.set_and_test_track_limit(6)
     time.sleep(5)
@@ -486,10 +490,9 @@ class TestJoinLeave(unittest.TestCase):
 
     print("screen shot 3 start: 6")
     self.chrome.print_ss_as_base64()
+    self.chrome.save_ss_as_file("shot-3.png")
     print("screen shot 3 end: 6")
 
-
-    time.sleep(5)
 
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
