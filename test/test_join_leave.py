@@ -101,9 +101,6 @@ class TestJoinLeave(unittest.TestCase):
       print("\n screen shot")
       self.chrome.print_ss_as_base64()
 
-      print("\n log file")
-      self.chrome.print_log_file()
-
       self.open_close_chat_drawer()
       print("++++++++++ end trial ++++++++++\n")
 

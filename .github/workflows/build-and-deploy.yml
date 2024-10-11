@@ -111,6 +111,13 @@ jobs:
       with:
         name: screenshots
         path: ${{ github.workspace }}/test/**/*.png
+
+    - name: Upload log files as artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: logs
+        path: /tmp/chromedriver.log
           
     - name: Publish to Maven Central
       if: github.ref == 'refs/heads/main'
