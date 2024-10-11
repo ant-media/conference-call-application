@@ -446,8 +446,6 @@ class TestJoinLeave(unittest.TestCase):
 
     process = self.create_participants_with_test_tool("participant", room, N-1)
 
-    time.sleep(7)
-
     self.join_room_in_new_tab("participant"+str(N-1), room)     
 
     self.assertLocalVideoAvailable()
@@ -471,9 +469,7 @@ class TestJoinLeave(unittest.TestCase):
     print("Files in Directory:", files)
 
 
-    self.set_and_test_track_limit(4)
-    time.sleep(5)
-  
+    self.set_and_test_track_limit(4)  
   
     wait.until(lambda x: len(self.get_videoTrackAssignments(3)) == 3) 
 
@@ -483,7 +479,6 @@ class TestJoinLeave(unittest.TestCase):
     print("screen shot 2 end: default")  
 
     self.set_and_test_track_limit(6)
-    time.sleep(5)
     
 
     wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
