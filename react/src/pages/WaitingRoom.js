@@ -246,7 +246,7 @@ function WaitingRoom(props) {
                     </Typography>
                     <Typography id="modal-modal-description"
                                 sx={{mt: 2, color: "white", marginTop: '12px', marginBottom: '21px',
-                                    display: conference?.speedTestObject?.errorMessage != "" ? "none" : "block"
+                                    display: conference?.speedTestObject?.errorMessage !== "" ? "none" : "block"
 
                                 }}>
                         {conference?.speedTestObject?.message}
