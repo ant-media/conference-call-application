@@ -324,7 +324,7 @@ public class WebSocketApplicationHandler
 
 	private void responseRoomSettings(Session session) {
 
-		String participantVisibilityMatrix = appSettings.getParticipantVisibilityMatrix();
+		String participantVisibilityMatrix = appSettings.getParticipantVisibilityMatrix().toString();
 
 		if (participantVisibilityMatrix != null) {
 			conferenceRoomSettings.setParticipantVisibilityMatrix(participantVisibilityMatrix);
