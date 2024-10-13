@@ -411,7 +411,7 @@ function AntMedia(props) {
 
     const [devices, setDevices] = React.useState([]);
 
-    const [isPlayOnly, setIsPlayOnly] = React.useState(playOnly);
+    const [isPlayOnly, setIsPlayOnly] = React.useState(initialPlayOnly);
 
     const [isEnterDirectly] = React.useState(enterDirectly);
 
