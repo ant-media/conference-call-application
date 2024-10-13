@@ -303,8 +303,6 @@ describe('AntMedia Component', () => {
     obj = {};
     obj.data = json;
 
-    const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
-
     await act(async () => {
       webRTCAdaptorConstructor.callback("data_received", obj);
     });
