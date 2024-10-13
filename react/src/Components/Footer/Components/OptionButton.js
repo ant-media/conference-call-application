@@ -100,7 +100,7 @@ function OptionButton({footer, ...props}) {
           aria-expanded={open ? "true" : undefined}
           onClick={handleClick}
         >
-          <SvgIcon size={40} name={'settings'} color={open ? '#000' : '#fff'}/>
+          <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'xxx'}/>
         </CustomizedBtn>
       </Tooltip>
       <Menu
@@ -123,7 +123,7 @@ function OptionButton({footer, ...props}) {
         {process.env.REACT_APP_OPTION_MENU_GENERAL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
         <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
           <ListItemIcon>
-            <SvgIcon size={36} name={"settings"} color={"#fff"}/>
+            <SvgIcon size={36} name={"settings"} color={"xxx"}/>
           </ListItemIcon>
           <ListItemText
             id="general-button"
@@ -136,7 +136,7 @@ function OptionButton({footer, ...props}) {
         {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
         <MenuItem onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
           <ListItemIcon>
-            <SvgIcon size={36} name={"layout"} color={"#fff"}/>
+            <SvgIcon size={36} name={"layout"} color={"xxx"}/>
           </ListItemIcon>
           <ListItemText>
             {t("Change Layout")}
@@ -148,7 +148,7 @@ function OptionButton({footer, ...props}) {
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
           <MenuItem onClick={() => handleDialogOpen()}>
             <ListItemIcon>
-              <SvgIcon size={36} name={"call-settings"} color={"#fff"}/>
+              <SvgIcon size={36} name={"call-settings"} color={"xxx"}/>
             </ListItemIcon>
             <ListItemText>{t("Call Settings")}</ListItemText>
           </MenuItem>
@@ -158,7 +158,7 @@ function OptionButton({footer, ...props}) {
         && process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true' ?
             <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }}>
               <ListItemIcon>
-                <SvgIcon size={36} name={"background-replacement"} color={"#fff"} />
+                <SvgIcon size={36} name={"background-replacement"} color={"xxx"} />
               </ListItemIcon>
               <ListItemText>{t("Virtual Effects")}</ListItemText>
             </MenuItem>
@@ -170,7 +170,7 @@ function OptionButton({footer, ...props}) {
             (<MenuItem onClick={() => { conference.startRecord(); handleClose(); } } id="start-recording-button"
             >
               <ListItemIcon>
-                <SvgIcon size={36} name={"camera"} color={"#fff"} />
+                <SvgIcon size={36} name={"camera"} color={"xxx"} />
               </ListItemIcon>
               <ListItemText>{t("Start Record")}</ListItemText>
             </MenuItem>
@@ -178,12 +178,12 @@ function OptionButton({footer, ...props}) {
 
             (conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true) &&
             (<MenuItem onClick={() => { conference.stopRecord(); handleClose(); }} id="stop-recording-button"
-              >
-                <ListItemIcon>
-                  <SvgIcon size={36} name={"camera"} color={"#fff"} />
-                </ListItemIcon>
-                <ListItemText>{t("Stop Record")}</ListItemText>
-              </MenuItem>
+          >
+            <ListItemIcon>
+              <SvgIcon size={36} name={"camera"} color={"xxx"} />
+            </ListItemIcon>
+            <ListItemText>{t("Stop Record")}</ListItemText>
+          </MenuItem>
             )
           ]
           : null}
@@ -196,7 +196,7 @@ function OptionButton({footer, ...props}) {
             rel="noopener noreferrer"
           >
             <ListItemIcon>
-              <SvgIcon size={36} name={"report"} color={"#fff"}/>
+              <SvgIcon size={36} name={"report"} color={"xxx"}/>
             </ListItemIcon>
             <ListItemText>{t("Report Problem")}</ListItemText>
           </MenuItem>

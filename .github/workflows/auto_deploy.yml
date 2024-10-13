@@ -30,12 +30,27 @@ jobs:
       run: |
         export LATEST_SNAPSHOT=$(grep -oP '(?<=<version>)[^<]+' maven-metadata.xml| tail -1)
         echo $LATEST_SNAPSHOT
+        echo "LATEST_SNAPSHOT=$LATEST_SNAPSHOT" >> $GITHUB_ENV
         wget -O ConferenceCall.war "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=io.antmedia.webrtc&a=ConferenceCall&v=${LATEST_SNAPSHOT}&e=war"
         ls -al
         if [ ! -f ConferenceCall.war ]; then
           echo "War file not found."
           exit 1
         fi
+        
+    - name: MD5 file checksum
+      run: |
+        echo $LATEST_SNAPSHOT
+        wget -O ConferenceCall.md5 "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=io.antmedia.webrtc&a=ConferenceCall&v=${LATEST_SNAPSHOT}&e=war.md5"
+        local_file_md5="$(md5sum ConferenceCall.war | awk '{print $1}')"
+        remote_file_md5="$(cat ConferenceCall.md5)"
+        
+        if [ "$remote_file_md5" != "$local_file_md5" ]; then
+          echo "MD5 checksum mismatch!"
+          exit 1
+        else
+          echo "MD5 checksum matches."
+        fi 
         
     - name: Setup kubectl
       uses: azure/setup-kubectl@v3

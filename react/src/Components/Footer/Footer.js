@@ -77,37 +77,37 @@ function Footer(props) {
     }
   }, [conference.isRecordPluginActive, conference.isEnterDirectly, conference.isPlayOnly]);
 
-    return (
-        <CustomizedGrid
-            container
-            alignItems={"center"}
-            justifyContent={{xs: "center", sm: "space-between"}}
-        >
-          <Grid item sx={{display: {xs: "none", sm: "block"}}}>
-            <Grid container alignItems={"center"}>
-              {process.env.REACT_APP_FOOTER_APP_LOGO_VISIBILITY === "true" ?
-              <a href={process.env.REACT_APP_FOOTER_LOGO_ON_CLICK_URL} target="_blank" rel="noreferrer">
-                <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
-              </a>
+  return (
+      <CustomizedGrid
+          container
+          alignItems={"center"}
+          justifyContent={{xs: "center", sm: "space-between"}}
+      >
+        <Grid item sx={{display: {xs: "none", sm: "block"}}}>
+          <Grid container alignItems={"center"}>
+            {process.env.REACT_APP_FOOTER_APP_LOGO_VISIBILITY === "true" ?
+                <a href={process.env.REACT_APP_FOOTER_LOGO_ON_CLICK_URL} target="_blank" rel="noreferrer">
+                  <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
+                </a>
                 : null}
-              <Typography color={theme.palette.textColor} variant="body1">
-                {id}
-              </Typography>
-              <InfoButton/>
-            </Grid>
+            <Typography color={theme.palette.textColor} variant="body1">
+              {id}
+            </Typography>
+            <InfoButton/>
           </Grid>
-          {conference.isPlayOnly === false || conference.isEnterDirectly === false ?
-              <Grid item>
-                <Grid
-                    container
-                    justifyContent="center"
-                    columnSpacing={{xs: 1, sm: 2}}
-                >
-                  {process.env.REACT_APP_FOOTER_OPTION_BUTTON_VISIBILITY === 'true' ?
-                  <Grid item xs={0}>
-                    <OptionButton footer/>
-                  </Grid>
-                  : null}
+        </Grid>
+        {conference.isPlayOnly === false || conference.isEnterDirectly === false ?
+            <Grid item>
+              <Grid
+                  container
+                  justifyContent="center"
+                  columnSpacing={{xs: 1, sm: 2}}
+              >
+                {process.env.REACT_APP_FOOTER_OPTION_BUTTON_VISIBILITY === 'true' ?
+                    <Grid item xs={0}>
+                      <OptionButton footer/>
+                    </Grid>
+                    : null}
 
                   {conference.isPlayOnly === false
                     && process.env.REACT_APP_FOOTER_CAMERA_BUTTON_VISIBILITY === 'true' ?

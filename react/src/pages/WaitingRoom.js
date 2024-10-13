@@ -1,5 +1,16 @@
 import React, {useContext} from "react";
-import {Box, Button, CircularProgress, Container, Grid, Modal, TextField, Tooltip, Typography,} from "@mui/material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    Grid,
+    LinearProgress,
+    Modal,
+    TextField,
+    Tooltip,
+    Typography,
+} from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
 import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
@@ -20,10 +31,9 @@ function getPublishStreamId() {
     return (dataRoomName) ? dataRoomName : getUrlParameter("streamId");
 }
 
-var isSpeedTestInTestPurposes = getUrlParameter("speedTestInTestPurposes");
-
-if (isSpeedTestInTestPurposes === null || isSpeedTestInTestPurposes === undefined) {
-    isSpeedTestInTestPurposes = "true";
+var enterDirectly = getUrlParameter("enterDirectly");
+if (enterDirectly == null || typeof enterDirectly === "undefined") {
+    enterDirectly = false;
 }
 
 function WaitingRoom(props) {
@@ -91,13 +101,13 @@ function WaitingRoom(props) {
             streamId = publishStreamId;
         }
 
-        if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true' && isSpeedTestInTestPurposes === 'true') {
+        if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true' && enterDirectly === false) {
             let speedTestObjectDefault = {};
             speedTestObjectDefault.message = "Please wait while we are testing your connection speed";
             speedTestObjectDefault.isfinished = false;
             speedTestObjectDefault.isfailed = false;
             speedTestObjectDefault.errorMessage = "";
-            speedTestObjectDefault.progressValue = 0;
+            speedTestObjectDefault.progressValue = 10;
 
             conference?.setSpeedTestObject(speedTestObjectDefault);
             if (conference.speedTestStreamId) {
@@ -110,18 +120,10 @@ function WaitingRoom(props) {
             conference?.setIsJoining(true);
             conference?.joinRoom(roomName, streamId);
             if (conference?.isPlayOnly) {
-                conference?.setWaitingOrMeetingRoom("meeting");
                 setDialogOpen(false);
-                conference?.setIsJoining(false);
             }
         }
     }
-
-    React.useEffect(() => {
-        if (conference?.speedTestObject?.isfinished === true) {
-            setSpeedTestModalButtonVisibility(true);
-        }
-    }, [conference?.speedTestObject]);
 
     React.useEffect(() => {
         if (conference?.speedTestObject?.isfinished === true) {
@@ -166,7 +168,9 @@ function WaitingRoom(props) {
             conference?.joinRoom(roomName, conference?.makeId(10));
         }
         if (conference?.isPlayOnly) {
+            conference?.setWaitingOrMeetingRoom("meeting");
             setDialogOpen(false);
+            conference?.setIsJoining(false);
         }
     }
 
@@ -176,7 +180,7 @@ function WaitingRoom(props) {
             isfinished: false,
             isfailed: false,
             errorMessage: "",
-            progressValue: 0
+            progressValue: 10
         });
         setSpeedTestModalButtonVisibility(false);
         setSpeedTestModelVisibility(false);
@@ -254,8 +258,8 @@ function WaitingRoom(props) {
                         <CircularProgressWithLabel
                             id={"speed-test-modal-circle-progress-bar"}
                             sx={(speedTestModalButtonVisibility) ? {
-                            visibility: "hidden"
-                        } : {visibility: "visible"}} value={conference?.speedTestObject?.progressValue}/>
+                                visibility: "hidden"
+                            } : {visibility: "visible"}} value={conference?.speedTestObject?.progressValue}/>
                     </Box>
                     <Typography id="modal-modal-description" sx={{mt: 2, color: "black", marginTop: '12px', marginBottom: '21px', visibility: conference?.speedTestObject?.isfailed ? "visible" : "hidden"}}>
                         {conference?.speedTestObject?.errorMessage}
@@ -322,7 +326,7 @@ function WaitingRoom(props) {
                                             sx={roundStyle}
                                             onClick={() => handleDialogOpen()}
                                         >
-                                            <SvgIcon size={40} name={"settings"} color={"#fff"}/>
+                                            <SvgIcon size={40} name={"settings"} color={"xxx"}/>
                                         </CustomizedBtn>
                                     </Tooltip>
                                 </Grid>

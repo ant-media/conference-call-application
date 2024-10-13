@@ -80,6 +80,9 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
       requestVideoTrackAssignments: jest.fn(),
       stopSpeedTest: jest.fn().mockImplementation(() => console.log('stopSpeedTest')),
+      getSubtracks: jest.fn(),
+      closeStream: jest.fn(),
+      closeWebSocket: jest.fn(),
     }
 
     for (var key in params) {
@@ -87,7 +90,6 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
         mockAdaptor[key] = params[key];
       }
     }
-
 
     if (params.purposeForTest === "main-adaptor") {
       webRTCAdaptorConstructor = mockAdaptor;
@@ -206,6 +208,15 @@ describe('AntMedia Component', () => {
     console.log(currentConference);
 
     expect(currentConference.isScreenShared).toBe(true);
+
+    await act(()=> {
+      currentConference.handleStopScreenShare();
+    });
+
+    expect(webRTCAdaptorScreenConstructor.closeStream).toHaveBeenCalled();
+    expect(webRTCAdaptorScreenConstructor.closeWebSocket).toHaveBeenCalled();
+
+
   });
 
   it('share screen adaptor callbacks', async () => {
@@ -298,8 +309,7 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callback("data_received", obj);
     });
 
-    var event = {"eventType": "PIN_USER", "streamId": "p1"};
-    expect(consoleSpy).toHaveBeenCalledWith("send notification event", event);
+    expect(consoleSpy).toHaveBeenCalledWith("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(notificationEvent.payload));
 
 
     consoleSpy.mockRestore();
@@ -898,8 +908,6 @@ describe('AntMedia Component', () => {
 
     expect(container.outerHTML).not.toContain("Reconnecting...");
 
-
-
     await act(async () => {
       webRTCAdaptorConstructor.callback("reconnection_attempt_for_publisher");
     });
@@ -1120,6 +1128,25 @@ describe('AntMedia Component', () => {
     );
 
     expect(contextValue.removeAllRemoteParticipants).toHaveBeenCalled();
+  });
+
+  it('handleLeaveFromRoom#closeStream', async () => { 
+    const { container } = render(
+      <AntMedia isTest={true}>
+        <MockChild/>
+      </AntMedia>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.handleLeaveFromRoom();
+    });
+
+    expect(webRTCAdaptorConstructor.stop).toHaveBeenCalled();
+    expect(webRTCAdaptorConstructor.closeStream).toHaveBeenCalled();
+
   });
 
   it('screen sharing state test', async () => {

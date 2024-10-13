@@ -24,6 +24,7 @@ function debounce(fn, ms) {
   };
 }
 
+
 const MeetingRoom = React.memo((props) => {
   const conference = React.useContext(ConferenceContext)
   const [gallerySize, setGallerySize] = React.useState({"w": 100, "h": 100});

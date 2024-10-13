@@ -241,7 +241,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<description>StreamApp for Ant Media Server</description>
+	<description>Circle for Ant Media Server</description>
 	<organization>
 		<name>Ant Media</name>
 		<url>http://antmedia.io</url>
