@@ -91,13 +91,38 @@ function getMediaConstraints(videoSendResolution, frameRate) {
 var peerconnection_config = {
   'iceServers': [
     {
-      'urls': 'turn:ovh36.antmedia.io:3478',
-      'username': 'ovh36',
-      'credential': 'ovh36'
+      'urls': 'stun:stun1.l.google.com:19302'
     }
   ],
   sdpSemantics: 'unified-plan'
 };
+
+checkAndSetPeerConnectionConfig();
+
+function checkAndSetPeerConnectionConfig() {
+    let turnServerURL = getRootAttribute("data-turn-server-url");
+    let turnUsername = getRootAttribute("data-turn-username");
+    let turnCredential = getRootAttribute("data-turn-credential");
+
+    if (!turnServerURL) {
+        turnServerURL = process.env.REACT_APP_TURN_SERVER_URL;
+        turnUsername = process.env.REACT_APP_TURN_USERNAME;
+        turnCredential = process.env.REACT_APP_TURN_CREDENTIAL;
+    }
+
+    if (turnServerURL) {
+        peerconnection_config = {
+            'iceServers': [
+                {
+                    'urls': turnServerURL,
+                    'username': turnUsername,
+                    'credential': turnCredential
+                }
+            ],
+            sdpSemantics: 'unified-plan'
+        };
+    }
+}
 
 var streamNameInit = getRootAttribute("stream-name");
 
@@ -1037,8 +1062,9 @@ function AntMedia(props) {
             checkDevices().then(() => {
                     var adaptor = new WebRTCAdaptor({
                     websocket_url: websocketURL,
-                    mediaConstraints: mediaConstraints, //placeholder for peerconnection_config
-                    isPlayMode: playOnly, // onlyDataChannel: playOnly,
+                    mediaConstraints: mediaConstraints,
+                    peerconnection_config: peerconnection_config,
+                    isPlayMode: isPlayOnly, // onlyDataChannel: isPlayOnly,
                     debug: true,
                     callback: infoCallback,
                     callbackError: errorCallback,
