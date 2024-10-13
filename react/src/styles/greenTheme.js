@@ -20,6 +20,7 @@ export function getGreenTheme() {
   const themeColor99 = "#FFFFFF";
   const chatText = "#DDFFFC";
   const darkGray = "#222B2A";
+  const iconColor = "#FFFFFF";
 
   const error = "#DF0515";
   const primaryColor = themeColor10;

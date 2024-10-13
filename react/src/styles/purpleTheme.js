@@ -20,6 +20,7 @@ export function getPurpleTheme() {
   const themeColor99 = "#FFFFFF";
   const chatText = "#F3E5F5";
   const darkGray = "#37474F";
+  const iconColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;

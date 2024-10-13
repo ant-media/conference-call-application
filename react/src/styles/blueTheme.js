@@ -20,6 +20,7 @@ export function getBlueTheme() {
   const themeColor99 = "#FFFFFF";
   const chatText = "#E0F7FA";
   const darkGray = "#37474F";
+  const iconColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;

@@ -20,6 +20,7 @@ export function getGrayTheme() {
   const themeColor99 = "#FFFFFF";
   const chatText = "#FAFAFA";
   const darkGray = "#222B2A";
+  const iconColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;

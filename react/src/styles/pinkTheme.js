@@ -20,6 +20,7 @@ export function getPinkTheme() {
   const themeColor99 = "#FFFFFF";
   const chatText = "#FCE4EC";
   const darkGray = "#37474F";
+  const iconColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;

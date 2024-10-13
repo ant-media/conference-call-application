@@ -20,6 +20,7 @@ export function getRedTheme() {
   const themeColor99 = "#FFFFFF";
   const chatText = "#FFEBEE";
   const darkGray = "#37474F";
+  const iconColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;

@@ -27,6 +27,7 @@ export function getWhiteTheme() {
     const chatText = "#DDFFFC";
     const darkGray = "#222B2A";
     const textColor = "#000000";
+    const iconColor = "#FFFFFF";
 
     const error = "#DF0515";
     const primaryColor = themeColor10;
