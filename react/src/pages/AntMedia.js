@@ -106,8 +106,8 @@ function checkAndSetPeerConnectionConfig() {
 
     if (!turnServerURL) {
         turnServerURL = process.env.REACT_APP_TURN_SERVER_URL;
-        turnUsername = process.env.REACT_APP_TURN_USERNAME;
-        turnCredential = process.env.REACT_APP_TURN_CREDENTIAL;
+        turnUsername = process.env.REACT_APP_TURN_SERVER_USERNAME;
+        turnCredential = process.env.REACT_APP_TURN_SERVER_CREDENTIAL;
     }
 
     if (turnServerURL) {
