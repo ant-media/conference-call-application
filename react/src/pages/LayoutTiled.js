@@ -69,14 +69,8 @@ function LayoutTiled(props) {
     //console.log("***** W:"+cardWidth+" H:"+cardHeight+" props.width:"+props.width+" width:"+width+" cols:"+cols+" vc:"+videoCount);
   }, [conference.videoTrackAssignments, props.width, props.height, conference.participantUpdated]);
 
-  console.log("debug 1 len:"+Object.keys(conference.allParticipants).length+" des:"+conference.globals.desiredMaxVideoTrackCount);
   const showOthers = Object.keys(conference.allParticipants).length > conference.globals.desiredMaxVideoTrackCount;
-  console.log("debug 2 showOthers:"+showOthers);
-
   let trackCount = conference.globals.desiredMaxVideoTrackCount - 1; //remove you
-
-  console.log("debug 3 trackCount:"+trackCount);
-
   conference.updateMaxVideoTrackCount(showOthers ? trackCount - 1 : trackCount); //remove others if we show
 
   const playingParticipantsCount = conference.videoTrackAssignments.length;
