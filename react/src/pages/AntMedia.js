@@ -906,6 +906,7 @@ function AntMedia(props) {
                 delete temp[trackId];
             }
         });
+        console.log("handleMainTrackBroadcastObject setAllParticipants:"+JSON.stringify(temp));
         setAllParticipants(temp);
         setParticipantUpdated(!participantUpdated);
 
@@ -934,6 +935,9 @@ function AntMedia(props) {
 
         broadcastObject.isScreenShared = metaData.isScreenShared;
         allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
+
+        console.log("handleSubtrackBroadcastObject setAllParticipants:"+JSON.stringify(allParticipantsTemp));
+
         setAllParticipants(allParticipantsTemp);
         setParticipantUpdated(!participantUpdated);
     }
@@ -1847,6 +1851,9 @@ function AntMedia(props) {
         if (!playOnly) {
             allParticipantsTemp[publishStreamId] = {name: "You"};
         }
+
+        console.log("removeAllRemoteParticipants setAllParticipants:"+JSON.stringify(allParticipantsTemp));
+
         setAllParticipants(allParticipantsTemp);
     }
 
@@ -1868,6 +1875,9 @@ function AntMedia(props) {
         allParticipantsTemp[publishStreamId] = {
             streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false
         };
+
+        console.log("addMeAsParticipant setAllParticipants:"+JSON.stringify(allParticipantsTemp));
+
         setAllParticipants(allParticipantsTemp);
     }
 
