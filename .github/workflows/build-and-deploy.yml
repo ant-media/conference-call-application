@@ -99,37 +99,39 @@ jobs:
         mkdir ~/test
         mv webrtc-load-test ~/test
         
-    #- name: Install Selenium
-    #  run: |
-    #    wget https://storage.googleapis.com/chrome-for-testing-public/128.0.6613.86/linux64/chromedriver-linux64.zip
-    #    unzip chromedriver-linux64.zip
-    #    sudo cp chromedriver-linux64/chromedriver /tmp
-    #    ls -al /tmp
-    #    pip3 install selenium==4.14
-    #    pip3 install requests
-    #    pip3 show selenium 
-    #    pip3 install psutil
+    - name: Install Selenium
+      run: |
+        wget https://storage.googleapis.com/chrome-for-testing-public/128.0.6613.86/linux64/chromedriver-linux64.zip
+        unzip chromedriver-linux64.zip
+        sudo cp chromedriver-linux64/chromedriver /tmp
+        ls -al /tmp
+        pip3 install selenium==4.14
+        pip3 install requests
+        pip3 show selenium 
+        pip3 install psutil
         
-    #- name: Run Integration Test
-    #  run: |
-    #    cd test
-    #    python3 test_main.py ${{ secrets.STAGING_SERVER_URL }} ${{ secrets.USER_NAME }} ${{ secrets.PASSWORD }} ../webapp/target/*.war
+    - name: Run Integration Test
+      run: |
+        cd test
+        python3 test_main.py ${{ secrets.STAGING_SERVER_URL }} ${{ secrets.USER_NAME }} ${{ secrets.PASSWORD }} ../webapp/target/*.war
 
     - name: Copy Logs From Pods
       if: always()
       run: |
         kubectl -n circle cp $(kubectl -n circle get pods | grep "ant-media-server" | awk '{print $1}'):/usr/local/antmedia/log/ant-media-server.log /tmp/ant-media-server-$(kubectl -n circle get pods -o wide | grep "ant-media-server" | awk '{print $6}').log
+        kubectl -n circle cp $(kubectl -n circle get pods | grep "ant-media-server" | awk '{print $1}'):/usr/local/antmedia/log/antmedia-error.log /tmp/antmedia-error-$(kubectl -n circle get pods -o wide | grep "ant-media-server" | awk '{print $6}').log
+
 
     - name: Upload PNG files as artifacts
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: screenshots
         path: ${{ github.workspace }}/test/**/*.png
 
     - name: Upload log files as artifacts
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: logs
         path: /tmp/*.log
