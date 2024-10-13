@@ -17,14 +17,15 @@ if (process.env.NODE_ENV !== 'development' && !roomName) {
   //console.log = function () { };
 }
 
+//React.StricMode causes double rendering of components in "development" to detect the problems with the code - mekya 
 root.render(
   <WebSocketProvider>
-  <React.StrictMode>
-    <BrowserRouter basename={appName}>
-        <App />
-    </BrowserRouter>
-  </React.StrictMode>
-  </WebSocketProvider>
+    <React.StrictMode>
+      <BrowserRouter basename={appName}>
+          <App />
+      </BrowserRouter>
+    </React.StrictMode>
+  </WebSocketProvider> 
 );
 
 // If you want your app to work offline and load faster, you can change

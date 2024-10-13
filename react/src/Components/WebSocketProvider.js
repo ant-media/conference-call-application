@@ -8,8 +8,7 @@ export const WebSocketProvider = ({ children }) => {
     const webSocket = useRef(null);
     const [latestMessage, setLatestMessage] = useState(null);
     const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
-
-    var websocketUrlTemp = getRootAttribute("data-websocket-url");
+    var websocketUrlTemp = process.env.REACT_APP_WEBSOCKET_URL;
     if (!websocketUrlTemp) {
         websocketUrlTemp = process.env.REACT_APP_WEBSOCKET_URL;
         if (!websocketUrlTemp) {
@@ -85,11 +84,11 @@ export const WebSocketProvider = ({ children }) => {
             };
     },[applicationWebSocketUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const sendMessage = (message) => {
+    const sendMessage = React.useCallback((message) => {
         if (webSocket.current && isWebSocketConnected) {
             webSocket.current.send(message);
         }
-    };
+    },[isWebSocketConnected]);
 
     return (
         <WebSocketContext.Provider value={{ sendMessage, latestMessage, isWebSocketConnected}}>

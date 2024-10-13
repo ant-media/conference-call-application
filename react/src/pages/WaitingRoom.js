@@ -115,9 +115,7 @@ function WaitingRoom(props) {
             conference?.setIsJoining(true);
             conference?.joinRoom(roomName, streamId);
             if (conference?.isPlayOnly) {
-                conference?.setWaitingOrMeetingRoom("meeting");
                 setDialogOpen(false);
-                conference?.setIsJoining(false);
             }
         }
     }
