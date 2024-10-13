@@ -2,7 +2,7 @@ import React from "react";
 import Button from "@mui/material/Button";
 import {SvgIcon} from "Components/SvgIcon";
 import Menu from "@mui/material/Menu";
-import {styled} from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import SettingsDialog from "./SettingsDialog";
 import {LayoutSettingsDialog} from "./LayoutSettingsDialog";
@@ -33,6 +33,7 @@ function OptionButton({footer, ...props}) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
+  const theme = useTheme();
 
   // if you select camera then we are going to focus on camera button.
   const [selectFocus, setSelectFocus] = React.useState(null);
