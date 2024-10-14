@@ -376,6 +376,8 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.open_close_participant_list_drawer()
 
+    time.sleep(15)
+
     self.add_presenter_to_listener_room(presenterId)
 
     #remove_speaker_button = self.chrome.get_element_with_retry(By.ID,"remove-presenter-"+presenterId)
@@ -394,13 +396,6 @@ class TestTestFakeehScenario(unittest.TestCase):
     self.chrome.switch_to_tab(handle_admin)
 
     time.sleep(15)
-
-    ###
-
-    self.chrome.close_all()
-    return
-    
-    ###
 
     self.remove_presenter_from_listener_room(presenterId)
 
@@ -525,6 +520,8 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.open_close_participant_list_drawer()
 
+    time.sleep(15)
+
     # pin presenterC
 
     pin_button = self.chrome.get_element_with_retry(By.ID,"pin-"+presenterId)
@@ -592,6 +589,8 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.open_close_participant_list_drawer()
 
+    time.sleep(15)
+
     self.add_presenter_to_listener_room(presenterId)
 
     # switch to playerA and check if presenter is added to listener room
@@ -619,13 +618,6 @@ class TestTestFakeehScenario(unittest.TestCase):
     self.chrome.switch_to_tab(handle_admin)
 
     time.sleep(15)
-
-    ###
-
-    self.chrome.close_all()
-    return
-
-    ###
 
     self.remove_presenter_from_listener_room(presenterId)
 
@@ -691,6 +683,8 @@ class TestTestFakeehScenario(unittest.TestCase):
     presenterId = self.get_id_of_participant("presenterA")
 
     self.open_close_participant_list_drawer()
+
+    time.sleep(15)
 
     self.add_presenter_to_listener_room(presenterId)
 

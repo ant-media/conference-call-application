@@ -2500,7 +2500,8 @@ function AntMedia(props) {
     }, [reactions, publishStreamId]);
 
     const sendReactions = React.useCallback((reaction) =>{
-        handleSendNotificationEvent("REACTIONS", publishStreamId, {
+        let reactionsStreamId = (isPlayOnly) ? roomName : publishStreamId;
+        handleSendNotificationEvent("REACTIONS", reactionsStreamId, {
             reaction: reaction, senderStreamId: publishStreamId,
         });
         showReactions(publishStreamId, reaction, allParticipants);
