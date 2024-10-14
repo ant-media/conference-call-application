@@ -363,6 +363,8 @@ class TestTestFakeehScenario(unittest.TestCase):
     # switch to playerA and check if presenter is added to listener room
     self.chrome.switch_to_tab(handle_player_A)
 
+    time.sleep(5)
+
     wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
 
 
@@ -374,6 +376,8 @@ class TestTestFakeehScenario(unittest.TestCase):
     # switch to playerA and check if presenter is removed from listener room
     self.chrome.switch_to_tab(handle_player_A)
 
+    time.sleep(5)
+    
     wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
 
 
