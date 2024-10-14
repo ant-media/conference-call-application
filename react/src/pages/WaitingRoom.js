@@ -261,7 +261,9 @@ function WaitingRoom(props) {
                     <Box sx={conference?.speedTestObject?.isfailed ? {
                           display: 'none', justifyContent: 'center', alignItems: 'center'
                     } : { display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        <CircularProgressWithLabel sx={(speedTestModalButtonVisibility) ? {
+                        <CircularProgressWithLabel
+                             id={"speed-test-modal-circle-progress-bar"}
+                             sx={(speedTestModalButtonVisibility) ? {
                              display: 'none'
                         } : {display: 'block'}} value={conference?.speedTestObject?.progressValue}/>
                     </Box>
@@ -277,11 +279,14 @@ function WaitingRoom(props) {
                     </Typography>
     
                     <Button
+                        id={"speed-test-modal-close-button"}
                         sx={(conference?.speedTestObject?.isfailed || speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display:"none"}}
                         onClick={() => {
                             speedTestModalCloseButton();
                         }}>Close</Button>
-                    <Button sx={(speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display: "none"}}
+                    <Button
+                        id={"speed-test-modal-join-button"}
+                        sx={(speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display: "none"}}
                             onClick={() => {
                                 speedTestModalJoinButton();
                             }}>Join</Button>
