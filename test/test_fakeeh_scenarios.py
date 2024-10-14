@@ -371,15 +371,16 @@ class TestTestFakeehScenario(unittest.TestCase):
     # switch to admin and remove presenter from listener room
     self.chrome.switch_to_tab(handle_admin)
 
+    time.sleep(15)
+
     self.remove_presenter_from_listener_room(presenterId)
 
     # switch to playerA and check if presenter is removed from listener room
     self.chrome.switch_to_tab(handle_player_A)
 
-    time.sleep(5)
+    time.sleep(15)
 
     wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
-
 
     self.chrome.close_all()
 
@@ -550,35 +551,49 @@ class TestTestFakeehScenario(unittest.TestCase):
     # switch to playerA and check if presenter is added to listener room
     self.chrome.switch_to_tab(handle_player_A)
 
+    time.sleep(15)
+
     wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
 
     # switch to playerB and check if presenter is added to listener room
     self.chrome.switch_to_tab(handle_player_B)
+
+    time.sleep(15)
 
     wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
 
     # switch to playerC and check if presenter is added to listener room
     self.chrome.switch_to_tab(handle_player_C)
 
+    time.sleep(15)
+
     wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
 
     # switch to admin and remove presenter from listener room
     self.chrome.switch_to_tab(handle_admin)
+
+    time.sleep(15)
 
     self.remove_presenter_from_listener_room(presenterId)
 
     # switch to playerA and check if presenter is removed from listener room
     self.chrome.switch_to_tab(handle_player_A)
 
+    time.sleep(15)
+
     wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
 
     # switch to playerB and check if presenter is removed from listener room
     self.chrome.switch_to_tab(handle_player_B)
 
+    time.sleep(15)
+
     wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
 
     # switch to playerC and check if presenter is removed from listener room
     self.chrome.switch_to_tab(handle_player_C)
+
+    time.sleep(15)
 
     wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
 
