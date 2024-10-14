@@ -348,6 +348,11 @@ export function getBlueTheme() {
         default: "#FFFFFF",
         secondary: chatText, // dark4
       },
+      iconColor: {
+        primary: "#FFFFFF",
+        default: "#FFFFFF",
+        secondary: iconColor,
+      }
     },
   };
   if (!isComponentMode()) {

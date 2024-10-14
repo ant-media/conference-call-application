@@ -359,6 +359,11 @@ export function getWhiteTheme() {
                 default: "#000000",
                 secondary: chatText, // dark4
             },
+            iconColor: {
+                primary: "#FFFFFF",
+                default: "#FFFFFF",
+                secondary: iconColor,
+            }
         },
     };
     if (!isComponentMode()) {

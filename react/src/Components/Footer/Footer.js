@@ -90,7 +90,7 @@ function Footer(props) {
                   <img src="./favicon-32x32.png" alt="Antmedia Circle" style={{width: '22px', marginRight: 4}}/>
                 </a>
                 : null}
-            <Typography color={theme.palette.textColor} variant="body1">
+            <Typography color={theme.palette.text.primary} variant="body1">
               {id}
             </Typography>
             <InfoButton/>

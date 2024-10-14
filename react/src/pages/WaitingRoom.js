@@ -252,7 +252,7 @@ function WaitingRoom(props) {
                         Connection Test
                     </Typography>
                     <Typography id="modal-modal-description"
-                                sx={{mt: 2, color: "white", marginTop: '12px', marginBottom: '21px',
+                                sx={{mt: 2, color: theme.palette.text.primary, marginTop: '12px', marginBottom: '21px',
                                     display: conference?.speedTestObject?.errorMessage !== "" ? "none" : "block"
 
                                 }}>
@@ -269,7 +269,7 @@ function WaitingRoom(props) {
                     </Box>
                     <Typography id="modal-modal-error-description" sx={{
                         mt: 2,
-                        color: "white",
+                        color: theme.palette.text.primary,
                         marginTop: '12px',
                         marginBottom: '21px',
                         display: conference?.speedTestObject?.isfailed ? "block" : "none"
@@ -336,7 +336,7 @@ function WaitingRoom(props) {
                                             sx={roundStyle}
                                             onClick={() => handleDialogOpen()}
                                         >
-                                            <SvgIcon size={40} name={"settings"} color={theme.palette.iconColor}/>
+                                            <SvgIcon size={40} name={"settings"} color={theme.palette.iconColor.primary}/>
                                         </CustomizedBtn>
                                     </Tooltip>
                                 </Grid>
