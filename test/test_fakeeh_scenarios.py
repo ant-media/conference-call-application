@@ -378,6 +378,10 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.add_presenter_to_listener_room(presenterId)
 
+    remove_speaker_button = self.chrome.get_element_with_retry(By.ID,"remove-presenter-"+presenterId)
+
+    assert(remove_speaker_button.is_displayed())
+
     # switch to playerA and check if presenter is added to listener room
     self.chrome.switch_to_tab(handle_player_A)
 
