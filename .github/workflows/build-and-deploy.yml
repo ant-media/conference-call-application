@@ -94,8 +94,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
-        curl -L "https://drive.usercontent.google.com/download?id=1Gp3LTFvG4arbXWFiGrQTPYw2CUEuKhf5&export=download&confirm=t" -o "webrtc-load-test-tool-2.9.1-SNAPSHOT.zip"
-        unzip webrtc-load-test-tool-2.9.1-SNAPSHOT.zip
+        git clone https://gitlab.com/Ant-Media/webrtc-test.git
+        cd webrtc-test
+        ./redeploy.sh
+        cp target/webrtc-load-test-tool-*.zip ../
+        cd ..
+        unzip webrtc-load-test-tool-*.zip
         mkdir ~/test
         mv webrtc-load-test ~/test
         
