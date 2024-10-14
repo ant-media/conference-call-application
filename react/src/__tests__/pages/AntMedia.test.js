@@ -1713,15 +1713,11 @@ describe('AntMedia Component', () => {
     });
 
     await act(async () => {
-      currentConference.createSpeedTestForPlayWebRtcAdaptor();
+      currentConference.startSpeedTest();
     });
 
     await waitFor(() => {
       expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
-    });
-
-    await act(async () => {
-      currentConference.createSpeedTestForPublishWebRtcAdaptor();
     });
 
     await waitFor(() => {
@@ -1800,7 +1796,7 @@ describe('AntMedia Component', () => {
     });
 
     await act(async () => {
-      currentConference.createSpeedTestForPlayWebRtcAdaptor();
+      currentConference.startSpeedTest();
     });
 
     await waitFor(() => {

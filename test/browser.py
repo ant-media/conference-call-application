@@ -64,6 +64,9 @@ class Browser:
 
   def get_screenshot_as_base64(self):
     return self.driver.get_screenshot_as_base64()
+  
+  def save_ss_as_file(self, file_path):
+    self.driver.save_screenshot(file_path)
 
   def print_log_file(self):
     file_path = "/tmp/chromedriver.log"
@@ -167,8 +170,8 @@ class Browser:
     move = ActionChains(self.driver)
     move.click_and_hold(element).move_by_offset(value, 0).release().perform()
 
-  def get_wait(self, wait_time=25):
-    return WebDriverWait(self.driver, wait_time, 1)
+  def get_wait(self, wait_time=25, poll_frequency=1):
+    return WebDriverWait(self.driver, wait_time, poll_frequency)
 
   def close(self):
     self.driver.close()

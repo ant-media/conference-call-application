@@ -182,8 +182,10 @@ function WaitingRoom(props) {
             errorMessage: "",
             progressValue: 10
         });
+        
         setSpeedTestModalButtonVisibility(false);
         setSpeedTestModelVisibility(false);
+        conference?.stopSpeedTest();
     }
 
     function CircularProgressWithLabel(
@@ -249,34 +251,37 @@ function WaitingRoom(props) {
                     <Typography id="modal-modal-title" variant="h6" component="h2" sx={{position: "center"}}>
                         Connection Test
                     </Typography>
-                    <Typography id="modal-modal-description" sx={{mt: 2, color: "black", marginTop: '12px', marginBottom: '21px'}}>
+                    <Typography id="modal-modal-description"
+                                sx={{mt: 2, color: "white", marginTop: '12px', marginBottom: '21px',
+                                    display: conference?.speedTestObject?.errorMessage !== "" ? "none" : "block"
+
+                                }}>
                         {conference?.speedTestObject?.message}
                     </Typography>
                     <Box sx={conference?.speedTestObject?.isfailed ? {
-                        visibility: "hidden", display: 'flex', justifyContent: 'center', alignItems: 'center'
-                    } : {visibility: "visible", display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        <CircularProgressWithLabel
-                            id={"speed-test-modal-circle-progress-bar"}
-                            sx={(speedTestModalButtonVisibility) ? {
-                                visibility: "hidden"
-                            } : {visibility: "visible"}} value={conference?.speedTestObject?.progressValue}/>
+                          display: 'none', justifyContent: 'center', alignItems: 'center'
+                    } : { display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                        <CircularProgressWithLabel sx={(speedTestModalButtonVisibility) ? {
+                             display: 'none'
+                        } : {display: 'block'}} value={conference?.speedTestObject?.progressValue}/>
                     </Box>
-                    <Typography id="modal-modal-description" sx={{mt: 2, color: "black", marginTop: '12px', marginBottom: '21px', visibility: conference?.speedTestObject?.isfailed ? "visible" : "hidden"}}>
+                    <Typography id="modal-modal-error-description" sx={{
+                        mt: 2,
+                        color: "white",
+                        marginTop: '12px',
+                        marginBottom: '21px',
+                        display: conference?.speedTestObject?.isfailed ? "block" : "none"
+                        
+                    }}>
                         {conference?.speedTestObject?.errorMessage}
                     </Typography>
-                    <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}}
-                            id={"speed-test-modal-close-button"}
-                            onClick={() => {
-                                speedTestModalCloseButton();
-                            }}>Close</Button>
-                    <Button sx={(conference?.speedTestObject?.isfailed) ? {visibility: "visible"} : {visibility: "hidden"}}
-                            id={"speed-test-modal-failed-close-button"}
-                            onClick={() => {
-                                //conference?.startSpeedTest();
-                                speedTestModalCloseButton();
-                            }}>Close</Button>
-                    <Button sx={(speedTestModalButtonVisibility) ? {visibility: "visible"} : {visibility: "hidden"}}
-                            id={"speed-test-modal-join-button"}
+    
+                    <Button
+                        sx={(conference?.speedTestObject?.isfailed || speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display:"none"}}
+                        onClick={() => {
+                            speedTestModalCloseButton();
+                        }}>Close</Button>
+                    <Button sx={(speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display: "none"}}
                             onClick={() => {
                                 speedTestModalJoinButton();
                             }}>Join</Button>
