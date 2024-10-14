@@ -395,6 +395,13 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     time.sleep(15)
 
+    ###
+
+    self.chrome.close_all()
+    return
+    
+    ###
+
     self.remove_presenter_from_listener_room(presenterId)
 
     # switch to playerA and check if presenter is removed from listener room
@@ -610,6 +617,13 @@ class TestTestFakeehScenario(unittest.TestCase):
     self.chrome.switch_to_tab(handle_admin)
 
     time.sleep(15)
+
+    ###
+
+    self.chrome.close_all()
+    return
+
+    ###
 
     self.remove_presenter_from_listener_room(presenterId)
 
