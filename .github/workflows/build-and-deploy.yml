@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    uses: ./github/workflows/common-steps.yml
+    uses: ./github/workflows/prepare_runner.yml
 
     steps:
            
@@ -27,7 +27,7 @@ jobs:
 
   run_conference_test:
     runs-on: ubuntu-latest 
-    uses: ./github/workflows/common-steps.yml
+    uses: ./github/workflows/prepare_runner.yml
     needs: build
     steps:
       - name: Run Conference Integration Test
@@ -37,7 +37,7 @@ jobs:
   
   run_webinar_test:
     runs-on: ubuntu-latest 
-    uses: ./github/workflows/common-steps.yml
+    uses: ./github/workflows/prepare_runner.yml
     needs: build
     steps:
       - name: Run Conference Integration Test
