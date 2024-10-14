@@ -695,6 +695,10 @@ function AntMedia(props) {
     }
 
     function checkAndUpdateVideoAudioSources() {
+        if (isPlayOnly) {
+            console.info("Play only mode is active, no need to check and update video audio sources.");
+            return;
+        }
         let isVideoDeviceAvailable = false;
         let isAudioDeviceAvailable = false;
         let selectedDevices = getSelectedDevices();
