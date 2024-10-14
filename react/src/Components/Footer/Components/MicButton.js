@@ -81,7 +81,7 @@ function MicButton(props) {
             id="mic-button"
             disabled={conference?.microphoneButtonDisabled}
             className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="error" onClick={(e) => { handleUnmute(e) }}>
-            <SvgIcon size={40} name={'muted-microphone'} color={theme.palette.iconColor.primary} />
+            <SvgIcon size={40} name={'muted-microphone'} color={theme.palette?.iconColor?.primary} />
           </CustomizedBtn>
         </Tooltip>
       ) : (
@@ -90,7 +90,7 @@ function MicButton(props) {
             id="mic-button"
             disabled={conference?.microphoneButtonDisabled}
             className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => { handleMute(e) }}>
-            <SvgIcon size={40} name={'microphone'} color={theme.palette.iconColor.primary} />
+            <SvgIcon size={40} name={'microphone'} color={theme.palette?.iconColor?.primary} />
           </CustomizedBtn>
         </Tooltip>
       )}

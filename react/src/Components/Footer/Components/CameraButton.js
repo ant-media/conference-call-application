@@ -83,7 +83,7 @@ function CameraButton(props) {
           <CustomizedBtn
             id="camera-button"
             className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={conference?.cameraButtonDisabled} onClick={(e) => handleOn(e)}>
-            <SvgIcon size={40} name={'camera-off'} color={theme.palette.iconColor.primary} />
+            <SvgIcon size={40} name={'camera-off'} color={theme.palette?.iconColor?.primary} />
           </CustomizedBtn>
          </Tooltip>
       ) : (
@@ -91,7 +91,7 @@ function CameraButton(props) {
           <CustomizedBtn
             id="camera-button"
             className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={conference?.cameraButtonDisabled} onClick={(e) => handleOff(e)}>
-            <SvgIcon size={40} name={'camera'} color={theme.palette.iconColor.primary} />
+            <SvgIcon size={40} name={'camera'} color={theme.palette?.iconColor?.primary} />
           </CustomizedBtn>
         </Tooltip>
       )}

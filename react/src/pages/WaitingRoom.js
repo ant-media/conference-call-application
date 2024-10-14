@@ -5,7 +5,6 @@ import {
     CircularProgress,
     Container,
     Grid,
-    LinearProgress,
     Modal,
     TextField,
     Tooltip,
@@ -336,7 +335,7 @@ function WaitingRoom(props) {
                                             sx={roundStyle}
                                             onClick={() => handleDialogOpen()}
                                         >
-                                            <SvgIcon size={40} name={"settings"} color={theme.palette.iconColor.primary}/>
+                                            <SvgIcon size={40} name={"settings"} color={theme.palette?.iconColor?.primary}/>
                                         </CustomizedBtn>
                                     </Tooltip>
                                 </Grid>

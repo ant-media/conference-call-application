@@ -82,7 +82,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 aria-expanded={open ? "true" : undefined}
                 onClick={handleClick}
             >
-              <SvgIcon size={40} name={'option'} color={theme.palette.iconColor.primary} />
+              <SvgIcon size={40} name={'option'} color={theme.palette?.iconColor?.primary} />
             </CustomizedBtn>
           </Tooltip>
           <Menu
@@ -114,7 +114,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 handleClose();
               }}>
                 <ListItemIcon>
-                  <SvgIcon size={36} name={"share-screen-off"} color={theme.palette.iconColor.primary} />
+                  <SvgIcon size={36} name={"share-screen-off"} color={theme.palette?.iconColor?.primary} />
                 </ListItemIcon>
                 <ListItemText
                   id="more-options-share-screen-button"
@@ -127,7 +127,7 @@ function MoreOptionsButton({ footer, ...props }) {
             {process.env.REACT_APP_FOOTER_REACTIONS_BUTTON_VISIBILITY === 'true' ?
               <MenuItem onClick={() => {conference.setShowEmojis(!conference.showEmojis); handleClose();}}>
                 <ListItemIcon>
-                  <SvgIcon size={36} name={'smiley-face'} color={theme.palette.iconColor.primary} />
+                  <SvgIcon size={36} name={'smiley-face'} color={theme.palette?.iconColor?.primary} />
                 </ListItemIcon>
                 <ListItemText
                   id="more-options-reactions-button"
@@ -146,7 +146,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 handleClose();
               }}>
                 <ListItemIcon>
-                  <SvgIcon size={36} name={"message-off"} color={theme.palette.iconColor.primary} />
+                  <SvgIcon size={36} name={"message-off"} color={theme.palette?.iconColor?.primary} />
                 </ListItemIcon>
                 <ListItemText id={"more-options-chat-button"}>{t("Chat")}</ListItemText>
               </MenuItem>
@@ -157,7 +157,7 @@ function MoreOptionsButton({ footer, ...props }) {
                   onClick={() => {conference?.handleParticipantListOpen(!conference?.participantListDrawerOpen); handleClose();}}
               >
                 <ListItemIcon>
-                  <SvgIcon size={36} name={"participants"} color={theme.palette.iconColor.primary} />
+                  <SvgIcon size={36} name={"participants"} color={theme.palette?.iconColor?.primary} />
                 </ListItemIcon>
                 <ListItemText id={"more-options-participant-list-button"}>{t("Participant List")}</ListItemText>
               </MenuItem>
