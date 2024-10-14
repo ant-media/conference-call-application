@@ -2763,7 +2763,8 @@ function AntMedia(props) {
                         speedTestStreamId,
                         startSpeedTest,
                         stopSpeedTest,
-                        statsList
+                        statsList,
+                        getTrackStats
                     }}
                 >
                     {props.children}
