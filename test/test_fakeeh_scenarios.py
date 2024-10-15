@@ -311,6 +311,12 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     send_button = self.chrome.get_element_with_retry(By.ID, "message-send-button")
     self.chrome.click_element_as_script(send_button)
+
+  def get_role(self, streamId):
+    all_participants = self.get_participants()
+    role = all_participants[streamId].role
+    print("role of: "+str(role))
+    return role
  
   def test_presenter_room(self):
     room = "room"+str(random.randint(100, 999))
@@ -377,13 +383,15 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.open_close_participant_list_drawer()
 
-    time.sleep(15)
+    time.sleep(5)
 
     self.add_presenter_to_listener_room(presenterId)
 
-    #remove_speaker_button = self.chrome.get_element_with_retry(By.ID,"remove-presenter-"+presenterId)
+    wait.until(lambda x: len(self.get_role(presenterId)) == "active_speaker")
 
-    #assert(remove_speaker_button.is_displayed())
+    remove_speaker_button = self.chrome.get_element_with_retry(By.ID,"remove-presenter-"+presenterId)
+
+    assert(remove_speaker_button.is_displayed())
 
     # switch to playerA and check if presenter is added to listener room
     self.chrome.switch_to_tab(handle_player_A)
