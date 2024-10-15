@@ -941,7 +941,6 @@ function AntMedia(props) {
     }
 
     function updateParticipantRole(streamId, newRole) {
-        console.info("send notification event", notEvent);
         updateBroadcastRole(streamId, newRole);
         
         setTimeout(() => {
