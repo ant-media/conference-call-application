@@ -944,12 +944,15 @@ function AntMedia(props) {
         updateBroadcastRole(streamId, newRole);
         
         setTimeout(() => {
-            let notEvent = {
-                streamId: streamId,
-                eventType: "UPDATE_PARTICIPANT_ROLE",
-                role: newRole
-            };
-            sendDataChannelMessage(roomName, JSON.stringify(notEvent));
+            handleSendNotificationEvent(
+                "UPDATE_PARTICIPANT_ROLE",
+                publishStreamId,
+                {
+                  streamId: streamId,
+                  senderStreamId: publishStreamId,
+                  role: newRole
+                }
+            );
             console.log("UPDATE_PARTICIPANT_ROLE event sent by "+publishStreamId);
         }, 2000);
     }
