@@ -1887,6 +1887,7 @@ function AntMedia(props) {
 
     function handleNotificationEvent(obj) {
         var notificationEvent = JSON.parse(obj.data);
+        console.log("handleNotificationEvent:", notificationEvent);
         if (notificationEvent != null && typeof notificationEvent == "object") {
             var eventStreamId = notificationEvent.streamId;
             var eventType = notificationEvent.eventType;
