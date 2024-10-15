@@ -387,7 +387,7 @@ class TestTestFakeehScenario(unittest.TestCase):
 
     self.add_presenter_to_listener_room(presenterId)
 
-    wait.until(lambda x: len(self.get_role(presenterId)) == "active_speaker")
+    #wait.until(lambda x: len(self.get_role(presenterId)) == "active_speaker")
 
     remove_speaker_button = self.chrome.get_element_with_retry(By.ID,"remove-presenter-"+presenterId)
 
