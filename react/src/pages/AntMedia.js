@@ -954,6 +954,8 @@ function AntMedia(props) {
                 }
             );
             console.log("UPDATE_PARTICIPANT_ROLE event sent by "+publishStreamId);
+
+            webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
         }, 2000);
     }
 
