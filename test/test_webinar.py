@@ -12,7 +12,7 @@ import subprocess
 import threading
 import psutil
 
-class TestTestFakeehScenario(unittest.TestCase):
+class TestWebinarScenario(unittest.TestCase):
   def setUp(self):
     print(self._testMethodName, " starting...")
     self.url = os.environ.get('SERVER_URL')
