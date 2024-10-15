@@ -1951,7 +1951,7 @@ function AntMedia(props) {
                     }
                 });
             } else if (eventType === "REACTIONS" && notificationEvent.senderStreamId !== publishStreamId) {
-            showReactions(notificationEvent.senderStreamId, notificationEvent.reaction, allParticipants);
+                showReactions(notificationEvent.senderStreamId, notificationEvent.senderStreamName, notificationEvent.reaction, allParticipants);
             } else if (eventType === "TURN_YOUR_CAM_OFF") {
                 if (publishStreamId === notificationEvent.streamId) {
                     console.warn(notificationEvent.senderStreamId, "closed your cam");
@@ -2482,9 +2482,8 @@ function AntMedia(props) {
         sendMessage(JSON.stringify(jsCmd));
     }
 
-    const showReactions = React.useCallback((streamId, reactionRequest, allParticipants) => {
+    const showReactions = React.useCallback((streamId, streamName, reactionRequest, allParticipants) => {
         let reaction = '😀';
-        let streamName = '';
 
         if (reactions[reactionRequest] !== undefined) {
             reaction = reactions[reactionRequest];
@@ -2492,10 +2491,6 @@ function AntMedia(props) {
 
         if (streamId === publishStreamId) {
             streamName = 'You';
-        } else if (allParticipants[streamId]?.name !== undefined) {
-            streamName = allParticipants[streamId].name;
-        } else {
-            streamName = streamId;
         }
 
         floating({
@@ -2511,9 +2506,9 @@ function AntMedia(props) {
     const sendReactions = React.useCallback((reaction) =>{
         let reactionsStreamId = (isPlayOnly) ? roomName : publishStreamId;
         handleSendNotificationEvent("REACTIONS", reactionsStreamId, {
-            reaction: reaction, senderStreamId: publishStreamId,
+            reaction: reaction, senderStreamId: publishStreamId, senderStreamName: streamName
         });
-        showReactions(publishStreamId, reaction, allParticipants);
+        showReactions(publishStreamId, streamName, reaction, allParticipants);
     },[handleSendNotificationEvent, publishStreamId, showReactions, allParticipants]);
 
     function muteLocalMic() {
