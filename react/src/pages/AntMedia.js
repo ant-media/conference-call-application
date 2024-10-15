@@ -1585,7 +1585,7 @@ function AntMedia(props) {
         let videoLabel;
         let broadcastObject = allParticipants[streamId];
 
-    if (broadcastObject === null || broadcastObject === undefined) {
+        if (broadcastObject === null || broadcastObject === undefined) {
             console.error("Cannot find broadcast object for streamId: " + streamId);
             return;
         }
@@ -1606,7 +1606,11 @@ function AntMedia(props) {
         }
 
         if (videoLabel !== "localVideo" && videoTrackAssignments.length > 0) {
-            videoLabel = videoTrackAssignments[1]?.videoLabel;
+            // if we are play only mode, we are going to pin the first video track.
+            // if we are not play only mode, we are going to pin the second video track because the first video track is local video.
+            // it's a workaround for now. we need to fix the root cause of the issue in the backend side.
+            // Mustafa - 2024-10-16
+            videoLabel = (isPlayOnly) ? videoTrackAssignments[0]?.videoLabel : videoTrackAssignments[1]?.videoLabel;
             webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
         }
 
