@@ -941,25 +941,17 @@ function AntMedia(props) {
     }
 
     function updateParticipantRole(streamId, newRole) {
-        let notEvent = {
-            streamId: streamId,
-            eventType: "UPDATE_PARTICIPANT_ROLE",
-            role: newRole
-        };
         console.info("send notification event", notEvent);
         updateBroadcastRole(streamId, newRole);
         
         setTimeout(() => {
+            let notEvent = {
+                streamId: streamId,
+                eventType: "UPDATE_PARTICIPANT_ROLE",
+                role: newRole
+            };
             sendDataChannelMessage(roomName, JSON.stringify(notEvent));
-            handleSendNotificationEvent(
-                "UPDATE_PARTICIPANT_ROLE",
-                publishStreamId,
-                {
-                  streamId: streamId,
-                  senderStreamId: publishStreamId,
-                  role: newRole
-                }
-            );
+            console.log("UPDATE_PARTICIPANT_ROLE event sent by "+publishStreamId);
         }, 2000);
     }
 
@@ -2049,6 +2041,9 @@ function AntMedia(props) {
 
                 console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
 
+                console.log("UPDATE_PARTICIPANT_ROLE is received by "+publishStreamId);
+
+
                 let updatedParticipant = allParticipants[notificationEvent.streamId];
 
                 if (updatedParticipant === null || updatedParticipant === undefined) {
@@ -2061,9 +2056,13 @@ function AntMedia(props) {
 
                 updatedParticipant.role = notificationEvent.role;
 
+                console.log("UPDATE_PARTICIPANT_ROLE event received and role updated for ", updatedParticipant);
+
+
                 if (publishStreamId === notificationEvent.streamId) {
                     setRole(notificationEvent.role);
                 } else {
+                    console.log("UPDATE_PARTICIPANT_ROLE event received and subtracks are queried");
                     webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
                 }
                 setParticipantUpdated(!participantUpdated);
