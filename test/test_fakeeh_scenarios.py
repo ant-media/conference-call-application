@@ -314,7 +314,7 @@ class TestTestFakeehScenario(unittest.TestCase):
 
   def get_role(self, streamId):
     all_participants = self.get_participants()
-    role = all_participants[streamId].role
+    role = all_participants[streamId]["role"]
     print("role of: "+str(role))
     return role
  
