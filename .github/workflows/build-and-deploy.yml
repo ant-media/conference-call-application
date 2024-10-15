@@ -86,6 +86,7 @@ jobs:
         NODE_OPTIONS: '--max-old-space-size=4096'
       run: |
         cd react
+        mv .env.production.webinar env.production
         sed -i "s#//placeholder for peerconnection_config#peerconnection_config:{\"iceServers\":[{\"urls\":\"turn:${{ secrets.STAGING_TURN_URL }}\",\"username\":\"${{ secrets.STAGING_TURN_USERNAME }}\",\"credential\":\"${{ secrets.STAGING_TURN_PASSWORD }}\"}],\"sdpSemantics\":\"unified-plan\"},#" src/pages/AntMedia.js
         npm install
         npm run build
@@ -95,7 +96,6 @@ jobs:
     - name: Build Maven project for webinar
       run: |
         cd webapp
-        mv .env.production.webinar env.production
         mvn clean install -DskipTests -Dgpg.skip=true --quiet
         ls -alh
         ls -alh target/
