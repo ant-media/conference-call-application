@@ -940,34 +940,34 @@ function AntMedia(props) {
         updateParticipantRole(streamId, participantsNewRole);
     }
 
-    function updateParticipantRole(streamId, role) {
+    function updateParticipantRole(streamId, newRole) {
         let notEvent = {
             streamId: streamId,
             eventType: "UPDATE_PARTICIPANT_ROLE",
-            role: role
+            role: newRole
         };
         console.info("send notification event", notEvent);
-        sendDataChannelMessage(roomName, JSON.stringify(notEvent));
-        updateBroadcastRole(streamId, role);
-
+        updateBroadcastRole(streamId, newRole);
+        
         setTimeout(() => {
+            sendDataChannelMessage(roomName, JSON.stringify(notEvent));
             handleSendNotificationEvent(
                 "UPDATE_PARTICIPANT_ROLE",
                 publishStreamId,
                 {
                   streamId: streamId,
                   senderStreamId: publishStreamId,
-                  role: role
+                  role: newRole
                 }
             );
         }, 2000);
     }
 
-    function updateBroadcastRole(streamId, role) {
+    function updateBroadcastRole(streamId, newRole) {
         const jsCmd = {
             command: "updateBroadcastRole",
             streamId: streamId,
-            role: role,
+            role: newRole,
         };
 
         sendMessage(JSON.stringify(jsCmd));
