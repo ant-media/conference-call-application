@@ -1,6 +1,7 @@
 from browser import Browser
 from selenium.webdriver.common.by import By
 from selenium.common import exceptions  
+from rest_helper import RestHelper 
 
 import sys
 import unittest
