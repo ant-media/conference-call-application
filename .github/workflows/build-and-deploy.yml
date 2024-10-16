@@ -99,6 +99,7 @@ jobs:
 
     - name: Build React application for webinar
       env:
+        CI: false
         NODE_OPTIONS: '--max-old-space-size=4096'
       run: |
         cd react
