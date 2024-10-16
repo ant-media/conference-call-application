@@ -11,7 +11,7 @@ function LayoutPinned (props) {
 
   const pinnedParticipant = conference.videoTrackAssignments.find(e => e.streamId === props.pinnedParticipant?.streamId);
 
-  let MAX_VIDEO_AT_SIDE = 4;
+  let MAX_VIDEO_AT_SIDE = 60;
 
   let trackCount = Math.min(conference.globals.desiredMaxVideoTrackCount-1, MAX_VIDEO_AT_SIDE);
 

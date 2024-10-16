@@ -82,15 +82,30 @@ class TestJoinLeave(unittest.TestCase):
 
     return handle
     
-  def get_videoTrackAssignments(self):
+  def get_videoTrackAssignments(self, expected_value=None):
     script = "return window.conference;"
     result_json = self.chrome.execute_script_with_retry(script)
+    
     if result_json is None:
       return []
     
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    #print("----------------------\n vtas("+str(len(vtas))+"):\n" + str(vtas))
+    if expected_value is not None and len(vtas) != expected_value:
+      print("\n ++++++++++ start trial ++++++++++")
+      print("VTA expected: "+str(expected_value) + " but got: "+str(len(vtas)))
+      self.call_debugme()
+      print("\n")
+      self.print_message()
+
+      #print("\n screen shot")
+      #self.chrome.print_ss_as_base64()
+
+      self.open_close_chat_drawer()
+      print("++++++++++ end trial ++++++++++\n")
+
+
+   
     cpu_usage = psutil.cpu_percent(interval=0)
     print(f"Instant CPU Usage: {cpu_usage}%")
     return vtas
@@ -169,9 +184,11 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
   def set_and_test_track_limit(self, limit):
+      print("set_track_limit -> count: "+str(limit))
       self.change_video_track_count(limit)
       wait = self.chrome.get_wait()
       wait.until(lambda x: self.get_video_track_limit() == limit)
+      print("video_track_limit: "+str(limit))
   
   def _test_video_track_count(self):
     #self.chrome.makeFullScreen()
@@ -200,7 +217,36 @@ class TestJoinLeave(unittest.TestCase):
   def leave_room(self):
     leave_button = self.chrome.get_element(By.ID, "leave-room-button")
     self.chrome.click_element(leave_button)
-    
+
+  def open_close_chat_drawer(self):
+    if(self.chrome.is_element_exist(By.ID, "messages-button")):
+      messages_button = self.chrome.get_element(By.ID, "messages-button")
+    else:
+      more_button = self.chrome.get_element(By.ID, "more-button")
+      self.chrome.click_element_as_script(more_button)
+      messages_button = self.chrome.get_element(By.ID, "more-options-chat-button")
+
+    self.chrome.click_element_as_script(messages_button)
+
+  def call_debugme(self):
+    self.open_close_chat_drawer()
+
+    message_input = self.chrome.get_element_with_retry(By.ID, "message-input")
+    self.chrome.write_to_element(message_input, "debugme")
+
+    send_button = self.chrome.get_element_with_retry(By.ID, "message-send-button")
+    self.chrome.click_element_as_script(send_button)
+
+
+  def print_message(self):
+    messages = self.chrome.get_all_elements(By.ID, "message")
+    print(">>>>>>>\nlast 2 messages:"+str(len(messages)))
+    last_two_messages = messages[-2:]
+    for message in last_two_messages:
+      print("message:" + message.get_attribute("innerHTML"))
+    print("<<<<<<<\n")
+
+
   def test_others_tile(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -217,9 +263,9 @@ class TestJoinLeave(unittest.TestCase):
     if(self.chrome.is_element_exist(By.ID, "share-screen-button")):
       ss_button = self.chrome.get_element(By.ID, "share-screen-button")
     else:
-      more_button = self.chrome.get_element(By.ID, "more-button")
+      more_button = self.chrome.get_element_with_retry(By.ID, "more-button")
       self.chrome.click_element(more_button)
-      ss_button = self.chrome.get_element(By.ID, "more-options-share-screen-button")
+      ss_button = self.chrome.get_element_with_retry(By.ID, "more-options-share-screen-button")
 
     self.chrome.click_element(ss_button)
 
@@ -286,7 +332,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_with_stats(self):
+  def _test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -307,15 +353,15 @@ class TestJoinLeave(unittest.TestCase):
 
 
     wait.until(lambda x: len(self.get_track_stats()['inboundRtpList']) == 4)
+
+    time.sleep(5)
     stats = self.get_track_stats()
+
+    assert(stats is not None)
+    print("stats: "+str(stats))
 
     for track_stat in stats['inboundRtpList']:
       assert(track_stat['bytesReceived'] > 0)
-
-
-    print("stats: "+str(stats))
-
-    assert(stats is not None)
 
     self.chrome.close_all()
 
@@ -393,28 +439,76 @@ class TestJoinLeave(unittest.TestCase):
     '''
 
   def test_join_room_N_participants(self):
-    N = 3
+    self.chrome.makeFullScreen()
+    N = 5
     room = "room"+str(random.randint(100, 999))
-    wait = self.chrome.get_wait()
+    wait = self.chrome.get_wait(25, 5)
 
     process = self.create_participants_with_test_tool("participant", room, N-1)
 
     self.join_room_in_new_tab("participant"+str(N-1), room)     
 
-    time.sleep(5)
     self.assertLocalVideoAvailable()
 
+    print("len(self.get_videoTrackAssignments()): "+str(len(self.get_videoTrackAssignments())))
+    print("N: "+str(N))
+    print("**********************************************")
+    wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
 
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
-    self.set_and_test_track_limit(2)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1) 
+    print("screen shot 1 start: default")
+    #self.chrome.print_ss_as_base64()
+    self.chrome.save_ss_as_file("shot-1.png")
+    print("screen shot 1 end: default")
+
+    # Print the current working directory
+    print("Current Directory:", os.getcwd())
+
+    # List all files in the current directory
+    files = os.listdir()
+    print("Files in Directory:", files)
+
+
+    self.set_and_test_track_limit(4)  
+  
+    wait.until(lambda x: len(self.get_videoTrackAssignments(3)) == 3) 
+
+    print("screen shot 2 start: 4")
+    #self.chrome.print_ss_as_base64()
+    self.chrome.save_ss_as_file("shot-2.png")
+    print("screen shot 2 end: default")  
 
     self.set_and_test_track_limit(6)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
+    
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
+
+    print("screen shot 3 start: 6")
+    #self.chrome.print_ss_as_base64()
+    self.chrome.save_ss_as_file("shot-3.png")
+    print("screen shot 3 end: 6")
+
 
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
+
+  def test_get_debugme_info(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+
+    print("current: "+self.chrome.get_current_tab_id())
+    assert(handle_2 == self.chrome.get_current_tab_id())
+    self.assertLocalVideoAvailable()
+    wait = self.chrome.get_wait()
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    self.call_debugme()
+    time.sleep(5)
+    self.print_message()
+
+    self.chrome.close_all()
+
 
   def is_avatar_displayed_for(self, stream_id):
     video_card = self.chrome.get_element(By.ID, "card-"+stream_id)

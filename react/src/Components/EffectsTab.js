@@ -73,7 +73,7 @@ function EffectsTab() {
                   padding: '2px', // Add some padding
                   borderRadius: '50%', // Make the button round
                   backgroundColor: '#f00', // Make the button red
-                  color: '#fff', // Make the 'x' icon white
+                  color: 'theme.palette.textColor', // Make the 'x' icon white
                 }}
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent the parent button's onClick from firing
