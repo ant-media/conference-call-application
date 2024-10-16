@@ -36,9 +36,9 @@ function ParticipantListButton({ footer }) {
                     className={footer ? 'footer-icon-button' : ''}
                     color={conference?.participantListDrawerOpen ? 'primary' : 'secondary'}
                 >
-                    <SvgIcon size={32} color={conference?.participantListDrawerOpen ? 'black' : 'white'} name={'participants'} />
+                    <SvgIcon size={32} color={conference?.participantListDrawerOpen ? '#000' : '#fff'} name={'participants'} />
                   {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                    <a style={{color: conference?.participantListDrawerOpen ? 'black' : 'white'}}>{Object.keys(conference.allParticipants).length}</a>
+                    <a style={{color: conference?.participantListDrawerOpen ? '#000' : '#fff'}}>{Object.keys(conference.allParticipants).length}</a>
                 </CustomizedBtn>
             </Tooltip>
         );

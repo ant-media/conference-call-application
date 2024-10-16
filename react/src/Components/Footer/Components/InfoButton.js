@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from 'Components/SvgIcon';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
@@ -27,6 +27,7 @@ function InfoButton(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const conference = React.useContext(ConferenceContext);
+  const theme = useTheme();
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget);
@@ -58,7 +59,7 @@ function InfoButton(props) {
                 onClick={handleClick}
                 sx={{ml: 0.5, px: 1, py: 1.5, minWidth: 'unset'}}
             >
-              <SvgIcon size={20} name={'info'} viewBox="0 0 500 500" color="#fff"/>
+              <SvgIcon size={20} name={'info'} viewBox="0 0 500 500" color={theme.palette.text.primary}/>
             </Button>
           </Tooltip>
           <Menu
@@ -102,7 +103,7 @@ function InfoButton(props) {
                         );
                       }}
                   >
-                    <SvgIcon size={14} viewBox="0 0 500 1000" name={'copy'} color={'white'}/>
+                    <SvgIcon size={14} viewBox="0 0 500 1000" name={'copy'} color={'#fff'}/>
                   </Button>
                 </Tooltip>
               </ListItemIcon>

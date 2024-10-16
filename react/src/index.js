@@ -5,26 +5,27 @@ import App from "./App";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
-import { getRoomNameAttribute } from "utils";
+import { getRootAttribute } from "utils";
 import { WebSocketProvider } from "Components/WebSocketProvider";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 let appName = undefined
-let roomName = getRoomNameAttribute();
+let roomName = getRootAttribute("data-room-name");
 
 if (process.env.NODE_ENV !== 'development' && !roomName) {
   appName = "/" + window.location.pathname.split("/")[1];
   //console.log = function () { };
 }
 
+//React.StricMode causes double rendering of components in "development" to detect the problems with the code - mekya 
 root.render(
   <WebSocketProvider>
-  <React.StrictMode>
-    <BrowserRouter basename={appName}>
-        <App />
-    </BrowserRouter>
-  </React.StrictMode>
-  </WebSocketProvider>
+    <React.StrictMode>
+      <BrowserRouter basename={appName}>
+          <App />
+      </BrowserRouter>
+    </React.StrictMode>
+  </WebSocketProvider> 
 );
 
 // If you want your app to work offline and load faster, you can change

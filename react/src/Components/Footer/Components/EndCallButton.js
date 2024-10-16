@@ -26,13 +26,10 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
 function EndCallButton({ footer, ...props }) {
   const conference = useContext(ConferenceContext);
   const { t } = useTranslation();
-  // const exit = () => {
-  //   ahndleLeaveFromRoom();
 
-  // }
   return (
     <Tooltip title={t('Leave call')} placement="top">
-      <CustomizedBtn 
+      <CustomizedBtn
         id="leave-room-button"
         onClick={() => conference.setLeftTheRoom(true)} className={footer ? 'footer-icon-button' : ''} variant="contained" color="error">
         <SvgIcon size={28} name={"end-call"} />
