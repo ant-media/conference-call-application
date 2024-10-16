@@ -32,7 +32,7 @@ const AntDialogTitle = props => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={'close'} color={'white'}/>
+          <SvgIcon size={30} name={'close'} color={'#fff'}/>
         </Button>
       ) : null}
     </DialogTitle>
@@ -90,7 +90,7 @@ export function GeneralSettingsDialog(props) {
                   variant="outlined"
                   value={currentLanguage}
                   onChange={e => switchLanguage(e.target.value)}
-                  sx={{color: 'white'}}
+                  sx={{color: '#fff'}}
                 >
                   {languageList
                     .map(currentLanguage => (
@@ -116,7 +116,7 @@ export function GeneralSettingsDialog(props) {
                   variant="outlined"
                   value={themeContext?.currentTheme ? themeContext?.currentTheme : ThemeList.Green}
                   onChange={e => switchTheme(e.target.value)}
-                  sx={{color: 'white'}}
+                  sx={{color: '#fff'}}
                 >
                   {themeList
                     .map(theme => (

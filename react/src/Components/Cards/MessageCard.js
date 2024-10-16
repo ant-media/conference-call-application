@@ -5,7 +5,7 @@ import {styled, useTheme} from '@mui/material/styles';
 
 const HyperTypography = styled(Typography)(({theme}) => ({
   '& a': {
-    color: 'white',
+    color: '#fff',
   },
 }));
 

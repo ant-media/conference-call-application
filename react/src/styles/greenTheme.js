@@ -17,12 +17,15 @@ export function getGreenTheme() {
   const themeColor80 = "#001D1A";
   const themeColor85 = "#024B46";
   const themeColor90 = "#6BCBC3";
+  const themeColor99 = "#FFFFFF";
   const chatText = "#DDFFFC";
   const darkGray = "#222B2A";
+  const iconColor = "#FFFFFF";
 
   const error = "#DF0515";
   const primaryColor = themeColor10;
   const secondaryColor = themeColor60;
+  const textColor = "#FFFFFF";
   let themeObject = {
     typography: {
       allVariants: {
@@ -335,6 +338,7 @@ export function getGreenTheme() {
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
+        99: themeColor99,
       },
       gray: {
         90: darkGray,
@@ -344,6 +348,11 @@ export function getGreenTheme() {
         default: "#FFFFFF",
         secondary: chatText, // dark4
       },
+      iconColor: {
+        primary: "#FFFFFF",
+        default: "#FFFFFF",
+        secondary: iconColor,
+      }
     },
   };
   if (!isComponentMode()) {

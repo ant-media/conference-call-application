@@ -44,7 +44,7 @@ function ShareScreenButton({ footer, ...props }) {
         color={conference.isScreenShared ? "primary" : "secondary"}
       >
         <SvgIcon
-          color={conference.isScreenShared ? "black" : "white"}
+          color={conference.isScreenShared ? "#000" : "#fff"}
           size={40}
           name={"share-screen-off"}
         />
