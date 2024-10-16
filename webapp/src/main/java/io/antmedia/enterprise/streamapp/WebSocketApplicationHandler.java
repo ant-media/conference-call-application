@@ -61,6 +61,7 @@ public class WebSocketApplicationHandler
 	protected static Logger logger = LoggerFactory.getLogger(WebSocketApplicationHandler.class);
 
 	ConfigurableWebApplicationContext context;
+	AMSBroadcastManager amsBroadcastManager;
 	ConferenceRoomSettings conferenceRoomSettings;
 
 	private Gson gsonOnlyExposedFields = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
@@ -112,8 +113,13 @@ public class WebSocketApplicationHandler
 			sendNotInitializedError(session);
 		}
 	}
-
-
+	
+	private AMSBroadcastManager getAMSBroadcastManager() {
+		if (amsBroadcastManager == null && context != null) {
+			amsBroadcastManager = (AMSBroadcastManager) context.getBean("amsBroadcastManager");
+		}
+		return amsBroadcastManager;
+	}
 
 	private void setConferenceRoomSettings(){
 		if(context != null){
@@ -225,7 +231,13 @@ public class WebSocketApplicationHandler
 		else if (cmd.equals(WebSocketApplicationConstants.GET_SETTINGS_COMMAND))
 		{
 			responseRoomSettings(session);
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.SEND_DATA_CHANNEL_COMMAND))
+		{
+			String receiverStreamId = (String)jsonObject.get(WebSocketApplicationConstants.RECEIVER_STREAM_ID_FIELD);
+			String messageData = (String)jsonObject.get(WebSocketApplicationConstants.MESSAGE_FIELD);
 
+			handleSendDataChannelMessage(receiverStreamId, messageData);
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.START_RECORDING_COMMAND)) {
 			//start recording
@@ -294,6 +306,12 @@ public class WebSocketApplicationHandler
 
 			sendMessage(session, jsonObjectResponse.toJSONString());
 		}
+		else if (cmd.equals(WebSocketApplicationConstants.UPDATE_BROADCAST_ROLE_COMMAND)) {
+			String streamId = (String)jsonObject.get(WebSocketConstants.STREAM_ID);
+			String role = (String)jsonObject.get(WebSocketConstants.ROLE);
+
+			handleUpdateBroadcastRole(streamId, role);
+		}
 	}
 
 
@@ -306,11 +324,42 @@ public class WebSocketApplicationHandler
 
 	private void responseRoomSettings(Session session) {
 
+		String participantVisibilityMatrix = appSettings.getParticipantVisibilityMatrix().toString();
+
+		if (participantVisibilityMatrix != null) {
+			conferenceRoomSettings.setParticipantVisibilityMatrix(participantVisibilityMatrix);
+		}
+
+		int maxVideoTrackCount = appSettings.getMaxVideoTrackCount();
+
+		conferenceRoomSettings.setMaxVideoTrackCount(maxVideoTrackCount);
+
 		JSONObject jsonResponse = new JSONObject();
 		jsonResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.SET_SETTINGS_COMMAND);
 		jsonResponse.put(WebSocketApplicationConstants.SETTINGS, gsonOnlyExposedFields.toJson(conferenceRoomSettings));
 
 		sendMessage(session, jsonResponse.toJSONString());
+	}
+
+	public void handleUpdateBroadcastRole(String streamId, String role) {
+
+		boolean result = getAMSBroadcastManager().updateBroadcastRole(streamId, role);
+
+		if (result) {
+			logger.info("Broadcast role is updated to {} for {}", role, streamId);
+		} else {
+			logger.error("Broadcast role could not be updated to {} for {}", role, streamId);
+		}
+	}
+
+	public void handleSendDataChannelMessage(String receiverStreamId, String messageData) {
+		boolean result = getAMSBroadcastManager().sendDataChannelMessage(receiverStreamId, messageData);
+
+		if (result) {
+			logger.info("Data channel message is sent to {}", receiverStreamId);
+		} else {
+			logger.error("Data channel message could not be sent to {}", receiverStreamId);
+		}
 	}
 
 	private void handlePasswordRequiredCommand(Session session) {

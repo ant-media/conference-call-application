@@ -88,6 +88,7 @@ const MessageInput = React.memo(() => {
                   aria-label="toggle password visibility"
                   size={"medium"}
                   edge="end"
+                  id="message-send-button"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -108,6 +109,7 @@ const MessageInput = React.memo(() => {
           fullWidth
           placeholder={t("Send a message")}
           variant="outlined"
+          id="message-input"
         />
       </form>
     </MessageInputContainer>

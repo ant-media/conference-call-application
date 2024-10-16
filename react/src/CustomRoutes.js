@@ -6,16 +6,12 @@ import Home from "pages/Home";
 import AntMedia from "pages/AntMedia";
 import {isComponentMode} from "utils";
 
-function isComponent() {
-  return isComponentMode();
-}
-
 function CustomRoutes(props) {
   const theme = useTheme();
 
   console.log("CustomRoutes");
 
-  if (isComponent()) {
+  if (isComponentMode()) {
     return (
       <Grid container style={{background: theme.palette.background}}>
         <Routes>
