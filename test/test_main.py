@@ -18,9 +18,9 @@ suite = unittest.TestSuite()
 suite.addTest(TestDeployment('test_install_app'))
 
 if test_webinar:
-    suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
-else:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_webinar)
+else:
+    suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
 
 suite.addTests(suite2)
 suite.addTest(TestDeployment('test_delete_app'))
