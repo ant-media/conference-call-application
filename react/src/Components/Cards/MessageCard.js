@@ -5,7 +5,7 @@ import {styled, useTheme} from '@mui/material/styles';
 
 const HyperTypography = styled(Typography)(({theme}) => ({
   '& a': {
-    color: 'white',
+    color: '#fff',
   },
 }));
 
@@ -26,7 +26,7 @@ function MessageCard(props) {
       <Grid item xs={12} sx={{mt: 1}}>
         <HyperTypography variant="body1" fontSize={14} style={{whiteSpace: 'pre-wrap', overflowWrap: 'break-word'}}
                          color={theme.palette.chatText} align={isMe ? 'right' : 'left'} fontWeight={400}
-                         lineHeight={1.4}>
+                         lineHeight={1.4} id="message">
           {urlify(message)}
         </HyperTypography>
       </Grid>

@@ -17,12 +17,15 @@ export function getOrangeTheme() {
   const themeColor80 = "#EF6C00";
   const themeColor85 = "#E65100";
   const themeColor90 = "#FFD180";
+  const themeColor99 = "#FFFFFF";
   const chatText = "#FFF3E0";
   const darkGray = "#37474F";
+  const iconColor = "#FFFFFF";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
   const secondaryColor = themeColor60;
+  const textColor = "#FFFFFF";
   let themeObject = {
     typography: {
       allVariants: {
@@ -335,6 +338,7 @@ export function getOrangeTheme() {
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
+        99: themeColor99,
       },
       gray: {
         90: darkGray,
@@ -344,6 +348,11 @@ export function getOrangeTheme() {
         default: "#FFFFFF",
         secondary: chatText, // dark4
       },
+      iconColor: {
+        primary: "#FFFFFF",
+        default: "#FFFFFF",
+        secondary: iconColor,
+      }
     },
   };
   if (!isComponentMode()) {

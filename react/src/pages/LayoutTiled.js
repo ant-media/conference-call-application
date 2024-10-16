@@ -48,8 +48,6 @@ function calculateLayout(
 function LayoutTiled(props) {
   const conference = React.useContext(ConferenceContext);
 
-  conference.updateMaxVideoTrackCount(conference.globals.desiredMaxVideoTrackCount);
-
   const aspectRatio = 16 / 9;
   const [cardWidth, setCardWidth] = React.useState(500*aspectRatio);
   const [cardHeight, setCardHeight] = React.useState(500);
@@ -71,10 +69,11 @@ function LayoutTiled(props) {
     //console.log("***** W:"+cardWidth+" H:"+cardHeight+" props.width:"+props.width+" width:"+width+" cols:"+cols+" vc:"+videoCount);
   }, [conference.videoTrackAssignments, props.width, props.height, conference.participantUpdated]);
 
-  const showOthers = Object.keys(conference.allParticipants).length > conference.globals.maxVideoTrackCount;
+  const showOthers = Object.keys(conference.allParticipants).length > conference.globals.desiredMaxVideoTrackCount;
+  let trackCount = conference.globals.desiredMaxVideoTrackCount - 1; //remove you
+  conference.updateMaxVideoTrackCount(showOthers ? trackCount - 1 : trackCount); //remove others if we show
 
-  //if we need to show others card, then we don't show the last video to hold place for the others card
-  const playingParticipantsCount = showOthers ? conference.videoTrackAssignments.length - 1 : conference.videoTrackAssignments.length;
+  const playingParticipantsCount = conference.videoTrackAssignments.length;
   const playingParticipants = conference.videoTrackAssignments.slice(0, playingParticipantsCount);
 
   const videoCards = () => {

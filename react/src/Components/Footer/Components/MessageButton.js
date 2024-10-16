@@ -44,8 +44,9 @@ function MessageButton({ footer, ...props }) {
           variant="contained"
           className={footer ? 'footer-icon-button' : ''}
           color={conference?.messageDrawerOpen ? 'primary' : 'secondary'}
+          id="messages-button"
         >
-          <SvgIcon size={40} color={conference?.messageDrawerOpen ? 'black' : 'white'} name={'message-off'} />
+          <SvgIcon size={40} color={conference?.messageDrawerOpen ? '#000' : '#fff'} name={'message-off'} />
         </CustomizedBtn>
       </Tooltip>
     </Badge>

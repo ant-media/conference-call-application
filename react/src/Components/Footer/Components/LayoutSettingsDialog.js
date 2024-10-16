@@ -55,7 +55,7 @@ const AntDialogTitle = (props) => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={"close"} color={"white"}/>
+          <SvgIcon size={30} name={"close"} color={"#fff"}/>
         </Button>
       ) : null}
     </DialogTitle>
@@ -125,16 +125,13 @@ export function LayoutSettingsDialog(props) {
             borderRadius: 4,
           }}
         >
-          <SvgIcon size={42} name={icon} color={"white"}/>
+          <SvgIcon size={42} name={icon} color={"#fff"}/>
         </Grid>
       </Grid>
     );
   };
   const handleMaxVideoTrackCountChange = (count) => {
-    //why the minus 1? because what user sees is (my local video + maxvideoTrackCount)
-    //so if the user sets the tiles to 6 it means (1 + 5) respectively to the statement above.
-    //what the count number actually is the second variable in that.
-    conference.handleSetMaxVideoTrackCount(count - 1);
+    conference.handleSetMaxVideoTrackCount(count);
   };
   const debouncedHandleMaxVideoTrackCountChange = debounce(
     handleMaxVideoTrackCountChange,
