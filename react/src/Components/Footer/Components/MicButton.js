@@ -4,7 +4,7 @@ import { SvgIcon } from '../../SvgIcon';
 import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 export const roundStyle = {
@@ -37,6 +37,7 @@ function MicButton(props) {
   const conference = useContext(ConferenceContext);
   const { enqueueSnackbar } = useSnackbar();
   const { t } = useTranslation();
+  const theme = useTheme();
 
   const handleMute = (e) => {
     e.stopPropagation();
@@ -80,7 +81,7 @@ function MicButton(props) {
             id="mic-button"
             disabled={conference?.microphoneButtonDisabled}
             className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="error" onClick={(e) => { handleUnmute(e) }}>
-            <SvgIcon size={40} name={'muted-microphone'} color="#fff" />
+            <SvgIcon size={40} name={'muted-microphone'} color={theme.palette?.iconColor?.primary} />
           </CustomizedBtn>
         </Tooltip>
       ) : (
@@ -89,7 +90,7 @@ function MicButton(props) {
             id="mic-button"
             disabled={conference?.microphoneButtonDisabled}
             className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => { handleMute(e) }}>
-            <SvgIcon size={40} name={'microphone'} color='inherit' />
+            <SvgIcon size={40} name={'microphone'} color={theme.palette?.iconColor?.primary} />
           </CustomizedBtn>
         </Tooltip>
       )}

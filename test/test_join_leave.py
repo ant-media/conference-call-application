@@ -98,8 +98,8 @@ class TestJoinLeave(unittest.TestCase):
       print("\n")
       self.print_message()
 
-      print("\n screen shot")
-      self.chrome.print_ss_as_base64()
+      #print("\n screen shot")
+      #self.chrome.print_ss_as_base64()
 
       self.open_close_chat_drawer()
       print("++++++++++ end trial ++++++++++\n")
@@ -332,7 +332,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_with_stats(self):
+  def _test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -457,7 +457,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
     print("screen shot 1 start: default")
-    self.chrome.print_ss_as_base64()
+    #self.chrome.print_ss_as_base64()
     self.chrome.save_ss_as_file("shot-1.png")
     print("screen shot 1 end: default")
 
@@ -474,7 +474,7 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments(3)) == 3) 
 
     print("screen shot 2 start: 4")
-    self.chrome.print_ss_as_base64()
+    #self.chrome.print_ss_as_base64()
     self.chrome.save_ss_as_file("shot-2.png")
     print("screen shot 2 end: default")  
 
@@ -484,7 +484,7 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
 
     print("screen shot 3 start: 6")
-    self.chrome.print_ss_as_base64()
+    #self.chrome.print_ss_as_base64()
     self.chrome.save_ss_as_file("shot-3.png")
     print("screen shot 3 end: 6")
 

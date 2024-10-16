@@ -1,5 +1,15 @@
 import React, {useContext} from "react";
-import {Box, Button, CircularProgress, Container, Grid, Modal, TextField, Tooltip, Typography,} from "@mui/material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    Grid,
+    Modal,
+    TextField,
+    Tooltip,
+    Typography,
+} from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
 import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
@@ -11,7 +21,7 @@ import {SvgIcon} from "Components/SvgIcon";
 import {useSnackbar} from "notistack";
 import {ConferenceContext} from "./AntMedia";
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
-import {isComponentMode, getRoomNameAttribute} from "utils";
+import {getRootAttribute, isComponentMode} from "utils";
 import {useTheme} from "@mui/material/styles";
 
 
@@ -27,7 +37,7 @@ if (enterDirectly == null || typeof enterDirectly === "undefined") {
 
 function WaitingRoom(props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const id = (isComponentMode()) ? getRoomNameAttribute() : useParams().id;
+    const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
     const publishStreamId = getPublishStreamId()
     const {t} = useTranslation();
     const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -182,11 +192,7 @@ function WaitingRoom(props) {
     ) {
         return (
             <Box sx={conference?.speedTestObject?.isfailed ?
-                {visibility: "hidden", position: 'relative', display: 'inline-flex'} : {
-                    visibility: "visible",
-                    position: 'relative',
-                    display: 'inline-flex'
-                }}>
+                {visibility: "hidden", position: 'relative', display: 'inline-flex'} : {visibility: "visible",position: 'relative', display: 'inline-flex'}}>
                 <CircularProgress variant="determinate" {...props} />
                 <Box
                     sx={{
@@ -245,7 +251,7 @@ function WaitingRoom(props) {
                         Connection Test
                     </Typography>
                     <Typography id="modal-modal-description"
-                                sx={{mt: 2, color: "white", marginTop: '12px', marginBottom: '21px',
+                                sx={{mt: 2, color: theme.palette.text.primary, marginTop: '12px', marginBottom: '21px',
                                     display: conference?.speedTestObject?.errorMessage !== "" ? "none" : "block"
 
                                 }}>
@@ -254,13 +260,15 @@ function WaitingRoom(props) {
                     <Box sx={conference?.speedTestObject?.isfailed ? {
                           display: 'none', justifyContent: 'center', alignItems: 'center'
                     } : { display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        <CircularProgressWithLabel sx={(speedTestModalButtonVisibility) ? {
+                        <CircularProgressWithLabel
+                             id={"speed-test-modal-circle-progress-bar"}
+                             sx={(speedTestModalButtonVisibility) ? {
                              display: 'none'
                         } : {display: 'block'}} value={conference?.speedTestObject?.progressValue}/>
                     </Box>
                     <Typography id="modal-modal-error-description" sx={{
                         mt: 2,
-                        color: "white",
+                        color: theme.palette.text.primary,
                         marginTop: '12px',
                         marginBottom: '21px',
                         display: conference?.speedTestObject?.isfailed ? "block" : "none"
@@ -270,11 +278,14 @@ function WaitingRoom(props) {
                     </Typography>
     
                     <Button
+                        id={"speed-test-modal-close-button"}
                         sx={(conference?.speedTestObject?.isfailed || speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display:"none"}}
                         onClick={() => {
                             speedTestModalCloseButton();
                         }}>Close</Button>
-                    <Button sx={(speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display: "none"}}
+                    <Button
+                        id={"speed-test-modal-join-button"}
+                        sx={(speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display: "none"}}
                             onClick={() => {
                                 speedTestModalJoinButton();
                             }}>Join</Button>
@@ -324,7 +335,7 @@ function WaitingRoom(props) {
                                             sx={roundStyle}
                                             onClick={() => handleDialogOpen()}
                                         >
-                                            <SvgIcon size={40} name={"settings"} color={"white"}/>
+                                            <SvgIcon size={40} name={"settings"} color={theme.palette?.iconColor?.primary}/>
                                         </CustomizedBtn>
                                     </Tooltip>
                                 </Grid>

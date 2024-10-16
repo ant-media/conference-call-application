@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 const AntDialogTitle = props => {
   const { children, onClose, ...other } = props;
 
-  
+
   return (
     <DialogTitle {...other}>
       {children}
@@ -24,7 +24,7 @@ const AntDialogTitle = props => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={'close'} color={'white'} />
+          <SvgIcon size={30} name={'close'} color={'#fff'} />
         </Button>
       ) : null}
     </DialogTitle>
@@ -39,7 +39,7 @@ export function UnauthrorizedDialog(props) {
   const handleClose = (event, reason) => {
     onClose();
   };
- 
+
 
 
   const exitClicked = (e) =>{
@@ -51,8 +51,8 @@ export function UnauthrorizedDialog(props) {
     <Dialog onClose={handleClose} open={open}  maxWidth={'sm'}>
       <AntDialogTitle onClose={handleClose}>{t('You are unauthorized to join this room.')}</AntDialogTitle>
       <DialogContent>
-       
-    
+
+
         <Button
                   style={{marginTop:'35px'}}
 
