@@ -18,6 +18,9 @@ import floating from "../external/floating.js";
 import {UnauthrorizedDialog} from "Components/Footer/Components/UnauthorizedDialog";
 import {useWebSocket} from 'Components/WebSocketProvider';
 import {useTheme} from "@mui/material/styles";
+import useSound from 'use-sound';
+import joinRoomSound from 'static/sounds/join-sound.mp3';
+import leaveRoomSound from 'static/sounds/leave-sound.mp3';
 import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 import {WebinarRoles} from "../WebinarRoles";
 import Stack from "@mui/material/Stack";
@@ -331,8 +334,6 @@ function AntMedia(props) {
 
   const [isBroadcasting, setIsBroadcasting] = React.useState(false);
 
-  const [participantVisibilityMatrix, setParticipantVisibilityMatrix] = React.useState({});
-
   const [appSettingsMaxVideoTrackCount, setAppSettingsMaxVideoTrackCount] = React.useState(6);
 
     const [reactions] = useState({
@@ -347,7 +348,17 @@ function AntMedia(props) {
         'thumbs_down': '👎🏼'
     });
 
-  React.useEffect(() => {
+    const [playJoinRoomSound /*, { stopJoinRoomSound }*/] = useSound(
+        joinRoomSound,
+        { volume: 0.5, interrupt: true }
+    );
+
+    const [playLeaveRoomSound /*, { stopLeaveRoomSound }*/] = useSound(
+        leaveRoomSound,
+        { volume: 0.5, interrupt: true }
+    );
+
+    React.useEffect(() => {
     setParticipantUpdated(!participantUpdated);
     if (presenterButtonStreamIdInProcess.length > 0) {
       setTimeout(() => {
@@ -1070,6 +1081,7 @@ function AntMedia(props) {
             isFake: true
         };
         allParticipantsTemp["streamId_" + suffix] = broadcastObject;
+
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
           setAllParticipants(allParticipantsTemp);
         }
@@ -1358,6 +1370,7 @@ function AntMedia(props) {
                 return;
             }
             console.log("publish started");
+            playJoinRoomSound();
             //stream is being published
             webRTCAdaptor?.enableStats(publishStreamId);
         } else if (info === "publish_finished") {
@@ -2156,7 +2169,6 @@ function AntMedia(props) {
 
     function handleLeaveFromRoom() {
 
-
         // we need to empty participant array. if we are going to leave it in the first place.
         setVideoTrackAssignments([]);
         setAllParticipants({});
@@ -2178,6 +2190,8 @@ function AntMedia(props) {
         if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
             handleStopScreenShare();
         }
+
+        playLeaveRoomSound();
 
         setWaitingOrMeetingRoom("waiting");
     }
@@ -2280,6 +2294,7 @@ function AntMedia(props) {
         allParticipantsTemp[publishStreamId] = {
             streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false
         };
+
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
             console.log("addMeAsParticipant setAllParticipants:"+JSON.stringify(allParticipantsTemp));
             setAllParticipants(allParticipantsTemp);
@@ -2320,7 +2335,7 @@ function AntMedia(props) {
                 videoLabel: index, track: obj.track, streamId: obj.streamId
             };
 
-            let tempVideoTrackAssignments = videoTrackAssignments;
+            let tempVideoTrackAssignments = [...videoTrackAssignments];
             if (isVideoLabelExsist(newVideoTrackAssignment.videoLabel, tempVideoTrackAssignments)) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
@@ -2329,6 +2344,10 @@ function AntMedia(props) {
             if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
                 setVideoTrackAssignments(tempVideoTrackAssignments);
                 setParticipantUpdated(!participantUpdated);
+                console.log("document.hidden",document.hidden);
+                if (document.hidden) {
+                    playJoinRoomSound();
+                }
             }
         }
     }
@@ -2579,9 +2598,6 @@ function AntMedia(props) {
             var localSettings = JSON.parse(obj.settings);
             console.log("--isRecordingFeatureAvailable: ", localSettings?.isRecordingFeatureAvailable);
             setIsRecordPluginInstalled(localSettings?.isRecordingFeatureAvailable);
-            if (localSettings?.participantVisibilityMatrix !== undefined && localSettings?.participantVisibilityMatrix !== null) {
-                setParticipantVisibilityMatrix(JSON.parse(localSettings?.participantVisibilityMatrix));
-            }
             if (localSettings?.maxVideoTrackCount !== undefined && localSettings?.maxVideoTrackCount !== null) {
                 console.log("--maxVideoTrackCountFromAppSettings: ", localSettings?.maxVideoTrackCount);
                 setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount);
