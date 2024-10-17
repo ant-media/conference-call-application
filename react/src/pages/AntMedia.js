@@ -333,8 +333,6 @@ function AntMedia(props) {
 
   const [isBroadcasting, setIsBroadcasting] = React.useState(false);
 
-  const [participantVisibilityMatrix, setParticipantVisibilityMatrix] = React.useState({});
-
   const [appSettingsMaxVideoTrackCount, setAppSettingsMaxVideoTrackCount] = React.useState(6);
 
     const [reactions] = useState({
@@ -2591,9 +2589,6 @@ function AntMedia(props) {
             var localSettings = JSON.parse(obj.settings);
             console.log("--isRecordingFeatureAvailable: ", localSettings?.isRecordingFeatureAvailable);
             setIsRecordPluginInstalled(localSettings?.isRecordingFeatureAvailable);
-            if (localSettings?.participantVisibilityMatrix !== undefined && localSettings?.participantVisibilityMatrix !== null) {
-                setParticipantVisibilityMatrix(JSON.parse(localSettings?.participantVisibilityMatrix));
-            }
             if (localSettings?.maxVideoTrackCount !== undefined && localSettings?.maxVideoTrackCount !== null) {
                 console.log("--maxVideoTrackCountFromAppSettings: ", localSettings?.maxVideoTrackCount);
                 setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount);
