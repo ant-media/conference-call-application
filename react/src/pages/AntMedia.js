@@ -2785,7 +2785,8 @@ function AntMedia(props) {
                         startSpeedTest,
                         stopSpeedTest,
                         statsList,
-                        getTrackStats
+                        getTrackStats,
+                        isBroadcasting
                     }}
                 >
                     {props.children}
