@@ -10,7 +10,7 @@ function DummyCard() {
     <Grid
       container
       style={{
-        background: theme.palette.themeColor[75],
+        background: theme.palette.themeColor[70],
         borderRadius: 4,
         height: "100%",
       }}
