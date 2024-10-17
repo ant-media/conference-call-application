@@ -73,4 +73,39 @@ describe('ParticipantTab Component', () => {
     expect(adminButtons).toBe(true);
   });
 
+  it('renders unpresenter button with correct icon and color', () => {
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+    const unpresenterButton = getByTestId('remove-presenter-test-stream-id');
+    expect(unpresenterButton).toBeInTheDocument();
+    expect(unpresenterButton.querySelector('svg')).toHaveAttribute('name', 'unpresenter');
+    expect(unpresenterButton.querySelector('svg')).toHaveStyle(`color: ${theme(ThemeList.Green).palette.participantListIcon.primary}`);
+  });
+
+  it('unpresenter button is disabled when presenterButtonDisabled includes streamId', () => {
+    contextValue.presenterButtonDisabled = ['test-stream-id'];
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+    const unpresenterButton = getByTestId('remove-presenter-test-stream-id');
+    expect(unpresenterButton).toBeDisabled();
+  });
+
+  it('unpresenter button shows CircularProgress when presenterButtonStreamIdInProcess includes streamId', () => {
+    contextValue.presenterButtonStreamIdInProcess = ['test-stream-id'];
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+    const unpresenterButton = getByTestId('remove-presenter-test-stream-id');
+    expect(unpresenterButton.querySelector('svg')).not.toBeInTheDocument();
+    expect(unpresenterButton.querySelector('div')).toHaveClass('MuiCircularProgress-root');
+  });
+
 });
