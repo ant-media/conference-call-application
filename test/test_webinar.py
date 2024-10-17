@@ -650,7 +650,6 @@ class TestWebinarScenario(unittest.TestCase):
     self.chrome.close_all()
 
   def test_request_to_speak(self):
-    return
     # create a room and join as admin and presenter
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("adminA", room)   
