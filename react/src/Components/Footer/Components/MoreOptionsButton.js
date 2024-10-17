@@ -82,7 +82,7 @@ function MoreOptionsButton({ footer, ...props }) {
                 aria-expanded={open ? "true" : undefined}
                 onClick={handleClick}
             >
-              <SvgIcon size={40} name={'option'} color={theme.palette?.iconColor?.primary} />
+              <SvgIcon size={40} name={'option'} color={open ? theme.palette?.darkIconColor?.primary : theme.palette?.iconColor?.primary} />
             </CustomizedBtn>
           </Tooltip>
           <Menu

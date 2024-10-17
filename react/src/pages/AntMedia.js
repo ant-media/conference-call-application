@@ -2031,13 +2031,14 @@ function AntMedia(props) {
                     });
                 });
 
-            // check if there is any difference between old and new assignments
-            if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
-                    setVideoTrackAssignments(tempVideoTrackAssignments);
-                    checkScreenSharingStatus();
-                    requestSyncAdministrativeFields();
-                    setParticipantUpdated(!participantUpdated);
-            }
+                checkScreenSharingStatus();
+
+                // check if there is any difference between old and new assignments
+                if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+                        setVideoTrackAssignments(tempVideoTrackAssignments);
+                        requestSyncAdministrativeFields();
+                        setParticipantUpdated(!participantUpdated);
+                }
 
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
                 // xxx to be able to reduce render
@@ -2785,7 +2786,8 @@ function AntMedia(props) {
                         startSpeedTest,
                         stopSpeedTest,
                         statsList,
-                        getTrackStats
+                        getTrackStats,
+                        isBroadcasting
                     }}
                 >
                     {props.children}

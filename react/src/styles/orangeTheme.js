@@ -13,6 +13,7 @@ export function getOrangeTheme() {
   const themeColor50 = "#FF9800";
   const themeColor60 = "#FB8C00";
   const themeColor70 = "#F57C00";
+  const themeColor72 = "#F57C00";
   const themeColor75 = "#EF6C00";
   const themeColor80 = "#EF6C00";
   const themeColor85 = "#E65100";
@@ -21,6 +22,7 @@ export function getOrangeTheme() {
   const chatText = "#FFF3E0";
   const darkGray = "#37474F";
   const iconColor = "#FFFFFF";
+  const darkIconColor = "#000000";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
@@ -335,6 +337,7 @@ export function getOrangeTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        72: themeColor72,
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
@@ -348,10 +351,20 @@ export function getOrangeTheme() {
         default: "#FFFFFF",
         secondary: chatText, // dark4
       },
+      participantListIcon: {
+        primary: "#FFFFFF",
+        default: "#FFFFFF",
+        secondary: iconColor,
+      },
       iconColor: {
         primary: "#FFFFFF",
         default: "#FFFFFF",
         secondary: iconColor,
+      },
+      darkIconColor: {
+        primary: "#000000",
+        default: "#000000",
+        secondary: darkIconColor,
       }
     },
   };
