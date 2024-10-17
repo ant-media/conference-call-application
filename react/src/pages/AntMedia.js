@@ -20,6 +20,7 @@ import {useWebSocket} from 'Components/WebSocketProvider';
 import {useTheme} from "@mui/material/styles";
 import useSound from 'use-sound';
 import joinRoomSound from 'static/sounds/join-sound.mp3';
+import leaveRoomSound from 'static/sounds/leave-sound.mp3';
 import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 import {WebinarRoles} from "../WebinarRoles";
 import Stack from "@mui/material/Stack";
@@ -349,6 +350,11 @@ function AntMedia(props) {
 
     const [playJoinRoomSound /*, { stopJoinRoomSound }*/] = useSound(
         joinRoomSound,
+        { volume: 0.5, interrupt: true }
+    );
+
+    const [playLeaveRoomSound /*, { stopLeaveRoomSound }*/] = useSound(
+        leaveRoomSound,
         { volume: 0.5, interrupt: true }
     );
 
@@ -2163,7 +2169,6 @@ function AntMedia(props) {
 
     function handleLeaveFromRoom() {
 
-
         // we need to empty participant array. if we are going to leave it in the first place.
         setVideoTrackAssignments([]);
         setAllParticipants({});
@@ -2185,6 +2190,8 @@ function AntMedia(props) {
         if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
             handleStopScreenShare();
         }
+
+        playLeaveRoomSound();
 
         setWaitingOrMeetingRoom("waiting");
     }
