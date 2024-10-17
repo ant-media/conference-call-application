@@ -1078,7 +1078,6 @@ function AntMedia(props) {
 
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
           setAllParticipants(allParticipantsTemp);
-          playJoinRoomSound();
         }
 
         if (Object.keys(allParticipantsTemp).length <= globals.maxVideoTrackCount) {
@@ -1365,6 +1364,7 @@ function AntMedia(props) {
                 return;
             }
             console.log("publish started");
+            playJoinRoomSound();
             //stream is being published
             webRTCAdaptor?.enableStats(publishStreamId);
         } else if (info === "publish_finished") {
@@ -2290,7 +2290,6 @@ function AntMedia(props) {
 
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
             console.log("addMeAsParticipant setAllParticipants:"+JSON.stringify(allParticipantsTemp));
-            playJoinRoomSound();
             setAllParticipants(allParticipantsTemp);
             setParticipantUpdated(!participantUpdated);
         }
@@ -2329,7 +2328,7 @@ function AntMedia(props) {
                 videoLabel: index, track: obj.track, streamId: obj.streamId
             };
 
-            let tempVideoTrackAssignments = videoTrackAssignments;
+            let tempVideoTrackAssignments = [...videoTrackAssignments];
             if (isVideoLabelExsist(newVideoTrackAssignment.videoLabel, tempVideoTrackAssignments)) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
