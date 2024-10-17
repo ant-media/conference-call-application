@@ -349,7 +349,7 @@ function AntMedia(props) {
 
     const [playJoinRoomSound /*, { stopJoinRoomSound }*/] = useSound(
         joinRoomSound,
-        { volume: 0.5 }
+        { volume: 0.5, interrupt: true }
     );
 
     React.useEffect(() => {
