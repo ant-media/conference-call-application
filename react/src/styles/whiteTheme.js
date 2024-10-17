@@ -362,6 +362,11 @@ export function getWhiteTheme() {
                 default: "#000000",
                 secondary: chatText, // dark4
             },
+            participantListIcon: {
+                primary: "#000000",
+                default: "#000000",
+                secondary: iconColor,
+            },
             iconColor: {
                 primary: "#FFFFFF",
                 default: "#FFFFFF",

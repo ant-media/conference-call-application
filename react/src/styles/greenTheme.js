@@ -351,6 +351,11 @@ export function getGreenTheme() {
         default: "#FFFFFF",
         secondary: chatText, // dark4
       },
+      participantListIcon: {
+        primary: "#FFFFFF",
+        default: "#FFFFFF",
+        secondary: iconColor,
+      },
       iconColor: {
         primary: "#FFFFFF",
         default: "#FFFFFF",

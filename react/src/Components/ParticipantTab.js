@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import {CircularProgress} from "@mui/material";
@@ -23,6 +23,7 @@ const PinBtn = styled(Button)(({ theme }) => ({
 
 function ParticipantTab(props) {
   const conference = React.useContext(ConferenceContext);
+  const theme = useTheme();
 
   const getAdminButtons = (streamId, assignedVideoCardId) => {
       let publishStreamId = (streamId === "localVideo") ? conference.publishStreamId : streamId;
@@ -39,7 +40,7 @@ function ParticipantTab(props) {
         }
       >
         { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={15} /> :
-          <SvgIcon size={28} name="unpresenter" color="#000" />}
+          <SvgIcon size={28} name="unpresenter" color={theme.palette?.participantListIcon?.primary} />}
       </PinBtn>
     ) : null}
   { ( role === WebinarRoles.Host || role === WebinarRoles.Speaker || role === WebinarRoles.TempListener ) && conference?.isAdmin === true ?(
@@ -52,7 +53,7 @@ function ParticipantTab(props) {
     >
       {/* this icon for publish speaker */}
       { conference?.presenterButtonStreamIdInProcess.includes(publishStreamId) ? <CircularProgress size={15} /> :
-        <SvgIcon size={28} name="presenter" color="#000" />}
+        <SvgIcon size={28} name="presenter" color={theme.palette?.participantListIcon?.primary} />}
     </PinBtn>
   ) : null}
   { ( role === WebinarRoles.TempListener || role === WebinarRoles.ActiveTempListener ) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ? (
@@ -60,7 +61,7 @@ function ParticipantTab(props) {
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => conference?.makeListenerAgain(publishStreamId)}
     >
-      <SvgIcon size={28} name="close" color="#000" />
+      <SvgIcon size={28} name="close" color={theme.palette?.participantListIcon?.primary} />
     </PinBtn>
   ) : null}
       </div>
@@ -94,7 +95,7 @@ function ParticipantTab(props) {
                   conference.pinVideo(streamId);
                 }}
               >
-                <SvgIcon size={28} name="unpin" color="theme.palette.textColor"/>
+                <SvgIcon size={28} name="unpin" color={theme.palette?.participantListIcon?.primary}/>
               </PinBtn>
             ) : (
               <PinBtn
@@ -104,7 +105,7 @@ function ParticipantTab(props) {
                   conference.pinVideo(streamId);
                 }}
               >
-                <SvgIcon size={28} name="pin" color="theme.palette.textColor"/>
+                <SvgIcon size={28} name="pin" color={theme.palette?.participantListIcon?.primary}/>
               </PinBtn>
             )}
             <div>
@@ -122,7 +123,7 @@ function ParticipantTab(props) {
     <div style={{width: "100%", overflow: "hidden"}}>
       <Stack sx={{width: "100%",}} spacing={2}>
         <Grid container>
-          <SvgIcon size={28} name="participants" color="theme.palette.textColor"/>
+          <SvgIcon size={28} name="participants" color={theme.palette?.participantListIcon?.primary}/>
           <ParticipantName
             variant="body2"
             style={{marginLeft: 4, fontWeight: 500}}
