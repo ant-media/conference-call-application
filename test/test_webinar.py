@@ -491,6 +491,7 @@ class TestWebinarScenario(unittest.TestCase):
     handle_presenter1 = self.join_room_as_presenter("presenterA", room)
     handle_presenter2 = self.join_room_as_presenter("presenterB", room)
     handle_presenter3 = self.join_room_as_presenter("presenterC", room)
+    handle_listener = self.join_room_as_player("listenerA", room)
 
     assert(handle_presenter3 == self.chrome.get_current_tab_id())
 
@@ -543,6 +544,14 @@ class TestWebinarScenario(unittest.TestCase):
     pin_button = self.chrome.get_element_with_retry(By.ID,"pin-"+presenterId)
 
     self.chrome.click_element(pin_button)
+
+    # switch to listener and check if presenterC is pinned
+
+    self.chrome.switch_to_tab(handle_listener)
+
+    time.sleep(15)
+
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
 
     self.chrome.close_all()
 
@@ -650,7 +659,6 @@ class TestWebinarScenario(unittest.TestCase):
     self.chrome.close_all()
 
   def test_request_to_speak(self):
-    return
     # create a room and join as admin and presenter
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("adminA", room)   
