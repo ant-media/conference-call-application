@@ -17,6 +17,7 @@ export function getWhiteTheme() {
     const themeColor60 = "#2B6197";
     //participant list background
     const themeColor70 = "#fff";
+    const themeColor72 = "#2B6197";
     const themeColor75 = "#2B6197";
     //footer background
     const themeColor80 = "#fff";
@@ -346,6 +347,7 @@ export function getWhiteTheme() {
                 50: themeColor50,
                 60: themeColor60,
                 70: themeColor70,
+                72: themeColor72,
                 75: themeColor75,
                 80: themeColor80,
                 85: themeColor85,

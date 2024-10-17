@@ -13,6 +13,7 @@ export function getGrayTheme() {
   const themeColor50 = "#9E9E9E";
   const themeColor60 = "#757575";
   const themeColor70 = "#616161";
+  const themeColor72 = "#616161";
   const themeColor75 = "#424242";
   const themeColor80 = "#424242";
   const themeColor85 = "#212121";
@@ -336,6 +337,7 @@ export function getGrayTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        72: themeColor72,
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,

@@ -13,6 +13,7 @@ export function getRedTheme() {
   const themeColor50 = "#F44336";
   const themeColor60 = "#E53935";
   const themeColor70 = "#D32F2F";
+  const themeColor72 = "#D32F2F";
   const themeColor75 = "#C62828";
   const themeColor80 = "#C62828";
   const themeColor85 = "#B71C1C";
@@ -336,6 +337,7 @@ export function getRedTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        72: themeColor72,
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,

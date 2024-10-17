@@ -13,6 +13,7 @@ export function getPurpleTheme() {
   const themeColor50 = "#9C27B0";
   const themeColor60 = "#8E24AA";
   const themeColor70 = "#7B1FA2";
+  const themeColor72 = "#7B1FA2";
   const themeColor75 = "#6A1B9A";
   const themeColor80 = "#6A1B9A";
   const themeColor85 = "#4A148C";
@@ -336,6 +337,7 @@ export function getPurpleTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        72: themeColor72,
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,

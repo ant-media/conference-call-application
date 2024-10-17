@@ -13,6 +13,7 @@ export function getPinkTheme() {
   const themeColor50 = "#E91E63";
   const themeColor60 = "#D81B60";
   const themeColor70 = "#C2185B";
+  const themeColor72 = "#C2185B";
   const themeColor75 = "#AD1457";
   const themeColor80 = "#AD1457";
   const themeColor85 = "#880E4F";
@@ -336,6 +337,7 @@ export function getPinkTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        72: themeColor72,
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,

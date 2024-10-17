@@ -13,6 +13,7 @@ export function getGreenTheme() {
   const themeColor50 = "#007269";
   const themeColor60 = "#00564F";
   const themeColor70 = "#003935";
+  const themeColor72 = "#003935";
   const themeColor75 = "#002D2D";
   const themeColor80 = "#001D1A";
   const themeColor85 = "#024B46";
@@ -336,6 +337,7 @@ export function getGreenTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        72: themeColor72,
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
