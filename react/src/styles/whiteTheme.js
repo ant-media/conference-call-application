@@ -28,6 +28,7 @@ export function getWhiteTheme() {
     const darkGray = "#222B2A";
     const textColor = "#000000";
     const iconColor = "#FFFFFF";
+    const darkIconColor = "#FFFFFF";
 
     const error = "#DF0515";
     const primaryColor = themeColor10;
@@ -363,7 +364,12 @@ export function getWhiteTheme() {
                 primary: "#FFFFFF",
                 default: "#FFFFFF",
                 secondary: iconColor,
-            }
+            },
+            darkIconColor: {
+                primary: "#FFFFFF",
+                default: "#FFFFFF",
+                secondary: darkIconColor,
+            },
         },
     };
     if (!isComponentMode()) {

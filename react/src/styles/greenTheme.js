@@ -21,6 +21,7 @@ export function getGreenTheme() {
   const chatText = "#DDFFFC";
   const darkGray = "#222B2A";
   const iconColor = "#FFFFFF";
+  const darkIconColor = "#000000";
 
   const error = "#DF0515";
   const primaryColor = themeColor10;
@@ -352,6 +353,11 @@ export function getGreenTheme() {
         primary: "#FFFFFF",
         default: "#FFFFFF",
         secondary: iconColor,
+      },
+      darkIconColor: {
+        primary: "#000000",
+        default: "#000000",
+        secondary: darkIconColor,
       }
     },
   };
