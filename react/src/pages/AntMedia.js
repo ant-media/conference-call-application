@@ -2335,9 +2335,12 @@ function AntMedia(props) {
                 tempVideoTrackAssignments.push(newVideoTrackAssignment);
             }
             if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
-                playJoinRoomSound();
                 setVideoTrackAssignments(tempVideoTrackAssignments);
                 setParticipantUpdated(!participantUpdated);
+                console.log("document.hidden",document.hidden);
+                if (document.hidden) {
+                    playJoinRoomSound();
+                }
             }
         }
     }
