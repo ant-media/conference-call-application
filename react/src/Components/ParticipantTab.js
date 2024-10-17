@@ -34,6 +34,7 @@ function ParticipantTab(props) {
       {( role === WebinarRoles.ActiveHost || role === WebinarRoles.ActiveSpeaker || role === WebinarRoles.ActiveTempListener ) && conference?.isAdmin === true ? (
       <PinBtn
         id={"remove-presenter-"+streamId}
+        data-testid="remove-presenter-test-stream-id"
         disabled={conference?.presenterButtonDisabled.includes(publishStreamId)}
         sx={{ width: 28, pt: 1, pb: 1 }}
         onClick={() => { conference?.makeParticipantUndoPresenter(publishStreamId) }
@@ -46,6 +47,7 @@ function ParticipantTab(props) {
   { ( role === WebinarRoles.Host || role === WebinarRoles.Speaker || role === WebinarRoles.TempListener ) && conference?.isAdmin === true ?(
     <PinBtn
       id={"add-presenter-"+streamId}
+      data-testid="add-presenter-test-stream-id"
       disabled={conference?.presenterButtonDisabled.includes(streamId)}
       sx={{ width: 28, pt: 1, pb: 1 }}
       onClick={() => { conference?.makeParticipantPresenter(publishStreamId) }
