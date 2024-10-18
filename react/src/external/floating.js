@@ -85,6 +85,7 @@ export default function floating(
 
   for (let i = 0; i < number; i++) {
     const floater = document.createElement('div');
+    floater.id = "floater-" + i;
     floater.innerHTML = content;
 
     floater.style.cssText = `

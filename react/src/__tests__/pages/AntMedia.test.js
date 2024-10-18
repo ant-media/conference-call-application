@@ -1923,6 +1923,41 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('auto pins when screen share is enabled', async () => {
+    process.env.REACT_APP_AUTO_PIN_WHEN_SCREEN_SHARE = 'true';
+    const checkScreenSharingStatus = jest.fn();
+
+    render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    var notificationEvent = {
+      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+      streamId: "stream1",
+      payload: [
+        {videoLabel: "videoTrack1", trackId: "tracka1"},
+        {videoLabel: "videoTrack2", trackId: "tracka2"},
+      ]
+    };
+    var json = JSON.stringify(notificationEvent);
+
+    let obj = {};
+    obj.data = json;
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("data_received", obj);
+    });
+
+    expect(checkScreenSharingStatus).toHaveBeenCalled();
+  });
+
   it('does not auto pin when screen share is disabled', () => {
     process.env.REACT_APP_AUTO_PIN_WHEN_SCREEN_SHARE = 'false';
     const checkScreenSharingStatus = jest.fn();
