@@ -491,7 +491,6 @@ class TestWebinarScenario(unittest.TestCase):
     handle_presenter1 = self.join_room_as_presenter("presenterA", room)
     handle_presenter2 = self.join_room_as_presenter("presenterB", room)
     handle_presenter3 = self.join_room_as_presenter("presenterC", room)
-    handle_listener = self.join_room_as_player("listenerA", room)
 
     assert(handle_presenter3 == self.chrome.get_current_tab_id())
 
@@ -545,13 +544,102 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.click_element(pin_button)
 
-    # switch to listener and check if presenterC is pinned
+    self.chrome.close_all()
+
+  def test_pin_scenario_for_play_only(self):
+    # create a room and join as admin, 1 presenter and 1 listener
+    room = "room"+str(random.randint(100, 999))
+    handle_admin = self.join_room_as_admin("adminA", room)   
+    handle_listener = self.join_room_as_player("listenerA", room)
+    handle_presenter = self.join_room_as_presenter("presenterA", room)
+
+    assert(handle_presenter == self.chrome.get_current_tab_id())
+
+    presenterId = self.get_publishStreamId()
+
+    assert(self.chrome.get_element_with_retry(By.ID,presenterId).is_displayed())
+
+    wait = self.chrome.get_wait()
+
+    # check if participants are in the room and see each other
+    self.chrome.switch_to_tab(handle_admin)
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+    self.chrome.switch_to_tab(handle_presenter)
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
 
     self.chrome.switch_to_tab(handle_listener)
 
+    wait.until(lambda x: len(self.get_participants()) == 0)
+
+    # switch to admin and pin presenterC
+    self.chrome.switch_to_tab(handle_admin)
+
+    presenterId = self.get_id_of_participant("presenterA")
+
+    self.open_close_participant_list_drawer()
+
     time.sleep(15)
 
-    wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
+    # Add presenterA into the listener room
+
+    presenterId = self.get_id_of_participant("presenterA")
+
+    self.open_close_participant_list_drawer()
+
+    time.sleep(15)
+
+    # Add adminA into the listener room
+
+    presenterId = self.get_id_of_participant("adminA")
+
+    self.open_close_participant_list_drawer()
+
+    time.sleep(15)
+
+    # Switch to listenerA and check if presenterA and adminA are added to listener room
+
+    self.chrome.switch_to_tab(handle_listener)
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+    time.sleep(15)
+
+    # pin adminA
+
+    presenterId = self.get_id_of_participant("adminA")
+
+    pin_button = self.chrome.get_element_with_retry(By.ID,"pin-"+presenterId)
+
+    self.chrome.click_element(pin_button)
+
+    time.sleep(15)
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+    # pin presenterA
+
+    presenterId = self.get_id_of_participant("presenterA")
+
+    pin_button = self.chrome.get_element_with_retry(By.ID,"pin-"+presenterId)
+
+    self.chrome.click_element(pin_button)
+
+    time.sleep(15)
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+    # unpin presenterA
+
+    pin_button = self.chrome.get_element_with_retry(By.ID,"unpin-"+presenterId)
+
+    self.chrome.click_element(pin_button)
+
+    time.sleep(15)
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
 
     self.chrome.close_all()
 
