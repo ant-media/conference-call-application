@@ -1923,4 +1923,17 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('does not auto pin when screen share is disabled', () => {
+    process.env.REACT_APP_AUTO_PIN_WHEN_SCREEN_SHARE = 'false';
+    const checkScreenSharingStatus = jest.fn();
+
+    render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia />
+        </ThemeProvider>
+    );
+
+    expect(checkScreenSharingStatus).not.toHaveBeenCalled();
+  });
+
 });

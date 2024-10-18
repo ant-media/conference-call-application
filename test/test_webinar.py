@@ -272,7 +272,7 @@ class TestWebinarScenario(unittest.TestCase):
     if index == 500:
       return ""
     
-    print("mustafa get_publishStreamId index: "+str(index))
+    print("get_publishStreamId index: "+str(index))
     conference = self.get_conference()
     print("conference: "+str(conference))
 

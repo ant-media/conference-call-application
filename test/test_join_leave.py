@@ -278,7 +278,6 @@ class TestJoinLeave(unittest.TestCase):
 
     self.set_and_test_track_limit(2)
 
-
     others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner', retries=10, wait_time=3)
     assert(others_tile.is_displayed())
 
