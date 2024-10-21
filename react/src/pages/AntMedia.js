@@ -619,6 +619,11 @@ function AntMedia(props) {
         } 
         else if (info === "updated_stats") 
         {
+            // we are testing the publish speed so we will ignore the play stats which are coming from the room's broadcast object
+            if (obj.streamId === roomName) {
+                return;
+            }
+
             if (speedTestCounter.current === 0) {
                 statsList.current = []; // reset stats list if it is the first time
             }
@@ -1446,6 +1451,11 @@ function AntMedia(props) {
     }
 
     function checkConnectionQuality(obj) {
+        // we are testing the publish connection quality so we will ignore the play stats which are coming from the room's broadcast object
+        if (obj.streamId === roomName) {
+            return;
+        }
+
         let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
         let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
         //let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
