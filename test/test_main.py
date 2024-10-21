@@ -11,7 +11,7 @@ os.environ['SERVER_URL'] = sys.argv[1]
 os.environ['AMS_USER'] = sys.argv[2]
 os.environ['AMS_PASSWORD'] = sys.argv[3]
 os.environ['WAR_FILE'] = sys.argv[4]
-test_webinar = sys.argv[5]
+use_test_webinar = sys.argv[5].lower() == 'true'
 os.environ['TEST_APP_NAME'] = "TestAPP"+str(random.randint(100, 999))
 
 suite = unittest.TestSuite()
@@ -19,7 +19,7 @@ suite.addTest(TestDeployment('test_install_app'))
 
 suite2 = None
 
-if test_webinar:
+if use_test_webinar:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_webinar)
 else:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
