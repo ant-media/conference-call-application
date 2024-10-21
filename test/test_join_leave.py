@@ -164,8 +164,41 @@ class TestJoinLeave(unittest.TestCase):
     layout_dialog_close_button = self.chrome.get_element_with_retry(By.ID, "layout-dialog-close-button")
     self.chrome.click_element(layout_dialog_close_button)
 
+  def get_reactions_button(self):
+    reactions_button = self.chrome.get_element_with_retry(By.ID, "reactions-button")
+    return reactions_button
+  
+  def get_emoji_button(self, emoji):
+    # Find the container for the meeting reactions
+    meeting_reactions_popup = self.chrome.get_element_with_retry(By.ID, "meeting-reactions")
+
+    # Find the "Love It" emoji button inside the container
+    love_it_button = meeting_reactions_popup.find_element(By.XPATH, ".//div[contains(text(), '{emoji}')]")
+    
+    return love_it_button
+  
+  def get_latest_floating_emoji(self, emoji):
+    # Locate all elements with the class 'float-container'
+    float_containers = self.chrome.get_elements_with_retry(By.CLASS_NAME, "float-container")
+    
+    # Check if there are any containers found
+    if not float_containers:
+        return None
+    
+    # Get the latest (last) float-container
+    latest_container = float_containers[-1]
+    
+    # Find the div containing the specified emoji within the latest float-container
+    emoji_xpath = f".//div[contains(text(), '{emoji}')]"
+    emoji_div = latest_container.find_element(By.XPATH, emoji_xpath)
+    
+    # Get the emoji text (before the line break)
+    found_emoji = emoji_div.text.split("\n")[0]
+
+    return found_emoji
+
   def get_start_recording_button(self):
-    settings_button = self.chrome.get_element(By.ID, "settings-button")
+    settings_button = self.chrome.get_element_with_retry(By.ID, "settings-button")
     self.chrome.click_element(settings_button)
 
     start_recording_button = self.chrome.get_element(By.ID, "start-recording-button")
@@ -648,6 +681,41 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
+  def test_reactions(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+
+    assert(handle_2 == self.chrome.get_current_tab_id())
+
+    self.assertLocalVideoAvailable()
+
+    wait = self.chrome.get_wait()
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    self.chrome.switch_to_tab(handle_1)
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    reactions_button = self.get_reactions_button()
+    assert(reactions_button.is_displayed())
+
+    self.chrome.click_element(reactions_button)
+
+    love_it_emoji_button = self.get_emoji_button('💖')
+    assert(love_it_emoji_button.is_displayed())
+
+    self.chrome.click_element(love_it_emoji_button)
+
+    self.chrome.switch_to_tab(handle_2)
+
+    love_it_emoji_button = self.get_latest_floating_emoji('💖')
+    assert(love_it_emoji_button.is_displayed())
+
+    time.sleep(5)
+
+    self.chrome.close_all()
 
 
 
