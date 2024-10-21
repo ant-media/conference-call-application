@@ -619,10 +619,6 @@ function AntMedia(props) {
         } 
         else if (info === "updated_stats") 
         {
-            // we are testing the publish speed so we will ignore the play stats which are coming from the room's broadcast object
-            if (obj.streamId === roomName) {
-                return;
-            }
 
             if (speedTestCounter.current === 0) {
                 statsList.current = []; // reset stats list if it is the first time
