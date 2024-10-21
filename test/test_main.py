@@ -17,6 +17,8 @@ os.environ['TEST_APP_NAME'] = "TestAPP"+str(random.randint(100, 999))
 suite = unittest.TestSuite()
 suite.addTest(TestDeployment('test_install_app'))
 
+suite2 = None
+
 if test_webinar:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_webinar)
 else:
