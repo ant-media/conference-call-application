@@ -1449,7 +1449,7 @@ function AntMedia(props) {
     function checkConnectionQuality(obj) {
         // we are testing the publish connection quality so we will ignore the play stats which are coming from the room's broadcast object
         if (obj.streamId === roomName) {
-            return;
+            return -1;
         }
 
         let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);

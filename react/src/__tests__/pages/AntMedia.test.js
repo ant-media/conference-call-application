@@ -1935,16 +1935,12 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    const obj = {streamId: 'room1'};
-    const roomName = 'room1';
+    const obj = {streamId: 'room'};
 
     await act(async () => {
-      currentConference.checkConnectionQuality(obj);
+      const result = currentConference.checkConnectionQuality(obj);
+      expect(result).toBe(-1);
     });
-
-
-    //const result = checkConnectionQuality(obj);
-    //expect(result).toBeUndefined();
   });
 
   it('does not return early if streamId does not match roomName', async () => {
@@ -1960,10 +1956,10 @@ describe('AntMedia Component', () => {
     });
 
     const obj = {streamId: 'stream2'};
-    const roomName = 'room1';
 
     await act(async () => {
-      currentConference.checkConnectionQuality(obj);
+      const result = currentConference.checkConnectionQuality(obj);
+      expect(result).toBeUndefined();
     });
   });
 
