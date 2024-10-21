@@ -1923,4 +1923,44 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('returns early if streamId matches roomName', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const obj = {streamId: 'room'};
+
+    await act(async () => {
+      const result = currentConference.checkConnectionQuality(obj);
+      expect(result).toBe(-1);
+    });
+  });
+
+  it('does not return early if streamId does not match roomName', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const obj = {streamId: 'stream2'};
+
+    await act(async () => {
+      const result = currentConference.checkConnectionQuality(obj);
+      expect(result).toBeUndefined();
+    });
+  });
+
 });
