@@ -998,9 +998,6 @@ function AntMedia(props) {
         setIsReconnectionInProgress(true);
         reconnecting = true;
 
-    publishReconnected = isPlayOnly;
-    playReconnected = false;
-
         displayWarning("Connection lost. Trying reconnect...");
     }
 
@@ -1195,8 +1192,8 @@ function AntMedia(props) {
 
 
             reconnecting = false;
-            publishReconnected = false;
-            playReconnected = false;
+            publishReconnected = true;
+            playReconnected = true;
             console.log("++ createWebRTCAdaptor");
             //here we check if audio or video device available and wait result
             //according to the result we modify mediaConstraints
