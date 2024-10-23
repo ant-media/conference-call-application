@@ -1829,7 +1829,6 @@ function AntMedia(props) {
             let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
             if (iceState !== null && iceState !== "failed" && iceState !== "disconnected") {
                 if (message === "debugme") {
-                    testVTAList();
                     webRTCAdaptor?.getDebugInfo(publishStreamId);
                     return;
                 } else if (message === "clearme") {
