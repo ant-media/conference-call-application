@@ -92,7 +92,9 @@ jobs:
         NODE_OPTIONS: '--max-old-space-size=4096'
       run: |
         cd react
-        sed -i "s#//placeholder for peerconnection_config#peerconnection_config:{\"iceServers\":[{\"urls\":\"turn:${{ secrets.STAGING_TURN_URL }}\",\"username\":\"${{ secrets.STAGING_TURN_USERNAME }}\",\"credential\":\"${{ secrets.STAGING_TURN_PASSWORD }}\"}],\"sdpSemantics\":\"unified-plan\"},#" src/pages/AntMedia.js
+        sed -i "s#^REACT_APP_TURN_SERVER_URL=.*#REACT_APP_TURN_SERVER_URL=\"turn:${{ secrets.STAGING_TURN_URL }}\"#" .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_USERNAME=.*#REACT_APP_TURN_SERVER_USERNAME=\"${{ secrets.STAGING_TURN_USERNAME }}\"#" .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_CREDENTIAL=.*#REACT_APP_TURN_SERVER_CREDENTIAL=\"${{ secrets.STAGING_TURN_PASSWORD }}\"#" .env.production
         npm install
         npm run build
         cd ..
