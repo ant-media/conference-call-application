@@ -1079,7 +1079,9 @@ function AntMedia(props) {
         };
         allParticipantsTemp["streamId_" + suffix] = broadcastObject;
 
-        setAllParticipants(allParticipantsTemp);
+        if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+          setAllParticipants(allParticipantsTemp);
+        }
 
         if (Object.keys(allParticipantsTemp).length <= globals.maxVideoTrackCount) {
             let newVideoTrackAssignment = {
@@ -1087,7 +1089,9 @@ function AntMedia(props) {
             };
             let temp = videoTrackAssignments;
             temp.push(newVideoTrackAssignment);
-            setVideoTrackAssignments(temp);
+          if (!_.isEqual(temp, videoTrackAssignments)) {
+                setVideoTrackAssignments(temp);
+            }
     }
 
         console.log("fake participant added");
@@ -1100,11 +1104,15 @@ function AntMedia(props) {
         setFakeParticipantCounter(tempCount);
 
         let tempVideoTrackAssignments = videoTrackAssignments.filter(el => el.streamId !== "streamId_" + suffix)
-        setVideoTrackAssignments(tempVideoTrackAssignments);
+        if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+            setVideoTrackAssignments(tempVideoTrackAssignments);
+        }
 
         let allParticipantsTemp = allParticipants;
         delete allParticipantsTemp["streamId_" + suffix];
-        setAllParticipants(allParticipantsTemp);
+        if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+            setAllParticipants(allParticipantsTemp);
+        }
 
         console.log("fake participant removed");
         setParticipantUpdated(!participantUpdated);
@@ -1162,8 +1170,10 @@ function AntMedia(props) {
         broadcastObject.isScreenShared = metaData.isScreenShared;
         let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
         allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject; //TODO: optimize
-        setAllParticipants(allParticipantsTemp);
-        setParticipantUpdated(!participantUpdated);
+        if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+            setAllParticipants(allParticipantsTemp);
+            setParticipantUpdated(!participantUpdated);
+        }
     }
 
     // TODO: instead of filterBroadcastObject, we can implement eqivalent function instead of _.isEqual
@@ -1317,8 +1327,10 @@ function AntMedia(props) {
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
             });
-            setAllParticipants(allParticipantsTemp);
-            setParticipantUpdated(!participantUpdated);
+            if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+                setAllParticipants(allParticipantsTemp);
+                setParticipantUpdated(!participantUpdated);
+            }
         } else if (info === "broadcastObject") {
             if (obj.broadcast === undefined) {
                 return;
@@ -1985,16 +1997,21 @@ function AntMedia(props) {
                 let tempVideoTrackAssignmentsNew = [];
 
                 tempVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
-                    let assignment = videoTrackAssignmentList.find(videoTrackAssignment =>
-                        tempVideoTrackAssignment.videoLabel === videoTrackAssignment.videoLabel
-                    );
+                    let assignment;
+
+                    videoTrackAssignmentList.forEach(videoTrackAssignment => {
+                        if (tempVideoTrackAssignment.videoLabel === videoTrackAssignment.videoLabel) {
+                            assignment = videoTrackAssignment;
+                        }
+                    });
 
                     if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
                         if (isVideoLabelExsist(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)) {
-                            console.error("Video label already exists: " + tempVideoTrackAssignment.videoLabel);
+                            console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
                         } else {
                             tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
                         }
+
                     } else {
                         console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
                     }
@@ -2002,21 +2019,23 @@ function AntMedia(props) {
 
                 tempVideoTrackAssignments = tempVideoTrackAssignmentsNew;
 
-                // Add and/or update participants according to current assignments
-                videoTrackAssignmentList.forEach(vta => {
-                    let existingAssignment = tempVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
-                    if (existingAssignment) {
-                        existingAssignment.streamId = vta.trackId;
-                    } else {
-                        tempVideoTrackAssignments.push({ "videoLabel": vta.videoLabel, "track": {}, "streamId": vta.trackId });
-                    }
+                //add and/or update participants according to current assignments
+                videoTrackAssignmentList.forEach((vta) => {
+                    tempVideoTrackAssignments.forEach((oldVTA) => {
+                        if (oldVTA.videoLabel === vta.videoLabel) {
+                            oldVTA.streamId = vta.trackId;
+                        }
+                    });
                 });
 
                 checkScreenSharingStatus();
 
-                setVideoTrackAssignments(tempVideoTrackAssignments);
-                requestSyncAdministrativeFields();
-                setParticipantUpdated(!participantUpdated);
+                // check if there is any difference between old and new assignments
+                if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+                        setVideoTrackAssignments(tempVideoTrackAssignments);
+                        requestSyncAdministrativeFields();
+                        setParticipantUpdated(!participantUpdated);
+                }
 
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
                 // xxx to be able to reduce render
@@ -2237,14 +2256,18 @@ function AntMedia(props) {
         if (!isPlayOnly) {
             tempVideoTrackAssignments.push(newVideoTrackAssignment);
         }
-        setVideoTrackAssignments(tempVideoTrackAssignments);
+        if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+            setVideoTrackAssignments(tempVideoTrackAssignments);
+        }
 
         let allParticipantsTemp = {};
         if (!isPlayOnly) {
             allParticipantsTemp[publishStreamId] = {name: "You"};
         }
-        console.log("removeAllRemoteParticipants setAllParticipants:"+JSON.stringify(allParticipantsTemp));
-        setAllParticipants(allParticipantsTemp);
+        if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+            console.log("removeAllRemoteParticipants setAllParticipants:"+JSON.stringify(allParticipantsTemp));
+            setAllParticipants(allParticipantsTemp);
+        }
         setParticipantUpdated(!participantUpdated);
     }
 
@@ -2260,17 +2283,21 @@ function AntMedia(props) {
         };
         let tempVideoTrackAssignments = videoTrackAssignments;
         tempVideoTrackAssignments.push(newVideoTrackAssignment);
-        setVideoTrackAssignments(tempVideoTrackAssignments);
-        setParticipantUpdated(!participantUpdated);
+        if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+            setVideoTrackAssignments(tempVideoTrackAssignments);
+            setParticipantUpdated(!participantUpdated);
+        }
 
         let allParticipantsTemp = allParticipants;
         allParticipantsTemp[publishStreamId] = {
             streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false
         };
 
-        console.log("addMeAsParticipant setAllParticipants:"+JSON.stringify(allParticipantsTemp));
-        setAllParticipants(allParticipantsTemp);
-        setParticipantUpdated(!participantUpdated);
+        if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+            console.log("addMeAsParticipant setAllParticipants:"+JSON.stringify(allParticipantsTemp));
+            setAllParticipants(allParticipantsTemp);
+            setParticipantUpdated(!participantUpdated);
+        }
     }
 
 
@@ -2312,11 +2339,13 @@ function AntMedia(props) {
             } else {
                 tempVideoTrackAssignments.push(newVideoTrackAssignment);
             }
-            setVideoTrackAssignments(tempVideoTrackAssignments);
-            setParticipantUpdated(!participantUpdated);
-            console.log("document.hidden",document.hidden);
-            if (document.hidden) {
-                playJoinRoomSound();
+            if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
+                setVideoTrackAssignments(tempVideoTrackAssignments);
+                setParticipantUpdated(!participantUpdated);
+                console.log("document.hidden",document.hidden);
+                if (document.hidden) {
+                    playJoinRoomSound();
+                }
             }
         }
     }
