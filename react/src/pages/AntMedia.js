@@ -1986,27 +1986,35 @@ function AntMedia(props) {
                     updateVideoSendResolution(false);
                 }
             } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
-                let videoTrackAssignmentList = notificationEvent.payload;
 
-                console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(videoTrackAssignmentList));
+                // There are 2 operations here:
+                // 1. VTA available in both sides -> Update
+                // 2. VTA available in the current state but not in the new list -> Remove
+                // We don't need to add new VTA because it will be added by the handlePlayVideo function
 
-                videoTrackAssignmentList = videoTrackAssignmentList.filter((vta) => vta.trackId !== "");
+                let receivedVideoTrackAssignments = notificationEvent.payload;
 
-                let tempVideoTrackAssignments = [...videoTrackAssignments];
+                console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(receivedVideoTrackAssignments));
+
+                // Remove empty trackId assignments
+                receivedVideoTrackAssignments = receivedVideoTrackAssignments.filter((vta) => vta.trackId !== "");
+
+                let currentVideoTrackAssignments = [...videoTrackAssignments];
 
                 let tempVideoTrackAssignmentsNew = [];
 
-                tempVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
+                // This function checks the case 1 and case 2
+                currentVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
                     let assignment;
 
-                    videoTrackAssignmentList.forEach(videoTrackAssignment => {
+                    receivedVideoTrackAssignments.forEach(videoTrackAssignment => {
                         if (tempVideoTrackAssignment.videoLabel === videoTrackAssignment.videoLabel) {
                             assignment = videoTrackAssignment;
                         }
                     });
 
                     if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
-                        if (isVideoLabelExsist(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)) {
+                        if (isVideoLabelExists(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)) {
                             console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
                         } else {
                             tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
@@ -2017,23 +2025,21 @@ function AntMedia(props) {
                     }
                 });
 
-                tempVideoTrackAssignments = tempVideoTrackAssignmentsNew;
+                currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
 
-                // Add and/or update participants according to current assignments
-                videoTrackAssignmentList.forEach(vta => {
-                    let existingAssignment = tempVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
+                // update participants according to current assignments
+                receivedVideoTrackAssignments.forEach(vta => {
+                    let existingAssignment = currentVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
                     if (existingAssignment) {
                         existingAssignment.streamId = vta.trackId;
-                    } else {
-                        tempVideoTrackAssignments.push({ "videoLabel": vta.videoLabel, "track": {}, "streamId": vta.trackId });
                     }
                 });
 
                 checkScreenSharingStatus();
 
                 // check if there is any difference between old and new assignments
-                if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
-                        setVideoTrackAssignments(tempVideoTrackAssignments);
+                if (!_.isEqual(currentVideoTrackAssignments, videoTrackAssignments)) {
+                        setVideoTrackAssignments(currentVideoTrackAssignments);
                         requestSyncAdministrativeFields();
                         setParticipantUpdated(!participantUpdated);
                 }
@@ -2334,14 +2340,10 @@ function AntMedia(props) {
                 videoLabel: index, track: obj.track, streamId: obj.streamId
             };
 
-            let tempVideoTrackAssignments = [...videoTrackAssignments];
-            if (isVideoLabelExsist(newVideoTrackAssignment.videoLabel, tempVideoTrackAssignments)) {
+            if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
-                tempVideoTrackAssignments.push(newVideoTrackAssignment);
-            }
-            if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
-                setVideoTrackAssignments(tempVideoTrackAssignments);
+                setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
                 setParticipantUpdated(!participantUpdated);
                 console.log("document.hidden",document.hidden);
                 if (document.hidden) {
@@ -2351,7 +2353,7 @@ function AntMedia(props) {
         }
     }
 
-    function isVideoLabelExsist(videoLabel, assignments) {
+    function isVideoLabelExists(videoLabel, assignments) {
         let isExist = false;
         assignments.forEach((vta) => {
             if (vta.videoLabel === videoLabel) {
