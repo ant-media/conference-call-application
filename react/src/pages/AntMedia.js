@@ -1013,6 +1013,12 @@ function AntMedia(props) {
             handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
         }
 
+        // if the user is in playOnly mode, we will set the subscriberId as the streamName
+        // so we can get the player list from the server
+        if (isPlayOnly) {
+            subscriberId = streamName;
+        }
+
         webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode, '{}', role);
     }
 
