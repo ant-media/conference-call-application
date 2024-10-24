@@ -1068,7 +1068,7 @@ function AntMedia(props) {
         let tempCount = fakeParticipantCounter + 1;
         setFakeParticipantCounter(tempCount);
 
-        let allParticipantsTemp = allParticipants;
+        let allParticipantsTemp = {...allParticipants};
         let broadcastObject = {
             name: "name_" + suffix,
             streamId: "streamId_" + suffix,
@@ -1087,7 +1087,7 @@ function AntMedia(props) {
             let newVideoTrackAssignment = {
                 videoLabel: "label_" + suffix, track: null, streamId: "streamId_" + suffix,
             };
-            let temp = videoTrackAssignments;
+            let temp = [...videoTrackAssignments];
             temp.push(newVideoTrackAssignment);
           if (!_.isEqual(temp, videoTrackAssignments)) {
                 setVideoTrackAssignments(temp);
@@ -1108,7 +1108,7 @@ function AntMedia(props) {
             setVideoTrackAssignments(tempVideoTrackAssignments);
         }
 
-        let allParticipantsTemp = allParticipants;
+        let allParticipantsTemp = {...allParticipants};
         delete allParticipantsTemp["streamId_" + suffix];
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
             setAllParticipants(allParticipantsTemp);
@@ -1130,7 +1130,7 @@ function AntMedia(props) {
         let participantIds = broadcastObject.subTrackStreamIds;
 
         //find and remove not available tracks
-        const temp = allParticipants;
+        const temp = {...allParticipants};
         let currentTracks = Object.keys(temp);
         currentTracks.forEach(trackId => {
             if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
@@ -1165,7 +1165,7 @@ function AntMedia(props) {
 
         let metaData = JSON.parse(broadcastObject.metaData);
 
-        let allParticipantsTemp = allParticipants;
+        let allParticipantsTemp = {...allParticipants};
 
         broadcastObject.isScreenShared = metaData.isScreenShared;
         let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
@@ -1992,7 +1992,7 @@ function AntMedia(props) {
 
                 videoTrackAssignmentList = videoTrackAssignmentList.filter((vta) => vta.trackId !== "");
 
-                let tempVideoTrackAssignments = videoTrackAssignments;
+                let tempVideoTrackAssignments = [...videoTrackAssignments];
 
                 let tempVideoTrackAssignmentsNew = [];
 
@@ -2019,13 +2019,14 @@ function AntMedia(props) {
 
                 tempVideoTrackAssignments = tempVideoTrackAssignmentsNew;
 
-                //add and/or update participants according to current assignments
-                videoTrackAssignmentList.forEach((vta) => {
-                    tempVideoTrackAssignments.forEach((oldVTA) => {
-                        if (oldVTA.videoLabel === vta.videoLabel) {
-                            oldVTA.streamId = vta.trackId;
-                        }
-                    });
+                // Add and/or update participants according to current assignments
+                videoTrackAssignmentList.forEach(vta => {
+                    let existingAssignment = tempVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
+                    if (existingAssignment) {
+                        existingAssignment.streamId = vta.trackId;
+                    } else {
+                        tempVideoTrackAssignments.push({ "videoLabel": vta.videoLabel, "track": {}, "streamId": vta.trackId });
+                    }
                 });
 
                 checkScreenSharingStatus();
@@ -2281,14 +2282,14 @@ function AntMedia(props) {
         let newVideoTrackAssignment = {
             videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true
         };
-        let tempVideoTrackAssignments = videoTrackAssignments;
+        let tempVideoTrackAssignments = [...videoTrackAssignments];
         tempVideoTrackAssignments.push(newVideoTrackAssignment);
         if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
             setVideoTrackAssignments(tempVideoTrackAssignments);
             setParticipantUpdated(!participantUpdated);
         }
 
-        let allParticipantsTemp = allParticipants;
+        let allParticipantsTemp = {...allParticipants};
         allParticipantsTemp[publishStreamId] = {
             streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false
         };
