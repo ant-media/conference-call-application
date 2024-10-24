@@ -1426,10 +1426,10 @@ function AntMedia(props) {
                 console.log("Reconnection attempt for player with no stream existmfor play only mode.")
             } else {
                 playReconnected = false;
+                //reset UI releated states
+                removeAllRemoteParticipants();
+                
                 if (!reconnecting) {
-                    //reset UI releated states
-                    removeAllRemoteParticipants();
-
                     reconnectionInProgress();
                 }
             }
