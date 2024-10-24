@@ -992,9 +992,6 @@ function AntMedia(props) {
     }
 
     function reconnectionInProgress() {
-        //reset UI releated states
-        removeAllRemoteParticipants();
-
         setIsReconnectionInProgress(true);
         reconnecting = true;
 
@@ -1430,6 +1427,9 @@ function AntMedia(props) {
             } else {
                 playReconnected = false;
                 if (!reconnecting) {
+                    //reset UI releated states
+                    removeAllRemoteParticipants();
+
                     reconnectionInProgress();
                 }
             }
