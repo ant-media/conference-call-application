@@ -203,6 +203,7 @@ var scrollThreshold = -Infinity;
 var scroll_down = true;
 var last_warning_time = null;
 var newTrackQueue = [];
+var scalingTiles = false;
 
 var videoQualityConstraints = {
     video: {
@@ -2324,10 +2325,16 @@ function AntMedia(props) {
     }
 
     function handleNewTrackQ() {
+        if(scalingTiles) {
+            return;
+        }
+        scalingTiles = true;
         while (newTrackQueue.length > 0) {
             let item = newTrackQueue.shift(); // Removes the first item from the list
             handlePlayVideo(item);
           }
+        
+          scalingTiles = false;
     }
 
     function handlePlayVideo(obj) {
