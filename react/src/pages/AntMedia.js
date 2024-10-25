@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
-import _ from "lodash";
+import _, { forEach } from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
 import {useSnackbar} from "notistack";
@@ -202,6 +202,7 @@ var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
 var scroll_down = true;
 var last_warning_time = null;
+var newTrackQueue = [];
 
 var videoQualityConstraints = {
     video: {
@@ -1343,7 +1344,8 @@ function AntMedia(props) {
 
             console.log(obj.broadcast);
         } else if (info === "newStreamAvailable") {
-            handlePlayVideo(obj);
+            newTrackQueue.push(obj);
+            handleNewTrackQ();
             console.log("newStreamAvailable:", obj);
         } else if (info === "publish_started") {
             setIsPublished(true);
@@ -2319,6 +2321,13 @@ function AntMedia(props) {
         }
 
         webRTCAdaptor?.publish(publishStreamId, token, subscriberId, subscriberCode, currentStreamName, roomName, JSON.stringify(userStatusMetadata), role);
+    }
+
+    function handleNewTrackQ() {
+        while (newTrackQueue.length > 0) {
+            let item = newTrackQueue.shift(); // Removes the first item from the list
+            handlePlayVideo(item);
+          }
     }
 
     function handlePlayVideo(obj) {
