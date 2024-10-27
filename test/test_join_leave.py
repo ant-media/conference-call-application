@@ -245,6 +245,7 @@ class TestJoinLeave(unittest.TestCase):
     for message in last_two_messages:
       print("message:" + message.get_attribute("innerHTML"))
     print("<<<<<<<\n")
+    
 
 
   def test_others_tile(self):
