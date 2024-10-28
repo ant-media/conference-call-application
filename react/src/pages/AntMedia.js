@@ -792,12 +792,15 @@ function AntMedia(props) {
 
         let oldTotalPacketsLost = oldVideoPacketsLost + oldAudioPacketsLost;
 
+        let packageReceived = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).packetsReceived + stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).packetsReceived;
+        let oldPackageReceived = oldStats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).packetsReceived + oldStats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).packetsReceived;
+
         // Calculate the packet loss percentage
         let packageLostPercentage = 0;
         console.log("publishStats:", publishStats);
         if (publishStats !== null) {
             let deltaPackageLost = oldTotalPacketsLost - totalPacketsLost;
-            let deltaPackageReceived = oldStats.packetsReceived - stats.packetsReceived;
+            let deltaPackageReceived = oldPackageReceived - packageReceived;
 
             if (deltaPackageLost > 0) {
                 packageLostPercentage = ((deltaPackageLost / parseInt(deltaPackageReceived)) * 100).toPrecision(3);
