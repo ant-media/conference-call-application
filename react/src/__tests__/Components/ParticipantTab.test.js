@@ -22,6 +22,7 @@ const contextValue = {
       videoLabel: 'test-video-label',
     },
   },
+  playOnlyParticipants: [],
   publishStreamId: 'test-stream-id',
   pinVideo: jest.fn(),
   makeParticipantPresenter: jest.fn(),

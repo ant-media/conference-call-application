@@ -47,6 +47,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       init : jest.fn(),
       publish : jest.fn().mockImplementation(() => console.log('publishhhhhh')),
       play : jest.fn(),
+      joinRoom : jest.fn(),
       unpublish : jest.fn(),
       leaveRoom : jest.fn(),
       startPublishing : jest.fn(),
