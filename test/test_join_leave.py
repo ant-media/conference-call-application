@@ -447,12 +447,7 @@ class TestJoinLeave(unittest.TestCase):
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(25, 5)
 
-    #process = self.create_participants_with_test_tool("participant", room, N-1)
-    self.join_room_in_new_tab("participant0", room)     
-    self.join_room_in_new_tab("participant1", room)     
-    self.join_room_in_new_tab("participant2", room)     
-    self.join_room_in_new_tab("participant3", room)     
-
+    process = self.create_participants_with_test_tool("participant", room, N-1)
 
     self.join_room_in_new_tab("participant"+str(N-1), room)     
 
@@ -497,7 +492,7 @@ class TestJoinLeave(unittest.TestCase):
     print("screen shot 3 end: 6")
 
 
-    #self.kill_participants_with_test_tool(process)
+    self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
 
   def test_get_debugme_info(self):
