@@ -22,6 +22,7 @@ const PinBtn = styled(Button)(({ theme }) => ({
 
 function PublisherRequestTab(props) {
     const conference = useContext(ConferenceContext);
+    const theme = useTheme();
 
     const getPublisherRequestItem = (videoId) => {
         return (
@@ -46,7 +47,7 @@ function PublisherRequestTab(props) {
 
                     <PinBtn
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.rejectSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {conference?.rejectBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
                     >
                         Deny
                     </PinBtn>

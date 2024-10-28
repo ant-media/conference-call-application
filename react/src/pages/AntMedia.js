@@ -1839,6 +1839,43 @@ function AntMedia(props) {
         }
     }
 
+    const handlePublisherRequest = React.useCallback(() =>{
+        if (!isPlayOnly) {
+            return;
+        }
+        handleSendNotificationEvent("REQUEST_BECOME_PUBLISHER", roomName, {
+            senderStreamId: publishStreamId, senderStreamName: streamName
+        });
+    }, [handleSendNotificationEvent, publishStreamId, streamName, isPlayOnly]);
+
+    function makeListenerAgain(streamId) {
+        handleSendNotificationEvent("MAKE_LISTENER_AGAIN", roomName, {
+            senderStreamId: streamId
+        });
+        updateParticipantRole(streamId, WebinarRoles.Listener);
+    }
+
+    function handleStartBecomePublisher() {
+        if (isPlayOnly) {
+            setIsPlayOnly(false);
+            setWaitingOrMeetingRoom("waiting");
+            joinRoom(roomName, publishStreamId);
+        }
+    }
+
+    function approveBecomeSpeakerRequest(streamId) {
+        handleSendNotificationEvent("APPROVE_BECOME_PUBLISHER", roomName, {
+            senderStreamId: streamId
+        });
+        updateParticipantRole(streamId, WebinarRoles.TempListener);
+    }
+
+    function rejectBecomeSpeakerRequest(streamId) {
+        handleSendNotificationEvent("REJECT_BECOME_PUBLISHER", roomName, {
+            senderStreamId: streamId
+        });
+    }
+
     function handleSendMessage(message) {
         if (publishStreamId) {
             let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
@@ -2088,6 +2125,53 @@ function AntMedia(props) {
                     webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
                 }
                 setParticipantUpdated(!participantUpdated);
+            } else if (eventType === "REQUEST_BECOME_PUBLISHER") {
+                if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
+                    setRequestSpeakerList((oldRequestSpeakerList) => {
+                        return [...oldRequestSpeakerList, notificationEvent];
+                    });
+                    enqueueSnackbar({
+                        message: streamId + t(" is requesting to become a speaker"),
+                        variant: 'info',
+                        icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
+                        anchorOrigin: {
+                            vertical: "top",
+                            horizontal: "right",
+                        },
+                    }, {
+                        autoHideDuration: 1000,
+                    });
+                }
+            } else if (eventType === "MAKE_LISTENER_AGAIN") {
+                makeListenerAgain(notificationEvent.streamId);
+            } else if (eventType === "APPROVE_BECOME_PUBLISHER") {
+                if (role === WebinarRoles.Listener && notificationEvent.streamId === publishStreamId) {
+                    enqueueSnackbar({
+                        message: t("Your request to become a speaker is approved"),
+                        variant: 'info',
+                        icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
+                        anchorOrigin: {
+                            vertical: "top",
+                            horizontal: "right",
+                        },
+                    }, {
+                        autoHideDuration: 1000,
+                    });
+                }
+            } else if (eventType === "REJECT_BECOME_PUBLISHER") {
+                if (role === WebinarRoles.Listener && notificationEvent.streamId === publishStreamId) {
+                    enqueueSnackbar({
+                        message: t("Your request to become a speaker is rejected"),
+                        variant: 'info',
+                        icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
+                        anchorOrigin: {
+                            vertical: "top",
+                            horizontal: "right",
+                        },
+                    }, {
+                        autoHideDuration: 1000,
+                    });
+                }
             }
         }
     }
@@ -2785,7 +2869,12 @@ function AntMedia(props) {
                         startSpeedTest,
                         stopSpeedTest,
                         statsList,
-                        getTrackStats
+                        getTrackStats,
+                        handlePublisherRequest,
+                        handleStartBecomePublisher,
+                        approveBecomeSpeakerRequest,
+                        rejectBecomeSpeakerRequest,
+                        makeListenerAgain
                     }}
                 >
                     {props.children}

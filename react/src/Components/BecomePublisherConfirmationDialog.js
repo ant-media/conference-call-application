@@ -21,7 +21,7 @@ export default function BecomePublisherConfirmationDialog() {
   const approveBecomePublisher = () => {
     conference?.setBecomePublisherConfirmationDialogOpen(false);
     conference?.handleStartBecomePublisher();
-          }
+  }
 
   return (
     <Dialog

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Drawer from '@mui/material/Drawer';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import {  Grid,  Tabs, Tab } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseDrawerButton from './DrawerButton';
@@ -13,7 +13,7 @@ const AntDrawer = styled(Drawer)(({ theme }) => (getAntDrawerStyle(theme)));
 const PublisherRequestListGrid = styled(Grid)(({ theme }) => ({
     position: 'relative',
     padding: 16,
-    background: theme.palette.themeColor70,
+    background: theme.palette.themeColor[70],
     borderRadius: 10,
 }));
 const TabGrid = styled(Grid)(({ theme }) => ({
@@ -27,6 +27,7 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 const PublisherRequestListDrawer = React.memo(props => {
     const [value, setValue] = React.useState(0);
     const conference = React.useContext(ConferenceContext);
+    const theme = useTheme();
 
     const { t } = useTranslation();
 
