@@ -17,6 +17,16 @@ jobs:
       with:
         node-version: '16.x'
         registry-url: 'https://registry.npmjs.org'
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Create kubeconfig file
+      run: |
+        mkdir $HOME/.kube
+        echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
         
     - name: Run Unit Test
       run: |
@@ -82,7 +92,9 @@ jobs:
         NODE_OPTIONS: '--max-old-space-size=4096'
       run: |
         cd react
-        sed -i "s#//placeholder for peerconnection_config#peerconnection_config:{\"iceServers\":[{\"urls\":\"turn:${{ secrets.STAGING_TURN_URL }}\",\"username\":\"${{ secrets.STAGING_TURN_USERNAME }}\",\"credential\":\"${{ secrets.STAGING_TURN_PASSWORD }}\"}],\"sdpSemantics\":\"unified-plan\"},#" src/pages/AntMedia.js
+        sed -i "s#^REACT_APP_TURN_SERVER_URL=.*#REACT_APP_TURN_SERVER_URL=\"turn:${{ secrets.STAGING_TURN_URL }}\"#" .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_USERNAME=.*#REACT_APP_TURN_SERVER_USERNAME=\"${{ secrets.STAGING_TURN_USERNAME }}\"#" .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_CREDENTIAL=.*#REACT_APP_TURN_SERVER_CREDENTIAL=\"${{ secrets.STAGING_TURN_PASSWORD }}\"#" .env.production
         npm install
         npm run build
         cd ..
@@ -123,8 +135,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
-        curl -L "https://drive.usercontent.google.com/download?id=1Gp3LTFvG4arbXWFiGrQTPYw2CUEuKhf5&export=download&confirm=t" -o "webrtc-load-test-tool-2.9.1-SNAPSHOT.zip"
-        unzip webrtc-load-test-tool-2.9.1-SNAPSHOT.zip
+        git clone https://gitlab.com/Ant-Media/webrtc-test.git
+        cd webrtc-test
+        ./redeploy.sh
+        cp target/webrtc-load-test-tool-*.zip ../
+        cd ..
+        unzip webrtc-load-test-tool-*.zip
         mkdir ~/test
         mv webrtc-load-test ~/test
         
@@ -149,19 +165,26 @@ jobs:
         cd test
         python3 test_main.py ${{ secrets.STAGING_SERVER_URL }} ${{ secrets.USER_NAME }} ${{ secrets.PASSWORD }} /tmp/circle-webinar.war true
 
+    - name: Copy Logs From Pods
+      if: always()
+      run: |
+        kubectl -n circle cp $(kubectl -n circle get pods | grep "ant-media-server" | awk '{print $1}'):/usr/local/antmedia/log/ant-media-server.log /tmp/ant-media-server-$(kubectl -n circle get pods -o wide | grep "ant-media-server" | awk '{print $6}').log
+        kubectl -n circle cp $(kubectl -n circle get pods | grep "ant-media-server" | awk '{print $1}'):/usr/local/antmedia/log/antmedia-error.log /tmp/antmedia-error-$(kubectl -n circle get pods -o wide | grep "ant-media-server" | awk '{print $6}').log
+
+
     - name: Upload PNG files as artifacts
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: screenshots
         path: ${{ github.workspace }}/test/**/*.png
 
     - name: Upload log files as artifacts
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: logs
-        path: /tmp/chromedriver.log
+        path: /tmp/*.log
           
     - name: Publish to Maven Central
       if: github.ref == 'refs/heads/main'

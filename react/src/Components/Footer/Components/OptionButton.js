@@ -101,7 +101,7 @@ function OptionButton({footer, ...props}) {
           aria-expanded={open ? "true" : undefined}
           onClick={handleClick}
         >
-          <SvgIcon size={40} name={'settings'} color={theme.palette?.iconColor?.primary}/>
+          <SvgIcon size={40} name={'settings'} color={open ? theme.palette?.darkIconColor?.primary : theme.palette?.iconColor?.primary}/>
         </CustomizedBtn>
       </Tooltip>
       <Menu
