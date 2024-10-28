@@ -88,12 +88,10 @@ class TestJoinLeave(unittest.TestCase):
     
     if result_json is None:
       return []
-    
-    print("all parts:"+str(result_json["allParticipants"]))
-    
+        
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    if expected_value is not None: # and len(vtas) != expected_value:
+    if expected_value is not None and len(vtas) != expected_value:
       print("\n ++++++++++ start trial ++++++++++")
       print("VTA expected: "+str(expected_value) + " but got: "+str(len(vtas)))
       self.call_debugme()
