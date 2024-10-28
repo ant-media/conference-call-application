@@ -24,6 +24,7 @@ import leaveRoomSound from 'static/sounds/leave-sound.mp3';
 import PublisherRequestListDrawer from "../Components/PublisherRequestListDrawer";
 import {WebinarRoles} from "../WebinarRoles";
 import Stack from "@mui/material/Stack";
+import {isMobile, isTablet} from "react-device-detect";
 
 export const ConferenceContext = React.createContext(null);
 
@@ -507,7 +508,7 @@ function AntMedia(props) {
                 setSpeedTestObject(tempSpeedTestObject);
 
             }
-        }, 15000); //it tooks about 20 seconds to finish the test, if it's less 40, it means it's stuck
+        }, 45000); //it tooks about 20 seconds to finish the test, if it's less 40, it means it's stuck
     }
 
     function stopSpeedTest() {
@@ -969,11 +970,15 @@ function AntMedia(props) {
 
         setSelectedDevices(selectedDevices);
 
-        if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
-            webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
-        }
-        if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
-            webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+        try {
+            if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
+                webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+            }
+            if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
+                webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+            }
+        } catch (error) {
+            console.error("Error while switching video and audio sources", error);
         }
     }
 
@@ -1692,7 +1697,18 @@ function AntMedia(props) {
         console.log("***** " + error)
     }
 
+    function checkIfUserIsPinned(streamId) {
+        let broadcastObject = allParticipants[streamId];
+        if (broadcastObject !== null && broadcastObject !== undefined) {
+            return broadcastObject.isPinned;
+        }
+        return false;
+    }
+
     function pinVideo(streamId) {
+        if (isMobile || isTablet) {
+            return;
+        }
         // id is for pinning user.
         let videoLabel;
         let broadcastObject = allParticipants[streamId];
@@ -2128,6 +2144,9 @@ function AntMedia(props) {
 
                     } else {
                         console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
+                        if (isPlayOnly && checkIfUserIsPinned(tempVideoTrackAssignment.streamId)) {
+                            pinVideo(tempVideoTrackAssignment.streamId);
+                        }
                     }
                 });
 
@@ -2247,6 +2266,9 @@ function AntMedia(props) {
         const broadcastObjectsArray = Object.values(allParticipants);
         broadcastObjectsArray.forEach((broadcastObject) => {
             if (broadcastObject.isScreenShared === true && typeof broadcastObject.isPinned === "undefined") {
+                if (isPlayOnly && videoTrackAssignments.filter(vta => vta.streamId === broadcastObject.streamId).length === 0) {
+                    return;
+                }
                 pinVideo(broadcastObject.streamId);
             }
         })
