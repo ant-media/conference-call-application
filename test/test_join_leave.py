@@ -49,8 +49,8 @@ class TestJoinLeave(unittest.TestCase):
     process = subprocess.Popen(
         ["bash", script_path] + parameters,
         cwd=directory,
-        #stdout=subprocess.DEVNULL,
-        #stderr=subprocess.DEVNULL
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
     )
 
     return process
@@ -91,7 +91,7 @@ class TestJoinLeave(unittest.TestCase):
     
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    if expected_value is not None and len(vtas) != expected_value:
+    if expected_value is not None: # and len(vtas) != expected_value:
       print("\n ++++++++++ start trial ++++++++++")
       print("VTA expected: "+str(expected_value) + " but got: "+str(len(vtas)))
       self.call_debugme()
