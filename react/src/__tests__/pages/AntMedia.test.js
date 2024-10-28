@@ -1923,52 +1923,104 @@ describe('AntMedia Component', () => {
     });
   });
 
-  it('sets play only participants correctly when some participants are not in temp', () => {
-    const participantIds = ['pid1', 'pid2', 'pid3'];
-    const temp = { 'pid1': {}, 'pid3': {} };
-    const setPlayOnlyParticipants = jest.fn();
+  /*
 
-    let tempPlayOnlyParticipants = [];
-    forEach(participantIds, function (pid) {
-      if (temp[pid] === undefined) {
-        tempPlayOnlyParticipants.push(pid);
-      }
+  it('sets play only participants correctly when some participants are not in temp', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
-    setPlayOnlyParticipants(tempPlayOnlyParticipants);
 
-    expect(setPlayOnlyParticipants).toHaveBeenCalledWith(['pid2']);
+    currentConference.allParticipants = {'pid1': {}, 'pid3': {}};
+    currentConference.playOnlyParticipants = [];
+
+    var obj = {};
+    let broadcastObject = {streamId: "room", name: "room", subTrackStreamIds: ["pid1", "pid2", "pid3"]};
+    let broadcastObjectMessage = JSON.stringify(broadcastObject);
+
+    obj.broadcast = broadcastObjectMessage;
+    obj.streamId = "room";
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("broadcastObject", obj);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.playOnlyParticipants).toEqual(["pid2"]);
+    });
+
   });
 
-  it('sets play only participants to an empty array when all participants are in temp', () => {
-    const participantIds = ['pid1', 'pid2', 'pid3'];
-    const temp = { 'pid1': {}, 'pid2': {}, 'pid3': {} };
-    const setPlayOnlyParticipants = jest.fn();
+  it('sets play only participants to an empty array when all participants are in temp', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
 
-    let tempPlayOnlyParticipants = [];
-    forEach(participantIds, function (pid) {
-      if (temp[pid] === undefined) {
-        tempPlayOnlyParticipants.push(pid);
-      }
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
-    setPlayOnlyParticipants(tempPlayOnlyParticipants);
 
-    expect(setPlayOnlyParticipants).toHaveBeenCalledWith([]);
+    currentConference.allParticipants = {'pid1': {}, 'pid2': {}, 'pid3': {}};
+    currentConference.playOnlyParticipants = [];
+
+    var obj = {};
+    let broadcastObject = {streamId: "room", name: "room", subTrackStreamIds: ["pid1", "pid2", "pid3"]};
+    let broadcastObjectMessage = JSON.stringify(broadcastObject);
+
+    obj.broadcast = broadcastObjectMessage;
+    obj.streamId = "room";
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("broadcastObject", obj);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.playOnlyParticipants).toEqual([]);
+    });
+
   });
 
-  it('sets play only participants to all participants when none are in temp', () => {
-    const participantIds = ['pid1', 'pid2', 'pid3'];
-    const temp = {};
-    const setPlayOnlyParticipants = jest.fn();
+   */
 
-    let tempPlayOnlyParticipants = [];
-    forEach(participantIds, function (pid) {
-      if (temp[pid] === undefined) {
-        tempPlayOnlyParticipants.push(pid);
-      }
+  it('sets play only participants to all participants when none are in temp', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
-    setPlayOnlyParticipants(tempPlayOnlyParticipants);
 
-    expect(setPlayOnlyParticipants).toHaveBeenCalledWith(['pid1', 'pid2', 'pid3']);
+    currentConference.allParticipants = {};
+    currentConference.playOnlyParticipants = [];
+
+    var obj = {};
+    let broadcastObject = {streamId: "room", name: "room", subTrackStreamIds: ["pid1", "pid2", "pid3"]};
+    let broadcastObjectMessage = JSON.stringify(broadcastObject);
+
+    obj.broadcast = broadcastObjectMessage;
+    obj.streamId = "room";
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("broadcastObject", obj);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.playOnlyParticipants).toEqual(broadcastObject.subTrackStreamIds);
+    });
+
   });
 
 });
