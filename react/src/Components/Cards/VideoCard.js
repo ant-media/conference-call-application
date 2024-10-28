@@ -156,7 +156,7 @@ function VideoCard(props) {
                                 <SvgIcon
                                     size={36}
                                     name={props.pinned ? t("unpin") : t("pin")}
-                                    color={theme.palette?.iconColor?.primary}
+                                    color={theme.palette?.darkIconColor?.primary}
                                 />
                             </Fab>
                         </Tooltip>
@@ -186,7 +186,7 @@ function VideoCard(props) {
                                             <SvgIcon
                                                 size={36}
                                                 name={"camera"}
-                                                color={theme.palette?.iconColor?.primary}
+                                                color={theme.palette?.darkIconColor?.primary}
                                             />
                                         </Fab>
                                     </Tooltip>
@@ -236,7 +236,7 @@ function VideoCard(props) {
                                             <SvgIcon
                                                 size={36}
                                                 name={"microphone"}
-                                                color={theme.palette?.iconColor?.primary}
+                                                color={theme.palette?.darkIconColor?.primary}
                                             />
                                         </Fab>
                                     </Tooltip>
@@ -317,7 +317,7 @@ function VideoCard(props) {
                 <SvgIcon
                   size={36}
                   name={props.pinned ? "unpin" : "pin"}
-                  color={theme.palette?.iconColor?.primary}
+                  color={theme.palette?.darkIconColor?.primary}
                 />
               </Fab>
             </Tooltip>

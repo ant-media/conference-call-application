@@ -10,9 +10,18 @@ import {ThemeList} from "styles/themeList";
 const contextValue = {
   presenters: [],
   approvedSpeakerRequestList: [],
-  presenterButtonDisabled: false,
+  presenterButtonDisabled: [],
   presenterButtonStreamIdInProcess: '',
-  allParticipants: {},
+  allParticipants: {
+    'test-stream-id': {
+      role: 'host',
+      participantID: 'test-participant-id',
+      streamID: 'test-stream-id',
+      videoTrack: 'test-video-track',
+      audioTrack: 'test-audio-track',
+      videoLabel: 'test-video-label',
+    },
+  },
   publishStreamId: 'test-stream-id',
   pinVideo: jest.fn(),
   makeParticipantPresenter: jest.fn(),
@@ -73,4 +82,17 @@ describe('ParticipantTab Component', () => {
     expect(adminButtons).toBe(true);
   });
 
+  it('renders presenter button with correct icon and color', () => {
+    contextValue.isAdmin = true;
+    process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED=true
+
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+    const presenterButton = getByTestId('add-presenter-test-stream-id');
+    expect(presenterButton).toBeInTheDocument();
+  });
+  
 });

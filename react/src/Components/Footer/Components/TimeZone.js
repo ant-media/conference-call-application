@@ -23,10 +23,6 @@ function TimeZone(props) {
   setInterval(checkTime, 1000);
   return (
     <div>
-      {conference?.isRecordPluginActive === true ? (
-            <Typography color="#FF0000" variant="h6">
-              Meeting is being recorded
-            </Typography>) : null}
       {process.env.REACT_APP_TIME_ZONE_LIVE_TEXT_VISIBILITY === "true" && conference?.isBroadcasting === true ? (
           <Typography color="#FF0000" variant="h6">
             Live

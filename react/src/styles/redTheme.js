@@ -13,6 +13,7 @@ export function getRedTheme() {
   const themeColor50 = "#F44336";
   const themeColor60 = "#E53935";
   const themeColor70 = "#D32F2F";
+  const themeColor72 = "#D32F2F";
   const themeColor75 = "#C62828";
   const themeColor80 = "#C62828";
   const themeColor85 = "#B71C1C";
@@ -21,6 +22,7 @@ export function getRedTheme() {
   const chatText = "#FFEBEE";
   const darkGray = "#37474F";
   const iconColor = "#FFFFFF";
+  const darkIconColor = "#000000";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
@@ -335,6 +337,7 @@ export function getRedTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        72: themeColor72,
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
@@ -348,10 +351,20 @@ export function getRedTheme() {
         default: "#FFFFFF",
         secondary: chatText, // dark4
       },
+      participantListIcon: {
+        primary: "#FFFFFF",
+        default: "#FFFFFF",
+        secondary: iconColor,
+      },
       iconColor: {
         primary: "#FFFFFF",
         default: "#FFFFFF",
         secondary: iconColor,
+      },
+      darkIconColor: {
+        primary: "#000000",
+        default: "#000000",
+        secondary: darkIconColor,
       }
     },
   };
