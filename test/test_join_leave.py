@@ -447,7 +447,12 @@ class TestJoinLeave(unittest.TestCase):
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(25, 5)
 
-    process = self.create_participants_with_test_tool("participant", room, N-1)
+    #process = self.create_participants_with_test_tool("participant", room, N-1)
+    self.join_room_in_new_tab("participant"+0, room)     
+    self.join_room_in_new_tab("participant"+1, room)     
+    self.join_room_in_new_tab("participant"+2, room)     
+    self.join_room_in_new_tab("participant"+3, room)     
+
 
     self.join_room_in_new_tab("participant"+str(N-1), room)     
 
