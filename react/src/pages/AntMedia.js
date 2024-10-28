@@ -31,7 +31,7 @@ const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
   maxVideoTrackCount: 6,
-  desiredMaxVideoTrackCount: 6,
+  desiredTileCount: 6,
   trackEvents: [],
 };
 
@@ -1005,7 +1005,7 @@ function AntMedia(props) {
         roomOfStream[generatedStreamId] = room;
 
         globals.maxVideoTrackCount = appSettingsMaxVideoTrackCount;
-        globals.desiredMaxVideoTrackCount = appSettingsMaxVideoTrackCount;
+        globals.desiredTileCount = appSettingsMaxVideoTrackCount;
         setPublishStreamId(generatedStreamId);
 
         if (!isPlayOnly) {
@@ -1687,8 +1687,8 @@ function AntMedia(props) {
         });
     }
 
-    function handleSetMaxVideoTrackCount(maxTrackCount) {
-        globals.desiredMaxVideoTrackCount = maxTrackCount;
+    function handleSetDesiredTileCount(maxTrackCount) {
+        globals.desiredTileCount = maxTrackCount;
     }
 
     function updateMaxVideoTrackCount(newCount) {
@@ -2743,7 +2743,7 @@ function AntMedia(props) {
                         setStreamName,
                         handleLeaveFromRoom,
                         handleSendNotificationEvent,
-                        handleSetMaxVideoTrackCount,
+                        handleSetDesiredTileCount,
                         handleSendMessage,
                         turnOffYourMicNotification,
                         addFakeParticipant,

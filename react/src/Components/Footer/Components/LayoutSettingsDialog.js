@@ -131,7 +131,7 @@ export function LayoutSettingsDialog(props) {
     );
   };
   const handleMaxVideoTrackCountChange = (count) => {
-    conference.handleSetMaxVideoTrackCount(count);
+    conference.handleSetDesiredTileCount(count);
   };
   const debouncedHandleMaxVideoTrackCountChange = debounce(
     handleMaxVideoTrackCountChange,

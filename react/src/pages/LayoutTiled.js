@@ -69,11 +69,11 @@ function LayoutTiled(props) {
     //console.log("***** W:"+cardWidth+" H:"+cardHeight+" props.width:"+props.width+" width:"+width+" cols:"+cols+" vc:"+videoCount);
   }, [conference.videoTrackAssignments, props.width, props.height, conference.participantUpdated]);
 
-  const showOthers = Object.keys(conference.allParticipants).length > conference.globals.desiredMaxVideoTrackCount;
-  console.log("allpcount:"+Object.keys(conference.allParticipants).length +" "+conference.globals.desiredMaxVideoTrackCount);
-  let trackCount = conference.globals.desiredMaxVideoTrackCount - 1; //remove you
+  const showOthers = Object.keys(conference.allParticipants).length > conference.globals.desiredTileCount;
+  console.log("allpcount:"+Object.keys(conference.allParticipants).length +" "+conference.globals.desiredTileCount);
+  let trackCount = conference.globals.desiredTileCount - 1; //remove you
   console.log("allpcount:"+Object.keys(conference.allParticipants).length 
-    +" desiredMaxVideoTrackCount:"+conference.globals.desiredMaxVideoTrackCount
+    +" desiredTileCount:"+conference.globals.desiredTileCount
     +" showothers:"+showOthers
     +" trackCount:"+trackCount);
 

@@ -132,7 +132,7 @@ class TestJoinLeave(unittest.TestCase):
     result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return -1
-    return result_json["globals"]["desiredMaxVideoTrackCount"]
+    return result_json["globals"]["desiredTileCount"]
   
   def change_video_track_count(self, count):
     index = 0
@@ -245,7 +245,7 @@ class TestJoinLeave(unittest.TestCase):
     for message in last_two_messages:
       print("message:" + message.get_attribute("innerHTML"))
     print("<<<<<<<\n")
-    
+
 
 
   def test_others_tile(self):
