@@ -385,8 +385,6 @@ function AntMedia(props) {
    */
   const [allParticipants, setAllParticipants] = useState({});
 
-    const [playOnlyParticipants, setPlayOnlyParticipants] = useState([]);
-
     const [audioTracks, setAudioTracks] = useState([]);
 
     const [talkers, setTalkers] = useState([]);
@@ -1016,7 +1014,9 @@ function AntMedia(props) {
 
         // if the user is in playOnly mode, it will join the room with the generated stream id
         // so we can get the list of play only participants in the room
-        webRTCAdaptor?.joinRoom(roomName, generatedStreamId);
+        if (isPlayOnly) {
+            webRTCAdaptor?.joinRoom(roomName, generatedStreamId);
+        }
 
         webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode, '{}', role);
     }
@@ -1025,7 +1025,6 @@ function AntMedia(props) {
         if (videoTrackAssignmentsIntervalJob === null) {
             videoTrackAssignmentsIntervalJob = setInterval(() => {
                 webRTCAdaptor?.requestVideoTrackAssignments(roomName);
-                webRTCAdaptor?.getBroadcastObject(roomName);
             }, 3000);
         }
     }
@@ -1145,15 +1144,6 @@ function AntMedia(props) {
                 delete temp[trackId];
             }
         });
-
-        var tempPlayOnlyParticipants = [];
-        forEach(participantIds, function (pid) {
-            if (temp[pid] === undefined) {
-                tempPlayOnlyParticipants.push(pid);
-            }
-        });
-        setPlayOnlyParticipants(tempPlayOnlyParticipants);
-
         console.log("handleMainTrackBroadcastObject setAllParticipants:"+JSON.stringify(temp));
         setAllParticipants(temp);
         setParticipantUpdated(!participantUpdated);
@@ -2819,8 +2809,7 @@ function AntMedia(props) {
                         stopSpeedTest,
                         statsList,
                         getTrackStats,
-                        isBroadcasting,
-                        playOnlyParticipants
+                        isBroadcasting
                     }}
                 >
                     {props.children}
