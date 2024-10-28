@@ -487,7 +487,7 @@ function AntMedia(props) {
     function startSpeedTest() {
         //TODO: this speed test should be refactored and be thought again
         if (isPlayOnly === "true" || isPlayOnly === true) {
-            createSpeedTestForPublishWebRtcAdaptorPlayOnly();
+            createSpeedTestForPlayWebRtcAdaptor();
         } else {
             createSpeedTestForPublishWebRtcAdaptor();
         }
@@ -508,8 +508,6 @@ function AntMedia(props) {
 
             }
         }, 15000); //it tooks about 20 seconds to finish the test, if it's less 40, it means it's stuck
-
-        createSpeedTestForPlayWebRtcAdaptor();
     }
 
     function stopSpeedTest() {
@@ -526,62 +524,6 @@ function AntMedia(props) {
 
         //we need to listen device changes with main webRTCAdaptor
         webRTCAdaptor.mediaManager?.trackDeviceChange();
-    }
-
-    function parseWebSocketURL(url) {
-        // sample url: ws://localhost:5080/WebRTCAppEE/websocket
-
-        if (!url) {
-            return '';
-        }
-
-        let parsedURL = url.split("/");
-        let protocol = parsedURL[0];
-        if (protocol === "wss:") {
-            protocol = "https:";
-        } else {
-            protocol = "http:";
-        }
-        let host = parsedURL[2];
-        let appName = parsedURL[3];
-        return protocol + "//" + host + "/" + appName;
-    }
-
-    function createSpeedTestForPublishWebRtcAdaptorPlayOnly() {
-        // create video element and get the stream
-        let videoElement = document.createElement("video");
-        videoElement.id = "speedTestVideoElement";
-        videoElement.style.display = "none";
-        videoElement.autoplay = true;
-        videoElement.muted = true;
-        videoElement.playsInline = true;
-        videoElement.controls = false;
-        videoElement.width = 640;
-        videoElement.height = 360;
-        videoElement.loop = true;
-        videoElement.crossOrigin = "anonymous"
-
-        let videoElementUrl = parseWebSocketURL(websocketURL) + "/speed-test-sample-video.mp4";
-        videoElement.src = videoElementUrl;
-        document.body.appendChild(videoElement);
-
-        setTimeout(() => {
-            let videoStream = videoElement.captureStream();
-
-            speedTestForPublishWebRtcAdaptor.current = new WebRTCAdaptor({
-                websocket_url: websocketURL,
-                localStream: videoStream,
-                sdp_constraints: {
-                    OfferToReceiveAudio: false, OfferToReceiveVideo: false,
-                },
-                peerconnection_config: peerconnection_config,
-                debug: true,
-                callback: speedTestForPublishWebRtcAdaptorInfoCallback,
-                callbackError: speedTestForPublishWebRtcAdaptorErrorCallback,
-                purposeForTest: "publish-speed-test-play-only"
-            })
-        }, 3000);
-
     }
 
     function createSpeedTestForPublishWebRtcAdaptor() {
@@ -793,13 +735,35 @@ function AntMedia(props) {
     function speedTestForPlayWebRtcAdaptorInfoCallback(info, obj) {
         if (info === "initialized") {
             speedTestPlayStarted.current = false;
-            speedTestForPlayWebRtcAdaptor.current.play("speedTestStream" + speedTestStreamId.current, "", "", [], "", "", "");
+            speedTestForPlayWebRtcAdaptor.current.play("speedTestSampleStream", "", "", [], "", "", "");
         } else if (info === "play_started") {
             console.log("speed test play started")
             speedTestPlayStarted.current = true;
+            setSpeedTestObjectProgress(20);
+            speedTestForPlayWebRtcAdaptor.current?.enableStats("speedTestSampleStream");
+        }
+        else if (info === "updated_stats")
+        {
+            if (speedTestCounter.current === 0) {
+                statsList.current = []; // reset stats list if it is the first time
+            }
+            setSpeedTestObjectProgress(20 + (speedTestCounter.current * 20));
 
-        } else if (info === "updated_stats") {
-            console.log("speed test updated stats")
+            speedTestCounter.current = speedTestCounter.current + 1;
+            setAndFillPlayStatsList(obj);
+
+            if (speedTestCounter.current > 3 && statsList.current.length > 3) {
+                calculateThePlaySpeedTestResult();
+            } else {
+                let tempSpeedTestObject = {};
+                tempSpeedTestObject.message = speedTestObject.message;
+                tempSpeedTestObject.isfinished = false;
+                tempSpeedTestObject.isfailed = false;
+                tempSpeedTestObject.errorMessage = "";
+                tempSpeedTestObject.progressValue = 20 + (speedTestCounter.current * 20);
+                speedTestProgress.current = tempSpeedTestObject.progressValue;
+                setSpeedTestObject(tempSpeedTestObject);
+            }
         } else if (info === "ice_connection_state_changed") {
             console.log("speed test ice connection state changed")
         }
@@ -810,7 +774,142 @@ function AntMedia(props) {
         //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
         console.log("error:" + error + " message:" + message);
 
-        //we just check if play_started is received or not to detect playback is successful in speedTestForPlayWebRtcAdaptorInfoCallback
+        let tempSpeedTestObject = {};
+        tempSpeedTestObject.message = speedTestObject.message;
+        tempSpeedTestObject.isfinished = speedTestObject.isfinished;
+        tempSpeedTestObject.isfailed = true;
+        tempSpeedTestObject.errorMessage = "There is an error('"+error+"'). It will try again..." ;
+        tempSpeedTestObject.progressValue = 0;
+        speedTestProgress.current = tempSpeedTestObject.progressValue;
+
+        setSpeedTestObject(tempSpeedTestObject);
+    }
+
+    function setAndFillPlayStatsList(obj) {
+        console.log("obj", obj);
+        let tempStatsList = statsList.current;
+        let tempStats = {};
+
+        tempStats.currentRoundTripTime = obj.currentRoundTripTime >= 0 ? obj.currentRoundTripTime : 0;
+
+        tempStats.packetsReceived = obj.packetsReceived >= 0 ? obj.packetsReceived : 0;
+
+        tempStats.totalBytesReceivedCount = obj.totalBytesReceivedCount >= 0 ? obj.totalBytesReceivedCount : 0;
+
+        tempStats.framesReceived = obj.framesReceived >= 0 ? obj.framesReceived : 0;
+        tempStats.framesDropped = obj.framesDropped >= 0 ? obj.framesDropped : 0;
+
+        tempStats.startTime = obj.startTime >= 0 ? obj.startTime : 0;
+        tempStats.currentTimestamp = obj.currentTimestamp >= 0 ? obj.currentTimestamp : 0;
+
+        tempStats.firstBytesReceivedCount = obj.firstBytesReceivedCount >= 0 ? obj.firstBytesReceivedCount : 0;
+        tempStats.lastBytesReceived = obj.lastBytesReceived >= 0 ? obj.lastBytesReceived : 0;
+
+        tempStats.videoPacketsLost = obj.videoPacketsLost >= 0 ? obj.videoPacketsLost : 0;
+        tempStats.audioPacketsLost = obj.audioPacketsLost >= 0 ? obj.audioPacketsLost : 0;
+
+        tempStats.inboundRtpList = obj.inboundRtpList;
+
+        tempStats.videoJitterAverageDelay = obj.videoJitterAverageDelay >= 0 ? obj.videoJitterAverageDelay : 0;
+        tempStats.audioJitterAverageDelay = obj.audioJitterAverageDelay >= 0 ? obj.audioJitterAverageDelay : 0;
+
+        tempStats.videoRoundTripTime = obj.videoRoundTripTime >= 0 ? obj.videoRoundTripTime : 0;
+        tempStats.audioRoundTripTime = obj.audioRoundTripTime >= 0 ? obj.audioRoundTripTime : 0;
+
+        tempStatsList.push(tempStats);
+        statsList.current = tempStatsList;
+    }
+
+    function calculateThePlaySpeedTestResult() {
+        let stats = statsList.current[statsList.current.length - 1];
+        let oldStats = statsList.current[statsList.current.length - 2];
+
+        // Calculate total bytes received
+        let totalBytesReceived = stats.totalBytesReceivedCount;
+
+        // Calculate video frames received and frames dropped
+        let framesReceived = stats.framesReceived;
+        let framesDropped = stats.framesDropped;
+
+        // Calculate the time difference (in seconds)
+        let timeElapsed = (stats.currentTimestamp - stats.startTime) / 1000; // Convert ms to seconds
+
+        // Calculate incoming bitrate (bits per second)
+        let bytesReceivedDiff = stats.lastBytesReceived - stats.firstBytesReceivedCount;
+        let incomingBitrate = (bytesReceivedDiff * 8) / timeElapsed; // Convert bytes to bits
+
+        // Calculate packet loss
+        let videoPacketsLost = stats.videoPacketsLost;
+        videoPacketsLost = (videoPacketsLost < 0) ? 0 : videoPacketsLost;
+        let audioPacketsLost = stats.audioPacketsLost;
+        audioPacketsLost = (audioPacketsLost < 0) ? 0 : audioPacketsLost;
+
+        let totalPacketsLost = videoPacketsLost + audioPacketsLost;
+
+        // Calculate packet loss for the previous stats
+        let oldVideoPacketsLost = stats.videoPacketsLost;
+        oldVideoPacketsLost = (oldVideoPacketsLost < 0) ? 0 : oldVideoPacketsLost;
+        let oldAudioPacketsLost = stats.audioPacketsLost;
+        oldAudioPacketsLost = (oldAudioPacketsLost < 0) ? 0 : oldAudioPacketsLost;
+
+        let oldTotalPacketsLost = oldVideoPacketsLost + oldAudioPacketsLost;
+
+        let packageReceived = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).packetsReceived + stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).packetsReceived;
+        let oldPackageReceived = oldStats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).packetsReceived + oldStats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).packetsReceived;
+
+        // Calculate the packet loss percentage
+        let packageLostPercentage = 0;
+        console.log("publishStats:", publishStats);
+        if (publishStats !== null) {
+            let deltaPackageLost = oldTotalPacketsLost - totalPacketsLost;
+            let deltaPackageReceived = oldPackageReceived - packageReceived;
+
+            if (deltaPackageLost > 0) {
+                packageLostPercentage = ((deltaPackageLost / parseInt(deltaPackageReceived)) * 100).toPrecision(3);
+            }
+        }
+
+        // Jitter calculation (average of video and audio jitter)
+        let videoJitter = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).jitterBufferDelay;
+        videoJitter = (videoJitter < 0) ? 0 : videoJitter;
+        let audioJitter = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).jitterBufferDelay;
+        audioJitter = (audioJitter < 0) ? 0 : audioJitter;
+
+        let avgJitter = (videoJitter + audioJitter) / 2;
+
+        let rtt = ((parseFloat(stats.videoRoundTripTime) + parseFloat(stats.audioRoundTripTime)) / 2).toPrecision(3);
+
+        // Frame drop rate
+        let frameDropRate = framesDropped / framesReceived * 100;
+
+        console.log("* Total bytes received: " + totalBytesReceived);
+        console.log("* Incoming bitrate: " + incomingBitrate.toFixed(2) + " bps");
+        console.log("* Total packets lost: " + totalPacketsLost);
+        console.log("* Frame drop rate: " + frameDropRate.toFixed(2) + "%");
+        console.log("* Average jitter: " + avgJitter.toFixed(2) + " ms");
+
+        let speedTestResult = {};
+
+        if (rtt > 0.15 || packageLostPercentage > 2.5 || frameDropRate > 5 || avgJitter > 100) {
+            console.log("-> Your connection quality is poor. You may experience interruptions");
+            speedTestResult.message = "Your connection quality is poor. You may experience interruptions";
+        } else if (rtt > 0.1 || packageLostPercentage > 1.5 || avgJitter > 50 || frameDropRate > 2.5) {
+            console.log("-> Your connection is moderate, occasional disruptions may occur");
+            speedTestResult.message = "Your connection is moderate, occasional disruptions may occur";
+        } else {
+            console.log("-> Your connection is great");
+            speedTestResult.message = "Your connection is Great!";
+        }
+
+        speedTestResult.isfailed = false;
+        speedTestResult.errorMessage = "";
+        speedTestResult.progressValue = 100;
+
+        speedTestResult.isfinished = true;
+        speedTestProgress.current = speedTestResult.progressValue;
+        setSpeedTestObject(speedTestResult);
+
+        stopSpeedTest();
     }
 
     function checkAndUpdateVideoAudioSources() {
