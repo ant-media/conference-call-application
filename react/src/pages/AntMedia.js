@@ -30,8 +30,8 @@ export const ConferenceContext = React.createContext(null);
 const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
-  maxVideoTrackCount: 6,
-  desiredMaxVideoTrackCount: 6,
+  maxVideoTrackCount: 60,
+  desiredMaxVideoTrackCount: 60,
   trackEvents: [],
 };
 
@@ -1618,6 +1618,9 @@ function AntMedia(props) {
             videoLabel = "localVideo";
         }
 
+        // TODO: Disabling this part for now for the fakeehcare until we merge double screen share issue.
+
+        /*
         if (videoLabel !== "localVideo" && videoTrackAssignments.length > 0) {
             // if we are play only mode, we are going to pin the first video track.
             // if we are not play only mode, we are going to pin the second video track because the first video track is local video.
@@ -1626,6 +1629,7 @@ function AntMedia(props) {
             videoLabel = (isPlayOnly) ? videoTrackAssignments[0]?.videoLabel : videoTrackAssignments[1]?.videoLabel;
             webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
         }
+         */
 
         Object.keys(allParticipants).forEach(id => {
             let participant = allParticipants[id];
