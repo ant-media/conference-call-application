@@ -617,7 +617,14 @@ function AntMedia(props) {
         let tempStatsList = statsList.current;
         let tempStats = {};
 
+        tempStats.currentRoundTripTime = obj.currentRoundTripTime >= 0 ? obj.currentRoundTripTime : 0;
+
+        tempStats.packetsReceived = obj.packetsReceived >= 0 ? obj.packetsReceived : 0;
+
         tempStats.totalBytesReceivedCount = obj.totalBytesReceivedCount >= 0 ? obj.totalBytesReceivedCount : 0;
+
+        tempStats.framesReceived = obj.framesReceived >= 0 ? obj.framesReceived : 0;
+        tempStats.framesDropped = obj.framesDropped >= 0 ? obj.framesDropped : 0;
 
         tempStats.startTime = obj.startTime >= 0 ? obj.startTime : 0;
         tempStats.currentTimestamp = obj.currentTimestamp >= 0 ? obj.currentTimestamp : 0;
@@ -632,6 +639,9 @@ function AntMedia(props) {
 
         tempStats.videoJitterAverageDelay = obj.videoJitterAverageDelay >= 0 ? obj.videoJitterAverageDelay : 0;
         tempStats.audioJitterAverageDelay = obj.audioJitterAverageDelay >= 0 ? obj.audioJitterAverageDelay : 0;
+
+        tempStats.videoRoundTripTime = obj.videoRoundTripTime >= 0 ? obj.videoRoundTripTime : 0;
+        tempStats.audioRoundTripTime = obj.audioRoundTripTime >= 0 ? obj.audioRoundTripTime : 0;
 
         tempStatsList.push(tempStats);
         statsList.current = tempStatsList;
@@ -723,13 +733,13 @@ function AntMedia(props) {
 
         let speedTestResult = {};
 
-        if (rtt >= 200 || packetLostPercentage >= 3.5 || jitter >= 100) {
+        if (rtt >= 0.2 || packetLostPercentage >= 3.5 || jitter >= 0.2) {
             console.log("-> Your connection quality is poor. You may experience interruptions");
             speedTestResult.message = "Your connection quality is poor. You may experience interruptions";
-        } else if (rtt >= 100 || packetLostPercentage >= 2 || jitter >= 80) {
+        } else if (rtt >= 0.1 || packetLostPercentage >= 2 || jitter >= 0.08) {
             console.log("-> Your connection is moderate, occasional disruptions may occur");
             speedTestResult.message = "Your connection is moderate, occasional disruptions may occur";
-        } else if (rtt >= 30 || jitter >= 20 || packetLostPercentage >= 1) {
+        } else if (rtt >= 0.03 || jitter >= 0.02 || packetLostPercentage >= 1) {
             console.log("-> Your connection is good.");
             speedTestResult.message = "Your connection is Good.";
         } else {
@@ -750,13 +760,14 @@ function AntMedia(props) {
 
     function calculateThePlaySpeedTestResult() {
         let stats = statsList.current[statsList.current.length - 1];
+        let oldStats = statsList.current[statsList.current.length - 2];
 
         // Calculate total bytes received
         let totalBytesReceived = stats.totalBytesReceivedCount;
 
         // Calculate video frames received and frames dropped
-        let framesReceived = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).framesReceived;
-        let framesDropped = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).framesDropped;
+        let framesReceived = stats.framesReceived;
+        let framesDropped = stats.framesDropped;
 
         // Calculate the time difference (in seconds)
         let timeElapsed = (stats.currentTimestamp - stats.startTime) / 1000; // Convert ms to seconds
@@ -766,11 +777,32 @@ function AntMedia(props) {
         let incomingBitrate = (bytesReceivedDiff * 8) / timeElapsed; // Convert bytes to bits
 
         // Calculate packet loss
-        let videoPacketsLost = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).videoPacketsLost;
+        let videoPacketsLost = stats.videoPacketsLost;
         videoPacketsLost = (videoPacketsLost < 0) ? 0 : videoPacketsLost;
-        let audioPacketsLost = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).audioPacketsLost;
+        let audioPacketsLost = stats.audioPacketsLost;
         audioPacketsLost = (audioPacketsLost < 0) ? 0 : audioPacketsLost;
+
         let totalPacketsLost = videoPacketsLost + audioPacketsLost;
+
+        // Calculate packet loss for the previous stats
+        let oldVideoPacketsLost = stats.videoPacketsLost;
+        oldVideoPacketsLost = (oldVideoPacketsLost < 0) ? 0 : oldVideoPacketsLost;
+        let oldAudioPacketsLost = stats.audioPacketsLost;
+        oldAudioPacketsLost = (oldAudioPacketsLost < 0) ? 0 : oldAudioPacketsLost;
+
+        let oldTotalPacketsLost = oldVideoPacketsLost + oldAudioPacketsLost;
+
+        // Calculate the packet loss percentage
+        let packageLostPercentage = 0;
+        console.log("publishStats:", publishStats);
+        if (publishStats !== null) {
+            let deltaPackageLost = oldTotalPacketsLost - totalPacketsLost;
+            let deltaPackageReceived = oldStats.packetsReceived - stats.packetsReceived;
+
+            if (deltaPackageLost > 0) {
+                packageLostPercentage = ((deltaPackageLost / parseInt(deltaPackageReceived)) * 100).toPrecision(3);
+            }
+        }
 
         // Jitter calculation (average of video and audio jitter)
         let videoJitter = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).jitterBufferDelay;
@@ -779,6 +811,8 @@ function AntMedia(props) {
         audioJitter = (audioJitter < 0) ? 0 : audioJitter;
 
         let avgJitter = (videoJitter + audioJitter) / 2;
+
+        let rtt = ((parseFloat(stats.videoRoundTripTime) + parseFloat(stats.audioRoundTripTime)) / 2).toPrecision(3);
 
         // Frame drop rate
         let frameDropRate = framesDropped / framesReceived * 100;
@@ -791,10 +825,10 @@ function AntMedia(props) {
 
         let speedTestResult = {};
 
-        if (totalPacketsLost > 0 || frameDropRate > 5 || avgJitter > 100) {
+        if (rtt > 0.15 || packageLostPercentage > 2.5 || frameDropRate > 5 || avgJitter > 0.1) {
             console.log("-> Your connection quality is poor. You may experience interruptions");
             speedTestResult.message = "Your connection quality is poor. You may experience interruptions";
-        } else if (avgJitter > 50 || frameDropRate > 2.5) {
+        } else if (rtt > 0.1 || packageLostPercentage > 1.5 || avgJitter > 0.05 || frameDropRate > 2.5) {
             console.log("-> Your connection is moderate, occasional disruptions may occur");
             speedTestResult.message = "Your connection is moderate, occasional disruptions may occur";
         } else {
@@ -1545,10 +1579,10 @@ function AntMedia(props) {
             }
         }
 
-        if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
+        if (rtt >= 0.15 || packageLostPercentage >= 2.5 || jitter >= 0.08) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
             displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
-        } else if (rtt >= 100 || packageLostPercentage >= 1.5 || jitter >= 50) {
+        } else if (rtt >= 0.1 || packageLostPercentage >= 1.5 || jitter >= 0.05) {
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter);
             displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
         }
