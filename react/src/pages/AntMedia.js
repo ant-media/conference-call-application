@@ -825,10 +825,10 @@ function AntMedia(props) {
 
         let speedTestResult = {};
 
-        if (rtt > 0.15 || packageLostPercentage > 2.5 || frameDropRate > 5 || avgJitter > 0.1) {
+        if (rtt > 0.15 || packageLostPercentage > 2.5 || frameDropRate > 5 || avgJitter > 100) {
             console.log("-> Your connection quality is poor. You may experience interruptions");
             speedTestResult.message = "Your connection quality is poor. You may experience interruptions";
-        } else if (rtt > 0.1 || packageLostPercentage > 1.5 || avgJitter > 0.05 || frameDropRate > 2.5) {
+        } else if (rtt > 0.1 || packageLostPercentage > 1.5 || avgJitter > 50 || frameDropRate > 2.5) {
             console.log("-> Your connection is moderate, occasional disruptions may occur");
             speedTestResult.message = "Your connection is moderate, occasional disruptions may occur";
         } else {
