@@ -8,7 +8,7 @@ import { ConferenceContext } from "pages/AntMedia";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
-import { times } from 'lodash';
+import {forEach, times} from 'lodash';
 import { useParams } from 'react-router-dom';
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
@@ -1921,6 +1921,54 @@ describe('AntMedia Component', () => {
     await waitFor(() => {
       expect(container.outerHTML).not.toContain("Reconnecting...");
     });
+  });
+
+  it('sets play only participants correctly when some participants are not in temp', () => {
+    const participantIds = ['pid1', 'pid2', 'pid3'];
+    const temp = { 'pid1': {}, 'pid3': {} };
+    const setPlayOnlyParticipants = jest.fn();
+
+    let tempPlayOnlyParticipants = [];
+    forEach(participantIds, function (pid) {
+      if (temp[pid] === undefined) {
+        tempPlayOnlyParticipants.push(pid);
+      }
+    });
+    setPlayOnlyParticipants(tempPlayOnlyParticipants);
+
+    expect(setPlayOnlyParticipants).toHaveBeenCalledWith(['pid2']);
+  });
+
+  it('sets play only participants to an empty array when all participants are in temp', () => {
+    const participantIds = ['pid1', 'pid2', 'pid3'];
+    const temp = { 'pid1': {}, 'pid2': {}, 'pid3': {} };
+    const setPlayOnlyParticipants = jest.fn();
+
+    let tempPlayOnlyParticipants = [];
+    forEach(participantIds, function (pid) {
+      if (temp[pid] === undefined) {
+        tempPlayOnlyParticipants.push(pid);
+      }
+    });
+    setPlayOnlyParticipants(tempPlayOnlyParticipants);
+
+    expect(setPlayOnlyParticipants).toHaveBeenCalledWith([]);
+  });
+
+  it('sets play only participants to all participants when none are in temp', () => {
+    const participantIds = ['pid1', 'pid2', 'pid3'];
+    const temp = {};
+    const setPlayOnlyParticipants = jest.fn();
+
+    let tempPlayOnlyParticipants = [];
+    forEach(participantIds, function (pid) {
+      if (temp[pid] === undefined) {
+        tempPlayOnlyParticipants.push(pid);
+      }
+    });
+    setPlayOnlyParticipants(tempPlayOnlyParticipants);
+
+    expect(setPlayOnlyParticipants).toHaveBeenCalledWith(['pid1', 'pid2', 'pid3']);
   });
 
 });
