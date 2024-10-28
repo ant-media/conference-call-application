@@ -22,7 +22,7 @@ const contextValue = {
       videoLabel: 'test-video-label',
     },
   },
-  playOnlyParticipants: [],
+  playOnlyParticipants: ["test-play-only-stream-id"],
   publishStreamId: 'test-stream-id',
   pinVideo: jest.fn(),
   makeParticipantPresenter: jest.fn(),
@@ -66,6 +66,16 @@ describe('ParticipantTab Component', () => {
       </ThemeProvider>
     );
     const participantItem = container.innerHTML.includes('participant-item-'+contextValue.videoTrackAssignments[0].streamID);
+    expect(participantItem).toBe(true);
+  });
+
+  it('renders getPlayOnlyParticipantItem without crashing', () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+    const participantItem = container.innerHTML.includes('play-only-participant-item-'+contextValue.playOnlyParticipants[0]);
     expect(participantItem).toBe(true);
   });
 
