@@ -2038,7 +2038,9 @@ function AntMedia(props) {
                     }
                 });
 
-                checkScreenSharingStatus();
+                if (process.env.REACT_APP_AUTO_PIN_WHEN_SCREEN_SHARE === 'true') {
+                    checkScreenSharingStatus();
+                }
 
                 // check if there is any difference between old and new assignments
                 if (!_.isEqual(currentVideoTrackAssignments, videoTrackAssignments)) {
