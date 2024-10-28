@@ -69,14 +69,25 @@ describe('ParticipantTab Component', () => {
     expect(participantItem).toBe(true);
   });
 
-  it('renders getPlayOnlyParticipantItem without crashing', () => {
+  it('renders play only participants correctly', () => {
     const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <ParticipantTab />
         </ThemeProvider>
     );
-    const participantItem = container.innerHTML.includes('play-only-participant-item-'+contextValue.playOnlyParticipants[0]);
-    expect(participantItem).toBe(true);
+    const playOnlyParticipantItem = container.innerHTML.includes('play-only-participant-item-'+contextValue.playOnlyParticipants[0]);
+    expect(playOnlyParticipantItem).toBe(true);
+  });
+
+  it('does not render play only participant if it matches publishStreamId', () => {
+    contextValue.playOnlyParticipants = [contextValue.publishStreamId];
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+    const playOnlyParticipantItem = container.innerHTML.includes('play-only-participant-item-'+contextValue.publishStreamId);
+    expect(playOnlyParticipantItem).toBe(false);
   });
 
   it('renders getAdminButtons without crashing', () => {
