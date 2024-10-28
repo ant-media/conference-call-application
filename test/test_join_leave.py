@@ -497,7 +497,7 @@ class TestJoinLeave(unittest.TestCase):
     print("screen shot 3 end: 6")
 
 
-    self.kill_participants_with_test_tool(process)
+    #self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
 
   def test_get_debugme_info(self):
