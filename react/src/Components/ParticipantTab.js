@@ -121,6 +121,24 @@ function ParticipantTab(props) {
   );
   };
 
+  const getPlayOnlyParticipantItem = (streamId) => {
+    return (
+        <Grid
+            id={"play-only-participant-item-" + streamId}
+            key={streamId}
+            container
+            alignItems="center"
+            justifyContent="space-between"
+            style={{ borderBottomWidth: 1 }}
+            sx={{ borderColor: "primary.main" }}
+        >
+          <Grid item sx={{ pr: 1 }}>
+            <ParticipantName variant="body1">{streamId}</ParticipantName>
+          </Grid>
+        </Grid>
+    );
+  };
+
   return (
     <div style={{width: "100%", overflow: "hidden"}}>
       <Stack sx={{width: "100%",}} spacing={2}>
@@ -138,6 +156,22 @@ function ParticipantTab(props) {
           if (conference.publishStreamId !== streamId) {
             var assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
             return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
+          } else {
+            return "";
+          }
+        })}
+        <Grid container alignItems="center" style={{ marginTop: 21, marginBottom: 12 }}>
+          <Typography variant="body2" style={{ marginRight: 4, fontWeight: 500 }}>
+            Play Only Participants
+          </Typography>
+          <SvgIcon size={28} name="participants" color={theme.palette?.participantListIcon?.primary} />
+          <ParticipantName variant="body2" style={{ marginLeft: 4, fontWeight: 500 }}>
+            {conference.playOnlyParticipants.length}
+          </ParticipantName>
+        </Grid>
+        {conference.playOnlyParticipants.map((streamId) => {
+          if (conference.publishStreamId !== streamId) {
+            return getPlayOnlyParticipantItem(streamId);
           } else {
             return "";
           }
