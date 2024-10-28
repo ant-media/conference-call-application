@@ -2617,7 +2617,7 @@ function AntMedia(props) {
             setIsRecordPluginInstalled(localSettings?.isRecordingFeatureAvailable);
             if (localSettings?.maxVideoTrackCount !== undefined && localSettings?.maxVideoTrackCount !== null) {
                 console.log("--maxVideoTrackCountFromAppSettings: ", localSettings?.maxVideoTrackCount);
-                setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount);
+                setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount+1);
             }
         } else if (obj.command === "startRecordingResponse") {
             console.log("Incoming startRecordingResponse:", obj);
