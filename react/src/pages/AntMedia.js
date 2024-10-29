@@ -2325,16 +2325,23 @@ function AntMedia(props) {
     }
 
     function handleNewTrackQ() {
+        console.log("handleNewTrackQ 1 size:"+newTrackQueue.length+" scalingTiles:"+scalingTiles)
         if(scalingTiles) {
+            console.log("handleNewTrackQ 2 return")
             return;
         }
         scalingTiles = true;
         while (newTrackQueue.length > 0) {
             let item = newTrackQueue.shift(); // Removes the first item from the list
+            console.log("handleNewTrackQ 3 :"+item)
+
             handlePlayVideo(item);
         }
         
         scalingTiles = false;
+
+        console.log("handleNewTrackQ 4 size:"+newTrackQueue.length+" scalingTiles:"+scalingTiles)
+
     }
 
     function handlePlayVideo(obj) {
