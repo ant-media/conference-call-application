@@ -443,7 +443,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.makeFullScreen()
     N = 5
     room = "room"+str(random.randint(100, 999))
-    wait = self.chrome.get_wait(25, 5)
+    wait = self.chrome.get_wait(30, 3)
 
     process = self.create_participants_with_test_tool("participant", room, N-1)
 
