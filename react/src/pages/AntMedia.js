@@ -2370,6 +2370,7 @@ function AntMedia(props) {
             if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
+                console.log("add vta:"+newVideoTrackAssignment.videoLabel)
                 setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
                 setParticipantUpdated(!participantUpdated);
                 console.log("document.hidden",document.hidden);
