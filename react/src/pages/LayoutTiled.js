@@ -70,13 +70,7 @@ function LayoutTiled(props) {
   }, [conference.videoTrackAssignments, props.width, props.height, conference.participantUpdated]);
 
   const showOthers = Object.keys(conference.allParticipants).length > conference.globals.desiredTileCount;
-  console.log("allpcount:"+Object.keys(conference.allParticipants).length +" "+conference.globals.desiredTileCount);
   let trackCount = conference.globals.desiredTileCount - 1; //remove you
-  console.log("allpcount:"+Object.keys(conference.allParticipants).length 
-    +" desiredTileCount:"+conference.globals.desiredTileCount
-    +" showothers:"+showOthers
-    +" trackCount:"+trackCount);
-
   conference.updateMaxVideoTrackCount(showOthers ? trackCount - 1 : trackCount); //remove others if we show
 
   const playingParticipantsCount = conference.videoTrackAssignments.length;

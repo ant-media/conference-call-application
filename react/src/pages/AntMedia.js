@@ -468,7 +468,7 @@ function AntMedia(props) {
   useEffect(() => {
     setTimeout(() => {
       setParticipantUpdated(!participantUpdated);
-      console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
+      //console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
     }, 5000);
   }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1909,7 +1909,7 @@ function AntMedia(props) {
 
     function handleNotificationEvent(obj) {
         var notificationEvent = JSON.parse(obj.data);
-        console.log("handleNotificationEvent:", notificationEvent);
+        //console.log("handleNotificationEvent:", notificationEvent);
         if (notificationEvent != null && typeof notificationEvent == "object") {
             var eventStreamId = notificationEvent.streamId;
             var eventType = notificationEvent.eventType;
@@ -2004,7 +2004,7 @@ function AntMedia(props) {
                 console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(receivedVideoTrackAssignments));
 
                 // Remove empty trackId assignments
-                receivedVideoTrackAssignments = receivedVideoTrackAssignments.filter((vta) => vta.trackId !== "");
+                //receivedVideoTrackAssignments = receivedVideoTrackAssignments.filter((vta) => vta.trackId !== "");
 
                 let currentVideoTrackAssignments = [...videoTrackAssignments];
 
@@ -2335,10 +2335,10 @@ function AntMedia(props) {
             return;
         }
         scalingTiles = true;
-        for (let i = 0; i < newTrackQueue.length; i++) {
-            let item = newTrackQueue[i];
-            console.log("handleNewTrackQ 3 :" + item);
-        
+        while (newTrackQueue.length > 0) {
+            let item = newTrackQueue.shift(); // Removes the first item from the list
+            console.log("handleNewTrackQ 3 :"+item)
+
             handlePlayVideo(item);
         }
         
