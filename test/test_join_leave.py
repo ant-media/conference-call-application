@@ -228,7 +228,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.click_element_as_script(messages_button)
 
   def call_debugme(self):
-    if(not self.chrome.is_element_exist(By.ID, "message-input")):
+    if not self.chrome.is_element_displayed(By.ID, "message-input"):
       self.open_close_chat_drawer()
 
     message_input = self.chrome.get_element_with_retry(By.ID, "message-input")
