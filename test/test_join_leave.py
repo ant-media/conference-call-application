@@ -39,7 +39,7 @@ class TestJoinLeave(unittest.TestCase):
     directory = os.path.expanduser("~/test/webrtc-load-test")
     script = "run.sh"
     ws_url = self.url.replace("https://", "").replace("http://", "")
-    parameters = ["-m", "publisher", "-s", ws_url, "-p", "443", "-q", "true", "-f", "test.mp4", "-a", self.test_app_name, "-i", participant_name, "-t", room, "-n", str(count)]  
+    parameters = ["-m", "publisher", "-s", ws_url, "-p", "443", "-q", "true", "-f", "test.mp4", "-r", "true", "-a", self.test_app_name, "-i", participant_name, "-t", room, "-n", str(count)]  
     
     print("test tool is running with parameters: "+str(parameters))
     # Full path to the script
