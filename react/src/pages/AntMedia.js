@@ -2367,10 +2367,10 @@ function AntMedia(props) {
                 videoLabel: index, track: obj.track, streamId: obj.streamId
             };
 
+            setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
             if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
-                setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
                 //setParticipantUpdated(!participantUpdated);
                 //console.log("document.hidden",document.hidden);
                 //if (document.hidden) {
