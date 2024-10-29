@@ -101,7 +101,6 @@ class TestJoinLeave(unittest.TestCase):
       #print("\n screen shot")
       #self.chrome.print_ss_as_base64()
 
-      self.open_close_chat_drawer()
       print("++++++++++ end trial ++++++++++\n")
 
 
@@ -229,7 +228,8 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.click_element_as_script(messages_button)
 
   def call_debugme(self):
-    self.open_close_chat_drawer()
+    if(not self.chrome.is_element_exist(By.ID, "message-input")):
+      self.open_close_chat_drawer()
 
     message_input = self.chrome.get_element_with_retry(By.ID, "message-input")
     self.chrome.write_to_element(message_input, "debugme")
