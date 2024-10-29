@@ -1990,6 +1990,10 @@ function AntMedia(props) {
                 }
             } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
 
+                if (scalingTiles) {
+                    return;
+                }
+
                 // There are 2 operations here:
                 // 1. VTA available in both sides -> Update
                 // 2. VTA available in the current state but not in the new list -> Remove
