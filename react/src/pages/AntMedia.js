@@ -2332,9 +2332,9 @@ function AntMedia(props) {
         while (newTrackQueue.length > 0) {
             let item = newTrackQueue.shift(); // Removes the first item from the list
             handlePlayVideo(item);
-          }
+        }
         
-          scalingTiles = false;
+        scalingTiles = false;
     }
 
     function handlePlayVideo(obj) {
