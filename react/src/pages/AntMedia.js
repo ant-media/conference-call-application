@@ -2371,11 +2371,11 @@ function AntMedia(props) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
                 setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
-                setParticipantUpdated(!participantUpdated);
-                console.log("document.hidden",document.hidden);
-                if (document.hidden) {
-                    playJoinRoomSound();
-                }
+                //setParticipantUpdated(!participantUpdated);
+                //console.log("document.hidden",document.hidden);
+                //if (document.hidden) {
+                //    playJoinRoomSound();
+                //}
             }
         }
     }
