@@ -122,7 +122,7 @@ jobs:
         npm install
         npm run build
         cd ..
-        rm -r webapp/src/main/webapp/*
+        rm -r webapp/src/main/webapp/static/*
         cp -a react/build/. webapp/src/main/webapp
 
     - name: Build Maven project for webinar
