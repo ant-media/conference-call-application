@@ -161,7 +161,7 @@ jobs:
     - name: Run Integration Test
       run: |
         cd test
-      #python3 test_main.py ${{ secrets.STAGING_SERVER_URL }} ${{ secrets.USER_NAME }} ${{ secrets.PASSWORD }} /tmp/circle-conferencing.war false
+        python3 test_main.py ${{ secrets.STAGING_SERVER_URL }} ${{ secrets.USER_NAME }} ${{ secrets.PASSWORD }} /tmp/circle-conferencing.war false
 
     - name: Run Integration Test for webinar
       run: |
