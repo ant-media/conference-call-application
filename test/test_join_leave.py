@@ -230,6 +230,7 @@ class TestJoinLeave(unittest.TestCase):
   def call_debugme(self):
     if not self.chrome.is_element_displayed(By.ID, "message-input"):
       self.open_close_chat_drawer()
+      time.sleep(2)
 
     message_input = self.chrome.get_element_with_retry(By.ID, "message-input")
     self.chrome.write_to_element(message_input, "debugme")
