@@ -2335,10 +2335,10 @@ function AntMedia(props) {
             return;
         }
         scalingTiles = true;
-        while (newTrackQueue.length > 0) {
-            let item = newTrackQueue.shift(); // Removes the first item from the list
-            console.log("handleNewTrackQ 3 :"+item)
-
+        for (let i = 0; i < newTrackQueue.length; i++) {
+            let item = newTrackQueue[i];
+            console.log("handleNewTrackQ 3 :" + item);
+        
             handlePlayVideo(item);
         }
         
@@ -2367,15 +2367,15 @@ function AntMedia(props) {
                 videoLabel: index, track: obj.track, streamId: obj.streamId
             };
 
-            setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
             if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
-                //setParticipantUpdated(!participantUpdated);
-                //console.log("document.hidden",document.hidden);
-                //if (document.hidden) {
-                //    playJoinRoomSound();
-                //}
+                setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
+                setParticipantUpdated(!participantUpdated);
+                console.log("document.hidden",document.hidden);
+                if (document.hidden) {
+                    playJoinRoomSound();
+                }
             }
         }
     }
