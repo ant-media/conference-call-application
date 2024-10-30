@@ -21,6 +21,7 @@ class TestDeployment(unittest.TestCase):
     print(self._testMethodName, " ending...")
     
   def test_install_app(self):
+    time.sleep(10)
     response = self.rest_helper.call_install_app(self.war_file, self.test_app_name)
     print(response)
     assert(response["success"])
@@ -31,7 +32,7 @@ class TestDeployment(unittest.TestCase):
     app_settings["turnServerCredential"] = "ovh36"
     response = self.rest_helper.call_set_app_settings(self.test_app_name, app_settings)
     assert(response["success"])
-    time.sleep(40)
+    time.sleep(20)
     app_settings = self.rest_helper.call_get_app_settings(self.test_app_name)
     #print("App Settings after:" + str(app_settings))
 
