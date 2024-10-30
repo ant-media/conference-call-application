@@ -271,6 +271,8 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.click_element(ss_button)
 
+    time.sleep(3)
+
     self.chrome.switch_to_tab(handle_2)
     assert(self.chrome.get_element(By.ID, "unpinned-gallery").is_displayed())
 
