@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import {ConferenceContext} from "../pages/AntMedia";
 
@@ -40,14 +40,14 @@ function PublisherRequestTab(props) {
                 <Grid item>
                     <PinBtn
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.approveBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {conference?.approveBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== videoId))}}
                     >
                         Allow
                     </PinBtn>
 
                     <PinBtn
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.rejectBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {conference?.rejectBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== videoId))}}
                     >
                         Deny
                     </PinBtn>
