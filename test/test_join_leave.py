@@ -273,7 +273,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_2)
     assert(self.chrome.get_element(By.ID, "unpinned-gallery").is_displayed())
 
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
+    wait.until(lambda x: len(self.get_videoTrackAssignments(3)) == 3) 
 
     assert(not self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
 
