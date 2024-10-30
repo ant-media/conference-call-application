@@ -83,7 +83,7 @@ class TestJoinLeave(unittest.TestCase):
     
   def get_videoTrackAssignments(self, expected_value=None):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script_with_retry(script)
+    result_json = self.chrome.execute_script_with_retry(script, 5, 3)
     
     if result_json is None:
       return []
@@ -261,6 +261,8 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
     self.chrome.switch_to_tab(handle_1)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    time.sleep(3)
     
     if(self.chrome.is_element_exist(By.ID, "share-screen-button")):
       ss_button = self.chrome.get_element(By.ID, "share-screen-button")
