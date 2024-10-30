@@ -31,7 +31,6 @@ class TestJoinLeave(unittest.TestCase):
     #print("broadcasts are empty")
 
 
-
   def tearDown(self):
     print(self._testMethodName, " ending...\n","----------------")
 
