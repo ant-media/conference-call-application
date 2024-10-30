@@ -202,8 +202,6 @@ var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
 var scroll_down = true;
 var last_warning_time = null;
-var newTrackQueue = [];
-var scalingTiles = false;
 
 var videoQualityConstraints = {
     video: {
@@ -1345,9 +1343,8 @@ function AntMedia(props) {
 
             console.log(obj.broadcast);
         } else if (info === "newStreamAvailable") {
-            newTrackQueue.push(obj);
-            handleNewTrackQ();
             console.log("newStreamAvailable:", obj);
+            handlePlayVideo(obj);
         } else if (info === "publish_started") {
             setIsPublished(true);
             console.log("**** publish started:" + reconnecting);
@@ -1990,10 +1987,6 @@ function AntMedia(props) {
                 }
             } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
 
-                if (scalingTiles) {
-                    return;
-                }
-
                 // There are 2 operations here:
                 // 1. VTA available in both sides -> Update
                 // 2. VTA available in the current state but not in the new list -> Remove
@@ -2326,26 +2319,6 @@ function AntMedia(props) {
         }
 
         webRTCAdaptor?.publish(publishStreamId, token, subscriberId, subscriberCode, currentStreamName, roomName, JSON.stringify(userStatusMetadata), role);
-    }
-
-    function handleNewTrackQ() {
-        console.log("handleNewTrackQ 1 size:"+newTrackQueue.length+" scalingTiles:"+scalingTiles)
-        if(scalingTiles) {
-            console.log("handleNewTrackQ 2 return")
-            return;
-        }
-        scalingTiles = true;
-        while (newTrackQueue.length > 0) {
-            let item = newTrackQueue.shift(); // Removes the first item from the list
-            console.log("handleNewTrackQ 3 :"+item)
-
-            handlePlayVideo(item);
-        }
-        
-        scalingTiles = false;
-
-        console.log("handleNewTrackQ 4 size:"+newTrackQueue.length+" scalingTiles:"+scalingTiles)
-
     }
 
     function handlePlayVideo(obj) {
