@@ -1837,7 +1837,7 @@ function AntMedia(props) {
     }
 
     function handleSendMessage(message) {
-        if (publishStreamId) {
+        if (publishStreamId || playOnly) {
             let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
             if (iceState !== null && iceState !== "failed" && iceState !== "disconnected") {
                 if (message === "debugme") {
