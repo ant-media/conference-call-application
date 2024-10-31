@@ -41,7 +41,7 @@ class TestDeployment(unittest.TestCase):
                 print(f"App couldn't be installed. Retrying {MAX_RETRIES - retry_count} more time(s)...")
                 self.test_app_name += "v"+str(retry_count)
                 os.environ['TEST_APP_NAME'] = self.test_app_name
-                time.sleep(5)  # Wait before retrying
+                time.sleep(60)  # Wait before retrying
             else:
                 print("App couldn't be installed after 3 attempts.")
 
