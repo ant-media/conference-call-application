@@ -64,6 +64,7 @@ class TestDeployment(unittest.TestCase):
     response = self.rest_helper.call_delete_app(self.test_app_name)
     print(response)
     assert(response["success"])
+    time.sleep(60)
 
 if __name__ == '__main__':
     unittest.main()
