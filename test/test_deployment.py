@@ -21,9 +21,14 @@ class TestDeployment(unittest.TestCase):
     print(self._testMethodName, " ending...")
     
   def test_install_app(self):
-    time.sleep(10)
     response = self.rest_helper.call_install_app(self.war_file, self.test_app_name)
     print(response)
+    if not response["success"]:
+      print("App couldn't be installed. Will try one more time.")
+      time.sleep(10)
+      response = self.rest_helper.call_install_app(self.war_file, self.test_app_name)
+      print(response)
+
     assert(response["success"])
     time.sleep(30)
     app_settings = self.rest_helper.call_get_app_settings(self.test_app_name)
