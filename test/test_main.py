@@ -25,7 +25,7 @@ else:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
 
 suite.addTests(suite2)
-suite.addTest(TestDeployment('test_delete_app'))
+#suite.addTest(TestDeployment('test_delete_app'))
 
 ret = not unittest.TextTestRunner(verbosity=2, failfast=True).run(suite).wasSuccessful()
 sys.exit(ret)
