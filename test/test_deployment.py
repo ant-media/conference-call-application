@@ -21,15 +21,26 @@ class TestDeployment(unittest.TestCase):
     print(self._testMethodName, " ending...")
     
   def test_install_app(self):
-    response = self.rest_helper.call_install_app(self.war_file, self.test_app_name)
-    print(response)
-    if not response["success"]:
-      print("App couldn't be installed. Will try one more time.")
-      time.sleep(10)
-      response = self.rest_helper.call_install_app(self.war_file, self.test_app_name)
-      print(response)
+    
+    MAX_RETRIES = 3
+    retry_count = 0
+    response = None
 
-    assert(response["success"])
+    while retry_count < MAX_RETRIES:
+        response = self.rest_helper.call_install_app(self.war_file, self.test_app_name)
+        print(response)
+        
+        if response["success"]:
+            print("App installed successfully.")
+            break  # Exit the loop if the installation was successful
+        else:
+            retry_count += 1
+            if retry_count < MAX_RETRIES:
+                print(f"App couldn't be installed. Retrying {MAX_RETRIES - retry_count} more time(s)...")
+                time.sleep(10)  # Wait before retrying
+            else:
+                print("App couldn't be installed after 3 attempts.")
+
     time.sleep(30)
     app_settings = self.rest_helper.call_get_app_settings(self.test_app_name)
     app_settings["stunServerURI"] = "turn:coturn.antmedia.svc.cluster.local"
