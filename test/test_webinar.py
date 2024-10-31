@@ -411,7 +411,7 @@ class TestWebinarScenario(unittest.TestCase):
     # switch to playerA and check if presenter is added to listener room
     self.chrome.switch_to_tab(handle_player_A)
 
-    wait.until(lambda x: len(self.get_video_track_assignments(1)) == 1)
+    wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
 
     print("listener can see publisher now")
 
