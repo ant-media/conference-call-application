@@ -488,10 +488,12 @@ function AntMedia(props) {
             createSpeedTestForPublishWebRtcAdaptor();
         }
         setTimeout(() => {
-            if (speedTestProgress.current < 40 ||
-                (isPlayOnly ? speedTestPlayStarted.current === false : true) ||
-                (!isPlayOnly && speedTestPlayStarted.current === false)) {
+            if (speedTestProgress.current < 40 &&
+                ((isPlayOnly ? speedTestPlayStarted.current === false : true) ||
+                (!isPlayOnly && speedTestPlayStarted.current === false))) {
                 //it means that it's stuck before publish started
+                console.log("speed test is stuck before publish started speedTestProgress.current:", speedTestProgress.current);
+
                 stopSpeedTest();
                 setSpeedTestObjectFailed("Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ");
             }
