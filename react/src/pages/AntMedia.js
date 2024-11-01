@@ -493,16 +493,7 @@ function AntMedia(props) {
                 (!isPlayOnly && speedTestPlayStarted.current === false)) {
                 //it means that it's stuck before publish started
                 stopSpeedTest();
-                let tempSpeedTestObject = {};
-                tempSpeedTestObject.isfailed = true;
-                tempSpeedTestObject.errorMessage = "";
-                tempSpeedTestObject.progressValue = 0;
-        
-                tempSpeedTestObject.isfinished = false;
-                tempSpeedTestObject.message = "Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ";
-
-                setSpeedTestObject(tempSpeedTestObject);
-
+                setSpeedTestObjectFailed("Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ");
             }
         }, 15000); //it tooks about 20 seconds to finish the test, if it's less 40, it means it's stuck
     }
@@ -588,7 +579,23 @@ function AntMedia(props) {
         statsList.current = tempStatsList;
     }
 
+    function setSpeedTestObjectFailed(errorMessage) {
+        let tempSpeedTestObject = {};
+        tempSpeedTestObject.message = errorMessage;
+        tempSpeedTestObject.isfinished = false;
+        tempSpeedTestObject.isfailed = true;
+        tempSpeedTestObject.errorMessage = errorMessage;
+        tempSpeedTestObject.progressValue = 0;
+        speedTestProgress.current = tempSpeedTestObject.progressValue;
+
+        setSpeedTestObject(tempSpeedTestObject);
+    }
+
     function setSpeedTestObjectProgress(progressValue) {
+        if (progressValue > 100) {
+            setSpeedTestObjectFailed("Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ");
+            return;
+        }
         let tempSpeedTestObject = {};
         tempSpeedTestObject.message = speedTestObject.message;
         tempSpeedTestObject.isfinished = false;
@@ -686,16 +693,7 @@ function AntMedia(props) {
         console.log("error from speed test webrtc adaptor callback")
         //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
         console.log("error:" + error + " message:" + message);
-
-        let tempSpeedTestObject = {};
-        tempSpeedTestObject.message = speedTestObject.message;
-        tempSpeedTestObject.isfinished = speedTestObject.isfinished;
-        tempSpeedTestObject.isfailed = true;
-        tempSpeedTestObject.errorMessage = "There is an error('"+error+"'). It will try again..." ;
-        tempSpeedTestObject.progressValue = 0;
-        speedTestProgress.current = tempSpeedTestObject.progressValue;
-
-        setSpeedTestObject(tempSpeedTestObject);
+        setSpeedTestObjectFailed("There is an error('"+error+"'). It will try again...");
     }
 
     function createSpeedTestForPlayWebRtcAdaptor() {
@@ -750,15 +748,7 @@ function AntMedia(props) {
         //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
         console.log("error:" + error + " message:" + message);
 
-        let tempSpeedTestObject = {};
-        tempSpeedTestObject.message = speedTestObject.message;
-        tempSpeedTestObject.isfinished = speedTestObject.isfinished;
-        tempSpeedTestObject.isfailed = true;
-        tempSpeedTestObject.errorMessage = "There is an error('"+error+"'). It will try again..." ;
-        tempSpeedTestObject.progressValue = 0;
-        speedTestProgress.current = tempSpeedTestObject.progressValue;
-
-        setSpeedTestObject(tempSpeedTestObject);
+        setSpeedTestObjectFailed("There is an error('"+error+"'). It will try again...");
     }
 
     function setAndFillPlayStatsList(obj) {
