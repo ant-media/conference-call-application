@@ -270,6 +270,7 @@ var room = null;
 var reconnecting = false;
 var publishReconnected;
 var playReconnected;
+var streamIdInUseCounter = 0;
 
 function AntMedia(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -1454,6 +1455,7 @@ function AntMedia(props) {
             console.log("newStreamAvailable:", obj);
         } else if (info === "publish_started") {
             setIsPublished(true);
+            streamIdInUseCounter = 0;
             console.log("**** publish started:" + reconnecting);
             updateMaxVideoTrackCount(appSettingsMaxVideoTrackCount);
 
@@ -1641,6 +1643,14 @@ function AntMedia(props) {
             errorMessage = "Fatal Error: WebSocket not supported in this browser";
         } else if (error.indexOf("no_stream_exist") !== -1) {
             setIsNoSreamExist(true);
+        } else if (error.indexOf("streamIdInUse") !== -1) {
+            streamIdInUseCounter++;
+            if (streamIdInUseCounter > 3) {
+                setLeaveRoomWithError("Stream ID is in use. Please report this.");
+                setLeftTheRoom(true);
+                setIsJoining(false);
+                setIsReconnectionInProgress(false);
+            }
         } else if (error.indexOf("data_channel_error") !== -1) {
             errorMessage = "There was a error during data channel communication";
         } else if (error.indexOf("ScreenSharePermissionDenied") !== -1) {
