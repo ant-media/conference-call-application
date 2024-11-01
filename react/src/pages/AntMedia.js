@@ -592,6 +592,7 @@ function AntMedia(props) {
     }
 
     function setSpeedTestObjectProgress(progressValue) {
+        // if progress value is more than 100, it means that speed test is failed and we can not get or set the stat list properly
         if (progressValue > 100) {
             setSpeedTestObjectFailed("Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ");
             return;
