@@ -542,14 +542,7 @@ function AntMedia(props) {
     function speedTestForPublishWebRtcAdaptorInfoCallback(info, obj) {
         if (info === "initialized") {
             speedTestCounter.current = 0;
-            let tempSpeedTestObject = {};
-            tempSpeedTestObject.message = speedTestObject.message;
-            tempSpeedTestObject.isfinished = false;
-            tempSpeedTestObject.isfailed = false;
-            tempSpeedTestObject.errorMessage = "";
-            tempSpeedTestObject.progressValue = 10;
-            speedTestProgress.current = tempSpeedTestObject.progressValue;
-            setSpeedTestObject(tempSpeedTestObject);
+            setSpeedTestObjectProgress(10);
             speedTestForPublishWebRtcAdaptor.current.publish("speedTestStream" + speedTestStreamId.current, token, subscriberId, subscriberCode, "speedTestStream" + speedTestStreamId.current, "", "")
         } 
         else if (info === "publish_started") {
@@ -571,14 +564,7 @@ function AntMedia(props) {
             if (speedTestCounter.current > 3 && statsList.current.length > 3) {
                 calculateTheSpeedTestResult();
             } else {
-                let tempSpeedTestObject = {};
-                tempSpeedTestObject.message = speedTestObject.message;
-                tempSpeedTestObject.isfinished = false;
-                tempSpeedTestObject.isfailed = false;
-                tempSpeedTestObject.errorMessage = "";
-                tempSpeedTestObject.progressValue = 20 + (speedTestCounter.current * 20);
-                speedTestProgress.current = tempSpeedTestObject.progressValue;
-                setSpeedTestObject(tempSpeedTestObject);
+                setSpeedTestObjectProgress(20 + (speedTestCounter.current * 20));
             }
         } 
         else if (info === "ice_connection_state_changed") {
@@ -752,14 +738,7 @@ function AntMedia(props) {
             if (speedTestCounter.current > 3 && statsList.current.length > 3) {
                 calculateThePlaySpeedTestResult();
             } else {
-                let tempSpeedTestObject = {};
-                tempSpeedTestObject.message = speedTestObject.message;
-                tempSpeedTestObject.isfinished = false;
-                tempSpeedTestObject.isfailed = false;
-                tempSpeedTestObject.errorMessage = "";
-                tempSpeedTestObject.progressValue = 20 + (speedTestCounter.current * 20);
-                speedTestProgress.current = tempSpeedTestObject.progressValue;
-                setSpeedTestObject(tempSpeedTestObject);
+                setSpeedTestObjectProgress(20 + (speedTestCounter.current * 20));
             }
         } else if (info === "ice_connection_state_changed") {
             console.log("speed test ice connection state changed")
