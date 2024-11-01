@@ -39,6 +39,12 @@ const globals = {
 function getMediaConstraints(videoSendResolution, frameRate) {
   let constraint = null;
 
+  constraint = {
+      video: true
+  }
+
+  return constraint;
+
     switch (videoSendResolution) {
         case "screenConstraints":
             constraint = {
@@ -207,11 +213,7 @@ var newTrackQueue = [];
 var scalingTiles = false;
 
 var videoQualityConstraints = {
-    video: {
-        width: {ideal: 640},
-        height: {ideal: 360},
-        advanced: [{frameRate: {min: 15}}, {height: {min: 360}}, {width: {min: 640}}, {frameRate: {max: 15}}, {width: {max: 640}}, {height: {max: 360}}, {aspectRatio: {exact: 1.77778}}]
-    },
+    video: true,
 }
 
 var audioQualityConstraints = {
@@ -222,16 +224,8 @@ var audioQualityConstraints = {
 
 var mediaConstraints = {
     // setting constraints here breaks source switching on firefox.
-    video: videoQualityConstraints.video, audio: audioQualityConstraints.audio,
+    video: true, audio: audioQualityConstraints.audio,
 };
-
-if (localStorage.getItem('selectedCamera')) {
-    mediaConstraints.video.deviceId = localStorage.getItem('selectedCamera');
-}
-
-if (localStorage.getItem('selectedMicrophone')) {
-    mediaConstraints.audio.deviceId = localStorage.getItem('selectedMicrophone');
-}
 
 
 if (initialPlayOnly) {
@@ -494,8 +488,9 @@ function AntMedia(props) {
             createSpeedTestForPublishWebRtcAdaptor();
         }
         setTimeout(() => {
-            if (speedTestProgress.current < 40 || speedTestPlayStarted.current === false) 
-                {
+            if (speedTestProgress.current < 40 ||
+                (isPlayOnly ? speedTestPlayStarted.current === false : true) ||
+                (!isPlayOnly && speedTestPlayStarted.current === false)) {
                 //it means that it's stuck before publish started
                 stopSpeedTest();
                 let tempSpeedTestObject = {};
@@ -563,7 +558,7 @@ function AntMedia(props) {
             setSpeedTestObjectProgress(20);
             speedTestForPublishWebRtcAdaptor.current.enableStats("speedTestStream" + speedTestStreamId.current);
         } 
-        else if (info === "updated_stats") 
+        else if (info === "updated_stats")
         {
             if (speedTestCounter.current === 0) {
                 statsList.current = []; // reset stats list if it is the first time
@@ -2358,6 +2353,7 @@ function AntMedia(props) {
     function updateVideoSendResolution(isPinned) {
         let promise = null;
         let mediaConstraints = {video: true};
+        return;
 
         if (isScreenShared) {
             mediaConstraints = getMediaConstraints("screenConstraints", 20);
