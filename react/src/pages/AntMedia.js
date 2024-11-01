@@ -508,7 +508,7 @@ function AntMedia(props) {
                 setSpeedTestObject(tempSpeedTestObject);
 
             }
-        }, 45000); //it tooks about 20 seconds to finish the test, if it's less 40, it means it's stuck
+        }, 15000); //it tooks about 20 seconds to finish the test, if it's less 40, it means it's stuck
     }
 
     function stopSpeedTest() {
