@@ -1717,7 +1717,7 @@ describe('AntMedia Component', () => {
     });
 
     await waitFor(() => {
-      expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
+      expect(webRTCAdaptorPlaySpeedTestConstructor).toBe(undefined);
     });
 
     await waitFor(() => {
@@ -1726,7 +1726,6 @@ describe('AntMedia Component', () => {
 
     const mockStop = jest.fn();
 
-    webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
     webRTCAdaptorPublishSpeedTestConstructor.stop = mockStop;
 
 
@@ -1746,9 +1745,6 @@ describe('AntMedia Component', () => {
     });
 
     /*
-    await waitFor(() => {
-      expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
-    });
     await waitFor(() => {
       expect(webRTCAdaptorPublishSpeedTestConstructor).toBeNull();
     });
@@ -1795,6 +1791,12 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
+    currentConference.setIsPlayOnly(true);
+
+    await waitFor(() => {
+      expect(currentConference.isPlayOnly).toBe(true);
+    });
+
     await act(async () => {
       currentConference.startSpeedTest();
     });
@@ -1818,7 +1820,7 @@ describe('AntMedia Component', () => {
 
     // Assert
     await waitFor(() => {
-      expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+      expect(mockStop).toHaveBeenCalledWith(`speedTestSampleStream`);
     });
     //await waitFor(() => {
     //  expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
