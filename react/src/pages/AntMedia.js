@@ -487,10 +487,11 @@ function AntMedia(props) {
         } else {
             createSpeedTestForPublishWebRtcAdaptor();
         }
+
+        //If it's not playonly (aka webrtc publish is enabled), we only look at the publish statistics
+        //If it's playonly, we look at the play statistics
         setTimeout(() => {
-            if (speedTestProgress.current < 40 &&
-                ((isPlayOnly ? speedTestPlayStarted.current === false : true) ||
-                (!isPlayOnly && speedTestPlayStarted.current === false))) {
+            if (speedTestProgress.current < 40) {
                 //it means that it's stuck before publish started
                 console.log("speed test is stuck before publish started speedTestProgress.current:", speedTestProgress.current);
 
@@ -595,6 +596,8 @@ function AntMedia(props) {
 
     function setSpeedTestObjectProgress(progressValue) {
         // if progress value is more than 100, it means that speed test is failed, and we can not get or set the stat list properly
+
+        //TODO: It's just a insurance to not encounter this case. It's put there for a workaround solution in production for fakeeh. Remove it later - mekya
         if (progressValue > 100) {
             // we need to stop the speed test and set the speed test object as failed
             stopSpeedTest();
@@ -698,7 +701,8 @@ function AntMedia(props) {
         console.log("error from speed test webrtc adaptor callback")
         //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
         console.log("error:" + error + " message:" + message);
-        setSpeedTestObjectFailed("There is an error('"+error+"'). It will try again...");
+        setSpeedTestObjectFailed("There is an error('"+error+"'). Please try again later...");
+        stopSpeedTest();
     }
 
     function createSpeedTestForPlayWebRtcAdaptor() {
@@ -753,7 +757,9 @@ function AntMedia(props) {
         //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
         console.log("error:" + error + " message:" + message);
 
-        setSpeedTestObjectFailed("There is an error('"+error+"'). It will try again...");
+        setSpeedTestObjectFailed("There is an error('"+error+"'). Please try again later...");
+
+        stopSpeedTest();
     }
 
     function setAndFillPlayStatsList(obj) {
