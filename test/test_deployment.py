@@ -59,7 +59,6 @@ class TestDeployment(unittest.TestCase):
 
 
 
-
   def test_delete_app(self):
     response = self.rest_helper.call_delete_app(self.test_app_name)
     print(response)
