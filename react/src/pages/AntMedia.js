@@ -505,7 +505,7 @@ function AntMedia(props) {
             speedTestForPublishWebRtcAdaptor.current.closeWebSocket();
         }
         if (speedTestForPlayWebRtcAdaptor.current) {
-            speedTestForPlayWebRtcAdaptor.current.stop("speedTestStream" + speedTestStreamId.current);
+            speedTestForPlayWebRtcAdaptor.current.stop("speedTestSampleStream");
         }
         speedTestForPublishWebRtcAdaptor.current = null;
         speedTestForPlayWebRtcAdaptor.current = null;
