@@ -100,39 +100,17 @@ function getMediaConstraints(videoSendResolution, frameRate) {
 
 var peerconnection_config = {
   'iceServers': [
-    {
-      'urls': 'stun:stun1.l.google.com:19302'
-    }
+      {
+          'urls': 'turn:turn.fakeeh.education:3478',
+          'username': 'QbhpN2f9',
+          'credential': '7qQP9aLFBEyE'
+      },
+      {
+          'urls': 'stun:stun1.l.google.com:19302'
+      }
   ],
   sdpSemantics: 'unified-plan'
 };
-
-checkAndSetPeerConnectionConfig();
-
-function checkAndSetPeerConnectionConfig() {
-    let turnServerURL = getRootAttribute("data-turn-server-url");
-    let turnUsername = getRootAttribute("data-turn-username");
-    let turnCredential = getRootAttribute("data-turn-credential");
-
-    if (!turnServerURL) {
-        turnServerURL = process.env.REACT_APP_TURN_SERVER_URL;
-        turnUsername = process.env.REACT_APP_TURN_SERVER_USERNAME;
-        turnCredential = process.env.REACT_APP_TURN_SERVER_CREDENTIAL;
-    }
-
-    if (turnServerURL) {
-        peerconnection_config = {
-            'iceServers': [
-                {
-                    'urls': turnServerURL,
-                    'username': turnUsername,
-                    'credential': turnCredential
-                }
-            ],
-            sdpSemantics: 'unified-plan'
-        };
-    }
-}
 
 var streamNameInit = getRootAttribute("stream-name");
 
