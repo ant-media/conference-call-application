@@ -84,8 +84,16 @@ function ParticipantTab(props) {
         style={{ borderBottomWidth: 1 }}
         sx={{ borderColor: "primary.main" }}
       >
-        <Grid item sx={{ pr: 1 }}>
-          <ParticipantName variant="body1">{name}</ParticipantName>
+        <Grid item sx={{ pr: 1,  maxWidth: "60%" }}>
+          <ParticipantName
+              variant="body1"
+              sx={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "block"
+              }}
+          >{name}</ParticipantName>
         </Grid>
         <Grid item>
           <div style={{display: 'flex'}}>
