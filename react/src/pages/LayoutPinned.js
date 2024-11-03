@@ -3,6 +3,7 @@ import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
 import React from "react";
 import { ConferenceContext } from "./AntMedia";
+import {isMobile} from "react-device-detect";
 
 
 function LayoutPinned (props) {
@@ -12,14 +13,15 @@ function LayoutPinned (props) {
 
   let MAX_VIDEO_AT_SIDE = 4;
 
-  conference.updateMaxVideoTrackCount(Math.min(conference.globals.desiredMaxVideoTrackCount, MAX_VIDEO_AT_SIDE));
+  let trackCount = Math.min(conference.globals.desiredMaxVideoTrackCount, MAX_VIDEO_AT_SIDE);
+  conference.updateMaxVideoTrackCount(trackCount);
 
-  const showOthers = Object.keys(conference.allParticipants).length > MAX_VIDEO_AT_SIDE + 1; //one video is pinned
+  const showOthers = Object.keys(conference.allParticipants).length > trackCount + 1; //one video is pinned
 
   let playingParticipantsCount = 0;
 
-  //if we need to show others card, then we don't show the last video to hold place for the others card
-  const maxPlayingParticipantsCount = showOthers ? MAX_VIDEO_AT_SIDE - 1 : Math.min(conference.videoTrackAssignments.length, MAX_VIDEO_AT_SIDE);
+  //if we need to show others card, then we don't show the last video to hold place for the others card. but should show you.
+  const maxPlayingParticipantsCount = showOthers ? Math.max(2, trackCount-1) : Math.min(conference.videoTrackAssignments.length, MAX_VIDEO_AT_SIDE);
   const playingParticipants = [];
 
   const pinnedVideo = () => {
@@ -49,7 +51,7 @@ function LayoutPinned (props) {
     )
   }
 
-  const videoCards = () => {
+  const videoCards = (isMobileView) => {
     return (
       <>
       {
@@ -77,6 +79,7 @@ function LayoutPinned (props) {
               <div className="unpinned" key={index}>
                 <div className="single-video-container">
                   <VideoCard
+                      isMobileView={isMobileView}
                     trackAssignment={element}
                       autoPlay
                       name={participantName}
@@ -110,11 +113,18 @@ function LayoutPinned (props) {
   return (
     <>
       {pinnedVideo()}
-      <div id="unpinned-gallery">
-        {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
-        {videoCards()}
-        {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
-      </div>
+      { (!isMobile) ?
+          <div id="unpinned-gallery">
+            {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {videoCards(false)}
+            {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
+          </div>
+          : <><div id="unpinned-gallery">
+            {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
+          </div>
+            {videoCards(true)}
+          </>}
     </>
   );
 };

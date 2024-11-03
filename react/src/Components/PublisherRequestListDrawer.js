@@ -32,7 +32,7 @@ const AntDrawer = styled(Drawer)(({ theme }) => ({
 const PublisherRequestListGrid = styled(Grid)(({ theme }) => ({
     position: 'relative',
     padding: 16,
-    background: theme.palette.green[70],
+    background: theme.palette.themeColor70,
     borderRadius: 10,
 }));
 const TabGrid = styled(Grid)(({ theme }) => ({
