@@ -450,6 +450,7 @@ function AntMedia(props) {
   const [isBecomePublisherConfirmationDialogOpen, setBecomePublisherConfirmationDialogOpen] = React.useState(false);
 
     const [publishStats, setPublishStats] = React.useState(null);
+    const [playStats, setPlayStats] = React.useState(null);
 
     const [isReconnectionInProgress, setIsReconnectionInProgress] = React.useState(false);
 
@@ -868,11 +869,15 @@ function AntMedia(props) {
 
         setSelectedDevices(selectedDevices);
 
-        if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
-            webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
-        }
-        if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
-            webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+        try {
+            if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
+                webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+            }
+            if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
+                webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+            }
+        } catch (error) {
+            console.error("Error while switching video/audio sources", error);
         }
     }
 
@@ -1415,7 +1420,11 @@ function AntMedia(props) {
             setDevices(obj);
 
         } else if (info === "updated_stats") {
-            checkConnectionQuality(obj);
+            if (obj.streamId === roomName) {
+                checkConnectionQualityForPlay(obj);
+            } else {
+                checkConnectionQualityForPublish(obj);
+            }
         } else if (info === "debugInfo") {
             handleDebugInfo(obj.debugInfo);
         } else if (info === "ice_connection_state_changed") {
@@ -1442,7 +1451,77 @@ function AntMedia(props) {
         }
     }
 
-    function checkConnectionQuality(obj) {
+    function checkConnectionQualityForPlay(obj) {
+        if (obj.inboundRtpList === undefined || obj.inboundRtpList === null || obj.inboundRtpList.length === 0) {
+            // it means that there is no incoming stream so we don't need to check the connection quality for playback
+            return;
+        }
+
+        if (playStats === null) {
+            // Initialize the playStats object
+            let packageReceived = obj.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).packetsReceived + obj.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).packetsReceived;
+            setPlayStats({videoPacketsLost: obj.videoPacketsLost, audioPacketsLost: obj.audioPacketsLost, packageReceived: packageReceived, inboundRtpList: obj.inboundRtpList});
+            return;
+        }
+
+        // Calculate total bytes received
+        let totalBytesReceived = obj.totalBytesReceivedCount;
+
+        // Calculate video frames received and frames dropped
+        let framesReceived = obj.framesReceived;
+        let framesDropped = obj.framesDropped;
+
+        // Calculate the time difference (in seconds)
+        let timeElapsed = (obj.currentTimestamp - obj.startTime) / 1000; // Convert ms to seconds
+
+        // Calculate incoming bitrate (bits per second)
+        let bytesReceivedDiff = obj.lastBytesReceived - obj.firstBytesReceivedCount;
+        let incomingBitrate = (bytesReceivedDiff * 8) / timeElapsed; // Convert bytes to bits
+
+        // Calculate packet loss
+        let videoPacketsLost = obj.videoPacketsLost;
+        videoPacketsLost = (videoPacketsLost < 0) ? 0 : videoPacketsLost;
+        let audioPacketsLost = obj.audioPacketsLost;
+        audioPacketsLost = (audioPacketsLost < 0) ? 0 : audioPacketsLost;
+
+        let totalPacketsLost = videoPacketsLost + audioPacketsLost;
+
+        // Calculate packet loss for the previous stats
+        let oldVideoPacketsLost = playStats.videoPacketsLost;
+        oldVideoPacketsLost = (oldVideoPacketsLost < 0) ? 0 : oldVideoPacketsLost;
+        let oldAudioPacketsLost = playStats.audioPacketsLost;
+        oldAudioPacketsLost = (oldAudioPacketsLost < 0) ? 0 : oldAudioPacketsLost;
+
+        let oldTotalPacketsLost = oldVideoPacketsLost + oldAudioPacketsLost;
+
+        console.log("playStats:", playStats);
+
+        // Jitter calculation (average of video and audio jitter)
+        let videoJitter = obj.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).jitterBufferDelay;
+        videoJitter = (videoJitter < 0) ? 0 : videoJitter;
+        let audioJitter = obj.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).jitterBufferDelay;
+        audioJitter = (audioJitter < 0) ? 0 : audioJitter;
+
+        let avgJitter = (videoJitter + audioJitter) / 2;
+
+        let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
+
+        // Frame drop rate
+        let frameDropRate = framesDropped / framesReceived * 100;
+
+
+        if (rtt > 0.15 || frameDropRate > 5 || avgJitter > 100) {
+            console.warn("rtt:" + rtt + " average jitter:" + avgJitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
+            displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
+        } else if (rtt > 0.1 || avgJitter > 50 || frameDropRate > 2.5) {
+            console.warn("rtt:" + rtt + " average jitter:" + avgJitter);
+            displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
+        }
+
+        setPlayStats({videoPacketsLost: videoPacketsLost, audioPacketsLost: audioPacketsLost, inboundRtpList: obj.inboundRtpList});
+    }
+
+    function checkConnectionQualityForPublish(obj) {
         let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
         let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
         //let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
@@ -1461,10 +1540,10 @@ function AntMedia(props) {
             }
         }
 
-        if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
+        if (rtt >= 0.15 || packageLostPercentage >= 2.5 || jitter >= 80) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
             displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
-        } else if (rtt >= 100 || packageLostPercentage >= 1.5 || jitter >= 50) {
+        } else if (rtt >= 0.1 || packageLostPercentage >= 1.5 || jitter >= 50) {
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter);
             displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
         }
@@ -2788,7 +2867,9 @@ function AntMedia(props) {
                         stopSpeedTest,
                         statsList,
                         getTrackStats,
-                        isBroadcasting
+                        isBroadcasting,
+                        checkConnectionQualityForPlay,
+                        checkConnectionQualityForPublish
                     }}
                 >
                     {props.children}
