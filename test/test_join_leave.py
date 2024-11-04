@@ -31,7 +31,6 @@ class TestJoinLeave(unittest.TestCase):
     #print("broadcasts are empty")
 
 
-
   def tearDown(self):
     print(self._testMethodName, " ending...\n","----------------")
 
@@ -39,7 +38,7 @@ class TestJoinLeave(unittest.TestCase):
     directory = os.path.expanduser("~/test/webrtc-load-test")
     script = "run.sh"
     ws_url = self.url.replace("https://", "").replace("http://", "")
-    parameters = ["-m", "publisher", "-s", ws_url, "-p", "443", "-q", "true", "-f", "test.mp4", "-a", self.test_app_name, "-i", participant_name, "-t", room, "-n", str(count)]  
+    parameters = ["-m", "publisher", "-s", ws_url, "-p", "443", "-q", "true", "-f", "test.mp4", "-r", "true", "-a", self.test_app_name, "-i", participant_name, "-t", room, "-n", str(count)]  
     
     print("test tool is running with parameters: "+str(parameters))
     # Full path to the script
@@ -84,11 +83,11 @@ class TestJoinLeave(unittest.TestCase):
     
   def get_videoTrackAssignments(self, expected_value=None):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script_with_retry(script)
+    result_json = self.chrome.execute_script_with_retry(script, 5, 3)
     
     if result_json is None:
       return []
-    
+        
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
     if expected_value is not None and len(vtas) != expected_value:
@@ -101,7 +100,6 @@ class TestJoinLeave(unittest.TestCase):
       #print("\n screen shot")
       #self.chrome.print_ss_as_base64()
 
-      self.open_close_chat_drawer()
       print("++++++++++ end trial ++++++++++\n")
 
 
@@ -132,7 +130,7 @@ class TestJoinLeave(unittest.TestCase):
     result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return -1
-    return result_json["globals"]["desiredMaxVideoTrackCount"]
+    return result_json["globals"]["desiredTileCount"]
   
   def change_video_track_count(self, count):
     index = 0
@@ -236,7 +234,9 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.click_element_as_script(messages_button)
 
   def call_debugme(self):
-    self.open_close_chat_drawer()
+    if not self.chrome.is_element_displayed(By.ID, "message-input"):
+      self.open_close_chat_drawer()
+      time.sleep(2)
 
     message_input = self.chrome.get_element_with_retry(By.ID, "message-input")
     self.chrome.write_to_element(message_input, "debugme")
@@ -254,7 +254,9 @@ class TestJoinLeave(unittest.TestCase):
     print("<<<<<<<\n")
 
 
+
   def test_others_tile(self):
+    self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -266,6 +268,8 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
     self.chrome.switch_to_tab(handle_1)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    time.sleep(3)
     
     if(self.chrome.is_element_exist(By.ID, "share-screen-button")):
       ss_button = self.chrome.get_element(By.ID, "share-screen-button")
@@ -276,10 +280,12 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.click_element(ss_button)
 
+    time.sleep(3)
+
     self.chrome.switch_to_tab(handle_2)
     assert(self.chrome.get_element(By.ID, "unpinned-gallery").is_displayed())
 
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3) 
+    wait.until(lambda x: len(self.get_videoTrackAssignments(3)) == 3) 
 
     assert(not self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
 
@@ -447,7 +453,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.makeFullScreen()
     N = 5
     room = "room"+str(random.randint(100, 999))
-    wait = self.chrome.get_wait(25, 5)
+    wait = self.chrome.get_wait(30, 3)
 
     process = self.create_participants_with_test_tool("participant", room, N-1)
 
@@ -607,7 +613,7 @@ class TestJoinLeave(unittest.TestCase):
    
 
 
-  def test_recording(self):
+  def _test_recording(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)

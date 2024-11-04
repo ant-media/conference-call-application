@@ -115,11 +115,14 @@ jobs:
         NODE_OPTIONS: '--max-old-space-size=4096'
       run: |
         cd react
-        mv .env.production.webinar env.production
-        sed -i "s#//placeholder for peerconnection_config#peerconnection_config:{\"iceServers\":[{\"urls\":\"turn:${{ secrets.STAGING_TURN_URL }}\",\"username\":\"${{ secrets.STAGING_TURN_USERNAME }}\",\"credential\":\"${{ secrets.STAGING_TURN_PASSWORD }}\"}],\"sdpSemantics\":\"unified-plan\"},#" src/pages/AntMedia.js
+        mv .env.production.webinar .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_URL=.*#REACT_APP_TURN_SERVER_URL=\"turn:${{ secrets.STAGING_TURN_URL }}\"#" .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_USERNAME=.*#REACT_APP_TURN_SERVER_USERNAME=\"${{ secrets.STAGING_TURN_USERNAME }}\"#" .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_CREDENTIAL=.*#REACT_APP_TURN_SERVER_CREDENTIAL=\"${{ secrets.STAGING_TURN_PASSWORD }}\"#" .env.production
         npm install
         npm run build
         cd ..
+        rm -r webapp/src/main/webapp/static/*
         cp -a react/build/. webapp/src/main/webapp
 
     - name: Build Maven project for webinar
@@ -146,7 +149,7 @@ jobs:
         
     - name: Install Selenium
       run: |
-        wget https://storage.googleapis.com/chrome-for-testing-public/128.0.6613.86/linux64/chromedriver-linux64.zip
+        wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip
         unzip chromedriver-linux64.zip
         sudo cp chromedriver-linux64/chromedriver /tmp
         ls -al /tmp
@@ -185,6 +188,13 @@ jobs:
       with:
         name: logs
         path: /tmp/*.log
+
+    - name: Upload war files as artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: wars
+        path: /tmp/*.war
           
     - name: Publish to Maven Central
       if: github.ref == 'refs/heads/main'
