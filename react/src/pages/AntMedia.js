@@ -1347,8 +1347,8 @@ function AntMedia(props) {
             }
 
             console.log(obj.broadcast);
-        } else if (info === "newStreamAvailable") {
-            console.log("newStreamAvailable:", obj);
+        } else if (info === "newTrackAvailable") {
+            console.log("newTrackAvailable:", obj);
             handlePlayVideo(obj);
         } else if (info === "publish_started") {
             setIsPublished(true);
@@ -1716,7 +1716,6 @@ function AntMedia(props) {
         allParticipants[streamId] = broadcastObject;
 
         handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
-
 
         setParticipantUpdated(!participantUpdated);
     }
