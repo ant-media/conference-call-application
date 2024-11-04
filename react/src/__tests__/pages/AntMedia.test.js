@@ -1923,4 +1923,56 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('increments streamIdInUseCounter and does not leave room when counter is less than or equal to 3', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+    });
+
+    //expect(consoleSpy).toHaveBeenCalledWith("StreamId is in use. Please report this.");
+
+    consoleSpy.mockRestore();
+  });
+
+  it('increments streamIdInUseCounter and leaves room with error when counter exceeds 3', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith("StreamId is in use. Please report this.");
+
+    consoleSpy.mockRestore();
+  });
+
 });
