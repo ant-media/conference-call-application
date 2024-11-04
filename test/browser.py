@@ -136,6 +136,13 @@ class Browser:
 
     return element.find_elements(by, value)
 
+  def is_element_displayed(self, by, value):
+    try:
+        element = self.driver.find_element(by, value)
+        return element.is_displayed()
+    except NoSuchElementException:
+        print(f"Element not found by {by} with value {value}")
+        return False
 
   def is_element_exist(self, by, value):
     try:

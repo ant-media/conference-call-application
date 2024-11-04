@@ -31,7 +31,7 @@ const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
   maxVideoTrackCount: 6,
-  desiredMaxVideoTrackCount: 6,
+  desiredTileCount: 6,
   trackEvents: [],
 };
 
@@ -202,8 +202,6 @@ var subscriberCode = getUrlParameter("subscriberCode");
 var scrollThreshold = -Infinity;
 var scroll_down = true;
 var last_warning_time = null;
-var newTrackQueue = [];
-var scalingTiles = false;
 
 var videoQualityConstraints = {
     video: {
@@ -468,7 +466,7 @@ function AntMedia(props) {
   useEffect(() => {
     setTimeout(() => {
       setParticipantUpdated(!participantUpdated);
-      console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
+      //console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
     }, 5000);
   }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1009,7 +1007,7 @@ function AntMedia(props) {
         roomOfStream[generatedStreamId] = room;
 
         globals.maxVideoTrackCount = appSettingsMaxVideoTrackCount;
-        globals.desiredMaxVideoTrackCount = appSettingsMaxVideoTrackCount;
+        globals.desiredTileCount = appSettingsMaxVideoTrackCount;
         setPublishStreamId(generatedStreamId);
 
         if (!isPlayOnly) {
@@ -1350,9 +1348,8 @@ function AntMedia(props) {
 
             console.log(obj.broadcast);
         } else if (info === "newStreamAvailable") {
-            newTrackQueue.push(obj);
-            handleNewTrackQ();
             console.log("newStreamAvailable:", obj);
+            handlePlayVideo(obj);
         } else if (info === "publish_started") {
             setIsPublished(true);
             console.log("**** publish started:" + reconnecting);
@@ -1692,8 +1689,8 @@ function AntMedia(props) {
         });
     }
 
-    function handleSetMaxVideoTrackCount(maxTrackCount) {
-        globals.desiredMaxVideoTrackCount = maxTrackCount;
+    function handleSetDesiredTileCount(maxTrackCount) {
+        globals.desiredTileCount = maxTrackCount;
     }
 
     function updateMaxVideoTrackCount(newCount) {
@@ -1883,7 +1880,7 @@ function AntMedia(props) {
     }
 
     function handleSendMessage(message) {
-        if (publishStreamId) {
+        if (publishStreamId || isPlayOnly) {
             let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
             if (iceState !== null && iceState !== "failed" && iceState !== "disconnected") {
                 if (message === "debugme") {
@@ -1980,7 +1977,7 @@ function AntMedia(props) {
 
     function handleNotificationEvent(obj) {
         var notificationEvent = JSON.parse(obj.data);
-        console.log("handleNotificationEvent:", notificationEvent);
+        //console.log("handleNotificationEvent:", notificationEvent);
         if (notificationEvent != null && typeof notificationEvent == "object") {
             var eventStreamId = notificationEvent.streamId;
             var eventType = notificationEvent.eventType;
@@ -2071,7 +2068,7 @@ function AntMedia(props) {
                 console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(receivedVideoTrackAssignments));
 
                 // Remove empty trackId assignments
-                receivedVideoTrackAssignments = receivedVideoTrackAssignments.filter((vta) => vta.trackId !== "");
+                //receivedVideoTrackAssignments = receivedVideoTrackAssignments.filter((vta) => vta.trackId !== "");
 
                 let currentVideoTrackAssignments = [...videoTrackAssignments];
 
@@ -2469,19 +2466,6 @@ function AntMedia(props) {
         webRTCAdaptor?.publish(publishStreamId, token, subscriberId, subscriberCode, currentStreamName, roomName, JSON.stringify(userStatusMetadata), role);
     }
 
-    function handleNewTrackQ() {
-        if(scalingTiles) {
-            return;
-        }
-        scalingTiles = true;
-        while (newTrackQueue.length > 0) {
-            let item = newTrackQueue.shift(); // Removes the first item from the list
-            handlePlayVideo(item);
-          }
-        
-          scalingTiles = false;
-    }
-
     function handlePlayVideo(obj) {
         console.log("handlePlayVideo: " + JSON.stringify(obj));
         let index = obj?.trackId?.substring("ARDAMSx".length);
@@ -2504,6 +2488,7 @@ function AntMedia(props) {
             if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
+                console.log("add vta:"+newVideoTrackAssignment.videoLabel)
                 setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
                 setParticipantUpdated(!participantUpdated);
                 console.log("document.hidden",document.hidden);
@@ -2762,7 +2747,7 @@ function AntMedia(props) {
             setIsRecordPluginInstalled(localSettings?.isRecordingFeatureAvailable);
             if (localSettings?.maxVideoTrackCount !== undefined && localSettings?.maxVideoTrackCount !== null) {
                 console.log("--maxVideoTrackCountFromAppSettings: ", localSettings?.maxVideoTrackCount);
-                setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount);
+                setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount > 0 ? localSettings?.maxVideoTrackCount+1 : 6);
             }
         } else if (obj.command === "startRecordingResponse") {
             console.log("Incoming startRecordingResponse:", obj);
@@ -2888,7 +2873,7 @@ function AntMedia(props) {
                         setStreamName,
                         handleLeaveFromRoom,
                         handleSendNotificationEvent,
-                        handleSetMaxVideoTrackCount,
+                        handleSetDesiredTileCount,
                         handleSendMessage,
                         turnOffYourMicNotification,
                         addFakeParticipant,
