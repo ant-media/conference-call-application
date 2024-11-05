@@ -86,28 +86,6 @@ jobs:
         mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --quiet
         cd ..
 
-    - name: Build React application
-      env:
-        CI: false
-        NODE_OPTIONS: '--max-old-space-size=4096'
-      run: |
-        cd react
-        sed -i "s#^REACT_APP_TURN_SERVER_URL=.*#REACT_APP_TURN_SERVER_URL=\"turn:${{ secrets.STAGING_TURN_URL }}\"#" .env.production
-        sed -i "s#^REACT_APP_TURN_SERVER_USERNAME=.*#REACT_APP_TURN_SERVER_USERNAME=\"${{ secrets.STAGING_TURN_USERNAME }}\"#" .env.production
-        sed -i "s#^REACT_APP_TURN_SERVER_CREDENTIAL=.*#REACT_APP_TURN_SERVER_CREDENTIAL=\"${{ secrets.STAGING_TURN_PASSWORD }}\"#" .env.production
-        npm install
-        npm run build
-        cd ..
-        cp -a react/build/. webapp/src/main/webapp
-
-    - name: Build Maven project
-      run: |
-        cd webapp
-        mvn clean install -DskipTests -Dgpg.skip=true --quiet
-        ls -alh
-        ls -alh target/
-        cp target/*.war /tmp/circle-conferencing.war
-        cd ..
 
     - name: Build React application for webinar
       env:
@@ -115,6 +93,7 @@ jobs:
         NODE_OPTIONS: '--max-old-space-size=4096'
       run: |
         cd react
+        mv .env.production .env.production.conferencing
         mv .env.production.webinar .env.production
         sed -i "s#^REACT_APP_TURN_SERVER_URL=.*#REACT_APP_TURN_SERVER_URL=\"turn:${{ secrets.STAGING_TURN_URL }}\"#" .env.production
         sed -i "s#^REACT_APP_TURN_SERVER_USERNAME=.*#REACT_APP_TURN_SERVER_USERNAME=\"${{ secrets.STAGING_TURN_USERNAME }}\"#" .env.production
@@ -132,6 +111,31 @@ jobs:
         ls -alh
         ls -alh target/
         cp target/*.war /tmp/circle-webinar.war
+        cd ..
+
+    - name: Build React application
+      env:
+        CI: false
+        NODE_OPTIONS: '--max-old-space-size=4096'
+      run: |
+        cd react
+        mv .env.conferencing .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_URL=.*#REACT_APP_TURN_SERVER_URL=\"turn:${{ secrets.STAGING_TURN_URL }}\"#" .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_USERNAME=.*#REACT_APP_TURN_SERVER_USERNAME=\"${{ secrets.STAGING_TURN_USERNAME }}\"#" .env.production
+        sed -i "s#^REACT_APP_TURN_SERVER_CREDENTIAL=.*#REACT_APP_TURN_SERVER_CREDENTIAL=\"${{ secrets.STAGING_TURN_PASSWORD }}\"#" .env.production
+        npm install
+        npm run build
+        cd ..
+        rm -r webapp/src/main/webapp/static/*
+        cp -a react/build/. webapp/src/main/webapp
+
+    - name: Build Maven project
+      run: |
+        cd webapp
+        mvn clean install -DskipTests -Dgpg.skip=true --quiet
+        ls -alh
+        ls -alh target/
+        cp target/*.war /tmp/circle-conferencing.war
         cd ..
         
     - name: Install Test Tool
