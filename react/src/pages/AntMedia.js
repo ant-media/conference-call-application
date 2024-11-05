@@ -375,6 +375,12 @@ function AntMedia(props) {
 
     const [videoTrackAssignments, setVideoTrackAssignments] = useState([]);
 
+    /*
+     * When a new vta added, it will add into this list
+     * we will use this list to check if the new vta should pinned or not
+     */
+    const [newlyAddedVideoTrackAssignments, setNewlyAddedVideoTrackAssignments] = useState([]);
+
   /*
    * allParticipants: is a dictionary of (streamId, broadcastObject) for all participants in the room.
    * It determines the participants list in the participants drawer.
@@ -2136,12 +2142,17 @@ function AntMedia(props) {
 
     function checkScreenSharingStatus() {
 
-        const broadcastObjectsArray = Object.values(allParticipants);
-        broadcastObjectsArray.forEach((broadcastObject) => {
-            if (broadcastObject.isScreenShared === true && typeof broadcastObject.isPinned === "undefined") {
-                pinVideo(broadcastObject.streamId);
+        newlyAddedVideoTrackAssignments.forEach(
+            (videoTrackAssignment) => {
+                let broadcastObject = allParticipants[videoTrackAssignment.streamId];
+                if (broadcastObject !== null && broadcastObject !== undefined) {
+                    if (broadcastObject.isScreenShared === true && typeof broadcastObject.isPinned === "undefined") {
+                        pinVideo(broadcastObject.streamId);
+                    }
+                }
             }
-        })
+        )
+        setNewlyAddedVideoTrackAssignments([]);
     }
 
     function getUserStatusMetadata(isMicMuted, isCameraOn, isScreenShareActive) {
@@ -2345,6 +2356,8 @@ function AntMedia(props) {
             } else {
                 console.log("add vta:"+newVideoTrackAssignment.videoLabel)
                 setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
+                setNewlyAddedVideoTrackAssignments((newlyAddedVideoTrackAssignments) => [...newlyAddedVideoTrackAssignments, newVideoTrackAssignment]);
+
                 setParticipantUpdated(!participantUpdated);
                 console.log("document.hidden",document.hidden);
                 if (document.hidden) {
