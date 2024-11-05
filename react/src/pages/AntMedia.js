@@ -490,20 +490,11 @@ function AntMedia(props) {
             createSpeedTestForPublishWebRtcAdaptor();
         }
         setTimeout(() => {
-            if (speedTestProgress.current < 40 || speedTestPlayStarted.current === false) 
+            if (speedTestProgress.current < 40)
                 {
                 //it means that it's stuck before publish started
                 stopSpeedTest();
-                let tempSpeedTestObject = {};
-                tempSpeedTestObject.isfailed = true;
-                tempSpeedTestObject.errorMessage = "";
-                tempSpeedTestObject.progressValue = 0;
-        
-                tempSpeedTestObject.isfinished = false;
-                tempSpeedTestObject.message = "Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ";
-
-                setSpeedTestObject(tempSpeedTestObject);
-
+                setSpeedTestObjectFailed("Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ");
             }
         }, 15000); //it tooks about 20 seconds to finish the test, if it's less 40, it means it's stuck
     }
@@ -522,25 +513,6 @@ function AntMedia(props) {
 
         //we need to listen device changes with main webRTCAdaptor
         webRTCAdaptor.mediaManager?.trackDeviceChange();
-    }
-
-    function parseWebSocketURL(url) {
-        // sample url: ws://localhost:5080/WebRTCAppEE/websocket
-
-        if (!url) {
-            return '';
-        }
-
-        let parsedURL = url.split("/");
-        let protocol = parsedURL[0];
-        if (protocol === "wss:") {
-            protocol = "https:";
-        } else {
-            protocol = "http:";
-        }
-        let host = parsedURL[2];
-        let appName = parsedURL[3];
-        return protocol + "//" + host + "/" + appName;
     }
 
     function createSpeedTestForPublishWebRtcAdaptor() {
@@ -562,14 +534,7 @@ function AntMedia(props) {
     function speedTestForPublishWebRtcAdaptorInfoCallback(info, obj) {
         if (info === "initialized") {
             speedTestCounter.current = 0;
-            let tempSpeedTestObject = {};
-            tempSpeedTestObject.message = speedTestObject.message;
-            tempSpeedTestObject.isfinished = false;
-            tempSpeedTestObject.isfailed = false;
-            tempSpeedTestObject.errorMessage = "";
-            tempSpeedTestObject.progressValue = 10;
-            speedTestProgress.current = tempSpeedTestObject.progressValue;
-            setSpeedTestObject(tempSpeedTestObject);
+            setSpeedTestObjectProgress(10);
             speedTestForPublishWebRtcAdaptor.current.publish("speedTestStream" + speedTestStreamId.current, token, subscriberId, subscriberCode, "speedTestStream" + speedTestStreamId.current, "", "")
         } 
         else if (info === "publish_started") {
@@ -591,14 +556,7 @@ function AntMedia(props) {
             if (speedTestCounter.current > 3 && statsList.current.length > 3) {
                 calculateThePublishSpeedTestResult();
             } else {
-                let tempSpeedTestObject = {};
-                tempSpeedTestObject.message = speedTestObject.message;
-                tempSpeedTestObject.isfinished = false;
-                tempSpeedTestObject.isfailed = false;
-                tempSpeedTestObject.errorMessage = "";
-                tempSpeedTestObject.progressValue = 20 + (speedTestCounter.current * 20);
-                speedTestProgress.current = tempSpeedTestObject.progressValue;
-                setSpeedTestObject(tempSpeedTestObject);
+                setSpeedTestObjectProgress(20 + (speedTestCounter.current * 20));
             }
         } 
         else if (info === "ice_connection_state_changed") {
@@ -662,7 +620,28 @@ function AntMedia(props) {
         statsList.current = tempStatsList;
     }
 
+    function setSpeedTestObjectFailed(errorMessage) {
+        let tempSpeedTestObject = {};
+        tempSpeedTestObject.message = errorMessage;
+        tempSpeedTestObject.isfinished = false;
+        tempSpeedTestObject.isfailed = true;
+        tempSpeedTestObject.errorMessage = errorMessage;
+        tempSpeedTestObject.progressValue = 0;
+        speedTestProgress.current = tempSpeedTestObject.progressValue;
+
+        setSpeedTestObject(tempSpeedTestObject);
+    }
+
     function setSpeedTestObjectProgress(progressValue) {
+        // if progress value is more than 100, it means that speed test is failed, and we can not get or set the stat list properly
+
+        //TODO: It's just a insurance to not encounter this case. It's put there for a workaround solution in production for fakeeh. Remove it later - mekya
+        if (progressValue > 100) {
+            // we need to stop the speed test and set the speed test object as failed
+            stopSpeedTest();
+            setSpeedTestObjectFailed("Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ");
+            return;
+        }
         let tempSpeedTestObject = {};
         tempSpeedTestObject.message = speedTestObject.message;
         tempSpeedTestObject.isfinished = false;
@@ -854,15 +833,8 @@ function AntMedia(props) {
         //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
         console.log("error:" + error + " message:" + message);
 
-        let tempSpeedTestObject = {};
-        tempSpeedTestObject.message = speedTestObject.message;
-        tempSpeedTestObject.isfinished = speedTestObject.isfinished;
-        tempSpeedTestObject.isfailed = true;
-        tempSpeedTestObject.errorMessage = "There is an error('"+error+"'). It will try again..." ;
-        tempSpeedTestObject.progressValue = 0;
-        speedTestProgress.current = tempSpeedTestObject.progressValue;
-
-        setSpeedTestObject(tempSpeedTestObject);
+        setSpeedTestObjectFailed("There is an error('"+error+"'). Please try again later...");
+        stopSpeedTest();
     }
 
     function createSpeedTestForPlayWebRtcAdaptor() {
@@ -926,7 +898,9 @@ function AntMedia(props) {
         //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
         console.log("error:" + error + " message:" + message);
 
-        //we just check if play_started is received or not to detect playback is successful in speedTestForPlayWebRtcAdaptorInfoCallback
+        setSpeedTestObjectFailed("There is an error('"+error+"'). Please try again later...");
+
+        stopSpeedTest();
     }
 
     function checkAndUpdateVideoAudioSources() {
