@@ -1539,8 +1539,8 @@ function AntMedia(props) {
         } else if (error.indexOf("streamIdInUse") !== -1) {
             streamIdInUseCounter++;
             if (streamIdInUseCounter > 3) {
-                console.log("This stream is currently in use. Please contact support if the issue persists.");
-                setLeaveRoomWithError("This stream is already in use. If you're unable to connect, please contact support.");
+                console.log("This stream id is already in use. You may be logged in on another device.");
+                setLeaveRoomWithError("It looks like you're logged in on another device. Please check and try again.");
                 setLeftTheRoom(true);
                 setIsJoining(false);
                 setIsReconnectionInProgress(false);
