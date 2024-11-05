@@ -1943,7 +1943,7 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
     });
 
-    //expect(consoleSpy).toHaveBeenCalledWith("StreamId is in use. Please report this.");
+    expect(consoleSpy).not.toHaveBeenCalledWith("This stream is currently in use. Please contact support if the issue persists.");
 
     consoleSpy.mockRestore();
   });
@@ -1970,7 +1970,7 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith("StreamId is in use. Please report this.");
+    expect(consoleSpy).toHaveBeenCalledWith("This stream is currently in use. Please contact support if the issue persists.");
 
     consoleSpy.mockRestore();
   });
