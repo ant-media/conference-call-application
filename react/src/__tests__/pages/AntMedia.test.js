@@ -1281,6 +1281,7 @@ describe('AntMedia Component', () => {
 
 
     const mockStats = {
+      streamId: 'test-stream-id',
       videoRoundTripTime: '0',
       audioRoundTripTime: '0',
       videoJitter: '0',
@@ -1453,6 +1454,7 @@ describe('AntMedia Component', () => {
 
 
     const mockStats = {
+      streamId: 'test-stream-id',
       videoRoundTripTime: '0',
       audioRoundTripTime: '0',
       videoJitter: '0',
@@ -1602,6 +1604,7 @@ describe('AntMedia Component', () => {
     });
 
     const mockStats = {
+      streamId: 'test-stream-id',
       videoRoundTripTime: '0',
       audioRoundTripTime: '0',
       videoJitter: '0',
@@ -1620,15 +1623,15 @@ describe('AntMedia Component', () => {
 
     await act(async () => {
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-      mockStats.videoRoundTripTime = '150';
-      mockStats.audioRoundTripTime = '160';
+      mockStats.videoRoundTripTime = '0.150';
+      mockStats.audioRoundTripTime = '0.160';
 
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
 
-      mockStats.videoRoundTripTime = '120';
-      mockStats.audioRoundTripTime = '130';
+      mockStats.videoRoundTripTime = '0.120';
+      mockStats.audioRoundTripTime = '0.130';
 
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
 
@@ -1652,8 +1655,8 @@ describe('AntMedia Component', () => {
       expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
 
 
-      mockStats.videoJitter = '60';
-      mockStats.audioJitter = '70';
+      mockStats.videoJitter = '0.02';
+      mockStats.audioJitter = '0.10';
 
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
       expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
