@@ -62,6 +62,11 @@ jobs:
         mkdir $HOME/.kube
         echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
         
+    - name: Change Replicate Set
+      run: |
+        echo "current_replica=$(kubectl get deployment ant-media-server-origin -n antmedia -o jsonpath='{.spec.replicas}')" >> $GITHUB_ENV
+        kubectl scale deployment ant-media-server-origin --replicas=1 -n antmedia 
+        
     - name: Login to server
       run: |
         response=$(curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt) 
@@ -130,6 +135,11 @@ jobs:
           echo "Importing setting is failed."
           exit 1
         fi
+
+    - name: Revert Replicate Set
+      run: |
+        echo $current_replica
+        kubectl scale deployment ant-media-server-origin --replicas=$current_replica -n antmedia 
 
   restart_when_failed:
     name: Restarts the scheduled run when it failed

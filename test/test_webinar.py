@@ -366,9 +366,13 @@ class TestWebinarScenario(unittest.TestCase):
     # check if both participants are in the room and see each other
     wait.until(lambda x: len(self.get_participants()) == 2)
 
+    print("publisher can see admin and himself")
+
     self.chrome.switch_to_tab(handle_admin)
 
     wait.until(lambda x: len(self.get_participants()) == 2)
+
+    print("admin can see publisher and himself")
 
     self.chrome.switch_to_tab(handle_presenter)
 
@@ -377,6 +381,8 @@ class TestWebinarScenario(unittest.TestCase):
     # there should be no video in listener room
     wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
 
+    print("player doesn't see publisher and admin")
+
     # switch to admin and add presenter to listener room
     self.chrome.switch_to_tab(handle_admin)
 
@@ -384,31 +390,44 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.open_close_participant_list_drawer()
 
+    print("admin opened participant list")
+
     time.sleep(5)
 
     self.add_presenter_to_listener_room(presenterId)
+   
+    print("admin added publisher to listeners room")
 
     wait.until(lambda x: self.get_role(presenterId) == "active_speaker")
+
+    print("publisher is active_speaker now")
 
     remove_speaker_button = self.chrome.get_element_with_retry(By.ID,"remove-presenter-"+presenterId)
 
     assert(remove_speaker_button.is_displayed())
+
+    print("add button turned to remove now")
 
     # switch to playerA and check if presenter is added to listener room
     self.chrome.switch_to_tab(handle_player_A)
 
     wait.until(lambda x: len(self.get_video_track_assignments()) == 1)
 
+    print("listener can see publisher now")
 
     # switch to admin and remove presenter from listener room
     self.chrome.switch_to_tab(handle_admin)
 
     self.remove_presenter_from_listener_room(presenterId)
 
+    print("admin removed publisher from listeners room")
+
     # switch to playerA and check if presenter is removed from listener room
     self.chrome.switch_to_tab(handle_player_A)
 
     wait.until(lambda x: len(self.get_video_track_assignments()) == 0)
+
+    print("listener cannot see publisher now")
 
     self.chrome.close_all()
 

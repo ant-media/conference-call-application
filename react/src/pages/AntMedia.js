@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
-import _ from "lodash";
+import _, { forEach } from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
 import {useSnackbar} from "notistack";
@@ -31,7 +31,7 @@ const globals = {
   //this settings is to keep consistent with the sdk until backend for the app is setup
   // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
   maxVideoTrackCount: 6,
-  desiredMaxVideoTrackCount: 6,
+  desiredTileCount: 6,
   trackEvents: [],
 };
 
@@ -466,7 +466,7 @@ function AntMedia(props) {
   useEffect(() => {
     setTimeout(() => {
       setParticipantUpdated(!participantUpdated);
-      console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
+      //console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
     }, 5000);
   }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -992,14 +992,8 @@ function AntMedia(props) {
     }
 
     function reconnectionInProgress() {
-        //reset UI releated states
-        removeAllRemoteParticipants();
-
         setIsReconnectionInProgress(true);
         reconnecting = true;
-
-    publishReconnected = isPlayOnly;
-    playReconnected = false;
 
         displayWarning("Connection lost. Trying reconnect...");
     }
@@ -1009,7 +1003,7 @@ function AntMedia(props) {
         roomOfStream[generatedStreamId] = room;
 
         globals.maxVideoTrackCount = appSettingsMaxVideoTrackCount;
-        globals.desiredMaxVideoTrackCount = appSettingsMaxVideoTrackCount;
+        globals.desiredTileCount = appSettingsMaxVideoTrackCount;
         setPublishStreamId(generatedStreamId);
 
         if (!isPlayOnly) {
@@ -1071,7 +1065,7 @@ function AntMedia(props) {
         let tempCount = fakeParticipantCounter + 1;
         setFakeParticipantCounter(tempCount);
 
-        let allParticipantsTemp = allParticipants;
+        let allParticipantsTemp = {...allParticipants};
         let broadcastObject = {
             name: "name_" + suffix,
             streamId: "streamId_" + suffix,
@@ -1090,7 +1084,7 @@ function AntMedia(props) {
             let newVideoTrackAssignment = {
                 videoLabel: "label_" + suffix, track: null, streamId: "streamId_" + suffix,
             };
-            let temp = videoTrackAssignments;
+            let temp = [...videoTrackAssignments];
             temp.push(newVideoTrackAssignment);
           if (!_.isEqual(temp, videoTrackAssignments)) {
                 setVideoTrackAssignments(temp);
@@ -1111,7 +1105,7 @@ function AntMedia(props) {
             setVideoTrackAssignments(tempVideoTrackAssignments);
         }
 
-        let allParticipantsTemp = allParticipants;
+        let allParticipantsTemp = {...allParticipants};
         delete allParticipantsTemp["streamId_" + suffix];
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
             setAllParticipants(allParticipantsTemp);
@@ -1133,7 +1127,7 @@ function AntMedia(props) {
         let participantIds = broadcastObject.subTrackStreamIds;
 
         //find and remove not available tracks
-        const temp = allParticipants;
+        const temp = {...allParticipants};
         let currentTracks = Object.keys(temp);
         currentTracks.forEach(trackId => {
             if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
@@ -1168,7 +1162,7 @@ function AntMedia(props) {
 
         let metaData = JSON.parse(broadcastObject.metaData);
 
-        let allParticipantsTemp = allParticipants;
+        let allParticipantsTemp = {...allParticipants};
 
         broadcastObject.isScreenShared = metaData.isScreenShared;
         let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
@@ -1195,8 +1189,8 @@ function AntMedia(props) {
 
 
             reconnecting = false;
-            publishReconnected = false;
-            playReconnected = false;
+            publishReconnected = true;
+            playReconnected = true;
             console.log("++ createWebRTCAdaptor");
             //here we check if audio or video device available and wait result
             //according to the result we modify mediaConstraints
@@ -1349,8 +1343,8 @@ function AntMedia(props) {
 
             console.log(obj.broadcast);
         } else if (info === "newStreamAvailable") {
-            handlePlayVideo(obj);
             console.log("newStreamAvailable:", obj);
+            handlePlayVideo(obj);
         } else if (info === "publish_started") {
             setIsPublished(true);
             console.log("**** publish started:" + reconnecting);
@@ -1432,6 +1426,9 @@ function AntMedia(props) {
                 console.log("Reconnection attempt for player with no stream existmfor play only mode.")
             } else {
                 playReconnected = false;
+                //reset UI releated states
+                removeAllRemoteParticipants();
+                
                 if (!reconnecting) {
                     reconnectionInProgress();
                 }
@@ -1687,8 +1684,8 @@ function AntMedia(props) {
         });
     }
 
-    function handleSetMaxVideoTrackCount(maxTrackCount) {
-        globals.desiredMaxVideoTrackCount = maxTrackCount;
+    function handleSetDesiredTileCount(maxTrackCount) {
+        globals.desiredTileCount = maxTrackCount;
     }
 
     function updateMaxVideoTrackCount(newCount) {
@@ -1840,7 +1837,7 @@ function AntMedia(props) {
     }
 
     function handleSendMessage(message) {
-        if (publishStreamId) {
+        if (publishStreamId || isPlayOnly) {
             let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
             if (iceState !== null && iceState !== "failed" && iceState !== "disconnected") {
                 if (message === "debugme") {
@@ -1909,7 +1906,7 @@ function AntMedia(props) {
 
     function handleNotificationEvent(obj) {
         var notificationEvent = JSON.parse(obj.data);
-        console.log("handleNotificationEvent:", notificationEvent);
+        //console.log("handleNotificationEvent:", notificationEvent);
         if (notificationEvent != null && typeof notificationEvent == "object") {
             var eventStreamId = notificationEvent.streamId;
             var eventType = notificationEvent.eventType;
@@ -1989,27 +1986,35 @@ function AntMedia(props) {
                     updateVideoSendResolution(false);
                 }
             } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
-                let videoTrackAssignmentList = notificationEvent.payload;
 
-                console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(videoTrackAssignmentList));
+                // There are 2 operations here:
+                // 1. VTA available in both sides -> Update
+                // 2. VTA available in the current state but not in the new list -> Remove
+                // We don't need to add new VTA because it will be added by the handlePlayVideo function
 
-                videoTrackAssignmentList = videoTrackAssignmentList.filter((vta) => vta.trackId !== "");
+                let receivedVideoTrackAssignments = notificationEvent.payload;
 
-                let tempVideoTrackAssignments = videoTrackAssignments;
+                console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(receivedVideoTrackAssignments));
+
+                // Remove empty trackId assignments
+                //receivedVideoTrackAssignments = receivedVideoTrackAssignments.filter((vta) => vta.trackId !== "");
+
+                let currentVideoTrackAssignments = [...videoTrackAssignments];
 
                 let tempVideoTrackAssignmentsNew = [];
 
-                tempVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
+                // This function checks the case 1 and case 2
+                currentVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
                     let assignment;
 
-                    videoTrackAssignmentList.forEach(videoTrackAssignment => {
+                    receivedVideoTrackAssignments.forEach(videoTrackAssignment => {
                         if (tempVideoTrackAssignment.videoLabel === videoTrackAssignment.videoLabel) {
                             assignment = videoTrackAssignment;
                         }
                     });
 
                     if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
-                        if (isVideoLabelExsist(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)) {
+                        if (isVideoLabelExists(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)) {
                             console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
                         } else {
                             tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
@@ -2020,15 +2025,14 @@ function AntMedia(props) {
                     }
                 });
 
-                tempVideoTrackAssignments = tempVideoTrackAssignmentsNew;
+                currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
 
-                //add and/or update participants according to current assignments
-                videoTrackAssignmentList.forEach((vta) => {
-                    tempVideoTrackAssignments.forEach((oldVTA) => {
-                        if (oldVTA.videoLabel === vta.videoLabel) {
-                            oldVTA.streamId = vta.trackId;
-                        }
-                    });
+                // update participants according to current assignments
+                receivedVideoTrackAssignments.forEach(vta => {
+                    let existingAssignment = currentVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
+                    if (existingAssignment) {
+                        existingAssignment.streamId = vta.trackId;
+                    }
                 });
 
                 if (process.env.REACT_APP_AUTO_PIN_WHEN_SCREEN_SHARE === 'true') {
@@ -2036,8 +2040,8 @@ function AntMedia(props) {
                 }
 
                 // check if there is any difference between old and new assignments
-                if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
-                        setVideoTrackAssignments(tempVideoTrackAssignments);
+                if (!_.isEqual(currentVideoTrackAssignments, videoTrackAssignments)) {
+                        setVideoTrackAssignments(currentVideoTrackAssignments);
                         requestSyncAdministrativeFields();
                         setParticipantUpdated(!participantUpdated);
                 }
@@ -2286,14 +2290,14 @@ function AntMedia(props) {
         let newVideoTrackAssignment = {
             videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true
         };
-        let tempVideoTrackAssignments = videoTrackAssignments;
+        let tempVideoTrackAssignments = [...videoTrackAssignments];
         tempVideoTrackAssignments.push(newVideoTrackAssignment);
         if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
             setVideoTrackAssignments(tempVideoTrackAssignments);
             setParticipantUpdated(!participantUpdated);
         }
 
-        let allParticipantsTemp = allParticipants;
+        let allParticipantsTemp = {...allParticipants};
         allParticipantsTemp[publishStreamId] = {
             streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false
         };
@@ -2338,14 +2342,11 @@ function AntMedia(props) {
                 videoLabel: index, track: obj.track, streamId: obj.streamId
             };
 
-            let tempVideoTrackAssignments = [...videoTrackAssignments];
-            if (isVideoLabelExsist(newVideoTrackAssignment.videoLabel, tempVideoTrackAssignments)) {
+            if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
                 console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
             } else {
-                tempVideoTrackAssignments.push(newVideoTrackAssignment);
-            }
-            if (!_.isEqual(tempVideoTrackAssignments, videoTrackAssignments)) {
-                setVideoTrackAssignments(tempVideoTrackAssignments);
+                console.log("add vta:"+newVideoTrackAssignment.videoLabel)
+                setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
                 setParticipantUpdated(!participantUpdated);
                 console.log("document.hidden",document.hidden);
                 if (document.hidden) {
@@ -2355,7 +2356,7 @@ function AntMedia(props) {
         }
     }
 
-    function isVideoLabelExsist(videoLabel, assignments) {
+    function isVideoLabelExists(videoLabel, assignments) {
         let isExist = false;
         assignments.forEach((vta) => {
             if (vta.videoLabel === videoLabel) {
@@ -2603,7 +2604,7 @@ function AntMedia(props) {
             setIsRecordPluginInstalled(localSettings?.isRecordingFeatureAvailable);
             if (localSettings?.maxVideoTrackCount !== undefined && localSettings?.maxVideoTrackCount !== null) {
                 console.log("--maxVideoTrackCountFromAppSettings: ", localSettings?.maxVideoTrackCount);
-                setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount);
+                setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount > 0 ? localSettings?.maxVideoTrackCount+1 : 6);
             }
         } else if (obj.command === "startRecordingResponse") {
             console.log("Incoming startRecordingResponse:", obj);
@@ -2729,7 +2730,7 @@ function AntMedia(props) {
                         setStreamName,
                         handleLeaveFromRoom,
                         handleSendNotificationEvent,
-                        handleSetMaxVideoTrackCount,
+                        handleSetDesiredTileCount,
                         handleSendMessage,
                         turnOffYourMicNotification,
                         addFakeParticipant,
