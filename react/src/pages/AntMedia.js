@@ -1540,10 +1540,10 @@ function AntMedia(props) {
             }
         }
 
-        if (rtt >= 0.15 || packageLostPercentage >= 2.5 || jitter >= 80) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
+        if (rtt >= 150 || packageLostPercentage >= 2.5 || jitter >= 80) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
             displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
-        } else if (rtt >= 0.1 || packageLostPercentage >= 1.5 || jitter >= 50) {
+        } else if (rtt >= 100 || packageLostPercentage >= 1.5 || jitter >= 50) {
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter);
             displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
         }

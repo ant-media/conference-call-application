@@ -1077,7 +1077,7 @@ describe('AntMedia Component', () => {
     expect(currentConference.videoTrackAssignments[0].isMine).toBe(true);
 
     await act(async () => {
-      webRTCAdaptorConstructor.callback("newStreamAvailable", {"trackId" : "ARDAMSvvideoTrack0", "streamId":"room1", "track": {id: "someId", kind: "video"}});
+      webRTCAdaptorConstructor.callback("newTrackAvailable", {"trackId" : "ARDAMSvvideoTrack0", "streamId":"room1", "track": {id: "someId", kind: "video"}});
     });
 
     expect(currentConference.videoTrackAssignments).toHaveLength(2);
@@ -1281,6 +1281,7 @@ describe('AntMedia Component', () => {
 
 
     const mockStats = {
+      streamId: 'test-stream-id',
       videoRoundTripTime: '0',
       audioRoundTripTime: '0',
       videoJitter: '0',
@@ -1453,6 +1454,7 @@ describe('AntMedia Component', () => {
 
 
     const mockStats = {
+      streamId: 'test-stream-id',
       videoRoundTripTime: '0',
       audioRoundTripTime: '0',
       videoJitter: '0',
@@ -1602,6 +1604,7 @@ describe('AntMedia Component', () => {
     });
 
     const mockStats = {
+      streamId: 'test-stream-id',
       videoRoundTripTime: '0',
       audioRoundTripTime: '0',
       videoJitter: '0',
