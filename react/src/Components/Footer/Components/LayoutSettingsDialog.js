@@ -68,9 +68,9 @@ export function LayoutSettingsDialog(props) {
   const conference = React.useContext(ConferenceContext);
 
   const [value, setValue] = React.useState(
-    conference.globals.maxVideoTrackCount ? conference.globals.maxVideoTrackCount : 4
+    conference.globals.maxVideoTrackCount
   );
-  const [layout, setLayout] = React.useState( "sidebar"); //just for radioo buttons
+  const [layout, setLayout] = React.useState( "tiled"); //just for radioo buttons
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
@@ -131,7 +131,7 @@ export function LayoutSettingsDialog(props) {
     );
   };
   const handleMaxVideoTrackCountChange = (count) => {
-    conference.handleSetMaxVideoTrackCount(count);
+    conference.handleSetDesiredTileCount(count);
   };
   const debouncedHandleMaxVideoTrackCountChange = debounce(
     handleMaxVideoTrackCountChange,

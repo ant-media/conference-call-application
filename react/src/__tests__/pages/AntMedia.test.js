@@ -490,10 +490,10 @@ describe('AntMedia Component', () => {
     });
 
     await act(async () => {
-      currentConference.handleSetMaxVideoTrackCount(5);
+      currentConference.handleSetDesiredTileCount(5);
     });
 
-    expect(currentConference.globals.desiredMaxVideoTrackCount == 5);
+    expect(currentConference.globals.desiredTileCount == 5);
 
     await act(async () => {
       currentConference.updateMaxVideoTrackCount(7);

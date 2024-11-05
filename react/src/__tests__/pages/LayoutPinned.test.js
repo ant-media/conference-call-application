@@ -11,7 +11,7 @@ import {ThemeList} from "styles/themeList";
 const contextValue = {
   allParticipants: {},
   videoTrackAssignments: [],
-  globals: {desiredMaxVideoTrackCount: 10},
+  globals: {desiredTileCount: 10},
   updateMaxVideoTrackCount: jest.fn(),
 };
 
