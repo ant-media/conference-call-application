@@ -2868,7 +2868,8 @@ function AntMedia(props) {
                         getTrackStats,
                         isBroadcasting,
                         checkConnectionQualityForPlay,
-                        checkConnectionQualityForPublish
+                        checkConnectionQualityForPublish,
+                        playStats
                     }}
                 >
                     {props.children}
