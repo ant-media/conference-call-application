@@ -2088,9 +2088,13 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    currentConference.allParticipants = {
-      'fakeStream1': { streamId: 'fakeStream1', isFake: true }
-    };
+    currentConference.allParticipants["fakeStream1"] = {streamId: 'fakeStream1', isFake: true, videoTrackId: "participant0", isPinned: false};
+
+    await waitFor(() => {
+      expect(currentConference.allParticipants["fakeStream1"]).toBeDefined();
+      expect(currentConference.allParticipants["fakeStream1"].isFake).toBe(true);
+    });
+
     const subtrackList = [
       JSON.stringify({ streamId: 'stream1', metaData: JSON.stringify({ isScreenShared: false }) })
     ];
@@ -2101,6 +2105,7 @@ describe('AntMedia Component', () => {
     });
 
     await waitFor(() => {
+      expect(currentConference.allParticipants["fakeStream1"]).toBeDefined();
       expect(currentConference.participantUpdated).toBe(false);
     });
   });
