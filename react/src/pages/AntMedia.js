@@ -1316,7 +1316,7 @@ function AntMedia(props) {
         } else if (info === "subtrackList") {
             let subtrackList = obj.subtrackList;
             let allParticipantsTemp = {};
-            if (!isPlayOnly) {
+            if (!isPlayOnly && publishStreamId) {
                 allParticipantsTemp[publishStreamId] = {name: "You"};
             }
             subtrackList.forEach(subTrack => {
