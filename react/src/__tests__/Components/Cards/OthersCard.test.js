@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
-import ParticipantTab from 'Components/ParticipantTab';
+import OthersCard from 'Components/Cards/OthersCard';
 import theme from "styles/theme";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
@@ -44,7 +44,7 @@ describe('OthersCard Component', () => {
   it('renders without crashing', () => {
     render(
       <ThemeProvider theme={theme(ThemeList.Green)}>
-        <ParticipantTab/>
+        <OthersCard/>
       </ThemeProvider>
     );
   });
