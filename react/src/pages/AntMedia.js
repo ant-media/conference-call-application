@@ -1457,68 +1457,50 @@ function AntMedia(props) {
             return;
         }
 
-        if (playStats === null) {
-            // Initialize the playStats object
-            let packageReceived = obj.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).packetsReceived + obj.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).packetsReceived;
-            setPlayStats({videoPacketsLost: obj.videoPacketsLost, audioPacketsLost: obj.audioPacketsLost, packageReceived: packageReceived, inboundRtpList: obj.inboundRtpList});
-            return;
+        let totalPacketsLost, videoPacketsLost, audioPacketsLost, totalBytesReceived, incomingBitrate;
+
+        // if the playStats is null, it means that it is the first time to get the stats
+        // so we don't need to check the connection quality for playback
+        if (playStats !== null) {
+
+            // Calculate total bytes received
+            totalBytesReceived = obj.totalBytesReceivedCount;
+
+            // Calculate video frames received and frames dropped
+            let framesReceived = obj.framesReceived;
+            let framesDropped = obj.framesDropped;
+
+            // Calculate the time difference (in seconds)
+            let timeElapsed = (obj.currentTimestamp - obj.startTime) / 1000; // Convert ms to seconds
+
+            // Calculate incoming bitrate (bits per second)
+            let bytesReceivedDiff = obj.lastBytesReceived - obj.firstBytesReceivedCount;
+            incomingBitrate = (bytesReceivedDiff * 8) / timeElapsed; // Convert bytes to bits
+
+            // Calculate packet loss
+            videoPacketsLost = obj.videoPacketsLost;
+            audioPacketsLost = obj.audioPacketsLost;
+            totalPacketsLost = videoPacketsLost + audioPacketsLost;
+
+            // Calculate RTT as the average of audio and video RTT
+            let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
+
+            // Calculate frame drop rate as a percentage
+            let frameDropRate = (framesDropped / framesReceived) * 100;
+
+            // Determine network status warnings
+            if (rtt > 0.15 || frameDropRate > 5) {
+                console.warn(`rtt: ${rtt}, average frameDropRate: ${frameDropRate}`);
+                displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
+            } else if (rtt > 0.1 || frameDropRate > 2.5) {
+                console.warn(`rtt: ${rtt}, average frameDropRate: ${frameDropRate}`);
+                displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
+            }
         }
 
-        // Calculate total bytes received
-        let totalBytesReceived = obj.totalBytesReceivedCount;
-
-        // Calculate video frames received and frames dropped
-        let framesReceived = obj.framesReceived;
-        let framesDropped = obj.framesDropped;
-
-        // Calculate the time difference (in seconds)
-        let timeElapsed = (obj.currentTimestamp - obj.startTime) / 1000; // Convert ms to seconds
-
-        // Calculate incoming bitrate (bits per second)
-        let bytesReceivedDiff = obj.lastBytesReceived - obj.firstBytesReceivedCount;
-        let incomingBitrate = (bytesReceivedDiff * 8) / timeElapsed; // Convert bytes to bits
-
-        // Calculate packet loss
-        let videoPacketsLost = obj.videoPacketsLost;
-        videoPacketsLost = (videoPacketsLost < 0) ? 0 : videoPacketsLost;
-        let audioPacketsLost = obj.audioPacketsLost;
-        audioPacketsLost = (audioPacketsLost < 0) ? 0 : audioPacketsLost;
-
-        let totalPacketsLost = videoPacketsLost + audioPacketsLost;
-
-        // Calculate packet loss for the previous stats
-        let oldVideoPacketsLost = playStats.videoPacketsLost;
-        oldVideoPacketsLost = (oldVideoPacketsLost < 0) ? 0 : oldVideoPacketsLost;
-        let oldAudioPacketsLost = playStats.audioPacketsLost;
-        oldAudioPacketsLost = (oldAudioPacketsLost < 0) ? 0 : oldAudioPacketsLost;
-
-        let oldTotalPacketsLost = oldVideoPacketsLost + oldAudioPacketsLost;
-
-        console.log("playStats:", playStats);
-
-        // Jitter calculation (average of video and audio jitter)
-        let videoJitter = obj.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).jitterBufferDelay;
-        videoJitter = (videoJitter < 0) ? 0 : videoJitter;
-        let audioJitter = obj.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).jitterBufferDelay;
-        audioJitter = (audioJitter < 0) ? 0 : audioJitter;
-
-        let avgJitter = (videoJitter + audioJitter) / 2;
-
-        let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
-
-        // Frame drop rate
-        let frameDropRate = framesDropped / framesReceived * 100;
-
-
-        if (rtt > 0.15 || frameDropRate > 5 || avgJitter > 100) {
-            console.warn("rtt:" + rtt + " average jitter:" + avgJitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
-            displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
-        } else if (rtt > 0.1 || avgJitter > 50 || frameDropRate > 2.5) {
-            console.warn("rtt:" + rtt + " average jitter:" + avgJitter);
-            displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
-        }
-
-        setPlayStats({videoPacketsLost: videoPacketsLost, audioPacketsLost: audioPacketsLost, inboundRtpList: obj.inboundRtpList});
+        let updatedPlayStats = {totalPacketsLost: totalPacketsLost, videoPacketsLost: videoPacketsLost, audioPacketsLost: audioPacketsLost, totalBytesReceived: totalBytesReceived, incomingBitrate: incomingBitrate, inboundRtpList: obj.inboundRtpList};
+        console.log("playStats:", updatedPlayStats);
+        setPlayStats(updatedPlayStats);
     }
 
     function checkConnectionQualityForPublish(obj) {
@@ -2867,8 +2849,6 @@ function AntMedia(props) {
                         statsList,
                         getTrackStats,
                         isBroadcasting,
-                        checkConnectionQualityForPlay,
-                        checkConnectionQualityForPublish,
                         playStats
                     }}
                 >
