@@ -2111,6 +2111,7 @@ function AntMedia(props) {
                     let existingAssignment = currentVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
                     if (existingAssignment) {
                         existingAssignment.streamId = vta.trackId;
+                        existingAssignment.isReserved = vta.reserved;
                     }
                 });
 
