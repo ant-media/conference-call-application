@@ -985,17 +985,6 @@ function AntMedia(props) {
         sendMessage(JSON.stringify(jsCmd));
     }
 
-    function sendDataChannelMessage(receiverStreamId, message) {
-        const jsCmd = {
-            command: "sendData",
-            streamId: publishStreamId,
-            receiverStreamId: receiverStreamId,
-            message: message,
-        };
-
-        sendMessage(JSON.stringify(jsCmd));
-    }
-
     function reconnectionInProgress() {
         setIsReconnectionInProgress(true);
         reconnecting = true;
@@ -2852,7 +2841,8 @@ function AntMedia(props) {
                         getTrackStats,
                         isBroadcasting,
                         playStats,
-                        checkScreenSharingStatus
+                        checkScreenSharingStatus,
+                        checkAndSetIsPinned
                     }}
                 >
                     {props.children}
