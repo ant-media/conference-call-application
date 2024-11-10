@@ -1188,6 +1188,10 @@ describe('AntMedia Component', () => {
           </AntMedia>
         </ThemeProvider>);
 
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
     currentConference.setParticipantUpdated = jest.fn();
 
@@ -1196,18 +1200,24 @@ describe('AntMedia Component', () => {
     currentConference.allParticipants["participant2"] = {videoTrackId: "participant2", isPinned: false};
     currentConference.allParticipants["participant3"] = {videoTrackId: "participant3", isPinned: false};
 
-    currentConference.videoTrackAssignments["participant0"] = {streamId: "participant0", videoTrackId: "participant0", audioTrackId: "participant0"};
-    currentConference.videoTrackAssignments["participant1"] = {streamId: "participant1", videoTrackId: "participant1", audioTrackId: "participant1"};
-    currentConference.videoTrackAssignments["participant2"] = {streamId: "participant2", videoTrackId: "participant2", audioTrackId: "participant2"};
-    currentConference.videoTrackAssignments["participant3"] = {streamId: "participant3", videoTrackId: "participant3", audioTrackId: "participant3"};
+    await act(async () => {
+      currentConference.setVideoTrackAssignments([
+        {videoLabel: "participant0", streamId: "participant0", videoTrackId: "participant0", audioTrackId: "participant0", isReserved: false},
+        {videoLabel: "participant1", streamId: "participant1", videoTrackId: "participant1", audioTrackId: "participant1", isReserved: false},
+        {videoLabel: "participant2", streamId: "participant2", videoTrackId: "participant2", audioTrackId: "participant2", isReserved: false},
+        {videoLabel: "participant3", streamId: "participant3", videoTrackId: "participant3", audioTrackId: "participant3", isReserved: false}
+      ]);
+    });
 
     // testing pinning
     await act(async () => {
       currentConference.pinVideo("participant3");
     });
 
-    expect(currentConference.allParticipants['participant3'].isPinned).toBe(true);
-    expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+    await waitFor(() => {
+      expect(currentConference.allParticipants['participant3'].isPinned).toBe(true);
+      expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+    });
 
     // testing pinning while another participant is pinned
     await act(async () => {
