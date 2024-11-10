@@ -1304,7 +1304,7 @@ function AntMedia(props) {
 
     function checkAndSetIsPinned(streamId, broadcastObject) {
         let existingBroadcastObject = allParticipants[streamId];
-        if (existingBroadcastObject !== null && existingBroadcastObject !== undefined && existingBroadcastObject.isPinned === true) {
+        if (existingBroadcastObject !== null && existingBroadcastObject !== undefined) {
             broadcastObject.isPinned = existingBroadcastObject.isPinned;
         }
         return broadcastObject;
@@ -2849,7 +2849,8 @@ function AntMedia(props) {
                         statsList,
                         getTrackStats,
                         isBroadcasting,
-                        playStats
+                        playStats,
+                        checkAndSetIsPinned
                     }}
                 >
                     {props.children}
