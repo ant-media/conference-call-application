@@ -2851,7 +2851,8 @@ function AntMedia(props) {
                         statsList,
                         getTrackStats,
                         isBroadcasting,
-                        playStats
+                        playStats,
+                        checkScreenSharingStatus
                     }}
                 >
                     {props.children}

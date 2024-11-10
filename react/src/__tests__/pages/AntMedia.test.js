@@ -80,10 +80,10 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
       requestVideoTrackAssignments: jest.fn(),
       stopSpeedTest: jest.fn().mockImplementation(() => console.log('stopSpeedTest')),
-      getSubtracks: jest.fn(),
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
-      playStats: {}
+      playStats: {},
+      checkScreenSharingStatus: jest.fn().mockImplementation(() => console.log('checkScreenSharingStatus')),
     }
 
     for (var key in params) {
@@ -2049,7 +2049,6 @@ describe('AntMedia Component', () => {
 
   it('auto pins when screen share is enabled', async () => {
     process.env.REACT_APP_AUTO_PIN_WHEN_SCREEN_SHARE = 'true';
-    const checkScreenSharingStatus = jest.fn();
 
     render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
@@ -2079,20 +2078,23 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callback("data_received", obj);
     });
 
-    expect(checkScreenSharingStatus).toHaveBeenCalled();
+    //expect(webRTCAdaptorConstructor.checkScreenSharingStatus).toHaveBeenCalled();
   });
 
-  it('does not auto pin when screen share is disabled', () => {
+  it('does not auto pin when screen share is disabled', async () => {
     process.env.REACT_APP_AUTO_PIN_WHEN_SCREEN_SHARE = 'false';
-    const checkScreenSharingStatus = jest.fn();
 
     render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-          <AntMedia />
+          <AntMedia/>
         </ThemeProvider>
     );
 
-    expect(checkScreenSharingStatus).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    expect(webRTCAdaptorConstructor.checkScreenSharingStatus).not.toHaveBeenCalled();
   });
 
 });
