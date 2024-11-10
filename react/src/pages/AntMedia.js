@@ -450,6 +450,7 @@ function AntMedia(props) {
   const [isBecomePublisherConfirmationDialogOpen, setBecomePublisherConfirmationDialogOpen] = React.useState(false);
 
     const [publishStats, setPublishStats] = React.useState(null);
+    const [playStats, setPlayStats] = React.useState(null);
 
     const [isReconnectionInProgress, setIsReconnectionInProgress] = React.useState(false);
 
@@ -868,11 +869,15 @@ function AntMedia(props) {
 
         setSelectedDevices(selectedDevices);
 
-        if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
-            webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
-        }
-        if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
-            webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+        try {
+            if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
+                webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+            }
+            if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
+                webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+            }
+        } catch (error) {
+            console.error("Error while switching video/audio sources", error);
         }
     }
 
@@ -1342,8 +1347,8 @@ function AntMedia(props) {
             }
 
             console.log(obj.broadcast);
-        } else if (info === "newStreamAvailable") {
-            console.log("newStreamAvailable:", obj);
+        } else if (info === "newTrackAvailable") {
+            console.log("newTrackAvailable:", obj);
             handlePlayVideo(obj);
         } else if (info === "publish_started") {
             setIsPublished(true);
@@ -1415,7 +1420,11 @@ function AntMedia(props) {
             setDevices(obj);
 
         } else if (info === "updated_stats") {
-            checkConnectionQuality(obj);
+            if (obj.streamId === roomName) {
+                checkConnectionQualityForPlay(obj);
+            } else {
+                checkConnectionQualityForPublish(obj);
+            }
         } else if (info === "debugInfo") {
             handleDebugInfo(obj.debugInfo);
         } else if (info === "ice_connection_state_changed") {
@@ -1442,7 +1451,59 @@ function AntMedia(props) {
         }
     }
 
-    function checkConnectionQuality(obj) {
+    function checkConnectionQualityForPlay(obj) {
+        if (obj.inboundRtpList === undefined || obj.inboundRtpList === null || obj.inboundRtpList.length === 0) {
+            // it means that there is no incoming stream so we don't need to check the connection quality for playback
+            return;
+        }
+
+        let totalPacketsLost, videoPacketsLost, audioPacketsLost, totalBytesReceived, incomingBitrate;
+
+        // if the playStats is null, it means that it is the first time to get the stats
+        // so we don't need to check the connection quality for playback
+        if (playStats !== null) {
+
+            // Calculate total bytes received
+            totalBytesReceived = obj.totalBytesReceivedCount;
+
+            // Calculate video frames received and frames dropped
+            let framesReceived = obj.framesReceived;
+            let framesDropped = obj.framesDropped;
+
+            // Calculate the time difference (in seconds)
+            let timeElapsed = (obj.currentTimestamp - obj.startTime) / 1000; // Convert ms to seconds
+
+            // Calculate incoming bitrate (bits per second)
+            let bytesReceivedDiff = obj.lastBytesReceived - obj.firstBytesReceivedCount;
+            incomingBitrate = (bytesReceivedDiff * 8) / timeElapsed; // Convert bytes to bits
+
+            // Calculate packet loss
+            videoPacketsLost = obj.videoPacketsLost;
+            audioPacketsLost = obj.audioPacketsLost;
+            totalPacketsLost = videoPacketsLost + audioPacketsLost;
+
+            // Calculate RTT as the average of audio and video RTT
+            let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
+
+            // Calculate frame drop rate as a percentage
+            let frameDropRate = (framesDropped / framesReceived) * 100;
+
+            // Determine network status warnings
+            if (rtt > 0.15 || frameDropRate > 5) {
+                console.warn(`rtt: ${rtt}, average frameDropRate: ${frameDropRate}`);
+                displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
+            } else if (rtt > 0.1 || frameDropRate > 2.5) {
+                console.warn(`rtt: ${rtt}, average frameDropRate: ${frameDropRate}`);
+                displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
+            }
+        }
+
+        let updatedPlayStats = {totalPacketsLost: totalPacketsLost, videoPacketsLost: videoPacketsLost, audioPacketsLost: audioPacketsLost, totalBytesReceived: totalBytesReceived, incomingBitrate: incomingBitrate, inboundRtpList: obj.inboundRtpList};
+        console.log("playStats:", updatedPlayStats);
+        setPlayStats(updatedPlayStats);
+    }
+
+    function checkConnectionQualityForPublish(obj) {
         let rtt = ((parseFloat(obj.videoRoundTripTime) + parseFloat(obj.audioRoundTripTime)) / 2).toPrecision(3);
         let jitter = ((parseFloat(obj.videoJitter) + parseInt(obj.audioJitter)) / 2).toPrecision(3);
         //let outgoingBitrate = parseInt(obj.currentOutgoingBitrate);
@@ -1637,7 +1698,6 @@ function AntMedia(props) {
         allParticipants[streamId] = broadcastObject;
 
         handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
-
 
         setParticipantUpdated(!participantUpdated);
     }
@@ -2790,7 +2850,8 @@ function AntMedia(props) {
                         stopSpeedTest,
                         statsList,
                         getTrackStats,
-                        isBroadcasting
+                        isBroadcasting,
+                        playStats
                     }}
                 >
                     {props.children}

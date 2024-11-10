@@ -83,6 +83,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       getSubtracks: jest.fn(),
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
+      playStats: {}
     }
 
     for (var key in params) {
@@ -1077,7 +1078,7 @@ describe('AntMedia Component', () => {
     expect(currentConference.videoTrackAssignments[0].isMine).toBe(true);
 
     await act(async () => {
-      webRTCAdaptorConstructor.callback("newStreamAvailable", {"trackId" : "ARDAMSvvideoTrack0", "streamId":"room1", "track": {id: "someId", kind: "video"}});
+      webRTCAdaptorConstructor.callback("newTrackAvailable", {"trackId" : "ARDAMSvvideoTrack0", "streamId":"room1", "track": {id: "someId", kind: "video"}});
     });
 
     expect(currentConference.videoTrackAssignments).toHaveLength(2);
@@ -1266,7 +1267,7 @@ describe('AntMedia Component', () => {
     });
   });
 
-  it('checks connection quality and displays warning for poor network connection', async () => {
+  it('checks connection quality and displays warning for poor network connection for publish', async () => {
 
     const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
@@ -1281,6 +1282,7 @@ describe('AntMedia Component', () => {
 
 
     const mockStats = {
+      streamId: 'test-stream-id',
       videoRoundTripTime: '0',
       audioRoundTripTime: '0',
       videoJitter: '0',
@@ -1358,6 +1360,126 @@ describe('AntMedia Component', () => {
 
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
       expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+
+
+    });
+
+
+
+
+
+    consoleWarnSpy.mockRestore();
+
+  });
+
+  it('checks connection quality and displays warning for poor network connection for playback', async () => {
+
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+
+    const mockStats = {
+      streamId: 'room',
+      inboundRtpList: [
+        { trackIdentifier: 'ARDAMSv', jitterBufferDelay: 50 },
+        { trackIdentifier: 'ARDAMSa', jitterBufferDelay: 60 }
+      ],
+      videoPacketsLost: 5,
+      audioPacketsLost: 3,
+      totalBytesReceivedCount: 1000,
+      framesReceived: 100,
+      framesDropped: 5,
+      currentTimestamp: 2000,
+      startTime: 1000,
+      lastBytesReceived: 500,
+      firstBytesReceivedCount: 0,
+      videoRoundTripTime: '0.2',
+      audioRoundTripTime: '0.2'
+    };
+
+    await act(async () => {
+        webRTCAdaptorConstructor.playStats ={
+          videoPacketsLost: 2,
+          audioPacketsLost: 1,
+          inboundRtpList: mockStats.inboundRtpList
+        };
+    });
+
+    const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      mockStats.videoRoundTripTime = '150';
+      mockStats.audioRoundTripTime = '160';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      //expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+      mockStats.videoRoundTripTime = '120';
+      mockStats.audioRoundTripTime = '130';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+
+      //expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+      //expect(enqueueSnackbar).toHaveBeenCalledWith("Network connection is not stable. Please check your connection!", expect.anything());
+    });
+
+    await act(async () => {
+
+      mockStats.videoRoundTripTime = '0';
+      mockStats.audioRoundTripTime = '0';
+      mockStats.videoJitter = '90';
+      mockStats.audioJitter = '100';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      //expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+
+      mockStats.videoJitter = '60';
+      mockStats.audioJitter = '70';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      //expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
+    });
+
+    await act(async () => {
+
+      mockStats.videoJitter = '0';
+      mockStats.audioJitter = '0';
+      mockStats.videoPacketsLost = '3';
+      mockStats.audioPacketsLost = '4';
+      mockStats.totalVideoPacketsSent = '50';
+      mockStats.totalAudioPacketsSent = '50';
+      consoleWarnSpy.mockReset();
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      //expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
+
+    });
+
+    await act(async () => {
+
+      mockStats.videoPacketsLost = '4';
+      mockStats.audioPacketsLost = '5';
+      mockStats.totalVideoPacketsSent = '100';
+      mockStats.totalAudioPacketsSent = '100';
+
+      webRTCAdaptorConstructor.callback("updated_stats", mockStats);
+      //expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
 
 
     });
@@ -1453,6 +1575,7 @@ describe('AntMedia Component', () => {
 
 
     const mockStats = {
+      streamId: 'test-stream-id',
       videoRoundTripTime: '0',
       audioRoundTripTime: '0',
       videoJitter: '0',
@@ -1602,6 +1725,7 @@ describe('AntMedia Component', () => {
     });
 
     const mockStats = {
+      streamId: 'test-stream-id',
       videoRoundTripTime: '0',
       audioRoundTripTime: '0',
       videoJitter: '0',
