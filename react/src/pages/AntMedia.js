@@ -1540,7 +1540,7 @@ function AntMedia(props) {
             streamIdInUseCounter++;
             if (streamIdInUseCounter > 3) {
                 console.log("This stream id is already in use. You may be logged in on another device.");
-                setLeaveRoomWithError("It looks like you're logged in on another device. Please check and try again.");
+                setLeaveRoomWithError("Streaming is already active with your username. Please check that you're not using it in another browser tab.");
                 setLeftTheRoom(true);
                 setIsJoining(false);
                 setIsReconnectionInProgress(false);
