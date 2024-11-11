@@ -97,6 +97,7 @@ function ParticipantTab(props) {
         </Grid>
         <Grid item>
           <div style={{display: 'flex'}}>
+            {conference.allParticipants[streamId]?.status !== "created" ? <>
             {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
               <PinBtn
                 id={"unpin-" + streamId}
@@ -123,6 +124,13 @@ function ParticipantTab(props) {
                 getAdminButtons(streamId, assignedVideoCardId)
               ) : null}
             </div>
+            </> : <PinBtn
+                id={"playonly-" + streamId}
+                sx={{minWidth: "unset", pt: 1, pb: 1}}
+                onClick={() => {}}
+            >
+              <SvgIcon size={28} name="eye" color={theme.palette?.participantListIcon?.primary}/>
+            </PinBtn> }
           </div>
         </Grid>
       </Grid>
