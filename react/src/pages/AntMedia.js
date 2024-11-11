@@ -1013,6 +1013,10 @@ function AntMedia(props) {
 
         if (!isPlayOnly) {
             handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
+        } else {
+            // if the user is in playOnly mode, it will join the room with the generated stream id
+            // so we can get the list of play only participants in the room
+            webRTCAdaptor?.joinRoom(roomName, generatedStreamId, null, streamName, role, getUserStatusMetadata());
         }
 
         webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode, '{}', role);
@@ -1161,7 +1165,7 @@ function AntMedia(props) {
         if(!streamName){
           broadcastObject.name = broadcastObject.streamId
         }
-        if(metaDataStr === ""){
+        if(metaDataStr === "" || metaDataStr === null || metaDataStr === undefined){
           broadcastObject.metaData = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
         }
 
@@ -1322,7 +1326,12 @@ function AntMedia(props) {
             subtrackList.forEach(subTrack => {
                 let broadcastObject = JSON.parse(subTrack);
 
-                let metaData = JSON.parse(broadcastObject.metaData);
+                let metaDataStr = broadcastObject.metaData;
+                if(metaDataStr === "" || metaDataStr === null || metaDataStr === undefined){
+                    metaDataStr = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
+                }
+
+                let metaData = JSON.parse(metaDataStr);
                 broadcastObject.isScreenShared = metaData.isScreenShared;
 
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
@@ -2255,6 +2264,8 @@ function AntMedia(props) {
         if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
             handleStopScreenShare();
         }
+
+        webRTCAdaptor?.leaveFromRoom(roomName, publishStreamId);
 
         playLeaveRoomSound();
 
