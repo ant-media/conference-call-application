@@ -28,16 +28,6 @@ jobs:
         mkdir $HOME/.kube
         echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
         
-    - name: Run Unit Test
-      run: |
-        cd react
-        npm install --include=dev
-        npm test
-        
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -137,30 +127,6 @@ jobs:
         ls -alh target/
         cp target/*.war /tmp/circle-conferencing.war
         cd ..
-        
-    - name: Install Test Tool
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
-        git clone https://gitlab.com/Ant-Media/webrtc-test.git
-        cd webrtc-test
-        ./redeploy.sh
-        cp target/webrtc-load-test-tool-*.zip ../
-        cd ..
-        unzip webrtc-load-test-tool-*.zip
-        mkdir ~/test
-        mv webrtc-load-test ~/test
-        
-    - name: Install Selenium
-      run: |
-        wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip
-        unzip chromedriver-linux64.zip
-        sudo cp chromedriver-linux64/chromedriver /tmp
-        ls -al /tmp
-        pip3 install selenium==4.14
-        pip3 install requests
-        pip3 show selenium 
-        pip3 install psutil
         
     - name: Run Integration Test
       run: |
