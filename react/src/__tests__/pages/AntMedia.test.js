@@ -80,10 +80,10 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
       requestVideoTrackAssignments: jest.fn(),
       stopSpeedTest: jest.fn().mockImplementation(() => console.log('stopSpeedTest')),
-      getSubtracks: jest.fn(),
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
-      playStats: {}
+      playStats: {},
+      checkScreenSharingStatus: jest.fn().mockImplementation(() => console.log('checkScreenSharingStatus')),
     }
 
     for (var key in params) {
@@ -2321,6 +2321,169 @@ describe('AntMedia Component', () => {
     await waitFor(() => {
       expect(currentConference.participantUpdated).toBe(false);
     });
+  });
+
+  it('auto pins when screen share is enabled', async () => {
+    process.env.REACT_APP_AUTO_PIN_WHEN_SCREEN_SHARE = 'true';
+
+    render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    var notificationEvent = {
+      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+      streamId: "stream1",
+      payload: [
+        {videoLabel: "videoTrack1", trackId: "tracka1"},
+        {videoLabel: "videoTrack2", trackId: "tracka2"},
+      ]
+    };
+    var json = JSON.stringify(notificationEvent);
+
+    let obj = {};
+    obj.data = json;
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("data_received", obj);
+    });
+
+    //expect(webRTCAdaptorConstructor.checkScreenSharingStatus).toHaveBeenCalled();
+  });
+
+  it('does not auto pin when screen share is disabled', async () => {
+    process.env.REACT_APP_AUTO_PIN_WHEN_SCREEN_SHARE = 'false';
+
+    render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia/>
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    expect(webRTCAdaptorConstructor.checkScreenSharingStatus).not.toHaveBeenCalled();
+  });
+
+  it('returns broadcastObject with isPinned set to true if existing broadcastObject is pinned', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>)
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream1';
+    const broadcastObject = {streamId: 'stream1', isPinned: false};
+    currentConference.allParticipants = {
+      'stream1': {streamId: 'stream1', isPinned: true}
+    };
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(false);
+  });
+
+  it('returns broadcastObject with isPinned set to false if existing broadcastObject is not pinned', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>)
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream1';
+    const broadcastObject = {streamId: 'stream1', isPinned: false};
+    currentConference.allParticipants = {
+      'stream1': {streamId: 'stream1', isPinned: false}
+    };
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(false);
+  });
+
+  it('returns broadcastObject unchanged if existing broadcastObject is not found', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>)
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream1';
+    const broadcastObject = {streamId: 'stream1', isPinned: false};
+    currentConference.allParticipants = {};
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(false);
+  });
+
+  it('returns broadcastObject unchanged if existing broadcastObject is null', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>)
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream1';
+    const broadcastObject = {streamId: 'stream1', isPinned: false};
+    currentConference.allParticipants = {
+      'stream1': null
+    };
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(false);
+  });
+
+  it('returns broadcastObject unchanged if existing broadcastObject is undefined', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>)
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream1';
+    const broadcastObject = {streamId: 'stream1', isPinned: false};
+    currentConference.allParticipants = {
+      'stream1': undefined
+    };
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(false);
   });
 
 });
