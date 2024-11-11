@@ -1188,6 +1188,10 @@ describe('AntMedia Component', () => {
           </AntMedia>
         </ThemeProvider>);
 
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
     currentConference.setParticipantUpdated = jest.fn();
 
@@ -1196,18 +1200,24 @@ describe('AntMedia Component', () => {
     currentConference.allParticipants["participant2"] = {videoTrackId: "participant2", isPinned: false};
     currentConference.allParticipants["participant3"] = {videoTrackId: "participant3", isPinned: false};
 
-    currentConference.videoTrackAssignments["participant0"] = {streamId: "participant0", videoTrackId: "participant0", audioTrackId: "participant0"};
-    currentConference.videoTrackAssignments["participant1"] = {streamId: "participant1", videoTrackId: "participant1", audioTrackId: "participant1"};
-    currentConference.videoTrackAssignments["participant2"] = {streamId: "participant2", videoTrackId: "participant2", audioTrackId: "participant2"};
-    currentConference.videoTrackAssignments["participant3"] = {streamId: "participant3", videoTrackId: "participant3", audioTrackId: "participant3"};
+    await act(async () => {
+      currentConference.setVideoTrackAssignments([
+        {videoLabel: "participant0", streamId: "participant0", videoTrackId: "participant0", audioTrackId: "participant0", isReserved: false},
+        {videoLabel: "participant1", streamId: "participant1", videoTrackId: "participant1", audioTrackId: "participant1", isReserved: false},
+        {videoLabel: "participant2", streamId: "participant2", videoTrackId: "participant2", audioTrackId: "participant2", isReserved: false},
+        {videoLabel: "participant3", streamId: "participant3", videoTrackId: "participant3", audioTrackId: "participant3", isReserved: false}
+      ]);
+    });
 
     // testing pinning
     await act(async () => {
       currentConference.pinVideo("participant3");
     });
 
-    expect(currentConference.allParticipants['participant3'].isPinned).toBe(true);
-    expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+    await waitFor(() => {
+      expect(currentConference.allParticipants['participant3'].isPinned).toBe(true);
+      expect(currentConference.allParticipants['participant2'].isPinned).toBe(false);
+    });
 
     // testing pinning while another participant is pinned
     await act(async () => {
@@ -2047,9 +2057,7 @@ describe('AntMedia Component', () => {
     });
   });
 
-  it('increments streamIdInUseCounter and does not leave room when counter is less than or equal to 3', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
+  it('returns broadcastObject with isPinned set to true when existing broadcast object is pinned', async () => {
     const {container} = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
@@ -2062,19 +2070,16 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    await act(async () => {
-      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
-      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
-    });
+    const streamId = 'stream1';
+    const broadcastObject = {isPinned: false};
+    currentConference.allParticipants[streamId] = {isPinned: true};
 
-    expect(consoleSpy).not.toHaveBeenCalledWith("This stream id is already in use. You may be logged in on another device.");
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
 
-    consoleSpy.mockRestore();
+    expect(result.isPinned).toBe(true);
   });
 
-  it('increments streamIdInUseCounter and leaves room with error when counter exceeds 3', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
+  it('returns broadcastObject with isPinned set to false when existing broadcast object is not pinned', async () => {
     const {container} = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <AntMedia isTest={true}>
@@ -2087,16 +2092,57 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    await act(async () => {
-      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
-      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
-      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
-      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+    const streamId = 'stream2';
+    const broadcastObject = {isPinned: true};
+    currentConference.allParticipants[streamId] = {isPinned: false};
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(false);
+  });
+
+  it('returns broadcastObject unchanged when existing broadcast object is null', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith("This stream id is already in use. You may be logged in on another device.");
+    const streamId = 'stream3';
+    const broadcastObject = {isPinned: true};
+    currentConference.allParticipants[streamId] = null;
 
-    consoleSpy.mockRestore();
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(true);
+  });
+
+  it('returns broadcastObject unchanged when existing broadcast object is undefined', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream4';
+    const broadcastObject = {isPinned: false};
+    currentConference.allParticipants[streamId] = undefined;
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(false);
   });
 
 });

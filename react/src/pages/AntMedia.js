@@ -1305,7 +1305,7 @@ function AntMedia(props) {
 
     function checkAndSetIsPinned(streamId, broadcastObject) {
         let existingBroadcastObject = allParticipants[streamId];
-        if (existingBroadcastObject !== null && existingBroadcastObject !== undefined && existingBroadcastObject.isPinned === true) {
+        if (existingBroadcastObject !== null && existingBroadcastObject !== undefined) {
             broadcastObject.isPinned = existingBroadcastObject.isPinned;
         }
         return broadcastObject;
@@ -1687,12 +1687,31 @@ function AntMedia(props) {
             videoLabel = "localVideo";
         }
 
-        if (videoLabel !== "localVideo" && videoTrackAssignments.length > 0) {
-            // if we are play only mode, we are going to pin the first video track.
-            // if we are not play only mode, we are going to pin the second video track because the first video track is local video.
-            // it's a workaround for now. we need to fix the root cause of the issue in the backend side.
-            // Mustafa - 2024-10-16
-            videoLabel = (isPlayOnly) ? videoTrackAssignments[0]?.videoLabel : videoTrackAssignments[1]?.videoLabel;
+        if (videoLabel !== "localVideo") {
+            let nextAvailableVideoLabel;
+
+            // if we are publisher, the first video track is reserved for local video, so we start from 1
+            // if we are play only, the first video track is not reserved for local video, so we start from 0
+            let videoTrackAssignmentStartIndex = (isPlayOnly) ? 0 : 1;
+
+            for (let i = videoTrackAssignmentStartIndex; i < videoTrackAssignments.length; i++) {
+                // if the video track is not reserved, we can assign it to the pinned user
+                if (videoTrackAssignments[i].isReserved === false) {
+                    nextAvailableVideoLabel = videoTrackAssignments[i]?.videoLabel;
+                    break;
+                }
+            }
+
+            if (nextAvailableVideoLabel === undefined && videoTrackAssignments.length > videoTrackAssignmentStartIndex) {
+                // if there is no available video track, we use the first video track
+                videoLabel = videoTrackAssignments[videoTrackAssignmentStartIndex]?.videoLabel
+            } else if (nextAvailableVideoLabel === undefined) {
+                console.error("Cannot find available video track for pinning user.");
+                return;
+            } else {
+                videoLabel = nextAvailableVideoLabel;
+            }
+
             webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
         }
 
@@ -2103,6 +2122,7 @@ function AntMedia(props) {
                     let existingAssignment = currentVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
                     if (existingAssignment) {
                         existingAssignment.streamId = vta.trackId;
+                        existingAssignment.isReserved = vta.reserved;
                     }
                 });
 
@@ -2327,7 +2347,7 @@ function AntMedia(props) {
 
     function removeAllRemoteParticipants() {
         let newVideoTrackAssignment = {
-            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true
+            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true, isReserved: false
         };
 
         let tempVideoTrackAssignments = [];
@@ -2357,7 +2377,7 @@ function AntMedia(props) {
         }
 
         let newVideoTrackAssignment = {
-            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true
+            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true, isReserved: false
         };
         let tempVideoTrackAssignments = [...videoTrackAssignments];
         tempVideoTrackAssignments.push(newVideoTrackAssignment);
@@ -2408,7 +2428,7 @@ function AntMedia(props) {
             setAudioTracks(temp);
         } else if (obj.track.kind === "video") {
             let newVideoTrackAssignment = {
-                videoLabel: index, track: obj.track, streamId: obj.streamId
+                videoLabel: index, track: obj.track, streamId: obj.streamId, isReserved: false
             };
 
             if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
@@ -2860,7 +2880,8 @@ function AntMedia(props) {
                         statsList,
                         getTrackStats,
                         isBroadcasting,
-                        playStats
+                        playStats,
+                        checkAndSetIsPinned
                     }}
                 >
                     {props.children}
