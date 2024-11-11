@@ -13,6 +13,7 @@ export function getOrangeTheme() {
   const themeColor50 = "#FF9800";
   const themeColor60 = "#FB8C00";
   const themeColor70 = "#F57C00";
+  const themeColor71 = "#F57C00";
   const themeColor72 = "#F57C00";
   const themeColor75 = "#EF6C00";
   const themeColor80 = "#EF6C00";
@@ -337,6 +338,7 @@ export function getOrangeTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        71: themeColor71,
         72: themeColor72,
         80: themeColor80,
         85: themeColor85,
