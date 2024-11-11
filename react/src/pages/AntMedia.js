@@ -1132,29 +1132,6 @@ function AntMedia(props) {
                 setIsRecordPluginActive(brodcastStatusMetadata.isRecording);
             }
         }
-
-        let participantIds = broadcastObject.subTrackStreamIds;
-
-        //find and remove not available tracks
-        const temp = {...allParticipants};
-        let currentTracks = Object.keys(temp);
-        currentTracks.forEach(trackId => {
-            if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
-                console.log("stream removed:" + trackId);
-
-                delete temp[trackId];
-            }
-        });
-        console.log("handleMainTrackBroadcastObject setAllParticipants:"+JSON.stringify(temp));
-        setAllParticipants(temp);
-        setParticipantUpdated(!participantUpdated);
-
-        //request broadcast object for new tracks
-        participantIds.forEach(pid => {
-            if (allParticipants[pid] === undefined) {
-                webRTCAdaptor?.getBroadcastObject(pid);
-            }
-        });
     }
 
 
@@ -1326,6 +1303,8 @@ function AntMedia(props) {
             subtrackList.forEach(subTrack => {
                 let broadcastObject = JSON.parse(subTrack);
 
+                handleSubtrackBroadcastObject(broadcastObject);
+
                 let metaDataStr = broadcastObject.metaData;
                 if(metaDataStr === "" || metaDataStr === null || metaDataStr === undefined){
                     metaDataStr = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
@@ -1338,6 +1317,7 @@ function AntMedia(props) {
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
             });
+
             if (!_.isEqual(allParticipantsTemp, allParticipants)) {
                 setAllParticipants(allParticipantsTemp);
                 setParticipantUpdated(!participantUpdated);
