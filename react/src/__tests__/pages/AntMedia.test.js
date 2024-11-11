@@ -2047,4 +2047,92 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('returns broadcastObject with isPinned set to true when existing broadcast object is pinned', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream1';
+    const broadcastObject = {isPinned: false};
+    currentConference.allParticipants[streamId] = {isPinned: true};
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(true);
+  });
+
+  it('returns broadcastObject with isPinned set to false when existing broadcast object is not pinned', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream2';
+    const broadcastObject = {isPinned: true};
+    currentConference.allParticipants[streamId] = {isPinned: false};
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(false);
+  });
+
+  it('returns broadcastObject unchanged when existing broadcast object is null', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream3';
+    const broadcastObject = {isPinned: true};
+    currentConference.allParticipants[streamId] = null;
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(true);
+  });
+
+  it('returns broadcastObject unchanged when existing broadcast object is undefined', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'stream4';
+    const broadcastObject = {isPinned: false};
+    currentConference.allParticipants[streamId] = undefined;
+
+    const result = currentConference.checkAndSetIsPinned(streamId, broadcastObject);
+
+    expect(result.isPinned).toBe(false);
+  });
+
 });
