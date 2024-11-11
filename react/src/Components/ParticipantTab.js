@@ -84,8 +84,16 @@ function ParticipantTab(props) {
         style={{ borderBottomWidth: 1 }}
         sx={{ borderColor: "primary.main" }}
       >
-        <Grid item sx={{ pr: 1 }}>
-          <ParticipantName variant="body1">{name}</ParticipantName>
+        <Grid item sx={{ pr: 1,  maxWidth: "60%" }}>
+          <ParticipantName
+              variant="body1"
+              sx={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "block"
+              }}
+          >{name}</ParticipantName>
         </Grid>
         <Grid item>
           <div style={{display: 'flex'}}>
@@ -140,7 +148,8 @@ function ParticipantTab(props) {
   };
 
   return (
-    <div style={{width: "100%", overflow: "hidden"}}>
+    <>
+    <Grid container sx={{mt: 1}} id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}}>
       <Stack sx={{width: "100%",}} spacing={2}>
         <Grid container>
           <SvgIcon size={28} name="participants" color={theme.palette?.participantListIcon?.primary}/>
@@ -177,7 +186,8 @@ function ParticipantTab(props) {
           }
         })}
       </Stack>
-    </div>
+    </Grid>
+    </>
   );
 
 }
