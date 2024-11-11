@@ -264,6 +264,7 @@ var videoTrackAssignmentsIntervalJob = null;
 
 
 var room = null;
+var streamIdInUseCounter = 0;
 var reconnecting = false;
 var publishReconnected;
 var playReconnected;
@@ -1091,7 +1092,7 @@ function AntMedia(props) {
 
         if (Object.keys(allParticipantsTemp).length <= globals.maxVideoTrackCount) {
             let newVideoTrackAssignment = {
-                videoLabel: "label_" + suffix, track: null, streamId: "streamId_" + suffix,
+                videoLabel: "label_" + suffix, track: null, streamId: "streamId_" + suffix, isFake: true
             };
             let temp = [...videoTrackAssignments];
             temp.push(newVideoTrackAssignment);
@@ -1285,7 +1286,7 @@ function AntMedia(props) {
 
     function checkAndSetIsPinned(streamId, broadcastObject) {
         let existingBroadcastObject = allParticipants[streamId];
-        if (existingBroadcastObject !== null && existingBroadcastObject !== undefined && existingBroadcastObject.isPinned === true) {
+        if (existingBroadcastObject !== null && existingBroadcastObject !== undefined) {
             broadcastObject.isPinned = existingBroadcastObject.isPinned;
         }
         return broadcastObject;
@@ -1297,7 +1298,7 @@ function AntMedia(props) {
         } else if (info === "subtrackList") {
             let subtrackList = obj.subtrackList;
             let allParticipantsTemp = {};
-            if (!isPlayOnly) {
+            if (!isPlayOnly && publishStreamId) {
                 allParticipantsTemp[publishStreamId] = {name: "You"};
             }
             subtrackList.forEach(subTrack => {
@@ -1316,6 +1317,14 @@ function AntMedia(props) {
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
+            });
+
+            // add fake participants into the new list
+            Object.keys(allParticipants).forEach(streamId => {
+                let broadcastObject = allParticipants[streamId];
+                if (broadcastObject.isFake === true) {
+                    allParticipantsTemp[streamId] = broadcastObject;
+                }
             });
 
             if (!_.isEqual(allParticipantsTemp, allParticipants)) {
@@ -1341,6 +1350,7 @@ function AntMedia(props) {
             handlePlayVideo(obj);
         } else if (info === "publish_started") {
             setIsPublished(true);
+            streamIdInUseCounter = 0;
             console.log("**** publish started:" + reconnecting);
             updateMaxVideoTrackCount(appSettingsMaxVideoTrackCount);
 
@@ -1584,6 +1594,15 @@ function AntMedia(props) {
             errorMessage = "Fatal Error: WebSocket not supported in this browser";
         } else if (error.indexOf("no_stream_exist") !== -1) {
             setIsNoSreamExist(true);
+        } else if (error.indexOf("streamIdInUse") !== -1) {
+            streamIdInUseCounter++;
+            if (streamIdInUseCounter > 3) {
+                console.log("This stream id is already in use. You may be logged in on another device.");
+                setLeaveRoomWithError("Streaming is already active with your username. Please check that you're not using it in another browser tab.");
+                setLeftTheRoom(true);
+                setIsJoining(false);
+                setIsReconnectionInProgress(false);
+            }
         } else if (error.indexOf("data_channel_error") !== -1) {
             errorMessage = "There was a error during data channel communication";
         } else if (error.indexOf("ScreenSharePermissionDenied") !== -1) {
@@ -1665,12 +1684,31 @@ function AntMedia(props) {
             videoLabel = "localVideo";
         }
 
-        if (videoLabel !== "localVideo" && videoTrackAssignments.length > 0) {
-            // if we are play only mode, we are going to pin the first video track.
-            // if we are not play only mode, we are going to pin the second video track because the first video track is local video.
-            // it's a workaround for now. we need to fix the root cause of the issue in the backend side.
-            // Mustafa - 2024-10-16
-            videoLabel = (isPlayOnly) ? videoTrackAssignments[0]?.videoLabel : videoTrackAssignments[1]?.videoLabel;
+        if (videoLabel !== "localVideo") {
+            let nextAvailableVideoLabel;
+
+            // if we are publisher, the first video track is reserved for local video, so we start from 1
+            // if we are play only, the first video track is not reserved for local video, so we start from 0
+            let videoTrackAssignmentStartIndex = (isPlayOnly) ? 0 : 1;
+
+            for (let i = videoTrackAssignmentStartIndex; i < videoTrackAssignments.length; i++) {
+                // if the video track is not reserved, we can assign it to the pinned user
+                if (videoTrackAssignments[i].isReserved === false) {
+                    nextAvailableVideoLabel = videoTrackAssignments[i]?.videoLabel;
+                    break;
+                }
+            }
+
+            if (nextAvailableVideoLabel === undefined && videoTrackAssignments.length > videoTrackAssignmentStartIndex) {
+                // if there is no available video track, we use the first video track
+                videoLabel = videoTrackAssignments[videoTrackAssignmentStartIndex]?.videoLabel
+            } else if (nextAvailableVideoLabel === undefined) {
+                console.error("Cannot find available video track for pinning user.");
+                return;
+            } else {
+                videoLabel = nextAvailableVideoLabel;
+            }
+
             webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
         }
 
@@ -2062,7 +2100,7 @@ function AntMedia(props) {
                         }
                     });
 
-                    if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
+                    if (tempVideoTrackAssignment.isMine || tempVideoTrackAssignment.isFake || assignment !== undefined) {
                         if (isVideoLabelExists(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)) {
                             console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
                         } else {
@@ -2081,6 +2119,7 @@ function AntMedia(props) {
                     let existingAssignment = currentVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
                     if (existingAssignment) {
                         existingAssignment.streamId = vta.trackId;
+                        existingAssignment.isReserved = vta.reserved;
                     }
                 });
 
@@ -2307,7 +2346,7 @@ function AntMedia(props) {
 
     function removeAllRemoteParticipants() {
         let newVideoTrackAssignment = {
-            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true
+            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true, isReserved: false
         };
 
         let tempVideoTrackAssignments = [];
@@ -2337,7 +2376,7 @@ function AntMedia(props) {
         }
 
         let newVideoTrackAssignment = {
-            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true
+            videoLabel: "localVideo", track: null, streamId: publishStreamId, isMine: true, isReserved: false
         };
         let tempVideoTrackAssignments = [...videoTrackAssignments];
         tempVideoTrackAssignments.push(newVideoTrackAssignment);
@@ -2388,7 +2427,7 @@ function AntMedia(props) {
             setAudioTracks(temp);
         } else if (obj.track.kind === "video") {
             let newVideoTrackAssignment = {
-                videoLabel: index, track: obj.track, streamId: obj.streamId
+                videoLabel: index, track: obj.track, streamId: obj.streamId, isReserved: false
             };
 
             if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
@@ -2840,7 +2879,8 @@ function AntMedia(props) {
                         statsList,
                         getTrackStats,
                         isBroadcasting,
-                        playStats
+                        playStats,
+                        checkAndSetIsPinned
                     }}
                 >
                     {props.children}
