@@ -1088,7 +1088,7 @@ function AntMedia(props) {
 
         if (Object.keys(allParticipantsTemp).length <= globals.maxVideoTrackCount) {
             let newVideoTrackAssignment = {
-                videoLabel: "label_" + suffix, track: null, streamId: "streamId_" + suffix,
+                videoLabel: "label_" + suffix, track: null, streamId: "streamId_" + suffix, isFake: true
             };
             let temp = [...videoTrackAssignments];
             temp.push(newVideoTrackAssignment);
@@ -1317,7 +1317,7 @@ function AntMedia(props) {
         } else if (info === "subtrackList") {
             let subtrackList = obj.subtrackList;
             let allParticipantsTemp = {};
-            if (!isPlayOnly) {
+            if (!isPlayOnly && publishStreamId) {
                 allParticipantsTemp[publishStreamId] = {name: "You"};
             }
             subtrackList.forEach(subTrack => {
@@ -1329,6 +1329,13 @@ function AntMedia(props) {
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
+            });
+            // add fake participants into the new list
+            Object.keys(allParticipants).forEach(streamId => {
+                let broadcastObject = allParticipants[streamId];
+                if (broadcastObject.isFake === true) {
+                    allParticipantsTemp[streamId] = broadcastObject;
+                }
             });
             if (!_.isEqual(allParticipantsTemp, allParticipants)) {
                 setAllParticipants(allParticipantsTemp);
@@ -2103,7 +2110,7 @@ function AntMedia(props) {
                         }
                     });
 
-                    if (tempVideoTrackAssignment.isMine || assignment !== undefined) {
+                    if (tempVideoTrackAssignment.isMine || tempVideoTrackAssignment.isFake || assignment !== undefined) {
                         if (isVideoLabelExists(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)) {
                             console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
                         } else {
