@@ -611,6 +611,7 @@ function AntMedia(props) {
             tempSpeedTestObject.progressValue = 10;
             speedTestProgress.current = tempSpeedTestObject.progressValue;
             setSpeedTestObject(tempSpeedTestObject);
+            checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
             speedTestForPublishWebRtcAdaptor.current.publish("speedTestStream" + speedTestStreamId.current, token, subscriberId, subscriberCode, "speedTestStream" + speedTestStreamId.current, "", "")
         } 
         else if (info === "publish_started") {
@@ -879,6 +880,51 @@ function AntMedia(props) {
             }
         } catch (error) {
             console.error("Error while switching video/audio sources", error);
+        }
+    }
+
+    function checkAndUpdateVideoAudioSourcesForPublishSpeedTest() {
+        let isVideoDeviceAvailable = false;
+        let isAudioDeviceAvailable = false;
+        let selectedDevices = getSelectedDevices();
+        let currentCameraDeviceId = selectedDevices.videoDeviceId;
+        let currentAudioDeviceId = selectedDevices.audioDeviceId;
+
+        // check if the selected devices are still available
+        for (let index = 0; index < devices.length; index++) {
+            if (devices[index].kind === "videoinput" && devices[index].deviceId === selectedDevices.videoDeviceId) {
+                isVideoDeviceAvailable = true;
+            }
+            if (devices[index].kind === "audioinput" && devices[index].deviceId === selectedDevices.audioDeviceId) {
+                isAudioDeviceAvailable = true;
+            }
+        }
+
+        // if the selected devices are not available, select the first available device
+        if (selectedDevices.videoDeviceId === '' || isVideoDeviceAvailable === false) {
+            const camera = devices.find(d => d.kind === 'videoinput');
+            if (camera) {
+                selectedDevices.videoDeviceId = camera.deviceId;
+            }
+        }
+        if (selectedDevices.audioDeviceId === '' || isAudioDeviceAvailable === false) {
+            const audio = devices.find(d => d.kind === 'audioinput');
+            if (audio) {
+                selectedDevices.audioDeviceId = audio.deviceId;
+            }
+        }
+
+        setSelectedDevices(selectedDevices);
+
+        try {
+            if (speedTestForPublishWebRtcAdaptor.current !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
+                speedTestForPublishWebRtcAdaptor.current?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
+            }
+            if (speedTestForPublishWebRtcAdaptor.current !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
+                speedTestForPublishWebRtcAdaptor.current?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
+            }
+        } catch (error) {
+            console.error("Error while switching video and audio sources for the publish speed test adaptor", error);
         }
     }
 
