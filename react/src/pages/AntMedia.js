@@ -2295,6 +2295,7 @@ function AntMedia(props) {
                     mediaConstraints = {
                         video: false, audio: false,
                     };
+                    setIsPlayed(false);
                     setRole(WebinarRoles.Listener);
                     setIsPlayOnly(true);
                 }
