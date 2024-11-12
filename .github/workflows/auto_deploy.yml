@@ -65,6 +65,7 @@ jobs:
     - name: Change Replicate Set
       run: |
         echo "current_replica=$(kubectl get deployment ant-media-server-origin -n antmedia -o jsonpath='{.spec.replicas}')" >> $GITHUB_ENV
+        echo $current_replica
         kubectl scale deployment ant-media-server-origin --replicas=1 -n antmedia 
         
     - name: Login to server
