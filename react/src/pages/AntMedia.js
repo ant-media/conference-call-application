@@ -2477,8 +2477,14 @@ function AntMedia(props) {
         return isExist;
     }
 
-    function updateAllParticipantsPagination() {
-        globals.participantListPagination.currentPage = 1;
+    function updateAllParticipantsPagination(currentPage) {
+        if (currentPage === 0) {
+            currentPage = 1;
+        }
+        if (currentPage > globals.participantListPagination.totalPage) {
+            currentPage = globals.participantListPagination.totalPage;
+        }
+        globals.participantListPagination.currentPage = currentPage;
         globals.participantListPagination.pageSize = 15;
         globals.participantListPagination.startIndex = (globals.participantListPagination.currentPage - 1) * globals.participantListPagination.pageSize;
         globals.participantListPagination.endIndex = (globals.participantListPagination.currentPage) * globals.participantListPagination.pageSize;
