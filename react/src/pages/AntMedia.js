@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
-import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
+import {Backdrop, Box, CircularProgress, Grid} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
-import _, { forEach } from "lodash";
+import _ from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
 import {useSnackbar} from "notistack";
@@ -1139,29 +1139,6 @@ function AntMedia(props) {
                 setIsRecordPluginActive(brodcastStatusMetadata.isRecording);
             }
         }
-
-        let participantIds = broadcastObject.subTrackStreamIds;
-
-        //find and remove not available tracks
-        const temp = {...allParticipants};
-        let currentTracks = Object.keys(temp);
-        currentTracks.forEach(trackId => {
-            if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
-                console.log("stream removed:" + trackId);
-
-                delete temp[trackId];
-            }
-        });
-        console.log("handleMainTrackBroadcastObject setAllParticipants:"+JSON.stringify(temp));
-        setAllParticipants(temp);
-        setParticipantUpdated(!participantUpdated);
-
-        //request broadcast object for new tracks
-        participantIds.forEach(pid => {
-            if (allParticipants[pid] === undefined) {
-                webRTCAdaptor?.getBroadcastObject(pid);
-            }
-        });
     }
 
 
@@ -1340,6 +1317,16 @@ function AntMedia(props) {
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
             });
+            const participantVTAByStreamId = new Map(
+                videoTrackAssignments.map(e => [e.streamId, e])
+            );
+
+            Object.keys(allParticipants).forEach(participant => {
+                if (participantVTAByStreamId.has(participant.streamId) && !allParticipantsTemp[participant.streamId]) {
+                    allParticipantsTemp[participant.streamId] = participant;
+                }
+            });
+
             // add fake participants into the new list
             Object.keys(allParticipants).forEach(streamId => {
                 let broadcastObject = allParticipants[streamId];
@@ -2134,12 +2121,28 @@ function AntMedia(props) {
 
                 currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
 
+                let updateAllParticipants = {...allParticipants};
+
                 // update participants according to current assignments
                 receivedVideoTrackAssignments.forEach(vta => {
                     let existingAssignment = currentVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
                     if (existingAssignment) {
                         existingAssignment.streamId = vta.trackId;
                         existingAssignment.isReserved = vta.reserved;
+                    }
+                    if (!allParticipants[vta.trackId]) {
+                        /*
+                        updateAllParticipants[vta.trackId] = {
+                            streamId: vta.trackId,
+                            name: vta.trackId,
+                            isScreenShared: false,
+                            isPinned: false,
+                            isFake: false,
+                            isMine: false,
+                            metaData: "{\"isMicMuted\":true,\"isCameraOn\":false,\"isScreenShared\":false,\"playOnly\":false}"
+                        };
+                         */
+                        webRTCAdaptor?.getBroadcastObject(vta.trackId);
                     }
                 });
 
