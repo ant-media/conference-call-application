@@ -2491,6 +2491,9 @@ function AntMedia(props) {
         // we calculate the total page count for pagination
         globals.participantListPagination.totalPage = Math.floor(participantCount / globals.participantListPagination.pageSize)
             + (participantCount % globals.participantListPagination.pageSize > 0 ? 1 : 0);
+
+        // we need to get the subtracks for the new page
+        webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.startIndex, globals.participantListPagination.endIndex);
     }
 
     function setAndEnableVirtualBackgroundImage(imageUrl) {
