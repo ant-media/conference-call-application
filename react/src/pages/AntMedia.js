@@ -34,10 +34,12 @@ const globals = {
   desiredTileCount: 6,
   trackEvents: [],
   //pagination is used to keep track of the current page and the total page of the participants list
-  pagination: {
+  participantListPagination: {
       currentPage: 1,
       pageSize: 15,
-      totalPage: 1
+      totalPage: 8,
+      startIndex: 0,
+      endIndex: 15
   }
 };
 
@@ -389,6 +391,8 @@ function AntMedia(props) {
    * we use it to fill this dictionary.
    */
   const [allParticipants, setAllParticipants] = useState({});
+
+    const [participantCount, setParticipantCount] = useState(0);
 
     const [audioTracks, setAudioTracks] = useState([]);
 
@@ -978,7 +982,7 @@ function AntMedia(props) {
             );
             console.log("UPDATE_PARTICIPANT_ROLE event sent by "+publishStreamId);
 
-            webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
+            webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.startIndex, globals.participantListPagination.endIndex);
         }, 2000);
     }
 
@@ -1376,7 +1380,7 @@ function AntMedia(props) {
                 localVideoCreate(newLocalVideo);
                 // we need to set the setVideoCameraSource to be able to update sender source after the reconnection
                 webRTCAdaptor.mediaManager.setVideoCameraSource(publishStreamId, webRTCAdaptor.mediaManager.mediaConstraints, null, true);
-                webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
+                webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.startIndex, globals.participantListPagination.endIndex);
                 publishReconnected = true;
                 reconnecting = !(publishReconnected && playReconnected);
                 setIsReconnectionInProgress(reconnecting);
@@ -1405,7 +1409,7 @@ function AntMedia(props) {
             setIsPlayed(true);
             setIsNoSreamExist(false);
             webRTCAdaptor?.getBroadcastObject(roomName);
-            webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
+            webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.startIndex, globals.participantListPagination.endIndex);
             requestVideoTrackAssignmentsInterval();
 
             if (isPlayOnly) {
@@ -2167,7 +2171,7 @@ function AntMedia(props) {
             } else if (eventType === "TRACK_LIST_UPDATED") {
                 console.info("TRACK_LIST_UPDATED -> ", obj);
 
-                webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
+                webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.startIndex, globals.participantListPagination.endIndex);
             } else if (eventType === "UPDATE_PARTICIPANT_ROLE") {
 
                 console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
@@ -2179,7 +2183,7 @@ function AntMedia(props) {
 
                 if (updatedParticipant === null || updatedParticipant === undefined) {
                     console.warn("Cannot find broadcast object for streamId: " + notificationEvent.streamId, " in allParticipants. Updated participant list request is sent.");
-                    webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
+                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.startIndex, globals.participantListPagination.endIndex);
                     return;
                 }
 
@@ -2194,7 +2198,7 @@ function AntMedia(props) {
                     setRole(notificationEvent.role);
                 } else {
                     console.log("UPDATE_PARTICIPANT_ROLE event received and subtracks are queried");
-                    webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
+                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.startIndex, globals.participantListPagination.endIndex);
                 }
                 setParticipantUpdated(!participantUpdated);
             }
@@ -2466,6 +2470,16 @@ function AntMedia(props) {
             }
         });
         return isExist;
+    }
+
+    function updateAllParticipantsPagination() {
+        globals.participantListPagination.currentPage = 1;
+        globals.participantListPagination.pageSize = 15;
+        globals.participantListPagination.startIndex = (globals.participantListPagination.currentPage - 1) * globals.participantListPagination.pageSize;
+        globals.participantListPagination.endIndex = (globals.participantListPagination.currentPage) * globals.participantListPagination.pageSize;
+        // we calculate the total page count for pagination
+        globals.participantListPagination.totalPage = Math.floor(participantCount / globals.participantListPagination.pageSize)
+            + (participantCount % globals.participantListPagination.pageSize > 0 ? 1 : 0);
     }
 
     function setAndEnableVirtualBackgroundImage(imageUrl) {
