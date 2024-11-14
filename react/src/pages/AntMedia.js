@@ -37,7 +37,7 @@ const globals = {
   participantListPagination: {
       currentPage: 1,
       pageSize: 15,
-      totalPage: 8,
+      totalPage: 1,
       startIndex: 0,
       endIndex: 15
   }
@@ -392,7 +392,7 @@ function AntMedia(props) {
    */
   const [allParticipants, setAllParticipants] = useState({});
 
-    const [participantCount, setParticipantCount] = useState(0);
+    const [participantCount, setParticipantCount] = useState(0); // TODO: Get the participant count from the server
 
     const [audioTracks, setAudioTracks] = useState([]);
 
@@ -2483,15 +2483,18 @@ function AntMedia(props) {
         if (currentPage <= 0) {
             currentPage = 1;
         }
-        if (currentPage > globals.participantListPagination.totalPage) {
-            currentPage = globals.participantListPagination.totalPage;
-        }
-        globals.participantListPagination.currentPage = currentPage;
-        globals.participantListPagination.startIndex = (globals.participantListPagination.currentPage - 1) * globals.participantListPagination.pageSize;
-        globals.participantListPagination.endIndex = (globals.participantListPagination.currentPage) * globals.participantListPagination.pageSize;
+
         // we calculate the total page count for pagination
         globals.participantListPagination.totalPage = Math.floor(participantCount / globals.participantListPagination.pageSize)
             + (participantCount % globals.participantListPagination.pageSize > 0 ? 1 : 0);
+
+        if (currentPage > globals.participantListPagination.totalPage) {
+            currentPage = globals.participantListPagination.totalPage;
+        }
+
+        globals.participantListPagination.currentPage = currentPage;
+        globals.participantListPagination.startIndex = (globals.participantListPagination.currentPage - 1) * globals.participantListPagination.pageSize;
+        globals.participantListPagination.endIndex = (globals.participantListPagination.currentPage) * globals.participantListPagination.pageSize;
 
         // we need to get the subtracks for the new page
         webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.startIndex, globals.participantListPagination.endIndex);
