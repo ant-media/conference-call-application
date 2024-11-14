@@ -1088,7 +1088,8 @@ function AntMedia(props) {
             metaData: JSON.stringify({isCameraOn: false}),
             isPinned: undefined,
             isScreenShared: undefined,
-            isFake: true
+            isFake: true,
+            status: "livestream"
         };
         allParticipantsTemp["streamId_" + suffix] = broadcastObject;
 
@@ -2139,6 +2140,7 @@ function AntMedia(props) {
                             isPinned: false,
                             isFake: false,
                             isMine: false,
+                            status: "livestream"
                             metaData: "{\"isMicMuted\":true,\"isCameraOn\":false,\"isScreenShared\":false,\"playOnly\":false}"
                         };
                          */
@@ -2410,7 +2412,7 @@ function AntMedia(props) {
 
         let allParticipantsTemp = {...allParticipants};
         allParticipantsTemp[publishStreamId] = {
-            streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false
+            streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false, status: "livestream"
         };
 
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
