@@ -2121,7 +2121,7 @@ function AntMedia(props) {
 
                 currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
 
-                let updateAllParticipants = {...allParticipants};
+                //let updateAllParticipants = {...allParticipants};
 
                 // update participants according to current assignments
                 receivedVideoTrackAssignments.forEach(vta => {
@@ -2145,6 +2145,8 @@ function AntMedia(props) {
                         webRTCAdaptor?.getBroadcastObject(vta.trackId);
                     }
                 });
+                
+                //setAllParticipants(updateAllParticipants);
 
                 checkScreenSharingStatus();
 
