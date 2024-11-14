@@ -33,6 +33,12 @@ const globals = {
   maxVideoTrackCount: 6,
   desiredTileCount: 6,
   trackEvents: [],
+  //pagination is used to keep track of the current page and the total page of the participants list
+  pagination: {
+      currentPage: 1,
+      pageSize: 15,
+      totalPage: 1
+  }
 };
 
 function getMediaConstraints(videoSendResolution, frameRate) {
@@ -972,7 +978,7 @@ function AntMedia(props) {
             );
             console.log("UPDATE_PARTICIPANT_ROLE event sent by "+publishStreamId);
 
-            webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+            webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
         }, 2000);
     }
 
@@ -1370,7 +1376,7 @@ function AntMedia(props) {
                 localVideoCreate(newLocalVideo);
                 // we need to set the setVideoCameraSource to be able to update sender source after the reconnection
                 webRTCAdaptor.mediaManager.setVideoCameraSource(publishStreamId, webRTCAdaptor.mediaManager.mediaConstraints, null, true);
-                webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+                webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
                 publishReconnected = true;
                 reconnecting = !(publishReconnected && playReconnected);
                 setIsReconnectionInProgress(reconnecting);
@@ -1399,7 +1405,7 @@ function AntMedia(props) {
             setIsPlayed(true);
             setIsNoSreamExist(false);
             webRTCAdaptor?.getBroadcastObject(roomName);
-            webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+            webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
             requestVideoTrackAssignmentsInterval();
 
             if (isPlayOnly) {
@@ -2161,7 +2167,7 @@ function AntMedia(props) {
             } else if (eventType === "TRACK_LIST_UPDATED") {
                 console.info("TRACK_LIST_UPDATED -> ", obj);
 
-                webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+                webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
             } else if (eventType === "UPDATE_PARTICIPANT_ROLE") {
 
                 console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
@@ -2173,7 +2179,7 @@ function AntMedia(props) {
 
                 if (updatedParticipant === null || updatedParticipant === undefined) {
                     console.warn("Cannot find broadcast object for streamId: " + notificationEvent.streamId, " in allParticipants. Updated participant list request is sent.");
-                    webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+                    webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
                     return;
                 }
 
@@ -2188,7 +2194,7 @@ function AntMedia(props) {
                     setRole(notificationEvent.role);
                 } else {
                     console.log("UPDATE_PARTICIPANT_ROLE event received and subtracks are queried");
-                    webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+                    webRTCAdaptor?.getSubtracks(roomName, null, (globals.pagination.currentPage * globals.pagination.pageSize), globals.pagination.pageSize);
                 }
                 setParticipantUpdated(!participantUpdated);
             }
