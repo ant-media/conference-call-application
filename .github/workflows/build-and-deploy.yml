@@ -155,7 +155,6 @@ jobs:
         kubectl -n circle cp $(kubectl -n circle get pods | grep "ant-media-server" | awk '{print $1}'):/usr/local/antmedia/log/ant-media-server.log /tmp/ant-media-server-$(kubectl -n circle get pods -o wide | grep "ant-media-server" | awk '{print $6}').log
         kubectl -n circle cp $(kubectl -n circle get pods | grep "ant-media-server" | awk '{print $1}'):/usr/local/antmedia/log/antmedia-error.log /tmp/antmedia-error-$(kubectl -n circle get pods -o wide | grep "ant-media-server" | awk '{print $6}').log
 
-
     - name: Upload PNG files as artifacts
       if: always()
       uses: actions/upload-artifact@v4
