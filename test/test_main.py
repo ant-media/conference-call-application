@@ -17,14 +17,14 @@ os.environ['TEST_APP_NAME'] = "TestAPP"+str(random.randint(100, 999))
 suite = unittest.TestSuite()
 suite.addTest(TestDeployment('test_install_app'))
 
-'''
+
 suite2 = None
 if use_test_webinar:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_webinar)
 else:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
 suite.addTests(suite2)
-'''
+
 suite.addTest(TestDeployment('test_delete_app'))
 
 ret = not unittest.TextTestRunner(verbosity=2, failfast=True).run(suite).wasSuccessful()
