@@ -45,7 +45,9 @@
     "build": "react-scripts build && node custom-post-build.js",
     "eject": "react-scripts eject",
     "test": "jest --verbose",
-    "upload-coverage": "codecov"
+    "upload-coverage": "codecov",
+    "proBuild": "react-scripts build && node custom-post-build.js && node learnyst-pro-build.js",
+    "testBuild": "react-scripts build && node custom-post-build.js && node learnyst-test-build.js"
   },
   "eslintConfig": {
     "extends": [

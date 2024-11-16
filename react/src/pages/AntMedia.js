@@ -1052,7 +1052,6 @@ function AntMedia(props) {
 
         let packageLost = parseInt(obj.videoPacketsLost) + parseInt(obj.audioPacketsLost);
         let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
-
         let packageLostPercentage = 0;
         console.log("publishStats:", publishStats);
         if (publishStats !== null) {
@@ -1103,6 +1102,10 @@ function AntMedia(props) {
         console.log("error from screen share webrtc adaptor callback")
         //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
         console.log("error:" + error + " message:" + message);
+    }
+
+    function switchDesktopSharePlusCamera() {
+        webRTCAdaptor.switchDesktopCaptureWithCamera(publishStreamId)
     }
 
     function errorCallback(error, message) {
@@ -2193,7 +2196,8 @@ function AntMedia(props) {
                         speedTestForPlayWebRtcAdaptorInfoCallback,
                         speedTestForPlayWebRtcAdaptorErrorCallback,
                         speedTestForPublishWebRtcAdaptorInfoCallback,
-                        speedTestForPublishWebRtcAdaptorErrorCallback
+                        speedTestForPublishWebRtcAdaptorErrorCallback,
+                        switchDesktopSharePlusCamera
                     }}
                 >
                     {props.children}

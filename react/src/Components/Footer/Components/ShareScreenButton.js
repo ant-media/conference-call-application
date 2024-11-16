@@ -33,12 +33,13 @@ function ShareScreenButton({ footer, ...props }) {
         className={footer ? "footer-icon-button" : ""}
         id = "share-screen-button"
         onClick={() => {
-          if (conference.isScreenShared) {
-            conference.handleStopScreenShare();
-          } else {
-            conference.handleStartScreenShare();
-            // send other that you are sharing screen.
-          }
+          // if (conference.isScreenShared) {
+          //   conference.handleStopScreenShare();
+          // } else {
+          //   conference.handleStartScreenShare();
+          //   // send other that you are sharing screen.
+          // }
+          conference.switchDesktopSharePlusCamera();
         }}
         variant="contained"
         color={conference.isScreenShared ? "primary" : "secondary"}
