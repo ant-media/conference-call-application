@@ -156,7 +156,7 @@ function VideoCard(props) {
                                 <SvgIcon
                                     size={36}
                                     name={props.pinned ? t("unpin") : t("pin")}
-                                    color={theme.palette.grey[80]}
+                                    color={theme.palette?.darkIconColor?.primary}
                                 />
                             </Fab>
                         </Tooltip>
@@ -186,7 +186,7 @@ function VideoCard(props) {
                                             <SvgIcon
                                                 size={36}
                                                 name={"camera"}
-                                                color={theme.palette.grey[80]}
+                                                color={theme.palette?.darkIconColor?.primary}
                                             />
                                         </Fab>
                                     </Tooltip>
@@ -205,7 +205,7 @@ function VideoCard(props) {
                                             <SvgIcon
                                                 size={36}
                                                 name={"camera-off"}
-                                                color={theme.palette.grey[80]}
+                                                color={theme.palette?.iconColor?.primary}
                                             />
                                         </Fab>
                                     </Tooltip>
@@ -236,7 +236,7 @@ function VideoCard(props) {
                                             <SvgIcon
                                                 size={36}
                                                 name={"microphone"}
-                                                color={theme.palette.grey[80]}
+                                                color={theme.palette?.darkIconColor?.primary}
                                             />
                                         </Fab>
                                     </Tooltip>
@@ -261,7 +261,7 @@ function VideoCard(props) {
                                             <SvgIcon
                                                 size={36}
                                                 name={"muted-microphone"}
-                                                color={theme.palette.grey[80]}
+                                                color={theme.palette?.iconColor?.primary}
                                             />
                                         </Fab>
                                     </Tooltip> }
@@ -317,7 +317,7 @@ function VideoCard(props) {
                 <SvgIcon
                   size={36}
                   name={props.pinned ? "unpin" : "pin"}
-                  color={theme.palette.grey[80]}
+                  color={theme.palette?.darkIconColor?.primary}
                 />
               </Fab>
             </Tooltip>
@@ -347,7 +347,7 @@ function VideoCard(props) {
                     <SvgIcon
                       size={36}
                       name={"muted-microphone"}
-                      color={theme.palette.grey[80]}
+                      color={theme.palette?.iconColor?.primary}
                     />
                   </Fab>
                 </Tooltip>
@@ -386,7 +386,7 @@ function VideoCard(props) {
             style={{ objectFit: "contain" }}
             ref={refVideo}
             playsInline
-            muted={props?.trackAssignment.isMine}
+            muted={true} // mute the video because we are playing the audio separately
           />
         </Grid>
       </>
@@ -414,7 +414,7 @@ function VideoCard(props) {
               <CustomizedBox
                 id={"mic-muted-"+props.trackAssignment.streamId}
                 sx={cardBtnStyle}>
-                <SvgIcon size={32} name={"muted-microphone"} color="#fff" />
+                <SvgIcon size={32} name={"muted-microphone"} color={theme.palette?.iconColor?.primary} />
               </CustomizedBox>
             </Grid>
           </Tooltip>
@@ -429,7 +429,7 @@ function VideoCard(props) {
           <Tooltip title={t("pinned by you")} placement="top">
             <Grid item>
               <CustomizedBox sx={cardBtnStyle}>
-                <SvgIcon size={36} name={"unpin"} color="#fff" />
+                <SvgIcon size={36} name={"unpin"} color={theme.palette?.iconColor?.primary} />
               </CustomizedBox>
             </Grid>
           </Tooltip>
@@ -442,7 +442,7 @@ function VideoCard(props) {
     return (
       props.name && (
         <div className="name-indicator">
-          <Typography color="white" align="left" className="name">
+          <Typography color="#fff" align="left" className="name">
             {props.name}{" "}
             {process.env.NODE_ENV === "development"
               ? `${props?.trackAssignment.isMine
@@ -497,6 +497,14 @@ function VideoCard(props) {
         <div
           className={`single-video-card`}
           id={'card-'+(props.trackAssignment.streamId !== undefined ? props?.trackAssignment.streamId : "")}
+          style={{
+            height: (props.isMobileView === true) ? "40%" : "100%",
+            width: (props.isMobileView === true) ? "20%" : "100%",
+            position: "relative",
+            borderRadius: 4,
+            margin: (props.isMobileView === true) ? 30 : 0,
+            overflow: "hidden",
+          }}
         >
           {avatarOrPlayer()}
 

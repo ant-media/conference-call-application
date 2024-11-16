@@ -1,0 +1,95 @@
+name: Selenium Grid on Kubernetes
+
+on:
+  push:
+    branches:
+      - repeatLoadTests
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      POD_COUNT: 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Set up Kubernetes
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.15.0' # default is latest stable
+      id: install
+
+    - name: Set up Kubeconfig
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG_LOAD_TEST }}" > $HOME/.kube/config
+
+    - name: Deploy Selenium Grid
+      id: kubernetes
+      run: |
+        kubectl create -f https://raw.githubusercontent.com/kubernetes/examples/master/staging/selenium/selenium-hub-deployment.yaml
+        kubectl create -f https://raw.githubusercontent.com/kubernetes/examples/master/staging/selenium/selenium-hub-svc.yaml
+        kubectl create -f https://raw.githubusercontent.com/kubernetes/examples/master/staging/selenium/selenium-node-chrome-deployment.yaml
+        export PODNAME=`kubectl get pods --selector="app=selenium-hub" --output=template --template="{{with index .items 0}}{{.metadata.name}}{{end}}"`
+        kubectl get pods -o wide
+        export NODEPORT=`kubectl get svc --selector='app=selenium-hub' -o=jsonpath='{.items[0].spec.ports[0].nodePort}'`
+        export NODE_IP=`kubectl get nodes -o=jsonpath='{.items[0].status.addresses[0].address}'`
+        curl http://$NODE_IP:$NODEPORT
+        while [[ $(kubectl get pods $PODNAME -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1; done
+        kubectl get pods -o wide
+        echo "SELENIUM_GRID_URL=http://$NODE_IP:$NODEPORT" >> $GITHUB_ENV
+        echo "SELENIUM_GRID_URL1:$SELENIUM_GRID_URL"
+        kubectl scale deployment selenium-node-chrome --replicas=$POD_COUNT
+        echo "after scale"
+        kubectl get pods -o wide
+        kubectl wait --for=condition=ready pod --all --timeout=600s
+        echo "after wait"
+        kubectl get pods -o wide
+
+    - name: Run Testtool
+      run: |
+        kubectl create -f loadtest/testtool_deployment.yaml
+        kubectl wait --for=condition=ready pod --all --timeout=600s
+        echo "after wait"
+        kubectl get pods -o wide
+
+    - name: Run Python tests
+      run: |
+        mkdir -p artifacts
+        echo "SELENIUM_GRID_URL:$SELENIUM_GRID_URL"
+        python3 -m pip install selenium psutil
+        echo "installation is completed"
+        for i in $(seq 1 $POD_COUNT); do
+          echo "Script is running $i"
+          python3 loadtest/conference.py "$SELENIUM_GRID_URL" $i 2 &2>1
+          sleep 10
+        done
+        
+        python3 loadtest/check_results.py $POD_COUNT
+
+    - name: Collect Artifacts from Pods
+      run: |
+        # Get the pod name for the selenium-node-chrome
+        PODNAME=$(kubectl get pods --selector="app=selenium-node-chrome" --output=template --template="{{with index .items 0}}{{.metadata.name}}{{end}}")
+
+        echo "poddd:$PODNAME"
+        
+        # Copy PNG files from the pod to the local artifacts directory
+        kubectl cp "$PODNAME:/tmp/*.png" artifacts/
+        
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Selenium Screenshots
+        path: artifacts/
+        
+    - name: Delete Deployments
+      if: always()
+      run: |
+        kubectl delete deployment selenium-hub
+        kubectl delete svc selenium-hub
+        kubectl delete deployment selenium-node-chrome
+        kubectl delete deployment testtool-deployment
+

@@ -9,7 +9,8 @@
 name: Java CI with Maven
 
 on: 
-#[push]
+# [push]
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
 
@@ -27,53 +28,130 @@ jobs:
       run: sudo apt-get install jq -y
     - name: Download war File
       run: |
-        export LATEST_SNAPSHOT=$(cat maven-metadata.xml | grep "<version>" | tail -n 1 |  xargs | cut -c 10-23)
+        export LATEST_SNAPSHOT=$(grep -oP '(?<=<version>)[^<]+' maven-metadata.xml| tail -1)
         echo $LATEST_SNAPSHOT
+        echo "LATEST_SNAPSHOT=$LATEST_SNAPSHOT" >> $GITHUB_ENV
         wget -O ConferenceCall.war "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=io.antmedia.webrtc&a=ConferenceCall&v=${LATEST_SNAPSHOT}&e=war"
         ls -al
-        
-    - name: Login to server
-      run: |
-        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
-        
-    - name: Delete Old App
-      run: |
-        curl -i -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
-        sleep 10
-        
-    - name: Create New App
-      run: |
-        export WAR_FILE_NAME="ConferenceCall.war"
-        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
-  
-    - name: Check if Conference app exists
-      id: check-conference-app
-      run: |
-        response=$(curl -s "${{ secrets.SERVER_URL }}/rest/v2/applications" -b cookie.txt)
-        if [[ $(echo "$response" | jq '. | any(. == "Conference")' | grep -c true) -eq 0 ]]; then
-          echo "::set-output name=app_exists::false"
-        else
-          echo "::set-output name=app_exists::true"
+        if [ ! -f ConferenceCall.war ]; then
+          echo "War file not found."
+          exit 1
         fi
-    - name: Setup kubectl
-      uses: azure/k8s-set-context@v1
-      with:
-        kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
         
-    - name: Delete pod if the conference app not exists
-      if: steps.check-conference-app.outputs.app_exists == 'false'
+    - name: MD5 file checksum
       run: |
-        POD_NAME=$(kubectl get pods -l app=ant-media-origin -n antmedia -o jsonpath='{.items[0].metadata.name}')
-        kubectl delete pod $POD_NAME -n antmedia
-        sleep 20
+        echo $LATEST_SNAPSHOT
+        wget -O ConferenceCall.md5 "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=io.antmedia.webrtc&a=ConferenceCall&v=${LATEST_SNAPSHOT}&e=war.md5"
+        local_file_md5="$(md5sum ConferenceCall.war | awk '{print $1}')"
+        remote_file_md5="$(cat ConferenceCall.md5)"
+        
+        if [ "$remote_file_md5" != "$local_file_md5" ]; then
+          echo "MD5 checksum mismatch!"
+          exit 1
+        else
+          echo "MD5 checksum matches."
+        fi 
+        
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Create kubeconfig file
+      run: |
+        mkdir $HOME/.kube
+        echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
+        
+    - name: Change Replicate Set
+      run: |
+        echo "current_replica=$(kubectl get deployment ant-media-server-origin -n antmedia -o jsonpath='{.spec.replicas}')" >> $GITHUB_ENV
+        kubectl scale deployment ant-media-server-origin --replicas=1 -n antmedia 
         
     - name: Login to server
-      if: steps.check-conference-app.outputs.app_exists == 'false'
       run: |
-        curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt 
-                
-    - name: Recreate Conference App
+        response=$(curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt) 
+        success=$(echo $response | jq -r '.success')
+        if [ "$success" != "true" ]; then
+          echo "Login failed"
+          exit 1
+        fi
+
+    - name: Check if Conference App Exists
+      run: |
+        response=$(curl -s -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications" -b cookie.txt)
+        echo $response | jq .
+        app_exists=$(echo $response | jq -r '.applications | index("Conference")')
+        if [ "$app_exists" != "null" ]; then
+          echo "App exists, proceeding to delete it."
+          response=$(curl -s -X DELETE -H "Accept: Application/json" -H "Content-Type: application/json" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
+          sleep 20
+          success=$(echo $response | jq -r '.success')
+          if [ "$success" != "true" ]; then
+            echo "Conference app deletion failed"
+            exit 1
+          fi
+        else
+          echo "App does not exist, proceeding to create a new one."
+        fi
+        
+    - name: Create New Conference App
+      id: create_app
       run: |
         export WAR_FILE_NAME="ConferenceCall.war"
-        curl -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt
-  
+        response=$(curl -v -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
+        success=$(echo $response | jq -r '.success')
+        echo $response
+        if [ "$success" != "true" ]; then
+          echo "Conference app creation is failed"
+          exit 1
+        fi
+      continue-on-error: true
+
+    - name: Rollout restart deployment if Create Conference App failed
+      if: steps.create_app.outcome == 'failure'
+      run: |
+        echo "Create New App failed, performing kubectl rollout restart..."
+        kubectl rollout restart deployment ant-media-server-origin -n antmedia
+
+    - name: Retry Create New Conference App
+      if: steps.create_app.outcome == 'failure'
+      run: |
+        export WAR_FILE_NAME="ConferenceCall.war"
+        response=$(curl -v -X PUT -H "Accept: Application/json" -H "Content-Type: multipart/form-data" -F "file=@./$WAR_FILE_NAME" "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/Conference" -b cookie.txt)
+        success=$(echo $response | jq -r '.success')
+        echo $response
+        if [ "$success" != "true" ]; then
+          echo "Conference app creation failed again"
+          exit 1
+        fi
+        
+    - name: Change Settings
+      run: |
+        curl "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/settings/Conference" -b cookie.txt -o settings.json
+        jq '.stunServerURI = "turn:${{ secrets.PRODUCTION_TURN_URL }}" | .turnServerUsername = "${{ secrets.PRODUCTION_TURN_USERNAME }}" | .turnServerCredential = "${{ secrets.PRODUCTION_TURN_PASSWORD }}"' settings.json > updated_settings.json
+        response=$(curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" -d @updated_settings.json -b cookie.txt "${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/applications/settings/Conference")
+        success=$(echo $response | jq -r '.success')
+        if [ "$success" != "true" ]; then
+          echo "Importing setting is failed."
+          exit 1
+        fi
+
+    - name: Revert Replicate Set
+      run: |
+        echo $current_replica
+        kubectl scale deployment ant-media-server-origin --replicas=$current_replica -n antmedia 
+
+  restart_when_failed:
+    name: Restarts the scheduled run when it failed
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' && failure()
+    needs: build
+    steps:
+      - name: Retry the workflow
+        run: |
+          curl -i \
+          -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ secrets.GIT_TOKEN }}" \
+          https://api.github.com/repos/ant-media/conference-call-application/actions/workflows/auto_deploy.yml/dispatches \
+          -d '{"ref": "${{ github.ref }}" }'  

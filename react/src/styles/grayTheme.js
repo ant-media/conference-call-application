@@ -13,15 +13,22 @@ export function getGrayTheme() {
   const themeColor50 = "#9E9E9E";
   const themeColor60 = "#757575";
   const themeColor70 = "#616161";
+  const themeColor71 = "#616161";
+  const themeColor72 = "#616161";
   const themeColor75 = "#424242";
   const themeColor80 = "#424242";
   const themeColor85 = "#212121";
   const themeColor90 = "#000000";
+  const themeColor99 = "#FFFFFF";
   const chatText = "#FAFAFA";
+  const darkGray = "#222B2A";
+  const iconColor = "#FFFFFF";
+  const darkIconColor = "#000000";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
   const secondaryColor = themeColor60;
+  const textColor = "#FFFFFF";
   let themeObject = {
     typography: {
       allVariants: {
@@ -331,9 +338,12 @@ export function getGrayTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        71: themeColor71,
+        72: themeColor72,
         80: themeColor80,
         85: themeColor85,
         90: themeColor90,
+        99: themeColor99,
       },
       gray: {
         90: "#37474F",
@@ -343,6 +353,21 @@ export function getGrayTheme() {
         default: "#FFFFFF",
         secondary: chatText, // dark4
       },
+      participantListIcon: {
+        primary: "#FFFFFF",
+        default: "#FFFFFF",
+        secondary: iconColor,
+      },
+      iconColor: {
+        primary: "#FFFFFF",
+        default: "#FFFFFF",
+        secondary: iconColor,
+      },
+      darkIconColor: {
+        primary: "#000000",
+        default: "#000000",
+        secondary: darkIconColor,
+      }
     },
   };
   if (!isComponentMode()) {

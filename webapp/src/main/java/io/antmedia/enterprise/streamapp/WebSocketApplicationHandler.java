@@ -48,7 +48,7 @@ import jakarta.websocket.server.ServerEndpoint;
 
 
 @ServerEndpoint(value="/websocket/application", configurator=AMSEndpointConfigurator.class)
-public class WebSocketApplicationHandler 
+public class WebSocketApplicationHandler
 {
 	private static final String MEDIA_PUSH_PLUGIN_BEAN_NAME = "plugin.mediaPushPlugin";
 
@@ -61,10 +61,11 @@ public class WebSocketApplicationHandler
 	protected static Logger logger = LoggerFactory.getLogger(WebSocketApplicationHandler.class);
 
 	ConfigurableWebApplicationContext context;
+	AMSBroadcastManager amsBroadcastManager;
 	ConferenceRoomSettings conferenceRoomSettings;
 
 	private Gson gsonOnlyExposedFields = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-	
+
 	private Gson gson = new Gson();
 
 	private Object mediaPushPlugin;
@@ -113,14 +114,19 @@ public class WebSocketApplicationHandler
 		}
 	}
 	
-	
+	private AMSBroadcastManager getAMSBroadcastManager() {
+		if (amsBroadcastManager == null && context != null) {
+			amsBroadcastManager = (AMSBroadcastManager) context.getBean("amsBroadcastManager");
+		}
+		return amsBroadcastManager;
+	}
 
 	private void setConferenceRoomSettings(){
 		if(context != null){
 			conferenceRoomSettings = (ConferenceRoomSettings) context.getBean("conferenceRoomSettings");
 		}
 	}
-	
+
 	private void setAppSettings() {
 		if (context != null) {
 			appSettings = (AppSettings)context.getBean(AppSettings.BEAN_NAME);
@@ -157,12 +163,12 @@ public class WebSocketApplicationHandler
 			// Invoke startBroadcasting
 			result = (Result) startMediaPush.invoke(getMediaPushPlugin(), streamId, websocketUrl, width, height, url, token, "mp4");
 
-		} 
-		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) 
+		}
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
 		{
 			logger.error(ExceptionUtils.getStackTrace(e));
 			result.setMessage(e.getMessage());
-		}  
+		}
 
 		return result;
 	}
@@ -175,17 +181,17 @@ public class WebSocketApplicationHandler
 			// Invoke stopBroadcasting
 			result = (Result) stopBroadcastingMethod.invoke(getMediaPushPlugin(), streamId);
 		}
-		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) 
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
 		{
 			logger.error(ExceptionUtils.getStackTrace(e));
 			result.setMessage(e.getMessage());
-		}  
+		}
 
 		return result;
 
 	}
-	
-	public static String generateJwtToken(String jwtSecretKey, String streamId, long expireDateUnixTimeStampMs, String type) 
+
+	public static String generateJwtToken(String jwtSecretKey, String streamId, long expireDateUnixTimeStampMs, String type)
 	{
 		Date expireDateType = new Date(expireDateUnixTimeStampMs);
 		String jwtTokenId = null;
@@ -209,18 +215,29 @@ public class WebSocketApplicationHandler
 		JSONObject jsonObject = (JSONObject) jsonParser.parse(message);
 		String cmd = (String) jsonObject.get(WebSocketConstants.COMMAND);
 
-		if (cmd.equals(WebSocketApplicationConstants.IS_ROOM_CREATION_PASSWORD_REQUIRED_COMMAND)) 
+		if (cmd.equals(WebSocketApplicationConstants.PING_COMMAND))
+		{
+			Result result = new Result(true);
+			sendResponse(session, WebSocketApplicationConstants.PONG_RESPONSE, result);
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.IS_ROOM_CREATION_PASSWORD_REQUIRED_COMMAND))
 		{
 			handlePasswordRequiredCommand(session);
-		} 
-		else if (cmd.equals(WebSocketApplicationConstants.CREATE_ROOM_WITH_PASSWORD_COMMAND)) 
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.CREATE_ROOM_WITH_PASSWORD_COMMAND))
 		{
 			handleRoomCreationWithPassword(session, jsonObject);
 		}
-		else if (cmd.equals(WebSocketApplicationConstants.GET_SETTINGS_COMMAND)) 
-		{	
+		else if (cmd.equals(WebSocketApplicationConstants.GET_SETTINGS_COMMAND))
+		{
 			responseRoomSettings(session);
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.SEND_DATA_CHANNEL_COMMAND))
+		{
+			String receiverStreamId = (String)jsonObject.get(WebSocketApplicationConstants.RECEIVER_STREAM_ID_FIELD);
+			String messageData = (String)jsonObject.get(WebSocketApplicationConstants.MESSAGE_FIELD);
 
+			handleSendDataChannelMessage(receiverStreamId, messageData);
 		}
 		else if (cmd.equals(WebSocketApplicationConstants.START_RECORDING_COMMAND)) {
 			//start recording
@@ -235,7 +252,11 @@ public class WebSocketApplicationHandler
 
 
 				String url = websocketURLObject.getScheme().contains("wss") ? "https://" : "http://";
-				url += websocketURLObject.getHost() + ":" + websocketURLObject.getPort();
+				int port = websocketURLObject.getPort();
+				if (port == -1) {
+					port = websocketURLObject.getScheme().contains("wss") ? 443 : 80;
+				}
+				url += websocketURLObject.getHost() + ":" + port;
 				String path = websocketURLObject.getPath();
 
 				url += path.substring(0, path.lastIndexOf("/")+1);
@@ -251,25 +272,25 @@ public class WebSocketApplicationHandler
 				if (StringUtils.isNotBlank(appSettings.getJwtStreamSecretKey())) {
 					publishToken = generateJwtToken(appSettings.getJwtStreamSecretKey(), streamIdRecording, System.currentTimeMillis()+60000,  Token.PUBLISH_TOKEN);
 				}
-							
+
 				result = startRecording(streamIdRecording, websocketUrl, 1280, 720, urlToPublish, publishToken);
 
 
-			} 
+			}
 			catch (URISyntaxException e) {
 				logger.error(ExceptionUtils.getStackTrace(e));
 				result.setMessage(e.getMessage());
 			}
-			finally 
+			finally
 			{
 				JSONObject jsonObjectResponse = new JSONObject();
 				jsonObjectResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.START_RECORDING_RESPONSE);
 				jsonObjectResponse.put(WebSocketConstants.DEFINITION, gson.toJson(result));
-				
+
 				sendMessage(session, jsonObjectResponse.toJSONString());
 			}
 		}
-		else if (cmd.equals(WebSocketApplicationConstants.STOP_RECORDING_COMMAND)) 
+		else if (cmd.equals(WebSocketApplicationConstants.STOP_RECORDING_COMMAND))
 		{
 			String streamId = (String)jsonObject.get(WebSocketConstants.STREAM_ID);
 
@@ -277,13 +298,19 @@ public class WebSocketApplicationHandler
 
 			String streamIdRecording = streamId + SUFFIX;
 			Result result = stopRecording(streamIdRecording);
-			
+
 			JSONObject jsonObjectResponse = new JSONObject();
 			jsonObjectResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.STOP_RECORDING_RESPONSE);
 			jsonObjectResponse.put(WebSocketConstants.DEFINITION,  gson.toJson(result));
-			
-			
+
+
 			sendMessage(session, jsonObjectResponse.toJSONString());
+		}
+		else if (cmd.equals(WebSocketApplicationConstants.UPDATE_BROADCAST_ROLE_COMMAND)) {
+			String streamId = (String)jsonObject.get(WebSocketConstants.STREAM_ID);
+			String role = (String)jsonObject.get(WebSocketConstants.ROLE);
+
+			handleUpdateBroadcastRole(streamId, role);
 		}
 	}
 
@@ -297,6 +324,16 @@ public class WebSocketApplicationHandler
 
 	private void responseRoomSettings(Session session) {
 
+		String participantVisibilityMatrix = appSettings.getParticipantVisibilityMatrix().toString();
+
+		if (participantVisibilityMatrix != null) {
+			conferenceRoomSettings.setParticipantVisibilityMatrix(participantVisibilityMatrix);
+		}
+
+		int maxVideoTrackCount = appSettings.getMaxVideoTrackCount();
+
+		conferenceRoomSettings.setMaxVideoTrackCount(maxVideoTrackCount);
+
 		JSONObject jsonResponse = new JSONObject();
 		jsonResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.SET_SETTINGS_COMMAND);
 		jsonResponse.put(WebSocketApplicationConstants.SETTINGS, gsonOnlyExposedFields.toJson(conferenceRoomSettings));
@@ -304,11 +341,32 @@ public class WebSocketApplicationHandler
 		sendMessage(session, jsonResponse.toJSONString());
 	}
 
+	public void handleUpdateBroadcastRole(String streamId, String role) {
+
+		boolean result = getAMSBroadcastManager().updateBroadcastRole(streamId, role);
+
+		if (result) {
+			logger.info("Broadcast role is updated to {} for {}", role, streamId);
+		} else {
+			logger.error("Broadcast role could not be updated to {} for {}", role, streamId);
+		}
+	}
+
+	public void handleSendDataChannelMessage(String receiverStreamId, String messageData) {
+		boolean result = getAMSBroadcastManager().sendDataChannelMessage(receiverStreamId, messageData);
+
+		if (result) {
+			logger.info("Data channel message is sent to {}", receiverStreamId);
+		} else {
+			logger.error("Data channel message could not be sent to {}", receiverStreamId);
+		}
+	}
+
 	private void handlePasswordRequiredCommand(Session session) {
 		sendRoomPasswordRequiredMessage(session, conferenceRoomSettings.isRoomCreationPasswordEnabled());
 	}
 
-	private void handleRoomCreationWithPassword(Session session, JSONObject jsonObject) 
+	private void handleRoomCreationWithPassword(Session session, JSONObject jsonObject)
 	{
 		String roomCreationPassword = getStringValue(jsonObject, WebSocketApplicationConstants.ROOM_CREATION_PASSWORD);
 		String roomName = getStringValue(jsonObject, WebSocketApplicationConstants.ROOM_NAME);
@@ -415,5 +473,19 @@ public class WebSocketApplicationHandler
 		}
 	}
 
+	// Modular method to send a JSON response
+	private void sendResponse(Session session, String command, Result result) {
+		JSONObject response = new JSONObject();
+		response.put(WebSocketConstants.COMMAND, command);
+		response.put(WebSocketConstants.DEFINITION, gson.toJson(result));
+		sendMessage(session, response.toJSONString());
+	}
+
+	private void sendResponse(Session session, String command, JSONObject result) {
+		JSONObject response = new JSONObject();
+		response.put(WebSocketConstants.COMMAND, command);
+		response.put(WebSocketConstants.DEFINITION, result);
+		sendMessage(session, response.toJSONString());
+	}
 
 }

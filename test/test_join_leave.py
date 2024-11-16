@@ -1,23 +1,62 @@
 from browser import Browser
 from selenium.webdriver.common.by import By
+from rest_helper import RestHelper 
 
+
+import subprocess
 import sys
 import unittest
 import os
 import random
 import json
 import time
+import psutil
+
 
 class TestJoinLeave(unittest.TestCase):
   def setUp(self):
-    print(self._testMethodName, " starting...")
+    print("----------------\n", self._testMethodName, " starting...")
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
+    self.user = os.environ.get('AMS_USER')
+    self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
     self.chrome.init(True)
+    self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
+    self.rest_helper.login()
+
+    wait = self.chrome.get_wait()
+    time.sleep(15)
+    #wait.until(lambda x: len(self.rest_helper.get_broadcasts()) == 0)
+    #print("broadcasts are empty")
+
 
   def tearDown(self):
-    print(self._testMethodName, " ending...")
+    print(self._testMethodName, " ending...\n","----------------")
+
+  def create_participants_with_test_tool(self, participant_name, room, count):
+    directory = os.path.expanduser("~/test/webrtc-load-test")
+    script = "run.sh"
+    ws_url = self.url.replace("https://", "").replace("http://", "")
+    parameters = ["-m", "publisher", "-s", ws_url, "-p", "443", "-q", "true", "-f", "test.mp4", "-r", "true", "-a", self.test_app_name, "-i", participant_name, "-t", room, "-n", str(count)]  
+    
+    print("test tool is running with parameters: "+str(parameters))
+    # Full path to the script
+    script_path = os.path.join(directory, script)
+
+    # Run the script silently with parameters
+    process = subprocess.Popen(
+        ["bash", script_path] + parameters,
+        cwd=directory,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+    return process
+
+  def kill_participants_with_test_tool(self, process):
+    process.kill()
+
 
   def join_room_in_new_tab(self, participant, room):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
@@ -26,30 +65,60 @@ class TestJoinLeave(unittest.TestCase):
       app = ""
     handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
     
-    name_text_box = self.chrome.get_element_by_id("participant_name")
+    name_text_box = self.chrome.get_element_with_retry(By.ID, "participant_name")
+
     self.chrome.write_to_element(name_text_box, participant)
 
-    join_button = self.chrome.get_element_by_id("room_join_button")
+    join_button = self.chrome.get_element_with_retry(By.ID, "room_join_button")
     self.chrome.click_element(join_button)
  
-    meeting_gallery = self.chrome.get_element_by_id("meeting-gallery")
+    #self.chrome.print_console_logs()
+
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
+    #self.chrome.print_ss_as_base64()
 
     assert(meeting_gallery.is_displayed())
 
     return handle
     
-  def get_videoTrackAssignments(self):
+  def get_videoTrackAssignments(self, expected_value=None):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script, 5, 3)
+    
     if result_json is None:
       return []
-    #print("result_json:" + str(result_json))
-    #print ("videoTrackAssignments count:" + str(len(result_json["videoTrackAssignments"])))
-    return result_json["videoTrackAssignments"]
+        
+    #self.chrome.print_console_logs()
+    vtas = result_json["videoTrackAssignments"]
+    if expected_value is not None and len(vtas) != expected_value:
+      print("\n ++++++++++ start trial ++++++++++")
+      print("VTA expected: "+str(expected_value) + " but got: "+str(len(vtas)))
+      self.call_debugme()
+      print("\n")
+      self.print_message()
+
+      #print("\n screen shot")
+      #self.chrome.print_ss_as_base64()
+
+      print("++++++++++ end trial ++++++++++\n")
+
+
+   
+    cpu_usage = psutil.cpu_percent(interval=0)
+    print(f"Instant CPU Usage: {cpu_usage}%")
+    return vtas
+  
+  def get_track_stats(self):
+    script = "return window.conference.getTrackStats();"
+    result_json = self.chrome.execute_script_with_retry(script)
+    if result_json is None:
+      return []
+
+    return result_json
   
   def get_conference(self):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script)
     #print(result_json)
     if result_json is None:
       return {}
@@ -58,10 +127,10 @@ class TestJoinLeave(unittest.TestCase):
   
   def get_video_track_limit(self):
     script = "return window.conference;"
-    result_json = self.chrome.execute_script(script)
+    result_json = self.chrome.execute_script_with_retry(script)
     if result_json is None:
       return -1
-    return result_json["globals"]["desiredMaxVideoTrackCount"]
+    return result_json["globals"]["desiredTileCount"]
   
   def change_video_track_count(self, count):
     index = 0
@@ -76,18 +145,43 @@ class TestJoinLeave(unittest.TestCase):
     elif count == 30:
       index = 4
 
-    settings_button = self.chrome.get_element_by_id("settings-button")
+    settings_button = self.chrome.get_element_with_retry(By.ID, "settings-button")
     self.chrome.click_element(settings_button)
 
-    change_layout_button = self.chrome.get_element_by_id("change-layout-button")
+    time.sleep(1)
+
+    change_layout_button = self.chrome.get_element_with_retry(By.ID, "change-layout-button")
     self.chrome.click_element(change_layout_button)
 
-    tile_count_slider = self.chrome.get_element_by_id("tile-count-slider")
-    points = self.chrome.get_elements_of_an_element_by_class_name(tile_count_slider, "MuiSlider-mark")
+    time.sleep(1)
+
+    tile_count_slider = self.chrome.get_element_with_retry(By.ID, "tile-count-slider")
+    points = self.chrome.get_element_in_element(tile_count_slider, By.CLASS_NAME, "MuiSlider-mark")
     self.chrome.mouse_click_on(points[index])
 
-    layout_dialog_close_button = self.chrome.get_element_by_id("layout-dialog-close-button")
+    layout_dialog_close_button = self.chrome.get_element_with_retry(By.ID, "layout-dialog-close-button")
     self.chrome.click_element(layout_dialog_close_button)
+
+  def get_start_recording_button(self):
+    settings_button = self.chrome.get_element(By.ID, "settings-button")
+    self.chrome.click_element(settings_button)
+
+    start_recording_button = self.chrome.get_element(By.ID, "start-recording-button")
+    return start_recording_button
+  
+  def get_share_screen_button(self):
+    settings_button = self.chrome.get_element(By.ID, "settings-button")
+    self.chrome.click_element(settings_button)
+
+    share_screen_button = self.chrome.get_element(By.ID, "share-screen-button")
+    return share_screen_button
+  
+  def get_stop_recording_button(self):
+    settings_button = self.chrome.get_element(By.ID, "settings-button")
+    self.chrome.click_element(settings_button)
+
+    stop_recording_button = self.chrome.get_element(By.ID, "stop-recording-button")
+    return stop_recording_button
 
   def test_join_room(self):
     room = "room"+str(random.randint(100, 999))
@@ -95,21 +189,23 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
   def set_and_test_track_limit(self, limit):
+      print("set_track_limit -> count: "+str(limit))
       self.change_video_track_count(limit)
       wait = self.chrome.get_wait()
-      wait.until(lambda x: self.get_video_track_limit() == limit-1)
+      wait.until(lambda x: self.get_video_track_limit() == limit)
+      print("video_track_limit: "+str(limit))
   
-  def test_video_track_count(self):
-    self.chrome.makeFullScreen()
+  def _test_video_track_count(self):
+    #self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
 
     self.set_and_test_track_limit(2)
-    time.sleep(2)
+    time.sleep(5)
     self.set_and_test_track_limit(4)
-    time.sleep(2)
+    time.sleep(5)
     self.set_and_test_track_limit(6)
-    time.sleep(2)
+    time.sleep(5)
     self.set_and_test_track_limit(12)
 
     self.chrome.close_all()
@@ -118,14 +214,49 @@ class TestJoinLeave(unittest.TestCase):
     publishStreamId = self.get_publishStreamId()
     print("assertLocalVideoAvailable -> publishStreamId: "+publishStreamId)
 
-    assert(self.chrome.get_element_by_id(publishStreamId).is_displayed())
+    localVideo = self.chrome.get_element_with_retry(By.ID, publishStreamId)
+
+    assert(localVideo.is_displayed())
 
 
   def leave_room(self):
-    leave_button = self.chrome.get_element_by_id("leave-room-button")
+    leave_button = self.chrome.get_element(By.ID, "leave-room-button")
     self.chrome.click_element(leave_button)
-    
-  def _test_others_tile(self):
+
+  def open_close_chat_drawer(self):
+    if(self.chrome.is_element_exist(By.ID, "messages-button")):
+      messages_button = self.chrome.get_element(By.ID, "messages-button")
+    else:
+      more_button = self.chrome.get_element(By.ID, "more-button")
+      self.chrome.click_element_as_script(more_button)
+      messages_button = self.chrome.get_element(By.ID, "more-options-chat-button")
+
+    self.chrome.click_element_as_script(messages_button)
+
+  def call_debugme(self):
+    if not self.chrome.is_element_displayed(By.ID, "message-input"):
+      self.open_close_chat_drawer()
+      time.sleep(2)
+
+    message_input = self.chrome.get_element_with_retry(By.ID, "message-input")
+    self.chrome.write_to_element(message_input, "debugme")
+
+    send_button = self.chrome.get_element_with_retry(By.ID, "message-send-button")
+    self.chrome.click_element_as_script(send_button)
+
+
+  def print_message(self):
+    messages = self.chrome.get_all_elements(By.ID, "message")
+    print(">>>>>>>\nlast 2 messages:"+str(len(messages)))
+    last_two_messages = messages[-2:]
+    for message in last_two_messages:
+      print("message:" + message.get_attribute("innerHTML"))
+    print("<<<<<<<\n")
+
+
+
+  def test_others_tile(self):
+    self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -137,23 +268,33 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
     self.chrome.switch_to_tab(handle_1)
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    time.sleep(3)
     
-    ss_button = self.chrome.get_element_by_id("share-screen-button")
+    if(self.chrome.is_element_exist(By.ID, "share-screen-button")):
+      ss_button = self.chrome.get_element(By.ID, "share-screen-button")
+    else:
+      more_button = self.chrome.get_element_with_retry(By.ID, "more-button")
+      self.chrome.click_element(more_button)
+      ss_button = self.chrome.get_element_with_retry(By.ID, "more-options-share-screen-button")
+
     self.chrome.click_element(ss_button)
+
+    time.sleep(3)
+
     self.chrome.switch_to_tab(handle_2)
-    assert(self.chrome.get_element_by_id("unpinned-gallery").is_displayed())
+    assert(self.chrome.get_element(By.ID, "unpinned-gallery").is_displayed())
 
-    assert(not self.chrome.is_element_exist_by_class_name('others-tile-inner'))
-    for i in range(3,7):
-        handler = self.join_room_in_new_tab("participant" + str(i), room)
-        self.assertLocalVideoAvailable()
-        self.chrome.switch_to_tab(handler)
-        wait.until(lambda x: len(self.get_videoTrackAssignments()) == i)
+    wait.until(lambda x: len(self.get_videoTrackAssignments(3)) == 3) 
 
-        if i==6:
-            assert(self.chrome.is_element_exist_by_class_name('others-tile-inner'))
-            break
-        assert(not self.chrome.is_element_exist_by_class_name("others-tile-inner"))
+    assert(not self.chrome.is_element_exist(By.CLASS_NAME, 'others-tile-inner'))
+
+    self.set_and_test_track_limit(2)
+
+
+    others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner', retries=10, wait_time=3)
+    assert(others_tile.is_displayed())
+
     self.chrome.close_all()
 
   # it tooks too long to get videoTrackAssignments so we need to wait for it
@@ -192,11 +333,48 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_2)
 
+    
+    time.sleep(5)
+
     self.leave_room()
 
     self.chrome.switch_to_tab(handle_1)
 
+
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
+
+    self.chrome.close_all()
+
+  def _test_with_stats(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+    handle_3 = self.join_room_in_new_tab("participantB", room)
+
+
+    assert(handle_3 == self.chrome.get_current_tab_id())
+
+    self.assertLocalVideoAvailable()
+
+    wait = self.chrome.get_wait()
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
+
+    self.chrome.switch_to_tab(handle_1)
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
+
+
+    wait.until(lambda x: len(self.get_track_stats()['inboundRtpList']) == 4)
+
+    time.sleep(5)
+    stats = self.get_track_stats()
+
+    assert(stats is not None)
+    print("stats: "+str(stats))
+
+    for track_stat in stats['inboundRtpList']:
+      assert(track_stat['bytesReceived'] > 0)
 
     self.chrome.close_all()
 
@@ -205,8 +383,7 @@ class TestJoinLeave(unittest.TestCase):
     videoTrackAssignments = conference["videoTrackAssignments"]
     return videoTrackAssignments[1]["streamId"] == conference["pinnedVideoId"]
 
-  '''
-  def test_screen_share(self):
+  def _test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -225,14 +402,14 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
 
+    share_screen_button = self.get_share_screen_button()
 
-
-    if(self.chrome.is_element_exist_by_id("share-screen-button")):
-      ss_button = self.chrome.get_element_by_id("share-screen-button")
+    if(share_screen_button.is_displayed()):
+      ss_button = self.chrome.get_element(By.ID, "share-screen-button")
     else:
-      more_button = self.chrome.get_element_by_id("more-button")
+      more_button = self.chrome.get_element(By.ID, "more-button")
       self.chrome.click_element(more_button)
-      ss_button = self.chrome.get_element_by_id("more-options-share-screen-button")
+      ss_button = self.chrome.get_element(By.ID, "more-options-share-screen-button")
 
     self.chrome.click_element(ss_button)
 
@@ -240,12 +417,12 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
     
-    if(self.chrome.is_element_exist_by_id("share-screen-button")):
-      ss_button2 = self.chrome.get_element_by_id("share-screen-button")
+    if(share_screen_button.is_displayed()):
+      ss_button2 = self.chrome.get_element(By.ID, "share-screen-button")
     else:
-      more_button = self.chrome.get_element_by_id("more-button")
+      more_button = self.chrome.get_element(By.ID, "more-button")
       self.chrome.click_element(more_button)
-      ss_button2 = self.chrome.get_element_by_id("more-options-share-screen-button")
+      ss_button2 = self.chrome.get_element(By.ID, "more-options-share-screen-button")
 
     self.chrome.click_element(ss_button2)
 
@@ -271,41 +448,89 @@ class TestJoinLeave(unittest.TestCase):
     assert(presenter1Exists and presenter2Exists and presenterPinned)
 
     self.chrome.close_all()
-    '''
 
   def test_join_room_N_participants(self):
+    self.chrome.makeFullScreen()
     N = 5
     room = "room"+str(random.randint(100, 999))
-    handles = [] 
-    wait = self.chrome.get_wait()
+    wait = self.chrome.get_wait(30, 3)
 
-    for i in range(N):
-      handles.append(self.join_room_in_new_tab("participant"+str(i), room))
+    process = self.create_participants_with_test_tool("participant", room, N-1)
 
-    assert(handles[N-1] == self.chrome.get_current_tab_id())
+    self.join_room_in_new_tab("participant"+str(N-1), room)     
+
     self.assertLocalVideoAvailable()
 
+    print("len(self.get_videoTrackAssignments()): "+str(len(self.get_videoTrackAssignments())))
+    print("N: "+str(N))
+    print("**********************************************")
+    wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
 
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
 
-    self.set_and_test_track_limit(4)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 4)
+    print("screen shot 1 start: default")
+    #self.chrome.print_ss_as_base64()
+    self.chrome.save_ss_as_file("shot-1.png")
+    print("screen shot 1 end: default")
+
+    # Print the current working directory
+    print("Current Directory:", os.getcwd())
+
+    # List all files in the current directory
+    files = os.listdir()
+    print("Files in Directory:", files)
+
+
+    self.set_and_test_track_limit(4)  
+  
+    wait.until(lambda x: len(self.get_videoTrackAssignments(3)) == 3) 
+
+    print("screen shot 2 start: 4")
+    #self.chrome.print_ss_as_base64()
+    self.chrome.save_ss_as_file("shot-2.png")
+    print("screen shot 2 end: default")  
 
     self.set_and_test_track_limit(6)
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == N)
+    
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments(5)) == N)
+
+    print("screen shot 3 start: 6")
+    #self.chrome.print_ss_as_base64()
+    self.chrome.save_ss_as_file("shot-3.png")
+    print("screen shot 3 end: 6")
+
+
+    self.kill_participants_with_test_tool(process)
+    self.chrome.close_all()
+
+  def test_get_debugme_info(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+
+    print("current: "+self.chrome.get_current_tab_id())
+    assert(handle_2 == self.chrome.get_current_tab_id())
+    self.assertLocalVideoAvailable()
+    wait = self.chrome.get_wait()
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    self.call_debugme()
+    time.sleep(5)
+    self.print_message()
 
     self.chrome.close_all()
 
+
   def is_avatar_displayed_for(self, stream_id):
-    video_card = self.chrome.get_element_by_id("card-"+stream_id)
-    return self.chrome.is_element_of_element_exist_by_class_name(video_card, "MuiAvatar-root")
+    video_card = self.chrome.get_element(By.ID, "card-"+stream_id)
+    return self.chrome.is_nested_element_exist(video_card, By.CLASS_NAME, "MuiAvatar-root")
   
   def is_video_displayed_for(self, stream_id):
-    video_tag = self.chrome.get_element_by_id(stream_id)
+    video_tag = self.chrome.get_element(By.ID, stream_id)
     return video_tag.is_displayed()
   
   def is_mic_off_displayed_for(self, stream_id):
-    return self.chrome.is_element_exist_by_id("mic-muted-"+stream_id)
+    return self.chrome.is_element_exist(By.ID, "mic-muted-"+stream_id)
  
   def test_on_off_mic_cam(self):
     room = "room"+str(random.randint(100, 999))
@@ -326,7 +551,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
     #we are on participant 1 and turn off camera
-    camera = self.chrome.get_element_by_id("camera-button")
+    camera = self.chrome.get_element(By.ID, "camera-button")
     self.chrome.click_element(camera)
 
     self.chrome.switch_to_tab(handle_2)
@@ -342,7 +567,7 @@ class TestJoinLeave(unittest.TestCase):
     #switch to participant 1 and turn on camera
     self.chrome.switch_to_tab(handle_1)
 
-    camera = self.chrome.get_element_by_id("camera-button")
+    camera = self.chrome.get_element(By.ID, "camera-button")
     self.chrome.click_element(camera)
 
     self.chrome.switch_to_tab(handle_2)
@@ -355,7 +580,7 @@ class TestJoinLeave(unittest.TestCase):
     #switch to participant 1 and turn off mic
     self.chrome.switch_to_tab(handle_1)
 
-    mic = self.chrome.get_element_by_id("mic-button")
+    mic = self.chrome.get_element(By.ID, "mic-button")
     self.chrome.click_element(mic)
 
     self.chrome.switch_to_tab(handle_2)
@@ -368,7 +593,7 @@ class TestJoinLeave(unittest.TestCase):
     #switch to participant 1 and turn on mic
     self.chrome.switch_to_tab(handle_1)
 
-    mic = self.chrome.get_element_by_id("mic-button")
+    mic = self.chrome.get_element(By.ID, "mic-button")
     self.chrome.click_element(mic)
 
     self.chrome.switch_to_tab(handle_2)
@@ -379,6 +604,65 @@ class TestJoinLeave(unittest.TestCase):
     print("mic on done")
 
     self.chrome.close_all()
+
+  def get_snackbar_content(self):
+    snackbar = self.chrome.get_element_with_retry(By.CLASS_NAME, "notistack-Snackbar")
+    if snackbar is not None:
+      return snackbar.get_attribute("innerHTML")
+    return "not found"
+   
+
+
+  def _test_recording(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+
+    assert(handle_2 == self.chrome.get_current_tab_id())
+
+    self.assertLocalVideoAvailable()
+
+    wait = self.chrome.get_wait()
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    self.chrome.switch_to_tab(handle_1)
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+
+    recording_button = self.get_start_recording_button()
+    assert(recording_button.is_displayed())
+
+
+    self.chrome.click_element(recording_button)
+
+    stop_button = self.get_stop_recording_button()
+    assert(stop_button.is_displayed())
+
+    wait.until(lambda x: "Recording is started successfully" in self.get_snackbar_content())
+
+    self.chrome.switch_to_tab(handle_2)
+
+    stop_button = self.get_stop_recording_button()
+    assert(stop_button.is_displayed())
+
+    time.sleep(5)
+
+    stop_button.click()
+
+    recording_button = self.get_start_recording_button()
+    assert(recording_button.is_displayed())
+
+    wait.until(lambda x: "Recording is stopped successfully" in self.get_snackbar_content())
+
+    wait.until(lambda x: self.rest_helper.getVoDFor(room+"_composite") is not None)
+
+    self.chrome.close_all()
+
+
+
+
 
 
 if __name__ == '__main__':

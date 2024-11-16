@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testtool-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testtool
+  template:
+    metadata:
+      labels:
+        app: testtool
+    spec:
+      containers:
+      - name: testtool
+        image: burakkekec/testtool:2.9.1-SNAPSHOT
+        args: ["test2", "50"]
+

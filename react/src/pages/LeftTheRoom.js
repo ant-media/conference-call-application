@@ -19,7 +19,7 @@ function useWidth() {
   );
 }
 
-function LeftTheRoom({ isError : leaveRoomWithError }) {
+function LeftTheRoom({ withError : leaveRoomWithError }) {
   const conference = React.useContext(ConferenceContext);
 
   const width = useWidth();
@@ -30,7 +30,7 @@ function LeftTheRoom({ isError : leaveRoomWithError }) {
     conference.handleLeaveFromRoom();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const message = leaveRoomWithError ? t('Something Went Wrong') : t('You have left the meeting');
+  const message = leaveRoomWithError !== null ? t('Something Went Wrong') : t('You have left the meeting');
 
   return (
     <>
@@ -39,6 +39,11 @@ function LeftTheRoom({ isError : leaveRoomWithError }) {
           <Typography variant="h5" align="center">
             {message}
           </Typography>
+          <Box py={2}>
+            <Typography variant="h7" align="center">
+            {leaveRoomWithError !== null ? t(leaveRoomWithError) : ''}
+            </Typography>
+          </Box>
           <Box py={2}>
             <Typography variant="h6" align="center">
               {t('You can rejoin the meeting, or return to the home page.')}

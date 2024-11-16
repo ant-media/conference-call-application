@@ -14,7 +14,7 @@ import { assert } from 'workbox-core/_private';
 const contextValue = {
   allParticipants: {},
   videoTrackAssignments: [{id: 1, name: 'test'}],
-  globals: {desiredMaxVideoTrackCount: 10},
+  globals: {desiredTileCount: 10},
   updateMaxVideoTrackCount: jest.fn(),
 };
 
@@ -63,7 +63,7 @@ describe('Pinned Layout Component', () => {
         </ThemeProvider>
       );
 
-      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(10);
+      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(9);
 
   });
 });

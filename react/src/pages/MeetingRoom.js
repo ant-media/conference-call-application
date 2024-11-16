@@ -10,8 +10,8 @@ import MuteParticipantDialog from "../Components/MuteParticipantDialog";
 import {useTheme} from "@mui/material/styles";
 import {t} from "i18next";
 import {isComponentMode} from "../utils";
-import { isMobile, isTablet } from "react-device-detect";
-
+import BecomePublisherConfirmationDialog from "../Components/BecomePublisherConfirmationDialog";
+import RecordingButton from "../Components/RecordingButton";
 
 function debounce(fn, ms) {
   let timer;
@@ -34,11 +34,11 @@ const MeetingRoom = React.memo((props) => {
   React.useEffect(() => {
     handleGalleryResize(false);
     window.conference = conference;
-  }, [conference.videoTrackAssignments, conference.participantUpdated]);
+  }, [conference.videoTrackAssignments, conference.allParticipants, conference.participantUpdated]);
 
   React.useEffect(() => {
     handleGalleryResize(true);
-  }, [conference.messageDrawerOpen, conference.participantListDrawerOpen, conference.effectsDrawerOpen]);
+  }, [conference.messageDrawerOpen, conference.participantListDrawerOpen, conference.effectsDrawerOpen, conference.publisherRequestListDrawerOpen]);
 
   React.useEffect(() => {
     const debouncedHandleResize = debounce(handleGalleryResize, 500);
@@ -49,9 +49,10 @@ const MeetingRoom = React.memo((props) => {
     };
   });
 
+  //this trigger ReactionBarSelector to render everytime, useCallback by making sure about conference dependency - mekya
   function sendEmoji(emoji) {
     conference?.sendReactions(emoji);
-    conference.setShowEmojis(!conference.showEmojis);
+    conference?.setShowEmojis(!conference.showEmojis);
   }
 
   const reactionList = [
@@ -72,7 +73,7 @@ const MeetingRoom = React.memo((props) => {
 
     if (gallery) {
       if (calcDrawer) {
-        if (conference.messageDrawerOpen || conference.participantListDrawerOpen || conference.effectsDrawerOpen) {
+        if (conference.messageDrawerOpen || conference.participantListDrawerOpen || conference.effectsDrawerOpen || conference.publisherRequestListDrawerOpen) {
           gallery.classList.add("drawer-open");
         } else {
           gallery.classList.remove("drawer-open");
@@ -103,54 +104,56 @@ const MeetingRoom = React.memo((props) => {
 
   const firstPinnedParticipant = getPinnedParticipant();
 
-  const pinLayout = (typeof firstPinnedParticipant !== "undefined") && !isMobile && !isTablet
+  const pinLayout = (typeof firstPinnedParticipant !== "undefined");
 
   return (
-    <>
-      <MuteParticipantDialog/>
-      {conference.audioTracks.map((audioTrackAssignment, index) => (
-        <VideoCard
-          key={index}
-          trackAssignment={audioTrackAssignment}
-          autoPlay
-          name={""}
-          style={{display: "none"}}
-        />
-      ))}
-      <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
-        <>
+      <>
+        {conference?.isRecordPluginActive === true ?
+            <RecordingButton/> : null
+        }
+        <MuteParticipantDialog/>
+        <BecomePublisherConfirmationDialog/>
+        {conference.audioTracks.map((audioTrackAssignment, index) => (
+            <VideoCard
+                key={index}
+                trackAssignment={audioTrackAssignment}
+                autoPlay
+                name={""}
+                style={{display: "none"}}
+            />
+        ))}
+        <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
           {pinLayout ?
-            (<LayoutPinned
-              pinnedParticipant={firstPinnedParticipant}
-              width={gallerySize.w}
-              height={gallerySize.h}
-            />)
-            :
-            (<LayoutTiled
-              width={gallerySize.w}
-              height={gallerySize.h}
-            />)
+              (<LayoutPinned
+                  pinnedParticipant={firstPinnedParticipant}
+                  width={gallerySize.w}
+                  height={gallerySize.h}
+              />)
+              :
+              (<LayoutTiled
+                  width={gallerySize.w}
+                  height={gallerySize.h}
+              />)
           }
-        </>
-      </div>
+        </div>
 
-      {conference.showEmojis && (
-        <div id="meeting-reactions" style={{
-          position: isComponentMode() ? "absolute" : "fixed",
-          bottom: 80,
-          display: "flex",
-          alignItems: "center",
-          padding: 16,
-          zIndex: 666,
-          height: 46,
-        }}>
-          <ReactionBarSelector reactions={reactionList} iconSize={28}
-                               style={{backgroundColor: theme.palette.themeColor[70]}} onSelect={sendEmoji}/>
-        </div>)
-      }
-      <Footer {...props} />
-    </>
-  )
+        {conference.showEmojis && (
+            <div id="meeting-reactions" style={{
+              position: isComponentMode() ? "absolute" : "fixed",
+              bottom: 80,
+              display: "flex",
+              alignItems: "center",
+              padding: 16,
+              zIndex: 666,
+              height: 46,
+            }}>
+              <ReactionBarSelector reactions={reactionList} iconSize={28}
+                                   style={{backgroundColor: theme.palette.themeColor[70]}} onSelect={sendEmoji}/>
+            </div>)
+        }
+        <Footer {...props} />
+      </>
+  );
 });
 
 export default MeetingRoom;

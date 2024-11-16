@@ -2,7 +2,7 @@ import React from "react";
 import Button from "@mui/material/Button";
 import {SvgIcon} from "Components/SvgIcon";
 import Menu from "@mui/material/Menu";
-import {styled} from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import SettingsDialog from "./SettingsDialog";
 import {LayoutSettingsDialog} from "./LayoutSettingsDialog";
@@ -33,6 +33,7 @@ function OptionButton({footer, ...props}) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
+  const theme = useTheme();
 
   // if you select camera then we are going to focus on camera button.
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -100,7 +101,7 @@ function OptionButton({footer, ...props}) {
           aria-expanded={open ? "true" : undefined}
           onClick={handleClick}
         >
-          <SvgIcon size={40} name={'settings'} color={open ? 'black' : 'white'}/>
+          <SvgIcon size={40} name={'settings'} color={open ? theme.palette?.darkIconColor?.primary : theme.palette?.iconColor?.primary}/>
         </CustomizedBtn>
       </Tooltip>
       <Menu
@@ -123,7 +124,7 @@ function OptionButton({footer, ...props}) {
         {process.env.REACT_APP_OPTION_MENU_GENERAL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
         <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
           <ListItemIcon>
-            <SvgIcon size={36} name={"settings"} color={"white"}/>
+            <SvgIcon size={36} name={"settings"} color={theme.palette?.iconColor?.primary}/>
           </ListItemIcon>
           <ListItemText
             id="general-button"
@@ -136,7 +137,7 @@ function OptionButton({footer, ...props}) {
         {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
         <MenuItem onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
           <ListItemIcon>
-            <SvgIcon size={36} name={"layout"} color={"white"}/>
+            <SvgIcon size={36} name={"layout"} color={theme.palette?.iconColor?.primary}/>
           </ListItemIcon>
           <ListItemText>
             {t("Change Layout")}
@@ -148,37 +149,44 @@ function OptionButton({footer, ...props}) {
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
           <MenuItem onClick={() => handleDialogOpen()}>
             <ListItemIcon>
-              <SvgIcon size={36} name={"call-settings"} color={"white"}/>
+              <SvgIcon size={36} name={"call-settings"} color={theme.palette?.iconColor?.primary}/>
             </ListItemIcon>
             <ListItemText>{t("Call Settings")}</ListItemText>
           </MenuItem>
           : null}
 
+        {conference.isPlayOnly === false
+        && process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true' ?
             <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }}>
               <ListItemIcon>
-                <SvgIcon size={36} name={"background-replacement"} color={"white"} />
+                <SvgIcon size={36} name={"background-replacement"} color={theme.palette?.iconColor?.primary} />
               </ListItemIcon>
               <ListItemText>{t("Virtual Effects")}</ListItemText>
             </MenuItem>
+          : null}
 
-            {conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true ?
-            <MenuItem onClick={() => { conference.startRecord(); handleClose(); } }
+        {process.env.REACT_APP_RECORDING_MANAGED_BY_ADMIN === 'false' || conference.isAdmin === true ?
+          [
+            (conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true) &&
+            (<MenuItem onClick={() => { conference.startRecord(); handleClose(); } } id="start-recording-button"
             >
               <ListItemIcon>
-                <SvgIcon size={36} name={"camera"} color={"white"} />
+                <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />
               </ListItemIcon>
               <ListItemText>{t("Start Record")}</ListItemText>
             </MenuItem>
-                : null}
+            ),
 
-        {conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true ?
-          <MenuItem onClick={() => { conference.stopRecord(); handleClose(); }}
+            (conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true) &&
+            (<MenuItem onClick={() => { conference.stopRecord(); handleClose(); }} id="stop-recording-button"
           >
             <ListItemIcon>
-              <SvgIcon size={36} name={"camera"} color={"white"} />
+              <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />
             </ListItemIcon>
             <ListItemText>{t("Stop Record")}</ListItemText>
           </MenuItem>
+            )
+          ]
           : null}
 
         {process.env.REACT_APP_OPTION_MENU_REPORT_PROBLEM_BUTTON_VISIBILITY === 'true' ?
@@ -189,7 +197,7 @@ function OptionButton({footer, ...props}) {
             rel="noopener noreferrer"
           >
             <ListItemIcon>
-              <SvgIcon size={36} name={"report"} color={"white"}/>
+              <SvgIcon size={36} name={"report"} color={theme.palette?.iconColor?.primary}/>
             </ListItemIcon>
             <ListItemText>{t("Report Problem")}</ListItemText>
           </MenuItem>

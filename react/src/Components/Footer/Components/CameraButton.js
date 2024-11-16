@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "../../SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import { Tooltip } from "@mui/material";
@@ -27,6 +27,7 @@ function CameraButton(props) {
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
   const conference = useContext(ConferenceContext);
+  const theme = useTheme();
 
   const handleOff = (e) => {
     e.stopPropagation();
@@ -82,7 +83,7 @@ function CameraButton(props) {
           <CustomizedBtn
             id="camera-button"
             className={footer ? 'footer-icon-button' : ''} variant="contained" color="error" sx={rounded ? roundStyle : {}} disabled={conference?.cameraButtonDisabled} onClick={(e) => handleOn(e)}>
-            <SvgIcon size={40} name={'camera-off'} color="#fff" />
+            <SvgIcon size={40} name={'camera-off'} color={theme.palette?.iconColor?.primary} />
           </CustomizedBtn>
          </Tooltip>
       ) : (
@@ -90,7 +91,7 @@ function CameraButton(props) {
           <CustomizedBtn
             id="camera-button"
             className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} disabled={conference?.cameraButtonDisabled} onClick={(e) => handleOff(e)}>
-            <SvgIcon size={40} name={'camera'} color='inherit' />
+            <SvgIcon size={40} name={'camera'} color={theme.palette?.darkIconColor?.primary} />
           </CustomizedBtn>
         </Tooltip>
       )}
