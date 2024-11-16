@@ -2462,6 +2462,24 @@ function AntMedia(props) {
         return isExist;
     }
 
+    const fetchImageAsBlob = async (url) => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+    };
+
+    function setVirtualBackgroundImage(url) {
+        if (url === undefined || url === null || url === "") {
+            return;
+        } else if (url.startsWith("data:image")) {
+            setAndEnableVirtualBackgroundImage(url);
+        } else {
+            fetchImageAsBlob(url).then((blobUrl) => {
+                setAndEnableVirtualBackgroundImage(blobUrl);
+            });
+        }
+    }
+
     function setAndEnableVirtualBackgroundImage(imageUrl) {
         let virtualBackgroundImage = document.createElement("img");
         virtualBackgroundImage.id = "virtualBackgroundImage";
@@ -2854,7 +2872,7 @@ function AntMedia(props) {
                         setPresenterButtonDisabled,
                         effectsDrawerOpen,
                         handleEffectsOpen,
-                        setAndEnableVirtualBackgroundImage,
+                        setVirtualBackgroundImage,
                         localVideoCreate,
                         microphoneButtonDisabled,
                         setMicrophoneButtonDisabled,
