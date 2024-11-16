@@ -31,6 +31,7 @@ function ShareScreenButton({ footer, ...props }) {
     >
       <CustomizedBtn
         className={footer ? "footer-icon-button" : ""}
+        id = "share-screen-button"
         onClick={() => {
           if (conference.isScreenShared) {
             conference.handleStopScreenShare();

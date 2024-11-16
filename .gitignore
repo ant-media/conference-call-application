@@ -1,5 +1,8 @@
-﻿test/__pycache__/
 codesigning.asc
 .DS_Store
-/webapp/src/main/webapp/static/
+webapp/src/main/webapp/
+.vscode/
 
+react/.env.development
+react/.idea/workspace.xml
+react/.env.fakeeh

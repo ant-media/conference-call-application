@@ -36,7 +36,7 @@ const AntDialogTitle = props => {
   );
 };
 
-export function SettingsDialog(props) {
+export default function SettingsDialog(props) {
   const { t } = useTranslation();
   const { onClose, selectedValue, open, selectFocus } = props;
   const conference = React.useContext(ConferenceContext);
@@ -53,11 +53,6 @@ export function SettingsDialog(props) {
 
   function switchAudioMode(value) {
     conference.microphoneSelected(value);
-  }
-
-  function setBackground(value) {
-    conference.setSelectedBackgroundMode(value);
-    conference.handleBackgroundReplacement(value);
   }
 
   React.useEffect(() => {
@@ -115,16 +110,16 @@ export function SettingsDialog(props) {
               <Grid item xs={10}>
                 <Select variant="outlined" fullWidth value={conference.videoSendResolution} onChange={e => conference.setVideoSendResolution(e.target.value)} sx={{ color: 'white' }}>
                   <MenuItem key="auto" value="auto">
-                    Auto
+                    {t('Auto')}
                   </MenuItem>
                   <MenuItem key="high-definition" value="highDefinition">
-                    High definition (720p)
+                    {t('High definition (720p)')}
                   </MenuItem>
                   <MenuItem key="standart-definition" value="standardDefinition">
-                    Standard definition (360p)
+                    {t('Standard definition (360p)')}
                   </MenuItem>
                   <MenuItem key="low-definition" value="lowDefinition">
-                    Low definition (180p)
+                    {t('Low definition (180p)')}
                   </MenuItem>
                 </Select>
               </Grid>
@@ -154,31 +149,6 @@ export function SettingsDialog(props) {
               <Hidden xsDown>
                 <Grid item>
                   <SvgIcon size={36} name={'microphone'} color={'white'} />
-                </Grid>
-              </Hidden>
-            </Grid>
-          </Grid>
-          <Grid container sx={{ mt: 4 }}>
-            <Grid container>
-              <InputLabel>{t('Background')}</InputLabel>
-            </Grid>
-            <Grid container alignItems={'center'} spacing={2}>
-              <Grid item xs={10}>
-                <Select variant="outlined" fullWidth value={conference.selectedBackgroundMode} onChange={e => setBackground(e.target.value)} sx={{ color: 'white' }}>
-                  <MenuItem key="none" value="none">
-                    None
-                  </MenuItem>
-                  <MenuItem key="blur" value="blur">
-                    Blur
-                  </MenuItem>
-                  <MenuItem key="background" value="background">
-                    Virtual Background
-                  </MenuItem>
-                </Select>
-              </Grid>
-              <Hidden xsDown>
-                <Grid item>
-                  <SvgIcon size={36} name={'background-replacement'} color={'white'} />
                 </Grid>
               </Hidden>
             </Grid>

@@ -1,30 +1,29 @@
 import * as React from "react";
-import { styled, alpha } from "@mui/material/styles";
+import {alpha, styled} from "@mui/material/styles";
 
 import {
-  Grid,
-  Typography,
-  useMediaQuery,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Button,
   Box,
-  Slider,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  Grid,
   Radio,
   RadioGroup,
-  FormControlLabel,
-  FormControl,
+  Slider,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
-import { useTheme } from "@mui/material";
-
-import { ConferenceContext } from 'pages/AntMedia';
-import { useTranslation } from "react-i18next";
-import { SvgIcon } from "Components/SvgIcon";
+import {ConferenceContext} from 'pages/AntMedia';
+import {useTranslation} from "react-i18next";
+import {SvgIcon} from "Components/SvgIcon";
 import debounce from "lodash/debounce";
 
-const CustomizedSlider = styled(Slider)(({ theme }) => ({
+const CustomizedSlider = styled(Slider)(({theme}) => ({
   marginBottom: 0,
 
   "&.MuiSlider-dragging .MuiSlider-thumb": {
@@ -40,7 +39,7 @@ const CustomizedSlider = styled(Slider)(({ theme }) => ({
 }));
 
 const AntDialogTitle = (props) => {
-  const { children, onClose, ...other } = props;
+  const {children, onClose, ...other} = props;
 
   return (
     <DialogTitle {...other}>
@@ -49,13 +48,14 @@ const AntDialogTitle = (props) => {
         <Button
           aria-label="close"
           onClick={onClose}
+          id="layout-dialog-close-button"
           sx={{
             position: "absolute",
             right: 26,
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={"close"} color={"white"} />
+          <SvgIcon size={30} name={"close"} color={"white"}/>
         </Button>
       ) : null}
     </DialogTitle>
@@ -63,23 +63,18 @@ const AntDialogTitle = (props) => {
 };
 
 export function LayoutSettingsDialog(props) {
-  const { t } = useTranslation();
-  const { onClose, selectedValue, open } = props;
+  const {t} = useTranslation();
+  const {onClose, selectedValue, open} = props;
   const conference = React.useContext(ConferenceContext);
 
   const [value, setValue] = React.useState(
     conference.globals.maxVideoTrackCount ? conference.globals.maxVideoTrackCount : 4
   );
-  const [layout, setLayout] = React.useState(
-    conference.pinnedVideoId !== null ? "sidebar" : "tiled"
-  ); //just for radioo buttons
+  const [layout, setLayout] = React.useState( "sidebar"); //just for radioo buttons
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
-  React.useEffect(() => {
-    setLayout(conference.pinnedVideoId !== null ? "sidebar" : "tiled");
-  }, [conference.pinnedVideoId]);
   const handleClose = () => {
     onClose(selectedValue);
   };
@@ -90,7 +85,13 @@ export function LayoutSettingsDialog(props) {
 
     if (mode === "tiled") {
       //unpin the pinned video
-      conference.pinVideo(conference.pinnedVideoId);
+      conference.allParticipants = conference.allParticipants || {};
+      Object.keys(conference.allParticipants).forEach(streamId => {
+        if (typeof conference.allParticipants[streamId].pinned === 'undefined'
+          && conference.allParticipants[streamId].pinned === true) {
+          conference.pinVideo(streamId);
+        }
+      });
     } else if (mode === "sidebar") {
       const participants = document.querySelectorAll(
         ".single-video-container.not-pinned video"
@@ -99,14 +100,14 @@ export function LayoutSettingsDialog(props) {
         participants.length > 1 ? participants[1] : participants[0];
 
       //pin the first participant
-      conference.pinVideo(firstParticipant?.id ? firstParticipant.id : "localVideo");
+      conference.pinVideo(firstParticipant?.id ? firstParticipant.streamId : "localVideo");
     }
   };
   const radioLabel = (label, icon) => {
     return (
       <Grid
         container
-        style={{ width: "100%" }}
+        style={{width: "100%"}}
         alignItems="center"
         justifyContent="space-between"
       >
@@ -124,7 +125,7 @@ export function LayoutSettingsDialog(props) {
             borderRadius: 4,
           }}
         >
-          <SvgIcon size={42} name={icon} color={"white"} />
+          <SvgIcon size={42} name={icon} color={"white"}/>
         </Grid>
       </Grid>
     );
@@ -154,36 +155,36 @@ export function LayoutSettingsDialog(props) {
       <Typography variant="body2" color="#fff">
         {t("You can choose either tiled or sidebar view.")}
       </Typography>
-      <DialogContent sx={{ px: 1 }}>
-        <Box component="form" sx={{ display: "flex", flexWrap: "wrap" }}>
+      <DialogContent sx={{px: 1}}>
+        <Box component="form" sx={{display: "flex", flexWrap: "wrap"}}>
           <Grid container>
-            <FormControl sx={{ width: "100%" }}>
+            <FormControl sx={{width: "100%"}}>
               <RadioGroup
                 aria-labelledby="layout-radio-buttons"
-                defaultValue={conference.pinnedVideoId !== null ? "sidebar" : "tiled"}
+                defaultValue={"sidebar"}
                 value={layout}
                 onChange={changeLayout}
                 name="layout-radio-buttons-group"
               >
                 <FormControlLabel
-                  classes={{ label: "layout-radio-label" }}
-                  sx={{ width: "100%", pb: 1 }}
+                  classes={{label: "layout-radio-label"}}
+                  sx={{width: "100%", pb: 1}}
                   value="tiled"
-                  control={<Radio />}
-                  label={radioLabel("Tiled", "tiled")}
+                  control={<Radio/>}
+                  label={radioLabel(t("Tiled view"), "tiled")}
                 />
                 <FormControlLabel
-                  classes={{ label: "layout-radio-label" }}
-                  sx={{ width: "100%" }}
+                  classes={{label: "layout-radio-label"}}
+                  sx={{width: "100%"}}
                   value="sidebar"
-                  control={<Radio />}
-                  label={radioLabel("Sidebar", "sidebar")}
+                  control={<Radio/>}
+                  label={radioLabel(t("Sidebar view"), "sidebar")}
                 />
               </RadioGroup>
             </FormControl>
           </Grid>
-          <Typography color="#fff" sx={{ fontWeight: 600, mt: 2.5, mb: 2 }}>
-            Change tile count
+          <Typography color="#fff" sx={{fontWeight: 600, mt: 2.5, mb: 2}}>
+            {t("Change tile count")}
           </Typography>
           <Grid
             container
@@ -204,11 +205,15 @@ export function LayoutSettingsDialog(props) {
                 value={value}
                 aria-label="video track count"
                 valueLabelDisplay="auto"
+                id="tile-count-slider"
                 defaultValue={value}
                 step={null}
-                min={3}
+                min={2}
                 max={30}
                 marks={[
+                  {
+                    value: 2,
+                  },
                   {
                     value: 4,
                   },

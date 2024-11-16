@@ -2,6 +2,8 @@ from rest_helper import RestHelper
 import unittest
 import sys
 import os
+import time
+
 
 
 class TestDeployment(unittest.TestCase):
@@ -17,11 +19,12 @@ class TestDeployment(unittest.TestCase):
     response = self.rest_helper.call_install_app(os.environ.get('WAR_FILE'), self.test_app_name)
     print(response)
     assert(response["success"])
+    time.sleep(20)
 
   def test_delete_app(self):
-    #response = self.rest_helper.call_delete_app(self.test_app_name)
-    #print(response)
-    #assert(response["success"])
+    response = self.rest_helper.call_delete_app(self.test_app_name)
+    print(response)
+    assert(response["success"])
 
 if __name__ == '__main__':
     unittest.main()
