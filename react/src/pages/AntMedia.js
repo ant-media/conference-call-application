@@ -2504,9 +2504,10 @@ function AntMedia(props) {
             webRTCAdaptor?.setBackgroundImage(virtualBackgroundImage);
 
             if (selectedVideoEffect === VideoEffect.VIRTUAL_BACKGROUND) {
-                // if virtual background is already enabled, we need to re-enable it.
+                // if virtual background is already enabled, no need to enable it again.
                 return;
             }
+
             webRTCAdaptor?.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
                 console.log("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is enabled");
                 setSelectedVideoEffect(VideoEffect.VIRTUAL_BACKGROUND);
