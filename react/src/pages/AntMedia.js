@@ -2926,7 +2926,10 @@ function AntMedia(props) {
                         getTrackStats,
                         isBroadcasting,
                         playStats,
-                        checkAndSetIsPinned
+                        checkAndSetIsPinned,
+                        updateAllParticipantsPagination,
+                        participantCount,
+                        setParticipantCount
                     }}
                 >
                     {props.children}
