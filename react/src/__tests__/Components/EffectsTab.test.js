@@ -33,6 +33,13 @@ describe('Effects Tab Component', () => {
     // Reset the mock implementation before each test
     jest.clearAllMocks();
 
+    Object.defineProperty(navigator, 'storage', {
+      value: {
+        getDirectory: jest.fn().mockResolvedValue({}),
+      },
+      writable: true,
+    });
+
     React.useContext.mockImplementation(input => {
       if (input === ConferenceContext) {
         return contextValue;
@@ -42,14 +49,11 @@ describe('Effects Tab Component', () => {
   });
 
   it('renders without crashing', () => {
-    /*
     render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <EffectsTab />
         </ThemeProvider>
       );
-
-     */
   });
 
 });
