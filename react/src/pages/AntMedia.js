@@ -2920,7 +2920,9 @@ function AntMedia(props) {
                         getTrackStats,
                         isBroadcasting,
                         playStats,
-                        checkAndSetIsPinned
+                        checkAndSetIsPinned,
+                        fetchImageAsBlob,
+                        setAndEnableVirtualBackgroundImage
                     }}
                 >
                     {props.children}

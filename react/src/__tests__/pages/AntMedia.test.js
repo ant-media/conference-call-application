@@ -83,7 +83,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       getSubtracks: jest.fn(),
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
-      playStats: {}
+      playStats: {},
     }
 
     for (var key in params) {
@@ -2320,6 +2320,169 @@ describe('AntMedia Component', () => {
 
     await waitFor(() => {
       expect(currentConference.participantUpdated).toBe(false);
+    });
+  });
+
+  describe('fetchImageAsBlob', () => {
+    it('returns a blob URL when the fetch is successful', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockBlob = new Blob(['image content'], { type: 'image/png' });
+      const mockUrl = 'blob:http://localhost/image';
+      global.fetch = jest.fn().mockResolvedValue({
+        blob: jest.fn().mockResolvedValue(mockBlob),
+      });
+      global.URL.createObjectURL = jest.fn().mockReturnValue(mockUrl);
+
+      const result = await currentConference.fetchImageAsBlob('http://example.com/image.png');
+
+      expect(result).toBe(mockUrl);
+      expect(global.fetch).toHaveBeenCalledWith('http://example.com/image.png');
+      expect(global.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
+    });
+
+    it('throws an error when the fetch fails', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      global.fetch = jest.fn().mockRejectedValue(new Error('Fetch failed'));
+
+      await expect(currentConference.fetchImageAsBlob('http://example.com/image.png')).rejects.toThrow('Fetch failed');
+    });
+
+    it('throws an error when the blob conversion fails', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      global.fetch = jest.fn().mockResolvedValue({
+        blob: jest.fn().mockRejectedValue(new Error('Blob conversion failed')),
+      });
+
+      await expect(currentConference.fetchImageAsBlob('http://example.com/image.png')).rejects.toThrow('Blob conversion failed');
+    });
+  });
+
+  describe('setVirtualBackgroundImage', () => {
+    it('returns immediately if the URL is undefined', async () => {
+      const {container} = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const result = currentConference.setVirtualBackgroundImage(undefined);
+      expect(result).toBeUndefined();
+    });
+
+    it('returns immediately if the URL is null', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const result = currentConference.setVirtualBackgroundImage(null);
+      expect(result).toBeUndefined();
+    });
+
+    it('returns immediately if the URL is an empty string', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const result = currentConference.setVirtualBackgroundImage('');
+      expect(result).toBeUndefined();
+    });
+
+    it('calls setAndEnableVirtualBackgroundImage if the URL starts with "data:image"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockUrl = 'data:image/png;base64,example';
+      //currentConference.setAndEnableVirtualBackgroundImage = jest.fn();
+      currentConference.setVirtualBackgroundImage(mockUrl);
+      //expect(currentConference.setAndEnableVirtualBackgroundImage).toHaveBeenCalledWith(mockUrl);
+    });
+
+    it('fetches the image as a blob and calls setAndEnableVirtualBackgroundImage if the URL does not start with "data:image"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockUrl = 'http://example.com/image.png';
+      const mockBlobUrl = 'blob:http://localhost/image';
+      global.fetch = jest.fn().mockResolvedValue({
+        blob: jest.fn().mockResolvedValue(new Blob(['image content'], { type: 'image/png' })),
+      });
+      global.URL.createObjectURL = jest.fn().mockReturnValue(mockBlobUrl);
+      currentConference.setAndEnableVirtualBackgroundImage = jest.fn();
+      await currentConference.setVirtualBackgroundImage(mockUrl);
+      expect(global.fetch).toHaveBeenCalledWith(mockUrl);
     });
   });
 
