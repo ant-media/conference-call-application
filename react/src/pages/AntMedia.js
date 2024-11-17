@@ -2542,7 +2542,7 @@ function AntMedia(props) {
             effectName = VideoEffect.VIRTUAL_BACKGROUND;
             setIsVideoEffectRunning(true);
         }
-        webRTCAdaptor?.enableEffect(effectName).then(() => {
+        webRTCAdaptor?.enableEffect(effectName)?.then(() => {
             console.log("Effect: " + effectName + " is enabled");
             setSelectedVideoEffect(effectName);
         }).catch(err => {
@@ -2922,7 +2922,7 @@ function AntMedia(props) {
                         playStats,
                         checkAndSetIsPinned,
                         fetchImageAsBlob,
-                        setAndEnableVirtualBackgroundImage
+                        setAndEnableVirtualBackgroundImage,
                     }}
                 >
                     {props.children}

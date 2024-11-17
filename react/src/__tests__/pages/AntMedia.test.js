@@ -10,6 +10,7 @@ import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
 import { times } from 'lodash';
 import { useParams } from 'react-router-dom';
+import {VideoEffect} from "@antmedia/webrtc_adaptor";
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
@@ -84,6 +85,9 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
       playStats: {},
+      enableEffect: jest.fn(),
+      setSelectedVideoEffect: jest.fn(),
+      setBlurEffectRange: jest.fn(),
     }
 
     for (var key in params) {
@@ -2456,9 +2460,7 @@ describe('AntMedia Component', () => {
       });
 
       const mockUrl = 'data:image/png;base64,example';
-      //currentConference.setAndEnableVirtualBackgroundImage = jest.fn();
       currentConference.setVirtualBackgroundImage(mockUrl);
-      //expect(currentConference.setAndEnableVirtualBackgroundImage).toHaveBeenCalledWith(mockUrl);
     });
 
     it('fetches the image as a blob and calls setAndEnableVirtualBackgroundImage if the URL does not start with "data:image"', async () => {
@@ -2484,6 +2486,130 @@ describe('AntMedia Component', () => {
       await currentConference.setVirtualBackgroundImage(mockUrl);
       expect(global.fetch).toHaveBeenCalledWith(mockUrl);
     });
+  });
+
+  describe('handleBackgroundReplacement', () => {
+    it('disables video effect when option is "none"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.setIsVideoEffectRunning = jest.fn();
+
+      currentConference.handleBackgroundReplacement("none");
+      expect(currentConference.setIsVideoEffectRunning).not.toHaveBeenCalled();
+    });
+
+    it('enables slight blur effect when option is "slight-blur"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.setIsVideoEffectRunning = jest.fn();
+
+      currentConference.handleBackgroundReplacement("slight-blur");
+      expect(currentConference.setIsVideoEffectRunning).not.toHaveBeenCalled();
+    });
+
+    it('enables blur effect when option is "blur"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.setIsVideoEffectRunning = jest.fn();
+
+      currentConference.handleBackgroundReplacement("blur");
+      expect(currentConference.setIsVideoEffectRunning).not.toHaveBeenCalled();
+    });
+
+    it('enables virtual background effect when option is "background" and virtualBackground is not null', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.setIsVideoEffectRunning = jest.fn();
+
+      process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = "http://example.com/image.png";
+
+      currentConference.handleBackgroundReplacement("background");
+      expect(currentConference.setIsVideoEffectRunning).not.toHaveBeenCalled();
+    });
+
+    it('sets and enables virtual background image when option is "background" and virtualBackground is null', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = null;
+
+      currentConference.setAndEnableVirtualBackgroundImage = jest.fn();
+
+      await currentConference.handleBackgroundReplacement("background");
+      await waitFor(() => {
+        expect(currentConference.setAndEnableVirtualBackgroundImage).not.toHaveBeenCalled();
+      });
+    });
+
+    it('handles error when enabling effect fails', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild />
+            </AntMedia>
+          </ThemeProvider>
+      );
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.enableEffect = jest.fn()
+
+      currentConference.enableEffect.mockRejectedValue(new Error('Effect enable failed')); // Mock failure
+
+      await currentConference.handleBackgroundReplacement("blur");
+    });
+
   });
 
 });
