@@ -2479,6 +2479,10 @@ function AntMedia(props) {
         return isExist;
     }
 
+    React.useEffect(() => {
+        updateAllParticipantsPagination(globals.participantListPagination.currentPage);
+    }, [participantCount]);
+
     function updateAllParticipantsPagination(currentPage) {
         if (currentPage <= 0) {
             currentPage = 1;

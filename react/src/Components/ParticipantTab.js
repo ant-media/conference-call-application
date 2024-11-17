@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
-import {CircularProgress} from "@mui/material";
+import {CircularProgress, Pagination} from "@mui/material";
 import {WebinarRoles} from "../WebinarRoles";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
@@ -153,6 +153,20 @@ function ParticipantTab(props) {
         })}
       </Stack>
     </Grid>
+      {/* Pagination Controls */}
+      <Grid
+          container
+          justifyContent="center"
+          sx={{ mt: 2, mb: 2 }}
+      >
+        <Pagination
+            count={conference.globals.participantListPagination.totalPage}
+            page={conference.globals.participantListPagination.currentPage}
+            onChange={(event, value)=>{
+              conference?.updateAllParticipantsPagination(value);
+            }}
+        />
+      </Grid>
     </>
   );
 
