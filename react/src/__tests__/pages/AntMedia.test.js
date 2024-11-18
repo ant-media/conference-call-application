@@ -1,15 +1,12 @@
 // src/Button.test.js
 import React from 'react';
-import { render, act, waitFor, screen } from '@testing-library/react';
-import AntMedia from 'pages/AntMedia';
-import { useWebSocket } from 'Components/WebSocketProvider';
-import { useSnackbar} from "notistack";
-import { ConferenceContext } from "pages/AntMedia";
-import { ThemeProvider } from '@mui/material/styles';
+import {act, render, waitFor} from '@testing-library/react';
+import AntMedia, {ConferenceContext} from 'pages/AntMedia';
+import {useWebSocket} from 'Components/WebSocketProvider';
+import {useSnackbar} from "notistack";
+import {ThemeProvider} from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
-import { times } from 'lodash';
-import { useParams } from 'react-router-dom';
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
@@ -80,10 +77,9 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
       requestVideoTrackAssignments: jest.fn(),
       stopSpeedTest: jest.fn().mockImplementation(() => console.log('stopSpeedTest')),
-      getSubtracks: jest.fn(),
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
-      playStats: {}
+      playStats: {},
     }
 
     for (var key in params) {
@@ -2320,6 +2316,58 @@ describe('AntMedia Component', () => {
 
     await waitFor(() => {
       expect(currentConference.participantUpdated).toBe(false);
+    });
+  });
+
+  describe('checkVideoTrackHealth', () => {
+    it('returns true if the camera is turned off by the user', async () => {
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.isMyCamTurnedOff = true;
+      currentConference.mediaManager = {
+        localStream: {
+          getAudioTracks: jest.fn().mockReturnValue([]),
+          getVideoTracks: jest.fn().mockReturnValue([
+            {id: "tracka1", kind: "video", label: "videoTrack1", muted: true},
+          ]),
+        }
+      };
+      expect(currentConference.checkVideoTrackHealth()).toBe(true);
+    });
+
+    it('returns false if the camera is turned on and the video track is not muted', async () => {
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.isMyCamTurnedOff = false;
+      currentConference.mediaManager = {
+        localStream: {
+          getAudioTracks: jest.fn().mockReturnValue([]),
+          getVideoTracks: jest.fn().mockReturnValue([
+            {id: "tracka1", kind: "video", label: "videoTrack1", muted: true},
+          ]),
+        }
+      };
+      expect(currentConference.checkVideoTrackHealth()).toBe(true);
     });
   });
 

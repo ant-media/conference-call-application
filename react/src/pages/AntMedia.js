@@ -2678,7 +2678,7 @@ function AntMedia(props) {
             return true;
         }
         // if the camera is turned on and the video track is muted, then there is a problem with the camera
-        return !webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].muted;
+        return !webRTCAdaptor?.mediaManager?.localStream?.getVideoTracks()[0].muted;
     }
 
     const getTrackStats = React.useCallback(() => { // eslint-disable-line  no-unused-vars 
