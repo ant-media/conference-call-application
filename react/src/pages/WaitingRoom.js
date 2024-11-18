@@ -76,8 +76,25 @@ function WaitingRoom(props) {
     }, [conference.initialized]);
 
     function joinRoom(e) {
+        e.preventDefault();
+
+        let isVideoTrackHealthy = conference?.checkVideoTrackHealth();
+        if (!isVideoTrackHealthy) {
+            enqueueSnackbar(
+                {
+                    message: t(
+                        "Your camera is not working properly. Please check your camera settings"
+                    ),
+                    variant: "error",
+                    icon: <SvgIcon size={24} name={"muted-camera"} color="#fff"/>,
+                },
+                {
+                    autoHideDuration: 1500,
+                }
+            );
+            return;
+        }
         if (conference.localVideo === null && conference.isPlayOnly === false) {
-            e.preventDefault();
             enqueueSnackbar(
                 {
                     message: t(
