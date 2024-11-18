@@ -2934,7 +2934,8 @@ function AntMedia(props) {
                         getTrackStats,
                         isBroadcasting,
                         playStats,
-                        checkAndSetIsPinned
+                        checkAndSetIsPinned,
+                        checkAndUpdateVideoAudioSourcesForPublishSpeedTest
                     }}
                 >
                     {props.children}
