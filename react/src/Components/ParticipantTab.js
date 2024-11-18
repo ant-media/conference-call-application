@@ -25,6 +25,10 @@ function ParticipantTab(props) {
   const conference = React.useContext(ConferenceContext);
   const theme = useTheme();
 
+  const paginationUpdate = (event, value) => {
+    conference?.updateAllParticipantsPagination(value);
+  }
+
   const getAdminButtons = (streamId, assignedVideoCardId) => {
       let publishStreamId = (streamId === "localVideo") ? conference.publishStreamId : streamId;
       let role = conference.allParticipants[publishStreamId]?.role;
@@ -139,7 +143,7 @@ function ParticipantTab(props) {
             variant="body2"
             style={{marginLeft: 4, fontWeight: 500}}
           >
-            {Object.keys(conference.allParticipants).length}
+            {Object.keys(conference?.allParticipants).length}
           </ParticipantName>
         </Grid>
         {conference.isPlayOnly === false ? getParticipantItem(conference.publishStreamId, "You") : ""}
@@ -160,11 +164,10 @@ function ParticipantTab(props) {
           sx={{ mt: 2, mb: 2 }}
       >
         <Pagination
+            data-testid="participant-list-pagination"
             count={conference.globals.participantListPagination.totalPage}
             page={conference.globals.participantListPagination.currentPage}
-            onChange={(event, value)=>{
-              conference?.updateAllParticipantsPagination(value);
-            }}
+            onChange={paginationUpdate}
         />
       </Grid>
     </>
