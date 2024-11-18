@@ -175,9 +175,11 @@ jobs:
     - name: Copy Logs From Pods
       if: always()
       run: |
-        kubectl -n circle cp $(kubectl -n circle get pods | grep "ant-media-server" | awk '{print $1}'):/usr/local/antmedia/log/ant-media-server.log /tmp/ant-media-server-$(kubectl -n circle get pods -o wide | grep "ant-media-server" | awk '{print $6}').log
-        kubectl -n circle cp $(kubectl -n circle get pods | grep "ant-media-server" | awk '{print $1}'):/usr/local/antmedia/log/antmedia-error.log /tmp/antmedia-error-$(kubectl -n circle get pods -o wide | grep "ant-media-server" | awk '{print $6}').log
-
+        for pod in $(kubectl -n circle get pods | grep "ant-media-server" | awk '{print $1}'); do
+          node_ip=$(kubectl -n circle get pods -o wide | grep "$pod" | awk '{print $6}')
+          kubectl -n circle cp $pod:/usr/local/antmedia/log/ant-media-server.log /tmp/ant-media-server-$node_ip.log
+          kubectl -n circle cp $pod:/usr/local/antmedia/log/antmedia-error.log /tmp/antmedia-error-$node_ip.log
+        done
 
     - name: Upload PNG files as artifacts
       if: always()
