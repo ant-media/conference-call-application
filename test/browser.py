@@ -31,7 +31,7 @@ class Browser:
     browser_options.add_argument('--enable-logging')
     browser_options.add_argument('--v=1')
 
-    #is_headless = False #for local testing in windows
+    is_headless = False #for local testing in windows
     
     if is_headless:
       browser_options.add_argument("--headless")

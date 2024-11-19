@@ -38,7 +38,7 @@ function Home(props) {
 
       const handleCreateMeeting = () => {
             console.log("handleCreateMeeting is called");
-            if (settings.roomCreationPasswordEnabled) {
+            if (typeof settings !== 'undefined' && settings.roomCreationPasswordEnabled) {
                 setCreateRoomPasswordDialogOpen(true);
             }
             else {

@@ -26,7 +26,7 @@ class TestJoinLeave(unittest.TestCase):
     self.rest_helper.login()
 
     wait = self.chrome.get_wait()
-    time.sleep(15)
+    #time.sleep(15)
     #wait.until(lambda x: len(self.rest_helper.get_broadcasts()) == 0)
     #print("broadcasts are empty")
 
@@ -182,6 +182,37 @@ class TestJoinLeave(unittest.TestCase):
 
     stop_recording_button = self.chrome.get_element(By.ID, "stop-recording-button")
     return stop_recording_button
+  
+  def test_home_page_create_room(self):
+    room = "room"+str(random.randint(100, 999))
+    app = "/"+self.test_app_name
+    if self.url.endswith("localhost:3000"):
+      app = ""
+    handle = self.chrome.open_in_new_tab(self.url+app)
+    room_name_text_box = self.chrome.get_element_with_retry(By.ID, "room_name")
+
+    self.chrome.write_to_element(room_name_text_box, room)
+
+    join_button = self.chrome.get_element_with_retry(By.ID, "room_join_button")
+    self.chrome.click_element(join_button)
+    waiting_gallery = self.chrome.get_element_with_retry(By.ID, "waiting-room")
+
+    assert(waiting_gallery.is_displayed())
+
+    self.chrome.close_all()
+
+  def test_home_page_create_random_room(self):
+    room = "room"+str(random.randint(100, 999))
+    app = "/"+self.test_app_name
+    if self.url.endswith("localhost:3000"):
+      app = ""
+    handle = self.chrome.open_in_new_tab(self.url+app)
+    link = self.chrome.get_element_with_retry(By.XPATH, "//p[text()='Create Meeting']") 
+    link.click()
+    waiting_gallery = self.chrome.get_element_with_retry(By.ID, "waiting-room")
+    assert(waiting_gallery.is_displayed())
+
+    self.chrome.close_all()
 
   def test_join_room(self):
     room = "room"+str(random.randint(100, 999))

@@ -218,7 +218,9 @@ function WaitingRoom(props) {
     }
 
     return (
-        <Container>
+        <Container
+            id="waiting-room"
+        >
             <SettingsDialog
                 open={dialogOpen}
                 onClose={handleDialogClose}
