@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven
+name: Auto Deploy Workflow
 
 on: 
 # [push]
@@ -70,6 +70,7 @@ jobs:
     - name: Login to server
       run: |
         response=$(curl -X POST -H "Accept: Application/json" -H "Content-Type: application/json" ${{ secrets.PRODUCTION_SERVER_URL }}/rest/v2/users/authenticate -d '{"email":"${{ secrets.USER_NAME }}","password":"${{ secrets.PASSWORD }}"}' -c cookie.txt) 
+        echo $response
         success=$(echo $response | jq -r '.success')
         if [ "$success" != "true" ]; then
           echo "Login failed"
