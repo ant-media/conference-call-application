@@ -2314,6 +2314,7 @@ function AntMedia(props) {
         // we need to empty participant array. if we are going to leave it in the first place.
         setVideoTrackAssignments([]);
         setAllParticipants({});
+        setPagedParticipants({});
 
         clearInterval(audioListenerIntervalJob);
         audioListenerIntervalJob = null;
@@ -2412,6 +2413,7 @@ function AntMedia(props) {
             console.log("removeAllRemoteParticipants setAllParticipants:"+JSON.stringify(allParticipantsTemp));
             setAllParticipants(allParticipantsTemp);
         }
+        setPagedParticipants({});
         setParticipantUpdated(!participantUpdated);
     }
 
