@@ -31,7 +31,7 @@ function ParticipantTab(props) {
 
   const getAdminButtons = (streamId, assignedVideoCardId) => {
       let publishStreamId = (streamId === "localVideo") ? conference.publishStreamId : streamId;
-      let role = conference.allParticipants[publishStreamId]?.role;
+      let role = conference.pagedParticipants[publishStreamId]?.role;
 
     return (
       <div id={'admin-button-group-'+streamId}>
@@ -101,7 +101,7 @@ function ParticipantTab(props) {
         </Grid>
         <Grid item>
           <div style={{display: 'flex'}}>
-            {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
+            {(typeof conference.pagedParticipants[streamId]?.isPinned !== "undefined") && (conference.pagedParticipants[streamId]?.isPinned === true) ? (
               <PinBtn
                 id={"unpin-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
@@ -143,16 +143,15 @@ function ParticipantTab(props) {
             variant="body2"
             style={{marginLeft: 4, fontWeight: 500}}
           >
-            {Object.keys(conference?.allParticipants).length}
+            {conference?.participantCount}
           </ParticipantName>
         </Grid>
-        {conference.isPlayOnly === false ? getParticipantItem(conference.publishStreamId, "You") : ""}
-        {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
+        {Object.entries(conference.pagedParticipants).map(([streamId, broadcastObject]) => {
           if (conference.publishStreamId !== streamId) {
-            var assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
+            let assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
             return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
           } else {
-            return "";
+            return getParticipantItem(conference.publishStreamId, "You");
           }
         })}
       </Stack>
