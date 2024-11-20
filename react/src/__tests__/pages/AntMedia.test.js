@@ -2260,6 +2260,39 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('handle the case if the metadata is empty', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const subtrackList = [
+      JSON.stringify({ streamId: 'stream1', metaData: null }),
+      JSON.stringify({ streamId: 'stream2', metaData: "" })
+    ];
+    const obj = { subtrackList };
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback('subtrackList', obj);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.participantUpdated).toBe(false);
+    });
+
+    await waitFor(() => {
+        expect(currentConference.allParticipants["stream1"]).toBeDefined();
+        expect(currentConference.allParticipants["stream2"]).toBeDefined();
+    });
+  });
+
   it('does not update allParticipants if there are no changes', async () => {
     const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
