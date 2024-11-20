@@ -1162,7 +1162,7 @@ function AntMedia(props) {
         if(!streamName){
           broadcastObject.name = broadcastObject.streamId
         }
-        if(metaDataStr === ""){
+        if(metaDataStr === "" || metaDataStr === null || metaDataStr === undefined){
           broadcastObject.metaData = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
         }
 
@@ -1323,7 +1323,14 @@ function AntMedia(props) {
             subtrackList.forEach(subTrack => {
                 let broadcastObject = JSON.parse(subTrack);
 
-                let metaData = JSON.parse(broadcastObject.metaData);
+                handleSubtrackBroadcastObject(broadcastObject);
+
+                let metaDataStr = broadcastObject.metaData;
+                if(metaDataStr === "" || metaDataStr === null || metaDataStr === undefined){
+                    metaDataStr = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
+                }
+
+                let metaData = JSON.parse(metaDataStr);
                 broadcastObject.isScreenShared = metaData.isScreenShared;
 
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
