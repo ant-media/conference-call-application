@@ -336,6 +336,7 @@ function WaitingRoom(props) {
                                             color="secondary"
                                             sx={roundStyle}
                                             onClick={() => handleDialogOpen()}
+                                            id="waiting-room-more-options"
                                         >
                                             <SvgIcon size={40} name={"settings"} color={theme.palette?.iconColor?.primary}/>
                                         </CustomizedBtn>

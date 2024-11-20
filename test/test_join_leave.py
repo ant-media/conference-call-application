@@ -202,7 +202,6 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
   def test_home_page_create_random_room(self):
-    room = "room"+str(random.randint(100, 999))
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
@@ -213,6 +212,18 @@ class TestJoinLeave(unittest.TestCase):
     assert(waiting_gallery.is_displayed())
 
     self.chrome.close_all()
+
+  def test_change_camera_setting_in_waiting_room(self):
+    room = "room"+str(random.randint(100, 999))
+    app = "/"+self.test_app_name
+    if self.url.endswith("localhost:3000"):
+      app = ""
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
+    more_options_button = self.chrome.get_element_with_retry(By.ID, "waiting-room-more-options")
+    more_options_button.click()
+
+    #self.chrome.close_all()
+    
 
   def test_join_room(self):
     room = "room"+str(random.randint(100, 999))
