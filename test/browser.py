@@ -20,8 +20,8 @@ class Browser:
   def init(self, is_headless):
     browser_options = Options()
     browser_options.add_experimental_option("detach", True)
-    browser_options.add_argument("--use-fake-ui-for-media-stream") 
-    browser_options.add_argument("--use-fake-device-for-media-stream")
+    #browser_options.add_argument("--use-fake-ui-for-media-stream") 
+    #browser_options.add_argument("--use-fake-device-for-media-stream")
     browser_options.add_argument('--log-level=0')
     browser_options.add_argument('--no-sandbox')
     browser_options.add_argument('--disable-extensions')
@@ -31,7 +31,7 @@ class Browser:
     browser_options.add_argument('--enable-logging')
     browser_options.add_argument('--v=1')
 
-    is_headless = False #for local testing in windows
+    #is_headless = False #for local testing in windows
     
     if is_headless:
       browser_options.add_argument("--headless")

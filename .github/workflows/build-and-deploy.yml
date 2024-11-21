@@ -141,7 +141,7 @@ jobs:
     - name: Install Test Tool
       run: |
         sudo apt-get update
-        sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
+        sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg v4l2loopback-dkms v4l2loopback-utils
         git clone https://gitlab.com/Ant-Media/webrtc-test.git
         cd webrtc-test
         ./redeploy.sh

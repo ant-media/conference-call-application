@@ -213,7 +213,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_change_camera_setting_in_waiting_room(self):
+  def test_camera_mic_setting_in_waiting_room(self):
     room = "room"+str(random.randint(100, 999))
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
@@ -222,7 +222,115 @@ class TestJoinLeave(unittest.TestCase):
     more_options_button = self.chrome.get_element_with_retry(By.ID, "waiting-room-more-options")
     more_options_button.click()
 
-    #self.chrome.close_all()
+    camera_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-camera-select")
+    self.chrome.mouse_click_on(camera_select)
+
+    camera = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'fake_device_0')]")
+    self.chrome.mouse_click_on(camera)
+
+
+    resolution_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-resolution-select")
+    self.chrome.mouse_click_on(resolution_select)
+
+    resolution = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'Low definition (180p)')]")
+    self.chrome.mouse_click_on(resolution)
+
+    mic_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-mic-select")
+    self.chrome.mouse_click_on(mic_select)
+
+    mic = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'Fake Audio Input 2')]")
+    self.chrome.mouse_click_on(mic)
+
+    close_button = self.chrome.get_element_with_retry(By.CSS_SELECTOR, "button[aria-label='close']")
+    close_button.click()
+
+
+    name_text_box = self.chrome.get_element_with_retry(By.ID, "participant_name")
+
+    self.chrome.write_to_element(name_text_box, "participant1")
+
+    join_button = self.chrome.get_element_with_retry(By.ID, "room_join_button")
+    self.chrome.click_element(join_button)
+ 
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
+    assert(meeting_gallery.is_displayed())
+    self.chrome.close_all()
+
+  def test_join_as_camera_mic_off(self):
+      room = "room"+str(random.randint(100, 999))
+      app = "/"+self.test_app_name
+      if self.url.endswith("localhost:3000"):
+        app = ""
+      handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
+
+      camera_button = self.chrome.get_element_with_retry(By.ID, "camera-button")
+      camera_button.click()
+
+      min_button = self.chrome.get_element_with_retry(By.ID, "mic-button")
+      min_button.click()
+
+      name_text_box = self.chrome.get_element_with_retry(By.ID, "participant_name")
+
+      self.chrome.write_to_element(name_text_box, "participant1")
+
+      join_button = self.chrome.get_element_with_retry(By.ID, "room_join_button")
+      self.chrome.click_element(join_button)
+  
+      meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
+      assert(meeting_gallery.is_displayed())
+      self.chrome.close_all()
+
+  def test_join_with_2_virtual_camera(self):
+      room = "room"+str(random.randint(100, 999))
+      app = "/"+self.test_app_name
+      if self.url.endswith("localhost:3000"):
+        app = ""
+
+
+      print("Creating virtual cameras...")
+      subprocess.run(["sudo", "modprobe", "v4l2loopback", "devices=2"], check=True)
+
+      # Step 2: Start feeding videos to the virtual cameras
+      print("Feeding videos to virtual cameras...")
+      ffmpeg_process1 = subprocess.Popen(["ffmpeg", "-re", "-i", "camera.mp4", "-f", "v4l2", "/dev/video0"])
+      ffmpeg_process2 = subprocess.Popen(["ffmpeg", "-re", "-i", "camera.mp4", "-f", "v4l2", "/dev/video1"])
+
+
+      handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
+      more_options_button = self.chrome.get_element_with_retry(By.ID, "waiting-room-more-options")
+      more_options_button.click()
+
+      self.chrome.save_ss_as_file("settings-1.png")
+
+
+      camera_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-camera-select")
+      self.chrome.mouse_click_on(camera_select)
+
+      self.chrome.save_ss_as_file("cameras-1.png")
+
+
+      print("Stopping video feeds...")
+      ffmpeg_process1.terminate()
+      ffmpeg_process2.terminate()
+      ffmpeg_process1.wait()
+      ffmpeg_process2.wait()
+
+      # Step 4: Clean up the virtual cameras
+      print("Removing virtual cameras...")
+      subprocess.run(["sudo", "modprobe", "-r", "v4l2loopback"], check=True)
+
+      '''
+      name_text_box = self.chrome.get_element_with_retry(By.ID, "participant_name")
+
+      self.chrome.write_to_element(name_text_box, "participant1")
+
+      join_button = self.chrome.get_element_with_retry(By.ID, "room_join_button")
+      self.chrome.click_element(join_button)
+  
+      meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
+      assert(meeting_gallery.is_displayed())
+      '''
+      self.chrome.close_all()
     
 
   def test_join_room(self):
