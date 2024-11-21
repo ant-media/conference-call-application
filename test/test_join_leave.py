@@ -286,7 +286,7 @@ class TestJoinLeave(unittest.TestCase):
       if self.url.endswith("localhost:3000"):
         app = ""
 
-
+      '''
       print("Creating virtual cameras...")
       subprocess.run(["sudo", "modprobe", "v4l2loopback", "devices=2"], check=True)
 
@@ -294,7 +294,7 @@ class TestJoinLeave(unittest.TestCase):
       print("Feeding videos to virtual cameras...")
       ffmpeg_process1 = subprocess.Popen(["ffmpeg", "-re", "-i", "camera.mp4", "-f", "v4l2", "/dev/video0"])
       ffmpeg_process2 = subprocess.Popen(["ffmpeg", "-re", "-i", "camera.mp4", "-f", "v4l2", "/dev/video1"])
-
+      '''
 
       handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
       more_options_button = self.chrome.get_element_with_retry(By.ID, "waiting-room-more-options")
@@ -308,7 +308,7 @@ class TestJoinLeave(unittest.TestCase):
 
       self.chrome.save_ss_as_file("cameras-1.png")
 
-
+      '''
       print("Stopping video feeds...")
       ffmpeg_process1.terminate()
       ffmpeg_process2.terminate()
@@ -318,7 +318,7 @@ class TestJoinLeave(unittest.TestCase):
       # Step 4: Clean up the virtual cameras
       print("Removing virtual cameras...")
       subprocess.run(["sudo", "modprobe", "-r", "v4l2loopback"], check=True)
-
+      '''
       '''
       name_text_box = self.chrome.get_element_with_retry(By.ID, "participant_name")
 

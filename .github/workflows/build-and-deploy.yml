@@ -150,7 +150,13 @@ jobs:
         unzip webrtc-load-test-tool-*.zip
         mkdir ~/test
         mv webrtc-load-test ~/test
-        
+
+    - name: Run Virtual Cameras
+      run: |
+        sudo modprobe v4l2loopback devices=2
+        ffmpeg -re -stream_loop 1000 -i test/camera.mp4 -f v4l2 /dev/video0 &
+        ffmpeg -re -stream_loop 1000 -i test/camera.mp4 -f v4l2 /dev/video1 &
+
     - name: Install Selenium
       run: |
         wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip
