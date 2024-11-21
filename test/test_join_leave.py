@@ -306,6 +306,8 @@ class TestJoinLeave(unittest.TestCase):
       close_button = self.chrome.get_element_with_retry(By.CSS_SELECTOR, "button[aria-label='close']")
       close_button.click()
 
+      time.sleep(2)
+
       camera_button = self.chrome.get_element_with_retry(By.ID, "camera-button")
       camera_button.click()
 
