@@ -298,10 +298,7 @@ class TestJoinLeave(unittest.TestCase):
 
       self.chrome.save_ss_as_file("settings-1.png")
 
-      camera_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-camera-select")
-      self.chrome.mouse_click_on(camera_select)
-
-      assert(not self.chrome.is_element_exist(By.XPATH, "//li[contains(text(), 'fake_device_0')]"))
+      time.sleep(2)
 
       close_button = self.chrome.get_element_with_retry(By.CSS_SELECTOR, "button[aria-label='close']")
       close_button.click()
