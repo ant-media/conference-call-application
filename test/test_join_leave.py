@@ -335,7 +335,7 @@ class TestJoinLeave(unittest.TestCase):
       wait.until(lambda x: self.get_video_track_limit() == limit)
       print("video_track_limit: "+str(limit))
   
-  def _test_video_track_count(self):
+  def test_video_track_count(self):
     #self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
@@ -485,7 +485,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_with_stats(self):
+  def test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -523,7 +523,7 @@ class TestJoinLeave(unittest.TestCase):
     videoTrackAssignments = conference["videoTrackAssignments"]
     return videoTrackAssignments[1]["streamId"] == conference["pinnedVideoId"]
 
-  def _test_screen_share(self):
+  def test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -753,7 +753,7 @@ class TestJoinLeave(unittest.TestCase):
    
 
 
-  def _test_recording(self):
+  def test_recording(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)

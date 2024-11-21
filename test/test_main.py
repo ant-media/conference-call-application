@@ -19,7 +19,6 @@ os.environ['TEST_APP_NAME'] = "TestAPP"+str(random.randint(100, 999))
 suite = unittest.TestSuite()
 suite.addTest(TestDeployment('test_install_app'))
 
-'''
 suite2 = None
 if use_test_webinar:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_webinar)
@@ -27,8 +26,8 @@ else:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
 
     suite.addTests(suite2)
-'''
-suite.addTest(TestJoinLeave("test_join_without_camera_mic")) 
+
+#suite.addTest(TestJoinLeave("test_join_without_camera_mic")) 
 
 suite.addTest(TestDeployment('test_delete_app'))
 
