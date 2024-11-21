@@ -28,7 +28,7 @@ else:
 
     suite.addTests(suite2)
 '''
-suite.addTest(TestJoinLeave("test_join_with_2_virtual_camera")) 
+suite.addTest(TestJoinLeave("test_join_without_camera_mic")) 
 
 suite.addTest(TestDeployment('test_delete_app'))
 

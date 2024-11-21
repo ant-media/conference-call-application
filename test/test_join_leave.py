@@ -280,21 +280,13 @@ class TestJoinLeave(unittest.TestCase):
       assert(meeting_gallery.is_displayed())
       self.chrome.close_all()
 
-  def test_join_with_2_virtual_camera(self):
+  #this test will not work on local since we have camera and mic in local
+  def test_join_without_camera_mic(self):
       room = "room"+str(random.randint(100, 999))
       app = "/"+self.test_app_name
       if self.url.endswith("localhost:3000"):
         app = ""
-
-      '''
-      print("Creating virtual cameras...")
-      subprocess.run(["sudo", "modprobe", "v4l2loopback", "devices=2"], check=True)
-
-      # Step 2: Start feeding videos to the virtual cameras
-      print("Feeding videos to virtual cameras...")
-      ffmpeg_process1 = subprocess.Popen(["ffmpeg", "-re", "-i", "camera.mp4", "-f", "v4l2", "/dev/video0"])
-      ffmpeg_process2 = subprocess.Popen(["ffmpeg", "-re", "-i", "camera.mp4", "-f", "v4l2", "/dev/video1"])
-      '''
+      handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
 
       handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
       more_options_button = self.chrome.get_element_with_retry(By.ID, "waiting-room-more-options")
@@ -302,24 +294,12 @@ class TestJoinLeave(unittest.TestCase):
 
       self.chrome.save_ss_as_file("settings-1.png")
 
+      camera_button = self.chrome.get_element_with_retry(By.ID, "camera-button")
+      camera_button.click()
 
-      camera_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-camera-select")
-      self.chrome.mouse_click_on(camera_select)
+      min_button = self.chrome.get_element_with_retry(By.ID, "mic-button")
+      min_button.click()
 
-      self.chrome.save_ss_as_file("cameras-1.png")
-
-      '''
-      print("Stopping video feeds...")
-      ffmpeg_process1.terminate()
-      ffmpeg_process2.terminate()
-      ffmpeg_process1.wait()
-      ffmpeg_process2.wait()
-
-      # Step 4: Clean up the virtual cameras
-      print("Removing virtual cameras...")
-      subprocess.run(["sudo", "modprobe", "-r", "v4l2loopback"], check=True)
-      '''
-      '''
       name_text_box = self.chrome.get_element_with_retry(By.ID, "participant_name")
 
       self.chrome.write_to_element(name_text_box, "participant1")
@@ -329,7 +309,6 @@ class TestJoinLeave(unittest.TestCase):
   
       meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
       assert(meeting_gallery.is_displayed())
-      '''
       self.chrome.close_all()
     
 
