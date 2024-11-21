@@ -151,6 +151,11 @@ jobs:
         mkdir ~/test
         mv webrtc-load-test ~/test
 
+    - name: Check kernel module support
+      run: |
+        lsmod
+        modprobe v4l2loopback
+
     - name: Run Virtual Cameras
       run: |
         sudo modprobe v4l2loopback devices=2
