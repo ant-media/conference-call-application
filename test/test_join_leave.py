@@ -282,11 +282,15 @@ class TestJoinLeave(unittest.TestCase):
 
   #this test will not work on local since we have camera and mic in local
   def test_join_without_camera_mic(self):
+      
+      self.chrome = Browser()
+      self.chrome.init(True, False)
+      
+      self.chrome.makeFullScreen()
       room = "room"+str(random.randint(100, 999))
       app = "/"+self.test_app_name
       if self.url.endswith("localhost:3000"):
         app = ""
-      handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
 
       handle = self.chrome.open_in_new_tab(self.url+app+"/"+room)
       more_options_button = self.chrome.get_element_with_retry(By.ID, "waiting-room-more-options")
