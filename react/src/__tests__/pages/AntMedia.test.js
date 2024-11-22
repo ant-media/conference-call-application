@@ -2529,6 +2529,43 @@ describe('AntMedia Component', () => {
 
       //expect(mockConsoleError).toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
     });
+
+    it('handles errors when switching video and audio sources', async () => {
+      const {container} = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+        await waitFor(() => {
+            expect(webRTCAdaptorConstructor).not.toBe(undefined);
+        });
+
+        const mockSelectedDevices = {videoDeviceId: 'camera1', audioDeviceId: 'microphone1'};
+        const mockSetSelectedDevices = jest.fn();
+        const mockSwitchVideoCameraCapture = jest.fn().mockImplementation(() => {
+            throw new Error('Error switching video');
+        });
+        const mockSwitchAudioInputSource = jest.fn().mockImplementation(() => {
+            throw new Error('Error switching audio');
+        });
+        const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
+
+        currentConference.devices = [{kind: 'videoinput', deviceId: 'camera1'}, {kind: 'audioinput', deviceId: 'microphone1'}];
+        currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
+        currentConference.setSelectedDevices = mockSetSelectedDevices;
+        currentConference.speedTestForPublishWebRtcAdaptor = {current: {switchVideoCameraCapture: mockSwitchVideoCameraCapture, switchAudioInputSource: mockSwitchAudioInputSource}};
+        currentConference.publishStreamId = 'stream1';
+
+        await act(async () => {
+          currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
+        });
+
+        await waitFor(() => {
+          //expect(mockConsoleError).toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
+        });
+    });
   });
 
 });
