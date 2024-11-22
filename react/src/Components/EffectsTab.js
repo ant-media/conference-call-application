@@ -50,6 +50,7 @@ function EffectsTab() {
             position: 'relative'
           }}
           id="custom-virtual-background-button"
+          data-testid="custom-virtual-background-button"
           onClick={(e) => {
             conference.setVirtualBackgroundImage(imageSrc);
           }}

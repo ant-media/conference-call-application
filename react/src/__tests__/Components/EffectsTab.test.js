@@ -28,6 +28,7 @@ const contextValue = {
     },
   },
   publishStreamId: 'test-stream-id',
+  setVirtualBackgroundImage: jest.fn(),
 };
 
 // Mock the useContext hook
@@ -65,48 +66,20 @@ describe('Effects Tab Component', () => {
       );
   });
 
-  /*
   describe('getBackgroundImages', () => {
     it('returns an empty array when no environment variable or custom images are provided', () => {
       process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = undefined;
-      //customVirtualBackgroundImages = [];
-      const result = getBackgroundImages();
-      expect(result).toEqual([]);
+      const {getByTestId} = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <EffectsTab />
+          </ThemeProvider>
+      );
+      let customVirtualBackgroundButton = getByTestId('custom-virtual-background-button');
+      customVirtualBackgroundButton.click();
+      expect(contextValue.setVirtualBackgroundImage).toHaveBeenCalled();
     });
 
-    it('returns an array of buttons for environment variable images', () => {
-      process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = 'image1.jpg,image2.jpg';
-      //customVirtualBackgroundImages = [];
-      const result = getBackgroundImages();
-      expect(result.length).toBe(2);
-      expect(result[0].key).toBe('0');
-      expect(result[1].key).toBe('1');
-    });
 
-    it('returns an array of buttons for custom images', () => {
-      process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = undefined;
-      //customVirtualBackgroundImages = [{ url: 'custom1.jpg', name: 'custom1' }];
-      const result = getBackgroundImages();
-      expect(result.length).toBe(1);
-      expect(result[0].key).toBe('0');
-    });
-
-    it('returns an array of buttons for both environment variable and custom images', () => {
-      process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = 'image1.jpg';
-      //customVirtualBackgroundImages = [{ url: 'custom1.jpg', name: 'custom1' }];
-      const result = getBackgroundImages();
-      expect(result.length).toBe(2);
-      expect(result[0].key).toBe('0');
-      expect(result[1].key).toBe('1');
-    });
-
-    it('sets the background images button list state', () => {
-      process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = 'image1.jpg';
-      //customVirtualBackgroundImages = [];
-      getBackgroundImages();
-      expect(setBackgroundImagesButtonList).toHaveBeenCalled();
-    });
   });
-  */
 
 });
