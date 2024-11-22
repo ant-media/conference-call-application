@@ -394,6 +394,7 @@ function AntMedia(props) {
     const [selectedCamera, setSelectedCamera] = React.useState(localStorage.getItem('selectedCamera'));
     const [selectedMicrophone, setSelectedMicrophone] = React.useState(localStorage.getItem('selectedMicrophone'));
     const [selectedBackgroundMode, setSelectedBackgroundMode] = React.useState("");
+    const [selectedVideoEffect, setSelectedVideoEffect] = React.useState(VideoEffect.NO_EFFECT);
     const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
     const [virtualBackground, setVirtualBackground] = React.useState(null);
     const timeoutRef = React.useRef(null);
@@ -2469,11 +2470,33 @@ function AntMedia(props) {
         return isExist;
     }
 
+    const fetchImageAsBlob = async (url) => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+    };
+
+    function setVirtualBackgroundImage(url) {
+        if (url === undefined || url === null || url === "") {
+            return;
+        } else if (url.startsWith("data:image")) {
+            setAndEnableVirtualBackgroundImage(url);
+        } else {
+            fetchImageAsBlob(url).then((blobUrl) => {
+                setAndEnableVirtualBackgroundImage(blobUrl);
+            });
+        }
+    }
+
     function setAndEnableVirtualBackgroundImage(imageUrl) {
-        let virtualBackgroundImage = document.createElement("img");
-        virtualBackgroundImage.id = "virtualBackgroundImage";
-        virtualBackgroundImage.style.visibility = "hidden";
-        virtualBackgroundImage.alt = "virtual-background";
+        let virtualBackgroundImage = document.getElementById("virtualBackgroundImage");
+
+        if (virtualBackgroundImage === null) {
+            virtualBackgroundImage = document.createElement("img");
+            virtualBackgroundImage.id = "virtualBackgroundImage";
+            virtualBackgroundImage.style.visibility = "hidden";
+            virtualBackgroundImage.alt = "virtual-background";
+        }
 
         console.log("Virtual background image url: " + imageUrl);
         if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
@@ -2487,11 +2510,18 @@ function AntMedia(props) {
             setVirtualBackground(virtualBackgroundImage);
             webRTCAdaptor?.setBackgroundImage(virtualBackgroundImage);
 
+            if (selectedVideoEffect === VideoEffect.VIRTUAL_BACKGROUND) {
+                // if virtual background is already enabled, no need to enable it again.
+                return;
+            }
+
             webRTCAdaptor?.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
                 console.log("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is enabled");
+                setSelectedVideoEffect(VideoEffect.VIRTUAL_BACKGROUND);
                 setIsVideoEffectRunning(true);
             }).catch(err => {
                 console.error("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is not enabled. Error is " + err);
+                setSelectedVideoEffect(VideoEffect.NO_EFFECT);
                 setIsVideoEffectRunning(false);
             });
         };
@@ -2519,10 +2549,12 @@ function AntMedia(props) {
             effectName = VideoEffect.VIRTUAL_BACKGROUND;
             setIsVideoEffectRunning(true);
         }
-        webRTCAdaptor?.enableEffect(effectName).then(() => {
+        webRTCAdaptor?.enableEffect(effectName)?.then(() => {
             console.log("Effect: " + effectName + " is enabled");
+            setSelectedVideoEffect(effectName);
         }).catch(err => {
             console.error("Effect: " + effectName + " is not enabled. Error is " + err);
+            setSelectedVideoEffect(VideoEffect.NO_EFFECT);
             setIsVideoEffectRunning(false);
         });
     }
@@ -2861,7 +2893,7 @@ function AntMedia(props) {
                         setPresenterButtonDisabled,
                         effectsDrawerOpen,
                         handleEffectsOpen,
-                        setAndEnableVirtualBackgroundImage,
+                        setVirtualBackgroundImage,
                         localVideoCreate,
                         microphoneButtonDisabled,
                         setMicrophoneButtonDisabled,
@@ -2895,7 +2927,9 @@ function AntMedia(props) {
                         getTrackStats,
                         isBroadcasting,
                         playStats,
-                        checkAndSetIsPinned
+                        checkAndSetIsPinned,
+                        fetchImageAsBlob,
+                        setAndEnableVirtualBackgroundImage,
                     }}
                 >
                     {props.children}
