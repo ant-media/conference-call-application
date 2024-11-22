@@ -10,6 +10,7 @@ import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
 import { times } from 'lodash';
 import { useParams } from 'react-router-dom';
+import {VideoEffect} from "@antmedia/webrtc_adaptor";
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
@@ -83,7 +84,10 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       getSubtracks: jest.fn(),
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
-      playStats: {}
+      playStats: {},
+      enableEffect: jest.fn(),
+      setSelectedVideoEffect: jest.fn(),
+      setBlurEffectRange: jest.fn(),
     }
 
     for (var key in params) {
@@ -2356,8 +2360,8 @@ describe('AntMedia Component', () => {
     });
   });
 
-  describe('checkAndUpdateVideoAudioSourcesForPublishSpeedTest', () => {
-    it('selects the first available camera if the selected camera is not available', async () => {
+  describe('fetchImageAsBlob', () => {
+    it('returns a blob URL when the fetch is successful', async () => {
       const { container } = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
             <AntMedia isTest={true}>
@@ -2370,23 +2374,21 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
 
-      const mockDevices = [
-        { kind: 'videoinput', deviceId: 'camera1' },
-        { kind: 'audioinput', deviceId: 'microphone1' }
-      ];
-      const mockSelectedDevices = { videoDeviceId: 'camera2', audioDeviceId: 'microphone1' };
-      const mockSetSelectedDevices = jest.fn();
+      const mockBlob = new Blob(['image content'], { type: 'image/png' });
+      const mockUrl = 'blob:http://localhost/image';
+      global.fetch = jest.fn().mockResolvedValue({
+        blob: jest.fn().mockResolvedValue(mockBlob),
+      });
+      global.URL.createObjectURL = jest.fn().mockReturnValue(mockUrl);
 
-      currentConference.devices = mockDevices;
-      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
-      currentConference.setSelectedDevices = mockSetSelectedDevices;
+      const result = await currentConference.fetchImageAsBlob('http://example.com/image.png');
 
-      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
-
-      //expect(mockSetSelectedDevices).toHaveBeenCalledWith({ videoDeviceId: 'camera1', audioDeviceId: 'microphone1' });
+      expect(result).toBe(mockUrl);
+      expect(global.fetch).toHaveBeenCalledWith('http://example.com/image.png');
+      expect(global.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
     });
 
-    it('selects the first available microphone if the selected microphone is not available', async () => {
+    it('throws an error when the fetch fails', async () => {
       const { container } = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
             <AntMedia isTest={true}>
@@ -2399,23 +2401,12 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
 
-      const mockDevices = [
-        { kind: 'videoinput', deviceId: 'camera1' },
-        { kind: 'audioinput', deviceId: 'microphone1' }
-      ];
-      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone2' };
-      const mockSetSelectedDevices = jest.fn();
+      global.fetch = jest.fn().mockRejectedValue(new Error('Fetch failed'));
 
-      currentConference.devices = mockDevices;
-      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
-      currentConference.setSelectedDevices = mockSetSelectedDevices;
-
-      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
-
-      //expect(mockSetSelectedDevices).toHaveBeenCalledWith({ videoDeviceId: 'camera1', audioDeviceId: 'microphone1' });
+      await expect(currentConference.fetchImageAsBlob('http://example.com/image.png')).rejects.toThrow('Fetch failed');
     });
 
-    it('does not change selected devices if they are available', async () => {
+    it('throws an error when the blob conversion fails', async () => {
       const { container } = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
             <AntMedia isTest={true}>
@@ -2428,109 +2419,16 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
 
-      const mockDevices = [
-        { kind: 'videoinput', deviceId: 'camera1' },
-        { kind: 'audioinput', deviceId: 'microphone1' }
-      ];
-      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone1' };
-      const mockSetSelectedDevices = jest.fn();
-
-      currentConference.devices = mockDevices;
-      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
-      currentConference.setSelectedDevices = mockSetSelectedDevices;
-
-      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
-
-      //expect(mockSetSelectedDevices).toHaveBeenCalledWith(mockSelectedDevices);
-    });
-
-    it('switches video camera capture if the selected camera changes', async () => {
-      const { container } = render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <AntMedia isTest={true}>
-              <MockChild/>
-            </AntMedia>
-          </ThemeProvider>);
-
-
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      global.fetch = jest.fn().mockResolvedValue({
+        blob: jest.fn().mockRejectedValue(new Error('Blob conversion failed')),
       });
 
-      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone1' };
-      const mockSetSelectedDevices = jest.fn();
-      const mockSwitchVideoCameraCapture = jest.fn();
-
-      currentConference.devices = [{ kind: 'videoinput', deviceId: 'camera1' }];
-      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
-      currentConference.setSelectedDevices = mockSetSelectedDevices;
-      currentConference.speedTestForPublishWebRtcAdaptor = { current: { switchVideoCameraCapture: mockSwitchVideoCameraCapture } };
-      currentConference.publishStreamId = 'stream1';
-
-      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
-
-      //expect(mockSwitchVideoCameraCapture).toHaveBeenCalledWith('stream1', 'camera1');
+      await expect(currentConference.fetchImageAsBlob('http://example.com/image.png')).rejects.toThrow('Blob conversion failed');
     });
+  });
 
-    it('switches audio input source if the selected microphone changes', async () => {
-      const { container } = render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <AntMedia isTest={true}>
-              <MockChild/>
-            </AntMedia>
-          </ThemeProvider>);
-
-
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone1' };
-      const mockSetSelectedDevices = jest.fn();
-      const mockSwitchAudioInputSource = jest.fn();
-
-      currentConference.devices = [{ kind: 'audioinput', deviceId: 'microphone1' }];
-      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
-      currentConference.setSelectedDevices = mockSetSelectedDevices;
-      currentConference.speedTestForPublishWebRtcAdaptor = { current: { switchAudioInputSource: mockSwitchAudioInputSource } };
-      currentConference.publishStreamId = 'stream1';
-
-      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
-
-      //expect(mockSwitchAudioInputSource).toHaveBeenCalledWith('stream1', 'microphone1');
-    });
-
-    it('handles errors when switching video and audio sources', async () => {
-      const { container } = render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <AntMedia isTest={true}>
-              <MockChild/>
-            </AntMedia>
-          </ThemeProvider>);
-
-
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone1' };
-      const mockSetSelectedDevices = jest.fn();
-      const mockSwitchVideoCameraCapture = jest.fn().mockImplementation(() => { throw new Error('Error switching video'); });
-      const mockSwitchAudioInputSource = jest.fn().mockImplementation(() => { throw new Error('Error switching audio'); });
-      const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
-
-      currentConference.devices = [{ kind: 'videoinput', deviceId: 'camera1' }, { kind: 'audioinput', deviceId: 'microphone1' }];
-      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
-      currentConference.setSelectedDevices = mockSetSelectedDevices;
-      currentConference.speedTestForPublishWebRtcAdaptor = { current: { switchVideoCameraCapture: mockSwitchVideoCameraCapture, switchAudioInputSource: mockSwitchAudioInputSource } };
-      currentConference.publishStreamId = 'stream1';
-
-      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
-
-      //expect(mockConsoleError).toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
-    });
-
-    it('handles errors when switching video and audio sources', async () => {
+  describe('setVirtualBackgroundImage', () => {
+    it('returns immediately if the URL is undefined', async () => {
       const {container} = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
             <AntMedia isTest={true}>
@@ -2538,34 +2436,213 @@ describe('AntMedia Component', () => {
             </AntMedia>
           </ThemeProvider>);
 
-        await waitFor(() => {
-            expect(webRTCAdaptorConstructor).not.toBe(undefined);
-        });
 
-        const mockSelectedDevices = {videoDeviceId: 'camera1', audioDeviceId: 'microphone1'};
-        const mockSetSelectedDevices = jest.fn();
-        const mockSwitchVideoCameraCapture = jest.fn().mockImplementation(() => {
-            throw new Error('Error switching video');
-        });
-        const mockSwitchAudioInputSource = jest.fn().mockImplementation(() => {
-            throw new Error('Error switching audio');
-        });
-        const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
 
-        currentConference.devices = [{kind: 'videoinput', deviceId: 'camera1'}, {kind: 'audioinput', deviceId: 'microphone1'}];
-        currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
-        currentConference.setSelectedDevices = mockSetSelectedDevices;
-        currentConference.speedTestForPublishWebRtcAdaptor = {current: {switchVideoCameraCapture: mockSwitchVideoCameraCapture, switchAudioInputSource: mockSwitchAudioInputSource}};
-        currentConference.publishStreamId = 'stream1';
-
-        await act(async () => {
-          currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
-        });
-
-        await waitFor(() => {
-          //expect(mockConsoleError).toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
-        });
+      const result = currentConference.setVirtualBackgroundImage(undefined);
+      expect(result).toBeUndefined();
     });
+
+    it('returns immediately if the URL is null', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const result = currentConference.setVirtualBackgroundImage(null);
+      expect(result).toBeUndefined();
+    });
+
+    it('returns immediately if the URL is an empty string', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const result = currentConference.setVirtualBackgroundImage('');
+      expect(result).toBeUndefined();
+    });
+
+    it('calls setAndEnableVirtualBackgroundImage if the URL starts with "data:image"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockUrl = 'data:image/png;base64,example';
+      currentConference.setVirtualBackgroundImage(mockUrl);
+    });
+
+    it('fetches the image as a blob and calls setAndEnableVirtualBackgroundImage if the URL does not start with "data:image"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockUrl = 'http://example.com/image.png';
+      const mockBlobUrl = 'blob:http://localhost/image';
+      global.fetch = jest.fn().mockResolvedValue({
+        blob: jest.fn().mockResolvedValue(new Blob(['image content'], { type: 'image/png' })),
+      });
+      global.URL.createObjectURL = jest.fn().mockReturnValue(mockBlobUrl);
+      currentConference.setAndEnableVirtualBackgroundImage = jest.fn();
+      await currentConference.setVirtualBackgroundImage(mockUrl);
+      expect(global.fetch).toHaveBeenCalledWith(mockUrl);
+    });
+  });
+
+  describe('handleBackgroundReplacement', () => {
+    it('disables video effect when option is "none"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.setIsVideoEffectRunning = jest.fn();
+
+      currentConference.handleBackgroundReplacement("none");
+      expect(currentConference.setIsVideoEffectRunning).not.toHaveBeenCalled();
+    });
+
+    it('enables slight blur effect when option is "slight-blur"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.setIsVideoEffectRunning = jest.fn();
+
+      currentConference.handleBackgroundReplacement("slight-blur");
+      expect(currentConference.setIsVideoEffectRunning).not.toHaveBeenCalled();
+    });
+
+    it('enables blur effect when option is "blur"', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.setIsVideoEffectRunning = jest.fn();
+
+      currentConference.handleBackgroundReplacement("blur");
+      expect(currentConference.setIsVideoEffectRunning).not.toHaveBeenCalled();
+    });
+
+    it('enables virtual background effect when option is "background" and virtualBackground is not null', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.setIsVideoEffectRunning = jest.fn();
+
+      process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = "http://example.com/image.png";
+
+      currentConference.handleBackgroundReplacement("background");
+      expect(currentConference.setIsVideoEffectRunning).not.toHaveBeenCalled();
+    });
+
+    it('sets and enables virtual background image when option is "background" and virtualBackground is null', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = null;
+
+      currentConference.setAndEnableVirtualBackgroundImage = jest.fn();
+
+      await currentConference.handleBackgroundReplacement("background");
+      await waitFor(() => {
+        expect(currentConference.setAndEnableVirtualBackgroundImage).not.toHaveBeenCalled();
+      });
+    });
+
+    it('handles error when enabling effect fails', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild />
+            </AntMedia>
+          </ThemeProvider>
+      );
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.enableEffect = jest.fn()
+
+      currentConference.enableEffect.mockRejectedValue(new Error('Effect enable failed')); // Mock failure
+
+      await currentConference.handleBackgroundReplacement("blur");
+    });
+
   });
 
 });
