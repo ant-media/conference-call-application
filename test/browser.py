@@ -17,12 +17,14 @@ import time
 import subprocess
 
 class Browser:
-  def init(self, is_headless=True, isFakeCamera=True):
+  def init(self, is_headless=True, is_fake_camera=True, mic_file=None):
     browser_options = Options()
     browser_options.add_experimental_option("detach", True)
-    if isFakeCamera:
+    if is_fake_camera:
       browser_options.add_argument("--use-fake-ui-for-media-stream") 
       browser_options.add_argument("--use-fake-device-for-media-stream")
+      if mic_file is not None:
+        browser_options.add_argument(f"--use-file-for-fake-audio-capture={mic_file}") 
     browser_options.add_argument('--log-level=0')
     browser_options.add_argument('--no-sandbox')
     browser_options.add_argument('--disable-extensions')
@@ -31,8 +33,6 @@ class Browser:
     browser_options.add_argument('--disable-setuid-sandbox')
     browser_options.add_argument('--enable-logging')
     browser_options.add_argument('--v=1')
-
-    #is_headless = False #for local testing in windows
     
     if is_headless:
       browser_options.add_argument("--headless")
@@ -54,9 +54,9 @@ class Browser:
   def get_current_tab_id(self):
     return self.driver.current_window_handle
 
-  def execute_script(self, script):
+  def execute_script(self, script, *args):
     try:
-      return self.driver.execute_script(script)
+      return self.driver.execute_script(script, *args)
     except StaleElementReferenceException as e:
       return None
     
@@ -128,7 +128,7 @@ class Browser:
     return self.driver.find_element(by, value)
 
 
-  def get_element_in_element(self, element, by, value, timeout=15):
+  def get_all_elements_in_element(self, element, by, value, timeout=15):
     try:
       element_present = EC.element_to_be_clickable((by, value))
       WebDriverWait(element, timeout).until(element_present)
@@ -136,6 +136,16 @@ class Browser:
       print("Timed out waiting for nested element to be clickable by "+str(by)+" with value "+str(value))
 
     return element.find_elements(by, value)
+  
+  def get_element_in_element(self, element, by, value, timeout=15, wait_until_clickable=True):
+    if wait_until_clickable:
+      try:
+        element_present = EC.element_to_be_clickable((by, value))
+        WebDriverWait(element, timeout).until(element_present)
+      except TimeoutException:
+        print("Timed out waiting for nested element to be clickable by "+str(by)+" with value "+str(value))
+
+    return element.find_element(by, value)
 
   def is_element_displayed(self, by, value):
     try:

@@ -150,7 +150,7 @@ function VideoCard(props) {
                                   conference.pinVideo(props.trackAssignment.streamId);
                                 }}
                                 color="primary"
-                                aria-label="add"
+                                aria-label={props.pinned ? t("unpin") : t("pin")}
                                 size="small"
                             >
                                 <SvgIcon
@@ -180,7 +180,7 @@ function VideoCard(props) {
                                                 conference?.turnOffYourCamNotification(participant.streamId);
                                             }}
                                             color="primary"
-                                            aria-label="add"
+                                            aria-label="turn-off-camera"
                                             size="small"
                                         >
                                             <SvgIcon
@@ -199,7 +199,7 @@ function VideoCard(props) {
                                     >
                                         <Fab
                                             color="error"
-                                            aria-label="add"
+                                            aria-label="turn-on-camera"
                                             size="small"
                                         >
                                             <SvgIcon
@@ -230,7 +230,7 @@ function VideoCard(props) {
                                                 conference?.turnOffYourMicNotification(participant.streamId);
                                             }}
                                             color="primary"
-                                            aria-label="add"
+                                            aria-label="mute"
                                             size="small"
                                         >
                                             <SvgIcon
@@ -255,7 +255,7 @@ function VideoCard(props) {
                                                 conference?.turnOnYourMicNotification(participant.streamId);
                                             }}
                                             color="error"
-                                            aria-label="add"
+                                            aria-label="unmute"
                                             size="small"
                                         >
                                             <SvgIcon
@@ -311,7 +311,7 @@ function VideoCard(props) {
               <Fab
                 onClick={() => {conference.pinVideo(props.trackAssignment.streamId);}}
                 color="primary"
-                aria-label="add"
+                aria-label={props.pinned ? "unpin" : "pin"}
                 size="small"
               >
                 <SvgIcon
@@ -341,7 +341,7 @@ function VideoCard(props) {
 
                     }}
                     color="primary"
-                    aria-label="add"
+                    aria-label={micMuted ? "unmute" : "mute"}
                     size="small"
                   >
                     <SvgIcon

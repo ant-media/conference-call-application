@@ -34,9 +34,11 @@ class RestHelper:
     else:
         response.raise_for_status()
 
-  def getVoDFor(self, streamId):
+  def get_vod_for(self, streamId):
     resp = self.session.get(self.rest_url +"/request?_path="+self.app_name+"/rest/v2/vods/list/0/5")
+    print("get_vod_for "+str(streamId+":"+str(resp.text)))
     json_data = json.loads(resp.text)
+
     
     for item in json_data:
       if item["streamId"] == streamId:

@@ -1323,8 +1323,12 @@ function AntMedia(props) {
             subtrackList.forEach(subTrack => {
                 let broadcastObject = JSON.parse(subTrack);
 
-                let metaData = JSON.parse(broadcastObject.metaData);
-                broadcastObject.isScreenShared = metaData.isScreenShared;
+                try {
+                    let metaData = JSON.parse(broadcastObject.metaData);
+                    broadcastObject.isScreenShared = metaData.isScreenShared;
+                } catch (e) {
+                    console.log("Metadata can not be parsed:"+broadcastObject.metaData);
+                }
 
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
@@ -1685,6 +1689,12 @@ function AntMedia(props) {
             allParticipants[streamId] = broadcastObject;
             handleNotifyUnpinUser(streamId !== publishStreamId ? streamId : publishStreamId);
             setParticipantUpdated(!participantUpdated);
+
+            let vta = videoTrackAssignments.find(el => el.streamId == streamId);
+            if (vta) {
+                webRTCAdaptor?.assignVideoTrack(vta.videoLabel, streamId, false);
+            }
+
             return;
         }
 
@@ -2143,15 +2153,17 @@ function AntMedia(props) {
                 }
 
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
-                // xxx to be able to reduce render
+                // FIXME: to be able to reduce render
                 if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
                   return;
                 }
+                /*
                 clearInterval(timeoutRef.current);
                 timeoutRef.current = setTimeout(() => {
                     setTalkers([]);
                 }, 1000);
                 //console.log(JSON.stringify(notificationEvent.payload));
+                */
                 setTalkers((oldTalkers) => {
                     const newTalkers = notificationEvent.payload
                         .filter((p) => p.trackId !== "" && p.audioLevel < 60)
@@ -2601,6 +2613,8 @@ function AntMedia(props) {
         sendMessage(JSON.stringify(jsCmd));
     }
 
+    
+
     const showReactions = React.useCallback((streamId, streamName, reactionRequest, allParticipants) => {
         let reaction = '😀';
 
@@ -2644,6 +2658,10 @@ function AntMedia(props) {
         setIsMyMicMuted(false);
 
         handleSendNotificationEvent("MIC_UNMUTED", publishStreamId);
+    }
+
+    function setMicAudioLevel(audioLevel) {
+        webRTCAdaptor.setVolumeLevel(audioLevel);
     }
 
     const setAudioLevelListener = (listener, period) => {
@@ -2888,7 +2906,8 @@ function AntMedia(props) {
                         getTrackStats,
                         isBroadcasting,
                         playStats,
-                        checkAndSetIsPinned
+                        checkAndSetIsPinned,
+                        setMicAudioLevel
                     }}
                 >
                     {props.children}
