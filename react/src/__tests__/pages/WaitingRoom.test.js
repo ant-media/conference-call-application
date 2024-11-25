@@ -5,6 +5,7 @@ import AntMedia, { ConferenceContext } from 'pages/AntMedia';
 import {ThemeProvider} from "@mui/material/styles";
 import theme from "../../styles/theme";
 import {ThemeList} from "../../styles/themeList";
+import {useSnackbar} from "notistack";
 
 const contextValue = {
   initialized: true,
@@ -70,5 +71,30 @@ describe('Waiting Room Component', () => {
         getByTestId('join-room-button').click();
 
     });
+
+  it('shows error message if camera is not working properly', () => {
+    const mockEnqueueSnackbar = jest.fn();
+    jest.mock('notistack', () => ({
+      useSnackbar: () => {
+        return {
+          enqueueSnackbar: mockEnqueueSnackbar,
+        };
+      },
+    }));
+
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <WaitingRoom/>
+        </ThemeProvider>);
+
+    getByTestId('join-room-button').click();
+
+    expect(mockEnqueueSnackbar).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Your camera is not working properly. Please check your camera settings",
+        }),
+        expect.any(Object)
+    );
+  });
 
 });
