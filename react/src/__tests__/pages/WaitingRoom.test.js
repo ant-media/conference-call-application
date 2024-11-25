@@ -16,6 +16,7 @@ const contextValue = {
   localVideo: {},
   setSpeedTestObject: jest.fn(),
   makeId: jest.fn(),
+  checkVideoTrackHealth: jest.fn().mockReturnValue(false),
 };
 
 // Mock the useContext hook
