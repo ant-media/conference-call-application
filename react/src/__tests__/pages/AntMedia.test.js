@@ -2820,6 +2820,11 @@ describe('AntMedia Component', () => {
     });
 
     it('handles errors when switching video and audio sources', async () => {
+      mediaDevicesMock.enumerateDevices.mockResolvedValue([
+        { deviceId: 'camera1', kind: 'videoinput' },
+        { deviceId: 'microphone1', kind: 'audioinput' }
+      ]);
+
       const {container} = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
             <AntMedia isTest={true}>
@@ -2829,6 +2834,21 @@ describe('AntMedia Component', () => {
 
       await waitFor(() => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.startSpeedTest();
+      });
+
+      await waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        webRTCAdaptorPublishSpeedTestConstructor.callback("available_devices", [
+          { deviceId: 'camera1', kind: 'videoinput' },
+          { deviceId: 'microphone1', kind: 'audioinput' }
+        ]);
       });
 
       const mockSelectedDevices = {videoDeviceId: 'camera1', audioDeviceId: 'microphone1'};
@@ -2852,7 +2872,7 @@ describe('AntMedia Component', () => {
       });
 
       await waitFor(() => {
-        //expect(mockConsoleError).toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
+        expect(mockConsoleError).not.toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
       });
     });
   });
