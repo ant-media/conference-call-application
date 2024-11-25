@@ -612,6 +612,7 @@ function AntMedia(props) {
             tempSpeedTestObject.progressValue = 10;
             speedTestProgress.current = tempSpeedTestObject.progressValue;
             setSpeedTestObject(tempSpeedTestObject);
+            checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
             speedTestForPublishWebRtcAdaptor.current.publish("speedTestStream" + speedTestStreamId.current, token, subscriberId, subscriberCode, "speedTestStream" + speedTestStreamId.current, "", "")
         } 
         else if (info === "publish_started") {
@@ -882,6 +883,60 @@ function AntMedia(props) {
             console.error("Error while switching video/audio sources", error);
         }
     }
+
+    function checkAndUpdateVideoAudioSourcesForPublishSpeedTest() {
+        console.log("Start updating video and audio sources");
+
+        let { videoDeviceId, audioDeviceId } = getSelectedDevices();
+        const isDeviceAvailable = (deviceType, selectedDeviceId) =>
+            devices.some(device => device.kind === deviceType && device.deviceId === selectedDeviceId);
+
+        const updateDeviceIfUnavailable = (deviceType, selectedDeviceId) => {
+            if (!selectedDeviceId || !isDeviceAvailable(deviceType, selectedDeviceId)) {
+                const availableDevice = devices.find(device => device.kind === deviceType);
+                return availableDevice ? availableDevice.deviceId : selectedDeviceId;
+            }
+            return selectedDeviceId;
+        };
+
+        videoDeviceId = updateDeviceIfUnavailable("videoinput", videoDeviceId);
+        audioDeviceId = updateDeviceIfUnavailable("audioinput", audioDeviceId);
+
+        const updatedDevices = { videoDeviceId, audioDeviceId };
+        console.log("Updated device selections:", updatedDevices);
+
+        setSelectedDevices(updatedDevices);
+
+        const switchDevice = (switchMethod, currentDeviceId, newDeviceId, streamId) => {
+            if (speedTestForPublishWebRtcAdaptor.current && currentDeviceId !== newDeviceId && streamId) {
+                speedTestForPublishWebRtcAdaptor.current[switchMethod](streamId, newDeviceId);
+            }
+        };
+
+        try {
+            switchDevice(
+                "switchVideoCameraCapture",
+                getSelectedDevices().videoDeviceId,
+                videoDeviceId,
+                publishStreamId
+            );
+
+            switchDevice(
+                "switchAudioInputSource",
+                getSelectedDevices().audioDeviceId,
+                audioDeviceId,
+                publishStreamId
+            );
+        } catch (error) {
+            console.error(
+                "Error while switching video and audio sources for the publish speed test adaptor",
+                error
+            );
+        }
+
+        console.log("Finished updating video and audio sources");
+    }
+
 
     React.useEffect(() => {
         setParticipantUpdated(!participantUpdated);
@@ -2928,8 +2983,9 @@ function AntMedia(props) {
                         isBroadcasting,
                         playStats,
                         checkAndSetIsPinned,
+                        checkAndUpdateVideoAudioSourcesForPublishSpeedTest,
                         fetchImageAsBlob,
-                        setAndEnableVirtualBackgroundImage,
+                        setAndEnableVirtualBackgroundImage
                     }}
                 >
                     {props.children}

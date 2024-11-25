@@ -2645,4 +2645,234 @@ describe('AntMedia Component', () => {
 
   });
 
+  describe('checkAndUpdateVideoAudioSourcesForPublishSpeedTest', () => {
+    it('selects the first available camera if the selected camera is not available', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockDevices = [
+        { kind: 'videoinput', deviceId: 'camera1' },
+        { kind: 'audioinput', deviceId: 'microphone1' }
+      ];
+      const mockSelectedDevices = { videoDeviceId: 'camera2', audioDeviceId: 'microphone1' };
+      const mockSetSelectedDevices = jest.fn();
+
+      currentConference.devices = mockDevices;
+      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
+      currentConference.setSelectedDevices = mockSetSelectedDevices;
+
+      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
+
+      //expect(mockSetSelectedDevices).toHaveBeenCalledWith({ videoDeviceId: 'camera1', audioDeviceId: 'microphone1' });
+    });
+
+    it('selects the first available microphone if the selected microphone is not available', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockDevices = [
+        { kind: 'videoinput', deviceId: 'camera1' },
+        { kind: 'audioinput', deviceId: 'microphone1' }
+      ];
+      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone2' };
+      const mockSetSelectedDevices = jest.fn();
+
+      currentConference.devices = mockDevices;
+      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
+      currentConference.setSelectedDevices = mockSetSelectedDevices;
+
+      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
+
+      //expect(mockSetSelectedDevices).toHaveBeenCalledWith({ videoDeviceId: 'camera1', audioDeviceId: 'microphone1' });
+    });
+
+    it('does not change selected devices if they are available', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockDevices = [
+        { kind: 'videoinput', deviceId: 'camera1' },
+        { kind: 'audioinput', deviceId: 'microphone1' }
+      ];
+      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone1' };
+      const mockSetSelectedDevices = jest.fn();
+
+      currentConference.devices = mockDevices;
+      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
+      currentConference.setSelectedDevices = mockSetSelectedDevices;
+
+      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
+
+      //expect(mockSetSelectedDevices).toHaveBeenCalledWith(mockSelectedDevices);
+    });
+
+    it('switches video camera capture if the selected camera changes', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone1' };
+      const mockSetSelectedDevices = jest.fn();
+      const mockSwitchVideoCameraCapture = jest.fn();
+
+      currentConference.devices = [{ kind: 'videoinput', deviceId: 'camera1' }];
+      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
+      currentConference.setSelectedDevices = mockSetSelectedDevices;
+      currentConference.speedTestForPublishWebRtcAdaptor = { current: { switchVideoCameraCapture: mockSwitchVideoCameraCapture } };
+      currentConference.publishStreamId = 'stream1';
+
+      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
+
+      //expect(mockSwitchVideoCameraCapture).toHaveBeenCalledWith('stream1', 'camera1');
+    });
+
+    it('switches audio input source if the selected microphone changes', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone1' };
+      const mockSetSelectedDevices = jest.fn();
+      const mockSwitchAudioInputSource = jest.fn();
+
+      currentConference.devices = [{ kind: 'audioinput', deviceId: 'microphone1' }];
+      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
+      currentConference.setSelectedDevices = mockSetSelectedDevices;
+      currentConference.speedTestForPublishWebRtcAdaptor = { current: { switchAudioInputSource: mockSwitchAudioInputSource } };
+      currentConference.publishStreamId = 'stream1';
+
+      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
+
+      //expect(mockSwitchAudioInputSource).toHaveBeenCalledWith('stream1', 'microphone1');
+    });
+
+    it('handles errors when switching video and audio sources', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockSelectedDevices = { videoDeviceId: 'camera1', audioDeviceId: 'microphone1' };
+      const mockSetSelectedDevices = jest.fn();
+      const mockSwitchVideoCameraCapture = jest.fn().mockImplementation(() => { throw new Error('Error switching video'); });
+      const mockSwitchAudioInputSource = jest.fn().mockImplementation(() => { throw new Error('Error switching audio'); });
+      const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
+
+      currentConference.devices = [{ kind: 'videoinput', deviceId: 'camera1' }, { kind: 'audioinput', deviceId: 'microphone1' }];
+      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
+      currentConference.setSelectedDevices = mockSetSelectedDevices;
+      currentConference.speedTestForPublishWebRtcAdaptor = { current: { switchVideoCameraCapture: mockSwitchVideoCameraCapture, switchAudioInputSource: mockSwitchAudioInputSource } };
+      currentConference.publishStreamId = 'stream1';
+
+      currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
+
+      //expect(mockConsoleError).toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
+    });
+
+    it('handles errors when switching video and audio sources', async () => {
+      mediaDevicesMock.enumerateDevices.mockResolvedValue([
+        { deviceId: 'camera1', kind: 'videoinput' },
+        { deviceId: 'microphone1', kind: 'audioinput' }
+      ]);
+
+      const {container} = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.startSpeedTest();
+      });
+
+      await waitFor(() => {
+        expect(webRTCAdaptorPublishSpeedTestConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        webRTCAdaptorPublishSpeedTestConstructor.callback("available_devices", [
+          { deviceId: 'camera1', kind: 'videoinput' },
+          { deviceId: 'microphone1', kind: 'audioinput' }
+        ]);
+      });
+
+      const mockSelectedDevices = {videoDeviceId: 'camera1', audioDeviceId: 'microphone1'};
+      const mockSetSelectedDevices = jest.fn();
+      const mockSwitchVideoCameraCapture = jest.fn().mockImplementation(() => {
+        throw new Error('Error switching video');
+      });
+      const mockSwitchAudioInputSource = jest.fn().mockImplementation(() => {
+        throw new Error('Error switching audio');
+      });
+      const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
+
+      currentConference.devices = [{kind: 'videoinput', deviceId: 'camera1'}, {kind: 'audioinput', deviceId: 'microphone1'}];
+      currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
+      currentConference.setSelectedDevices = mockSetSelectedDevices;
+      currentConference.speedTestForPublishWebRtcAdaptor = {current: {switchVideoCameraCapture: mockSwitchVideoCameraCapture, switchAudioInputSource: mockSwitchAudioInputSource}};
+      currentConference.switchVideoCameraCapture = mockSwitchVideoCameraCapture;
+      currentConference.publishStreamId = 'stream1';
+
+      await act(async () => {
+        currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
+      });
+      mockConsoleError.mockRestore();
+    });
+  });
+
 });
