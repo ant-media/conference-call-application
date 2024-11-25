@@ -885,49 +885,58 @@ function AntMedia(props) {
     }
 
     function checkAndUpdateVideoAudioSourcesForPublishSpeedTest() {
-        let isVideoDeviceAvailable = false;
-        let isAudioDeviceAvailable = false;
-        let selectedDevices = getSelectedDevices();
-        let currentCameraDeviceId = selectedDevices.videoDeviceId;
-        let currentAudioDeviceId = selectedDevices.audioDeviceId;
+        console.log("Start updating video and audio sources");
 
-        // check if the selected devices are still available
-        for (let index = 0; index < devices.length; index++) {
-            if (devices[index].kind === "videoinput" && devices[index].deviceId === selectedDevices.videoDeviceId) {
-                isVideoDeviceAvailable = true;
-            }
-            if (devices[index].kind === "audioinput" && devices[index].deviceId === selectedDevices.audioDeviceId) {
-                isAudioDeviceAvailable = true;
-            }
-        }
+        let { videoDeviceId, audioDeviceId } = getSelectedDevices();
+        const isDeviceAvailable = (deviceType, selectedDeviceId) =>
+            devices.some(device => device.kind === deviceType && device.deviceId === selectedDeviceId);
 
-        // if the selected devices are not available, select the first available device
-        if (selectedDevices.videoDeviceId === '' || isVideoDeviceAvailable === false) {
-            const camera = devices.find(d => d.kind === 'videoinput');
-            if (camera) {
-                selectedDevices.videoDeviceId = camera.deviceId;
+        const updateDeviceIfUnavailable = (deviceType, selectedDeviceId) => {
+            if (!selectedDeviceId || !isDeviceAvailable(deviceType, selectedDeviceId)) {
+                const availableDevice = devices.find(device => device.kind === deviceType);
+                return availableDevice ? availableDevice.deviceId : selectedDeviceId;
             }
-        }
-        if (selectedDevices.audioDeviceId === '' || isAudioDeviceAvailable === false) {
-            const audio = devices.find(d => d.kind === 'audioinput');
-            if (audio) {
-                selectedDevices.audioDeviceId = audio.deviceId;
-            }
-        }
+            return selectedDeviceId;
+        };
 
-        setSelectedDevices(selectedDevices);
+        videoDeviceId = updateDeviceIfUnavailable("videoinput", videoDeviceId);
+        audioDeviceId = updateDeviceIfUnavailable("audioinput", audioDeviceId);
+
+        const updatedDevices = { videoDeviceId, audioDeviceId };
+        console.log("Updated device selections:", updatedDevices);
+
+        setSelectedDevices(updatedDevices);
+
+        const switchDevice = (switchMethod, currentDeviceId, newDeviceId, streamId) => {
+            if (speedTestForPublishWebRtcAdaptor.current && currentDeviceId !== newDeviceId && streamId) {
+                speedTestForPublishWebRtcAdaptor.current[switchMethod](streamId, newDeviceId);
+            }
+        };
 
         try {
-            if (speedTestForPublishWebRtcAdaptor.current !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
-                speedTestForPublishWebRtcAdaptor.current?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
-            }
-            if (speedTestForPublishWebRtcAdaptor.current !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
-                speedTestForPublishWebRtcAdaptor.current?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
-            }
+            switchDevice(
+                "switchVideoCameraCapture",
+                getSelectedDevices().videoDeviceId,
+                videoDeviceId,
+                publishStreamId
+            );
+
+            switchDevice(
+                "switchAudioInputSource",
+                getSelectedDevices().audioDeviceId,
+                audioDeviceId,
+                publishStreamId
+            );
         } catch (error) {
-            console.error("Error while switching video and audio sources for the publish speed test adaptor", error);
+            console.error(
+                "Error while switching video and audio sources for the publish speed test adaptor",
+                error
+            );
         }
+
+        console.log("Finished updating video and audio sources");
     }
+
 
     React.useEffect(() => {
         setParticipantUpdated(!participantUpdated);

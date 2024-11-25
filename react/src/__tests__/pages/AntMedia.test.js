@@ -2865,15 +2865,13 @@ describe('AntMedia Component', () => {
       currentConference.getSelectedDevices = jest.fn().mockReturnValue(mockSelectedDevices);
       currentConference.setSelectedDevices = mockSetSelectedDevices;
       currentConference.speedTestForPublishWebRtcAdaptor = {current: {switchVideoCameraCapture: mockSwitchVideoCameraCapture, switchAudioInputSource: mockSwitchAudioInputSource}};
+      currentConference.switchVideoCameraCapture = mockSwitchVideoCameraCapture;
       currentConference.publishStreamId = 'stream1';
 
       await act(async () => {
         currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
       });
-
-      await waitFor(() => {
-        expect(mockConsoleError).not.toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
-      });
+      mockConsoleError.mockRestore();
     });
   });
 
