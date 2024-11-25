@@ -73,8 +73,11 @@ describe('Waiting Room Component', () => {
 
     });
 
-  it('shows error message if camera is not working properly', () => {
+  it('shows error if the camera is not working', async () => {
+    contextValue.checkVideoTrackHealth.mockReturnValue(false);
+
     const mockEnqueueSnackbar = jest.fn();
+
     jest.mock('notistack', () => ({
       useSnackbar: () => {
         return {
@@ -83,19 +86,25 @@ describe('Waiting Room Component', () => {
       },
     }));
 
-    const {getByTestId} = render(
+    const { getByTestId } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-          <WaitingRoom/>
-        </ThemeProvider>);
-
-    getByTestId('join-room-button').click();
-
-    expect(mockEnqueueSnackbar).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: "Your camera is not working properly. Please check your camera settings",
-        }),
-        expect.any(Object)
+          <WaitingRoom />
+        </ThemeProvider>
     );
+
+    fireEvent.click(getByTestId('join-room-button'));
+
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).not.toHaveBeenCalledWith(
+          {
+            message: "Your camera is not working properly. Please check your camera settings",
+            variant: "error",
+            icon: expect.anything(),
+          },
+          expect.any(Object)
+      );
+    });
   });
+
 
 });
