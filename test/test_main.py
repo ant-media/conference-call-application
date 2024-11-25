@@ -29,3 +29,4 @@ suite.addTest(TestDeployment('test_delete_app'))
 
 ret = not unittest.TextTestRunner(verbosity=2, failfast=True).run(suite).wasSuccessful()
 sys.exit(ret)
+
