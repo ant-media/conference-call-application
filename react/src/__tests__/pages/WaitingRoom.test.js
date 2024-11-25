@@ -1,7 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import WaitingRoom from 'pages/WaitingRoom';
 import React from "react";
-import { ConferenceContext } from 'pages/AntMedia';
+import AntMedia, { ConferenceContext } from 'pages/AntMedia';
+import {ThemeProvider} from "@mui/material/styles";
+import theme from "../../styles/theme";
+import {ThemeList} from "../../styles/themeList";
 
 const contextValue = {
   initialized: true,
@@ -57,8 +60,15 @@ describe('Waiting Room Component', () => {
 
   it('renders WaitingRoom component without crashing', () => {
     render(<WaitingRoom/>);
-    //const linkElement = screen.getByText(/What's your name?/i);
-    //expect(linkElement).toBeInTheDocument();
   });
+
+    it('should click join room button', () => {
+      const {getByTestId} = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <WaitingRoom/>
+          </ThemeProvider>);
+        getByTestId('join-room-button').click();
+
+    });
 
 });

@@ -429,6 +429,7 @@ function WaitingRoom(props) {
                                         variant="contained"
                                         type="submit"
                                         id="room_join_button"
+                                        data-testid="join-room-button"
                                     >
                                         {t("I'm ready to join")}
                                     </Button>
