@@ -394,6 +394,7 @@ function AntMedia(props) {
     const [selectedCamera, setSelectedCamera] = React.useState(localStorage.getItem('selectedCamera'));
     const [selectedMicrophone, setSelectedMicrophone] = React.useState(localStorage.getItem('selectedMicrophone'));
     const [selectedBackgroundMode, setSelectedBackgroundMode] = React.useState("");
+    const [selectedVideoEffect, setSelectedVideoEffect] = React.useState(VideoEffect.NO_EFFECT);
     const [isVideoEffectRunning, setIsVideoEffectRunning] = React.useState(false);
     const [virtualBackground, setVirtualBackground] = React.useState(null);
     const timeoutRef = React.useRef(null);
@@ -611,6 +612,7 @@ function AntMedia(props) {
             tempSpeedTestObject.progressValue = 10;
             speedTestProgress.current = tempSpeedTestObject.progressValue;
             setSpeedTestObject(tempSpeedTestObject);
+            checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
             speedTestForPublishWebRtcAdaptor.current.publish("speedTestStream" + speedTestStreamId.current, token, subscriberId, subscriberCode, "speedTestStream" + speedTestStreamId.current, "", "")
         } 
         else if (info === "publish_started") {
@@ -881,6 +883,60 @@ function AntMedia(props) {
             console.error("Error while switching video/audio sources", error);
         }
     }
+
+    function checkAndUpdateVideoAudioSourcesForPublishSpeedTest() {
+        console.log("Start updating video and audio sources");
+
+        let { videoDeviceId, audioDeviceId } = getSelectedDevices();
+        const isDeviceAvailable = (deviceType, selectedDeviceId) =>
+            devices.some(device => device.kind === deviceType && device.deviceId === selectedDeviceId);
+
+        const updateDeviceIfUnavailable = (deviceType, selectedDeviceId) => {
+            if (!selectedDeviceId || !isDeviceAvailable(deviceType, selectedDeviceId)) {
+                const availableDevice = devices.find(device => device.kind === deviceType);
+                return availableDevice ? availableDevice.deviceId : selectedDeviceId;
+            }
+            return selectedDeviceId;
+        };
+
+        videoDeviceId = updateDeviceIfUnavailable("videoinput", videoDeviceId);
+        audioDeviceId = updateDeviceIfUnavailable("audioinput", audioDeviceId);
+
+        const updatedDevices = { videoDeviceId, audioDeviceId };
+        console.log("Updated device selections:", updatedDevices);
+
+        setSelectedDevices(updatedDevices);
+
+        const switchDevice = (switchMethod, currentDeviceId, newDeviceId, streamId) => {
+            if (speedTestForPublishWebRtcAdaptor.current && currentDeviceId !== newDeviceId && streamId) {
+                speedTestForPublishWebRtcAdaptor.current[switchMethod](streamId, newDeviceId);
+            }
+        };
+
+        try {
+            switchDevice(
+                "switchVideoCameraCapture",
+                getSelectedDevices().videoDeviceId,
+                videoDeviceId,
+                publishStreamId
+            );
+
+            switchDevice(
+                "switchAudioInputSource",
+                getSelectedDevices().audioDeviceId,
+                audioDeviceId,
+                publishStreamId
+            );
+        } catch (error) {
+            console.error(
+                "Error while switching video and audio sources for the publish speed test adaptor",
+                error
+            );
+        }
+
+        console.log("Finished updating video and audio sources");
+    }
+
 
     React.useEffect(() => {
         setParticipantUpdated(!participantUpdated);
@@ -1162,7 +1218,7 @@ function AntMedia(props) {
         if(!streamName){
           broadcastObject.name = broadcastObject.streamId
         }
-        if(metaDataStr === ""){
+        if(metaDataStr === "" || metaDataStr === null || metaDataStr === undefined){
           broadcastObject.metaData = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
         }
 
@@ -1324,7 +1380,14 @@ function AntMedia(props) {
             subtrackList.forEach(subTrack => {
                 let broadcastObject = JSON.parse(subTrack);
 
-                let metaData = JSON.parse(broadcastObject.metaData);
+                handleSubtrackBroadcastObject(broadcastObject);
+
+                let metaDataStr = broadcastObject.metaData;
+                if(metaDataStr === "" || metaDataStr === null || metaDataStr === undefined){
+                    metaDataStr = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
+                }
+
+                let metaData = JSON.parse(metaDataStr);
                 broadcastObject.isScreenShared = metaData.isScreenShared;
 
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
@@ -2604,11 +2667,33 @@ function AntMedia(props) {
         return isExist;
     }
 
+    const fetchImageAsBlob = async (url) => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+    };
+
+    function setVirtualBackgroundImage(url) {
+        if (url === undefined || url === null || url === "") {
+            return;
+        } else if (url.startsWith("data:image")) {
+            setAndEnableVirtualBackgroundImage(url);
+        } else {
+            fetchImageAsBlob(url).then((blobUrl) => {
+                setAndEnableVirtualBackgroundImage(blobUrl);
+            });
+        }
+    }
+
     function setAndEnableVirtualBackgroundImage(imageUrl) {
-        let virtualBackgroundImage = document.createElement("img");
-        virtualBackgroundImage.id = "virtualBackgroundImage";
-        virtualBackgroundImage.style.visibility = "hidden";
-        virtualBackgroundImage.alt = "virtual-background";
+        let virtualBackgroundImage = document.getElementById("virtualBackgroundImage");
+
+        if (virtualBackgroundImage === null) {
+            virtualBackgroundImage = document.createElement("img");
+            virtualBackgroundImage.id = "virtualBackgroundImage";
+            virtualBackgroundImage.style.visibility = "hidden";
+            virtualBackgroundImage.alt = "virtual-background";
+        }
 
         console.log("Virtual background image url: " + imageUrl);
         if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
@@ -2622,11 +2707,18 @@ function AntMedia(props) {
             setVirtualBackground(virtualBackgroundImage);
             webRTCAdaptor?.setBackgroundImage(virtualBackgroundImage);
 
+            if (selectedVideoEffect === VideoEffect.VIRTUAL_BACKGROUND) {
+                // if virtual background is already enabled, no need to enable it again.
+                return;
+            }
+
             webRTCAdaptor?.enableEffect(VideoEffect.VIRTUAL_BACKGROUND).then(() => {
                 console.log("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is enabled");
+                setSelectedVideoEffect(VideoEffect.VIRTUAL_BACKGROUND);
                 setIsVideoEffectRunning(true);
             }).catch(err => {
                 console.error("Effect: " + VideoEffect.VIRTUAL_BACKGROUND + " is not enabled. Error is " + err);
+                setSelectedVideoEffect(VideoEffect.NO_EFFECT);
                 setIsVideoEffectRunning(false);
             });
         };
@@ -2654,10 +2746,12 @@ function AntMedia(props) {
             effectName = VideoEffect.VIRTUAL_BACKGROUND;
             setIsVideoEffectRunning(true);
         }
-        webRTCAdaptor?.enableEffect(effectName).then(() => {
+        webRTCAdaptor?.enableEffect(effectName)?.then(() => {
             console.log("Effect: " + effectName + " is enabled");
+            setSelectedVideoEffect(effectName);
         }).catch(err => {
             console.error("Effect: " + effectName + " is not enabled. Error is " + err);
+            setSelectedVideoEffect(VideoEffect.NO_EFFECT);
             setIsVideoEffectRunning(false);
         });
     }
@@ -2996,7 +3090,7 @@ function AntMedia(props) {
                         setPresenterButtonDisabled,
                         effectsDrawerOpen,
                         handleEffectsOpen,
-                        setAndEnableVirtualBackgroundImage,
+                        setVirtualBackgroundImage,
                         localVideoCreate,
                         microphoneButtonDisabled,
                         setMicrophoneButtonDisabled,
@@ -3035,7 +3129,10 @@ function AntMedia(props) {
                         makeListenerAgain,
                         isBroadcasting,
                         playStats,
-                        checkAndSetIsPinned
+                        checkAndSetIsPinned,
+                        checkAndUpdateVideoAudioSourcesForPublishSpeedTest,
+                        fetchImageAsBlob,
+                        setAndEnableVirtualBackgroundImage
                     }}
                 >
                     {props.children}
