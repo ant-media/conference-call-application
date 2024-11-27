@@ -99,7 +99,7 @@ function VideoCard(props) {
         </Tooltip>
     );
 
-    const AdminButtons = ({ micMuted, useAvatar }) => {
+    const AdministrativeButtons = ({ micMuted, useAvatar }) => {
         const handleToggleMic = () => {
             const participant = {
                 streamId: props.trackAssignment.streamId,
@@ -153,8 +153,8 @@ function VideoCard(props) {
         if (props.hidePin) return null;
 
         const isAdminMode = process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true";
-        const adminControls =
-            !props?.trackAssignment.isMine && conference.isAdmin && isAdminMode;
+        const isAdministrativeButtonsVisible =
+            !props?.trackAssignment.isMine && (!isAdminMode || conference.isAdmin);
 
         return (
             <Grid
@@ -175,7 +175,7 @@ function VideoCard(props) {
                 <Grid container justifyContent="center" alignItems="center" wrap="nowrap">
                     <Grid item container justifyContent="center" alignItems="center" columnSpacing={0.5}>
                         {!isMobile && !isTablet && <PinButton props={props} />}
-                        {adminControls && <AdminButtons props={props} micMuted={micMuted} />}
+                        {isAdministrativeButtonsVisible && <AdministrativeButtons props={props} micMuted={micMuted} />}
                     </Grid>
                 </Grid>
             </Grid>
