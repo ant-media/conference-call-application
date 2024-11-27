@@ -76,67 +76,112 @@ function VideoCard(props) {
         );
 
     useEffect(() => {
-        if (isMine && conference.isPublished && !conference.isPlayOnly) {
+        if (props?.trackAssignment.isMine && conference.isPublished && !conference.isPlayOnly) {
             conference.setAudioLevelListener((value) => {
+                // sounds under 0.01 are probably background noise
                 if (value >= 0.01) {
-                    if (!isTalking) setIsTalking(true);
-                    clearTimeout(timeoutRef.current);
-                    timeoutRef.current = setTimeout(() => setIsTalking(false), 1500);
+                    if (isTalking === false) setIsTalking(true);
+                    clearInterval(timeoutRef.current);
+                    timeoutRef.current = setTimeout(() => {
+                        setIsTalking(false);
+                    }, 1500);
                 }
             }, 1000);
         }
-        return () => clearTimeout(timeoutRef.current);
-    }, [conference, isTalking, isMine]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conference.isPublished]);
+
+    const OverlayButton = ({ title, icon, color, onClick }) => (
+        <Tooltip title={title} placement="top">
+            <Fab onClick={onClick} color={color} aria-label="add" size="small">
+                <SvgIcon size={36} name={icon} color={theme.palette?.iconColor?.primary} />
+            </Fab>
+        </Tooltip>
+    );
+
+    const AdminButtons = ({ micMuted, useAvatar }) => {
+        const handleToggleMic = () => {
+            const participant = {
+                streamId: props.trackAssignment.streamId,
+                streamName: props.name,
+            };
+            conference?.setParticipantIdMuted(participant);
+            micMuted
+                ? conference?.turnOnYourMicNotification(participant.streamId)
+                : conference?.turnOffYourMicNotification(participant.streamId);
+        };
+
+        const handleToggleCam = () => {
+            const participant = {
+                streamId: props.trackAssignment.streamId,
+                streamName: props.name,
+            };
+            conference?.setParticipantIdMuted(participant);
+            conference?.turnOffYourCamNotification(participant.streamId);
+        };
+
+        return (
+            <>
+                {!useAvatar && (
+                    <OverlayButton
+                        title={`Camera ${useAvatar ? "off" : "on"} ${props.name}`}
+                        icon={useAvatar ? "camera-off" : "camera"}
+                        color={useAvatar ? "error" : "primary"}
+                        onClick={handleToggleCam}
+                    />
+                )}
+                <OverlayButton
+                    title={`Microphone ${micMuted ? "on" : "off"} ${props.name}`}
+                    icon={micMuted ? "microphone" : "muted-microphone"}
+                    color={micMuted ? "primary" : "error"}
+                    onClick={handleToggleMic}
+                />
+            </>
+        );
+    };
+
+    const PinButton = ({ }) => (
+        <OverlayButton
+            title={`${props.pinned ? t("unpin") : t("pin")} ${props.name}`}
+            icon={props.pinned ? "unpin" : "pin"}
+            color="primary"
+            onClick={() => conference.pinVideo(props.trackAssignment.streamId)}
+        />
+    );
 
     const renderOverlayButtons = () => {
-        if (!props.hidePin) {
-            const shouldShowTooltip = !isMobile && !isTablet;
-            return (
-                <Grid
-                    container
-                    justifyContent="center"
-                    alignItems="center"
-                    className="pin-overlay"
-                    sx={{
-                        opacity: displayHover ? 1 : 0,
-                        transition: "opacity 0.3s ease",
-                        position: "absolute",
-                        left: 0,
-                        top: 0,
-                        height: "100%",
-                        zIndex: 100,
-                    }}
-                >
-                    <Grid
-                        container
-                        justifyContent="center"
-                        alignItems="center"
-                        style={{ height: "100%" }}
-                    >
-                        {shouldShowTooltip && (
-                            <Tooltip
-                                title={`${props.pinned ? t("unpin") : t("pin")} ${props.name}`}
-                                placement="top"
-                            >
-                                <Fab
-                                    onClick={() => conference.pinVideo(props.trackAssignment.streamId)}
-                                    color="primary"
-                                    size="small"
-                                >
-                                    <SvgIcon
-                                        size={36}
-                                        name={props.pinned ? "unpin" : "pin"}
-                                        color={theme.palette?.darkIconColor?.primary}
-                                    />
-                                </Fab>
-                            </Tooltip>
-                        )}
+        if (props.hidePin) return null;
+
+        const isAdminMode = process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true";
+        const adminControls =
+            !props?.trackAssignment.isMine && conference.isAdmin && isAdminMode;
+
+        return (
+            <Grid
+                container
+                justifyContent="center"
+                alignItems="center"
+                className="pin-overlay"
+                sx={{
+                    opacity: displayHover ? 1 : 0,
+                    transition: "opacity 0.3s ease",
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    height: "100%",
+                    zIndex: 100,
+                }}
+            >
+                <Grid container justifyContent="center" alignItems="center" wrap="nowrap">
+                    <Grid item container justifyContent="center" alignItems="center" columnSpacing={0.5}>
+                        {!isMobile && !isTablet && <PinButton props={props} />}
+                        {adminControls && <AdminButtons props={props} micMuted={micMuted} />}
                     </Grid>
                 </Grid>
-            );
-        }
-        return null;
+            </Grid>
+        );
     };
+
 
     const renderAvatarOrPlayer = () => (
         <>
@@ -203,7 +248,42 @@ function VideoCard(props) {
         }
     }
 
-    return (
+    const overlayVideoTitle = () => {
+        return (
+            props.name && (
+                <div className="name-indicator">
+                    <Typography color="#fff" align="left" className="name">
+                        {props.name}{" "}
+                        {process.env.NODE_ENV === "development"
+                            ? `${props?.trackAssignment.isMine
+                                ? props.trackAssignment.streamId +
+                                " " +
+                                conference.streamName
+                                : props.trackAssignment.streamId + " " + props.trackAssignment.track?.id
+                            }`
+                            : ""}
+                    </Typography>
+                </div>
+            )
+        );
+    }
+
+    const isTalkingFrame = () => {
+        return (
+            <div
+                className="talking-indicator-light"
+                style={{
+                    borderColor: theme.palette.themeColor[20],
+                    ...(isTalking || conference.talkers.includes(props.trackAssignment.streamId)
+                        ? {}
+                        : { display: "none" }),
+                }}
+            />
+        );
+    }
+
+    return isMine || isVideoTrack ? (
+        <>
         <Grid
             container
             style={{
@@ -228,8 +308,21 @@ function VideoCard(props) {
                 {renderAvatarOrPlayer()}
                 {renderParticipantStatus()}
                 {setLocalVideo()}
+                {isTalkingFrame()}
+                {overlayVideoTitle()}
             </div>
         </Grid>
+        </>
+    ) : (
+        //for audio tracks
+        <>
+            <video
+                style={{ display: "none" }}
+                {...props}
+                ref={refVideo}
+                playsInline
+            ></video>
+        </>
     );
 };
 
