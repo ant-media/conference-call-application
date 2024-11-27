@@ -138,6 +138,14 @@ class TestJoinLeave(unittest.TestCase):
 
     return result_json
   
+  def fake_reconnect(self):
+    script = "return window.conference.fakeReconnect();"
+    result_json = self.chrome.execute_script_with_retry(script)
+    if result_json is None:
+      return []
+
+    return result_json
+  
   def set_audio_level(self, audioLevel):
     script = "return window.conference.setMicAudioLevel("+str(audioLevel)+");"
     self.chrome.execute_script_with_retry(script)
@@ -434,8 +442,8 @@ class TestJoinLeave(unittest.TestCase):
     self.send_message("debugme")
 
   def call_clearme_debugme(self):
-    self.chrome.send_message("clearme")
-    self.chrome.send_message("debugme")
+    self.send_message("clearme")
+    self.send_message("debugme")
     
     wait = self.chrome.get_wait()
     wait.until(lambda x: "Client Debug Info" in self.get_debugme_response())
@@ -644,24 +652,23 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
 
-    #check first vide track is assigned to A's screen
-    conference = self.get_conference()
-    allParticipants = conference["allParticipants"]
-    videoTrackAssignments = conference["videoTrackAssignments"]
-    
     participantA_share_stream_id = participantA_stream_id+"_presentation"
 
 
-    vta1 = videoTrackAssignments[1]
-    assert(vta1["streamId"] is participantA_share_stream_id
-           and
-           vta1["isReserved"])
-    
-    vta2 = videoTrackAssignments[2]
-    assert(vta2["streamId"] is participantA_stream_id
-           and
-           not vta2["isReserved"])
-
+    #check first vide track is assigned to A's screen   
+    wait.until(lambda x: 
+          (backend_assignments := self.parse_backend_video_trackAssignments(self.call_clearme_debugme()))
+          and 
+          (2 == len(backend_assignments))
+          and
+          (backend_assignments[0]["assigned_stream_id"] == participantA_share_stream_id)
+          and
+          (backend_assignments[0]["reserved"])
+          and
+          (backend_assignments[1]["assigned_stream_id"] == participantA_stream_id)
+          and
+          (not backend_assignments[1]["reserved"])
+    )
     
     #now share your video
     share_screen_button = self.get_share_screen_button()
@@ -671,28 +678,111 @@ class TestJoinLeave(unittest.TestCase):
 
     participantB_share_stream_id = participantB_stream_id+"_presentation"
 
+    wait.until(lambda x: 
+          (backend_assignments := self.parse_backend_video_trackAssignments(self.call_clearme_debugme()))
+          and 
+          (3 == len(backend_assignments))
+          and
+          (backend_assignments[0]["assigned_stream_id"] == participantA_share_stream_id)
+          and
+          (backend_assignments[0]["reserved"])
+          and
+          (backend_assignments[1]["assigned_stream_id"] == participantB_share_stream_id)
+          and
+          (backend_assignments[1]["reserved"])
+          and
+          (backend_assignments[2]["assigned_stream_id"] == participantA_stream_id)
+          and
+          (not backend_assignments[2]["reserved"])
+    )
 
-    conference = self.get_conference()
-    allParticipants = conference["allParticipants"]
-    videoTrackAssignments = conference["videoTrackAssignments"]
-
-    vta1 = videoTrackAssignments[1]
-    assert(vta1["streamId"] is participantB_share_stream_id
-           and
-           vta1["isReserved"])
     
-    vta2 = videoTrackAssignments[2]
-    assert(vta2["streamId"] is participantB_stream_id
-           and
-           not vta2["isReserved"])
-
-    vta3 = videoTrackAssignments[3]
-    assert(vta3["streamId"] is participantA_share_stream_id
-           and
-           not vta3["isReserved"])
 
 
     self.chrome.close_all()
+
+  def test_reconnection_while_screen_sharing(self):
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.join_room_in_new_tab("participantA", room)
+    handle_2 = self.join_room_in_new_tab("participantB", room)
+
+    print("current: "+self.chrome.get_current_tab_id())
+
+    assert(handle_2 == self.chrome.get_current_tab_id())
+
+    self.assertLocalVideoAvailable()
+
+    wait = self.chrome.get_wait()
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    participantA_stream_id = self.get_videoTrackAssignments()[1]["streamId"]
+
+    self.chrome.switch_to_tab(handle_1)
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+
+    participantB_stream_id = self.get_videoTrackAssignments()[1]["streamId"]
+
+    share_screen_button = self.get_share_screen_button()
+    self.chrome.click_element(share_screen_button)
+
+    self.chrome.switch_to_tab(handle_2)
+
+    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 3)
+
+    participantA_share_stream_id = participantA_stream_id+"_presentation"
+
+
+    #check first vide track is assigned to A's screen   
+    wait.until(lambda x: 
+          (backend_assignments := self.parse_backend_video_trackAssignments(self.call_clearme_debugme()))
+          and 
+          (2 == len(backend_assignments))
+          and
+          (backend_assignments[0]["assigned_stream_id"] == participantA_share_stream_id)
+          and
+          (backend_assignments[0]["reserved"])
+          and
+          (backend_assignments[1]["assigned_stream_id"] == participantA_stream_id)
+          and
+          (not backend_assignments[1]["reserved"])
+    )
+    
+    self.chrome.switch_to_tab(handle_1)
+    self.fake_reconnect()
+
+    wait.until(lambda x: self.chrome.is_element_exist(By.XPATH, "//span[text()='Reconnecting...']"))
+
+    wait.until(lambda x: not self.chrome.is_element_exist(By.XPATH, "//span[text()='Reconnecting...']"))
+
+    self.chrome.switch_to_tab(handle_2)
+
+    print("------------------")
+
+   
+
+
+    for i in range(20):
+      stats = self.get_track_stats()
+      assert(stats is not None)
+
+      for track_stat in stats['inboundRtpList']:
+        if track_stat['trackIdentifier'] == "ARDAMSvvideoTrack0":
+          print("* framesReceived: "+str(track_stat['framesReceived']))
+
+      time.sleep(2)
+
+
+    #time.sleep(60)
+
+
+
+
+    #self.chrome.close_all()
+
+
+
 
   def test_join_room_N_participants(self):
     self.chrome.makeFullScreen()
