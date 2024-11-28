@@ -1,41 +1,34 @@
 package io.antmedia.enterprise.streamapp;
 
 
+import com.google.gson.annotations.Expose;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-
-import com.google.gson.annotations.Expose;
 
 import jakarta.annotation.PostConstruct;
 
-@PropertySource("/WEB-INF/red5-web.properties")
+
 public class ConferenceRoomSettings {
 
 	protected static Logger logger = LoggerFactory.getLogger(ConferenceRoomSettings.class);
 
-	
-    @Value("${roomCreationPassword:#{null}}")
     private String roomCreationPassword;
 
-    @Expose
+	@Expose
     private boolean roomCreationPasswordEnabled = false;
-    
-    @Expose
+
+	@Expose
     private boolean isRecordingFeatureAvailable = false;
 
-    @Expose
-    private String participantVisibilityMatrix;
+	@Expose
+	private String participantVisibilityMatrix;
 
 	@Expose
 	private int maxVideoTrackCount = 6;
     
     @PostConstruct
     public void init() {
-        roomCreationPasswordEnabled = StringUtils.isNotBlank(roomCreationPassword);
-    	logger.info("roomCreationPasswordEnabled is {}", StringUtils.isNotBlank(roomCreationPassword));
 
     	try {
 			Class.forName("io.antmedia.plugin.IMediaPushPlugin");
@@ -46,6 +39,7 @@ public class ConferenceRoomSettings {
 
 			isRecordingFeatureAvailable = false;
 		}
+		roomCreationPasswordEnabled = StringUtils.isNotBlank(roomCreationPassword);
 
     }
 

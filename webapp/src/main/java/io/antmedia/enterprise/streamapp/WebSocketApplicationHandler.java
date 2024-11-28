@@ -122,9 +122,7 @@ public class WebSocketApplicationHandler
 	}
 
 	private void setConferenceRoomSettings(){
-		if(context != null){
-			conferenceRoomSettings = (ConferenceRoomSettings) context.getBean("conferenceRoomSettings");
-		}
+		conferenceRoomSettings = getAMSBroadcastManager().getConferenceRoomSettings();
 	}
 
 	private void setAppSettings() {
@@ -326,7 +324,7 @@ public class WebSocketApplicationHandler
 
 		String participantVisibilityMatrix = appSettings.getParticipantVisibilityMatrix().toString();
 
-		if (participantVisibilityMatrix != null) {
+		if (participantVisibilityMatrix != null && conferenceRoomSettings.getParticipantVisibilityMatrix() == null) {
 			conferenceRoomSettings.setParticipantVisibilityMatrix(participantVisibilityMatrix);
 		}
 
