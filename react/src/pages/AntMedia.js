@@ -2617,6 +2617,7 @@ function AntMedia(props) {
                 setAndEnableVirtualBackgroundImage(blobUrl);
             });
         }
+    }
 
     function setAndEnableVirtualBackgroundImage(imageUrl) {
         let virtualBackgroundImage = document.getElementById("virtualBackgroundImage");
