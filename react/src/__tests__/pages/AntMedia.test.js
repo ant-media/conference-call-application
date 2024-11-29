@@ -2959,8 +2959,6 @@ describe('AntMedia Component', () => {
       });
       currentConference.globals.participantListPagination.pageSize = 10;
       currentConference.updateAllParticipantsPagination(2);
-      //expect(currentConference.globals.participantListPagination.startIndex).toBe(10);
-      //expect(currentConference.globals.participantListPagination.endIndex).toBe(20);
     });
 
     it('calls getSubtracks with correct parameters', async () => {
@@ -2988,7 +2986,30 @@ describe('AntMedia Component', () => {
       });
       currentConference.globals.participantListPagination.pageSize = 10;
       currentConference.updateAllParticipantsPagination(2);
-      //expect(mockGetSubtracks).toHaveBeenCalledWith('testRoom', null, 10, 20);
+    });
+
+    it('update participant count, when we receive new subtrack count', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const obj = { count: 12 };
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback('subtrackCount', obj);
+      });
+
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(12);
+      });
     });
   });
 
