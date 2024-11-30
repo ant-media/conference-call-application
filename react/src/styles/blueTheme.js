@@ -13,6 +13,7 @@ export function getBlueTheme() {
   const themeColor50 = "#00BCD4";
   const themeColor60 = "#00ACC1";
   const themeColor70 = "#0097A7";
+  const themeColor71 = "#0097A7";
   const themeColor72 = "#0097A7";
   const themeColor75 = "#00838F";
   const themeColor80 = "#00838F";
@@ -337,6 +338,7 @@ export function getBlueTheme() {
         50: themeColor50,
         60: themeColor60,
         70: themeColor70,
+        71: themeColor71,
         72: themeColor72,
         80: themeColor80,
         85: themeColor85,
