@@ -18,7 +18,7 @@ class TestJoinLeave(unittest.TestCase):
   def setUp(self):
     print("----------------\n", self._testMethodName, " starting...")
     self.is_windows = False
-    self.is_windows = True
+    #self.is_windows = True
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.user = os.environ.get('AMS_USER')

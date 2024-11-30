@@ -1057,12 +1057,20 @@ function AntMedia(props) {
         console.log("************* fake reconnect");
         let orginal = webRTCAdaptor.iceConnectionState;
         webRTCAdaptor.iceConnectionState = () => "disconnected";
-
         webRTCAdaptor.reconnectIfRequired();
 
+        if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
+            screenShareWebRtcAdaptor.current.iceConnectionState = () => "disconnected";
+            screenShareWebRtcAdaptor.current.reconnectIfRequired();
+        }
+        
         setTimeout(() => {
             webRTCAdaptor.iceConnectionState = orginal;
+            if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
+                screenShareWebRtcAdaptor.current.iceConnectionState = orginal;
+            }
         }, 5000);
+        
     }
 
     function addFakeParticipant() {

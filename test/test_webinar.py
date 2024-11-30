@@ -16,7 +16,7 @@ import psutil
 class TestWebinarScenario(unittest.TestCase):
   def setUp(self):
     self.is_windows = False
-    self.is_windows = True
+    #self.is_windows = True
     print(self._testMethodName, " starting...")
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')

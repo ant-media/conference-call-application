@@ -16,6 +16,9 @@ os.environ['WAR_FILE'] = sys.argv[4]
 use_test_webinar = sys.argv[5].lower() == 'true'
 os.environ['TEST_APP_NAME'] = "TestAPP"+str(random.randint(100, 999))
 
+#Keep it True to stop tests immediately after a failed test
+fail_fast = False
+
 suite = unittest.TestSuite()
 suite.addTest(TestDeployment('test_install_app'))
 
@@ -31,5 +34,5 @@ else:
 
 suite.addTest(TestDeployment('test_delete_app'))
 
-ret = not unittest.TextTestRunner(verbosity=2, failfast=True).run(suite).wasSuccessful()
+ret = not unittest.TextTestRunner(verbosity=2, failfast=fail_fast).run(suite).wasSuccessful()
 sys.exit(ret)
