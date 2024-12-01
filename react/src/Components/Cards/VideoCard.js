@@ -228,7 +228,9 @@ function VideoCard(props) {
             {micMuted && (
                 <Tooltip title={t("mic is muted")} placement="top">
                     <Grid item>
-                        <CustomizedBox sx={cardBtnStyle}>
+                        <CustomizedBox
+                            id={"mic-muted-"+props.trackAssignment.streamId}
+                            sx={cardBtnStyle}>
                             <SvgIcon
                                 size={32}
                                 name="muted-microphone"
@@ -297,6 +299,7 @@ function VideoCard(props) {
             {renderOverlayButtons()}
             <div
                 className="single-video-card"
+                id={'card-'+(props.trackAssignment.streamId !== undefined ? props?.trackAssignment.streamId : "")}
                 style={{
                     height: props.isMobileView ? "40%" : "100%",
                     width: props.isMobileView ? "20%" : "100%",
