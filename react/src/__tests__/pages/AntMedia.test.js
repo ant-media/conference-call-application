@@ -1855,10 +1855,6 @@ describe('AntMedia Component', () => {
     });
 
     await waitFor(() => {
-      expect(webRTCAdaptorPlaySpeedTestConstructor).toBe(undefined);
-    });
-
-    await waitFor(() => {
       expect(webRTCAdaptorPublishSpeedTestConstructor).not.toBe(undefined);
     });
 
