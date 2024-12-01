@@ -1308,7 +1308,7 @@ describe('AntMedia Component', () => {
     };
 
     const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
 
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
@@ -1428,7 +1428,7 @@ describe('AntMedia Component', () => {
     });
 
     const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
 
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
@@ -1601,7 +1601,7 @@ describe('AntMedia Component', () => {
     };
 
     const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
 
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
@@ -1751,7 +1751,7 @@ describe('AntMedia Component', () => {
     };
 
     const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
 
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 

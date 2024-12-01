@@ -577,31 +577,31 @@ function AntMedia(props) {
         let tempStatsList = statsList.current;
         let tempStats = {};
 
-        tempStats.currentRoundTripTime = obj.currentRoundTripTime >= 0 ? obj.currentRoundTripTime : 0;
+        tempStats.currentRoundTripTime = obj.currentRoundTripTime;
 
-        tempStats.packetsReceived = obj.packetsReceived >= 0 ? obj.packetsReceived : 0;
+        tempStats.packetsReceived = obj.packetsReceived;
 
-        tempStats.totalBytesReceivedCount = obj.totalBytesReceivedCount >= 0 ? obj.totalBytesReceivedCount : 0;
+        tempStats.totalBytesReceivedCount = obj.totalBytesReceivedCount;
 
-        tempStats.framesReceived = obj.framesReceived >= 0 ? obj.framesReceived : 0;
-        tempStats.framesDropped = obj.framesDropped >= 0 ? obj.framesDropped : 0;
+        tempStats.framesReceived = obj.framesReceived;
+        tempStats.framesDropped = obj.framesDropped;
 
-        tempStats.startTime = obj.startTime >= 0 ? obj.startTime : 0;
-        tempStats.currentTimestamp = obj.currentTimestamp >= 0 ? obj.currentTimestamp : 0;
+        tempStats.startTime = obj.startTime;
+        tempStats.currentTimestamp = obj.currentTimestamp;
 
-        tempStats.firstBytesReceivedCount = obj.firstBytesReceivedCount >= 0 ? obj.firstBytesReceivedCount : 0;
-        tempStats.lastBytesReceived = obj.lastBytesReceived >= 0 ? obj.lastBytesReceived : 0;
+        tempStats.firstBytesReceivedCount = obj.firstBytesReceivedCount;
+        tempStats.lastBytesReceived = obj.lastBytesReceived;
 
-        tempStats.videoPacketsLost = obj.videoPacketsLost >= 0 ? obj.videoPacketsLost : 0;
-        tempStats.audioPacketsLost = obj.audioPacketsLost >= 0 ? obj.audioPacketsLost : 0;
+        tempStats.videoPacketsLost = obj.videoPacketsLost;
+        tempStats.audioPacketsLost = obj.audioPacketsLost;
 
         tempStats.inboundRtpList = obj.inboundRtpList;
 
-        tempStats.videoJitterAverageDelay = obj.videoJitterAverageDelay >= 0 ? obj.videoJitterAverageDelay : 0;
-        tempStats.audioJitterAverageDelay = obj.audioJitterAverageDelay >= 0 ? obj.audioJitterAverageDelay : 0;
+        tempStats.videoJitterAverageDelay = obj.videoJitterAverageDelay;
+        tempStats.audioJitterAverageDelay = obj.audioJitterAverageDelay;
 
-        tempStats.videoRoundTripTime = obj.videoRoundTripTime >= 0 ? obj.videoRoundTripTime : 0;
-        tempStats.audioRoundTripTime = obj.audioRoundTripTime >= 0 ? obj.audioRoundTripTime : 0;
+        tempStats.videoRoundTripTime = obj.videoRoundTripTime;
+        tempStats.audioRoundTripTime = obj.audioRoundTripTime;
 
         tempStatsList.push(tempStats);
         statsList.current = tempStatsList;
@@ -759,17 +759,13 @@ function AntMedia(props) {
 
         // Calculate packet loss
         let videoPacketsLost = stats.videoPacketsLost;
-        videoPacketsLost = (videoPacketsLost < 0) ? 0 : videoPacketsLost;
         let audioPacketsLost = stats.audioPacketsLost;
-        audioPacketsLost = (audioPacketsLost < 0) ? 0 : audioPacketsLost;
 
         let totalPacketsLost = videoPacketsLost + audioPacketsLost;
 
         // Calculate packet loss for the previous stats
         let oldVideoPacketsLost = stats.videoPacketsLost;
-        oldVideoPacketsLost = (oldVideoPacketsLost < 0) ? 0 : oldVideoPacketsLost;
         let oldAudioPacketsLost = stats.audioPacketsLost;
-        oldAudioPacketsLost = (oldAudioPacketsLost < 0) ? 0 : oldAudioPacketsLost;
 
         let oldTotalPacketsLost = oldVideoPacketsLost + oldAudioPacketsLost;
 
@@ -790,9 +786,7 @@ function AntMedia(props) {
 
         // Jitter calculation (average of video and audio jitter)
         let videoJitter = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSv')).jitterBufferDelay;
-        videoJitter = (videoJitter < 0) ? 0 : videoJitter;
         let audioJitter = stats.inboundRtpList.find(item => item.trackIdentifier.startsWith('ARDAMSa')).jitterBufferDelay;
-        audioJitter = (audioJitter < 0) ? 0 : audioJitter;
 
         let avgJitter = (videoJitter + audioJitter) / 2;
 
