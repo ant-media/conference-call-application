@@ -76,8 +76,25 @@ function WaitingRoom(props) {
     }, [conference.initialized]);
 
     function joinRoom(e) {
+        e.preventDefault();
+
+        let isVideoTrackHealthy = conference?.checkVideoTrackHealth();
+        if (!isVideoTrackHealthy) {
+            enqueueSnackbar(
+                {
+                    message: t(
+                        "Your camera is not working properly. Please check your camera settings"
+                    ),
+                    variant: "error",
+                    icon: <SvgIcon size={24} name={"muted-camera"} color="#fff"/>,
+                },
+                {
+                    autoHideDuration: 1500,
+                }
+            );
+            return;
+        }
         if (conference.localVideo === null && conference.isPlayOnly === false) {
-            e.preventDefault();
             enqueueSnackbar(
                 {
                     message: t(
@@ -374,6 +391,7 @@ function WaitingRoom(props) {
                         </Grid>
 
                         <form
+                            data-testid="form"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 joinRoom(e);
@@ -412,6 +430,7 @@ function WaitingRoom(props) {
                                         variant="contained"
                                         type="submit"
                                         id="room_join_button"
+                                        data-testid="join-room-button"
                                     >
                                         {t("I'm ready to join")}
                                     </Button>
