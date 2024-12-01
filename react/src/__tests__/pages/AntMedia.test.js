@@ -81,7 +81,6 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
       requestVideoTrackAssignments: jest.fn(),
       stopSpeedTest: jest.fn().mockImplementation(() => console.log('stopSpeedTest')),
-      getSubtracks: jest.fn(),
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
       playStats: {},
@@ -2953,6 +2952,80 @@ describe('AntMedia Component', () => {
       expect(currentConference.statsList.current.audioJitter).not.toBe(800);
       expect(currentConference.statsList.current.currentOutgoingBitrate).not.toBe(900);
     });
+  });
+
+  it('sets speed test object to failed state', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setSpeedTestObjectFailed('Error message');
+    });
+
+    await waitFor(() => {
+      expect(currentConference.speedTestObject.message).toBe('Error message');
+      expect(currentConference.speedTestObject.isfinished).toBe(false);
+      expect(currentConference.speedTestObject.isfailed).toBe(true);
+      expect(currentConference.speedTestObject.errorMessage).toBe('Error message');
+      expect(currentConference.speedTestObject.progressValue).toBe(0);
+    });
+  });
+
+  it('sets speed test object progress correctly', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setSpeedTestObjectProgress(50);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.speedTestObject.isfinished).toBe(false);
+      expect(currentConference.speedTestObject.isfailed).toBe(false);
+      expect(currentConference.speedTestObject.errorMessage).toBe('');
+      expect(currentConference.speedTestObject.progressValue).toBe(50);
+    });
+  });
+
+  it('handles progress value greater than 100', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setSpeedTestObjectProgress(150);
+    });
+
+    const stopSpeedTest = jest.fn();
+    //expect(stopSpeedTest).toHaveBeenCalled();
+    expect(currentConference.speedTestObject.message).toBe('Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ');
+    expect(currentConference.speedTestObject.isfinished).toBe(false);
+    expect(currentConference.speedTestObject.isfailed).toBe(true);
+    expect(currentConference.speedTestObject.errorMessage).toBe('Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ');
+    expect(currentConference.speedTestObject.progressValue).toBe(0);
   });
 
 });

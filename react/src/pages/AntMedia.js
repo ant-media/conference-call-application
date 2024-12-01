@@ -3078,7 +3078,9 @@ function AntMedia(props) {
                         fetchImageAsBlob,
                         setAndEnableVirtualBackgroundImage,
                         setAndFillPlayStatsList,
-                        setAndFillPublishStatsList
+                        setAndFillPublishStatsList,
+                        setSpeedTestObjectFailed,
+                        setSpeedTestObjectProgress
                     }}
                 >
                     {props.children}
