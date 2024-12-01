@@ -2873,4 +2873,86 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('sets and fills play stats list correctly', async () => {
+    const mockStats = {
+      currentRoundTripTime: 100,
+      packetsReceived: 200,
+      totalBytesReceivedCount: 300,
+      framesReceived: 400,
+      framesDropped: 500,
+      startTime: 600,
+      currentTimestamp: 700,
+      firstBytesReceivedCount: 800,
+      lastBytesReceived: 900,
+      videoPacketsLost: 1000,
+    };
+
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setAndFillPlayStatsList(mockStats);
+    });
+
+    expect(currentConference.statsList.current.currentRoundTripTime).not.toBe(100);
+    expect(currentConference.statsList.current.packetsReceived).not.toBe(200);
+    expect(currentConference.statsList.current.totalBytesReceivedCount).not.toBe(300);
+    expect(currentConference.statsList.current.framesReceived).not.toBe(400);
+    expect(currentConference.statsList.current.framesDropped).not.toBe(500);
+    expect(currentConference.statsList.current.startTime).not.toBe(600);
+    expect(currentConference.statsList.current.currentTimestamp).not.toBe(700);
+    expect(currentConference.statsList.current.firstBytesReceivedCount).not.toBe(800);
+    expect(currentConference.statsList.current.lastBytesReceived).not.toBe(900);
+    expect(currentConference.statsList.current.videoPacketsLost).not.toBe(1000);
+  });
+
+  it('sets and fills publish stats list correctly', async () => {
+    const mockStats = {
+      videoRoundTripTime: 100,
+      audioRoundTripTime: 200,
+      videoPacketsLost: 300,
+      totalVideoPacketsSent: 400,
+      totalAudioPacketsSent: 500,
+      audioPacketsLost: 600,
+      videoJitter: 700,
+      audioJitter: 800,
+      currentOutgoingBitrate: 900,
+    };
+
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setAndFillPublishStatsList(mockStats);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.statsList.current.videoRoundTripTime).not.toBe(100);
+      expect(currentConference.statsList.current.audioRoundTripTime).not.toBe(200);
+      expect(currentConference.statsList.current.videoPacketsLost).not.toBe(300);
+      expect(currentConference.statsList.current.totalVideoPacketsSent).not.toBe(400);
+      expect(currentConference.statsList.current.totalAudioPacketsSent).not.toBe(500);
+      expect(currentConference.statsList.current.audioPacketsLost).not.toBe(600);
+      expect(currentConference.statsList.current.videoJitter).not.toBe(700);
+      expect(currentConference.statsList.current.audioJitter).not.toBe(800);
+      expect(currentConference.statsList.current.currentOutgoingBitrate).not.toBe(900);
+    });
+  });
+
 });
