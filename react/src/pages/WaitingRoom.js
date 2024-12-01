@@ -391,6 +391,7 @@ function WaitingRoom(props) {
                         </Grid>
 
                         <form
+                            data-testid="form"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 joinRoom(e);

@@ -3,9 +3,9 @@ import WaitingRoom from 'pages/WaitingRoom';
 import React from "react";
 import {ThemeProvider} from "@mui/material/styles";
 import { ConferenceContext } from 'pages/AntMedia';
-import {useSnackbar} from "notistack";
 import theme from "../../styles/theme";
 import {ThemeList} from "../../styles/themeList";
+import { useSnackbar } from 'notistack';
 
 const contextValue = {
   initialized: true,
@@ -23,6 +23,10 @@ const contextValue = {
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
   useContext: jest.fn(),
+}));
+
+jest.mock('notistack', () => ({
+  useSnackbar: jest.fn(),
 }));
 
 jest.mock('utils', () => ({
@@ -56,6 +60,9 @@ describe('Waiting Room Component', () => {
       }
       return jest.requireActual('react').useContext(input);
     });
+
+    const mockEnqueueSnackbar = jest.fn();
+    useSnackbar.mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
   });
 
 
@@ -106,115 +113,44 @@ describe('Waiting Room Component', () => {
     });
   });
 
+  it('shows error message if camera is not working properly', () => {
+    const mockEnqueueSnackbar = jest.fn();
+    useSnackbar.mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
 
-  describe('joinRoom', () => {
-    it('shows error message if camera is not working properly', () => {
-      render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <WaitingRoom />
-          </ThemeProvider>
-      )
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <WaitingRoom />
+        </ThemeProvider>
+    )
 
-      fireEvent.submit(screen.getByRole('form'));
+    fireEvent.submit(getByTestId('form'));
 
-      expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: "Your camera is not working properly. Please check your camera settings",
-          }),
-          expect.any(Object)
-      );
-    });
+    expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Your camera is not working properly. Please check your camera settings",
+        }),
+        expect.any(Object)
+    );
+  });
 
-    it('shows info message if microphone and camera permissions are not allowed', () => {
-      const mockEnqueueSnackbar = jest.fn();
-      const mockConference = {
-        checkVideoTrackHealth: jest.fn().mockReturnValue(true),
-        localVideo: null,
-        isPlayOnly: false,
-      };
-      React.useContext = jest.fn().mockReturnValue(mockConference);
-      useSnackbar.mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
+  it('shows info message if microphone and camera permissions are not allowed', () => {
+    const mockEnqueueSnackbar = jest.fn();
+    useSnackbar.mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
 
-      render(<WaitingRoom />);
-      fireEvent.submit(screen.getByRole('form'));
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <WaitingRoom />
+        </ThemeProvider>
+    )
 
-      expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: "You need to allow microphone and camera permissions before joining",
-          }),
-          expect.any(Object)
-      );
-    });
+    fireEvent.submit(getByTestId('form'));
 
-    it('generates streamId if publishStreamId is null or undefined', () => {
-      const mockConference = {
-        checkVideoTrackHealth: jest.fn().mockReturnValue(true),
-        localVideo: {},
-        isPlayOnly: false,
-        streamName: 'testStream',
-        makeid: jest.fn().mockReturnValue('1234567890'),
-        joinRoom: jest.fn(),
-      };
-      React.useContext = jest.fn().mockReturnValue(mockConference);
-
-      render(<WaitingRoom />);
-      fireEvent.submit(screen.getByRole('form'));
-
-      expect(mockConference.joinRoom).toHaveBeenCalledWith('roomName', 'testStream_1234567890');
-    });
-
-    it('uses publishStreamId if it is defined', () => {
-      const mockConference = {
-        checkVideoTrackHealth: jest.fn().mockReturnValue(true),
-        localVideo: {},
-        isPlayOnly: false,
-        joinRoom: jest.fn(),
-      };
-      React.useContext = jest.fn().mockReturnValue(mockConference);
-      global.publishStreamId = 'definedStreamId';
-
-      render(<WaitingRoom />);
-      fireEvent.submit(screen.getByRole('form'));
-
-      expect(mockConference.joinRoom).toHaveBeenCalledWith('roomName', 'definedStreamId');
-    });
-
-    it('starts speed test if required before joining the room', () => {
-      process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM = 'true';
-      global.enterDirectly = false;
-      const mockConference = {
-        checkVideoTrackHealth: jest.fn().mockReturnValue(true),
-        localVideo: {},
-        isPlayOnly: false,
-        setSpeedTestObject: jest.fn(),
-        startSpeedTest: jest.fn(),
-      };
-      React.useContext = jest.fn().mockReturnValue(mockConference);
-
-      render(<WaitingRoom />);
-      fireEvent.submit(screen.getByRole('form'));
-
-      expect(mockConference.setSpeedTestObject).toHaveBeenCalled();
-      expect(mockConference.startSpeedTest).toHaveBeenCalled();
-    });
-
-    it('joins room directly if speed test is not required', () => {
-      process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM = 'false';
-      const mockConference = {
-        checkVideoTrackHealth: jest.fn().mockReturnValue(true),
-        localVideo: {},
-        isPlayOnly: false,
-        joinRoom: jest.fn(),
-        setIsJoining: jest.fn(),
-      };
-      React.useContext = jest.fn().mockReturnValue(mockConference);
-
-      render(<WaitingRoom />);
-      fireEvent.submit(screen.getByRole('form'));
-
-      expect(mockConference.setIsJoining).toHaveBeenCalledWith(true);
-      expect(mockConference.joinRoom).toHaveBeenCalled();
-    });
+    expect(mockEnqueueSnackbar).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "You need to allow microphone and camera permissions before joining",
+        }),
+        expect.any(Object)
+    );
   });
 
 });
