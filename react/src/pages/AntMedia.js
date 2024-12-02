@@ -3143,7 +3143,9 @@ function AntMedia(props) {
                         setParticipantListDrawerOpen,
                         setEffectsDrawerOpen,
                         updateParticipantRole,
-                        setInitialized
+                        setInitialized,
+                        setRole,
+                        handleNotificationEvent
                     }}
                 >
                     {props.children}

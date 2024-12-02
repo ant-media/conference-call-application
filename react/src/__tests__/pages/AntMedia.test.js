@@ -3028,4 +3028,156 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('handles REQUEST_BECOME_PUBLISHER event when role is Host', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const notificationEvent = { senderStreamId: 'testStreamId' };
+    const obj = {
+      eventType: 'REQUEST_BECOME_PUBLISHER', notificationEvent,
+      data: JSON.stringify({ message: 'Request rejected' })
+    };
+
+    await act(async () => {
+      currentConference.handleNotificationEvent(obj);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.requestSpeakerList).not.toContain('testStreamId');
+    });
+  });
+
+  it('does not handle REQUEST_BECOME_PUBLISHER event if request already received', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.requestSpeakerList = ['testStreamId'];
+    const notificationEvent = { senderStreamId: 'testStreamId' };
+    const obj = {
+      eventType: 'REQUEST_BECOME_PUBLISHER', notificationEvent,
+      data: JSON.stringify({ message: 'Request rejected' })
+    };
+
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    await act(async () => {
+      currentConference.handleNotificationEvent(obj);
+    });
+
+    expect(consoleSpy).not.toHaveBeenCalledWith("Request is already received from ", 'testStreamId');
+    consoleSpy.mockRestore();
+  });
+
+  it('handles MAKE_LISTENER_AGAIN event when role is TempListener', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.role = WebinarRoles.TempListener;
+    const obj = {
+      eventType: 'MAKE_LISTENER_AGAIN',
+      data: JSON.stringify({ message: 'Request rejected' })
+    };
+
+    await act(async () => {
+      currentConference.handleNotificationEvent(obj);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.isPlayOnly).toBe(false);
+    });
+  });
+
+  it('handles APPROVE_BECOME_PUBLISHER event when role is Listener', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(() => {
+      currentConference.setRole(WebinarRoles.Listener);
+    });
+
+    currentConference.publishStreamId = 'testStreamId';
+    const notificationEvent = { senderStreamId: 'testStreamId' };
+    const obj = {
+      eventType: 'APPROVE_BECOME_PUBLISHER', notificationEvent,
+      data: JSON.stringify({ message: 'Request approved' })
+    };
+
+    await act(async () => {
+      currentConference.handleNotificationEvent(obj);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.isPlayOnly).toBe(false);
+    });
+  });
+
+  it('handles REJECT_BECOME_PUBLISHER event when role is Listener', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(() => {
+      currentConference.setRole(WebinarRoles.Listener);
+    });
+
+    currentConference.publishStreamId = 'testStreamId';
+    const notificationEvent = { senderStreamId: 'testStreamId' };
+    const obj = {
+      eventType: 'REJECT_BECOME_PUBLISHER', notificationEvent,
+      data: JSON.stringify({ message: 'Request rejected' })
+    };
+
+    await act(async () => {
+      currentConference.handleNotificationEvent(obj);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.role).toBe(WebinarRoles.Listener);
+    });
+  });
+
 });
