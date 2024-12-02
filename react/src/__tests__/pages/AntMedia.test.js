@@ -3211,34 +3211,6 @@ describe('AntMedia Component', () => {
     expect(currentConference.speedTestObject.isfinished).toBe(true);
   });
 
-  /*
-  it('resets stats list on first iteration', async () => {
-    const {container} = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>
-        </ThemeProvider>);
-
-    await waitFor(() => {
-      expect(webRTCAdaptorConstructor).not.toBe(undefined);
-    });
-
-    currentConference.speedTestCounter.current = 0;
-    currentConference.statsList.current = [{}, {}];
-    currentConference.setAndFillPlayStatsList = jest.fn();
-    currentConference.setSpeedTestObjectProgress = jest.fn();
-    currentConference.setSpeedTestObject = jest.fn();
-
-    currentConference.processUpdatedStatsForPlaySpeedTest({});
-
-    expect(currentConference.statsList.current).toEqual([]);
-    expect(currentConference.setSpeedTestObjectProgress).toHaveBeenCalledWith(20);
-    expect(currentConference.setAndFillPlayStatsList).toHaveBeenCalled();
-  });
-  
-   */
-
   it('updates progress and stats list on subsequent iterations', async () => {
     const {container} = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
@@ -3260,34 +3232,7 @@ describe('AntMedia Component', () => {
     currentConference.processUpdatedStatsForPlaySpeedTest({});
 
     expect(currentConference.statsList.current).toEqual([{}, {}, {}]);
-    //expect(currentConference.setSpeedTestObjectProgress).toHaveBeenCalledWith(40);
-    //expect(currentConference.setAndFillPlayStatsList).toHaveBeenCalled();
   });
-
-  /*
-  it('calculates play speed test result after sufficient iterations', async () => {
-    const {container} = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>
-        </ThemeProvider>);
-
-    await waitFor(() => {
-      expect(webRTCAdaptorConstructor).not.toBe(undefined);
-    });
-
-    currentConference.speedTestCounter.current = 4;
-    currentConference.statsList.current = [{}, {}, {}, {}];
-    currentConference.calculateThePlaySpeedTestResult = jest.fn();
-    currentConference.setSpeedTestObjectProgress = jest.fn();
-    currentConference.setSpeedTestObject = jest.fn();
-
-    currentConference.processUpdatedStatsForPlaySpeedTest({});
-
-    expect(currentConference.calculateThePlaySpeedTestResult).toHaveBeenCalled();
-  });
-  */
 
   it('updates speed test object progress when iterations are insufficient', async () => {
     const {container} = render(
@@ -3308,7 +3253,6 @@ describe('AntMedia Component', () => {
 
     currentConference.processUpdatedStatsForPlaySpeedTest({});
 
-    //expect(currentConference.setSpeedTestObjectProgress).toHaveBeenCalledWith(60);
     expect(currentConference.setSpeedTestObject).not.toHaveBeenCalledWith({
       message: currentConference.speedTestObject.message,
       isfinished: false,
