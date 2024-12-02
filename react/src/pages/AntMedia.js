@@ -3138,7 +3138,12 @@ function AntMedia(props) {
                         checkAndSetIsPinned,
                         checkAndUpdateVideoAudioSourcesForPublishSpeedTest,
                         fetchImageAsBlob,
-                        setAndEnableVirtualBackgroundImage
+                        setAndEnableVirtualBackgroundImage,
+                        setMessageDrawerOpen,
+                        setParticipantListDrawerOpen,
+                        setEffectsDrawerOpen,
+                        updateParticipantRole,
+                        setInitialized
                     }}
                 >
                     {props.children}

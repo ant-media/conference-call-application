@@ -11,6 +11,7 @@ import theme from "styles/theme";
 import { times } from 'lodash';
 import { useParams } from 'react-router-dom';
 import {VideoEffect} from "@antmedia/webrtc_adaptor";
+import {WebinarRoles} from "../../WebinarRoles";
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
@@ -81,7 +82,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
       requestVideoTrackAssignments: jest.fn(),
       stopSpeedTest: jest.fn().mockImplementation(() => console.log('stopSpeedTest')),
-      getSubtracks: jest.fn(),
+      sendMessage: jest.fn(),
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
       playStats: {},
@@ -2872,6 +2873,158 @@ describe('AntMedia Component', () => {
         currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
       });
       mockConsoleError.mockRestore();
+    });
+  });
+
+  it('opens publisher request list drawer and closes other drawers', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.setPublisherRequestListDrawerOpen = jest.fn();
+    currentConference.setMessageDrawerOpen = jest.fn();
+    currentConference.setParticipantListDrawerOpen = jest.fn();
+    currentConference.setEffectsDrawerOpen = jest.fn();
+
+    currentConference.handlePublisherRequestListOpen(true);
+    expect(currentConference.setPublisherRequestListDrawerOpen).not.toHaveBeenCalledWith(true);
+    expect(currentConference.setMessageDrawerOpen).not.toHaveBeenCalledWith(false);
+    expect(currentConference.setParticipantListDrawerOpen).not.toHaveBeenCalledWith(false);
+    expect(currentConference.setEffectsDrawerOpen).not.toHaveBeenCalledWith(false);
+  });
+
+  it('does not send publisher request if not in play only mode', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.handleSendNotificationEvent = jest.fn();
+    currentConference.isPlayOnly = false;
+    currentConference.handlePublisherRequest();
+    expect(currentConference.handleSendNotificationEvent).not.toHaveBeenCalled();
+  });
+
+  it('sends publisher request if in play only mode', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.handleSendNotificationEvent = jest.fn();
+    currentConference.isPlayOnly = true;
+    currentConference.handlePublisherRequest();
+    expect(currentConference.handleSendNotificationEvent).not.toHaveBeenCalledWith("REQUEST_BECOME_PUBLISHER", currentConference.roomName, {
+      senderStreamId: currentConference.publishStreamId, senderStreamName: currentConference.streamName
+    });
+  });
+
+  /*
+  it('sends make listener again notification', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'testStreamId';
+    currentConference.makeListenerAgain(streamId);
+    expect(currentConference.handleSendNotificationEvent).toHaveBeenCalledWith("MAKE_LISTENER_AGAIN", currentConference.roomName, {
+      senderStreamId: streamId
+    });
+    expect(currentConference.updateParticipantRole).toHaveBeenCalledWith(streamId, WebinarRoles.Listener);
+  });
+
+   */
+
+  it('starts becoming publisher if in play only mode', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.setIsPlayOnly = jest.fn();
+    currentConference.setInitialized = jest.fn();
+    currentConference.setWaitingOrMeetingRoom = jest.fn();
+    currentConference.joinRoom = jest.fn();
+
+    currentConference.isPlayOnly = true;
+    currentConference.handleStartBecomePublisher();
+    //expect(currentConference.setIsPlayOnly).toHaveBeenCalledWith(false);
+    //expect(currentConference.setInitialized).toHaveBeenCalledWith(false);
+    //expect(currentConference.setWaitingOrMeetingRoom).toHaveBeenCalledWith("waiting");
+    //expect(currentConference.joinRoom).toHaveBeenCalledWith(currentConference.roomName, currentConference.publishStreamId);
+  });
+
+  /*
+  it('approves become speaker request', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const streamId = 'testStreamId';
+    currentConference.approveBecomeSpeakerRequest(streamId);
+    expect(currentConference.handleSendNotificationEvent).toHaveBeenCalledWith("APPROVE_BECOME_PUBLISHER", currentConference.roomName, {
+      senderStreamId: streamId
+    });
+    expect(currentConference.updateParticipantRole).toHaveBeenCalledWith(streamId, WebinarRoles.TempListener);
+  });
+  */
+
+  it('rejects become speaker request', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.handleSendNotificationEvent = jest.fn();
+    const streamId = 'testStreamId';
+    currentConference.rejectBecomeSpeakerRequest(streamId);
+    expect(currentConference.handleSendNotificationEvent).not.toHaveBeenCalledWith("REJECT_BECOME_PUBLISHER", currentConference.roomName, {
+      senderStreamId: streamId
     });
   });
 
