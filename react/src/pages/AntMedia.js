@@ -864,28 +864,7 @@ function AntMedia(props) {
         }
         else if (info === "updated_stats")
         {
-            if (speedTestCounter.current === 0) {
-                statsList.current = []; // reset stats list if it is the first time
-            }
-            setSpeedTestObjectProgress(20 + (speedTestCounter.current * 20));
-
-            speedTestCounter.current = speedTestCounter.current + 1;
-            setAndFillPlayStatsList(obj);
-
-            if (speedTestCounter.current > 3 && statsList.current.length > 3) {
-                calculateThePlaySpeedTestResult();
-            } else {
-                let tempSpeedTestObject = {};
-                tempSpeedTestObject.message = speedTestObject.message;
-                tempSpeedTestObject.isfinished = false;
-                tempSpeedTestObject.isfailed = false;
-                tempSpeedTestObject.errorMessage = "";
-                tempSpeedTestObject.progressValue = 20 + (speedTestCounter.current * 20);
-                speedTestProgress.current = tempSpeedTestObject.progressValue;
-                setSpeedTestObject(tempSpeedTestObject);
-            }
-    } else if (info === "updated_stats") {
-            console.log("speed test updated stats")
+            processUpdatedStatsForPlaySpeedTest(obj);
         } else if (info === "ice_connection_state_changed") {
             console.log("speed test ice connection state changed")
         }
@@ -899,6 +878,29 @@ function AntMedia(props) {
         setSpeedTestObjectFailed("There is an error('"+error+"'). Please try again later...");
 
         stopSpeedTest();
+    }
+
+    function processUpdatedStatsForPlaySpeedTest(statsObj) {
+        if (speedTestCounter.current === 0) {
+            statsList.current = []; // reset stats list if it is the first time
+        }
+        setSpeedTestObjectProgress(20 + (speedTestCounter.current * 20));
+
+        speedTestCounter.current = speedTestCounter.current + 1;
+        setAndFillPlayStatsList(statsObj);
+
+        if (speedTestCounter.current > 3 && statsList.current.length > 3) {
+            calculateThePlaySpeedTestResult();
+        } else {
+            let tempSpeedTestObject = {};
+            tempSpeedTestObject.message = speedTestObject.message;
+            tempSpeedTestObject.isfinished = false;
+            tempSpeedTestObject.isfailed = false;
+            tempSpeedTestObject.errorMessage = "";
+            tempSpeedTestObject.progressValue = 20 + (speedTestCounter.current * 20);
+            speedTestProgress.current = tempSpeedTestObject.progressValue;
+            setSpeedTestObject(tempSpeedTestObject);
+        }
     }
 
     function checkAndUpdateVideoAudioSources() {
@@ -3081,7 +3083,9 @@ function AntMedia(props) {
                         setAndFillPublishStatsList,
                         setSpeedTestObjectFailed,
                         setSpeedTestObjectProgress,
-                        calculateThePlaySpeedTestResult
+                        calculateThePlaySpeedTestResult,
+                        processUpdatedStatsForPlaySpeedTest,
+                        speedTestCounter
                     }}
                 >
                     {props.children}
