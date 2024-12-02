@@ -3080,7 +3080,8 @@ function AntMedia(props) {
                         setAndFillPlayStatsList,
                         setAndFillPublishStatsList,
                         setSpeedTestObjectFailed,
-                        setSpeedTestObjectProgress
+                        setSpeedTestObjectProgress,
+                        calculateThePlaySpeedTestResult
                     }}
                 >
                     {props.children}

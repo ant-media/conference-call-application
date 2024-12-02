@@ -3028,4 +3028,187 @@ describe('AntMedia Component', () => {
     expect(currentConference.speedTestObject.progressValue).toBe(0);
   });
 
+  it('calculates play speed test result with great connection', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.statsList.current = [
+      {
+        totalBytesReceivedCount: 1000,
+        framesReceived: 100,
+        framesDropped: 0,
+        currentTimestamp: 2000,
+        startTime: 1000,
+        lastBytesReceived: 1000,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 0,
+        audioPacketsLost: 0,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 100,
+          jitterBufferDelay: 10
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 100, jitterBufferDelay: 10}],
+        videoRoundTripTime: '0.05',
+        audioRoundTripTime: '0.05'
+      },
+      {
+        totalBytesReceivedCount: 500,
+        framesReceived: 50,
+        framesDropped: 0,
+        currentTimestamp: 1500,
+        startTime: 1000,
+        lastBytesReceived: 500,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 0,
+        audioPacketsLost: 0,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 50,
+          jitterBufferDelay: 10
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 50, jitterBufferDelay: 10}],
+        videoRoundTripTime: '0.05',
+        audioRoundTripTime: '0.05'
+      }
+    ];
+
+    await act(async () => {
+      currentConference.calculateThePlaySpeedTestResult();
+    });
+
+    expect(currentConference.speedTestObject.message).toBe('Your connection is Great!');
+    expect(currentConference.speedTestObject.isfailed).toBe(false);
+    expect(currentConference.speedTestObject.progressValue).toBe(100);
+    expect(currentConference.speedTestObject.isfinished).toBe(true);
+  });
+
+  it('calculates play speed test result with moderate connection', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.statsList.current = [
+      {
+        totalBytesReceivedCount: 1000,
+        framesReceived: 100,
+        framesDropped: 5,
+        currentTimestamp: 2000,
+        startTime: 1000,
+        lastBytesReceived: 1000,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 1,
+        audioPacketsLost: 1,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 100,
+          jitterBufferDelay: 60
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 100, jitterBufferDelay: 60}],
+        videoRoundTripTime: '0.12',
+        audioRoundTripTime: '0.12'
+      },
+      {
+        totalBytesReceivedCount: 500,
+        framesReceived: 50,
+        framesDropped: 2,
+        currentTimestamp: 1500,
+        startTime: 1000,
+        lastBytesReceived: 500,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 0,
+        audioPacketsLost: 0,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 50,
+          jitterBufferDelay: 60
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 50, jitterBufferDelay: 60}],
+        videoRoundTripTime: '0.12',
+        audioRoundTripTime: '0.12'
+      }
+    ];
+
+    await act(async () => {
+      currentConference.calculateThePlaySpeedTestResult();
+    });
+
+    expect(currentConference.speedTestObject.message).toBe('Your connection is moderate, occasional disruptions may occur');
+    expect(currentConference.speedTestObject.isfailed).toBe(false);
+    expect(currentConference.speedTestObject.progressValue).toBe(100);
+    expect(currentConference.speedTestObject.isfinished).toBe(true);
+  });
+
+  it('calculates play speed test result with poor connection', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.statsList.current = [
+      {
+        totalBytesReceivedCount: 1000,
+        framesReceived: 100,
+        framesDropped: 10,
+        currentTimestamp: 2000,
+        startTime: 1000,
+        lastBytesReceived: 1000,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 5,
+        audioPacketsLost: 5,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 100,
+          jitterBufferDelay: 120
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 100, jitterBufferDelay: 120}],
+        videoRoundTripTime: '0.2',
+        audioRoundTripTime: '0.2'
+      },
+      {
+        totalBytesReceivedCount: 500,
+        framesReceived: 50,
+        framesDropped: 5,
+        currentTimestamp: 1500,
+        startTime: 1000,
+        lastBytesReceived: 500,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 2,
+        audioPacketsLost: 2,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 50,
+          jitterBufferDelay: 120
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 50, jitterBufferDelay: 120}],
+        videoRoundTripTime: '0.2',
+        audioRoundTripTime: '0.2'
+      }
+    ];
+
+    await act(async () => {
+      currentConference.calculateThePlaySpeedTestResult();
+    });
+
+    expect(currentConference.speedTestObject.message).toBe('Your connection quality is poor. You may experience interruptions');
+    expect(currentConference.speedTestObject.isfailed).toBe(false);
+    expect(currentConference.speedTestObject.progressValue).toBe(100);
+    expect(currentConference.speedTestObject.isfinished).toBe(true);
+  });
+
 });
