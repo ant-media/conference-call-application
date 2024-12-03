@@ -15,6 +15,7 @@ const contextValue = {
     setSpeedTestObject: jest.fn(),
     makeId: jest.fn(),
     requestSpeakerList: [],
+    setRequestSpeakerList: jest.fn(),
 };
 
 // Mock the useContext hook
