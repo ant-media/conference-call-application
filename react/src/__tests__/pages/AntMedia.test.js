@@ -2913,7 +2913,9 @@ describe('AntMedia Component', () => {
     });
 
     currentConference.handleSendNotificationEvent = jest.fn();
-    currentConference.isPlayOnly = false;
+    await act(async () => {
+      currentConference.setIsPlayOnly(false);
+    });
     currentConference.handlePublisherRequest();
     expect(currentConference.handleSendNotificationEvent).not.toHaveBeenCalled();
   });
@@ -2931,7 +2933,9 @@ describe('AntMedia Component', () => {
     });
 
     currentConference.handleSendNotificationEvent = jest.fn();
-    currentConference.isPlayOnly = true;
+    await act(async () => {
+      currentConference.setIsPlayOnly(true);
+    });
     currentConference.handlePublisherRequest();
     expect(currentConference.handleSendNotificationEvent).not.toHaveBeenCalledWith("REQUEST_BECOME_PUBLISHER", currentConference.roomName, {
       senderStreamId: currentConference.publishStreamId, senderStreamName: currentConference.streamName
@@ -2978,7 +2982,9 @@ describe('AntMedia Component', () => {
     currentConference.setWaitingOrMeetingRoom = jest.fn();
     currentConference.joinRoom = jest.fn();
 
-    currentConference.isPlayOnly = true;
+    await act(async () => {
+      currentConference.setIsPlayOnly(true);
+    });
     currentConference.handleStartBecomePublisher();
     //expect(currentConference.setIsPlayOnly).toHaveBeenCalledWith(false);
     //expect(currentConference.setInitialized).toHaveBeenCalledWith(false);
