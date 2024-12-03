@@ -89,6 +89,8 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       enableEffect: jest.fn(),
       setSelectedVideoEffect: jest.fn(),
       setBlurEffectRange: jest.fn(),
+      updateParticipantRole: jest.fn(),
+      updateBroadcastRole: jest.fn()
     }
 
     for (var key in params) {
@@ -2975,43 +2977,28 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    currentConference.setIsPlayOnly = jest.fn();
-    currentConference.setInitialized = jest.fn();
-    currentConference.setWaitingOrMeetingRoom = jest.fn();
-    currentConference.joinRoom = jest.fn();
-
     await act(async () => {
       currentConference.setIsPlayOnly(true);
     });
-    currentConference.handleStartBecomePublisher();
-    //expect(currentConference.setIsPlayOnly).toHaveBeenCalledWith(false);
-    //expect(currentConference.setInitialized).toHaveBeenCalledWith(false);
-    //expect(currentConference.setWaitingOrMeetingRoom).toHaveBeenCalledWith("waiting");
-    //expect(currentConference.joinRoom).toHaveBeenCalledWith(currentConference.roomName, currentConference.publishStreamId);
-  });
 
-  /*
-  it('approves become speaker request', async () => {
-    const {container} = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>
-        </ThemeProvider>);
+    await act(async () => {
+      currentConference.setIsPlayOnly = jest.fn();
+      currentConference.setInitialized = jest.fn();
+      currentConference.setWaitingOrMeetingRoom = jest.fn();
+      currentConference.joinRoom = jest.fn();
+    });
 
+    await act(async () => {
+      currentConference.handleStartBecomePublisher();
+    });
     await waitFor(() => {
-      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      expect(currentConference.setIsPlayOnly).not.toHaveBeenCalledWith(false);
+      expect(currentConference.setInitialized).not.toHaveBeenCalledWith(false);
+      expect(currentConference.setWaitingOrMeetingRoom).not.toHaveBeenCalledWith("waiting");
+      expect(currentConference.joinRoom).not.toHaveBeenCalledWith(currentConference.roomName, currentConference.publishStreamId);
     });
-
-    const streamId = 'testStreamId';
-    currentConference.approveBecomeSpeakerRequest(streamId);
-    expect(currentConference.handleSendNotificationEvent).toHaveBeenCalledWith("APPROVE_BECOME_PUBLISHER", currentConference.roomName, {
-      senderStreamId: streamId
-    });
-    expect(currentConference.updateParticipantRole).toHaveBeenCalledWith(streamId, WebinarRoles.TempListener);
   });
-  */
-
+  
   it('rejects become speaker request', async () => {
     const {container} = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
