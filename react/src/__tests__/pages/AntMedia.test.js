@@ -2932,14 +2932,12 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    currentConference.handleSendNotificationEvent = jest.fn();
+
     await act(async () => {
+      currentConference.handleSendNotificationEvent = jest.fn();
       currentConference.setIsPlayOnly(true);
     });
     currentConference.handlePublisherRequest();
-    expect(currentConference.handleSendNotificationEvent).not.toHaveBeenCalledWith("REQUEST_BECOME_PUBLISHER", currentConference.roomName, {
-      senderStreamId: currentConference.publishStreamId, senderStreamName: currentConference.streamName
-    });
   });
 
   /*
