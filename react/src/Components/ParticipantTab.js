@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
-import {CircularProgress} from "@mui/material";
+import {CircularProgress, Pagination} from "@mui/material";
 import {WebinarRoles} from "../WebinarRoles";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
@@ -25,9 +25,13 @@ function ParticipantTab(props) {
   const conference = React.useContext(ConferenceContext);
   const theme = useTheme();
 
+  const paginationUpdate = (event, value) => {
+    conference?.updateAllParticipantsPagination(value);
+  }
+
   const getAdminButtons = (streamId, assignedVideoCardId) => {
       let publishStreamId = (streamId === "localVideo") ? conference.publishStreamId : streamId;
-      let role = conference.allParticipants[publishStreamId]?.role;
+      let role = conference.pagedParticipants[publishStreamId]?.role;
 
     return (
       <div id={'admin-button-group-'+streamId}>
@@ -97,7 +101,7 @@ function ParticipantTab(props) {
         </Grid>
         <Grid item>
           <div style={{display: 'flex'}}>
-            {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
+            {(typeof conference.pagedParticipants[streamId]?.isPinned !== "undefined") && (conference.pagedParticipants[streamId]?.isPinned === true) ? (
               <PinBtn
                 id={"unpin-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
@@ -139,20 +143,32 @@ function ParticipantTab(props) {
             variant="body2"
             style={{marginLeft: 4, fontWeight: 500}}
           >
-            {Object.keys(conference.allParticipants).length}
+            {conference?.participantCount}
           </ParticipantName>
         </Grid>
-        {conference.isPlayOnly === false ? getParticipantItem(conference.publishStreamId, "You") : ""}
-        {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
+        {Object.entries(conference.pagedParticipants).map(([streamId, broadcastObject]) => {
           if (conference.publishStreamId !== streamId) {
-            var assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
+            let assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
             return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
           } else {
-            return "";
+            return getParticipantItem(conference.publishStreamId, "You");
           }
         })}
       </Stack>
     </Grid>
+      {/* Pagination Controls */}
+      <Grid
+          container
+          justifyContent="center"
+          sx={{ mt: 2, mb: 2 }}
+      >
+        <Pagination
+            data-testid="participant-list-pagination"
+            count={conference.globals.participantListPagination.totalPage}
+            page={conference.globals.participantListPagination.currentPage}
+            onChange={paginationUpdate}
+        />
+      </Grid>
     </>
   );
 

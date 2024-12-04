@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
-import {Box, CircularProgress, Grid, Backdrop, Typography} from "@mui/material";
+import {Backdrop, Box, CircularProgress, Grid} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
-import _, { forEach } from "lodash";
+import _ from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
 import {useSnackbar} from "notistack";
@@ -33,6 +33,13 @@ const globals = {
   maxVideoTrackCount: 6,
   desiredTileCount: 6,
   trackEvents: [],
+  //pagination is used to keep track of the current page and the total page of the participants list
+  participantListPagination: {
+      currentPage: 1,
+      pageSize: 15,
+      totalPage: 1,
+      offset: 1
+  }
 };
 
 function getMediaConstraints(videoSendResolution, frameRate) {
@@ -378,12 +385,19 @@ function AntMedia(props) {
     const [videoTrackAssignments, setVideoTrackAssignments] = useState([]);
 
   /*
-   * allParticipants: is a dictionary of (streamId, broadcastObject) for all participants in the room.
-   * It determines the participants list in the participants drawer.
-   * subtrackList callback (which is return of getSubtracks request) for roomName has subtrackList and
-   * we use it to fill this dictionary.
+   * allParticipants: is a dictionary of (streamId, broadcastObject) for the sum of the paged participants and the participants in videoTrackAssignments.
+   * It comes from subtrackList callback + broadcast object which called in video track assignments list
    */
   const [allParticipants, setAllParticipants] = useState({});
+
+  /*
+   * pagedParticipants: is a dictionary of (streamId, broadcastObject) for participants in the participant list drawer.
+   * subtrackList callback (which is return of getSubtracks request) for roomName has subtrackList and
+   * we use it to fill this dictionary. It's a subset of allParticipants.
+   */
+    const [pagedParticipants, setPagedParticipants] = useState({});
+
+    const [participantCount, setParticipantCount] = useState(1); // 1 is for the local participant
 
     const [audioTracks, setAudioTracks] = useState([]);
 
@@ -1116,7 +1130,7 @@ function AntMedia(props) {
             );
             console.log("UPDATE_PARTICIPANT_ROLE event sent by "+publishStreamId);
 
-            webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+            webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
         }, 2000);
     }
 
@@ -1222,7 +1236,8 @@ function AntMedia(props) {
             metaData: JSON.stringify({isCameraOn: false}),
             isPinned: undefined,
             isScreenShared: undefined,
-            isFake: true
+            isFake: true,
+            status: "livestream"
         };
         allParticipantsTemp["streamId_" + suffix] = broadcastObject;
 
@@ -1273,29 +1288,6 @@ function AntMedia(props) {
                 setIsRecordPluginActive(brodcastStatusMetadata.isRecording);
             }
         }
-
-        let participantIds = broadcastObject.subTrackStreamIds;
-
-        //find and remove not available tracks
-        const temp = {...allParticipants};
-        let currentTracks = Object.keys(temp);
-        currentTracks.forEach(trackId => {
-            if (!allParticipants[trackId].isFake && !participantIds.includes(trackId)) {
-                console.log("stream removed:" + trackId);
-
-                delete temp[trackId];
-            }
-        });
-        console.log("handleMainTrackBroadcastObject setAllParticipants:"+JSON.stringify(temp));
-        setAllParticipants(temp);
-        setParticipantUpdated(!participantUpdated);
-
-        //request broadcast object for new tracks
-        participantIds.forEach(pid => {
-            if (allParticipants[pid] === undefined) {
-                webRTCAdaptor?.getBroadcastObject(pid);
-            }
-        });
     }
 
 
@@ -1331,6 +1323,9 @@ function AntMedia(props) {
             tempBroadcastObject.duration = -1;
             tempBroadcastObject.bitrate = -1;
             tempBroadcastObject.updateTime = -1;
+        }
+        if (tempBroadcastObject.streamId === publishStreamId) {
+            tempBroadcastObject.name = "You";
         }
         return tempBroadcastObject;
     }
@@ -1466,9 +1461,12 @@ function AntMedia(props) {
         } else if (info === "subtrackList") {
             let subtrackList = obj.subtrackList;
             let allParticipantsTemp = {};
+            let pagedParticipantsTemp = {};
             if (!isPlayOnly && publishStreamId) {
                 allParticipantsTemp[publishStreamId] = {name: "You"};
             }
+
+            // We are getting the subtracks of the room and adding them to the allParticipantsTemp
             subtrackList.forEach(subTrack => {
                 let broadcastObject = JSON.parse(subTrack);
 
@@ -1485,17 +1483,38 @@ function AntMedia(props) {
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
+                pagedParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
             });
+
+            // Subtrack list is pagination based, but we need to keep participants who have video track assignments but not in the subtrack list
+            const participantVTAByStreamId = new Map(
+                videoTrackAssignments.map(e => [e.streamId, e])
+            );
+
+            Object.keys(allParticipants).forEach(participantId => {
+                if (participantVTAByStreamId.has(participantId) && !allParticipantsTemp[participantId]) {
+                    allParticipantsTemp[participantId] = allParticipants[participantId];
+                }
+            });
+
             // add fake participants into the new list
             Object.keys(allParticipants).forEach(streamId => {
                 let broadcastObject = allParticipants[streamId];
                 if (broadcastObject.isFake === true) {
                     allParticipantsTemp[streamId] = broadcastObject;
+                    pagedParticipantsTemp[streamId] = broadcastObject;
                 }
             });
+            if (!_.isEqual(pagedParticipantsTemp, pagedParticipants)) {
+                setPagedParticipants(pagedParticipantsTemp);
+            }
             if (!_.isEqual(allParticipantsTemp, allParticipants)) {
                 setAllParticipants(allParticipantsTemp);
                 setParticipantUpdated(!participantUpdated);
+            }
+        } else if (info === "subtrackCount") {
+            if (obj.count !== undefined) {
+                setParticipantCount(obj.count);
             }
         } else if (info === "broadcastObject") {
             if (obj.broadcast === undefined) {
@@ -1526,7 +1545,7 @@ function AntMedia(props) {
                 localVideoCreate(newLocalVideo);
                 // we need to set the setVideoCameraSource to be able to update sender source after the reconnection
                 webRTCAdaptor.mediaManager.setVideoCameraSource(publishStreamId, webRTCAdaptor.mediaManager.mediaConstraints, null, true);
-                webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+                webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
                 publishReconnected = true;
                 reconnecting = !(publishReconnected && playReconnected);
                 setIsReconnectionInProgress(reconnecting);
@@ -1555,7 +1574,7 @@ function AntMedia(props) {
             setIsPlayed(true);
             setIsNoSreamExist(false);
             webRTCAdaptor?.getBroadcastObject(roomName);
-            webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+            webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
             requestVideoTrackAssignmentsInterval();
 
             if (isPlayOnly) {
@@ -2280,6 +2299,8 @@ function AntMedia(props) {
 
                 currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
 
+                //let updateAllParticipants = {...allParticipants};
+
                 // update participants according to current assignments
                 receivedVideoTrackAssignments.forEach(vta => {
                     let existingAssignment = currentVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
@@ -2287,7 +2308,24 @@ function AntMedia(props) {
                         existingAssignment.streamId = vta.trackId;
                         existingAssignment.isReserved = vta.reserved;
                     }
+                    if (!allParticipants[vta.trackId]) {
+                        /*
+                        updateAllParticipants[vta.trackId] = {
+                            streamId: vta.trackId,
+                            name: vta.trackId,
+                            isScreenShared: false,
+                            isPinned: false,
+                            isFake: false,
+                            isMine: false,
+                            status: "livestream"
+                            metaData: "{\"isMicMuted\":true,\"isCameraOn\":false,\"isScreenShared\":false,\"playOnly\":false}"
+                        };
+                         */
+                        webRTCAdaptor?.getBroadcastObject(vta.trackId);
+                    }
                 });
+                
+                //setAllParticipants(updateAllParticipants);
 
                 checkScreenSharingStatus();
 
@@ -2317,7 +2355,8 @@ function AntMedia(props) {
             } else if (eventType === "TRACK_LIST_UPDATED") {
                 console.info("TRACK_LIST_UPDATED -> ", obj);
 
-                webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+                webRTCAdaptor?.getSubtrackCount(roomName, null, null);
+                webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
             } else if (eventType === "UPDATE_PARTICIPANT_ROLE") {
 
                 console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
@@ -2329,7 +2368,7 @@ function AntMedia(props) {
 
                 if (updatedParticipant === null || updatedParticipant === undefined) {
                     console.warn("Cannot find broadcast object for streamId: " + notificationEvent.streamId, " in allParticipants. Updated participant list request is sent.");
-                    webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
                     return;
                 }
 
@@ -2344,7 +2383,7 @@ function AntMedia(props) {
                     setRole(notificationEvent.role);
                 } else {
                     console.log("UPDATE_PARTICIPANT_ROLE event received and subtracks are queried");
-                    webRTCAdaptor?.getSubtracks(roomName, null, 0, 15);
+                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
                 }
                 setParticipantUpdated(!participantUpdated);
             }
@@ -2431,6 +2470,7 @@ function AntMedia(props) {
         // we need to empty participant array. if we are going to leave it in the first place.
         setVideoTrackAssignments([]);
         setAllParticipants({});
+        setPagedParticipants({});
 
         clearInterval(audioListenerIntervalJob);
         audioListenerIntervalJob = null;
@@ -2529,6 +2569,7 @@ function AntMedia(props) {
             console.log("removeAllRemoteParticipants setAllParticipants:"+JSON.stringify(allParticipantsTemp));
             setAllParticipants(allParticipantsTemp);
         }
+        setPagedParticipants({});
         setParticipantUpdated(!participantUpdated);
     }
 
@@ -2551,7 +2592,7 @@ function AntMedia(props) {
 
         let allParticipantsTemp = {...allParticipants};
         allParticipantsTemp[publishStreamId] = {
-            streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false
+            streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false, status: "livestream"
         };
 
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
@@ -2616,6 +2657,35 @@ function AntMedia(props) {
             }
         });
         return isExist;
+    }
+
+    React.useEffect(() => {
+        updateAllParticipantsPagination(globals.participantListPagination.currentPage);
+    }, [participantCount]);
+
+    function updateAllParticipantsPagination(currentPage) {
+        if (currentPage <= 0) {
+            currentPage = 1;
+        }
+
+        // we calculate the total page count for pagination
+        if (participantCount === 0) {
+            // if we are play only user and there is no participant then total page is 1
+            globals.participantListPagination.totalPage = 1;
+        } else {
+            globals.participantListPagination.totalPage = Math.floor(participantCount / globals.participantListPagination.pageSize)
+                + (participantCount % globals.participantListPagination.pageSize > 0 ? 1 : 0);
+        }
+
+        if (currentPage > globals.participantListPagination.totalPage) {
+            currentPage = globals.participantListPagination.totalPage;
+        }
+
+        globals.participantListPagination.currentPage = currentPage;
+        globals.participantListPagination.offset = (globals.participantListPagination.currentPage - 1) * globals.participantListPagination.pageSize;
+
+        // we need to get the subtracks for the new page
+        webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
     }
 
     const fetchImageAsBlob = async (url) => {
@@ -3076,6 +3146,10 @@ function AntMedia(props) {
                         isBroadcasting,
                         playStats,
                         checkAndSetIsPinned,
+                        updateAllParticipantsPagination,
+                        pagedParticipants,
+                        participantCount,
+                        setParticipantCount,
                         checkAndUpdateVideoAudioSourcesForPublishSpeedTest,
                         fetchImageAsBlob,
                         setAndEnableVirtualBackgroundImage,
