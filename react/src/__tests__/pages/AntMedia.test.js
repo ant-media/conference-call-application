@@ -2875,4 +2875,142 @@ describe('AntMedia Component', () => {
     });
   });
 
+  describe('updateAllParticipantsPagination', () => {
+    it('sets currentPage to 1 if currentPage is less than or equal to 0', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.updateAllParticipantsPagination(0);
+      expect(currentConference.globals.participantListPagination.currentPage).toBe(1);
+    });
+
+    it('calculates totalPage correctly', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setParticipantCount(25);
+      });
+      currentConference.globals.participantListPagination.pageSize = 10;
+      currentConference.updateAllParticipantsPagination(1);
+      expect(currentConference.globals.participantListPagination.totalPage).toBe(3);
+    });
+
+    it('sets currentPage to totalPage if currentPage is greater than totalPage', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setParticipantCount(25);
+      });
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(25);
+      });
+      currentConference.globals.participantListPagination.pageSize = 10;
+      currentConference.updateAllParticipantsPagination(5);
+      expect(currentConference.globals.participantListPagination.currentPage).toBe(3);
+    });
+
+    it('calculates startIndex and endIndex correctly', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setParticipantCount(25);
+      });
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(25);
+      });
+      currentConference.globals.participantListPagination.pageSize = 10;
+      currentConference.updateAllParticipantsPagination(2);
+    });
+
+    it('calls getSubtracks with correct parameters', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockGetSubtracks = jest.fn();
+      currentConference.getSubtracks = mockGetSubtracks;
+
+      currentConference.roomName = 'testRoom';
+      await act(async () => {
+        currentConference.setParticipantCount(25);
+      });
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(25);
+      });
+      currentConference.globals.participantListPagination.pageSize = 10;
+      currentConference.updateAllParticipantsPagination(2);
+    });
+
+    it('update participant count, when we receive new subtrack count', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const obj = { count: 12 };
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback('subtrackCount', obj);
+      });
+
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(12);
+      });
+    });
+  });
+
 });
