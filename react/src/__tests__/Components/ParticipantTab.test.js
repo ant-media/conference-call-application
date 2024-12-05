@@ -25,9 +25,31 @@ const contextValue = {
   publishStreamId: 'test-stream-id',
   pinVideo: jest.fn(),
   makeParticipantPresenter: jest.fn(),
+  pagedParticipants: {
+    'test-stream-id': {
+        role: 'host',
+        participantID: 'test-participant-id',
+        streamID: 'test-stream-id',
+        videoTrack: 'test-video-track',
+        audioTrack: 'test-audio-track',
+        videoLabel: 'test-video-label',
+    }
+  },
   isAdmin: true,
   isPlayOnly: false,
   videoTrackAssignments: [{streamID: 'test-stream-id', participantID: 'test-participant-id', videoTrack: 'test-video-track', audioTrack: 'test-audio-track', videoLabel: 'test-video-label'}],
+  globals: {
+    maxVideoTrackCount: 6,
+    desiredTileCount: 6,
+    trackEvents: [],
+    participantListPagination: {
+      currentPage: 1,
+      pageSize: 15,
+      totalPage: 1,
+      startIndex: 0,
+      endIndex: 15
+    }
+  }
 };
 
 // Mock the useContext hook
