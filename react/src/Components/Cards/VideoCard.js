@@ -6,6 +6,7 @@ import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
 import { useTranslation } from "react-i18next";
 import { isMobile, isTablet } from "react-device-detect";
+import {parseMetaData} from "../../utils";
 
 const CustomizedVideo = styled("video")({
     borderRadius: 4,
@@ -46,16 +47,6 @@ function VideoCard(props) {
 
     const isMine = props.trackAssignment?.isMine;
     const isVideoTrack = props.trackAssignment.track?.kind === "video";
-
-    const parseMetaData = (metaData, key) => {
-        if (!metaData) return false;
-        try {
-            const parsed = JSON.parse(metaData);
-            return parsed[key] || false;
-        } catch {
-            return false;
-        }
-    };
 
     const micMuted = isMine
         ? conference?.isMyMicMuted
