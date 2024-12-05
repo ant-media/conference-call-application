@@ -59,17 +59,11 @@ class RestHelper:
             "type": "playlist"
         }
 
-        try:
-            response = self.session.post(url, json=payload)
-            if response.status_code == 200:
-                json_data = response.json()
-                print("Broadcast created successfully:", json_data)
-                return json_data
-            else:
-                response.raise_for_status()
-        except requests.RequestException as e:
-            print(f"An error occurred: {e}")
-            raise
+        response = self.session.post(url, json=payload)
+        if response.status_code == 200:
+            json_data = response.json()
+            print("Broadcast created successfully:", json_data)
+            return json_data
         
   def start_broadcast(self, streamId):
     url = f"{self.rest_url}/request?_path={self.app_name}/rest/v2/broadcasts/{streamId}/start"
@@ -78,8 +72,6 @@ class RestHelper:
         json_data = response.json()
         print("Broadcast started successfully:", json_data)
         return json_data
-    else:
-        response.raise_for_status()
 
   def getVoDFor(self, streamId):
     resp = self.session.get(self.rest_url +"/request?_path="+self.app_name+"/rest/v2/vods/list/0/5")
