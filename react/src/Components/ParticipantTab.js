@@ -58,7 +58,7 @@ function ParticipantTab(props) {
     return (
         <PinBtn
             id={"mic-toggle-participant-"+streamId}
-            data-testid="mic-toggle-participant-test-stream-id"
+            data-testid={"mic-toggle-participant-" + streamId}
             sx={{ width: 28, pt: 1, pb: 1 }}
             onClick={() => { handleToggleMic(micMuted, streamId, name) }
             }
@@ -90,7 +90,7 @@ function ParticipantTab(props) {
   { ( role === WebinarRoles.Host || role === WebinarRoles.Speaker || role === WebinarRoles.TempListener ) && conference?.isAdmin === true ?(
     <PinBtn
       id={"add-presenter-"+streamId}
-      data-testid="add-presenter-test-stream-id"
+      data-testid={"add-presenter-"+streamId}
       disabled={conference?.presenterButtonDisabled.includes(streamId)}
       sx={{ width: 28, pt: 1, pb: 1 }}
       onClick={() => { conference?.makeParticipantPresenter(publishStreamId) }
