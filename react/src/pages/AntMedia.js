@@ -92,7 +92,6 @@ function getMediaConstraints(videoSendResolution, frameRate) {
             };
             break;
         default:
-            constraint = { video: true };
             break;
     }
 
@@ -1277,7 +1276,6 @@ function AntMedia(props) {
         if (devices.length > 0) {
             checkAndUpdateVideoAudioSources();
         } else {
-            mediaConstraints = getMediaConstraints(null, 20);
             navigator.mediaDevices.enumerateDevices().then(devices => {
                 setDevices(devices);
             });
