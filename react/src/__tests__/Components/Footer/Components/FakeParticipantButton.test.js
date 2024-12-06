@@ -2,7 +2,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
-import EndCallButton from "../../../../Components/Footer/Components/EndCallButton";
 import FakeParticipantButton from "../../../../Components/Footer/Components/FakeParticipantButton";
 
 // Mock the context value

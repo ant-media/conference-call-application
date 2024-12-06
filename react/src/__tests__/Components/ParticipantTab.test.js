@@ -49,7 +49,9 @@ const contextValue = {
       startIndex: 0,
       endIndex: 15
     }
-  }
+  },
+  muteLocalMic: jest.fn(),
+  turnOffYourMicNotification: jest.fn(),
 };
 
 // Mock the useContext hook
@@ -115,6 +117,22 @@ describe('ParticipantTab Component', () => {
     );
     const presenterButton = getByTestId('add-presenter-test-stream-id');
     expect(presenterButton).toBeInTheDocument();
+  });
+
+  it('check muteLocalMic called in getMuteParticipantButton', () => {
+    contextValue.isAdmin = true;
+    process.env.REACT_APP_PARTICIPANT_TAB_MUTE_PARTICIPANT_BUTTON_ENABLED=true
+
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+    const micToggleParticipant = getByTestId('mic-toggle-participant-test-stream-id');
+    expect(micToggleParticipant).toBeInTheDocument();
+
+    micToggleParticipant.click();
+    expect(contextValue.muteLocalMic).toHaveBeenCalled();
   });
   
 });
