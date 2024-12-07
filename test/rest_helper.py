@@ -34,6 +34,45 @@ class RestHelper:
     else:
         response.raise_for_status()
 
+  def create_broadcast_for_play_only_speed_test(self):
+        url = f"{self.rest_url}/request?_path={self.app_name}/rest/v2/broadcasts/create"
+        payload = {
+            "hlsViewerCount": 0,
+            "dashViewerCount": 0,
+            "webRTCViewerCount": 0,
+            "rtmpViewerCount": 0,
+            "mp4Enabled": 0,
+            "playlistLoopEnabled": True,
+            "autoStartStopEnabled": False,
+            "plannedStartDate": 0,
+            "playListItemList": [
+                {
+                    "type": "VoD",
+                    "streamUrl": "https://github.com/ant-media/conference-call-application/raw/refs/heads/refactorPlayOnlySpeedTest/static/speedTestVideo/speed-test-sample-video.mp4",
+                    "name": "speedTestSampleStream",
+                    "seekTimeInMs": 0,
+                    "durationInMs": 60000
+                }
+            ],
+            "name": "speedTestSampleStream",
+            "streamId": "speedTestSampleStream",
+            "type": "playlist"
+        }
+
+        response = self.session.post(url, json=payload)
+        if response.status_code == 200:
+            json_data = response.json()
+            print("Broadcast created successfully:", json_data)
+            return json_data
+        
+  def start_broadcast(self, streamId):
+    url = f"{self.rest_url}/request?_path={self.app_name}/rest/v2/broadcasts/{streamId}/start"
+    response = self.session.post(url)
+    if response.status_code == 200:
+        json_data = response.json()
+        print("Broadcast started successfully:", json_data)
+        return json_data
+
   def getVoDFor(self, streamId):
     resp = self.session.get(self.rest_url +"/request?_path="+self.app_name+"/rest/v2/vods/list/0/5")
     json_data = json.loads(resp.text)
