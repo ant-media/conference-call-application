@@ -214,7 +214,7 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MVN_GPG_PASSPHRASE }}
 
   webinar-integration-tests:  
-    needs: unit-tests 
+    needs: install-test-structure 
     runs-on: ubuntu-latest
 
     steps:           
