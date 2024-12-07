@@ -1304,11 +1304,14 @@ function AntMedia(props) {
         let metaData = JSON.parse(broadcastObject.metaData);
 
         let allParticipantsTemp = {...allParticipants};
+        let pagedParticipantsTemp = {...pagedParticipants};
 
         broadcastObject.isScreenShared = metaData.isScreenShared;
         let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
         allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject; //TODO: optimize
+        pagedParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
+            setPagedParticipants(pagedParticipantsTemp);
             setAllParticipants(allParticipantsTemp);
             setParticipantUpdated(!participantUpdated);
         }

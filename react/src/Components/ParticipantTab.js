@@ -8,6 +8,7 @@ import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import {CircularProgress, Pagination} from "@mui/material";
 import {WebinarRoles} from "../WebinarRoles";
+import {parseMetaData} from "../utils";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: theme.palette.textColor,
@@ -27,6 +28,44 @@ function ParticipantTab(props) {
 
   const paginationUpdate = (event, value) => {
     conference?.updateAllParticipantsPagination(value);
+  }
+
+  const handleToggleMic = (isMicMuted, streamId, streamName) => {
+    if (streamId === conference?.publishStreamId && !conference?.isMyMicMuted) {
+      conference?.muteLocalMic();
+      return;
+    }
+
+    const participant = {
+      streamId: streamId,
+      streamName: streamName,
+    };
+    conference?.setParticipantIdMuted(participant);
+    if (!isMicMuted) {
+      conference?.turnOffYourMicNotification(participant.streamId);
+    }
+  };
+
+  const getMuteParticipantButton = (streamId) => {
+    let micMuted = false;
+    if (streamId === conference?.publishStreamId) {
+      micMuted = conference?.isMyMicMuted;
+    } else {
+      micMuted =parseMetaData(conference.pagedParticipants[streamId]?.metaData, "isMicMuted");
+    }
+    let name = conference.pagedParticipants[streamId]?.name;
+
+    return (
+        <PinBtn
+            id={"mic-toggle-participant-"+streamId}
+            data-testid={"mic-toggle-participant-" + streamId}
+            sx={{ width: 28, pt: 1, pb: 1 }}
+            onClick={() => { handleToggleMic(micMuted, streamId, name) }
+            }
+        >
+          <SvgIcon size={28} name={micMuted ? "muted-microphone" :  "microphone"} color={micMuted ? "primary" : "error"} />
+        </PinBtn>
+    )
   }
 
   const getAdminButtons = (streamId, assignedVideoCardId) => {
@@ -51,7 +90,7 @@ function ParticipantTab(props) {
   { ( role === WebinarRoles.Host || role === WebinarRoles.Speaker || role === WebinarRoles.TempListener ) && conference?.isAdmin === true ?(
     <PinBtn
       id={"add-presenter-"+streamId}
-      data-testid="add-presenter-test-stream-id"
+      data-testid={"add-presenter-"+streamId}
       disabled={conference?.presenterButtonDisabled.includes(streamId)}
       sx={{ width: 28, pt: 1, pb: 1 }}
       onClick={() => { conference?.makeParticipantPresenter(publishStreamId) }
@@ -125,6 +164,9 @@ function ParticipantTab(props) {
             <div>
               {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
                 getAdminButtons(streamId, assignedVideoCardId)
+              ) : null}
+              {process.env.REACT_APP_PARTICIPANT_TAB_MUTE_PARTICIPANT_BUTTON_ENABLED === "true" ? (
+                  getMuteParticipantButton(streamId)
               ) : null}
             </div>
           </div>
