@@ -177,7 +177,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   conference-integration-tests:  
-    needs: [build, setup-test-environment]   
+    needs: [unit-tests]   
     runs-on: ubuntu-latest
 
     steps:
@@ -199,7 +199,7 @@ jobs:
           path: ${{ github.workspace }}/test/**/*.png
 
   webinar-integration-tests:  
-    needs: [build, setup-test-environment] 
+    needs: [unit-tests] 
     runs-on: ubuntu-latest
 
     steps:           
