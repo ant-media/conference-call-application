@@ -160,7 +160,7 @@ jobs:
         pip3 install psutil
         
   unit-tests:     
-    needs: [build, setup-test-environment] 
+    needs: [build] 
     runs-on: ubuntu-latest
     steps:
       - name: Run Unit Test
