@@ -163,6 +163,12 @@ jobs:
     needs: [build] 
     runs-on: ubuntu-latest
     steps:
+      - name: Debug Workspace
+        run: |
+          echo "Current Directory:"
+          pwd
+          echo "Contents:"
+          ls -al
       - name: Run Unit Test
         run: |
           echo "pwd:"
