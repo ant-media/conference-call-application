@@ -163,19 +163,15 @@ jobs:
     needs: [build] 
     runs-on: ubuntu-latest
     steps:
-      - name: Debug Workspace
-        run: |
-          echo "Current Directory:"
-          pwd
-          echo "Contents:"
-          ls -al
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Run Unit Test
         run: |
           echo "pwd:"
           pwd
           echo "ls:"
           ls -al
-          echo "cd:"
           cd react
           npm install --include=dev
           npm test
