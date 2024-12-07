@@ -165,8 +165,11 @@ jobs:
     steps:
       - name: Run Unit Test
         run: |
+          echo "pwd:"
           pwd
-          ls
+          echo "ls:"
+          ls -al
+          echo "cd:"
           cd react
           npm install --include=dev
           npm test
