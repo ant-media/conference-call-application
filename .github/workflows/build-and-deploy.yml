@@ -186,6 +186,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Run Integration Test
         run: |
           cd test
@@ -208,6 +211,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:           
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
       - name: Run Integration Test for webinar
         run: |
           cd test
