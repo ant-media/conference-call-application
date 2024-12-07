@@ -133,9 +133,36 @@ jobs:
       with:
         name: wars
         path: /tmp/*.war
+  
+  setup-test-environment:     
+    runs-on: ubuntu-latest
+
+    - name: Install Test Tool
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
+        git clone https://gitlab.com/Ant-Media/webrtc-test.git
+        cd webrtc-test
+        ./redeploy.sh
+        cp target/webrtc-load-test-tool-*.zip ../
+        cd ..
+        unzip webrtc-load-test-tool-*.zip
+        mkdir ~/test
+        mv webrtc-load-test ~/test
+
+    - name: Install Selenium
+      run: |
+        wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip
+        unzip chromedriver-linux64.zip
+        sudo cp chromedriver-linux64/chromedriver /tmp
+        ls -al /tmp
+        pip3 install selenium==4.14
+        pip3 install requests
+        pip3 show selenium 
+        pip3 install psutil
         
   unit-tests:     
-    needs: build 
+    needs: [build, setup-test-environment] 
     runs-on: ubuntu-latest
     steps:
       - name: Run Unit Test
@@ -149,38 +176,8 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  install-test-structure:
-    needs: unit-tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Install Test Tool
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
-          git clone https://gitlab.com/Ant-Media/webrtc-test.git
-          cd webrtc-test
-          ./redeploy.sh
-          cp target/webrtc-load-test-tool-*.zip ../
-          cd ..
-          unzip webrtc-load-test-tool-*.zip
-          mkdir ~/test
-          mv webrtc-load-test ~/test
-
-      - name: Install Selenium
-        run: |
-          wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip
-          unzip chromedriver-linux64.zip
-          sudo cp chromedriver-linux64/chromedriver /tmp
-          ls -al /tmp
-          pip3 install selenium==4.14
-          pip3 install requests
-          pip3 show selenium 
-          pip3 install psutil
-      
-
   conference-integration-tests:  
-    needs: install-test-structure    
+    needs: [build, setup-test-environment]   
     runs-on: ubuntu-latest
 
     steps:
@@ -201,20 +198,8 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/test/**/*.png
 
-      - name: Publish to Maven Central
-        if: github.ref == 'refs/heads/main'
-        run: |
-          cd webapp
-          ls -alh
-          ls -alh target/
-          mvn -e deploy -DskipTests --quiet --settings ../mvn-settings.xml
-        env:
-          MAVEN_USERNAME: ${{ secrets.MVN_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.MVN_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MVN_GPG_PASSPHRASE }}
-
   webinar-integration-tests:  
-    needs: install-test-structure 
+    needs: [build, setup-test-environment] 
     runs-on: ubuntu-latest
 
     steps:           
@@ -260,6 +245,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Publish to Maven Central
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd webapp
+          ls -alh
+          ls -alh target/
+          mvn -e deploy -DskipTests --quiet --settings ../mvn-settings.xml
+        env:
+          MAVEN_USERNAME: ${{ secrets.MVN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MVN_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MVN_GPG_PASSPHRASE }}
 
     - name: Get versions data from repo
       run: wget -O maven-metadata.xml https://oss.sonatype.org/service/local/repositories/snapshots/content/io/antmedia/ant-media-server/maven-metadata.xml       
