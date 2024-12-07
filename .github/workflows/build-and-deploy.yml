@@ -165,6 +165,7 @@ jobs:
     steps:
       - name: Run Unit Test
         run: |
+          pwd
           cd react
           npm install --include=dev
           npm test
