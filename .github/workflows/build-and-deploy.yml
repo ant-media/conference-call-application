@@ -136,30 +136,30 @@ jobs:
   
   setup-test-environment:     
     runs-on: ubuntu-latest
+    steps:
+      - name: Install Test Tool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
+          git clone https://gitlab.com/Ant-Media/webrtc-test.git
+          cd webrtc-test
+          ./redeploy.sh
+          cp target/webrtc-load-test-tool-*.zip ../
+          cd ..
+          unzip webrtc-load-test-tool-*.zip
+          mkdir ~/test
+          mv webrtc-load-test ~/test
 
-    - name: Install Test Tool
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
-        git clone https://gitlab.com/Ant-Media/webrtc-test.git
-        cd webrtc-test
-        ./redeploy.sh
-        cp target/webrtc-load-test-tool-*.zip ../
-        cd ..
-        unzip webrtc-load-test-tool-*.zip
-        mkdir ~/test
-        mv webrtc-load-test ~/test
-
-    - name: Install Selenium
-      run: |
-        wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip
-        unzip chromedriver-linux64.zip
-        sudo cp chromedriver-linux64/chromedriver /tmp
-        ls -al /tmp
-        pip3 install selenium==4.14
-        pip3 install requests
-        pip3 show selenium 
-        pip3 install psutil
+      - name: Install Selenium
+        run: |
+          wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip
+          unzip chromedriver-linux64.zip
+          sudo cp chromedriver-linux64/chromedriver /tmp
+          ls -al /tmp
+          pip3 install selenium==4.14
+          pip3 install requests
+          pip3 show selenium 
+          pip3 install psutil
         
   unit-tests:     
     needs: [build, setup-test-environment] 
