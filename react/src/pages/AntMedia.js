@@ -1175,6 +1175,7 @@ function AntMedia(props) {
             // if the user is in playOnly mode, it will join the room with the generated stream id
             // so we can get the list of play only participants in the room
             webRTCAdaptor?.joinRoom(roomName, generatedStreamId, null, streamName, role, getUserStatusMetadata());
+            console.log("Play only mode is active, joining the room with the generated stream id");
         }
 
         webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode, '{}', role);
