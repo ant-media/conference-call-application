@@ -18,8 +18,14 @@ class TestWebinarScenario(unittest.TestCase):
     print(self._testMethodName, " starting...")
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
+    self.user = os.environ.get('AMS_USER')
+    self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
     self.chrome.init(True)
+    self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
+    self.rest_helper.login()
+    self.rest_helper.create_broadcast_for_play_only_speed_test()
+    self.rest_helper.start_broadcast("speedTestSampleStream")
     #self.startLoadTest()
 
   def tearDown(self):
