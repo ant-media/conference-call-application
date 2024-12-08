@@ -1171,7 +1171,7 @@ function AntMedia(props) {
 
         if (!isPlayOnly) {
             handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
-        } else {
+        } else if (process.env.REACT_APP_SHOW_PLAY_ONLY_PARTICIPANTS === "true") {
             // if the user is in playOnly mode, it will join the room with the generated stream id
             // so we can get the list of play only participants in the room
             webRTCAdaptor?.joinRoom(roomName, generatedStreamId, null, streamName, role, getUserStatusMetadata());
@@ -2495,7 +2495,9 @@ function AntMedia(props) {
             handleStopScreenShare();
         }
 
-        webRTCAdaptor?.leaveFromRoom(roomName, publishStreamId);
+        if (process.env.REACT_APP_SHOW_PLAY_ONLY_PARTICIPANTS === "true") {
+            webRTCAdaptor?.leaveFromRoom(roomName, publishStreamId);
+        }
 
         playLeaveRoomSound();
 
