@@ -146,14 +146,14 @@ jobs:
 
     - name: Upload conferencing war file as artifact
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: circle-conferencing.war
         path: /tmp/circle-conferencing.war
 
     - name: Upload webinar war file as artifact
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: circle-webinar.war
         path: /tmp/circle-webinar.war
@@ -209,7 +209,7 @@ jobs:
           mv webrtc-load-test ~/test
 
       - name: Download circle-conferencing.war Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: circle-conferencing.war
           path: /tmp
@@ -271,7 +271,7 @@ jobs:
           mv webrtc-load-test ~/test
 
       - name: Download circle-webinar.war Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: circle-webinar.war
           path: /tmp
