@@ -146,14 +146,14 @@ jobs:
 
     - name: Upload conferencing war file as artifact
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: circle-conferencing.war
         path: /tmp/circle-conferencing.war
 
     - name: Upload webinar war file as artifact
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: circle-webinar.war
         path: /tmp/circle-webinar.war
@@ -184,7 +184,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   conference-integration-tests:  
-    needs: [build]   
+    needs: [unit-tests]   
     runs-on: ubuntu-latest
 
     steps:
@@ -246,7 +246,7 @@ jobs:
           path: ${{ github.workspace }}/test/**/*.png
 
   webinar-integration-tests:  
-    needs: [build] 
+    needs: [unit-tests] 
     runs-on: ubuntu-latest
 
     steps:           
