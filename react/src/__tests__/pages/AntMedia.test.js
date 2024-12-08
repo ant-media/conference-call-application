@@ -3591,16 +3591,26 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    currentConference.requestSpeakerList = ['testStreamId'];
+    await act(() => {
+      currentConference.requestSpeakerList = ['testStreamIdListener'];
+    });
 
     await act(() => {
-      currentConference.setPublishStreamId('testStreamId');
+      currentConference.setRequestSpeakerList(['testStreamIdListener']);
+    });
+
+    await act(() => {
+      currentConference.setPublishStreamId('testStreamIdHost');
+    });
+
+    await act(() => {
+      currentConference.setRole(WebinarRoles.Host);
     });
 
     const notificationEvent = {
       streamId: 'testStreamId',
       eventType: 'REQUEST_BECOME_PUBLISHER',
-      senderStreamId: 'testStreamId',
+      senderStreamId: 'testStreamIdListener',
       message: 'Request rejected'
     };
     const obj = {
@@ -3613,7 +3623,7 @@ describe('AntMedia Component', () => {
       currentConference.handleNotificationEvent(obj);
     });
 
-    expect(consoleSpy).not.toHaveBeenCalledWith("Request is already received from ", 'testStreamId');
+    expect(consoleSpy).toHaveBeenCalledWith("Request is already received from ", 'testStreamIdListener');
     consoleSpy.mockRestore();
   });
 
