@@ -29,7 +29,7 @@ if use_test_webinar:
 else:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
 
-#suite.addTests(suite2)
+suite.addTests(suite2)
 
 #suite.addTest(TestJoinLeave("test_join_without_camera_mic")) 
 
