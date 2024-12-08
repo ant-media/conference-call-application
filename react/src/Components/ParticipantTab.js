@@ -172,8 +172,8 @@ function ParticipantTab(props) {
             </div>
             </> : <PinBtn
                 id={"playonly-" + streamId}
+                data-testid={"playonly-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
-                onClick={() => {}}
             >
               <SvgIcon size={28} name="eye" color={theme.palette?.participantListIcon?.primary}/>
             </PinBtn> }
