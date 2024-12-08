@@ -14,7 +14,8 @@ os.environ['AMS_USER'] = sys.argv[2]
 os.environ['AMS_PASSWORD'] = sys.argv[3]
 os.environ['WAR_FILE'] = sys.argv[4]
 use_test_webinar = sys.argv[5].lower() == 'true'
-os.environ['TEST_APP_NAME'] = "TestAPP"+str(random.randint(100, 999))
+app_name_prefix = "webinar" if use_test_webinar else "conference"
+os.environ['TEST_APP_NAME'] = app_name_prefix + str(random.randint(100, 999))
 
 #Keep it True to stop tests immediately after a failed test
 fail_fast = True

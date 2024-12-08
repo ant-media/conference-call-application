@@ -158,6 +158,8 @@ jobs:
         name: circle-webinar.war
         path: /tmp/circle-webinar.war
   
+    - name: Debug WAR file paths
+      run: ls -alh /tmp
 
   unit-tests:     
     needs: [build] 
@@ -182,7 +184,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   conference-integration-tests:  
-    needs: [unit-tests]   
+    needs: [build]   
     runs-on: ubuntu-latest
 
     steps:
@@ -211,6 +213,9 @@ jobs:
         with:
           name: circle-conferencing.war
           path: /tmp
+
+      - name: Debug WAR file paths
+        run: ls -alh /tmp
 
       - name: Install Selenium
         run: |
@@ -241,7 +246,7 @@ jobs:
           path: ${{ github.workspace }}/test/**/*.png
 
   webinar-integration-tests:  
-    needs: [unit-tests] 
+    needs: [build] 
     runs-on: ubuntu-latest
 
     steps:           
@@ -270,6 +275,9 @@ jobs:
         with:
           name: circle-webinar.war
           path: /tmp
+
+      - name: Debug WAR file paths
+        run: ls -alh /tmp
 
       - name: Install Selenium
         run: |
