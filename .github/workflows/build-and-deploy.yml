@@ -135,6 +135,8 @@ jobs:
         cd webrtc-test
         ./redeploy.sh
         cp target/webrtc-load-test-tool-*.zip $GITHUB_WORKSPACE/test-tool.zip
+        ls -al $GITHUB_WORKSPACE  # Check if the file exists
+
 
     - name: Upload war files as artifacts
       if: always()
