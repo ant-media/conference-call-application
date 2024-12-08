@@ -176,9 +176,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Get Test Tool
+      - name: Debug and Unzip Test Tool
         run: |
-          unzip $GITHUB_WORKSPACE/test-tool.zip -d ~/test
+          echo "Unzipping test-tool.zip"
+          echo "Checking GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          ls -al $GITHUB_WORKSPACE
+          unzip $GITHUB_WORKSPACE/test-tool.zip -d ~/test || unzip /home/runner/work/conference-call-application/conference-call-application/test-tool.zip -d ~/test
+          echo "Unzipped contents:"
+          ls -al ~/test
 
       - name: Install Selenium
         run: |
