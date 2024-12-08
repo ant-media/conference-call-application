@@ -1723,7 +1723,7 @@ class TestJoinLeave(unittest.TestCase):
 
     meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
     background_color = self.chrome.execute_script("return window.getComputedStyle(arguments[0]).backgroundColor;", meeting_gallery)
-    assert("##001D1A", background_color)
+    assert("#001D1A", background_color)
 
     theme_select = self.chrome.get_element(By.ID, "theme-select")
     self.chrome.mouse_click_on(theme_select)
