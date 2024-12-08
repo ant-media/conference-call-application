@@ -39,6 +39,7 @@ function PublisherRequestTab(props) {
                 </Grid>
                 <Grid item>
                     <PinBtn
+                        data-testid={"approve-become-speaker-"+videoId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                         onClick={() => {conference?.approveBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== videoId))}}
                     >
@@ -46,6 +47,7 @@ function PublisherRequestTab(props) {
                     </PinBtn>
 
                     <PinBtn
+                        data-testid={"reject-become-speaker-"+videoId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                         onClick={() => {conference?.rejectBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== videoId))}}
                     >
