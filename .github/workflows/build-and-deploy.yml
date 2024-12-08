@@ -235,9 +235,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Get Test Tool
+      - name: Restore Cached Test Tool
+        uses: actions/cache@v3
+        with:
+          path: webrtc-test/
+          key: test-tool-${{ hashFiles('**/tool-source/**') }}
+          restore-keys: test-tool-
+
+      - name: Locate Test Tool
         run: |
-          unzip $GITHUB_WORKSPACE/test-tool.zip -d ~/test
+          pwd
+          ls
+          cp webrtc-test/target/webrtc-load-test-tool-*.zip ../
+          cd ..
+          unzip webrtc-load-test-tool-*.zip
+          mkdir ~/test
+          mv webrtc-load-test ~/test
 
       - name: Install Selenium
         run: |
