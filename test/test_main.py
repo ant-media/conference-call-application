@@ -17,7 +17,7 @@ use_test_webinar = sys.argv[5].lower() == 'true'
 os.environ['TEST_APP_NAME'] = "TestAPP"+str(random.randint(100, 999))
 
 #Keep it True to stop tests immediately after a failed test
-fail_fast = False
+fail_fast = True
 
 suite = unittest.TestSuite()
 suite.addTest(TestDeployment('test_install_app'))
