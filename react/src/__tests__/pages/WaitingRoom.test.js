@@ -2,6 +2,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import WaitingRoom from 'pages/WaitingRoom';
 import React from "react";
 import { ConferenceContext } from 'pages/AntMedia';
+import theme from "../../styles/theme";
+import {ThemeList} from "../../styles/themeList";
+import {ThemeProvider} from "@mui/material";
 
 const contextValue = {
   initialized: true,
@@ -56,7 +59,11 @@ describe('Waiting Room Component', () => {
 
 
   it('renders WaitingRoom component without crashing', () => {
-    render(<WaitingRoom/>);
+    render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <WaitingRoom/>
+        </ThemeProvider>
+    );
     //const linkElement = screen.getByText(/What's your name?/i);
     //expect(linkElement).toBeInTheDocument();
   });

@@ -357,7 +357,9 @@ function WaitingRoom(props) {
                             )}
                         </Typography>
                         {conference.role === WebinarRoles.TempListener ? (
-                            <form onSubmit={(e) => {
+                            <form
+                                data-testid="temp-listener-join-form"
+                                onSubmit={(e) => {
                                 e.preventDefault();
                                 joinRoom(e);
                             }}>
@@ -404,6 +406,7 @@ function WaitingRoom(props) {
                         </Grid>
 
                         <form
+                            data-testid="join-form"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 joinRoom(e);
