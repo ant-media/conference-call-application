@@ -3168,7 +3168,9 @@ function AntMedia(props) {
                         setSpeedTestObjectProgress,
                         calculateThePlaySpeedTestResult,
                         processUpdatedStatsForPlaySpeedTest,
-                        speedTestCounter
+                        speedTestCounter,
+                        setRoomName,
+                        setPublishStreamId
                     }}
                 >
                     {props.children}

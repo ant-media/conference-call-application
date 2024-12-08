@@ -1143,12 +1143,28 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
+    let roomName = "room";
+    let publishStreamId = "publishStreamId";
+
+    await act(async () => {
+      currentConference.setRoomName(roomName);
+    });
+
+    await act(async () => {
+      currentConference.setPublishStreamId(publishStreamId);
+    });
+
+    await act(async () => {
+      process.env.REACT_APP_SHOW_PLAY_ONLY_PARTICIPANTS = 'true';
+    });
+
     await act(async () => {
       currentConference.handleLeaveFromRoom();
     });
 
     expect(webRTCAdaptorConstructor.stop).toHaveBeenCalled();
     expect(webRTCAdaptorConstructor.closeStream).toHaveBeenCalled();
+    expect(webRTCAdaptorConstructor.leaveFromRoom).toHaveBeenCalledWith(roomName, publishStreamId);
 
   });
 
