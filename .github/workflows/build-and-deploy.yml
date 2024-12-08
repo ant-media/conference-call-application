@@ -127,15 +127,21 @@ jobs:
         cp target/*.war /tmp/circle-conferencing.war
         cd ..
 
-    - name: Install Test Tool
+    - name: Create Test Tool
       run: |
         sudo apt-get update
         sudo apt-get install -y unzip iproute2 libva-drm2 libva-x11-2 libvdpau-dev ffmpeg
         git clone https://gitlab.com/Ant-Media/webrtc-test.git
         cd webrtc-test
         ./redeploy.sh
-        cp target/webrtc-load-test-tool-*.zip $GITHUB_WORKSPACE/test-tool.zip
-        ls -al $GITHUB_WORKSPACE  # Check if the file exists
+        cd ..
+
+    - name: Cache Test Tool
+      uses: actions/cache@v3
+      with:
+        path: webrtc-test/
+        key: test-tool-${{ hashFiles('**/tool-source/**') }}
+        restore-keys: test-tool-
 
 
     - name: Upload war files as artifacts
@@ -176,14 +182,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Debug and Unzip Test Tool
+      - name: Restore Cached Test Tool
+        uses: actions/cache@v3
+        with:
+          path: webrtc-test/
+          key: test-tool-${{ hashFiles('**/tool-source/**') }}
+          restore-keys: test-tool-
+
+      - name: Locate Test Tool
         run: |
-          echo "Unzipping test-tool.zip"
-          echo "Checking GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          ls -al $GITHUB_WORKSPACE
-          unzip $GITHUB_WORKSPACE/test-tool.zip -d ~/test || unzip /home/runner/work/conference-call-application/conference-call-application/test-tool.zip -d ~/test
-          echo "Unzipped contents:"
-          ls -al ~/test
+          pwd
+          ls
+          cp webrtc-test/target/webrtc-load-test-tool-*.zip ../
+          cd ..
+          unzip webrtc-load-test-tool-*.zip
+          mkdir ~/test
+          mv webrtc-load-test ~/test
 
       - name: Install Selenium
         run: |
