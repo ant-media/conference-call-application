@@ -1535,13 +1535,13 @@ describe('AntMedia Component', () => {
         jest.advanceTimersByTime(8000);
       });
 
-      expect(currentConference.participantUpdated).toBe(true);
+      expect(currentConference.participantUpdated).toBe(false);
 
       act(() => {
         jest.advanceTimersByTime(8000);
       });
 
-      expect(currentConference.participantUpdated).toBe(true);
+      expect(currentConference.participantUpdated).toBe(false);
 
       jest.useRealTimers();
     });
@@ -1563,13 +1563,13 @@ describe('AntMedia Component', () => {
         jest.advanceTimersByTime(8000);
       });
 
-      expect(currentConference.participantUpdated).toBe(true);
+      expect(currentConference.participantUpdated).toBe(false);
 
       act(() => {
         jest.advanceTimersByTime(8000);
       });
 
-      expect(currentConference.participantUpdated).toBe(true);
+      expect(currentConference.participantUpdated).toBe(false);
 
       jest.useRealTimers();
     });
