@@ -2469,31 +2469,11 @@ function AntMedia(props) {
                     setRequestSpeakerList((oldRequestSpeakerList) => {
                         return [...oldRequestSpeakerList, notificationEvent.senderStreamId];
                     });
-                    enqueueSnackbar({
-                        message: notificationEvent.senderStreamId + t(" is requesting to become a speaker"),
-                        variant: 'info',
-                        icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                        anchorOrigin: {
-                            vertical: "top",
-                            horizontal: "right",
-                        },
-                    }, {
-                        autoHideDuration: 1000,
-                    });
+                    showInfoSnackbarWithLatency(notificationEvent.senderStreamId + t(" is requesting to become a speaker"));
                 }
             } else if (eventType === "MAKE_LISTENER_AGAIN") {
                 if (role === WebinarRoles.TempListener || role === WebinarRoles.ActiveTempListener) {
-                    enqueueSnackbar({
-                        message: t("You are made listener again"),
-                        variant: 'info',
-                        icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                        anchorOrigin: {
-                            vertical: "top",
-                            horizontal: "right",
-                        },
-                    }, {
-                        autoHideDuration: 1000,
-                    });
+                    showInfoSnackbarWithLatency(t("You are made listener again"));
                     mediaConstraints = {
                         video: false, audio: false,
                     };
@@ -2503,17 +2483,7 @@ function AntMedia(props) {
                 }
             } else if (eventType === "APPROVE_BECOME_PUBLISHER") {
                 if (role === WebinarRoles.Listener && notificationEvent.senderStreamId === publishStreamId) {
-                    enqueueSnackbar({
-                        message: t("Your request to become a speaker is approved"),
-                        variant: 'info',
-                        icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                        anchorOrigin: {
-                            vertical: "top",
-                            horizontal: "right",
-                        },
-                    }, {
-                        autoHideDuration: 1000,
-                    });
+                    showInfoSnackbarWithLatency(t("Your request to become a speaker is approved"));
                     mediaConstraints = {
                         // setting constraints here breaks source switching on firefox.
                         video: videoQualityConstraints.video, audio: audioQualityConstraints.audio,
@@ -2523,17 +2493,7 @@ function AntMedia(props) {
                 }
             } else if (eventType === "REJECT_BECOME_PUBLISHER") {
                 if (role === WebinarRoles.Listener && notificationEvent.senderStreamId === publishStreamId) {
-                    enqueueSnackbar({
-                        message: t("Your request to become a speaker is rejected"),
-                        variant: 'info',
-                        icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                        anchorOrigin: {
-                            vertical: "top",
-                            horizontal: "right",
-                        },
-                    }, {
-                        autoHideDuration: 1000,
-                    });
+                    showInfoSnackbarWithLatency(t("Your request to become a speaker is rejected"));
                 }
             }
         }
@@ -2546,34 +2506,26 @@ function AntMedia(props) {
         }
 
         if (oldRole.includes("active") && !newRole.includes("active")) {
-            setTimeout(() => {
-                enqueueSnackbar({
-                    message: streamId + t(" is removed from the listening room"),
-                    variant: 'info',
-                    icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                    anchorOrigin: {
-                        vertical: "top",
-                        horizontal: "right",
-                    },
-                }, {
-                    autoHideDuration: 1000,
-                });
-            }, 1000);
+            showInfoSnackbarWithLatency(streamId + t(" is removed from the listening room"));
         } else if (!oldRole.includes("active") && newRole.includes("active")) {
-            setTimeout(() => {
-                enqueueSnackbar({
-                    message: streamId + t(" is added to the listening room"),
-                    variant: 'info',
-                    icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                    anchorOrigin: {
-                        vertical: "top",
-                        horizontal: "right",
-                    },
-                }, {
-                    autoHideDuration: 1000,
-                });
-            }, 1000);
+            showInfoSnackbarWithLatency(streamId + t(" is added to the listening room"));
         }
+    }
+
+    function showInfoSnackbarWithLatency(message) {
+        setTimeout(() => {
+            enqueueSnackbar({
+                message: message,
+                variant: 'info',
+                icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
+                anchorOrigin: {
+                    vertical: "top",
+                    horizontal: "right",
+                },
+            }, {
+                autoHideDuration: 1000,
+            });
+        }, 1000);
     }
 
     function checkScreenSharingStatus() {
