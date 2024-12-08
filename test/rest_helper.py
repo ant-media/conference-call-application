@@ -48,7 +48,7 @@ class RestHelper:
             "playListItemList": [
                 {
                     "type": "VoD",
-                    "streamUrl": "https://github.com/ant-media/conference-call-application/raw/refs/heads/refactorPlayOnlySpeedTest/static/speedTestVideo/speed-test-sample-video.mp4",
+                    "streamUrl": "https://github.com/ant-media/conference-call-application/raw/refs/heads/main/static/speedTestVideo/speed-test-sample-video.mp4",
                     "name": "speedTestSampleStream",
                     "seekTimeInMs": 0,
                     "durationInMs": 60000
