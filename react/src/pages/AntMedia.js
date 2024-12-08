@@ -2127,17 +2127,11 @@ function AntMedia(props) {
     }
 
     function handleStartBecomePublisher() {
-        console.log("BOLA 0", isPlayOnly);
         if (isPlayOnly) {
-            console.log("BOLA 1");
             setIsPlayOnly(false);
-            console.log("BOLA 2");
             setInitialized(false);
-            console.log("BOLA 3");
             setWaitingOrMeetingRoom("waiting");
-            console.log("BOLA 4");
             joinRoom(roomName, publishStreamId);
-            console.log("BOLA 5");
         }
     }
 
@@ -3273,7 +3267,9 @@ function AntMedia(props) {
                         setSpeedTestObjectProgress,
                         calculateThePlaySpeedTestResult,
                         processUpdatedStatsForPlaySpeedTest,
-                        speedTestCounter
+                        speedTestCounter,
+                        showInfoSnackbarWithLatency,
+                        setPublishStreamId
                     }}
                 >
                     {props.children}

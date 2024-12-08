@@ -40,7 +40,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 
-
 jest.mock('@antmedia/webrtc_adaptor', () => ({
   ...jest.requireActual('@antmedia/webrtc_adaptor'),
   WebRTCAdaptor: jest.fn().mockImplementation((params) => {
@@ -90,7 +89,8 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       setBlurEffectRange: jest.fn(),
       sendMessage: jest.fn(),
       updateParticipantRole: jest.fn(),
-      updateBroadcastRole: jest.fn()
+      updateBroadcastRole: jest.fn(),
+      showInfoSnackbarWithLatency: jest.fn(),
     }
 
     for (var key in params) {
@@ -3555,10 +3555,18 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    const notificationEvent = { senderStreamId: 'testStreamId' };
+    await act(() => {
+      currentConference.setPublishStreamId('testStreamId');
+    });
+
+    const notificationEvent = {
+      streamId: 'testStreamId',
+      eventType: 'REQUEST_BECOME_PUBLISHER',
+      senderStreamId: 'testStreamId',
+      message: 'Request approved'
+    };
     const obj = {
-      eventType: 'REQUEST_BECOME_PUBLISHER', notificationEvent,
-      data: JSON.stringify({ message: 'Request rejected' })
+      data: JSON.stringify(notificationEvent)
     };
 
     await act(async () => {
@@ -3584,10 +3592,19 @@ describe('AntMedia Component', () => {
     });
 
     currentConference.requestSpeakerList = ['testStreamId'];
-    const notificationEvent = { senderStreamId: 'testStreamId' };
+
+    await act(() => {
+      currentConference.setPublishStreamId('testStreamId');
+    });
+
+    const notificationEvent = {
+      streamId: 'testStreamId',
+      eventType: 'REQUEST_BECOME_PUBLISHER',
+      senderStreamId: 'testStreamId',
+      message: 'Request rejected'
+    };
     const obj = {
-      eventType: 'REQUEST_BECOME_PUBLISHER', notificationEvent,
-      data: JSON.stringify({ message: 'Request rejected' })
+      data: JSON.stringify(notificationEvent)
     };
 
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -3613,10 +3630,18 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
-    currentConference.role = WebinarRoles.TempListener;
-    const obj = {
+    await act(() => {
+      currentConference.setRole(WebinarRoles.TempListener);
+    });
+
+    const notificationEvent = {
+      streamId: 'testStreamId',
       eventType: 'MAKE_LISTENER_AGAIN',
-      data: JSON.stringify({ message: 'Request rejected' })
+      senderStreamId: 'testStreamId',
+      message: 'Request approved'
+    };
+    const obj = {
+      data: JSON.stringify(notificationEvent)
     };
 
     await act(async () => {
@@ -3624,7 +3649,7 @@ describe('AntMedia Component', () => {
     });
 
     await waitFor(() => {
-      expect(currentConference.isPlayOnly).toBe(false);
+      expect(currentConference.isPlayOnly).toBe(true);
     });
   });
 
@@ -3645,11 +3670,18 @@ describe('AntMedia Component', () => {
       currentConference.setRole(WebinarRoles.Listener);
     });
 
-    currentConference.publishStreamId = 'testStreamId';
-    const notificationEvent = { senderStreamId: 'testStreamId' };
+    await act(() => {
+      currentConference.setPublishStreamId('testStreamId');
+    });
+
+    const notificationEvent = {
+      streamId: 'testStreamId',
+      eventType: 'APPROVE_BECOME_PUBLISHER',
+      senderStreamId: 'testStreamId',
+      message: 'Request approved'
+    };
     const obj = {
-      eventType: 'APPROVE_BECOME_PUBLISHER', notificationEvent,
-      data: JSON.stringify({ message: 'Request approved' })
+      data: JSON.stringify(notificationEvent)
     };
 
     await act(async () => {
@@ -3678,12 +3710,23 @@ describe('AntMedia Component', () => {
       currentConference.setRole(WebinarRoles.Listener);
     });
 
-    currentConference.publishStreamId = 'testStreamId';
-    const notificationEvent = { senderStreamId: 'testStreamId' };
-    const obj = {
-      eventType: 'REJECT_BECOME_PUBLISHER', notificationEvent,
-      data: JSON.stringify({ message: 'Request rejected' })
+    await act(() => {
+      currentConference.setPublishStreamId('testStreamId');
+    });
+
+    const notificationEvent = {
+      streamId: 'testStreamId',
+      eventType: 'REJECT_BECOME_PUBLISHER',
+      senderStreamId: 'testStreamId',
+      message: 'Request rejected'
     };
+    const obj = {
+      data: JSON.stringify(notificationEvent)
+    };
+
+    await act(async () => {
+      currentConference.showInfoSnackbarWithLatency = jest.fn();
+    });
 
     await act(async () => {
       currentConference.handleNotificationEvent(obj);
@@ -3693,5 +3736,6 @@ describe('AntMedia Component', () => {
       expect(currentConference.role).toBe(WebinarRoles.Listener);
     });
   });
+
 
 });
