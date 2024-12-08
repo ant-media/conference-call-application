@@ -199,6 +199,12 @@ jobs:
           mkdir ~/test
           mv webrtc-load-test ~/test
 
+      - name: Download circle-conferencing.war Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: circle-conferencing.war
+          path: /tmp
+
       - name: Install Selenium
         run: |
           wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip
@@ -251,6 +257,12 @@ jobs:
           unzip webrtc-load-test-tool-*.zip
           mkdir ~/test
           mv webrtc-load-test ~/test
+
+      - name: Download circle-webinar.war Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: circle-webinar.war
+          path: /tmp
 
       - name: Install Selenium
         run: |
