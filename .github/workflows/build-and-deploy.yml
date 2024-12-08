@@ -297,7 +297,7 @@ jobs:
 
 
   collect-and-upload-logs:  
-    needs: [webinar-integration-tests , conference-integration-tests] 
+    needs: [unit-tests, webinar-integration-tests , conference-integration-tests] 
     if: always() 
     runs-on: ubuntu-latest
 
