@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import {ConferenceContext} from "../pages/AntMedia";
 
@@ -22,6 +22,7 @@ const PinBtn = styled(Button)(({ theme }) => ({
 
 function PublisherRequestTab(props) {
     const conference = useContext(ConferenceContext);
+    const theme = useTheme();
 
     const getPublisherRequestItem = (videoId) => {
         return (
@@ -38,15 +39,17 @@ function PublisherRequestTab(props) {
                 </Grid>
                 <Grid item>
                     <PinBtn
+                        data-testid={"approve-become-speaker-"+videoId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.approveBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {conference?.approveBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== videoId))}}
                     >
                         Allow
                     </PinBtn>
 
                     <PinBtn
+                        data-testid={"reject-become-speaker-"+videoId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.rejectSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {conference?.rejectBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== videoId))}}
                     >
                         Deny
                     </PinBtn>
