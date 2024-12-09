@@ -1703,6 +1703,15 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
+  def rgb_to_hex(self, rgb_string):
+    # Extract RGB values from the string
+    rgb_values = [int(x) for x in rgb_string.replace("rgb(", "").replace(")", "").split(",")]
+    # Convert to hex and return
+    color = "#{:02X}{:02X}{:02X}".format(*rgb_values)
+    print ("background_color:"+color)
+    return color
+
+
   def test_theme(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -1721,9 +1730,9 @@ class TestJoinLeave(unittest.TestCase):
     green = self.chrome.get_element(By.XPATH, "//li[@data-value='green']")
     self.chrome.mouse_click_on(green)
 
-    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "settings-button")
     background_color = self.chrome.execute_script("return window.getComputedStyle(arguments[0]).backgroundColor;", meeting_gallery)
-    assert("#001D1A" == background_color)
+    assert("#00564F" == self.rgb_to_hex(background_color))
 
     theme_select = self.chrome.get_element(By.ID, "theme-select")
     self.chrome.mouse_click_on(theme_select)
@@ -1733,9 +1742,9 @@ class TestJoinLeave(unittest.TestCase):
     blue = self.chrome.get_element(By.XPATH, "//li[@data-value='blue']")
     self.chrome.mouse_click_on(blue)
 
-    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "settings-button")
     background_color = self.chrome.execute_script("return window.getComputedStyle(arguments[0]).backgroundColor;", meeting_gallery)
-    assert("#00838F" == background_color)
+    assert("#00ACC1" == self.rgb_to_hex(background_color))
 
     theme_select = self.chrome.get_element(By.ID, "theme-select")
     self.chrome.mouse_click_on(theme_select)
@@ -1745,9 +1754,9 @@ class TestJoinLeave(unittest.TestCase):
     gray = self.chrome.get_element(By.XPATH, "//li[@data-value='gray']")
     self.chrome.mouse_click_on(gray)
 
-    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "settings-button")
     background_color = self.chrome.execute_script("return window.getComputedStyle(arguments[0]).backgroundColor;", meeting_gallery)
-    assert("#424242" == background_color)
+    assert("#757575" == self.rgb_to_hex(background_color))
 
     theme_select = self.chrome.get_element(By.ID, "theme-select")
     self.chrome.mouse_click_on(theme_select)
@@ -1757,9 +1766,9 @@ class TestJoinLeave(unittest.TestCase):
     white = self.chrome.get_element(By.XPATH, "//li[@data-value='white']")
     self.chrome.mouse_click_on(white)
 
-    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "settings-button")
     background_color = self.chrome.execute_script("return window.getComputedStyle(arguments[0]).backgroundColor;", meeting_gallery)
-    assert("#fff" == background_color)
+    assert("#2B6197" == self.rgb_to_hex(background_color))
 
     theme_select = self.chrome.get_element(By.ID, "theme-select")
     self.chrome.mouse_click_on(theme_select)
@@ -1769,9 +1778,9 @@ class TestJoinLeave(unittest.TestCase):
     green = self.chrome.get_element(By.XPATH, "//li[@data-value='green']")
     self.chrome.mouse_click_on(green)
 
-    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID, "settings-button")
     background_color = self.chrome.execute_script("return window.getComputedStyle(arguments[0]).backgroundColor;", meeting_gallery)
-    assert("#001D1A" == background_color)
+    assert("#00564F" == self.rgb_to_hex(background_color))
 
 
     self.chrome.close_all()
