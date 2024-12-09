@@ -36,9 +36,8 @@ class Browser:
     
     if is_headless:
       browser_options.add_argument("--headless")
-      service = Service(executable_path='/tmp/chromedriver', service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
-    else:
-      service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
+    
+    service = Service(executable_path='/tmp/chromedriver', service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
     
     browser_options.set_capability( "goog:loggingPrefs", { 'browser':'ALL' } )
     self.driver = webdriver.Chrome(service=service, options=browser_options)
@@ -88,7 +87,6 @@ class Browser:
                 time.sleep(wait_time)
             else:
                 print(f"Script {script} failed after {retries} attempts: {e}")
-                print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
                 raise
             
   def get_element_with_retry(self, by, value, retries=5, wait_time=2):
@@ -104,7 +102,7 @@ class Browser:
                 time.sleep(wait_time)
             else:
                 print(f"Element not found by {by} with value {value} after {retries} attempts: {e}")
-                print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
+                #print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
                 raise
             
   def get_all_elements(self, by, value):
@@ -123,7 +121,7 @@ class Browser:
       WebDriverWait(self.driver, timeout).until(element_present)
     except TimeoutException:
       print("Timed out waiting for element to be clickable by "+str(by)+" with value "+str(value))
-      print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
+      #print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
       
     return self.driver.find_element(by, value)
 

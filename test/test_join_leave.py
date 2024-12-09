@@ -17,14 +17,14 @@ import re
 class TestJoinLeave(unittest.TestCase):
   def setUp(self):
     print("----------------\n", self._testMethodName, " starting...")
-    self.is_windows = False
-    #self.is_windows = True
+    self.is_local = False
+    #self.is_local = True
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.user = os.environ.get('AMS_USER')
     self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
-    self.chrome.init(not self.is_windows)
+    self.chrome.init(not self.is_local)
     self.chrome.makeFullScreen()
     self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
     self.rest_helper.login()
@@ -40,7 +40,7 @@ class TestJoinLeave(unittest.TestCase):
     print(self._testMethodName, " ending...\n","----------------")
 
   def create_participants_with_test_tool(self, participant_name, room, count):
-    if self.is_windows:
+    if self.is_local:
       return self.create_participants_with_test_tool_windows(participant_name, room, count)
     
     directory = os.path.expanduser("~/test/webrtc-load-test")
@@ -1359,7 +1359,7 @@ class TestJoinLeave(unittest.TestCase):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
     self.chrome = Browser()
-    self.chrome.init(not self.is_windows, mic_file=fake_audio_file_path)
+    self.chrome.init(not self.is_local, mic_file=fake_audio_file_path)
 
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -1408,7 +1408,7 @@ class TestJoinLeave(unittest.TestCase):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
     self.chrome = Browser()
-    self.chrome.init(not self.is_windows, mic_file=fake_audio_file_path)
+    self.chrome.init(not self.is_local, mic_file=fake_audio_file_path)
 
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -1771,7 +1771,7 @@ class TestJoinLeave(unittest.TestCase):
 
     meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
     background_color = self.chrome.execute_script("return window.getComputedStyle(arguments[0]).backgroundColor;", meeting_gallery)
-    assert("##001D1A", background_color)
+    assert("#001D1A", background_color)
 
 
     self.chrome.close_all()

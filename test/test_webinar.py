@@ -15,13 +15,13 @@ import psutil
 
 class TestWebinarScenario(unittest.TestCase):
   def setUp(self):
-    self.is_windows = False
-    #self.is_windows = True
+    self.is_local = False
+    #self.is_local = True
     print(self._testMethodName, " starting...")
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.chrome = Browser()
-    self.chrome.init(not self.is_windows)
+    self.chrome.init(not self.is_local)
     #self.startLoadTest()
 
   def tearDown(self):
