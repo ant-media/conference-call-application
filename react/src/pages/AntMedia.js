@@ -1575,6 +1575,7 @@ function AntMedia(props) {
             setIsPlayed(true);
             setIsNoSreamExist(false);
             webRTCAdaptor?.getBroadcastObject(roomName);
+            webRTCAdaptor?.getSubtrackCount(roomName, null, null);
             webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
             requestVideoTrackAssignmentsInterval();
 
