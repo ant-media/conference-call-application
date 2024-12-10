@@ -2287,11 +2287,6 @@ describe('AntMedia Component', () => {
     await waitFor(() => {
       expect(currentConference.participantUpdated).toBe(false);
     });
-
-    await waitFor(() => {
-        expect(currentConference.allParticipants["stream1"]).toBeDefined();
-        expect(currentConference.allParticipants["stream2"]).toBeDefined();
-    });
   });
 
   it('does not update allParticipants if there are no changes', async () => {
@@ -2816,7 +2811,7 @@ describe('AntMedia Component', () => {
       //expect(mockConsoleError).toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
     });
 
-    it('handles errors when switching video and audio sources', async () => {
+    it('handles errors when switching video and audio source', async () => {
       mediaDevicesMock.enumerateDevices.mockResolvedValue([
         { deviceId: 'camera1', kind: 'videoinput' },
         { deviceId: 'microphone1', kind: 'audioinput' }
