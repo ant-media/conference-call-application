@@ -143,6 +143,8 @@ class TestWebinarScenario(unittest.TestCase):
       app = ""
     handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName="+participant)
     
+    wait = self.chrome.get_wait()
+
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
 
@@ -155,7 +157,7 @@ class TestWebinarScenario(unittest.TestCase):
     time.sleep(5)
 
     speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
-    assert(speedTestCircularProgress.is_displayed())
+    wait.until(lambda x: speedTestCircularProgress.is_displayed())
 
     time.sleep(5)
 
