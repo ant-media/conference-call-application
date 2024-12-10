@@ -87,6 +87,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       enableEffect: jest.fn(),
       setSelectedVideoEffect: jest.fn(),
       setBlurEffectRange: jest.fn(),
+      getSubtrackCount: jest.fn(),
     }
 
     for (var key in params) {

@@ -2297,7 +2297,7 @@ function AntMedia(props) {
                         }
 
                     } else {
-                        console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignment.streamId);
+                        console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
                         delete tempAllParticipants[tempVideoTrackAssignment.streamId];
                     }
                 });
