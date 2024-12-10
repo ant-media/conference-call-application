@@ -1492,6 +1492,8 @@ class TestJoinLeave(unittest.TestCase):
     more_options_button = self.chrome.get_element_with_retry(By.ID, "settings-button")
     more_options_button.click()
 
+    time.sleep(1)
+
     call_settings_button = self.chrome.get_element(By.ID, "call-settings")
     self.chrome.mouse_click_on(call_settings_button)
 

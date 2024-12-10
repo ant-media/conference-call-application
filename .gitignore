@@ -6,3 +6,4 @@ webapp/src/main/webapp/
 react/.env.development
 react/.idea/workspace.xml
 react/.env.fakeeh
+test/run.sh
