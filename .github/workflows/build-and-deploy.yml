@@ -207,6 +207,7 @@ jobs:
           unzip webrtc-load-test-tool-*.zip
           mkdir ~/test
           mv webrtc-load-test ~/test
+          ls -al ~/test
 
       - name: Download circle-conferencing.war Artifact
         uses: actions/download-artifact@v4
