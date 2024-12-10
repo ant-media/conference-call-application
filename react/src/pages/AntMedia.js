@@ -2302,6 +2302,8 @@ function AntMedia(props) {
                     }
                 });
 
+                setAllParticipants(tempAllParticipants);
+
                 currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
 
                 // update participants according to current assignments
@@ -2322,10 +2324,7 @@ function AntMedia(props) {
                 if (!_.isEqual(currentVideoTrackAssignments, videoTrackAssignments)) {
                         setVideoTrackAssignments(currentVideoTrackAssignments);
                         requestSyncAdministrativeFields();
-                }
-                if (!_.isEqual(tempAllParticipants, allParticipants)) {
-                    setAllParticipants(tempAllParticipants);
-                    setParticipantUpdated(!participantUpdated);
+                        setParticipantUpdated(!participantUpdated);
                 }
 
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
