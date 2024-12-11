@@ -15,7 +15,7 @@
     "i18next-browser-languagedetector": "^8.0.2",
     "jest-websocket-mock": "^2.5.0",
     "lodash": "^4.17.21",
-    "nanoid": "^5.0.7",
+    "nanoid": "^5.0.9",
     "notistack-v2-maintained": "^2.1.0",
     "react": "^19.0.0",
     "react-device-detect": "^2.2.3",
