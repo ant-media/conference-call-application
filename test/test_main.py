@@ -27,11 +27,22 @@ suite2 = None
 if use_test_webinar:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_webinar)
 else:
-    suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
+    #suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
+    suite.addTest(TestJoinLeave("test_background_replacement")) 
+    suite.addTest(TestJoinLeave("test_camera_mic_setting_in_meeting_room")) 
+    suite.addTest(TestJoinLeave("test_camera_mic_setting_in_waiting_room")) 
+    suite.addTest(TestJoinLeave("test_join_room_N_participants")) 
+    suite.addTest(TestJoinLeave("test_mute_on_video_card")) 
+    suite.addTest(TestJoinLeave("test_pinned_layout_test")) 
+    suite.addTest(TestJoinLeave("test_reconnection_while_screen_sharing")) 
+    suite.addTest(TestJoinLeave("test_tiled_layout_test")) 
+    suite.addTest(TestJoinLeave("test_video_track_assignment")) 
+    #suite.addTest(TestJoinLeave("test_join_without_camera_mic")) 
+
+
 
 suite.addTests(suite2)
 
-#suite.addTest(TestJoinLeave("test_join_without_camera_mic")) 
 
 suite.addTest(TestDeployment('test_delete_app'))
 
