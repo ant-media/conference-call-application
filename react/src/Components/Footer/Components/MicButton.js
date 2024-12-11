@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
 import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
-import { useSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack-v2-maintained';
 import {styled, useTheme} from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 

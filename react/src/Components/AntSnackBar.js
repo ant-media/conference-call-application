@@ -1,5 +1,5 @@
 import React, {forwardRef, useCallback} from 'react';
-import {SnackbarContent, useSnackbar} from 'notistack';
+import {SnackbarContent, useSnackbar} from 'notistack-v2-maintained';
 import {styled} from '@mui/material/styles';
 import {Grid, Typography, useTheme} from '@mui/material';
 import {SvgIcon} from './SvgIcon';

@@ -18,7 +18,7 @@ import {useTranslation} from "react-i18next";
 import SettingsDialog from "Components/Footer/Components/SettingsDialog";
 
 import {SvgIcon} from "Components/SvgIcon";
-import {useSnackbar} from "notistack";
+import {useSnackbar} from "notistack-v2-maintained";
 import {ConferenceContext} from "./AntMedia";
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
 import {getRootAttribute, isComponentMode} from "utils";
