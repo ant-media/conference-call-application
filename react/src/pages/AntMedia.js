@@ -17,7 +17,6 @@ import {getRootAttribute, isComponentMode} from "../utils";
 import floating from "../external/floating.js";
 import {UnauthrorizedDialog} from "Components/Footer/Components/UnauthorizedDialog";
 import {useWebSocket} from 'Components/WebSocketProvider';
-import {useTheme} from "@mui/material/styles";
 import useSound from 'use-sound';
 import joinRoomSound from 'static/sounds/join-sound.mp3';
 import leaveRoomSound from 'static/sounds/leave-sound.mp3';
@@ -477,8 +476,6 @@ function AntMedia(props) {
 
 
     const {t} = useTranslation();
-
-    const theme = useTheme();
 
   useEffect(() => {
     setTimeout(() => {
@@ -1138,17 +1135,6 @@ function AntMedia(props) {
             command: "updateBroadcastRole",
             streamId: streamId,
             role: newRole,
-        };
-
-        sendMessage(JSON.stringify(jsCmd));
-    }
-
-    function sendDataChannelMessage(receiverStreamId, message) {
-        const jsCmd = {
-            command: "sendData",
-            streamId: publishStreamId,
-            receiverStreamId: receiverStreamId,
-            message: message,
         };
 
         sendMessage(JSON.stringify(jsCmd));
@@ -3150,7 +3136,8 @@ function AntMedia(props) {
                         setSpeedTestObjectProgress,
                         calculateThePlaySpeedTestResult,
                         processUpdatedStatsForPlaySpeedTest,
-                        speedTestCounter
+                        speedTestCounter,
+                        setRoomName
                     }}
                 >
                     {props.children}
