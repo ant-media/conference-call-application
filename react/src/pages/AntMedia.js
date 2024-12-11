@@ -1576,6 +1576,7 @@ function AntMedia(props) {
             setIsPlayed(true);
             setIsNoSreamExist(false);
             webRTCAdaptor?.getBroadcastObject(roomName);
+            webRTCAdaptor?.getSubtrackCount(roomName, null, null);
             webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
             requestVideoTrackAssignmentsInterval();
 
@@ -2343,6 +2344,8 @@ function AntMedia(props) {
 
                 let tempVideoTrackAssignmentsNew = [];
 
+                let tempAllParticipants = {...allParticipants};
+
                 // This function checks the case 1 and case 2
                 currentVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
                     let assignment;
@@ -2362,12 +2365,13 @@ function AntMedia(props) {
 
                     } else {
                         console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
+                        delete tempAllParticipants[tempVideoTrackAssignment.streamId];
                     }
                 });
 
-                currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
+                setAllParticipants(tempAllParticipants);
 
-                //let updateAllParticipants = {...allParticipants};
+                currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
 
                 // update participants according to current assignments
                 receivedVideoTrackAssignments.forEach(vta => {
@@ -2377,23 +2381,9 @@ function AntMedia(props) {
                         existingAssignment.isReserved = vta.reserved;
                     }
                     if (!allParticipants[vta.trackId]) {
-                        /*
-                        updateAllParticipants[vta.trackId] = {
-                            streamId: vta.trackId,
-                            name: vta.trackId,
-                            isScreenShared: false,
-                            isPinned: false,
-                            isFake: false,
-                            isMine: false,
-                            status: "livestream"
-                            metaData: "{\"isMicMuted\":true,\"isCameraOn\":false,\"isScreenShared\":false,\"playOnly\":false}"
-                        };
-                         */
                         webRTCAdaptor?.getBroadcastObject(vta.trackId);
                     }
                 });
-                
-                //setAllParticipants(updateAllParticipants);
 
                 checkScreenSharingStatus();
 

@@ -91,6 +91,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       updateParticipantRole: jest.fn(),
       updateBroadcastRole: jest.fn(),
       showInfoSnackbarWithLatency: jest.fn(),
+      getSubtrackCount: jest.fn(),
     }
 
     for (var key in params) {

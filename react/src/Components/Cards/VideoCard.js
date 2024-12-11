@@ -113,7 +113,7 @@ function VideoCard(props) {
 
         return (
             <>
-                {!useAvatar && (
+                {(!useAvatar && process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true") && (
                     <OverlayButton
                         title={`Camera ${useAvatar ? "off" : "on"} ${props.name}`}
                         icon={useAvatar ? "camera-off" : "camera"}
@@ -123,8 +123,8 @@ function VideoCard(props) {
                 )}
                 <OverlayButton
                     title={`Microphone ${micMuted ? "on" : "off"} ${props.name}`}
-                    icon={micMuted ? "microphone" : "muted-microphone"}
-                    color={micMuted ? "primary" : "error"}
+                    icon={micMuted ? "muted-microphone" : "microphone"}
+                    color={micMuted ? "error" : "primary"}
                     onClick={handleToggleMic}
                 />
             </>
