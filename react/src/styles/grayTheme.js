@@ -21,14 +21,14 @@ export function getGrayTheme() {
   const themeColor90 = "#000000";
   const themeColor99 = "#FFFFFF";
   const chatText = "#FAFAFA";
-  const darkGray = "#222B2A";
+  const darkGray = "#222B2A"; // eslint-disable-line no-unused-vars
   const iconColor = "#FFFFFF";
   const darkIconColor = "#000000";
 
   const error = "#D50000";
   const primaryColor = themeColor10;
   const secondaryColor = themeColor60;
-  const textColor = "#FFFFFF";
+  const textColor = "#FFFFFF"; // eslint-disable-line no-unused-vars
   let themeObject = {
     typography: {
       allVariants: {

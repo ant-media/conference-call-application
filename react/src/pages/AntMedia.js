@@ -2162,7 +2162,7 @@ function AntMedia(props) {
 
     React.useEffect(() => {
         updateUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
-    }, [role]);
+    }, [role]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleNotificationEvent(obj) {
         var notificationEvent = JSON.parse(obj.data);
@@ -2638,7 +2638,7 @@ function AntMedia(props) {
 
     React.useEffect(() => {
         updateAllParticipantsPagination(globals.participantListPagination.currentPage);
-    }, [participantCount]);
+    }, [participantCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function updateAllParticipantsPagination(currentPage) {
         if (currentPage <= 0) {
@@ -2862,7 +2862,7 @@ function AntMedia(props) {
             reaction: reaction, senderStreamId: publishStreamId, senderStreamName: streamName
         });
         showReactions(publishStreamId, streamName, reaction, allParticipants);
-    },[handleSendNotificationEvent, publishStreamId, showReactions, allParticipants]);
+    },[handleSendNotificationEvent, publishStreamId, showReactions, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function muteLocalMic() {
         webRTCAdaptor?.muteLocalMic();
@@ -2920,7 +2920,7 @@ function AntMedia(props) {
             };
             sendMessage(JSON.stringify(jsCmd));
         }
-    }, [isWebSocketConnected]);
+    }, [isWebSocketConnected]); // eslint-disable-line react-hooks/exhaustive-deps
 
     React.useEffect(() => {
         if (!latestMessage) {

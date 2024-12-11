@@ -28,7 +28,7 @@ export function getBlueTheme() {
   const error = "#D50000";
   const primaryColor = themeColor10;
   const secondaryColor = themeColor60;
-  const textColor = "#FFFFFF";
+  const textColor = "#FFFFFF"; // eslint-disable-line no-unused-vars
   let themeObject = {
     typography: {
       allVariants: {

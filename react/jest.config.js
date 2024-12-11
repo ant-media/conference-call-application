@@ -34,6 +34,7 @@ module.exports = {
     ],
     // Add rule overrides if required
     rules: {
+        'react-compiler/react-compiler': 'error',
         'react-compiler/transform': 'warn', // Change to 'error' if stricter enforcement is needed
     },
 };
