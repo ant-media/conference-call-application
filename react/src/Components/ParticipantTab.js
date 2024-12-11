@@ -63,7 +63,7 @@ function ParticipantTab(props) {
             onClick={() => { handleToggleMic(micMuted, streamId, name) }
             }
         >
-          <SvgIcon size={28} name={micMuted ? "muted-microphone" :  "microphone"} color={micMuted ? "primary" : "error"} />
+          <SvgIcon size={28} name={micMuted ? "muted-microphone" :  "microphone"} color={theme.palette?.participantListIcon?.primary} />
         </PinBtn>
     )
   }
