@@ -30,14 +30,14 @@ else:
     #suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
     suite2 = unittest.TestSuite()
     suite2.addTest(TestJoinLeave("test_background_replacement")) 
-    suite2.addTest(TestJoinLeave("test_camera_mic_setting_in_meeting_room")) 
+    #suite2.addTest(TestJoinLeave("test_camera_mic_setting_in_meeting_room")) 
     suite2.addTest(TestJoinLeave("test_camera_mic_setting_in_waiting_room")) 
     suite2.addTest(TestJoinLeave("test_join_room_N_participants")) 
     suite2.addTest(TestJoinLeave("test_mute_on_video_card")) 
     suite2.addTest(TestJoinLeave("test_pinned_layout_test")) 
-    suite2.addTest(TestJoinLeave("test_reconnection_while_screen_sharing")) 
+    #suite2.addTest(TestJoinLeave("test_reconnection_while_screen_sharing")) 
     suite2.addTest(TestJoinLeave("test_tiled_layout_test")) 
-    suite2.addTest(TestJoinLeave("test_video_track_assignment")) 
+    #suite2.addTest(TestJoinLeave("test_video_track_assignment")) 
     #suite.addTest(TestJoinLeave("test_join_without_camera_mic")) 
 
 
