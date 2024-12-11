@@ -3,7 +3,7 @@ module.exports = {
     coverageReporters: ["json", "lcov", "text", "clover"],
     collectCoverageFrom: ['src/Components/*.js','src/pages/*.js'],
     coverageDirectory: 'coverage',
-    testEnvironment: 'jsdom',
+    testEnvironment: 'jest-fixed-jsdom',
     setupFiles: ['<rootDir>/.jest/setEnvVars.js'],
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
     moduleNameMapper:{
