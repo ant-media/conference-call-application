@@ -5,7 +5,6 @@ import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import {CustomizedBtn} from "./Footer/Components/MicButton";
 import {useTheme} from "@mui/material";
-import virtualBackgroundImageData from 'virtualBackground.json';
 import {useSnackbar} from "notistack";
 import {useTranslation} from "react-i18next";
 
@@ -51,8 +50,9 @@ function EffectsTab() {
             position: 'relative'
           }}
           id="custom-virtual-background-button"
+          data-testid="custom-virtual-background-button"
           onClick={(e) => {
-            conference.setAndEnableVirtualBackgroundImage(imageSrc);
+            conference.setVirtualBackgroundImage(imageSrc);
           }}
         >
           <img
@@ -92,11 +92,17 @@ function EffectsTab() {
   }
 
   const getBackgroundImages = ()  => {
+    let virtualBackgroundImageData = [];
+
+    if (process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES !== undefined && process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES !== null) {
+      virtualBackgroundImageData = process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES.split(',');
+    }
+
     const images = [];
     let imageIndex = 0;
-    for (let i = 0; i < virtualBackgroundImageData.virtualBackgroundImages.length; i++) {
+    for (let i = 0; i < virtualBackgroundImageData.length; i++) {
       images.push(
-        getVirtualBackgroundButton(virtualBackgroundImageData.virtualBackgroundImages[i], "image"+imageIndex, imageIndex, false)
+        getVirtualBackgroundButton(virtualBackgroundImageData[i], "image"+imageIndex, imageIndex, false)
       );
       ++imageIndex;
     }

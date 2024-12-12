@@ -1,6 +1,6 @@
 // src/Button.test.js
 import React from 'react';
-import { render } from '@testing-library/react';
+import {act, render} from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
 import ParticipantListButton from 'Components/Footer/Components/ParticipantListButton';
 import { random } from 'lodash';
@@ -8,6 +8,8 @@ import { random } from 'lodash';
 // Mock the context value
 const contextValue = {
   allParticipants: {},
+  participantCount: 0,
+  setParticipantCount: jest.fn()
 };
 
 // Mock the useContext hook
@@ -37,11 +39,14 @@ describe('ParticipantList Button Component', () => {
       );
   });
 
-  it('check the count on button', () => {
+  it('check the count on button', async () => {
     var noOfParticipants = random(1, 10);
-    for (let i = 0; i < noOfParticipants; i++) {
-      contextValue.allParticipants[`k${i}`] = `v${i}`;
-    }
+
+    await act(()=>
+    {
+      contextValue.setParticipantCount(noOfParticipants)
+      contextValue.participantCount = noOfParticipants;
+    });
 
     const { container, getByText, getByRole } = render(
         <ParticipantListButton />
