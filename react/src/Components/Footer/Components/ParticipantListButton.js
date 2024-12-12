@@ -21,24 +21,23 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-function ParticipantListButton({ footer }) {
-    const conference = React.useContext(ConferenceContext);
+function ParticipantListButton({ footer, participantCount, participantListDrawerOpen, handleParticipantListOpen }) {
     const {t} = useTranslation();
 
     return (
             <Tooltip title={t('Participant List')} placement="top">
                 <CustomizedBtn
                     onClick={() => {
-                        conference?.handleParticipantListOpen(!conference?.participantListDrawerOpen);
+                        handleParticipantListOpen(!participantListDrawerOpen);
                     }}
                     id="participant-list-button"
                     variant="contained"
                     className={footer ? 'footer-icon-button' : ''}
-                    color={conference?.participantListDrawerOpen ? 'primary' : 'secondary'}
+                    color={participantListDrawerOpen ? 'primary' : 'secondary'}
                 >
-                    <SvgIcon size={32} color={conference?.participantListDrawerOpen ? '#000' : '#fff'} name={'participants'} />
+                    <SvgIcon size={32} color={participantListDrawerOpen ? '#000' : '#fff'} name={'participants'} />
                   {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                    <a style={{color: conference?.participantListDrawerOpen ? '#000' : '#fff'}}>{conference.participantCount}</a>
+                    <a style={{color: participantListDrawerOpen ? '#000' : '#fff'}}>{participantCount}</a>
                 </CustomizedBtn>
             </Tooltip>
         );

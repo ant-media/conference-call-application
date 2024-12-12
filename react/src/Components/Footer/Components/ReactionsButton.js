@@ -32,15 +32,14 @@ export const CustomizedBtn = styled(Button)(({ theme }) => ({
 
 
 function ReactionsButton(props) {
-  const { rounded, footer } = props;
-  const conference = useContext(ConferenceContext);
+  const { rounded, footer, showEmojis, setShowEmojis } = props;
   const { t } = useTranslation();
 
   return (
     <>
         <Tooltip title={t('Emoji reactions')} placement="top">
-          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color={conference.showEmojis ? 'primary' :'secondary'} sx={rounded ? roundStyle : {}} onClick={(e) => { conference.setShowEmojis(!conference.showEmojis) }}>
-            <SvgIcon size={40} name={'smiley-face'} color={conference.showEmojis ? "#000" : "#fff"} />
+          <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" color={showEmojis ? 'primary' :'secondary'} sx={rounded ? roundStyle : {}} onClick={(e) => { setShowEmojis(!showEmojis) }}>
+            <SvgIcon size={40} name={'smiley-face'} color={showEmojis ? "#000" : "#fff"} />
           </CustomizedBtn>
         </Tooltip>
     </>

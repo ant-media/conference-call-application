@@ -20,22 +20,21 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
     }
 }));
 
-function PublisherRequestListButton({ footer, ...props }) {
+function PublisherRequestListButton({ footer, requestSpeakerList, publisherRequestListDrawerOpen, handlePublisherRequestListOpen }) {
     const {t} = useTranslation();
-    const conference = useContext(ConferenceContext);
 
     return (
         <Tooltip title={t('Publisher Request List')} placement="top">
             <CustomizedBtn
                 onClick={() => {
-                    conference?.handlePublisherRequestListOpen(!conference?.publisherRequestListDrawerOpen);
+                    handlePublisherRequestListOpen(!publisherRequestListDrawerOpen);
                 }}
                 variant="contained"
                 className={footer ? 'footer-icon-button' : ''}
-                color={conference?.publisherRequestListDrawerOpen ? 'primary' : 'secondary'}
+                color={publisherRequestListDrawerOpen ? 'primary' : 'secondary'}
             >
-                <SvgIcon size={32} color={conference?.publisherRequestListDrawerOpen ? '#000' : '#fff'} name={'raise-hand'} />
-                {conference.requestSpeakerList.length}
+                <SvgIcon size={32} color={publisherRequestListDrawerOpen ? '#000' : '#fff'} name={'raise-hand'} />
+                {requestSpeakerList.length}
             </CustomizedBtn>
         </Tooltip>
     );

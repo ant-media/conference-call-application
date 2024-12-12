@@ -1,8 +1,7 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { SvgIcon } from '../../SvgIcon';
-import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip, Badge } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -20,12 +19,11 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-function MessageButton({ footer, ...props }) {
+function MessageButton({ footer, numberOfUnReadMessages, toggleSetNumberOfUnreadMessages, messageDrawerOpen, handleMessageDrawerOpen }) {
   const {t} = useTranslation();
-  const conference = useContext(ConferenceContext);
   return (
     <Badge
-      badgeContent={conference?.numberOfUnReadMessages}
+      badgeContent={numberOfUnReadMessages}
       color="primary"
       anchorOrigin={{
         vertical: 'top',
@@ -36,17 +34,17 @@ function MessageButton({ footer, ...props }) {
       <Tooltip title={t('Chat with everyone')} placement="top">
         <CustomizedBtn
           onClick={() => {
-            if (!conference?.messageDrawerOpen) {
-              conference?.toggleSetNumberOfUnreadMessages(0);
+            if (!messageDrawerOpen) {
+              toggleSetNumberOfUnreadMessages(0);
             }
-            conference?.handleMessageDrawerOpen(!conference?.messageDrawerOpen);
+            handleMessageDrawerOpen(!messageDrawerOpen);
           }}
           variant="contained"
           className={footer ? 'footer-icon-button' : ''}
-          color={conference?.messageDrawerOpen ? 'primary' : 'secondary'}
+          color={messageDrawerOpen ? 'primary' : 'secondary'}
           id="messages-button"
         >
-          <SvgIcon size={40} color={conference?.messageDrawerOpen ? '#000' : '#fff'} name={'message-off'} />
+          <SvgIcon size={40} color={messageDrawerOpen ? '#000' : '#fff'} name={'message-off'} />
         </CustomizedBtn>
       </Tooltip>
     </Badge>

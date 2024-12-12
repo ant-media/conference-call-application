@@ -140,37 +140,67 @@ function Footer(props) {
                   {(conference.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     {" "}
-                    <ShareScreenButton footer/>
+                    <ShareScreenButton
+                        footer={true}
+                        isScreenShared={conference?.isScreenShared}
+                        handleStartScreenShare={()=>conference?.handleStartScreenShare}
+                        handleStopScreenShare={()=>conference?.handleStopScreenShare}
+                    />
                   </Grid>
                       : null}
 
                   {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_REACTIONS_BUTTON_VISIBILITY === 'true') ? (
                     <Grid item xs={0} style={{display: '-webkit-inline-box'}}>
-                      <ReactionsButton footer/>
+                      <ReactionsButton
+                          footer={true}
+                          rounded={false}
+                          showEmojis={conference?.showEmojis}
+                          setShowEmojis={(showEmojis) => conference?.setShowEmojis(showEmojis)}
+                      />
                     </Grid>)
                     : null}
 
                   {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'true') ? (
                     <Grid item xs={0}>
-                      <MessageButton footer/>
+                      <MessageButton
+                          footer={true}
+                          numberOfUnReadMessages={conference?.numberOfUnReadMessages}
+                          toggleSetNumberOfUnreadMessages={()=>conference?.toggleSetNumberOfUnreadMessages()}
+                          messageDrawerOpen={conference?.messageDrawerOpen}
+                          handleMessageDrawerOpen={(open)=>conference?.handleMessageDrawerOpen(open)}
+                      />
                     </Grid>)
                     : null}
 
                   {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PARTICIPANT_LIST_BUTTON_VISIBILITY === 'true') ? (
                     <Grid item xs={0}>
-                        <ParticipantListButton footer />
+                        <ParticipantListButton
+                            footer={true}
+                            participantCount={conference?.participantCount}
+                            participantListDrawerOpen={conference?.participantListDrawerOpen}
+                            handleParticipantListOpen={(open)=>conference?.handleParticipantListOpen(open)}
+                        />
                     </Grid>)
                     : null}
 
                   {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ?
                     <Grid item xs={0}>
-                      <PublisherRequestListButton footer />
+                      <PublisherRequestListButton
+                          footer={true}
+                          requestSpeakerList={conference?.requestSpeakerList}
+                          publisherRequestListDrawerOpen={conference?.publisherRequestListDrawerOpen}
+                          handlePublisherRequestListOpen={(open)=>conference?.handlePublisherRequestListOpen(open)}
+                      />
                     </Grid>
                     : null}
 
                   {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isPlayOnly === true) ?
                     <Grid item xs={0}>
-                      <RequestPublishButton footer />
+                      <RequestPublishButton
+                          footer={true}
+                          rounded={false}
+                          handlePublisherRequest={()=>conference?.handlePublisherRequest()}
+                      />
                     </Grid>
                     : null}
 
@@ -225,7 +255,9 @@ function Footer(props) {
 
             <Grid item sx={{display: {xs: "none", sm: "block"}}}>
               {process.env.REACT_APP_FOOTER_CLOCK_VISIBILITY === 'true' ?
-                <TimeZone/>
+                <TimeZone
+                    isBroadcasting={conference?.isBroadcasting}
+                />
                 : null}
             </Grid>
         </CustomizedGrid>
