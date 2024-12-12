@@ -293,6 +293,9 @@ class TestJoinLeave(unittest.TestCase):
 
     time.sleep(1)
 
+    self.chrome.save_ss_as_file("test_camera_mic_setting_in_waiting_room-1.png")
+
+
     mic = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'Fake Audio Input 2')]")
     self.chrome.mouse_click_on(mic)
 
