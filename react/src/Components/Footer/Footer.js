@@ -93,7 +93,9 @@ function Footer(props) {
             <Typography color={theme.palette.text.primary} variant="body1">
               {id}
             </Typography>
-            <InfoButton/>
+            <InfoButton
+                isPlayOnly={conference?.isPlayOnly}
+            />
           </Grid>
         </Grid>
         {conference.isPlayOnly === false || conference.isEnterDirectly === false ?
@@ -112,14 +114,27 @@ function Footer(props) {
                   {conference.isPlayOnly === false
                     && process.env.REACT_APP_FOOTER_CAMERA_BUTTON_VISIBILITY === 'true' ?
                   <Grid item xs={0}>
-                    <CameraButton {...props} footer/>
+                    <CameraButton
+                        rounded={false}
+                        footer={true}
+                        isCamTurnedOff={conference?.isMyCamTurnedOff}
+                        cameraButtonDisabled={conference?.cameraButtonDisabled}
+                        onTurnOffCamera={conference?.checkAndTurnOffLocalCamera}
+                        onTurnOnCamera={conference?.checkAndTurnOnLocalCamera}
+                    />
                   </Grid>
                     : null}
 
                   {conference.isPlayOnly === false
                     && process.env.REACT_APP_FOOTER_MIC_BUTTON_VISIBILITY === 'true' ?
                   <Grid item xs={0}>
-                    <MicButton footer/>
+                    <MicButton
+                        rounded={false}
+                        footer={true}
+                        isMicMuted={conference?.isMyMicMuted}
+                        toggleMic={conference?.toggleMic}
+                        microphoneButtonDisabled={conference?.microphoneButtonDisabled}
+                    />
                   </Grid>
                       : null}
                   {(conference.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
@@ -161,7 +176,10 @@ function Footer(props) {
 
                   {process.env.REACT_APP_FOOTER_END_CALL_BUTTON_VISIBILITY === 'true' ?
                     <Grid item xs={0}>
-                      <EndCallButton footer/>
+                      <EndCallButton
+                          footer={true}
+                          onLeaveRoom={()=>conference.setLeftTheRoom(true)}
+                      />
                     </Grid>
                    : null}
 
@@ -169,8 +187,9 @@ function Footer(props) {
 
                   <Grid item xs={0}>
                     <FakeParticipantButton
-                      footer
+                      footer={true}
                       increment={true}
+                      onAction={()=>conference?.addFakeParticipant()}
                     />
                   </Grid>
                   : null}
@@ -178,8 +197,9 @@ function Footer(props) {
                   {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     <FakeParticipantButton
-                      footer
+                      footer={true}
                       increment={false}
+                      onAction={()=>conference?.removeFakeParticipant()}
                     />
                   </Grid>
                   : null}
@@ -187,7 +207,8 @@ function Footer(props) {
                   {(process.env.NODE_ENV === "development") && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     <FakeReconnectButton
-                      footer
+                      footer={true}
+                      onFakeReconnect={()=>conference?.fakeReconnect()}
                     />
                   </Grid>
                   : null}

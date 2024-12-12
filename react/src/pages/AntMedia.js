@@ -2878,6 +2878,14 @@ function AntMedia(props) {
         showReactions(publishStreamId, streamName, reaction, allParticipants);
     },[handleSendNotificationEvent, publishStreamId, showReactions, allParticipants]);
 
+    const toggleMic = (mute) => {
+        if (mute) {
+            muteLocalMic();
+        } else {
+            unmuteLocalMic();
+        }
+    };
+
     function muteLocalMic() {
         webRTCAdaptor?.muteLocalMic();
         updateUserStatusMetadata(true, !isMyCamTurnedOff);
@@ -3063,6 +3071,7 @@ function AntMedia(props) {
                         handleBackgroundReplacement,
                         muteLocalMic,
                         unmuteLocalMic,
+                        toggleMic,
                         checkAndTurnOnLocalCamera,
                         checkAndTurnOffLocalCamera,
                         setAudioLevelListener,

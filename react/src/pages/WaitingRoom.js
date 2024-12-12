@@ -322,10 +322,23 @@ function WaitingRoom(props) {
                                 }}
                             >
                                 <Grid item>
-                                    <CameraButton rounded/>
+                                    <CameraButton
+                                        rounded={true}
+                                        footer={false}
+                                        isCamTurnedOff={conference?.isMyCamTurnedOff}
+                                        cameraButtonDisabled={conference?.cameraButtonDisabled}
+                                        onTurnOffCamera={conference?.checkAndTurnOffLocalCamera}
+                                        onTurnOnCamera={conference?.checkAndTurnOnLocalCamera}
+                                    />
                                 </Grid>
                                 <Grid item>
-                                    <MicButton rounded/>
+                                    <MicButton
+                                        rounded={true}
+                                        footer={false}
+                                        isMicMuted={conference?.isMyMicMuted}
+                                        toggleMic={conference?.toggleMic}
+                                        microphoneButtonDisabled={conference?.microphoneButtonDisabled}
+                                    />
                                 </Grid>
                                 <Grid item sx={{position: "absolute", bottom: 16, right: 16}}>
                                     <Tooltip title={t("More options")} placement="top">

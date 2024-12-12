@@ -9,7 +9,10 @@ import {LayoutSettingsDialog} from "./LayoutSettingsDialog";
 import {ListItemIcon, ListItemText, Tooltip} from "@mui/material";
 import {useTranslation} from "react-i18next";
 import {ConferenceContext} from 'pages/AntMedia';
-import {GeneralSettingsDialog} from "./GeneralSettingsDialog";
+import GeneralSettingsDialog from "./GeneralSettingsDialog";
+import {ThemeList} from "../../../styles/themeList";
+import {ThemeContext} from "../../../App";
+import i18n from "i18next";
 
 const CustomizedBtn = styled(Button)(({theme}) => ({
   "&.footer-icon-button": {
@@ -34,6 +37,31 @@ function OptionButton({footer, ...props}) {
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
   const theme = useTheme();
+  const themeContext = React.useContext(ThemeContext);
+
+  // Language and theme states
+  const [currentLanguage, setCurrentLanguage] = React.useState(
+      localStorage.getItem("i18nextLng") || "en"
+  );
+  const [currentTheme, setCurrentTheme] = React.useState(
+      themeContext?.currentTheme || ThemeList.Green
+  );
+
+  // Language handler
+  const switchLanguage = (value) => {
+    localStorage.setItem("i18nextLng", value);
+    i18n.changeLanguage(value).then(() => {
+      setCurrentLanguage(value);
+      console.log("Language switched to", value);
+    });
+  };
+
+  // Theme handler
+  const switchTheme = (value) => {
+    localStorage.setItem("selectedTheme", value);
+    themeContext.setCurrentTheme(value);
+    setCurrentTheme(value);
+  };
 
   // if you select camera then we are going to focus on camera button.
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -89,6 +117,10 @@ function OptionButton({footer, ...props}) {
         open={generalSettingsDialogOpen}
         onClose={handleGeneralSettingsDialogClose}
         selectFocus={selectFocus}
+        currentLanguage={currentLanguage}
+        switchLanguage={switchLanguage}
+        currentTheme={currentTheme}
+        switchTheme={switchTheme}
       />
       <Tooltip title={t("More options")} placement="top">
         <CustomizedBtn

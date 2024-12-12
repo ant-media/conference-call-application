@@ -9,8 +9,11 @@ import { LayoutSettingsDialog } from "./LayoutSettingsDialog";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ConferenceContext } from 'pages/AntMedia';
-import {GeneralSettingsDialog} from "./GeneralSettingsDialog";
+import GeneralSettingsDialog from "./GeneralSettingsDialog";
 import {isMobile,isTablet} from "react-device-detect";
+import i18n from "i18next";
+import {ThemeList} from "../../../styles/themeList";
+import {ThemeContext} from "../../../App";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -35,6 +38,31 @@ function MoreOptionsButton({ footer, ...props }) {
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
   const theme = useTheme();
+    const themeContext = React.useContext(ThemeContext);
+
+    // Language and theme states
+    const [currentLanguage, setCurrentLanguage] = React.useState(
+        localStorage.getItem("i18nextLng") || "en"
+    );
+    const [currentTheme, setCurrentTheme] = React.useState(
+        themeContext?.currentTheme || ThemeList.Green
+    );
+
+    // Language handler
+    const switchLanguage = (value) => {
+        localStorage.setItem("i18nextLng", value);
+        i18n.changeLanguage(value).then(() => {
+            setCurrentLanguage(value);
+            console.log("Language switched to", value);
+        });
+    };
+
+    // Theme handler
+    const switchTheme = (value) => {
+        localStorage.setItem("selectedTheme", value);
+        themeContext.setCurrentTheme(value);
+        setCurrentTheme(value);
+    };
 
 
   const handleClick = (event) => {
@@ -69,6 +97,10 @@ function MoreOptionsButton({ footer, ...props }) {
           <GeneralSettingsDialog
             open={generalSettingsDialogOpen}
             onClose={handleGeneralSettingsDialogClose}
+            currentLanguage={currentLanguage}
+            switchLanguage={switchLanguage}
+            currentTheme={currentTheme}
+            switchTheme={switchTheme}
           />
           <Tooltip title={t("More options")} placement="top">
             <CustomizedBtn

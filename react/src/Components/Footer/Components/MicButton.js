@@ -1,10 +1,9 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
-import { ConferenceContext } from 'pages/AntMedia';
-import { Tooltip } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import {styled, useTheme} from '@mui/material/styles';
+import { Tooltip } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 export const roundStyle = {
@@ -26,75 +25,52 @@ export const CustomizedBtn = styled(Button)(({ theme }) => ({
       width: '100%',
     },
     '& > svg': {
-      width: 36
+      width: 36,
     },
-  }
+  },
 }));
 
-
-function MicButton(props) {
-  const { rounded, footer } = props;
-  const conference = useContext(ConferenceContext);
+function MicButton({ isMicMuted, toggleMic, microphoneButtonDisabled, rounded, footer }) {
   const { enqueueSnackbar } = useSnackbar();
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const handleMute = (e) => {
+  const handleMicToggle = (e, mute) => {
     e.stopPropagation();
-    if (conference.localVideo === null) {
-      enqueueSnackbar({
-        message: t('You need to allow camera and microphone permissions before muting yourself'),
-        variant: 'info',
-        icon: <SvgIcon size={24} name={'muted-microphone'} color="#fff" />
-      }, {
-        autoHideDuration: 1500,
-      });
-      return
-    }
     enqueueSnackbar({
-      message: t('Microphone off'),
+      message: mute ? t('Microphone off') : t('Microphone on'),
       variant: 'info',
-      icon: <SvgIcon size={24} name={'muted-microphone'} color="#fff" />
+      icon: (
+          <SvgIcon
+              size={24}
+              name={mute ? 'muted-microphone' : 'microphone'}
+              color="#fff"
+          />
+      ),
     }, {
       autoHideDuration: 1500,
     });
-    conference?.muteLocalMic();
-  };
-
-  const handleUnmute = (e) => {
-    e.stopPropagation();
-    enqueueSnackbar({
-      message: t('Microphone on'),
-      variant: 'info',
-      icon: <SvgIcon size={24} name={'microphone'} color="#fff" />
-    }, {
-      autoHideDuration: 1500,
-    });
-    conference?.unmuteLocalMic();
+    toggleMic(!mute);
   };
 
   return (
-    <>
-      {conference?.isMyMicMuted ? (
-        <Tooltip title={t('Turn on microphone')} placement="top">
-          <CustomizedBtn
+      <Tooltip title={t(isMicMuted ? 'Turn on microphone' : 'Turn off microphone')} placement="top">
+        <CustomizedBtn
             id="mic-button"
-            disabled={conference?.microphoneButtonDisabled}
-            className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="error" onClick={(e) => { handleUnmute(e) }}>
-            <SvgIcon size={40} name={'muted-microphone'} color={theme.palette?.iconColor?.primary} />
-          </CustomizedBtn>
-        </Tooltip>
-      ) : (
-        <Tooltip title={t('Turn off microphone')} placement="top">
-          <CustomizedBtn
-            id="mic-button"
-            disabled={conference?.microphoneButtonDisabled}
-            className={footer ? 'footer-icon-button' : ''} variant="contained" color="primary" sx={rounded ? roundStyle : {}} onClick={(e) => { handleMute(e) }}>
-            <SvgIcon size={40} name={'microphone'} color={theme.palette?.darkIconColor?.primary} />
-          </CustomizedBtn>
-        </Tooltip>
-      )}
-    </>
+            disabled={microphoneButtonDisabled}
+            className={footer ? 'footer-icon-button' : ''}
+            variant="contained"
+            sx={rounded ? roundStyle : {}}
+            color={isMicMuted ? 'error' : 'primary'}
+            onClick={(e) => handleMicToggle(e, isMicMuted)}
+        >
+          <SvgIcon
+              size={40}
+              name={isMicMuted ? 'muted-microphone' : 'microphone'}
+              color={isMicMuted ? theme.palette.iconColor.primary : theme.palette.darkIconColor.primary}
+          />
+        </CustomizedBtn>
+      </Tooltip>
   );
 }
 
