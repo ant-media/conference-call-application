@@ -3223,7 +3223,26 @@ function AntMedia(props) {
                         <>
                             <MeetingRoom/>
                             <MessageDrawer/>
-                            <ParticipantListDrawer/>
+                            <ParticipantListDrawer
+                                globals={globals}
+                                isAdmin={isAdmin}
+                                pinVideo={(streamId) => pinVideo(streamId)}
+                                makeListenerAgain={(streamId) => {}}
+                                videoTrackAssignments={videoTrackAssignments}
+                                presenterButtonStreamIdInProcess={presenterButtonStreamIdInProcess}
+                                presenterButtonDisabled={presenterButtonDisabled}
+                                makeParticipantPresenter={(streamId) => makeParticipantPresenter(streamId)}
+                                makeParticipantUndoPresenter={(streamId) => makeParticipantUndoPresenter(streamId)}
+                                participantCount={participantCount}
+                                isMyMicMuted={isMyMicMuted}
+                                publishStreamId={publishStreamId}
+                                muteLocalMic={()=>muteLocalMic()}
+                                turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
+                                setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
+                                pagedParticipants={pagedParticipants}
+                                updateAllParticipantsPagination={(value) => updateAllParticipantsPagination(value)}
+                                participantListDrawerOpen={participantListDrawerOpen}
+                            />
                             <EffectsDrawer/>
                             <PublisherRequestListDrawer/>
                         </>

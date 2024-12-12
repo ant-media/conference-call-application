@@ -25,14 +25,31 @@ const TabGrid = styled(Grid)(({ theme }) => ({
   flexWrap: 'nowrap',
 }));
 
-const ParticipantListDrawer = React.memo(props => {
-  const conference = React.useContext(ConferenceContext);
-
+const ParticipantListDrawer = React.memo(({
+                                            globals,
+                                            isAdmin,
+                                            pinVideo,
+                                            makeListenerAgain,
+                                            videoTrackAssignments,
+                                            presenterButtonStreamIdInProcess,
+                                            presenterButtonDisabled,
+                                            makeParticipantPresenter,
+                                            makeParticipantUndoPresenter,
+                                            participantCount,
+                                            isMyMicMuted,
+                                            publishStreamId,
+                                            muteLocalMic,
+                                            turnOffYourMicNotification,
+                                            setParticipantIdMuted,
+                                            pagedParticipants,
+                                            updateAllParticipantsPagination,
+                                            participantListDrawerOpen,
+                                          }) => {
   const { t } = useTranslation();
 
 
   return (
-    <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={conference.participantListDrawerOpen} variant="persistent">
+    <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={participantListDrawerOpen} variant="persistent">
       <ParticipantListGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
         <Grid item container justifyContent="space-between" alignItems="center">
           {t('PARTICIPANTS')}
@@ -40,7 +57,25 @@ const ParticipantListDrawer = React.memo(props => {
         </Grid>
         <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
         <TabGrid container sx={{ pb: 0 }} direction={'column'}>
-          <ParticipantTab />
+          <ParticipantTab
+              globals={globals}
+              isAdmin={isAdmin}
+              pinVideo={(streamId) => pinVideo(streamId)}
+              makeListenerAgain={(streamId) => makeListenerAgain(streamId)}
+              videoTrackAssignments={videoTrackAssignments}
+              presenterButtonStreamIdInProcess={presenterButtonStreamIdInProcess}
+              presenterButtonDisabled={presenterButtonDisabled}
+              makeParticipantPresenter={(streamId) => makeParticipantPresenter(streamId)}
+              makeParticipantUndoPresenter={(streamId) => makeParticipantUndoPresenter(streamId)}
+              participantCount={participantCount}
+              isMyMicMuted={isMyMicMuted}
+              publishStreamId={publishStreamId}
+              muteLocalMic={()=>muteLocalMic()}
+              turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
+              setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
+              pagedParticipants={pagedParticipants}
+              updateAllParticipantsPagination={(value) => updateAllParticipantsPagination(value)}
+          />
           </TabGrid>
         </Grid>
       </ParticipantListGrid>
