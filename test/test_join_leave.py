@@ -274,6 +274,8 @@ class TestJoinLeave(unittest.TestCase):
     camera_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-camera-select")
     self.chrome.mouse_click_on(camera_select)
 
+    time.sleep(1)
+
     camera = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'fake_device_0')]")
     self.chrome.mouse_click_on(camera)
 
@@ -281,11 +283,15 @@ class TestJoinLeave(unittest.TestCase):
     resolution_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-resolution-select")
     self.chrome.mouse_click_on(resolution_select)
 
+    time.sleep(1)
+
     resolution = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'Low definition (180p)')]")
     self.chrome.mouse_click_on(resolution)
 
     mic_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-mic-select")
     self.chrome.mouse_click_on(mic_select)
+
+    time.sleep(1)
 
     mic = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'Fake Audio Input 2')]")
     self.chrome.mouse_click_on(mic)
@@ -1504,15 +1510,18 @@ class TestJoinLeave(unittest.TestCase):
     camera = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'fake_device_0')]")
     self.chrome.mouse_click_on(camera)
 
-
     resolution_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-resolution-select")
     self.chrome.mouse_click_on(resolution_select)
+
+    time.sleep(1)
 
     resolution = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'Low definition (180p)')]")
     self.chrome.mouse_click_on(resolution)
 
     mic_select = self.chrome.get_element_with_retry(By.ID, "setting-dialog-mic-select")
     self.chrome.mouse_click_on(mic_select)
+
+    time.sleep(1)
 
     mic = self.chrome.get_element_with_retry(By.XPATH, "//li[contains(text(), 'Fake Audio Input 2')]")
     self.chrome.mouse_click_on(mic)
