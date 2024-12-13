@@ -82,9 +82,9 @@ function VideoCard(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conference.isPublished]);
 
-    const OverlayButton = ({ title, icon, color, onClick }) => (
+    const OverlayButton = ({ title, icon, color, onClick, label }) => (
         <Tooltip title={title} placement="top">
-            <Fab onClick={onClick} color={color} aria-label="add" size="small">
+            <Fab onClick={onClick} color={color} aria-label={label} size="small">
                 <SvgIcon size={36} name={icon} color={theme.palette?.iconColor?.primary} />
             </Fab>
         </Tooltip>
@@ -118,6 +118,7 @@ function VideoCard(props) {
                         title={`Camera ${useAvatar ? "off" : "on"} ${props.name}`}
                         icon={useAvatar ? "camera-off" : "camera"}
                         color={useAvatar ? "error" : "primary"}
+                        label={useAvatar ? "turn-on-camera" : "turn-off-camera"}
                         onClick={handleToggleCam}
                     />
                 )}
@@ -125,6 +126,7 @@ function VideoCard(props) {
                     title={`Microphone ${micMuted ? "on" : "off"} ${props.name}`}
                     icon={micMuted ? "muted-microphone" : "microphone"}
                     color={micMuted ? "error" : "primary"}
+                    label={micMuted ? "unmute" : "mute"}
                     onClick={handleToggleMic}
                 />
             </>
@@ -136,6 +138,7 @@ function VideoCard(props) {
             title={`${props.pinned ? t("unpin") : t("pin")} ${props.name}`}
             icon={props.pinned ? "unpin" : "pin"}
             color="primary"
+            label={props.pinned ? "unpin" : "pin"}
             onClick={() => conference.pinVideo(props.trackAssignment.streamId)}
         />
     );

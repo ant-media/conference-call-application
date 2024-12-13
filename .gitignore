@@ -7,3 +7,4 @@ react/.env.development
 react/.idea/workspace.xml
 react/.env.fakeeh
 test/run.sh
+test/runw.sh
