@@ -21,13 +21,63 @@ const contextValue = {
       audioTrack: 'test-audio-track',
       videoLabel: 'test-video-label',
     },
+    'test-stream-id-2': {
+        role: 'host',
+        participantID: 'test-participant-id-2',
+        streamID: 'test-stream-id-2',
+        videoTrack: 'test-video-track-2',
+        audioTrack: 'test-audio-track-2',
+        videoLabel: 'test-video-label-2',
+        metaData: {
+          isMuted: false
+        }
+    }
   },
   publishStreamId: 'test-stream-id',
   pinVideo: jest.fn(),
   makeParticipantPresenter: jest.fn(),
+  pagedParticipants: {
+    'test-stream-id': {
+        role: 'host',
+        participantID: 'test-participant-id',
+        streamID: 'test-stream-id',
+        videoTrack: 'test-video-track',
+        audioTrack: 'test-audio-track',
+        videoLabel: 'test-video-label',
+    },
+    'test-stream-id-2': {
+      role: 'host',
+      participantID: 'test-participant-id-2',
+      streamID: 'test-stream-id-2',
+      videoTrack: 'test-video-track-2',
+      audioTrack: 'test-audio-track-2',
+      videoLabel: 'test-video-label-2',
+      metaData: {
+        isMuted: false
+      }
+    }
+  },
   isAdmin: true,
   isPlayOnly: false,
-  videoTrackAssignments: [{streamID: 'test-stream-id', participantID: 'test-participant-id', videoTrack: 'test-video-track', audioTrack: 'test-audio-track', videoLabel: 'test-video-label'}],
+  videoTrackAssignments: [
+      {streamID: 'test-stream-id', participantID: 'test-participant-id', videoTrack: 'test-video-track', audioTrack: 'test-audio-track', videoLabel: 'test-video-label'},
+      {streamID: 'test-stream-id-2', participantID: 'test-participant-id-2', videoTrack: 'test-video-track-2', audioTrack: 'test-audio-track-2', videoLabel: 'test-video-label-2'}
+  ],
+  globals: {
+    maxVideoTrackCount: 6,
+    desiredTileCount: 6,
+    trackEvents: [],
+    participantListPagination: {
+      currentPage: 1,
+      pageSize: 15,
+      totalPage: 1,
+      startIndex: 0,
+      endIndex: 15
+    }
+  },
+  muteLocalMic: jest.fn(),
+  turnOffYourMicNotification: jest.fn(),
+  setParticipantIdMuted: jest.fn(),
 };
 
 // Mock the useContext hook
@@ -93,6 +143,42 @@ describe('ParticipantTab Component', () => {
     );
     const presenterButton = getByTestId('add-presenter-test-stream-id');
     expect(presenterButton).toBeInTheDocument();
+  });
+
+  it('check muteLocalMic called in getMuteParticipantButton', () => {
+    contextValue.isAdmin = true;
+    process.env.REACT_APP_PARTICIPANT_TAB_MUTE_PARTICIPANT_BUTTON_ENABLED=true
+
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+    const micToggleParticipant = getByTestId('mic-toggle-participant-test-stream-id');
+    expect(micToggleParticipant).toBeInTheDocument();
+
+    micToggleParticipant.click();
+    expect(contextValue.muteLocalMic).toHaveBeenCalled();
+    expect(contextValue.setParticipantIdMuted).not.toHaveBeenCalled();
+    expect(contextValue.turnOffYourMicNotification).not.toHaveBeenCalled();
+  });
+
+  it('check turnOffYourMicNotification called in getMuteParticipantButton', () => {
+    contextValue.isAdmin = true;
+    process.env.REACT_APP_PARTICIPANT_TAB_MUTE_PARTICIPANT_BUTTON_ENABLED=true
+
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+    const micToggleParticipant = getByTestId('mic-toggle-participant-test-stream-id-2');
+    expect(micToggleParticipant).toBeInTheDocument();
+
+    micToggleParticipant.click();
+    expect(contextValue.muteLocalMic).not.toHaveBeenCalled();
+    expect(contextValue.setParticipantIdMuted).toHaveBeenCalled();
+    expect(contextValue.turnOffYourMicNotification).toHaveBeenCalled();
   });
   
 });

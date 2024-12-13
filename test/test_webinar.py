@@ -18,8 +18,14 @@ class TestWebinarScenario(unittest.TestCase):
     print(self._testMethodName, " starting...")
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
+    self.user = os.environ.get('AMS_USER')
+    self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
     self.chrome.init(True)
+    self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
+    self.rest_helper.login()
+    self.rest_helper.create_broadcast_for_play_only_speed_test()
+    self.rest_helper.start_broadcast("speedTestSampleStream")
     #self.startLoadTest()
 
   def tearDown(self):
@@ -137,6 +143,8 @@ class TestWebinarScenario(unittest.TestCase):
       app = ""
     handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName="+participant)
     
+    wait = self.chrome.get_wait()
+
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
 
@@ -149,7 +157,7 @@ class TestWebinarScenario(unittest.TestCase):
     time.sleep(5)
 
     speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
-    assert(speedTestCircularProgress.is_displayed())
+    wait.until(lambda x: speedTestCircularProgress.is_displayed())
 
     time.sleep(5)
 

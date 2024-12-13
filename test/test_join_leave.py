@@ -48,8 +48,8 @@ class TestJoinLeave(unittest.TestCase):
     process = subprocess.Popen(
         ["bash", script_path] + parameters,
         cwd=directory,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
+        #stdout=subprocess.DEVNULL,
+        #stderr=subprocess.DEVNULL
     )
 
     return process

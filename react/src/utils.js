@@ -34,3 +34,13 @@ export function isComponentMode() {
 export function getRootAttribute(attribute) {
     return document.getElementById("root")?.getAttribute(attribute);
 }
+
+export function parseMetaData(metaData, key) {
+    if (!metaData) return false;
+    try {
+        const parsed = JSON.parse(metaData);
+        return parsed[key] || false;
+    } catch {
+        return false;
+    }
+}

@@ -81,13 +81,13 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       createSpeedTestForPlayWebRtcAdaptor: jest.fn(),
       requestVideoTrackAssignments: jest.fn(),
       stopSpeedTest: jest.fn().mockImplementation(() => console.log('stopSpeedTest')),
-      getSubtracks: jest.fn(),
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
       playStats: {},
       enableEffect: jest.fn(),
       setSelectedVideoEffect: jest.fn(),
       setBlurEffectRange: jest.fn(),
+      getSubtrackCount: jest.fn(),
     }
 
     for (var key in params) {
@@ -1308,7 +1308,7 @@ describe('AntMedia Component', () => {
     };
 
     const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
 
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
@@ -1428,7 +1428,7 @@ describe('AntMedia Component', () => {
     });
 
     const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
 
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
@@ -1601,7 +1601,7 @@ describe('AntMedia Component', () => {
     };
 
     const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
 
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
@@ -1751,22 +1751,22 @@ describe('AntMedia Component', () => {
     };
 
     const weak_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
-    const unstable_msg = "Poor Network Connection Warning:Network connection is not stable. Please check your connection!";
+    const unstable_msg = "Poor Network Connection Warning:Network connection is weak. You may encounter connection drop!";
 
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
 
     await act(async () => {
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-      mockStats.videoRoundTripTime = '150';
-      mockStats.audioRoundTripTime = '160';
+      mockStats.videoRoundTripTime = '0.150';
+      mockStats.audioRoundTripTime = '0.160';
 
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
 
-      mockStats.videoRoundTripTime = '120';
-      mockStats.audioRoundTripTime = '130';
+      mockStats.videoRoundTripTime = '0.120';
+      mockStats.audioRoundTripTime = '0.130';
 
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
 
@@ -1790,8 +1790,8 @@ describe('AntMedia Component', () => {
       expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
 
 
-      mockStats.videoJitter = '60';
-      mockStats.audioJitter = '70';
+      mockStats.videoJitter = '0.02';
+      mockStats.audioJitter = '0.10';
 
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
       expect(consoleWarnSpy).toHaveBeenCalledWith(unstable_msg);
@@ -1855,16 +1855,11 @@ describe('AntMedia Component', () => {
     });
 
     await waitFor(() => {
-      expect(webRTCAdaptorPlaySpeedTestConstructor).not.toBe(undefined);
-    });
-
-    await waitFor(() => {
       expect(webRTCAdaptorPublishSpeedTestConstructor).not.toBe(undefined);
     });
 
     const mockStop = jest.fn();
 
-    webRTCAdaptorPlaySpeedTestConstructor.stop = mockStop;
     webRTCAdaptorPublishSpeedTestConstructor.stop = mockStop;
 
 
@@ -1884,9 +1879,6 @@ describe('AntMedia Component', () => {
     });
 
     /*
-    await waitFor(() => {
-      expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
-    });
     await waitFor(() => {
       expect(webRTCAdaptorPublishSpeedTestConstructor).toBeNull();
     });
@@ -1933,6 +1925,12 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
+    currentConference.setIsPlayOnly(true);
+
+    await waitFor(() => {
+      expect(currentConference.isPlayOnly).toBe(true);
+    });
+
     await act(async () => {
       currentConference.startSpeedTest();
     });
@@ -1956,7 +1954,7 @@ describe('AntMedia Component', () => {
 
     // Assert
     await waitFor(() => {
-      expect(mockStop).toHaveBeenCalledWith(`speedTestStream${currentConference.speedTestStreamId.current}`);
+      expect(mockStop).toHaveBeenCalledWith(`speedTestSampleStream`);
     });
     //await waitFor(() => {
     //  expect(webRTCAdaptorPlaySpeedTestConstructor).toBeNull();
@@ -2872,6 +2870,534 @@ describe('AntMedia Component', () => {
         currentConference.checkAndUpdateVideoAudioSourcesForPublishSpeedTest();
       });
       mockConsoleError.mockRestore();
+    });
+  });
+
+  it('sets and fills play stats list correctly', async () => {
+    const mockStats = {
+      currentRoundTripTime: 100,
+      packetsReceived: 200,
+      totalBytesReceivedCount: 300,
+      framesReceived: 400,
+      framesDropped: 500,
+      startTime: 600,
+      currentTimestamp: 700,
+      firstBytesReceivedCount: 800,
+      lastBytesReceived: 900,
+      videoPacketsLost: 1000,
+    };
+
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setAndFillPlayStatsList(mockStats);
+    });
+
+    expect(currentConference.statsList.current.currentRoundTripTime).not.toBe(100);
+    expect(currentConference.statsList.current.packetsReceived).not.toBe(200);
+    expect(currentConference.statsList.current.totalBytesReceivedCount).not.toBe(300);
+    expect(currentConference.statsList.current.framesReceived).not.toBe(400);
+    expect(currentConference.statsList.current.framesDropped).not.toBe(500);
+    expect(currentConference.statsList.current.startTime).not.toBe(600);
+    expect(currentConference.statsList.current.currentTimestamp).not.toBe(700);
+    expect(currentConference.statsList.current.firstBytesReceivedCount).not.toBe(800);
+    expect(currentConference.statsList.current.lastBytesReceived).not.toBe(900);
+    expect(currentConference.statsList.current.videoPacketsLost).not.toBe(1000);
+  });
+
+  it('sets and fills publish stats list correctly', async () => {
+    const mockStats = {
+      videoRoundTripTime: 100,
+      audioRoundTripTime: 200,
+      videoPacketsLost: 300,
+      totalVideoPacketsSent: 400,
+      totalAudioPacketsSent: 500,
+      audioPacketsLost: 600,
+      videoJitter: 700,
+      audioJitter: 800,
+      currentOutgoingBitrate: 900,
+    };
+
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setAndFillPublishStatsList(mockStats);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.statsList.current.videoRoundTripTime).not.toBe(100);
+      expect(currentConference.statsList.current.audioRoundTripTime).not.toBe(200);
+      expect(currentConference.statsList.current.videoPacketsLost).not.toBe(300);
+      expect(currentConference.statsList.current.totalVideoPacketsSent).not.toBe(400);
+      expect(currentConference.statsList.current.totalAudioPacketsSent).not.toBe(500);
+      expect(currentConference.statsList.current.audioPacketsLost).not.toBe(600);
+      expect(currentConference.statsList.current.videoJitter).not.toBe(700);
+      expect(currentConference.statsList.current.audioJitter).not.toBe(800);
+      expect(currentConference.statsList.current.currentOutgoingBitrate).not.toBe(900);
+    });
+  });
+
+  it('sets speed test object to failed state', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setSpeedTestObjectFailed('Error message');
+    });
+
+    await waitFor(() => {
+      expect(currentConference.speedTestObject.message).toBe('Error message');
+      expect(currentConference.speedTestObject.isfinished).toBe(false);
+      expect(currentConference.speedTestObject.isfailed).toBe(true);
+      expect(currentConference.speedTestObject.errorMessage).toBe('Error message');
+      expect(currentConference.speedTestObject.progressValue).toBe(0);
+    });
+  });
+
+  it('sets speed test object progress correctly', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setSpeedTestObjectProgress(50);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.speedTestObject.isfinished).toBe(false);
+      expect(currentConference.speedTestObject.isfailed).toBe(false);
+      expect(currentConference.speedTestObject.errorMessage).toBe('');
+      expect(currentConference.speedTestObject.progressValue).toBe(50);
+    });
+  });
+
+  it('handles progress value greater than 100', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setSpeedTestObjectProgress(150);
+    });
+
+    const stopSpeedTest = jest.fn();
+    //expect(stopSpeedTest).toHaveBeenCalled();
+    expect(currentConference.speedTestObject.message).toBe('Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ');
+    expect(currentConference.speedTestObject.isfinished).toBe(false);
+    expect(currentConference.speedTestObject.isfailed).toBe(true);
+    expect(currentConference.speedTestObject.errorMessage).toBe('Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again ');
+    expect(currentConference.speedTestObject.progressValue).toBe(0);
+  });
+
+  it('calculates play speed test result with great connection', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.statsList.current = [
+      {
+        totalBytesReceivedCount: 1000,
+        framesReceived: 100,
+        framesDropped: 0,
+        currentTimestamp: 2000,
+        startTime: 1000,
+        lastBytesReceived: 1000,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 0,
+        audioPacketsLost: 0,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 100,
+          jitterBufferDelay: 10
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 100, jitterBufferDelay: 10}],
+        videoRoundTripTime: '0.05',
+        audioRoundTripTime: '0.05'
+      },
+      {
+        totalBytesReceivedCount: 500,
+        framesReceived: 50,
+        framesDropped: 0,
+        currentTimestamp: 1500,
+        startTime: 1000,
+        lastBytesReceived: 500,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 0,
+        audioPacketsLost: 0,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 50,
+          jitterBufferDelay: 10
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 50, jitterBufferDelay: 10}],
+        videoRoundTripTime: '0.05',
+        audioRoundTripTime: '0.05'
+      }
+    ];
+
+    await act(async () => {
+      currentConference.calculateThePlaySpeedTestResult();
+    });
+
+    expect(currentConference.speedTestObject.message).toBe('Your connection is Great!');
+    expect(currentConference.speedTestObject.isfailed).toBe(false);
+    expect(currentConference.speedTestObject.progressValue).toBe(100);
+    expect(currentConference.speedTestObject.isfinished).toBe(true);
+  });
+
+  it('calculates play speed test result with moderate connection', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.statsList.current = [
+      {
+        totalBytesReceivedCount: 1000,
+        framesReceived: 100,
+        framesDropped: 5,
+        currentTimestamp: 2000,
+        startTime: 1000,
+        lastBytesReceived: 1000,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 1,
+        audioPacketsLost: 1,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 100,
+          jitterBufferDelay: 60
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 100, jitterBufferDelay: 60}],
+        videoRoundTripTime: '0.12',
+        audioRoundTripTime: '0.12'
+      },
+      {
+        totalBytesReceivedCount: 500,
+        framesReceived: 50,
+        framesDropped: 2,
+        currentTimestamp: 1500,
+        startTime: 1000,
+        lastBytesReceived: 500,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 0,
+        audioPacketsLost: 0,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 50,
+          jitterBufferDelay: 60
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 50, jitterBufferDelay: 60}],
+        videoRoundTripTime: '0.12',
+        audioRoundTripTime: '0.12'
+      }
+    ];
+
+    await act(async () => {
+      currentConference.calculateThePlaySpeedTestResult();
+    });
+
+    expect(currentConference.speedTestObject.message).toBe('Your connection is moderate, occasional disruptions may occur');
+    expect(currentConference.speedTestObject.isfailed).toBe(false);
+    expect(currentConference.speedTestObject.progressValue).toBe(100);
+    expect(currentConference.speedTestObject.isfinished).toBe(true);
+  });
+
+  it('calculates play speed test result with poor connection', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.statsList.current = [
+      {
+        totalBytesReceivedCount: 1000,
+        framesReceived: 100,
+        framesDropped: 10,
+        currentTimestamp: 2000,
+        startTime: 1000,
+        lastBytesReceived: 1000,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 5,
+        audioPacketsLost: 5,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 100,
+          jitterBufferDelay: 120
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 100, jitterBufferDelay: 120}],
+        videoRoundTripTime: '0.2',
+        audioRoundTripTime: '0.2'
+      },
+      {
+        totalBytesReceivedCount: 500,
+        framesReceived: 50,
+        framesDropped: 5,
+        currentTimestamp: 1500,
+        startTime: 1000,
+        lastBytesReceived: 500,
+        firstBytesReceivedCount: 0,
+        videoPacketsLost: 2,
+        audioPacketsLost: 2,
+        inboundRtpList: [{
+          trackIdentifier: 'ARDAMSv',
+          packetsReceived: 50,
+          jitterBufferDelay: 120
+        }, {trackIdentifier: 'ARDAMSa', packetsReceived: 50, jitterBufferDelay: 120}],
+        videoRoundTripTime: '0.2',
+        audioRoundTripTime: '0.2'
+      }
+    ];
+
+    await act(async () => {
+      currentConference.calculateThePlaySpeedTestResult();
+    });
+
+    expect(currentConference.speedTestObject.message).toBe('Your connection quality is poor. You may experience interruptions');
+    expect(currentConference.speedTestObject.isfailed).toBe(false);
+    expect(currentConference.speedTestObject.progressValue).toBe(100);
+    expect(currentConference.speedTestObject.isfinished).toBe(true);
+  });
+
+  it('updates progress and stats list on subsequent iterations', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.speedTestCounter.current = 1;
+    currentConference.statsList.current = [{}, {}];
+    currentConference.setAndFillPlayStatsList = jest.fn();
+    currentConference.setSpeedTestObjectProgress = jest.fn();
+    currentConference.setSpeedTestObject = jest.fn();
+
+    currentConference.processUpdatedStatsForPlaySpeedTest({});
+
+    expect(currentConference.statsList.current).toEqual([{}, {}, {}]);
+  });
+
+  it('updates speed test object progress when iterations are insufficient', async () => {
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    currentConference.speedTestCounter.current = 2;
+    currentConference.statsList.current = [{}, {}];
+    currentConference.setSpeedTestObjectProgress = jest.fn();
+    currentConference.setSpeedTestObject = jest.fn();
+
+    currentConference.processUpdatedStatsForPlaySpeedTest({});
+
+    expect(currentConference.setSpeedTestObject).not.toHaveBeenCalledWith({
+      message: currentConference.speedTestObject.message,
+      isfinished: false,
+      isfailed: false,
+      errorMessage: "",
+      progressValue: 60
+    });
+  });
+
+  describe('updateAllParticipantsPagination', () => {
+    it('sets currentPage to 1 if currentPage is less than or equal to 0', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.updateAllParticipantsPagination(0);
+      expect(currentConference.globals.participantListPagination.currentPage).toBe(1);
+    });
+
+    it('calculates totalPage correctly', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setParticipantCount(25);
+      });
+      currentConference.globals.participantListPagination.pageSize = 10;
+      currentConference.updateAllParticipantsPagination(1);
+      expect(currentConference.globals.participantListPagination.totalPage).toBe(3);
+    });
+
+    it('sets currentPage to totalPage if currentPage is greater than totalPage', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setParticipantCount(25);
+      });
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(25);
+      });
+      currentConference.globals.participantListPagination.pageSize = 10;
+      currentConference.updateAllParticipantsPagination(5);
+      expect(currentConference.globals.participantListPagination.currentPage).toBe(3);
+    });
+
+    it('calculates startIndex and endIndex correctly', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setParticipantCount(25);
+      });
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(25);
+      });
+      currentConference.globals.participantListPagination.pageSize = 10;
+      currentConference.updateAllParticipantsPagination(2);
+    });
+
+    it('calls getSubtracks with correct parameters', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const mockGetSubtracks = jest.fn();
+      currentConference.getSubtracks = mockGetSubtracks;
+
+      currentConference.roomName = 'testRoom';
+      await act(async () => {
+        currentConference.setParticipantCount(25);
+      });
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(25);
+      });
+      currentConference.globals.participantListPagination.pageSize = 10;
+      currentConference.updateAllParticipantsPagination(2);
+    });
+
+    it('update participant count, when we receive new subtrack count', async () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      const obj = { count: 12 };
+
+      await act(async () => {
+        webRTCAdaptorConstructor.callback('subtrackCount', obj);
+      });
+
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(12);
+      });
     });
   });
 
