@@ -1115,7 +1115,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
   #TODO reanable this
-  def _test_pin_on_video_card(self):
+  def test_pin_on_video_card(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1311,7 +1311,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
   #TODO: uncommnet this test
-  def _test_mute_on_video_card(self):
+  def test_mute_on_video_card(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)

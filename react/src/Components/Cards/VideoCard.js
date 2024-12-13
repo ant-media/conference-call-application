@@ -113,11 +113,11 @@ function VideoCard(props) {
 
         return (
             <>
-                {(!useAvatar && process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true") && (
+                {(process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true") && (
                     <OverlayButton
                         title={`Camera ${useAvatar ? "off" : "on"} ${props.name}`}
-                        icon={useAvatar ? "camera-off" : "camera"}
-                        color={useAvatar ? "error" : "primary"}
+                        icon={useAvatar ? "camera" : "camera-off"}
+                        color={useAvatar ? "primary" : "error"}
                         label={useAvatar ? "turn-on-camera" : "turn-off-camera"}
                         onClick={handleToggleCam}
                     />
