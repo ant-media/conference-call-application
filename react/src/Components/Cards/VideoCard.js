@@ -116,8 +116,8 @@ function VideoCard(props) {
                 {(process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true") && (
                     <OverlayButton
                         title={`Camera ${useAvatar ? "off" : "on"} ${props.name}`}
-                        icon={useAvatar ? "camera" : "camera-off"}
-                        color={useAvatar ? "primary" : "error"}
+                        icon={useAvatar ? "camera-off" : "camera"}
+                        color={useAvatar ? "error" : "primary"}
                         label={useAvatar ? "turn-on-camera" : "turn-off-camera"}
                         onClick={handleToggleCam}
                     />
@@ -169,7 +169,7 @@ function VideoCard(props) {
                 <Grid container justifyContent="center" alignItems="center" wrap="nowrap">
                     <Grid item container justifyContent="center" alignItems="center" columnSpacing={0.5}>
                         {!isMobile && !isTablet && <PinButton props={props} />}
-                        {isAdministrativeButtonsVisible && <AdministrativeButtons props={props} micMuted={micMuted} />}
+                        {isAdministrativeButtonsVisible && <AdministrativeButtons props={props} micMuted={micMuted} useAvatar={useAvatar}/>}
                     </Grid>
                 </Grid>
             </Grid>

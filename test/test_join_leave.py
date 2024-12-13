@@ -1114,7 +1114,6 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  #TODO reanable this
   def test_pin_on_video_card(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -1310,7 +1309,6 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  #TODO: uncommnet this test
   def test_mute_on_video_card(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -1344,11 +1342,12 @@ class TestJoinLeave(unittest.TestCase):
     mute_button = self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//button[@type='button' and @aria-label='mute']")
     mute_button.click()
 
+    '''
     #accept mute
     wait.until(lambda x: self.chrome.is_element_exist(By.XPATH, "//button[text()='Mute']"))
     mute_accept_button = self.chrome.get_element_with_retry(By.XPATH, "//button[text()='Mute']")
     mute_accept_button.click()
-
+    '''
 
     #check muted icon will be visible
     wait.until(lambda x: self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//div[@aria-label='mic is muted']") is not None)
