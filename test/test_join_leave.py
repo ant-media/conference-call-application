@@ -1360,7 +1360,7 @@ class TestJoinLeave(unittest.TestCase):
     #switch participantA tab and check muted icon is not visible
     self.chrome.switch_to_tab(handle_1)
     participantB_video_card = self.get_video_container_by_stream_name("participantB")
-    assert(not self.chrome.is_nested_element_exist(participantB_video_card, By.XPATH, "//div[@aria-label='mic is muted']"))
+    wait.until(lambda x: not self.chrome.is_nested_element_exist(participantB_video_card, By.XPATH, "//div[@aria-label='mic is muted']"))
 
     self.chrome.close_all()
 
