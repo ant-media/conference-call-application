@@ -111,19 +111,15 @@ class TestJoinLeave(unittest.TestCase):
         
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    if self.verbose and expected_value is not None and len(vtas) != expected_value:
-      print("\n ++++++++++ start trial ++++++++++")
+    if expected_value is not None and len(vtas) != expected_value:
       print("VTA expected: "+str(expected_value) + " but got: "+str(len(vtas)))
-      self.call_debugme()
-      print("\n")
-      self.print_message()
+      if self.verbose:
+        self.call_debugme()
+        print("\n")
+        self.print_message()
 
-      #print("\n screen shot")
-      #self.chrome.print_ss_as_base64()
-
-      print("++++++++++ end trial ++++++++++\n")
-
-
+        #print("\n screen shot")
+        #self.chrome.print_ss_as_base64()
    
     cpu_usage = psutil.cpu_percent(interval=0)
     print(f"Instant CPU Usage: {cpu_usage}%")
