@@ -1151,7 +1151,8 @@ class TestJoinLeave(unittest.TestCase):
     #unpin yourself
     print("unpin participantA")
     participantA_video_card = self.get_video_container_by_stream_name("participantA")
-    participantA_unpin_button = self.chrome.get_element_in_element(participantA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='unpin']", wait_until_clickable=False)
+    self.chrome.move_to_element(participantA_video_card)
+    participantA_unpin_button = self.chrome.get_element_in_element(participantA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='unpin']")
     participantA_unpin_button.click()
 
     wait.until(lambda x: not self.chrome.is_element_exist(By.CSS_SELECTOR, "div.single-video-container.pinned"))
@@ -1160,8 +1161,8 @@ class TestJoinLeave(unittest.TestCase):
     print("pin participantB")
     participantB_video_card = self.get_video_container_by_stream_name("participantB")
     print("participantB_video_card:"+participantB_video_card.get_attribute("innerHTML"))
-    participantB_pin_button = self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//button[@type='button' and @aria-label='pin']", wait_until_clickable=False)
-    
+    self.chrome.move_to_element(participantB_video_card)
+    participantB_pin_button = self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//button[@type='button' and @aria-label='pin']")
     participantB_pin_button.click()
 
     wait.until(lambda x: self.chrome.is_element_exist(By.CSS_SELECTOR, "div.single-video-container.pinned"))
@@ -1179,7 +1180,8 @@ class TestJoinLeave(unittest.TestCase):
     #unpin participantB
     print("unpin participantB")
     participantB_video_card = self.get_video_container_by_stream_name("participantB")
-    participantB_unpin_button = self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//button[@type='button' and @aria-label='unpin']", wait_until_clickable=False)
+    self.chrome.move_to_element(participantB_video_card)
+    participantB_unpin_button = self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//button[@type='button' and @aria-label='unpin']")
     participantB_unpin_button.click()
 
     wait.until(lambda x: not self.chrome.is_element_exist(By.CSS_SELECTOR, "div.single-video-container.pinned"))
@@ -1193,7 +1195,8 @@ class TestJoinLeave(unittest.TestCase):
     
     #pin yourself
     participantA_video_card = self.get_video_container_by_stream_name("participantA")
-    participantA_pin_button = self.chrome.get_element_in_element(participantA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='pin']", wait_until_clickable=False)
+    self.chrome.move_to_element(participantA_video_card)
+    participantA_pin_button = self.chrome.get_element_in_element(participantA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='pin']")
     participantA_pin_button.click()
 
     pinned_video_card = self.chrome.get_element_with_retry(By.CSS_SELECTOR, "div.single-video-container.pinned")
@@ -1202,7 +1205,8 @@ class TestJoinLeave(unittest.TestCase):
 
     #pin participantB
     participantB_video_card = self.get_video_container_by_stream_name("participantB")
-    participantB_pin_button = self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//button[@type='button' and @aria-label='pin']", wait_until_clickable=False)
+    self.chrome.move_to_element(participantB_video_card)
+    participantB_pin_button = self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//button[@type='button' and @aria-label='pin']")
     participantB_pin_button.click()
 
     pinned_video_card = self.chrome.get_element_with_retry(By.CSS_SELECTOR, "div.single-video-container.pinned")
