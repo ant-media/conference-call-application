@@ -19,6 +19,7 @@ class TestJoinLeave(unittest.TestCase):
     print("----------------\n", self._testMethodName, " starting...")
     self.is_local = False
     #self.is_local = True
+    self.verbose = False
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
     self.user = os.environ.get('AMS_USER')
@@ -58,8 +59,8 @@ class TestJoinLeave(unittest.TestCase):
     process = subprocess.Popen(
         ["bash", script_path] + parameters,
         cwd=directory,
-        #stdout=subprocess.DEVNULL,
-        #stderr=subprocess.DEVNULL
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
     )
 
     return process
@@ -110,7 +111,7 @@ class TestJoinLeave(unittest.TestCase):
         
     #self.chrome.print_console_logs()
     vtas = result_json["videoTrackAssignments"]
-    if expected_value is not None and len(vtas) != expected_value:
+    if self.verbose and expected_value is not None and len(vtas) != expected_value:
       print("\n ++++++++++ start trial ++++++++++")
       print("VTA expected: "+str(expected_value) + " but got: "+str(len(vtas)))
       self.call_debugme()
