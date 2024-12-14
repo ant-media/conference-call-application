@@ -1165,6 +1165,7 @@ class TestJoinLeave(unittest.TestCase):
     participantB_pin_button = self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//button[@type='button' and @aria-label='pin']")
     self.chrome.move_to_element(participantB_video_card)
     self.chrome.save_ss_as_file("test_pin_on_video_card-1.png")
+    time.sleep(1)
     participantB_pin_button.click()
 
     wait.until(lambda x: self.chrome.is_element_exist(By.CSS_SELECTOR, "div.single-video-container.pinned"))
