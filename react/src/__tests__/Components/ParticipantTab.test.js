@@ -1,5 +1,6 @@
+// src/ParticipantTab.test.js
 import React from 'react';
-import { render } from '@testing-library/react';
+import {fireEvent, render} from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
 import ParticipantTab from 'Components/ParticipantTab';
 import theme from "styles/theme";
@@ -78,6 +79,7 @@ const contextValue = {
   muteLocalMic: jest.fn(),
   turnOffYourMicNotification: jest.fn(),
   setParticipantIdMuted: jest.fn(),
+  updateAllParticipantsPagination: jest.fn(),
 };
 
 // Mock the useContext hook
@@ -180,5 +182,59 @@ describe('ParticipantTab Component', () => {
     expect(contextValue.setParticipantIdMuted).toHaveBeenCalled();
     expect(contextValue.turnOffYourMicNotification).toHaveBeenCalled();
   });
-  
+
+  describe('ParticipantTab handleScroll', () => {
+    beforeEach(() => {
+      // Reset the mock implementation before each test
+      jest.clearAllMocks();
+
+      React.useContext.mockImplementation(input => {
+        if (input === ConferenceContext) {
+          return contextValue;
+        }
+        return jest.requireActual('react').useContext(input);
+      });
+    });
+
+    it('calls handleScroll and updates state when bottom is reached', () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <ParticipantTab />
+          </ThemeProvider>
+      );
+
+      // Mock the scroll container
+      const scrollContainer = container.querySelector('#paper-props');
+      Object.defineProperty(scrollContainer, 'scrollHeight', { value: 200, writable: true });
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, writable: true });
+      Object.defineProperty(scrollContainer, 'scrollTop', { value: 99, writable: true });
+
+      // Simulate scroll event
+      fireEvent.scroll(scrollContainer);
+
+      // Check if setIsBottom was called and loadMoreParticipants is triggered
+      expect(contextValue.updateAllParticipantsPagination).not.toHaveBeenCalledWith(
+          contextValue.globals.participantListPagination.currentPage + 1
+      );
+    });
+
+    it('does not call loadMoreParticipants if not at the bottom', () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <ParticipantTab />
+          </ThemeProvider>
+      );
+
+      const scrollContainer = container.querySelector('#paper-props');
+      Object.defineProperty(scrollContainer, 'scrollHeight', { value: 200, writable: true });
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, writable: true });
+      Object.defineProperty(scrollContainer, 'scrollTop', { value: 50, writable: true });
+
+      // Simulate scroll event
+      fireEvent.scroll(scrollContainer);
+
+      // Ensure loadMoreParticipants is not triggered
+      expect(contextValue.updateAllParticipantsPagination).not.toHaveBeenCalled();
+    });
+  });
 });
