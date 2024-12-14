@@ -1,6 +1,6 @@
 // src/ParticipantTab.test.js
 import React from 'react';
-import {fireEvent, render} from '@testing-library/react';
+import {fireEvent, render, waitFor} from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
 import ParticipantTab from 'Components/ParticipantTab';
 import theme from "styles/theme";
@@ -196,7 +196,9 @@ describe('ParticipantTab Component', () => {
       });
     });
 
-    it('calls handleScroll and updates state when bottom is reached', () => {
+    it('calls handleScroll and updates state when bottom is reached', async () => {
+      jest.useFakeTimers();
+
       const { container } = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
             <ParticipantTab />
@@ -206,16 +208,21 @@ describe('ParticipantTab Component', () => {
       // Mock the scroll container
       const scrollContainer = container.querySelector('#paper-props');
       Object.defineProperty(scrollContainer, 'scrollHeight', { value: 200, writable: true });
-      Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, writable: true });
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 200, writable: true });
       Object.defineProperty(scrollContainer, 'scrollTop', { value: 99, writable: true });
 
       // Simulate scroll event
       fireEvent.scroll(scrollContainer);
 
+      jest.advanceTimersByTime(1000);
+
       // Check if setIsBottom was called and loadMoreParticipants is triggered
-      expect(contextValue.updateAllParticipantsPagination).not.toHaveBeenCalledWith(
-          contextValue.globals.participantListPagination.currentPage + 1
-      );
+      await waitFor(() => {
+        expect(contextValue.updateAllParticipantsPagination).toHaveBeenCalledWith(
+            contextValue.globals.participantListPagination.currentPage + 1
+        );
+      });
+      jest.clearAllTimers()
     });
 
     it('does not call loadMoreParticipants if not at the bottom', () => {
@@ -236,5 +243,6 @@ describe('ParticipantTab Component', () => {
       // Ensure loadMoreParticipants is not triggered
       expect(contextValue.updateAllParticipantsPagination).not.toHaveBeenCalled();
     });
+
   });
 });
