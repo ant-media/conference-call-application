@@ -1831,7 +1831,7 @@ class TestJoinLeave(unittest.TestCase):
     more_options_button = self.chrome.get_element_with_retry(By.ID, "settings-button")
     more_options_button.click()
 
-    time.sleep(1)
+    time.sleep(3)
 
     general_button = self.chrome.get_element(By.ID, "general-button")
     self.chrome.mouse_click_on(general_button)
@@ -1839,7 +1839,7 @@ class TestJoinLeave(unittest.TestCase):
     lang_select = self.chrome.get_element(By.ID, "language-select")
     self.chrome.mouse_click_on(lang_select)
 
-    time.sleep(1)
+    time.sleep(3)
 
     en = self.chrome.get_element(By.XPATH, "//li[@data-value='en']")
     self.chrome.mouse_click_on(en)
@@ -1849,7 +1849,7 @@ class TestJoinLeave(unittest.TestCase):
     lang_select = self.chrome.get_element(By.ID, "language-select")
     self.chrome.mouse_click_on(lang_select)
 
-    time.sleep(1)
+    time.sleep(3)
 
     tr = self.chrome.get_element(By.XPATH, "//li[@data-value='tr']")
     self.chrome.mouse_click_on(tr)
@@ -1859,7 +1859,7 @@ class TestJoinLeave(unittest.TestCase):
     lang_select = self.chrome.get_element(By.ID, "language-select")
     self.chrome.mouse_click_on(lang_select)
 
-    time.sleep(1)
+    time.sleep(3)
 
     es = self.chrome.get_element(By.XPATH, "//li[@data-value='es']")
     self.chrome.mouse_click_on(es)
@@ -1869,7 +1869,7 @@ class TestJoinLeave(unittest.TestCase):
     lang_select = self.chrome.get_element(By.ID, "language-select")
     self.chrome.mouse_click_on(lang_select)
 
-    time.sleep(1)
+    time.sleep(3)
 
     fr = self.chrome.get_element(By.XPATH, "//li[@data-value='fr']")
     self.chrome.mouse_click_on(fr)
@@ -1879,7 +1879,7 @@ class TestJoinLeave(unittest.TestCase):
     lang_select = self.chrome.get_element(By.ID, "language-select")
     self.chrome.mouse_click_on(lang_select)
 
-    time.sleep(1)
+    time.sleep(3)
 
     en = self.chrome.get_element(By.XPATH, "//li[@data-value='en']")
     self.chrome.mouse_click_on(en)
