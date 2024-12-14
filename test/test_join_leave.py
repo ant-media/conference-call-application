@@ -771,21 +771,16 @@ class TestJoinLeave(unittest.TestCase):
 
     for i in range(20):
       stats = self.get_track_stats()
-      assert(stats is not None)
+      assert stats is not None
 
-      for track_stat in stats['inboundRtpList']:
-        if track_stat['trackIdentifier'] == "ARDAMSvvideoTrack0":
-          print("* framesReceived: "+str(track_stat['framesReceived']))
-
+      for track_stat in stats['inboundRtpList']:  # Access 'inboundRtpList' properly
+          if 'trackIdentifier' in track_stat and track_stat['trackIdentifier'] == "ARDAMSvvideoTrack0":
+            print("* framesReceived: " + str(track_stat['framesReceived']))
+            assert track_stat['framesReceived'] > 0
       time.sleep(2)
 
 
-    #time.sleep(60)
-
-
-
-
-    #self.chrome.close_all()
+    self.chrome.close_all()
 
 
 
