@@ -147,7 +147,7 @@ function OptionButton({footer, ...props}) {
 
         {conference.isPlayOnly === false
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
-          <MenuItem onClick={() => handleDialogOpen()}>
+          <MenuItem onClick={() => handleDialogOpen()} id="call-settings">
             <ListItemIcon>
               <SvgIcon size={36} name={"call-settings"} color={theme.palette?.iconColor?.primary}/>
             </ListItemIcon>
@@ -157,7 +157,8 @@ function OptionButton({footer, ...props}) {
 
         {conference.isPlayOnly === false
         && process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true' ?
-            <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }}>
+            <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }} 
+              id="virtual-effects">
               <ListItemIcon>
                 <SvgIcon size={36} name={"background-replacement"} color={theme.palette?.iconColor?.primary} />
               </ListItemIcon>
