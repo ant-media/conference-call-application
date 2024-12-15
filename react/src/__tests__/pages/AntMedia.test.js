@@ -92,6 +92,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       updateBroadcastRole: jest.fn(),
       showInfoSnackbarWithLatency: jest.fn(),
       getSubtrackCount: jest.fn(),
+      setVolumeLevel: jest.fn(),
     }
 
     for (var key in params) {
@@ -1285,6 +1286,30 @@ describe('AntMedia Component', () => {
     });
   });
 
+  it('audio level setting test', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    await act(async () => {
+      currentConference.setMicAudioLevel(10);
+    });
+    expect(webRTCAdaptorConstructor.setVolumeLevel).toHaveBeenCalledWith(10);
+
+    consoleSpy.mockRestore();
+
+  });
+
   it('checks connection quality and displays warning for poor network connection for publish', async () => {
 
     const { container } = render(
@@ -1675,10 +1700,6 @@ describe('AntMedia Component', () => {
 
     });
 
-
-
-
-
     consoleWarnSpy.mockRestore();
 
   });
@@ -1695,23 +1716,54 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
+    expect(currentConference.isScreenShared).toBe(false);
+
+    await act(async () => {
+      currentConference.handleStartScreenShare();
+    });
+
+    await waitFor(() => {
+      expect(webRTCAdaptorScreenConstructor).not.toBe(undefined);
+    });
+
+    act(() => {
+      webRTCAdaptorScreenConstructor.callback("publish_started");
+    });
+
+
+    await waitFor(() => {
+      expect(currentConference.isScreenShared).toBe(true);
+    });
+
+    console.log(currentConference);
+
+    expect(currentConference.isScreenShared).toBe(true);
+
     webRTCAdaptorConstructor.reconnectIfRequired = jest.fn();
     webRTCAdaptorConstructor.requestVideoTrackAssignments = jest.fn();
     webRTCAdaptorConstructor.iceConnectionState = () => "mock1";
 
+    webRTCAdaptorScreenConstructor.reconnectIfRequired = jest.fn();
+    webRTCAdaptorScreenConstructor.requestVideoTrackAssignments = jest.fn();
+    webRTCAdaptorScreenConstructor.iceConnectionState = () => "mock1";
+
     await act(async () => {
       expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("mock1");
+      expect(webRTCAdaptorScreenConstructor.iceConnectionState()).toBe("mock1");
     });
 
     await act(async () => {
       jest.useFakeTimers();
       currentConference.fakeReconnect();
       expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("disconnected");
+      expect(webRTCAdaptorScreenConstructor.iceConnectionState()).toBe("disconnected");
       jest.runAllTimers();
     });
 
     await waitFor(() => {
       expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("mock1");
+      expect(webRTCAdaptorScreenConstructor.iceConnectionState()).toBe("mock1");
+
     });
 
     jest.useRealTimers();

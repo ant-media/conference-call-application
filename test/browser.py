@@ -17,11 +17,14 @@ import time
 import subprocess
 
 class Browser:
-  def init(self, is_headless):
+  def init(self, is_headless=True, is_fake_camera=True, mic_file=None):
     browser_options = Options()
     browser_options.add_experimental_option("detach", True)
-    browser_options.add_argument("--use-fake-ui-for-media-stream") 
-    browser_options.add_argument("--use-fake-device-for-media-stream")
+    if is_fake_camera:
+      browser_options.add_argument("--use-fake-ui-for-media-stream") 
+      browser_options.add_argument("--use-fake-device-for-media-stream")
+      if mic_file is not None:
+        browser_options.add_argument(f"--use-file-for-fake-audio-capture={mic_file}") 
     browser_options.add_argument('--log-level=0')
     browser_options.add_argument('--no-sandbox')
     browser_options.add_argument('--disable-extensions')
@@ -30,14 +33,11 @@ class Browser:
     browser_options.add_argument('--disable-setuid-sandbox')
     browser_options.add_argument('--enable-logging')
     browser_options.add_argument('--v=1')
-
-    #is_headless = False #for local testing in windows
     
     if is_headless:
       browser_options.add_argument("--headless")
-      service = Service(executable_path='/tmp/chromedriver', service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
-    else:
-      service = Service(executable_path='C:/WebDriver/chromedriver.exe') 
+    
+    service = Service(executable_path='/tmp/chromedriver', service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
     
     browser_options.set_capability( "goog:loggingPrefs", { 'browser':'ALL' } )
     self.driver = webdriver.Chrome(service=service, options=browser_options)
@@ -53,9 +53,9 @@ class Browser:
   def get_current_tab_id(self):
     return self.driver.current_window_handle
 
-  def execute_script(self, script):
+  def execute_script(self, script, *args):
     try:
-      return self.driver.execute_script(script)
+      return self.driver.execute_script(script, *args)
     except StaleElementReferenceException as e:
       return None
     
@@ -87,7 +87,6 @@ class Browser:
                 time.sleep(wait_time)
             else:
                 print(f"Script {script} failed after {retries} attempts: {e}")
-                print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
                 raise
             
   def get_element_with_retry(self, by, value, retries=5, wait_time=2):
@@ -103,7 +102,7 @@ class Browser:
                 time.sleep(wait_time)
             else:
                 print(f"Element not found by {by} with value {value} after {retries} attempts: {e}")
-                print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
+                #print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
                 raise
             
   def get_all_elements(self, by, value):
@@ -122,12 +121,12 @@ class Browser:
       WebDriverWait(self.driver, timeout).until(element_present)
     except TimeoutException:
       print("Timed out waiting for element to be clickable by "+str(by)+" with value "+str(value))
-      print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
+      #print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
       
     return self.driver.find_element(by, value)
 
 
-  def get_element_in_element(self, element, by, value, timeout=15):
+  def get_all_elements_in_element(self, element, by, value, timeout=15):
     try:
       element_present = EC.element_to_be_clickable((by, value))
       WebDriverWait(element, timeout).until(element_present)
@@ -135,6 +134,16 @@ class Browser:
       print("Timed out waiting for nested element to be clickable by "+str(by)+" with value "+str(value))
 
     return element.find_elements(by, value)
+  
+  def get_element_in_element(self, element, by, value, timeout=15, wait_until_clickable=True):
+    if wait_until_clickable:
+      try:
+        element_present = EC.element_to_be_clickable((by, value))
+        WebDriverWait(element, timeout).until(element_present)
+      except TimeoutException:
+        print("Timed out waiting for nested element to be clickable by "+str(by)+" with value "+str(value))
+
+    return element.find_element(by, value)
 
   def is_element_displayed(self, by, value):
     try:
@@ -176,6 +185,10 @@ class Browser:
   def move_slider_to(self, element, value):
     move = ActionChains(self.driver)
     move.click_and_hold(element).move_by_offset(value, 0).release().perform()
+
+  def move_to_element(self, element):
+    move = ActionChains(self.driver)
+    move.move_to_element(element).perform()
 
   def get_wait(self, wait_time=25, poll_frequency=1):
     return WebDriverWait(self.driver, wait_time, poll_frequency)
