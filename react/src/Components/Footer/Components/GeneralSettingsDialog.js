@@ -86,7 +86,7 @@ export function GeneralSettingsDialog(props) {
               <Grid item xs={10}>
                 <Select
                   fullWidth
-                  id="demo-dialog-native"
+                  id="language-select"
                   variant="outlined"
                   value={currentLanguage}
                   onChange={e => switchLanguage(e.target.value)}
@@ -112,7 +112,7 @@ export function GeneralSettingsDialog(props) {
               <Grid item xs={10}>
                 <Select
                   fullWidth
-                  id="demo-dialog-native"
+                  id="theme-select"
                   variant="outlined"
                   value={themeContext?.currentTheme ? themeContext?.currentTheme : ThemeList.Green}
                   onChange={e => switchTheme(e.target.value)}
