@@ -29,6 +29,7 @@ if use_test_webinar:
 else:
     suite2 = unittest.TestLoader().loadTestsFromModule(test_join_leave)
 
+
 suite.addTests(suite2)
 
 #suite.addTest(TestJoinLeave("test_join_without_camera_mic")) 
@@ -37,3 +38,4 @@ suite.addTest(TestDeployment('test_delete_app'))
 
 ret = not unittest.TextTestRunner(verbosity=2, failfast=fail_fast).run(suite).wasSuccessful()
 sys.exit(ret)
+

@@ -67,7 +67,7 @@ export default function SettingsDialog(props) {
   }, [conference.devices]);
 
   return (
-    <Dialog onClose={handleClose} open={open} fullScreen={fullScreen} maxWidth={'sm'}>
+    <Dialog onClose={handleClose} open={open} fullScreen={fullScreen} maxWidth={'sm'} id="settings-dialog">
       <AntDialogTitle onClose={handleClose}>{t('Set Camera and Microphone')}</AntDialogTitle>
       <DialogContent>
         <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -80,7 +80,7 @@ export default function SettingsDialog(props) {
                 <Select
                   autoFocus={selectFocus === 'camera'}
                   fullWidth
-                  id="demo-dialog-native"
+                  id="setting-dialog-camera-select"
                   variant="outlined"
                   value={conference.selectedCamera}
                   onChange={e => switchVideoMode(e.target.value)}
@@ -108,7 +108,12 @@ export default function SettingsDialog(props) {
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
-                <Select variant="outlined" fullWidth value={conference.videoSendResolution} onChange={e => conference.setVideoSendResolution(e.target.value)} sx={{ color: '#fff' }}>
+                <Select variant="outlined" 
+                  fullWidth value={conference.videoSendResolution} 
+                  onChange={e => conference.setVideoSendResolution(e.target.value)} 
+                  sx={{ color: '#fff' }}
+                  id="setting-dialog-resolution-select"
+                >
                   <MenuItem key="auto" value="auto">
                     {t('Auto')}
                   </MenuItem>
@@ -136,7 +141,13 @@ export default function SettingsDialog(props) {
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
-                <Select autoFocus={selectFocus === 'audio'} variant="outlined" fullWidth value={conference.selectedMicrophone} onChange={e => switchAudioMode(e.target.value)} sx={{ color: '#fff' }}>
+                <Select autoFocus={selectFocus === 'audio'} 
+                  variant="outlined" 
+                  fullWidth value={conference.selectedMicrophone} 
+                  onChange={e => switchAudioMode(e.target.value)} 
+                  sx={{ color: '#fff' }}
+                  id="setting-dialog-mic-select"
+                >
                   {conference.devices && conference.devices?.length > 0 && conference.devices
                     .filter(device => device.kind === 'audioinput')
                     .map(device => (

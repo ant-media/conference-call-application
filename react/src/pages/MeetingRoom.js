@@ -12,6 +12,7 @@ import {t} from "i18next";
 import {isComponentMode} from "../utils";
 import BecomePublisherConfirmationDialog from "../Components/BecomePublisherConfirmationDialog";
 import RecordingButton from "../Components/RecordingButton";
+import {Container} from "@mui/material";
 
 function debounce(fn, ms) {
   let timer;
@@ -107,7 +108,9 @@ const MeetingRoom = React.memo((props) => {
   const pinLayout = (typeof firstPinnedParticipant !== "undefined");
 
   return (
-      <>
+      <Container
+        id="meeting-room"
+      >
         {conference?.isRecordPluginActive === true ?
             <RecordingButton/> : null
         }
@@ -152,7 +155,7 @@ const MeetingRoom = React.memo((props) => {
             </div>)
         }
         <Footer {...props} />
-      </>
+      </Container>
   );
 });
 
