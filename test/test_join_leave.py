@@ -68,12 +68,23 @@ class TestJoinLeave(unittest.TestCase):
   def kill_participants_with_test_tool(self, process):
     print(f"Before killing process: {process.pid}")
     try:
+        # Kill the given process and its children
         parent = psutil.Process(process.pid)
         for child in parent.children(recursive=True):
             child.kill()
         parent.kill()
     except psutil.NoSuchProcess:
         print("Process already terminated.")
+
+    # Call `pkill java` to ensure no stray Java processes are left running
+    try:
+        subprocess.run(["pkill", "java"], check=True)
+        print("pkill java executed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing pkill java: {e}")
+    except FileNotFoundError:
+        print("pkill command not found on the system.")
+
     print(f"After killing process: {process.pid}")
 
 
