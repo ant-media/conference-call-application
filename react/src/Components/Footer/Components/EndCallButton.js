@@ -19,15 +19,15 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-function EndCallButton({ footer, onLeaveRoom }) {
+function EndCallButton(props) {
   const { t } = useTranslation();
 
   return (
       <Tooltip title={t("Leave call")} placement="top">
         <CustomizedBtn
             id="leave-room-button"
-            onClick={onLeaveRoom}
-            className={footer ? "footer-icon-button" : ""}
+            onClick={props?.onLeaveRoom}
+            className={props?.footer ? "footer-icon-button" : ""}
             variant="contained"
             color="error"
         >

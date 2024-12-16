@@ -28,7 +28,7 @@ const CustomizedBtn = styled(Button)(({theme}) => ({
   },
 }));
 
-function OptionButton({footer, ...props}) {
+function OptionButton(props) {
   const conference = React.useContext(ConferenceContext);
   const {t} = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -112,6 +112,10 @@ function OptionButton({footer, ...props}) {
         open={layoutDialogOpen}
         onClose={handleLayoutDialogClose}
         selectFocus={selectFocus}
+        globals={props?.globals}
+        allParticipants={props?.allParticipants}
+        pinVideo={props?.pinVideo}
+        handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
       />
       <GeneralSettingsDialog
         open={generalSettingsDialogOpen}
@@ -124,7 +128,7 @@ function OptionButton({footer, ...props}) {
       />
       <Tooltip title={t("More options")} placement="top">
         <CustomizedBtn
-          className={footer ? "footer-icon-button" : ""}
+          className={props?.footer ? "footer-icon-button" : ""}
           id="settings-button"
           variant="contained"
           color={open ? "primary" : "secondary"}

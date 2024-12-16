@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
-import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';

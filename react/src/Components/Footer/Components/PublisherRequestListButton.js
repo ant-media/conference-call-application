@@ -1,10 +1,9 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { SvgIcon } from '../../SvgIcon';
 import { Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { ConferenceContext } from 'pages/AntMedia';
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
     '&.footer-icon-button':{

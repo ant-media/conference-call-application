@@ -20,14 +20,7 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-function CameraButton({
-                        isCamTurnedOff,
-                        cameraButtonDisabled,
-                        onTurnOffCamera,
-                        onTurnOnCamera,
-                        rounded,
-                        footer,
-                      }) {
+function CameraButton(props) {
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
@@ -52,9 +45,9 @@ function CameraButton({
     });
 
     if (isTurningOff) {
-      onTurnOnCamera();
+        props?.onTurnOnCamera();
     } else {
-      onTurnOffCamera();
+        props?.onTurnOffCamera();
     }
   };
 
@@ -70,23 +63,23 @@ function CameraButton({
 
   return (
       <Tooltip
-          title={t(isCamTurnedOff ? "Turn on camera" : "Turn off camera")}
+          title={t(props?.isCamTurnedOff ? "Turn on camera" : "Turn off camera")}
           placement="top"
       >
         <CustomizedBtn
             id="camera-button"
-            className={footer ? "footer-icon-button" : ""}
+            className={props?.footer ? "footer-icon-button" : ""}
             variant="contained"
-            color={isCamTurnedOff ? "error" : "primary"}
-            sx={rounded ? roundStyle : {}}
-            disabled={cameraButtonDisabled}
-            onClick={(e) => handleCameraToggle(e, isCamTurnedOff)}
+            color={props?.isCamTurnedOff ? "error" : "primary"}
+            sx={props?.rounded ? roundStyle : {}}
+            disabled={props?.cameraButtonDisabled}
+            onClick={(e) => handleCameraToggle(e, props?.isCamTurnedOff)}
         >
           <SvgIcon
               size={40}
-              name={isCamTurnedOff ? "camera-off" : "camera"}
+              name={props?.isCamTurnedOff ? "camera-off" : "camera"}
               color={
-                isCamTurnedOff
+                  props?.isCamTurnedOff
                     ? theme.palette?.iconColor?.primary
                     : theme.palette?.darkIconColor?.primary
               }

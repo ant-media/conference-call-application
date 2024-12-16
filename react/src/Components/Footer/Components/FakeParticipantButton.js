@@ -18,21 +18,21 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
     },
 }));
 
-function FakeParticipantButton({ footer, increment, onAction }) {
+function FakeParticipantButton(props) {
     const { t } = useTranslation();
 
     return (
         <Tooltip
-            title={t((increment ? "Add" : "Remove") + " Fake Participant")}
+            title={t((props.increment ? "Add" : "Remove") + " Fake Participant")}
             placement="top"
         >
             <CustomizedBtn
-                onClick={onAction}
+                onClick={props?.onAction}
                 variant="contained"
-                className={footer ? "footer-icon-button" : ""}
+                className={props?.footer ? "footer-icon-button" : ""}
                 color="secondary"
             >
-                {increment ? "+" : "-"}
+                {props?.increment ? "+" : "-"}
             </CustomizedBtn>
         </Tooltip>
     );

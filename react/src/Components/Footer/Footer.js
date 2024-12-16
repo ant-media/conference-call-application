@@ -13,7 +13,6 @@ import EndCallButton from "./Components/EndCallButton";
 import FakeParticipantButton from "./Components/FakeParticipantButton";
 import TimeZone from "./Components/TimeZone";
 import { useParams } from "react-router-dom";
-import { ConferenceContext } from 'pages/AntMedia';
 import {getRootAttribute, isComponentMode} from 'utils';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactionsButton from "./Components/ReactionsButton";
@@ -47,7 +46,6 @@ const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme
 function Footer(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
-  const conference = React.useContext(ConferenceContext);
 
   const theme = useTheme();
 
@@ -70,12 +68,12 @@ function Footer(props) {
   }, []);
 
   React.useEffect(() => {
-    if (conference.isRecordPluginActive === true && conference.isEnterDirectly === false && conference.isPlayOnly === false) {
+    if (props?.isRecordPluginActive === true && props?.isEnterDirectly === false && props?.isPlayOnly === false) {
       setIsRecordingTextVisible(true);
     } else {
       setIsRecordingTextVisible(false);
     }
-  }, [conference.isRecordPluginActive, conference.isEnterDirectly, conference.isPlayOnly]);
+  }, [props?.isRecordPluginActive, props?.isEnterDirectly, props?.isPlayOnly]);
 
   return (
       <CustomizedGrid
@@ -94,11 +92,11 @@ function Footer(props) {
               {id}
             </Typography>
             <InfoButton
-                isPlayOnly={conference?.isPlayOnly}
+                isPlayOnly={props?.isPlayOnly}
             />
           </Grid>
         </Grid>
-        {conference.isPlayOnly === false || conference.isEnterDirectly === false ?
+        {props?.isPlayOnly === false || props?.isEnterDirectly === false ?
             <Grid item>
               <Grid
                   container
@@ -107,44 +105,50 @@ function Footer(props) {
               >
                 {process.env.REACT_APP_FOOTER_OPTION_BUTTON_VISIBILITY === 'true' ?
                     <Grid item xs={0}>
-                      <OptionButton footer/>
+                      <OptionButton
+                          footer={true}
+                          globals={props?.globals}
+                          allParticipants={props?.allParticipants}
+                          pinVideo={props?.pinVideo}
+                          handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
+                      />
                     </Grid>
                     : null}
 
-                  {conference.isPlayOnly === false
+                  {props?.isPlayOnly === false
                     && process.env.REACT_APP_FOOTER_CAMERA_BUTTON_VISIBILITY === 'true' ?
                   <Grid item xs={0}>
                     <CameraButton
                         rounded={false}
                         footer={true}
-                        isCamTurnedOff={conference?.isMyCamTurnedOff}
-                        cameraButtonDisabled={conference?.cameraButtonDisabled}
-                        onTurnOffCamera={conference?.checkAndTurnOffLocalCamera}
-                        onTurnOnCamera={conference?.checkAndTurnOnLocalCamera}
+                        isCamTurnedOff={props?.isMyCamTurnedOff}
+                        cameraButtonDisabled={props?.cameraButtonDisabled}
+                        onTurnOffCamera={props?.checkAndTurnOffLocalCamera}
+                        onTurnOnCamera={props?.checkAndTurnOnLocalCamera}
                     />
                   </Grid>
                     : null}
 
-                  {conference.isPlayOnly === false
+                  {props?.isPlayOnly === false
                     && process.env.REACT_APP_FOOTER_MIC_BUTTON_VISIBILITY === 'true' ?
                   <Grid item xs={0}>
                     <MicButton
                         rounded={false}
                         footer={true}
-                        isMicMuted={conference?.isMyMicMuted}
-                        toggleMic={conference?.toggleMic}
-                        microphoneButtonDisabled={conference?.microphoneButtonDisabled}
+                        isMicMuted={props?.isMyMicMuted}
+                        toggleMic={props?.toggleMic}
+                        microphoneButtonDisabled={props?.microphoneButtonDisabled}
                     />
                   </Grid>
                       : null}
-                  {(conference.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
+                  {(props?.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') && (windowWidth > mobileBreakpoint) ?
                   <Grid item xs={0}>
                     {" "}
                     <ShareScreenButton
                         footer={true}
-                        isScreenShared={conference?.isScreenShared}
-                        handleStartScreenShare={()=>conference?.handleStartScreenShare}
-                        handleStopScreenShare={()=>conference?.handleStopScreenShare}
+                        isScreenShared={props?.isScreenShared}
+                        handleStartScreenShare={()=>props?.handleStartScreenShare}
+                        handleStopScreenShare={()=>props?.handleStopScreenShare}
                     />
                   </Grid>
                       : null}
@@ -154,8 +158,8 @@ function Footer(props) {
                       <ReactionsButton
                           footer={true}
                           rounded={false}
-                          showEmojis={conference?.showEmojis}
-                          setShowEmojis={(showEmojis) => conference?.setShowEmojis(showEmojis)}
+                          showEmojis={props?.showEmojis}
+                          setShowEmojis={(showEmojis) => props?.setShowEmojis(showEmojis)}
                       />
                     </Grid>)
                     : null}
@@ -164,10 +168,10 @@ function Footer(props) {
                     <Grid item xs={0}>
                       <MessageButton
                           footer={true}
-                          numberOfUnReadMessages={conference?.numberOfUnReadMessages}
-                          toggleSetNumberOfUnreadMessages={()=>conference?.toggleSetNumberOfUnreadMessages()}
-                          messageDrawerOpen={conference?.messageDrawerOpen}
-                          handleMessageDrawerOpen={(open)=>conference?.handleMessageDrawerOpen(open)}
+                          numberOfUnReadMessages={props?.numberOfUnReadMessages}
+                          toggleSetNumberOfUnreadMessages={()=>props?.toggleSetNumberOfUnreadMessages()}
+                          messageDrawerOpen={props?.messageDrawerOpen}
+                          handleMessageDrawerOpen={(open)=>props?.handleMessageDrawerOpen(open)}
                       />
                     </Grid>)
                     : null}
@@ -176,30 +180,30 @@ function Footer(props) {
                     <Grid item xs={0}>
                         <ParticipantListButton
                             footer={true}
-                            participantCount={conference?.participantCount}
-                            participantListDrawerOpen={conference?.participantListDrawerOpen}
-                            handleParticipantListOpen={(open)=>conference?.handleParticipantListOpen(open)}
+                            participantCount={props?.participantCount}
+                            participantListDrawerOpen={props?.participantListDrawerOpen}
+                            handleParticipantListOpen={(open)=>props?.handleParticipantListOpen(open)}
                         />
                     </Grid>)
                     : null}
 
-                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ?
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (props?.isAdmin === true) ?
                     <Grid item xs={0}>
                       <PublisherRequestListButton
                           footer={true}
-                          requestSpeakerList={conference?.requestSpeakerList}
-                          publisherRequestListDrawerOpen={conference?.publisherRequestListDrawerOpen}
-                          handlePublisherRequestListOpen={(open)=>conference?.handlePublisherRequestListOpen(open)}
+                          requestSpeakerList={props?.requestSpeakerList}
+                          publisherRequestListDrawerOpen={props?.publisherRequestListDrawerOpen}
+                          handlePublisherRequestListOpen={(open)=>props?.handlePublisherRequestListOpen(open)}
                       />
                     </Grid>
                     : null}
 
-                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isPlayOnly === true) ?
+                  {(windowWidth > mobileBreakpoint) && (process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (props?.isPlayOnly === true) ?
                     <Grid item xs={0}>
                       <RequestPublishButton
                           footer={true}
                           rounded={false}
-                          handlePublisherRequest={()=>conference?.handlePublisherRequest()}
+                          handlePublisherRequest={()=>props?.handlePublisherRequest()}
                       />
                     </Grid>
                     : null}
@@ -208,7 +212,7 @@ function Footer(props) {
                     <Grid item xs={0}>
                       <EndCallButton
                           footer={true}
-                          onLeaveRoom={()=>conference.setLeftTheRoom(true)}
+                          onLeaveRoom={()=>props?.setLeftTheRoom(true)}
                       />
                     </Grid>
                    : null}
@@ -219,7 +223,7 @@ function Footer(props) {
                     <FakeParticipantButton
                       footer={true}
                       increment={true}
-                      onAction={()=>conference?.addFakeParticipant()}
+                      onAction={()=>props?.addFakeParticipant()}
                     />
                   </Grid>
                   : null}
@@ -229,7 +233,7 @@ function Footer(props) {
                     <FakeParticipantButton
                       footer={true}
                       increment={false}
-                      onAction={()=>conference?.removeFakeParticipant()}
+                      onAction={()=>props?.removeFakeParticipant()}
                     />
                   </Grid>
                   : null}
@@ -238,14 +242,29 @@ function Footer(props) {
                   <Grid item xs={0}>
                     <FakeReconnectButton
                       footer={true}
-                      onFakeReconnect={()=>conference?.fakeReconnect()}
+                      onFakeReconnect={()=>props?.fakeReconnect()}
                     />
                   </Grid>
                   : null}
 
                   {windowWidth <= mobileBreakpoint ? (
                     <Grid item xs={0}>
-                      <MoreOptionsButton footer/>
+                      <MoreOptionsButton
+                          footer={true}
+                          isPlayOnly={props?.isPlayOnly}
+                          isScreenShared={props?.isScreenShared}
+                          handleStartScreenShare={props?.handleStartScreenShare}
+                          handleStopScreenShare={props?.handleStopScreenShare}
+                          showEmojis={props?.showEmojis}
+                          setShowEmojis={(showEmojis) => props?.setShowEmojis(showEmojis)}
+                          messageDrawerOpen={props?.messageDrawerOpen}
+                          toggleSetNumberOfUnreadMessages={(numberOfUnreadMessages)=>props?.toggleSetNumberOfUnreadMessages(numberOfUnreadMessages)}
+                          handleMessageDrawerOpen={(open)=>props?.handleMessageDrawerOpen(open)}
+                          participantListDrawerOpen={props?.participantListDrawerOpen}
+                          handlePublisherRequestListOpen={(open)=>props?.handlePublisherRequestListOpen(open)}
+                          publisherRequestListDrawerOpen={props?.publisherRequestListDrawerOpen}
+                          handlePublisherRequest={()=>props?.handlePublisherRequest()}
+                      />
                     </Grid>
                   ) : null}
 
@@ -256,7 +275,7 @@ function Footer(props) {
             <Grid item sx={{display: {xs: "none", sm: "block"}}}>
               {process.env.REACT_APP_FOOTER_CLOCK_VISIBILITY === 'true' ?
                 <TimeZone
-                    isBroadcasting={conference?.isBroadcasting}
+                    isBroadcasting={props?.isBroadcasting}
                 />
                 : null}
             </Grid>

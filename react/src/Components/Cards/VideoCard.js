@@ -1,6 +1,5 @@
-import React, { useCallback, useContext, useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { alpha, styled } from "@mui/material/styles";
-import { ConferenceContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
@@ -21,7 +20,6 @@ const CustomizedBox = styled(Box)(({ theme }) => ({
 }));
 
 function VideoCard(props) {
-    const conference = useContext(ConferenceContext);
     const { t } = useTranslation();
     const [displayHover, setDisplayHover] = useState(false);
     const [isTalking, setIsTalking] = useState(false);
@@ -49,26 +47,26 @@ function VideoCard(props) {
     const isVideoTrack = props.trackAssignment.track?.kind === "video";
 
     const micMuted = isMine
-        ? conference?.isMyMicMuted
+        ? props?.isMyMicMuted
         : parseMetaData(
-            conference?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
+            props?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
             "isMicMuted"
         );
 
     const useAvatar = isMine
-        ? conference?.isMyCamTurnedOff
+        ? props?.isMyCamTurnedOff
         : !parseMetaData(
-            conference?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
+            props?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
             "isCameraOn"
         ) &&
         !parseMetaData(
-            conference?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
+            props?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
             "isScreenShared"
         );
 
     useEffect(() => {
-        if (props?.trackAssignment.isMine && conference.isPublished && !conference.isPlayOnly) {
-            conference.setAudioLevelListener((value) => {
+        if (props?.trackAssignment.isMine && props?.isPublished && !props?.isPlayOnly) {
+            props?.setAudioLevelListener((value) => {
                 // sounds under 0.01 are probably background noise
                 if (value >= 0.01) {
                     if (isTalking === false) setIsTalking(true);
@@ -80,7 +78,7 @@ function VideoCard(props) {
             }, 1000);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [conference.isPublished]);
+    }, [props?.isPublished]);
 
     const OverlayButton = ({ title, icon, color, onClick }) => (
         <Tooltip title={title} placement="top">
@@ -96,10 +94,10 @@ function VideoCard(props) {
                 streamId: props.trackAssignment.streamId,
                 streamName: props.name,
             };
-            conference?.setParticipantIdMuted(participant);
+            props?.setParticipantIdMuted(participant);
             micMuted
-                ? conference?.turnOnYourMicNotification(participant.streamId)
-                : conference?.turnOffYourMicNotification(participant.streamId);
+                ? props?.turnOnYourMicNotification(participant.streamId)
+                : props?.turnOffYourMicNotification(participant.streamId);
         };
 
         const handleToggleCam = () => {
@@ -107,8 +105,8 @@ function VideoCard(props) {
                 streamId: props.trackAssignment.streamId,
                 streamName: props.name,
             };
-            conference?.setParticipantIdMuted(participant);
-            conference?.turnOffYourCamNotification(participant.streamId);
+            props?.setParticipantIdMuted(participant);
+            props?.turnOffYourCamNotification(participant.streamId);
         };
 
         return (
@@ -136,7 +134,7 @@ function VideoCard(props) {
             title={`${props.pinned ? t("unpin") : t("pin")} ${props.name}`}
             icon={props.pinned ? "unpin" : "pin"}
             color="primary"
-            onClick={() => conference.pinVideo(props.trackAssignment.streamId)}
+            onClick={() => props?.pinVideo(props.trackAssignment.streamId)}
         />
     );
 
@@ -145,7 +143,7 @@ function VideoCard(props) {
 
         const isAdminMode = process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true";
         const isAdministrativeButtonsVisible =
-            !props?.trackAssignment.isMine && (!isAdminMode || conference.isAdmin);
+            !props?.trackAssignment.isMine && (!isAdminMode || props?.isAdmin);
 
         return (
             <Grid
@@ -235,9 +233,9 @@ function VideoCard(props) {
     );
 
     const setLocalVideo = () => {
-        let tempLocalVideo = document.getElementById((typeof conference?.publishStreamId === "undefined")? "localVideo" : conference?.publishStreamId);
-        if(props.trackAssignment.isMine && conference.localVideo !== tempLocalVideo) {
-            conference?.localVideoCreate(tempLocalVideo);
+        let tempLocalVideo = document.getElementById((typeof props?.publishStreamId === "undefined")? "localVideo" : props?.publishStreamId);
+        if(props.trackAssignment.isMine && props?.localVideo !== tempLocalVideo) {
+            props?.localVideoCreate(tempLocalVideo);
         }
     }
 
@@ -251,7 +249,7 @@ function VideoCard(props) {
                             ? `${props?.trackAssignment.isMine
                                 ? props.trackAssignment.streamId +
                                 " " +
-                                conference.streamName
+                                props?.streamName
                                 : props.trackAssignment.streamId + " " + props.trackAssignment.track?.id
                             }`
                             : ""}
@@ -267,7 +265,7 @@ function VideoCard(props) {
                 className="talking-indicator-light"
                 style={{
                     borderColor: theme.palette.themeColor[20],
-                    ...(isTalking || conference.talkers.includes(props.trackAssignment.streamId)
+                    ...(isTalking || props?.talkers.includes(props.trackAssignment.streamId)
                         ? {}
                         : { display: "none" }),
                 }}

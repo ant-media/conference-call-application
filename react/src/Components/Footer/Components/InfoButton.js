@@ -21,7 +21,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     paddingTop: 4,
 }));
 
-function InfoButton({ isPlayOnly }) {
+function InfoButton(props) {
     const { t } = useTranslation();
     const { enqueueSnackbar } = useSnackbar();
     const [anchorEl, setAnchorEl] = useState(null);
@@ -108,7 +108,7 @@ function InfoButton({ isPlayOnly }) {
                     </ListItemIcon>
                 </StyledMenuItem>
 
-                {isPlayOnly === false ? (
+                {props?.isPlayOnly === false ? (
                     <>
                         <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color="#fff">
                             {t('Resolution')}

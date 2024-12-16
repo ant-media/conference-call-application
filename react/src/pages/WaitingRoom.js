@@ -19,7 +19,6 @@ import SettingsDialog from "Components/Footer/Components/SettingsDialog";
 
 import {SvgIcon} from "Components/SvgIcon";
 import {useSnackbar} from "notistack";
-import {ConferenceContext} from "./AntMedia";
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
 import {getRootAttribute, isComponentMode} from "utils";
 import {useTheme} from "@mui/material/styles";
@@ -52,8 +51,6 @@ function WaitingRoom(props) {
 
     const roomName = id;
 
-    const conference = useContext(ConferenceContext);
-    window.conference = conference;
     const {enqueueSnackbar} = useSnackbar();
 
     // This is a temporary video track assignment for local video
@@ -67,16 +64,16 @@ function WaitingRoom(props) {
     };
 
     React.useEffect(() => {
-        if (!conference.isPlayOnly && conference.initialized) {
+        if (!props?.isPlayOnly && props?.initialized) {
             const tempLocalVideo = document.getElementById("localVideo");
-            conference?.localVideoCreate(tempLocalVideo);
+            props?.localVideoCreate(tempLocalVideo);
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [conference.initialized]);
+    }, [props?.initialized]);
 
     function joinRoom(e) {
-        if (conference.localVideo === null && conference.isPlayOnly === false) {
+        if (props?.localVideo === null && props?.isPlayOnly === false) {
             e.preventDefault();
             enqueueSnackbar(
                 {
@@ -94,7 +91,7 @@ function WaitingRoom(props) {
         }
         let streamId;
         if (publishStreamId === null || publishStreamId === undefined) {
-            streamId = conference.streamName.replace(/[\W_]/g, "") + "_" + conference.makeid(10);
+            streamId = props?.streamName.replace(/[\W_]/g, "") + "_" + props?.makeid(10);
             console.log("generatedStreamId:" + streamId);
         } else {
             streamId = publishStreamId;
@@ -108,30 +105,30 @@ function WaitingRoom(props) {
             speedTestObjectDefault.errorMessage = "";
             speedTestObjectDefault.progressValue = 10;
 
-            conference?.setSpeedTestObject(speedTestObjectDefault);
-            if (conference.speedTestStreamId) {
-                conference.speedTestStreamId.current = streamId;
+            props?.setSpeedTestObject(speedTestObjectDefault);
+            if (props?.speedTestStreamId) {
+                props.speedTestStreamId.current = streamId;
             }
 
             setSpeedTestModelVisibility(true);
-            conference?.startSpeedTest();
+            props?.startSpeedTest();
         } else {
-            conference?.setIsJoining(true);
-            conference?.joinRoom(roomName, streamId);
-            if (conference?.isPlayOnly) {
+            props?.setIsJoining(true);
+            props?.joinRoom(roomName, streamId);
+            if (props?.isPlayOnly) {
                 setDialogOpen(false);
             }
         }
     }
 
     React.useEffect(() => {
-        if (conference?.speedTestObject?.isfinished === true) {
+        if (props?.speedTestObject?.isfinished === true) {
             setSpeedTestModalButtonVisibility(true);
         }
-    }, [conference?.speedTestObject]);
+    }, [props?.speedTestObject]);
 
     const handleDialogOpen = (focus) => {
-        if (conference.localVideo === null) {
+        if (props?.localVideo === null) {
             enqueueSnackbar(
                 {
                     message: t(
@@ -154,27 +151,27 @@ function WaitingRoom(props) {
     };
 
     const speedTestModalJoinButton = () => {
-        conference?.setSpeedTestObject({
+        props?.setSpeedTestObject({
             message: "Please wait while we are testing your connection speed",
             isfinished: false
         });
         setSpeedTestModalButtonVisibility(false);
         setSpeedTestModelVisibility(false);
-        conference?.setIsJoining(true);
-        if (conference?.speedTestStreamId) {
-            conference?.joinRoom(roomName, conference?.speedTestStreamId.current);
+        props?.setIsJoining(true);
+        if (props?.speedTestStreamId) {
+            props?.joinRoom(roomName, props.speedTestStreamId.current);
         } else {
-            conference?.joinRoom(roomName, conference?.makeId(10));
+            props?.joinRoom(roomName, props?.makeId(10));
         }
-        if (conference?.isPlayOnly) {
-            conference?.setWaitingOrMeetingRoom("meeting");
+        if (props?.isPlayOnly) {
+            props?.setWaitingOrMeetingRoom("meeting");
             setDialogOpen(false);
-            conference?.setIsJoining(false);
+            props?.setIsJoining(false);
         }
     }
 
     const speedTestModalCloseButton = () => {
-        conference?.setSpeedTestObject({
+        props?.setSpeedTestObject({
             message: "Please wait while we are testing your connection speed",
             isfinished: false,
             isfailed: false,
@@ -184,16 +181,16 @@ function WaitingRoom(props) {
         
         setSpeedTestModalButtonVisibility(false);
         setSpeedTestModelVisibility(false);
-        conference?.stopSpeedTest();
+        props?.stopSpeedTest();
     }
 
     function CircularProgressWithLabel(
-        props
+        propsLocal
     ) {
         return (
-            <Box sx={conference?.speedTestObject?.isfailed ?
+            <Box sx={props?.speedTestObject?.isfailed ?
                 {visibility: "hidden", position: 'relative', display: 'inline-flex'} : {visibility: "visible",position: 'relative', display: 'inline-flex'}}>
-                <CircularProgress variant="determinate" {...props} />
+                <CircularProgress variant="determinate" {...propsLocal} />
                 <Box
                     sx={{
                         top: 0,
@@ -210,8 +207,8 @@ function WaitingRoom(props) {
                         variant="caption"
                         component="div"
                         color="themeColor.100"
-                        visibility={conference?.speedTestObject?.isfailed ? "hidden" : speedTestModalButtonVisibility ? "hidden" : "visible"}
-                    >{`${Math.round(props.value)}%`}</Typography>
+                        visibility={props?.speedTestObject?.isfailed ? "hidden" : speedTestModalButtonVisibility ? "hidden" : "visible"}
+                    >{`${Math.round(propsLocal.value)}%`}</Typography>
                 </Box>
             </Box>
         );
@@ -223,7 +220,7 @@ function WaitingRoom(props) {
                 open={dialogOpen}
                 onClose={handleDialogClose}
                 selectFocus={selectFocus}
-                handleBackgroundReplacement={conference.handleBackgroundReplacement}
+                handleBackgroundReplacement={props.handleBackgroundReplacement}
             />
 
             <Modal
@@ -252,34 +249,34 @@ function WaitingRoom(props) {
                     </Typography>
                     <Typography id="modal-modal-description"
                                 sx={{mt: 2, color: theme.palette.text.primary, marginTop: '12px', marginBottom: '21px',
-                                    display: conference?.speedTestObject?.errorMessage !== "" ? "none" : "block"
+                                    display: props?.speedTestObject?.errorMessage !== "" ? "none" : "block"
 
                                 }}>
-                        {conference?.speedTestObject?.message}
+                        {props?.speedTestObject?.message}
                     </Typography>
-                    <Box sx={conference?.speedTestObject?.isfailed ? {
+                    <Box sx={props?.speedTestObject?.isfailed ? {
                           display: 'none', justifyContent: 'center', alignItems: 'center'
                     } : { display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                         <CircularProgressWithLabel
                              id={"speed-test-modal-circle-progress-bar"}
                              sx={(speedTestModalButtonVisibility) ? {
                              display: 'none'
-                        } : {display: 'block'}} value={conference?.speedTestObject?.progressValue}/>
+                        } : {display: 'block'}} value={props?.speedTestObject?.progressValue}/>
                     </Box>
                     <Typography id="modal-modal-error-description" sx={{
                         mt: 2,
                         color: theme.palette.text.primary,
                         marginTop: '12px',
                         marginBottom: '21px',
-                        display: conference?.speedTestObject?.isfailed ? "block" : "none"
+                        display: props?.speedTestObject?.isfailed ? "block" : "none"
                         
                     }}>
-                        {conference?.speedTestObject?.errorMessage}
+                        {props?.speedTestObject?.errorMessage}
                     </Typography>
     
                     <Button
                         id={"speed-test-modal-close-button"}
-                        sx={(conference?.speedTestObject?.isfailed || speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display:"none"}}
+                        sx={(props?.speedTestObject?.isfailed || speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display:"none"}}
                         onClick={() => {
                             speedTestModalCloseButton();
                         }}>Close</Button>
@@ -299,7 +296,7 @@ function WaitingRoom(props) {
                 alignItems={"center"}
             >
 
-                {conference.isPlayOnly === false ?
+                {props.isPlayOnly === false ?
                     <Grid item md={7} alignSelf="stretch">
                         <Grid
                             container
@@ -325,19 +322,19 @@ function WaitingRoom(props) {
                                     <CameraButton
                                         rounded={true}
                                         footer={false}
-                                        isCamTurnedOff={conference?.isMyCamTurnedOff}
-                                        cameraButtonDisabled={conference?.cameraButtonDisabled}
-                                        onTurnOffCamera={conference?.checkAndTurnOffLocalCamera}
-                                        onTurnOnCamera={conference?.checkAndTurnOnLocalCamera}
+                                        isCamTurnedOff={props?.isMyCamTurnedOff}
+                                        cameraButtonDisabled={props?.cameraButtonDisabled}
+                                        onTurnOffCamera={props?.checkAndTurnOffLocalCamera}
+                                        onTurnOnCamera={props?.checkAndTurnOnLocalCamera}
                                     />
                                 </Grid>
                                 <Grid item>
                                     <MicButton
                                         rounded={true}
                                         footer={false}
-                                        isMicMuted={conference?.isMyMicMuted}
-                                        toggleMic={conference?.toggleMic}
-                                        microphoneButtonDisabled={conference?.microphoneButtonDisabled}
+                                        isMicMuted={props?.isMyMicMuted}
+                                        toggleMic={props?.toggleMic}
+                                        microphoneButtonDisabled={props?.microphoneButtonDisabled}
                                     />
                                 </Grid>
                                 <Grid item sx={{position: "absolute", bottom: 16, right: 16}}>
@@ -362,7 +359,7 @@ function WaitingRoom(props) {
                     </Grid>
                     : null}
 
-                <Grid item md={conference.isPlayOnly === false ? 4 : 12}>
+                <Grid item md={props?.isPlayOnly === false ? 4 : 12}>
                     <Grid container justifyContent={"center"}>
                         <Grid container justifyContent={"center"}>
                             <Typography variant="h5" align="center">
@@ -399,7 +396,7 @@ function WaitingRoom(props) {
                                         required
                                         fullWidth
                                         color="primary"
-                                        value={conference.streamName}
+                                        value={props.streamName}
                                         variant="outlined"
                                         placeholder={t("Your name")}
                                         readOnly={true}
@@ -410,9 +407,9 @@ function WaitingRoom(props) {
                                         required
                                         fullWidth
                                         color="primary"
-                                        value={conference.streamName}
+                                        value={props?.streamName}
                                         variant="outlined"
-                                        onChange={(e) => conference.setStreamName(e.target.value)}
+                                        onChange={(e) => props?.setStreamName(e.target.value)}
                                         placeholder={t("Your name")}
                                         id="participant_name"
                                     />}

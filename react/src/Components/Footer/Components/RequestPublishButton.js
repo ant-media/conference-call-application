@@ -1,10 +1,9 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
 import { Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { ConferenceContext} from "../../../pages/AntMedia";
 
 export const roundStyle = {
     width: { xs: 36, md: 46 },

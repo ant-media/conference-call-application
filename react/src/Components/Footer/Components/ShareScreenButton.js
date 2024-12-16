@@ -19,30 +19,30 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-function ShareScreenButton({ footer, isScreenShared, handleStartScreenShare, handleStopScreenShare }) {
+function ShareScreenButton(props) {
   const { t } = useTranslation();
 
   return (
     <Tooltip
-      title={isScreenShared ? t("You are presenting") : t("Present now")}
+      title={props?.isScreenShared ? t("You are presenting") : t("Present now")}
       placement="top"
     >
       <CustomizedBtn
-        className={footer ? "footer-icon-button" : ""}
+        className={props?.footer ? "footer-icon-button" : ""}
         id = "share-screen-button"
         onClick={() => {
-          if (isScreenShared) {
-            handleStopScreenShare();
+          if (props?.isScreenShared) {
+            props?.handleStopScreenShare();
           } else {
-            handleStartScreenShare();
+            props?.handleStartScreenShare();
             // send other that you are sharing screen.
           }
         }}
         variant="contained"
-        color={isScreenShared ? "primary" : "secondary"}
+        color={props?.isScreenShared ? "primary" : "secondary"}
       >
         <SvgIcon
-          color={isScreenShared ? "#000" : "#fff"}
+          color={props?.isScreenShared ? "#000" : "#fff"}
           size={40}
           name={"share-screen-off"}
         />

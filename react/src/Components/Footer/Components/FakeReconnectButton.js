@@ -18,15 +18,15 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
     },
 }));
 
-function FakeReconnectButton({ footer, onFakeReconnect }) {
+function FakeReconnectButton(props) {
     const { t } = useTranslation();
 
     return (
         <Tooltip title={t("Fake Reconnect")} placement="top">
             <CustomizedBtn
-                onClick={onFakeReconnect}
+                onClick={props?.onFakeReconnect}
                 variant="contained"
-                className={footer ? "footer-icon-button" : ""}
+                className={props?.footer ? "footer-icon-button" : ""}
                 color="secondary"
             >
                 "RC"

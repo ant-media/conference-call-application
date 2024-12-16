@@ -4,7 +4,6 @@ import { styled } from '@mui/material/styles';
 import {  Grid,  Tabs, Tab } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseDrawerButton from './DrawerButton';
-import { ConferenceContext } from 'pages/AntMedia';
 import EffectsTab from "./EffectsTab";
 import {getAntDrawerStyle} from "../styles/themeUtil";
 
@@ -26,7 +25,6 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 
 const EffectsDrawer = React.memo(props => {
   const [value, setValue] = React.useState(0);
-  const conference = React.useContext(ConferenceContext);
 
   const { t } = useTranslation();
 
@@ -52,7 +50,7 @@ const EffectsDrawer = React.memo(props => {
   }
 
   return (
-      <AntDrawer transitionDuration={200} anchor={'right'} id="effects-drawer" open={conference.effectsDrawerOpen} variant="persistent">
+      <AntDrawer transitionDuration={200} anchor={'right'} id="effects-drawer" open={props.effectsDrawerOpen} variant="persistent">
         <EffectsGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
           <Grid item container justifyContent="space-between" alignItems="center">
             <Tabs
@@ -67,12 +65,20 @@ const EffectsDrawer = React.memo(props => {
             >
               <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Effects')} {...a11yProps(0)} />
             </Tabs>
-            <CloseDrawerButton />
+            <CloseDrawerButton
+                handleMessageDrawerOpen={props?.handleMessageDrawerOpen}
+                handleParticipantListOpen={props?.handleParticipantListOpen}
+                handleEffectsOpen={props?.handleEffectsOpen}
+                setPublisherRequestListDrawerOpen={props?.setPublisherRequestListDrawerOpen}
+            />
           </Grid>
           <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
             <TabPanel value={value} index={0}>
               <TabGrid container>
-                <EffectsTab />
+                <EffectsTab
+                    setVirtualBackgroundImage={(img)=>props.setVirtualBackgroundImage(img)}
+                    handleBackgroundReplacement={(mode)=>props.handleBackgroundReplacement(mode)}
+                />
               </TabGrid>
             </TabPanel>
           </Grid>

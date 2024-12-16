@@ -2,35 +2,33 @@
 import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
 import React from "react";
-import { ConferenceContext } from "./AntMedia";
 import {isMobile} from "react-device-detect";
 
 
 function LayoutPinned (props) {
-  const conference = React.useContext(ConferenceContext);
 
-  const pinnedParticipant = conference.videoTrackAssignments.find(e => e.streamId === props.pinnedParticipant?.streamId);
+  const pinnedParticipant = props.videoTrackAssignments.find(e => e.streamId === props.pinnedParticipant?.streamId);
 
   let MAX_VIDEO_AT_SIDE = 4;
 
-  let trackCount = Math.min(conference.globals.desiredTileCount-1, MAX_VIDEO_AT_SIDE);
+  let trackCount = Math.min(props.globals.desiredTileCount-1, MAX_VIDEO_AT_SIDE);
 
-  const showOthers = Object.keys(conference.allParticipants).length > trackCount + 1; //one video is pinned
+  const showOthers = Object.keys(props.allParticipants).length > trackCount + 1; //one video is pinned
 
-  conference.updateMaxVideoTrackCount(showOthers ? trackCount - 1 : trackCount);
+  props.updateMaxVideoTrackCount(showOthers ? trackCount - 1 : trackCount);
 
 
   let playingParticipantsCount = 0;
 
   //if we need to show others card, then we don't show the last video to hold place for the others card. but should show you.
-  const maxPlayingParticipantsCount = showOthers ? Math.max(2, trackCount) : Math.min(conference.videoTrackAssignments.length, MAX_VIDEO_AT_SIDE);
+  const maxPlayingParticipantsCount = showOthers ? Math.max(2, trackCount) : Math.min(props.videoTrackAssignments.length, MAX_VIDEO_AT_SIDE);
   const playingParticipants = [];
 
   const pinnedVideo = () => {
     let pinnedParticipantName;
     if(pinnedParticipant !== undefined) {
-      playingParticipants.push(conference.videoTrackAssignments.find(e => e.streamId === pinnedParticipant.streamId));
-      pinnedParticipantName = conference?.allParticipants[pinnedParticipant.streamId]?.name;
+      playingParticipants.push(props.videoTrackAssignments.find(e => e.streamId === pinnedParticipant.streamId));
+      pinnedParticipantName = props?.allParticipants[pinnedParticipant.streamId]?.name;
     }
     return (
       pinnedParticipant ? (
@@ -43,7 +41,7 @@ function LayoutPinned (props) {
               }
               pinned
               onHandlePin={() => {
-                conference.pinVideo(
+                props.pinVideo(
                   pinnedParticipant.streamId
                 );
               }}
@@ -58,17 +56,17 @@ function LayoutPinned (props) {
       <>
       {
       // eslint-disable-next-line
-      conference.videoTrackAssignments.map((element, index) => {
+      props.videoTrackAssignments.map((element, index) => {
 
         let isPlayOnly;
 
         try {
-          isPlayOnly = JSON.parse(conference?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
+          isPlayOnly = JSON.parse(props?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
         } catch (e) {
           isPlayOnly = false;
         }
 
-        let participantName = conference?.allParticipants[element?.streamId]?.name;
+        let participantName = props?.allParticipants[element?.streamId]?.name;
 
         if (participantName === "" || typeof participantName === 'undefined' || isPlayOnly || participantName === "Anonymous") {
           return null;
@@ -102,7 +100,9 @@ function LayoutPinned (props) {
         <div className="unpinned">
         <div className="single-video-container  others-tile-wrapper">
         <OthersCard
-          playingParticipants = {playingParticipants}
+            publishStreamId={props?.publishStreamId}
+            allParticipants={props?.allParticipants}
+            playingParticipants = {playingParticipants}
         />
         </div>
       </div>
@@ -117,12 +117,12 @@ function LayoutPinned (props) {
       {pinnedVideo()}
       { (!isMobile) ?
           <div id="unpinned-gallery">
-            {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {props?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
             {videoCards(false)}
             {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
           </div>
           : <><div id="unpinned-gallery">
-            {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {props?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
             {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
           </div>
             {videoCards(true)}

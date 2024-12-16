@@ -3216,13 +3216,106 @@ function AntMedia(props) {
                     ):null}
 
                     {leftTheRoom ? (
-                        <LeftTheRoom withError={leaveRoomWithError} />
+                        <LeftTheRoom
+                            withError={leaveRoomWithError}
+                            handleLeaveFromRoom={handleLeaveFromRoom}
+                        />
                     ) : waitingOrMeetingRoom === "waiting" ? (
-                        <WaitingRoom/>
+                        <WaitingRoom
+                            isPlayOnly={isPlayOnly}
+                            initialized={initialized}
+                            localVideoCreate={(tempLocalVideo) => localVideoCreate(tempLocalVideo)}
+                            localVideo={localVideo}
+                            streamName={streamName}
+                            setStreamName={setStreamName}
+                            makeid={makeid}
+                            setSpeedTestObject={setSpeedTestObject}
+                            speedTestStreamId={speedTestStreamId}
+                            startSpeedTest={startSpeedTest}
+                            stopSpeedTest={stopSpeedTest}
+                            setIsJoining={setIsJoining}
+                            joinRoom={joinRoom}
+                            speedTestObject={speedTestObject}
+                            setWaitingOrMeetingRoom={setWaitingOrMeetingRoom}
+                            handleBackgroundReplacement={handleBackgroundReplacement}
+                            isMyCamTurnedOff={isMyCamTurnedOff}
+                            cameraButtonDisabled={cameraButtonDisabled}
+                            checkAndTurnOffLocalCamera={checkAndTurnOffLocalCamera}
+                            checkAndTurnOnLocalCamera={checkAndTurnOnLocalCamera}
+                            isMyMicMuted={isMyMicMuted}
+                            toggleMic={toggleMic}
+                            microphoneButtonDisabled={microphoneButtonDisabled}
+                        />
                     ) : (
                         <>
-                            <MeetingRoom/>
-                            <MessageDrawer/>
+                            <MeetingRoom
+                                messageDrawerOpen={messageDrawerOpen}
+                                participantListDrawerOpen={participantListDrawerOpen}
+                                effectsDrawerOpen={effectsDrawerOpen}
+                                publisherRequestListDrawerOpen={publisherRequestListDrawerOpen}
+                                showEmojis={showEmojis}
+                                sendReactions={sendReactions}
+                                setShowEmojis={setShowEmojis}
+                                globals={globals}
+                                audioTracks={audioTracks}
+                                participantIdMuted={participantIdMuted}
+                                isMuteParticipantDialogOpen={isMuteParticipantDialogOpen}
+                                turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
+                                setMuteParticipantDialogOpen={setMuteParticipantDialogOpen}
+                                publishStreamId={publishStreamId}
+                                pinVideo={(streamId) => pinVideo(streamId)}
+                                allParticipants={allParticipants}
+                                participantUpdated={participantUpdated}
+                                videoTrackAssignments={videoTrackAssignments}
+                                updateMaxVideoTrackCount={updateMaxVideoTrackCount}
+                                talkers={talkers}
+                                streamName={streamName}
+                                isPublished={isPublished}
+                                isPlayOnly={isPlayOnly}
+                                isMyMicMuted={isMyMicMuted}
+                                isMyCamTurnedOff={isMyCamTurnedOff}
+                                setAudioLevelListener={setAudioLevelListener}
+                                setParticipantIdMuted={setParticipantIdMuted}
+                                turnOnYourMicNotification={turnOnYourMicNotification}
+                                turnOffYourCamNotification={turnOffYourCamNotification}
+                                isAdmin={isAdmin}
+                                localVideo={localVideo}
+                                localVideoCreate={localVideoCreate}
+                                isRecordPluginActive={isRecordPluginActive}
+                                isEnterDirectly={isEnterDirectly}
+                                cameraButtonDisabled={cameraButtonDisabled}
+                                checkAndTurnOffLocalCamera={checkAndTurnOffLocalCamera}
+                                checkAndTurnOnLocalCamera={checkAndTurnOnLocalCamera}
+                                toggleMic={toggleMic}
+                                microphoneButtonDisabled={microphoneButtonDisabled}
+                                isScreenShared={isScreenShared}
+                                handleStartScreenShare={handleStartScreenShare}
+                                handleStopScreenShare={handleStopScreenShare}
+                                numberOfUnReadMessages={numberOfUnReadMessages}
+                                toggleSetNumberOfUnreadMessages={toggleSetNumberOfUnreadMessages}
+                                handleMessageDrawerOpen={handleMessageDrawerOpen}
+                                participantCount={participantCount}
+                                handleParticipantListOpen={handleParticipantListOpen}
+                                requestSpeakerList={requestSpeakerList}
+                                handlePublisherRequestListOpen={handlePublisherRequestListOpen}
+                                handlePublisherRequest={()=>{}}
+                                setLeftTheRoom={setLeftTheRoom}
+                                addFakeParticipant={addFakeParticipant}
+                                removeFakeParticipant={removeFakeParticipant}
+                                fakeReconnect={fakeReconnect}
+                                isBroadcasting={isBroadcasting}
+                                handleSetDesiredTileCount={handleSetDesiredTileCount}
+                            />
+                            <MessageDrawer
+                                messages={messages}
+                                sendMessage={sendMessage}
+                                handleSetMessages={handleSetMessages}
+                                messageDrawerOpen={messageDrawerOpen}
+                                handleMessageDrawerOpen={handleMessageDrawerOpen}
+                                handleParticipantListOpen={handleParticipantListOpen}
+                                handleEffectsOpen={handleEffectsOpen}
+                                setPublisherRequestListDrawerOpen={setPublisherRequestListDrawerOpen}
+                            />
                             <ParticipantListDrawer
                                 globals={globals}
                                 isAdmin={isAdmin}
@@ -3242,8 +3335,20 @@ function AntMedia(props) {
                                 pagedParticipants={pagedParticipants}
                                 updateAllParticipantsPagination={(value) => updateAllParticipantsPagination(value)}
                                 participantListDrawerOpen={participantListDrawerOpen}
+                                handleMessageDrawerOpen={handleMessageDrawerOpen}
+                                handleParticipantListOpen={handleParticipantListOpen}
+                                handleEffectsOpen={handleEffectsOpen}
+                                setPublisherRequestListDrawerOpen={setPublisherRequestListDrawerOpen}
                             />
-                            <EffectsDrawer/>
+                            <EffectsDrawer
+                                effectsDrawerOpen={effectsDrawerOpen}
+                                setVirtualBackgroundImage={(img)=>setVirtualBackgroundImage(img)}
+                                handleBackgroundReplacement={(mode)=>handleBackgroundReplacement(mode)}
+                                handleMessageDrawerOpen={handleMessageDrawerOpen}
+                                handleParticipantListOpen={handleParticipantListOpen}
+                                handleEffectsOpen={handleEffectsOpen}
+                                setPublisherRequestListDrawerOpen={setPublisherRequestListDrawerOpen}
+                            />
                             <PublisherRequestListDrawer/>
                         </>
                     )}

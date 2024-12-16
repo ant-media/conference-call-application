@@ -67,7 +67,12 @@ const PublisherRequestListDrawer = React.memo(props => {
                     >
                         <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Publisher Requests')} {...a11yProps(0)} />
                     </Tabs>
-                    <CloseDrawerButton />
+                    <CloseDrawerButton
+                        handleMessageDrawerOpen={conference?.handleMessageDrawerOpen}
+                        handleParticipantListOpen={conference?.handleParticipantListOpen}
+                        handleEffectsOpen={conference?.handleEffectsOpen}
+                        setPublisherRequestListDrawerOpen={conference?.setPublisherRequestListDrawerOpen}
+                    />
                 </Grid>
                 <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
                     <TabPanel value={value} index={0}>

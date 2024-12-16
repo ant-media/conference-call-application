@@ -30,7 +30,7 @@ export const CustomizedBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-function MicButton({ isMicMuted, toggleMic, microphoneButtonDisabled, rounded, footer }) {
+function MicButton(props) {
   const { enqueueSnackbar } = useSnackbar();
   const { t } = useTranslation();
   const theme = useTheme();
@@ -50,24 +50,24 @@ function MicButton({ isMicMuted, toggleMic, microphoneButtonDisabled, rounded, f
     }, {
       autoHideDuration: 1500,
     });
-    toggleMic(!mute);
+    props?.toggleMic(!mute);
   };
 
   return (
-      <Tooltip title={t(isMicMuted ? 'Turn on microphone' : 'Turn off microphone')} placement="top">
+      <Tooltip title={t(props?.isMicMuted ? 'Turn on microphone' : 'Turn off microphone')} placement="top">
         <CustomizedBtn
             id="mic-button"
-            disabled={microphoneButtonDisabled}
-            className={footer ? 'footer-icon-button' : ''}
+            disabled={props?.microphoneButtonDisabled}
+            className={props?.footer ? 'footer-icon-button' : ''}
             variant="contained"
-            sx={rounded ? roundStyle : {}}
-            color={isMicMuted ? 'error' : 'primary'}
-            onClick={(e) => handleMicToggle(e, isMicMuted)}
+            sx={props?.rounded ? roundStyle : {}}
+            color={props?.isMicMuted ? 'error' : 'primary'}
+            onClick={(e) => handleMicToggle(e, props?.isMicMuted)}
         >
           <SvgIcon
               size={40}
-              name={isMicMuted ? 'muted-microphone' : 'microphone'}
-              color={isMicMuted ? theme.palette.iconColor.primary : theme.palette.darkIconColor.primary}
+              name={props?.isMicMuted ? 'muted-microphone' : 'microphone'}
+              color={props?.isMicMuted ? theme.palette.iconColor.primary : theme.palette.darkIconColor.primary}
           />
         </CustomizedBtn>
       </Tooltip>

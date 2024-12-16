@@ -2,14 +2,12 @@ import React from "react";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import { SvgIcon } from "./SvgIcon";
-import { ConferenceContext } from "pages/AntMedia";
 import {CustomizedBtn} from "./Footer/Components/MicButton";
 import {useTheme} from "@mui/material";
 import {useSnackbar} from "notistack";
 import {useTranslation} from "react-i18next";
 
-function EffectsTab() {
-  const conference = React.useContext(ConferenceContext);
+function EffectsTab({ setVirtualBackgroundImage, handleBackgroundReplacement }) {
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
@@ -52,7 +50,7 @@ function EffectsTab() {
           id="custom-virtual-background-button"
           data-testid="custom-virtual-background-button"
           onClick={(e) => {
-            conference.setVirtualBackgroundImage(imageSrc);
+            setVirtualBackgroundImage(imageSrc);
           }}
         >
           <img
@@ -213,21 +211,21 @@ function EffectsTab() {
               <CustomizedBtn
                 style={{background: theme.palette.themeColor[60], marginRight: 10}}
                 id="remove-effect-button" onClick={(e) => {
-                conference.handleBackgroundReplacement("none");
+                handleBackgroundReplacement("none");
               }}>
                 <SvgIcon size={40} name={'remove-effect'} color="#fff"/>
               </CustomizedBtn>
               <CustomizedBtn
                 style={{background: theme.palette.themeColor[60], marginRight: 10}}
                 id="slight-blur-button" onClick={(e) => {
-                conference.handleBackgroundReplacement("slight-blur");
+                handleBackgroundReplacement("slight-blur");
               }}>
                 <SvgIcon size={40} name={'slight-blur'} color="#fff"/>
               </CustomizedBtn>
               <CustomizedBtn
                 style={{background: theme.palette.themeColor[60], marginRight: 10}}
                 id="blur-button" onClick={(e) => {
-                conference.handleBackgroundReplacement("blur");
+                handleBackgroundReplacement("blur");
               }}>
                 <SvgIcon size={40} name={'blur'} color="#fff"/>
               </CustomizedBtn>

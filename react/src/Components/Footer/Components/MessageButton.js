@@ -19,11 +19,11 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-function MessageButton({ footer, numberOfUnReadMessages, toggleSetNumberOfUnreadMessages, messageDrawerOpen, handleMessageDrawerOpen }) {
+function MessageButton(props) {
   const {t} = useTranslation();
   return (
     <Badge
-      badgeContent={numberOfUnReadMessages}
+      badgeContent={props?.numberOfUnReadMessages}
       color="primary"
       anchorOrigin={{
         vertical: 'top',
@@ -34,17 +34,17 @@ function MessageButton({ footer, numberOfUnReadMessages, toggleSetNumberOfUnread
       <Tooltip title={t('Chat with everyone')} placement="top">
         <CustomizedBtn
           onClick={() => {
-            if (!messageDrawerOpen) {
-              toggleSetNumberOfUnreadMessages(0);
+            if (!props?.messageDrawerOpen) {
+                props?.toggleSetNumberOfUnreadMessages(0);
             }
-            handleMessageDrawerOpen(!messageDrawerOpen);
+              props?.handleMessageDrawerOpen(!props?.messageDrawerOpen);
           }}
           variant="contained"
-          className={footer ? 'footer-icon-button' : ''}
-          color={messageDrawerOpen ? 'primary' : 'secondary'}
+          className={props?.footer ? 'footer-icon-button' : ''}
+          color={props?.messageDrawerOpen ? 'primary' : 'secondary'}
           id="messages-button"
         >
-          <SvgIcon size={40} color={messageDrawerOpen ? '#000' : '#fff'} name={'message-off'} />
+          <SvgIcon size={40} color={props?.messageDrawerOpen ? '#000' : '#fff'} name={'message-off'} />
         </CustomizedBtn>
       </Tooltip>
     </Badge>
