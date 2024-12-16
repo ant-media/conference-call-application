@@ -17,6 +17,17 @@ import re
 class TestJoinLeave(unittest.TestCase):
   def setUp(self):
     print("----------------\n", self._testMethodName, " starting...")
+    try:
+        subprocess.run(["pkill", "java"], check=True)
+        subprocess.run(["pkill", "chrome"], check=True)
+        print("pkill java executed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing pkill java: {e}")
+    except FileNotFoundError:
+        print("pkill command not found on the system.")
+    time.sleep(10)
+
+
     self.is_local = False
     #self.is_local = True
     self.verbose = False
@@ -32,15 +43,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
     wait = self.chrome.get_wait()
-    try:
-        subprocess.run(["pkill", "java"], check=True)
-        subprocess.run(["pkill", "chrome"], check=True)
-        print("pkill java executed successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing pkill java: {e}")
-    except FileNotFoundError:
-        print("pkill command not found on the system.")
-    time.sleep(10)
+    
     #wait.until(lambda x: len(self.rest_helper.get_broadcasts()) == 0)
     #print("broadcasts are empty")
 
