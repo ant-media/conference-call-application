@@ -96,6 +96,8 @@ class TestJoinLeave(unittest.TestCase):
     except FileNotFoundError:
         print("pkill command not found on the system.")
 
+    time.sleep(10)
+
     print(f"After killing process: {process.pid}")
 
 
