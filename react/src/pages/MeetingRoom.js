@@ -218,6 +218,22 @@ const MeetingRoom = React.memo((props) => {
             handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
             allParticipants={props?.allParticipants}
             pinVideo={props?.pinVideo}
+            handleBackgroundReplacement={props?.handleBackgroundReplacement}
+            microphoneSelected={(mic) => props?.microphoneSelected(mic)}
+            devices={props?.devices}
+            selectedCamera={props?.selectedCamera}
+            cameraSelected={(camera) => props?.cameraSelected(camera)}
+            selectedMicrophone={props?.selectedMicrophone}
+            selectedBackgroundMode={props?.selectedBackgroundMode}
+            setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
+            videoSendResolution={props?.videoSendResolution}
+            setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
+            isAdmin={props?.isAdmin}
+            isRecordPluginInstalled={props?.isRecordPluginInstalled}
+            startRecord={props?.startRecord}
+            stopRecord={props?.stopRecord}
+            effectsDrawerOpen={props?.effectsDrawerOpen}
+            handleEffectsOpen={props?.handleEffectsOpen}
         />
       </>
   );

@@ -8,7 +8,6 @@ import SettingsDialog from "./SettingsDialog";
 import {LayoutSettingsDialog} from "./LayoutSettingsDialog";
 import {ListItemIcon, ListItemText, Tooltip} from "@mui/material";
 import {useTranslation} from "react-i18next";
-import {ConferenceContext} from 'pages/AntMedia';
 import GeneralSettingsDialog from "./GeneralSettingsDialog";
 import {ThemeList} from "../../../styles/themeList";
 import {ThemeContext} from "../../../App";
@@ -29,7 +28,6 @@ const CustomizedBtn = styled(Button)(({theme}) => ({
 }));
 
 function OptionButton(props) {
-  const conference = React.useContext(ConferenceContext);
   const {t} = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -107,6 +105,16 @@ function OptionButton(props) {
         open={dialogOpen}
         onClose={handleDialogClose}
         selectFocus={selectFocus}
+        handleBackgroundReplacement={props.handleBackgroundReplacement}
+        microphoneSelected={(mic) => props?.microphoneSelected(mic)}
+        devices={props?.devices}
+        selectedCamera={props?.selectedCamera}
+        cameraSelected={(camera) => props?.cameraSelected(camera)}
+        selectedMicrophone={props?.selectedMicrophone}
+        selectedBackgroundMode={props?.selectedBackgroundMode}
+        setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
+        videoSendResolution={props?.videoSendResolution}
+        setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
       />
       <LayoutSettingsDialog
         open={layoutDialogOpen}
@@ -181,7 +189,7 @@ function OptionButton(props) {
         </MenuItem>
             : null}
 
-        {conference.isPlayOnly === false
+        {props?.isPlayOnly === false
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
           <MenuItem onClick={() => handleDialogOpen()}>
             <ListItemIcon>
@@ -191,9 +199,9 @@ function OptionButton(props) {
           </MenuItem>
           : null}
 
-        {conference.isPlayOnly === false
+        {props?.isPlayOnly === false
         && process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true' ?
-            <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }}>
+            <MenuItem onClick={() => { props?.handleEffectsOpen(!props?.effectsDrawerOpen); handleClose(); }}>
               <ListItemIcon>
                 <SvgIcon size={36} name={"background-replacement"} color={theme.palette?.iconColor?.primary} />
               </ListItemIcon>
@@ -201,10 +209,10 @@ function OptionButton(props) {
             </MenuItem>
           : null}
 
-        {process.env.REACT_APP_RECORDING_MANAGED_BY_ADMIN === 'false' || conference.isAdmin === true ?
+        {process.env.REACT_APP_RECORDING_MANAGED_BY_ADMIN === 'false' || props?.isAdmin === true ?
           [
-            (conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true) &&
-            (<MenuItem onClick={() => { conference.startRecord(); handleClose(); } } id="start-recording-button"
+            (props?.isRecordPluginActive === false && props?.isRecordPluginInstalled === true) &&
+            (<MenuItem onClick={() => { props?.startRecord(); handleClose(); } } id="start-recording-button"
             >
               <ListItemIcon>
                 <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />
@@ -213,8 +221,8 @@ function OptionButton(props) {
             </MenuItem>
             ),
 
-            (conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true) &&
-            (<MenuItem onClick={() => { conference.stopRecord(); handleClose(); }} id="stop-recording-button"
+            (props?.isRecordPluginActive === true && props?.isRecordPluginInstalled === true) &&
+            (<MenuItem onClick={() => { props?.stopRecord(); handleClose(); }} id="stop-recording-button"
           >
             <ListItemIcon>
               <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />

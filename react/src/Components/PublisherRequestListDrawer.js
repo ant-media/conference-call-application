@@ -5,7 +5,6 @@ import {  Grid,  Tabs, Tab } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseDrawerButton from './DrawerButton';
 import PublisherRequestTab from "./PublisherRequestTab";
-import {ConferenceContext} from "../pages/AntMedia";
 import {getAntDrawerStyle} from "../styles/themeUtil";
 
 const AntDrawer = styled(Drawer)(({ theme }) => (getAntDrawerStyle(theme)));
@@ -26,7 +25,6 @@ const TabGrid = styled(Grid)(({ theme }) => ({
 
 const PublisherRequestListDrawer = React.memo(props => {
     const [value, setValue] = React.useState(0);
-    const conference = React.useContext(ConferenceContext);
 
     const { t } = useTranslation();
 
@@ -52,7 +50,7 @@ const PublisherRequestListDrawer = React.memo(props => {
     }
 
     return (
-        <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={conference.publisherRequestListDrawerOpen} variant="persistent">
+        <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={props?.publisherRequestListDrawerOpen} variant="persistent">
             <PublisherRequestListGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
                 <Grid item container justifyContent="space-between" alignItems="center">
                     <Tabs
@@ -68,10 +66,10 @@ const PublisherRequestListDrawer = React.memo(props => {
                         <Tab disableRipple sx={{ color: '#ffffff80', p: 1, pl: 0 }} label={t('Publisher Requests')} {...a11yProps(0)} />
                     </Tabs>
                     <CloseDrawerButton
-                        handleMessageDrawerOpen={conference?.handleMessageDrawerOpen}
-                        handleParticipantListOpen={conference?.handleParticipantListOpen}
-                        handleEffectsOpen={conference?.handleEffectsOpen}
-                        setPublisherRequestListDrawerOpen={conference?.setPublisherRequestListDrawerOpen}
+                        handleMessageDrawerOpen={props?.handleMessageDrawerOpen}
+                        handleParticipantListOpen={props?.handleParticipantListOpen}
+                        handleEffectsOpen={props?.handleEffectsOpen}
+                        setPublisherRequestListDrawerOpen={props?.setPublisherRequestListDrawerOpen}
                     />
                 </Grid>
                 <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>

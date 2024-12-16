@@ -3218,7 +3218,7 @@ function AntMedia(props) {
                     {leftTheRoom ? (
                         <LeftTheRoom
                             withError={leaveRoomWithError}
-                            handleLeaveFromRoom={handleLeaveFromRoom}
+                            handleLeaveFromRoom={() => handleLeaveFromRoom()}
                         />
                     ) : waitingOrMeetingRoom === "waiting" ? (
                         <WaitingRoom
@@ -3227,24 +3227,33 @@ function AntMedia(props) {
                             localVideoCreate={(tempLocalVideo) => localVideoCreate(tempLocalVideo)}
                             localVideo={localVideo}
                             streamName={streamName}
-                            setStreamName={setStreamName}
-                            makeid={makeid}
-                            setSpeedTestObject={setSpeedTestObject}
+                            setStreamName={(name) => setStreamName(name)}
+                            makeid={(length)=>makeid(length)}
+                            setSpeedTestObject={(speedTestObject) => setSpeedTestObject(speedTestObject)}
                             speedTestStreamId={speedTestStreamId}
-                            startSpeedTest={startSpeedTest}
-                            stopSpeedTest={stopSpeedTest}
-                            setIsJoining={setIsJoining}
-                            joinRoom={joinRoom}
+                            startSpeedTest={()=>startSpeedTest()}
+                            stopSpeedTest={()=>stopSpeedTest()}
+                            setIsJoining={(isJoining) => setIsJoining(isJoining)}
+                            joinRoom={(roomName, generatedStreamId) => joinRoom(roomName, generatedStreamId)}
                             speedTestObject={speedTestObject}
-                            setWaitingOrMeetingRoom={setWaitingOrMeetingRoom}
-                            handleBackgroundReplacement={handleBackgroundReplacement}
+                            setWaitingOrMeetingRoom={(room) => setWaitingOrMeetingRoom(room)}
+                            handleBackgroundReplacement={(mode)=>handleBackgroundReplacement(mode)}
                             isMyCamTurnedOff={isMyCamTurnedOff}
                             cameraButtonDisabled={cameraButtonDisabled}
-                            checkAndTurnOffLocalCamera={checkAndTurnOffLocalCamera}
-                            checkAndTurnOnLocalCamera={checkAndTurnOnLocalCamera}
+                            checkAndTurnOffLocalCamera={(streamId) => checkAndTurnOffLocalCamera(streamId)}
+                            checkAndTurnOnLocalCamera={(streamId) => checkAndTurnOnLocalCamera(streamId)}
                             isMyMicMuted={isMyMicMuted}
-                            toggleMic={toggleMic}
+                            toggleMic={(mute) => toggleMic(mute)}
                             microphoneButtonDisabled={microphoneButtonDisabled}
+                            microphoneSelected={(mic) => microphoneSelected(mic)}
+                            devices={devices}
+                            selectedCamera={selectedCamera}
+                            cameraSelected={(camera) => cameraSelected(camera)}
+                            selectedMicrophone={selectedMicrophone}
+                            selectedBackgroundMode={selectedBackgroundMode}
+                            setSelectedBackgroundMode={(mode) => setSelectedBackgroundMode(mode)}
+                            videoSendResolution={videoSendResolution}
+                            setVideoSendResolution={(resolution) => setVideoSendResolution(resolution)}
                         />
                     ) : (
                         <>
@@ -3305,16 +3314,30 @@ function AntMedia(props) {
                                 fakeReconnect={fakeReconnect}
                                 isBroadcasting={isBroadcasting}
                                 handleSetDesiredTileCount={handleSetDesiredTileCount}
+                                handleBackgroundReplacement={handleBackgroundReplacement}
+                                microphoneSelected={(mic) => microphoneSelected(mic)}
+                                devices={devices}
+                                selectedCamera={selectedCamera}
+                                cameraSelected={(camera) => cameraSelected(camera)}
+                                selectedMicrophone={selectedMicrophone}
+                                selectedBackgroundMode={selectedBackgroundMode}
+                                setSelectedBackgroundMode={(mode) => setSelectedBackgroundMode(mode)}
+                                videoSendResolution={videoSendResolution}
+                                setVideoSendResolution={(resolution) => setVideoSendResolution(resolution)}
+                                isRecordPluginInstalled={isRecordPluginInstalled}
+                                startRecord={startRecord}
+                                stopRecord={stopRecord}
+                                handleEffectsOpen={handleEffectsOpen}
                             />
                             <MessageDrawer
                                 messages={messages}
-                                sendMessage={sendMessage}
-                                handleSetMessages={handleSetMessages}
+                                sendMessage={(message) => sendMessage(message)}
+                                handleSetMessages={(messages) => handleSetMessages(messages)}
                                 messageDrawerOpen={messageDrawerOpen}
-                                handleMessageDrawerOpen={handleMessageDrawerOpen}
-                                handleParticipantListOpen={handleParticipantListOpen}
-                                handleEffectsOpen={handleEffectsOpen}
-                                setPublisherRequestListDrawerOpen={setPublisherRequestListDrawerOpen}
+                                handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
+                                handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
+                                handleEffectsOpen={(open) => handleEffectsOpen(open)}
+                                setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
                             />
                             <ParticipantListDrawer
                                 globals={globals}
@@ -3335,19 +3358,19 @@ function AntMedia(props) {
                                 pagedParticipants={pagedParticipants}
                                 updateAllParticipantsPagination={(value) => updateAllParticipantsPagination(value)}
                                 participantListDrawerOpen={participantListDrawerOpen}
-                                handleMessageDrawerOpen={handleMessageDrawerOpen}
-                                handleParticipantListOpen={handleParticipantListOpen}
-                                handleEffectsOpen={handleEffectsOpen}
-                                setPublisherRequestListDrawerOpen={setPublisherRequestListDrawerOpen}
+                                handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
+                                handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
+                                handleEffectsOpen={(open) => handleEffectsOpen(open)}
+                                setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
                             />
                             <EffectsDrawer
                                 effectsDrawerOpen={effectsDrawerOpen}
                                 setVirtualBackgroundImage={(img)=>setVirtualBackgroundImage(img)}
                                 handleBackgroundReplacement={(mode)=>handleBackgroundReplacement(mode)}
-                                handleMessageDrawerOpen={handleMessageDrawerOpen}
-                                handleParticipantListOpen={handleParticipantListOpen}
-                                handleEffectsOpen={handleEffectsOpen}
-                                setPublisherRequestListDrawerOpen={setPublisherRequestListDrawerOpen}
+                                handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
+                                handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
+                                handleEffectsOpen={(open) => handleEffectsOpen(open)}
+                                setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
                             />
                             <PublisherRequestListDrawer/>
                         </>

@@ -111,6 +111,14 @@ function Footer(props) {
                           allParticipants={props?.allParticipants}
                           pinVideo={props?.pinVideo}
                           handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
+                          isAdmin={props?.isAdmin}
+                          isRecordPluginActive={props?.isRecordPluginActive}
+                          isRecordPluginInstalled={props?.isRecordPluginInstalled}
+                          startRecord={props?.startRecord}
+                          stopRecord={props?.stopRecord}
+                          isPlayOnly={props?.isPlayOnly}
+                          effectsDrawerOpen={props?.effectsDrawerOpen}
+                          handleEffectsOpen={props?.handleEffectsOpen}
                       />
                     </Grid>
                     : null}
@@ -264,6 +272,16 @@ function Footer(props) {
                           handlePublisherRequestListOpen={(open)=>props?.handlePublisherRequestListOpen(open)}
                           publisherRequestListDrawerOpen={props?.publisherRequestListDrawerOpen}
                           handlePublisherRequest={()=>props?.handlePublisherRequest()}
+                          handleBackgroundReplacement={props.handleBackgroundReplacement}
+                          microphoneSelected={(mic) => props?.microphoneSelected(mic)}
+                          devices={props?.devices}
+                          selectedCamera={props?.selectedCamera}
+                          cameraSelected={(camera) => props?.cameraSelected(camera)}
+                          selectedMicrophone={props?.selectedMicrophone}
+                          selectedBackgroundMode={props?.selectedBackgroundMode}
+                          setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
+                          videoSendResolution={props?.videoSendResolution}
+                          setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
                       />
                     </Grid>
                   ) : null}
