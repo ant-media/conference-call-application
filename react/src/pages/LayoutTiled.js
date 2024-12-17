@@ -107,8 +107,9 @@ function LayoutTiled(props) {
                   <TalkingIndicator
                       trackAssignment={element}
                       isTalking={props?.isTalking}
-                      streamId={props?.trackAssignment.streamId}
+                      streamId={element.streamId}
                       talkers={props?.talkers}
+                      setAudioLevelListener={props?.setAudioLevelListener}
                   />
                   <VideoCard
                       trackAssignment={element}
@@ -120,7 +121,6 @@ function LayoutTiled(props) {
                       isMyMicMuted={props?.isMyMicMuted}
                       isMyCamTurnedOff={props?.isMyCamTurnedOff}
                       allParticipants={props?.allParticipants}
-                      setAudioLevelListener={props?.setAudioLevelListener}
                       setParticipantIdMuted={props?.setParticipantIdMuted}
                       turnOnYourMicNotification={props?.turnOnYourMicNotification}
                       turnOffYourMicNotification={props?.turnOffYourMicNotification}

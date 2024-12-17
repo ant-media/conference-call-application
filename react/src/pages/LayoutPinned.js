@@ -38,8 +38,9 @@ function LayoutPinned (props) {
             <TalkingIndicator
                 trackAssignment={pinnedParticipant}
                 isTalking={props?.isTalking}
-                streamId={props?.trackAssignment.streamId}
+                streamId={pinnedParticipant.streamId}
                 talkers={props?.talkers}
+                setAudioLevelListener={props?.setAudioLevelListener}
             />
             <VideoCard
               trackAssignment={pinnedParticipant}
@@ -59,7 +60,6 @@ function LayoutPinned (props) {
               isMyMicMuted={props?.isMyMicMuted}
               isMyCamTurnedOff={props?.isMyCamTurnedOff}
               allParticipants={props?.allParticipants}
-              setAudioLevelListener={props?.setAudioLevelListener}
               setParticipantIdMuted={props?.setParticipantIdMuted}
               turnOnYourMicNotification={props?.turnOnYourMicNotification}
               turnOffYourMicNotification={props?.turnOffYourMicNotification}
@@ -107,8 +107,9 @@ function LayoutPinned (props) {
                     <TalkingIndicator
                         trackAssignment={element}
                         isTalking={props?.isTalking}
-                        streamId={props?.trackAssignment.streamId}
+                        streamId={element.streamId}
                         talkers={props?.talkers}
+                        setAudioLevelListener={props?.setAudioLevelListener}
                     />
                     <VideoCard
                         isMobileView={isMobileView}
@@ -121,7 +122,6 @@ function LayoutPinned (props) {
                         isMyMicMuted={props?.isMyMicMuted}
                         isMyCamTurnedOff={props?.isMyCamTurnedOff}
                         allParticipants={props?.allParticipants}
-                        setAudioLevelListener={props?.setAudioLevelListener}
                         setParticipantIdMuted={props?.setParticipantIdMuted}
                         turnOnYourMicNotification={props?.turnOnYourMicNotification}
                         turnOffYourMicNotification={props?.turnOffYourMicNotification}

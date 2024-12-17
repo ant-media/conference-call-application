@@ -120,9 +120,10 @@ const MeetingRoom = React.memo((props) => {
             <div style={{position: "relative", width: "100%", height: "100%"}}>
               <TalkingIndicator
                   isTalking={props?.isTalking}
-                  streamId={props?.trackAssignment.streamId}
+                  streamId={audioTrackAssignment.streamId}
                   trackAssignment={audioTrackAssignment}
                   talkers={props?.talkers}
+                  setAudioLevelListener={props?.setAudioLevelListener}
               />
                 <VideoCard
                     key={index}
@@ -136,7 +137,6 @@ const MeetingRoom = React.memo((props) => {
                     isMyMicMuted={props?.isMyMicMuted}
                     isMyCamTurnedOff={props?.isMyCamTurnedOff}
                     allParticipants={props?.allParticipants}
-                    setAudioLevelListener={props?.setAudioLevelListener}
                     setParticipantIdMuted={props?.setParticipantIdMuted}
                     turnOnYourMicNotification={props?.turnOnYourMicNotification}
                     turnOffYourMicNotification={props?.turnOffYourMicNotification}

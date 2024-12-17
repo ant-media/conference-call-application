@@ -26,10 +26,16 @@ function VideoCard(props) {
 
     const refVideo = useCallback((node) => {
         if (node && props.trackAssignment.track) {
-            node.srcObject = new MediaStream([props.trackAssignment.track]);
-            node.play().catch((e) => console.error("Video playback failed:", e));
+            const newStream = new MediaStream([props.trackAssignment.track]);
+            if (node.srcObject !== newStream) {
+                node.srcObject = newStream;
+                node.play().catch((e) =>
+                    console.error("Video playback failed:", e)
+                );
+            }
         }
     }, [props.trackAssignment.track]);
+
 
     const cardBtnStyle = {
         display: "flex",
@@ -122,10 +128,11 @@ function VideoCard(props) {
         />
     );
 
-    const renderOverlayButtons = () => {
+    const renderOverlayButtons = useCallback(() => {
         if (props.hidePin) return null;
 
-        const isAdminMode = process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true";
+        const isAdminMode =
+            process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true";
         const isAdministrativeButtonsVisible =
             !props?.trackAssignment.isMine && (!isAdminMode || props?.isAdmin);
 
@@ -146,15 +153,26 @@ function VideoCard(props) {
                 }}
             >
                 <Grid container justifyContent="center" alignItems="center" wrap="nowrap">
-                    <Grid item container justifyContent="center" alignItems="center" columnSpacing={0.5}>
+                    <Grid
+                        item
+                        container
+                        justifyContent="center"
+                        alignItems="center"
+                        columnSpacing={0.5}
+                    >
                         {!isMobile && !isTablet && <PinButton props={props} />}
-                        {isAdministrativeButtonsVisible && <AdministrativeButtons props={props} micMuted={micMuted} />}
+                        {isAdministrativeButtonsVisible && (
+                            <AdministrativeButtons props={props} micMuted={micMuted} />
+                        )}
                     </Grid>
                 </Grid>
             </Grid>
         );
-    };
+    }, [displayHover, props]);
 
+    const videoStyle = React.useMemo(() => ({
+        objectFit: "contain",
+    }), []);
 
     const renderAvatarOrPlayer = () => (
         <>
@@ -178,7 +196,7 @@ function VideoCard(props) {
                         ref={refVideo}
                         playsInline
                         muted
-                        style={{ objectFit: "contain" }}
+                        style={videoStyle}
                     />
                 </Grid>
             )}
@@ -216,12 +234,16 @@ function VideoCard(props) {
         </Grid>
     );
 
-    const setLocalVideo = () => {
-        let tempLocalVideo = document.getElementById((typeof props?.publishStreamId === "undefined")? "localVideo" : props?.publishStreamId);
-        if(props.trackAssignment.isMine && props?.localVideo !== tempLocalVideo) {
+    React.useEffect(() => {
+        let tempLocalVideo = document.getElementById(
+            typeof props?.publishStreamId === "undefined"
+                ? "localVideo"
+                : props?.publishStreamId
+        );
+        if (props.trackAssignment.isMine && props?.localVideo !== tempLocalVideo) {
             props?.localVideoCreate(tempLocalVideo);
         }
-    }
+    }, [props.trackAssignment.isMine, props.publishStreamId, props.localVideo, props.localVideoCreate]);
 
     const overlayVideoTitle = () => {
         return (
@@ -266,6 +288,22 @@ function VideoCard(props) {
 
     const videoProps = filterVideoProps(props);
 
+    const handleMouseEnter = useCallback(() => {
+        setDisplayHover(true);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        setDisplayHover(false);
+    }, []);
+
+    const cardStyle = React.useMemo(() => ({
+        height: props.isMobileView ? "40%" : "100%",
+        width: props.isMobileView ? "20%" : "100%",
+        position: "relative",
+        borderRadius: 4,
+        overflow: "hidden",
+    }), [props.isMobileView]);
+
     return isMine || isVideoTrack ? (
         <>
         <Grid
@@ -275,24 +313,17 @@ function VideoCard(props) {
                 width: "100%",
                 position: "relative",
             }}
-            onMouseEnter={() => setDisplayHover(true)}
-            onMouseLeave={() => setDisplayHover(false)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             {renderOverlayButtons()}
             <div
                 className="single-video-card"
                 id={'card-'+(props.trackAssignment.streamId !== undefined ? props?.trackAssignment.streamId : "")}
-                style={{
-                    height: props.isMobileView ? "40%" : "100%",
-                    width: props.isMobileView ? "20%" : "100%",
-                    position: "relative",
-                    borderRadius: 4,
-                    overflow: "hidden",
-                }}
+                style={cardStyle}
             >
                 {renderAvatarOrPlayer()}
                 {renderParticipantStatus()}
-                {setLocalVideo()}
                 {overlayVideoTitle()}
             </div>
         </Grid>
@@ -310,4 +341,4 @@ function VideoCard(props) {
     );
 };
 
-export default VideoCard;
+export default React.memo(VideoCard);

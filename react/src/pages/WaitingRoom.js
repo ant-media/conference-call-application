@@ -319,6 +319,7 @@ function WaitingRoom(props) {
                                     isTalking={props?.isTalking}
                                     streamId={props?.publishStreamId}
                                     talkers={props?.talkers}
+                                    setAudioLevelListener={props?.setAudioLevelListener}
                                 />
                                 <VideoCard
                                     trackAssignment={tempVTA}
@@ -331,7 +332,6 @@ function WaitingRoom(props) {
                                     isMyMicMuted={props?.isMyMicMuted}
                                     isMyCamTurnedOff={props?.isMyCamTurnedOff}
                                     allParticipants={props?.allParticipants}
-                                    setAudioLevelListener={props?.setAudioLevelListener}
                                     setParticipantIdMuted={props?.setParticipantIdMuted}
                                     turnOnYourMicNotification={props?.turnOnYourMicNotification}
                                     turnOffYourMicNotification={props?.turnOffYourMicNotification}
