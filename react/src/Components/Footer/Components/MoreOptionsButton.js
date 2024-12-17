@@ -116,7 +116,7 @@ function MoreOptionsButton(props) {
           />
           <Tooltip title={t("More options")} placement="top">
             <CustomizedBtn
-                className={footer ? "footer-icon-button" : ""}
+                className={props?.footer ? "footer-icon-button" : ""}
                 id="more-button"
                 data-testid="more-button-test"
                 variant="contained"
