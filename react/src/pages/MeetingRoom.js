@@ -154,6 +154,20 @@ const MeetingRoom = React.memo((props) => {
                   allParticipants={props?.allParticipants}
                   videoTrackAssignments={props?.videoTrackAssignments}
                   updateMaxVideoTrackCount={props?.updateMaxVideoTrackCount}
+                  talkers={props?.talkers}
+                  streamName={props?.streamName}
+                  isPublished={props?.isPublished}
+                  isPlayOnly={props?.isPlayOnly}
+                  isMyMicMuted={props?.isMyMicMuted}
+                  isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                  setAudioLevelListener={props?.setAudioLevelListener}
+                  setParticipantIdMuted={props?.setParticipantIdMuted}
+                  turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                  turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                  turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                  isAdmin={props?.isAdmin}
+                  localVideo={props?.localVideo}
+                  localVideoCreate={props?.localVideoCreate}
               />)
               :
               (<LayoutTiled
@@ -165,6 +179,21 @@ const MeetingRoom = React.memo((props) => {
                   globals={props?.globals}
                   updateMaxVideoTrackCount={props?.updateMaxVideoTrackCount}
                   publishStreamId={props?.publishStreamId}
+                  talkers={props?.talkers}
+                  streamName={props?.streamName}
+                  isPublished={props?.isPublished}
+                  isPlayOnly={props?.isPlayOnly}
+                  isMyMicMuted={props?.isMyMicMuted}
+                  isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                  setAudioLevelListener={props?.setAudioLevelListener}
+                  setParticipantIdMuted={props?.setParticipantIdMuted}
+                  turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                  turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                  turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                  pinVideo={props?.pinVideo}
+                  isAdmin={props?.isAdmin}
+                  localVideo={props?.localVideo}
+                  localVideoCreate={props?.localVideoCreate}
               />)
           }
         </div>

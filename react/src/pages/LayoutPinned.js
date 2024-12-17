@@ -45,6 +45,23 @@ function LayoutPinned (props) {
                   pinnedParticipant.streamId
                 );
               }}
+            talkers={props?.talkers}
+            streamName={props?.streamName}
+            isPublished={props?.isPublished}
+            isPlayOnly={props?.isPlayOnly}
+            isMyMicMuted={props?.isMyMicMuted}
+            isMyCamTurnedOff={props?.isMyCamTurnedOff}
+            allParticipants={props?.allParticipants}
+            setAudioLevelListener={props?.setAudioLevelListener}
+            setParticipantIdMuted={props?.setParticipantIdMuted}
+            turnOnYourMicNotification={props?.turnOnYourMicNotification}
+            turnOffYourMicNotification={props?.turnOffYourMicNotification}
+            turnOffYourCamNotification={props?.turnOffYourCamNotification}
+            pinVideo={props?.pinVideo}
+            isAdmin={props?.isAdmin}
+            publishStreamId={props?.publishStreamId}
+            localVideo={props?.localVideo}
+            localVideoCreate={props?.localVideoCreate}
           />
         </div>
       ) : null
@@ -83,6 +100,23 @@ function LayoutPinned (props) {
                     trackAssignment={element}
                       autoPlay
                       name={participantName}
+                      talkers={props?.talkers}
+                      streamName={props?.streamName}
+                      isPublished={props?.isPublished}
+                      isPlayOnly={props?.isPlayOnly}
+                      isMyMicMuted={props?.isMyMicMuted}
+                      isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                      allParticipants={props?.allParticipants}
+                      setAudioLevelListener={props?.setAudioLevelListener}
+                      setParticipantIdMuted={props?.setParticipantIdMuted}
+                      turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                      turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                      turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                      pinVideo={props?.pinVideo}
+                      isAdmin={props?.isAdmin}
+                      publishStreamId={props?.publishStreamId}
+                      localVideo={props?.localVideo}
+                      localVideoCreate={props?.localVideoCreate}
                   />
                 </div>
               </div>

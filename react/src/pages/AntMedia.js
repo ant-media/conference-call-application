@@ -3119,6 +3119,17 @@ function AntMedia(props) {
                             setSelectedBackgroundMode={(mode) => setSelectedBackgroundMode(mode)}
                             videoSendResolution={videoSendResolution}
                             setVideoSendResolution={(resolution) => setVideoSendResolution(resolution)}
+                            talkers={talkers}
+                            isPublished={isPublished}
+                            allParticipants={allParticipants}
+                            setAudioLevelListener={(listener, period) => setAudioLevelListener(listener, period)}
+                            setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
+                            turnOnYourMicNotification={(streamId) => turnOnYourMicNotification(streamId)}
+                            turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
+                            turnOffYourCamNotification={(streamId) => turnOffYourCamNotification(streamId)}
+                            pinVideo={(streamId) => pinVideo(streamId)}
+                            isAdmin={isAdmin}
+                            publishStreamId={publishStreamId}
                         />
                     ) : (
                         <>

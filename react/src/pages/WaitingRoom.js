@@ -312,7 +312,29 @@ function WaitingRoom(props) {
                             className="waiting-room-video"
                             sx={{position: "relative"}}
                         >
-                            <VideoCard trackAssignment={tempVTA} autoPlay muted hidePin={true}/>
+                            <VideoCard
+                                trackAssignment={tempVTA}
+                                autoPlay
+                                muted
+                                hidePin={true}
+                                talkers={props?.talkers}
+                                streamName={props?.streamName}
+                                isPublished={props?.isPublished}
+                                isPlayOnly={props?.isPlayOnly}
+                                isMyMicMuted={props?.isMyMicMuted}
+                                isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                                allParticipants={props?.allParticipants}
+                                setAudioLevelListener={props?.setAudioLevelListener}
+                                setParticipantIdMuted={props?.setParticipantIdMuted}
+                                turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                                turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                                turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                                pinVideo={props?.pinVideo}
+                                isAdmin={props?.isAdmin}
+                                publishStreamId={props?.publishStreamId}
+                                localVideo={props?.localVideo}
+                                localVideoCreate={props?.localVideoCreate}
+                            />
 
                             <Grid
                                 container
