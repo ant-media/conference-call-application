@@ -17,15 +17,7 @@ import re
 class TestJoinLeave(unittest.TestCase):
   def setUp(self):
     print("----------------\n", self._testMethodName, " starting...")
-    try:
-        subprocess.run(["pkill", "java"], check=True)
-        subprocess.run(["pkill", "chrome"], check=True)
-        print("pkill java executed successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing pkill java: {e}")
-    except FileNotFoundError:
-        print("pkill command not found on the system.")
-    time.sleep(10)
+
 
 
     self.is_local = False
@@ -44,11 +36,32 @@ class TestJoinLeave(unittest.TestCase):
 
     wait = self.chrome.get_wait()
     
+    self.addCleanup(self.check_test_outcome)
+
+
     #wait.until(lambda x: len(self.rest_helper.get_broadcasts()) == 0)
     #print("broadcasts are empty")
 
+  def check_test_outcome(self):
+      outcome = self._outcome
+      if outcome.errors or outcome.failures:
+        print(f"Test '{self._testMethodName}' FAILED.")
+        self.chrome.save_ss_as_file("failed-"+self._testMethodName+".png")
+
+
 
   def tearDown(self):
+
+    try:
+        subprocess.run(["pkill", "java"], check=True)
+        subprocess.run(["pkill", "chrome"], check=True)
+        print("pkill java executed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing pkill java: {e}")
+    except FileNotFoundError:
+        print("pkill command not found on the system.")
+    time.sleep(10)
+  
     print(self._testMethodName, " ending...\n","----------------")
 
   def create_participants_with_test_tool(self, participant_name, room, count):
