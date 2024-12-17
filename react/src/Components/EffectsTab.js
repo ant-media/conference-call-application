@@ -4,7 +4,7 @@ import Grid from "@mui/material/Grid";
 import { SvgIcon } from "./SvgIcon";
 import {CustomizedBtn} from "./Footer/Components/MicButton";
 import {useTheme} from "@mui/material";
-import {useSnackbar} from "notistack";
+import {useSnackbar} from "notistack-v2-maintained";
 import {useTranslation} from "react-i18next";
 
 function EffectsTab({ setVirtualBackgroundImage, handleBackgroundReplacement }) {
