@@ -37,19 +37,23 @@ function MicButton(props) {
 
   const handleMicToggle = (e, mute) => {
     e.stopPropagation();
-    enqueueSnackbar({
-      message: mute ? t('Microphone off') : t('Microphone on'),
-      variant: 'info',
-      icon: (
+
+    const notificationContent = (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <SvgIcon
               size={24}
               name={mute ? 'muted-microphone' : 'microphone'}
               color="#fff"
           />
-      ),
-    }, {
+          {mute ? t('Microphone off') : t('Microphone on')}
+        </div>
+    );
+
+    enqueueSnackbar(notificationContent, {
+      variant: 'info',
       autoHideDuration: 1500,
     });
+
     props?.toggleMic(!mute);
   };
 

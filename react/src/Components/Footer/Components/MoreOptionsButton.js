@@ -103,7 +103,7 @@ function MoreOptionsButton(props) {
               onClose={handleLayoutDialogClose}
               globals={props?.globals}
               allParticipants={props?.allParticipants}
-              pinVideo={props?.pinVideo}
+              pinVideo={(streamId) => props?.pinVideo(streamId)}
               handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
           />
           <GeneralSettingsDialog

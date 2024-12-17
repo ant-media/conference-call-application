@@ -122,7 +122,7 @@ function OptionButton(props) {
         selectFocus={selectFocus}
         globals={props?.globals}
         allParticipants={props?.allParticipants}
-        pinVideo={props?.pinVideo}
+        pinVideo={(streamId)=>props?.pinVideo(streamId)}
         handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
       />
       <GeneralSettingsDialog

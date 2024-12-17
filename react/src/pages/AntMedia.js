@@ -3235,7 +3235,7 @@ function AntMedia(props) {
                             />
                             <MessageDrawer
                                 messages={messages}
-                                sendMessage={(message) => sendMessage(message)}
+                                sendMessage={(message) => handleSendMessage(message)}
                                 handleSetMessages={(messages) => handleSetMessages(messages)}
                                 messageDrawerOpen={messageDrawerOpen}
                                 handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}

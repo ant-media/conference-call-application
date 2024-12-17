@@ -78,15 +78,15 @@ return (
             <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
               <TabPanel value={value} index={0}>
                 <TabGrid container sx={{ pb: 0 }} direction={'column'}>
-                  <MessagesTab messages={props.messages}/>
+                  <MessagesTab messages={props?.messages}/>
                 </TabGrid>
               </TabPanel>
             </Grid>
 
             {/*props.isPlayOnly === false &&*/ value === 0 ?
             <MessageInput
-                handleSendMessage={(message) => props.sendMessage(message)}
-                handleSetMessages={(messages) => props.handleSetMessages(messages)}
+                handleSendMessage={(message) => props?.sendMessage(message)}
+                handleSetMessages={(messages) => props?.handleSetMessages(messages)}
             />
                 : <Typography variant="body2" sx={{px: 1.5, py: 0.5, fontSize: 12, fontWeight: 700}} color="#fff">
                   {t('You cannot send message in play only mode')}

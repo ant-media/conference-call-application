@@ -160,7 +160,7 @@ function ParticipantTab({
               <PinBtn
                 id={"unpin-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
-                onClick={() => {
+                onClick={(e) => {
                   pinVideo(streamId);
                 }}
               >
@@ -170,7 +170,7 @@ function ParticipantTab({
               <PinBtn
                 id={"pin-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
-                onClick={() => {
+                onClick={(e) => {
                   pinVideo(streamId);
                 }}
               >

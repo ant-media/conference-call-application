@@ -24,65 +24,42 @@ const TabGrid = styled(Grid)(({ theme }) => ({
   flexWrap: 'nowrap',
 }));
 
-const ParticipantListDrawer = React.memo(({
-                                            globals,
-                                            isAdmin,
-                                            pinVideo,
-                                            makeListenerAgain,
-                                            videoTrackAssignments,
-                                            presenterButtonStreamIdInProcess,
-                                            presenterButtonDisabled,
-                                            makeParticipantPresenter,
-                                            makeParticipantUndoPresenter,
-                                            participantCount,
-                                            isMyMicMuted,
-                                            publishStreamId,
-                                            muteLocalMic,
-                                            turnOffYourMicNotification,
-                                            setParticipantIdMuted,
-                                            pagedParticipants,
-                                            updateAllParticipantsPagination,
-                                            participantListDrawerOpen,
-                                            handleMessageDrawerOpen,
-                                            handleParticipantListOpen,
-                                            handleEffectsOpen,
-                                            setPublisherRequestListDrawerOpen
-                                          }) => {
+const ParticipantListDrawer = React.memo((props) => {
   const { t } = useTranslation();
 
 
   return (
-    <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={participantListDrawerOpen} variant="persistent">
+    <AntDrawer transitionDuration={200} anchor={'right'} id="message-drawer" open={props?.participantListDrawerOpen} variant="persistent">
       <ParticipantListGrid container direction="column" style={{ flexWrap: 'nowrap', height: '100%', overflow: 'hidden' }}>
         <Grid item container justifyContent="space-between" alignItems="center">
           {t('PARTICIPANTS')}
           <CloseDrawerButton
-              handleMessageDrawerOpen={handleMessageDrawerOpen}
-              handleParticipantListOpen={handleParticipantListOpen}
-              handleEffectsOpen={handleEffectsOpen}
-              setPublisherRequestListDrawerOpen={setPublisherRequestListDrawerOpen}
+              handleMessageDrawerOpen={(open)=>props?.handleMessageDrawerOpen(open)}
+              handleParticipantListOpen={(open)=>props?.handleParticipantListOpen(open)}
+              handleEffectsOpen={(open)=>props?.handleEffectsOpen(open)}
+              setPublisherRequestListDrawerOpen={(open)=>props?.setPublisherRequestListDrawerOpen(open)}
           />
         </Grid>
         <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
         <TabGrid container sx={{ pb: 0 }} direction={'column'}>
           <ParticipantTab
-              globals={globals}
-              isAdmin={isAdmin}
-              pinVideo={(streamId) => pinVideo(streamId)}
-              makeListenerAgain={(streamId) => makeListenerAgain(streamId)}
-              videoTrackAssignments={videoTrackAssignments}
-              presenterButtonStreamIdInProcess={presenterButtonStreamIdInProcess}
-              presenterButtonDisabled={presenterButtonDisabled}
-              makeParticipantPresenter={(streamId) => makeParticipantPresenter(streamId)}
-              makeParticipantUndoPresenter={(streamId) => makeParticipantUndoPresenter(streamId)}
-              participantCount={participantCount}
-              isMyMicMuted={isMyMicMuted}
-              publishStreamId={publishStreamId}
-              muteLocalMic={()=>muteLocalMic()}
-              turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
-              setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
-              pagedParticipants={pagedParticipants}
-              updateAllParticipantsPagination={(value) => updateAllParticipantsPagination(value)}
+              globals={props?.globals}
+              isAdmin={props?.isAdmin}
+              pinVideo={(streamId) => props?.pinVideo(streamId)}
+              makeListenerAgain={(streamId) => props?.makeListenerAgain(streamId)}
+              videoTrackAssignments={props?.videoTrackAssignments}
+              presenterButtonStreamIdInProcess={props?.presenterButtonStreamIdInProcess}
+              presenterButtonDisabled={props?.presenterButtonDisabled}
+              makeParticipantPresenter={(streamId) => props?.makeParticipantPresenter(streamId)}
+              makeParticipantUndoPresenter={(streamId) => props?.makeParticipantUndoPresenter(streamId)}
+              participantCount={props?.participantCount}
+              isMyMicMuted={props?.isMyMicMuted}
+              publishStreamId={props?.publishStreamId}
+              muteLocalMic={()=>props?.muteLocalMic()}
+              turnOffYourMicNotification={(streamId) => props?.turnOffYourMicNotification(streamId)}
+              setParticipantIdMuted={(participant) => props?.setParticipantIdMuted(participant)}
+              pagedParticipants={props?.pagedParticipants}
+              updateAllParticipantsPagination={(value) => props?.updateAllParticipantsPagination(value)}
           />
           </TabGrid>
         </Grid>

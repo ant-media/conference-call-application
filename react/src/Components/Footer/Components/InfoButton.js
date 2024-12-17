@@ -42,7 +42,7 @@ function InfoButton(props) {
             const { width, height } = document.getElementById('localVideo').srcObject.getVideoTracks()[0].getSettings();
             return width + ' x ' + height;
         } catch (e) {
-            return "";
+            return '';
         }
     }, []);
 
@@ -83,7 +83,9 @@ function InfoButton(props) {
                     {t('Meeting link')}
                 </Typography>
                 <StyledMenuItem>
-                    <StyledListItemText>{meetingLink.replace(/^https?:\/\//, '').split('?')[0]}</StyledListItemText>
+                    <StyledListItemText>
+                        {meetingLink.replace(/^https?:\/\//, '').split('?')[0]}
+                    </StyledListItemText>
                     <ListItemIcon sx={{ pl: 1, cursor: 'pointer' }}>
                         <Tooltip title={t('Copy meeting link')} placement="top">
                             <Button
@@ -91,12 +93,11 @@ function InfoButton(props) {
                                 variant="text"
                                 onClick={() => {
                                     navigator.clipboard.writeText(meetingLink);
+
                                     enqueueSnackbar(
+                                        t('Link copied'), // Pass message directly as a string
                                         {
-                                            message: t('Link copied'),
                                             variant: 'info',
-                                        },
-                                        {
                                             autoHideDuration: 1500,
                                         }
                                     );
@@ -122,7 +123,6 @@ function InfoButton(props) {
                         {t('You are in play only mode')}
                     </Typography>
                 )}
-
             </Menu>
         </>
     );

@@ -119,7 +119,7 @@ function VideoCard(props) {
         );
     };
 
-    const PinButton = ({ }) => (
+    const PinButton = () => (
         <OverlayButton
             title={`${props.pinned ? t("unpin") : t("pin")} ${props.name}`}
             icon={props.pinned ? "unpin" : "pin"}

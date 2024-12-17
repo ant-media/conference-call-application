@@ -28,26 +28,27 @@ function CameraButton(props) {
   const handleCameraToggle = (e, isTurningOff) => {
     e.stopPropagation();
 
-    enqueueSnackbar({
-      message: isTurningOff
-          ? t("Camera turned off")
-          : t("Camera turned on"),
-      variant: "info",
-      icon: (
+    // Combine message and icon into a React Node
+    const notificationContent = (
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <SvgIcon
               size={24}
               name={isTurningOff ? "camera-off" : "camera"}
               color="#fff"
           />
-      ),
-    }, {
+          {isTurningOff ? t("Camera turned off") : t("Camera turned on")}
+        </div>
+    );
+
+    enqueueSnackbar(notificationContent, {
+      variant: "info",
       autoHideDuration: 1500,
     });
 
     if (isTurningOff) {
-        props?.onTurnOnCamera();
+      props?.onTurnOnCamera();
     } else {
-        props?.onTurnOffCamera();
+      props?.onTurnOffCamera();
     }
   };
 

@@ -157,7 +157,7 @@ const MeetingRoom = React.memo((props) => {
                         height={gallerySize.h}
                         globals={props?.globals}
                         publishStreamId={props?.publishStreamId}
-                        pinVideo={props?.pinVideo}
+                        pinVideo={(streamId)=>props?.pinVideo(streamId)}
                         allParticipants={props?.allParticipants}
                         videoTrackAssignments={props?.videoTrackAssignments}
                         updateMaxVideoTrackCount={props?.updateMaxVideoTrackCount}
@@ -197,7 +197,7 @@ const MeetingRoom = React.memo((props) => {
                         turnOnYourMicNotification={props?.turnOnYourMicNotification}
                         turnOffYourMicNotification={props?.turnOffYourMicNotification}
                         turnOffYourCamNotification={props?.turnOffYourCamNotification}
-                        pinVideo={props?.pinVideo}
+                        pinVideo={(streamId)=>props?.pinVideo(streamId)}
                         isAdmin={props?.isAdmin}
                         localVideo={props?.localVideo}
                         localVideoCreate={props?.localVideoCreate}
@@ -253,7 +253,7 @@ const MeetingRoom = React.memo((props) => {
                   isBroadcasting={props?.isBroadcasting}
                   handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
                   allParticipants={props?.allParticipants}
-                  pinVideo={props?.pinVideo}
+                  pinVideo={(streamId)=>props?.pinVideo(streamId)}
                   handleBackgroundReplacement={props?.handleBackgroundReplacement}
                   microphoneSelected={(mic) => props?.microphoneSelected(mic)}
                   devices={props?.devices}

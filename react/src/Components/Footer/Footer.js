@@ -109,7 +109,7 @@ function Footer(props) {
                           footer={true}
                           globals={props?.globals}
                           allParticipants={props?.allParticipants}
-                          pinVideo={props?.pinVideo}
+                          pinVideo={(streamId) => props?.pinVideo(streamId)}
                           handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
                           isAdmin={props?.isAdmin}
                           isRecordPluginActive={props?.isRecordPluginActive}
@@ -119,6 +119,16 @@ function Footer(props) {
                           isPlayOnly={props?.isPlayOnly}
                           effectsDrawerOpen={props?.effectsDrawerOpen}
                           handleEffectsOpen={props?.handleEffectsOpen}
+                          handleBackgroundReplacement={props.handleBackgroundReplacement}
+                          microphoneSelected={(mic) => props?.microphoneSelected(mic)}
+                          devices={props?.devices}
+                          selectedCamera={props?.selectedCamera}
+                          cameraSelected={(camera) => props?.cameraSelected(camera)}
+                          selectedMicrophone={props?.selectedMicrophone}
+                          selectedBackgroundMode={props?.selectedBackgroundMode}
+                          setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
+                          videoSendResolution={props?.videoSendResolution}
+                          setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
                       />
                     </Grid>
                     : null}
@@ -155,8 +165,8 @@ function Footer(props) {
                     <ShareScreenButton
                         footer={true}
                         isScreenShared={props?.isScreenShared}
-                        handleStartScreenShare={()=>props?.handleStartScreenShare}
-                        handleStopScreenShare={()=>props?.handleStopScreenShare}
+                        handleStartScreenShare={()=>props?.handleStartScreenShare()}
+                        handleStopScreenShare={()=>props?.handleStopScreenShare()}
                     />
                   </Grid>
                       : null}
@@ -283,6 +293,7 @@ function Footer(props) {
                           videoSendResolution={props?.videoSendResolution}
                           setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
                           globals={props?.globals}
+                          handleParticipantListOpen={(open)=>props?.handleParticipantListOpen(open)}
                       />
                     </Grid>
                   ) : null}
