@@ -22,6 +22,7 @@ import {useSnackbar} from "notistack";
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
 import {getRootAttribute, isComponentMode} from "utils";
 import {useTheme} from "@mui/material/styles";
+import TalkingIndicator from "../Components/TalkingIndicator";
 
 
 function getPublishStreamId() {
@@ -312,75 +313,83 @@ function WaitingRoom(props) {
                             className="waiting-room-video"
                             sx={{position: "relative"}}
                         >
-                            <VideoCard
-                                trackAssignment={tempVTA}
-                                autoPlay
-                                muted
-                                hidePin={true}
-                                talkers={props?.talkers}
-                                streamName={props?.streamName}
-                                isPublished={props?.isPublished}
-                                isPlayOnly={props?.isPlayOnly}
-                                isMyMicMuted={props?.isMyMicMuted}
-                                isMyCamTurnedOff={props?.isMyCamTurnedOff}
-                                allParticipants={props?.allParticipants}
-                                setAudioLevelListener={props?.setAudioLevelListener}
-                                setParticipantIdMuted={props?.setParticipantIdMuted}
-                                turnOnYourMicNotification={props?.turnOnYourMicNotification}
-                                turnOffYourMicNotification={props?.turnOffYourMicNotification}
-                                turnOffYourCamNotification={props?.turnOffYourCamNotification}
-                                pinVideo={props?.pinVideo}
-                                isAdmin={props?.isAdmin}
-                                publishStreamId={props?.publishStreamId}
-                                localVideo={props?.localVideo}
-                                localVideoCreate={props?.localVideoCreate}
-                            />
+                            <div style={{position: "relative", width: "100%", height: "100%"}}>
+                                <TalkingIndicator
+                                    trackAssignment={tempVTA}
+                                    isTalking={props?.isTalking}
+                                    streamId={props?.publishStreamId}
+                                    talkers={props?.talkers}
+                                />
+                                <VideoCard
+                                    trackAssignment={tempVTA}
+                                    autoPlay
+                                    muted
+                                    hidePin={true}
+                                    streamName={props?.streamName}
+                                    isPublished={props?.isPublished}
+                                    isPlayOnly={props?.isPlayOnly}
+                                    isMyMicMuted={props?.isMyMicMuted}
+                                    isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                                    allParticipants={props?.allParticipants}
+                                    setAudioLevelListener={props?.setAudioLevelListener}
+                                    setParticipantIdMuted={props?.setParticipantIdMuted}
+                                    turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                                    turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                                    turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                                    pinVideo={props?.pinVideo}
+                                    isAdmin={props?.isAdmin}
+                                    publishStreamId={props?.publishStreamId}
+                                    localVideo={props?.localVideo}
+                                    localVideoCreate={props?.localVideoCreate}
+                                />
+                            </div>
 
-                            <Grid
-                                container
-                                columnSpacing={2}
-                                justifyContent="center"
-                                alignItems="center"
-                                sx={{
-                                    position: "absolute",
-                                    bottom: 0,
-                                    left: 0,
-                                    p: 2,
-                                    zIndex: 10,
-                                }}
-                            >
-                                <Grid item>
-                                    <CameraButton
-                                        rounded={true}
-                                        footer={false}
-                                        isCamTurnedOff={props?.isMyCamTurnedOff}
-                                        cameraButtonDisabled={props?.cameraButtonDisabled}
-                                        onTurnOffCamera={props?.checkAndTurnOffLocalCamera}
-                                        onTurnOnCamera={props?.checkAndTurnOnLocalCamera}
-                                    />
+                                <Grid
+                                    container
+                                    columnSpacing={2}
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    sx={{
+                                        position: "absolute",
+                                        bottom: 0,
+                                        left: 0,
+                                        p: 2,
+                                        zIndex: 10,
+                                    }}
+                                >
+                                    <Grid item>
+                                        <CameraButton
+                                            rounded={true}
+                                            footer={false}
+                                            isCamTurnedOff={props?.isMyCamTurnedOff}
+                                            cameraButtonDisabled={props?.cameraButtonDisabled}
+                                            onTurnOffCamera={props?.checkAndTurnOffLocalCamera}
+                                            onTurnOnCamera={props?.checkAndTurnOnLocalCamera}
+                                        />
+                                    </Grid>
+                                    <Grid item>
+                                        <MicButton
+                                            rounded={true}
+                                            footer={false}
+                                            isMicMuted={props?.isMyMicMuted}
+                                            toggleMic={props?.toggleMic}
+                                            microphoneButtonDisabled={props?.microphoneButtonDisabled}
+                                        />
+                                    </Grid>
+                                    <Grid item sx={{position: "absolute", bottom: 16, right: 16}}>
+                                        <Tooltip title={t("More options")} placement="top">
+                                            <CustomizedBtn
+                                                variant="contained"
+                                                color="secondary"
+                                                sx={roundStyle}
+                                                onClick={() => handleDialogOpen()}
+                                            >
+                                                <SvgIcon size={40} name={"settings"}
+                                                         color={theme.palette?.iconColor?.primary}/>
+                                            </CustomizedBtn>
+                                        </Tooltip>
+                                    </Grid>
                                 </Grid>
-                                <Grid item>
-                                    <MicButton
-                                        rounded={true}
-                                        footer={false}
-                                        isMicMuted={props?.isMyMicMuted}
-                                        toggleMic={props?.toggleMic}
-                                        microphoneButtonDisabled={props?.microphoneButtonDisabled}
-                                    />
-                                </Grid>
-                                <Grid item sx={{position: "absolute", bottom: 16, right: 16}}>
-                                    <Tooltip title={t("More options")} placement="top">
-                                        <CustomizedBtn
-                                            variant="contained"
-                                            color="secondary"
-                                            sx={roundStyle}
-                                            onClick={() => handleDialogOpen()}
-                                        >
-                                            <SvgIcon size={40} name={"settings"} color={theme.palette?.iconColor?.primary}/>
-                                        </CustomizedBtn>
-                                    </Tooltip>
-                                </Grid>
-                            </Grid>
                         </Grid>
                         <Typography align="center" color={theme.palette?.chatText} sx={{mt: 2}}>
                             {t(

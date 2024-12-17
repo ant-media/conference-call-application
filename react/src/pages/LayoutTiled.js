@@ -2,6 +2,7 @@
 import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
 import React from "react";
+import TalkingIndicator from "../Components/TalkingIndicator";
 
 function calculateLayout(
   containerWidth,
@@ -102,28 +103,35 @@ function LayoutTiled(props) {
                     height: cardHeight + "px",
                   }}
               >
-                <VideoCard
-                    trackAssignment={element}
-                    autoPlay
-                    name={participantName}
-                    talkers={props?.talkers}
-                    streamName={props?.streamName}
-                    isPublished={props?.isPublished}
-                    isPlayOnly={props?.isPlayOnly}
-                    isMyMicMuted={props?.isMyMicMuted}
-                    isMyCamTurnedOff={props?.isMyCamTurnedOff}
-                    allParticipants={props?.allParticipants}
-                    setAudioLevelListener={props?.setAudioLevelListener}
-                    setParticipantIdMuted={props?.setParticipantIdMuted}
-                    turnOnYourMicNotification={props?.turnOnYourMicNotification}
-                    turnOffYourMicNotification={props?.turnOffYourMicNotification}
-                    turnOffYourCamNotification={props?.turnOffYourCamNotification}
-                    pinVideo={props?.pinVideo}
-                    isAdmin={props?.isAdmin}
-                    publishStreamId={props?.publishStreamId}
-                    localVideo={props?.localVideo}
-                    localVideoCreate={props?.localVideoCreate}
-                />
+                <div style={{position: "relative", width: "100%", height: "100%"}}>
+                  <TalkingIndicator
+                      trackAssignment={element}
+                      isTalking={props?.isTalking}
+                      streamId={props?.trackAssignment.streamId}
+                      talkers={props?.talkers}
+                  />
+                  <VideoCard
+                      trackAssignment={element}
+                      autoPlay
+                      name={participantName}
+                      streamName={props?.streamName}
+                      isPublished={props?.isPublished}
+                      isPlayOnly={props?.isPlayOnly}
+                      isMyMicMuted={props?.isMyMicMuted}
+                      isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                      allParticipants={props?.allParticipants}
+                      setAudioLevelListener={props?.setAudioLevelListener}
+                      setParticipantIdMuted={props?.setParticipantIdMuted}
+                      turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                      turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                      turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                      pinVideo={props?.pinVideo}
+                      isAdmin={props?.isAdmin}
+                      publishStreamId={props?.publishStreamId}
+                      localVideo={props?.localVideo}
+                      localVideoCreate={props?.localVideoCreate}
+                  />
+                </div>
               </div>
               )
           })

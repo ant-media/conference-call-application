@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useCallback, useState, useRef } from "react";
 import { alpha, styled } from "@mui/material/styles";
 import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
@@ -22,9 +22,7 @@ const CustomizedBox = styled(Box)(({ theme }) => ({
 function VideoCard(props) {
     const { t } = useTranslation();
     const [displayHover, setDisplayHover] = useState(false);
-    const [isTalking, setIsTalking] = useState(false);
     const theme = useTheme();
-    const timeoutRef = useRef(null);
 
     const refVideo = useCallback((node) => {
         if (node && props.trackAssignment.track) {
@@ -64,21 +62,7 @@ function VideoCard(props) {
             "isScreenShared"
         );
 
-    useEffect(() => {
-        if (props?.trackAssignment.isMine && props?.isPublished && !props?.isPlayOnly) {
-            props?.setAudioLevelListener((value) => {
-                // sounds under 0.01 are probably background noise
-                if (value >= 0.01) {
-                    if (isTalking === false) setIsTalking(true);
-                    clearInterval(timeoutRef.current);
-                    timeoutRef.current = setTimeout(() => {
-                        setIsTalking(false);
-                    }, 1500);
-                }
-            }, 1000);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props?.isPublished]);
+
 
     const OverlayButton = ({ title, icon, color, onClick }) => (
         <Tooltip title={title} placement="top">
@@ -259,20 +243,6 @@ function VideoCard(props) {
         );
     }
 
-    const isTalkingFrame = () => {
-        return (
-            <div
-                className="talking-indicator-light"
-                style={{
-                    borderColor: theme.palette.themeColor[20],
-                    ...(isTalking || props?.talkers.includes(props.trackAssignment.streamId)
-                        ? {}
-                        : { display: "none" }),
-                }}
-            />
-        );
-    }
-
     const filterVideoProps = (props) => {
         const allowedProps = [
             'autoPlay',
@@ -323,7 +293,6 @@ function VideoCard(props) {
                 {renderAvatarOrPlayer()}
                 {renderParticipantStatus()}
                 {setLocalVideo()}
-                {isTalkingFrame()}
                 {overlayVideoTitle()}
             </div>
         </Grid>

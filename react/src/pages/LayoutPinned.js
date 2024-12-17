@@ -3,6 +3,7 @@ import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
 import React from "react";
 import {isMobile} from "react-device-detect";
+import TalkingIndicator from "../Components/TalkingIndicator";
 
 
 function LayoutPinned (props) {
@@ -33,36 +34,43 @@ function LayoutPinned (props) {
     return (
       pinnedParticipant ? (
         <div className="single-video-container pinned keep-ratio">
-          <VideoCard
-            trackAssignment={pinnedParticipant}
-              autoPlay
-              name={
-                pinnedParticipantName
-              }
-              pinned
-              onHandlePin={() => {
-                props.pinVideo(
-                  pinnedParticipant.streamId
-                );
-              }}
-            talkers={props?.talkers}
-            streamName={props?.streamName}
-            isPublished={props?.isPublished}
-            isPlayOnly={props?.isPlayOnly}
-            isMyMicMuted={props?.isMyMicMuted}
-            isMyCamTurnedOff={props?.isMyCamTurnedOff}
-            allParticipants={props?.allParticipants}
-            setAudioLevelListener={props?.setAudioLevelListener}
-            setParticipantIdMuted={props?.setParticipantIdMuted}
-            turnOnYourMicNotification={props?.turnOnYourMicNotification}
-            turnOffYourMicNotification={props?.turnOffYourMicNotification}
-            turnOffYourCamNotification={props?.turnOffYourCamNotification}
-            pinVideo={props?.pinVideo}
-            isAdmin={props?.isAdmin}
-            publishStreamId={props?.publishStreamId}
-            localVideo={props?.localVideo}
-            localVideoCreate={props?.localVideoCreate}
-          />
+          <div style={{position: "relative", width: "100%", height: "100%"}}>
+            <TalkingIndicator
+                trackAssignment={pinnedParticipant}
+                isTalking={props?.isTalking}
+                streamId={props?.trackAssignment.streamId}
+                talkers={props?.talkers}
+            />
+            <VideoCard
+              trackAssignment={pinnedParticipant}
+                autoPlay
+                name={
+                  pinnedParticipantName
+                }
+                pinned
+                onHandlePin={() => {
+                  props.pinVideo(
+                    pinnedParticipant.streamId
+                  );
+                }}
+              streamName={props?.streamName}
+              isPublished={props?.isPublished}
+              isPlayOnly={props?.isPlayOnly}
+              isMyMicMuted={props?.isMyMicMuted}
+              isMyCamTurnedOff={props?.isMyCamTurnedOff}
+              allParticipants={props?.allParticipants}
+              setAudioLevelListener={props?.setAudioLevelListener}
+              setParticipantIdMuted={props?.setParticipantIdMuted}
+              turnOnYourMicNotification={props?.turnOnYourMicNotification}
+              turnOffYourMicNotification={props?.turnOffYourMicNotification}
+              turnOffYourCamNotification={props?.turnOffYourCamNotification}
+              pinVideo={props?.pinVideo}
+              isAdmin={props?.isAdmin}
+              publishStreamId={props?.publishStreamId}
+              localVideo={props?.localVideo}
+              localVideoCreate={props?.localVideoCreate}
+            />
+          </div>
         </div>
       ) : null
     )
@@ -95,48 +103,55 @@ function LayoutPinned (props) {
           return (
               <div className="unpinned" key={index}>
                 <div className="single-video-container">
-                  <VideoCard
-                      isMobileView={isMobileView}
-                    trackAssignment={element}
-                      autoPlay
-                      name={participantName}
-                      talkers={props?.talkers}
-                      streamName={props?.streamName}
-                      isPublished={props?.isPublished}
-                      isPlayOnly={props?.isPlayOnly}
-                      isMyMicMuted={props?.isMyMicMuted}
-                      isMyCamTurnedOff={props?.isMyCamTurnedOff}
-                      allParticipants={props?.allParticipants}
-                      setAudioLevelListener={props?.setAudioLevelListener}
-                      setParticipantIdMuted={props?.setParticipantIdMuted}
-                      turnOnYourMicNotification={props?.turnOnYourMicNotification}
-                      turnOffYourMicNotification={props?.turnOffYourMicNotification}
-                      turnOffYourCamNotification={props?.turnOffYourCamNotification}
-                      pinVideo={props?.pinVideo}
-                      isAdmin={props?.isAdmin}
-                      publishStreamId={props?.publishStreamId}
-                      localVideo={props?.localVideo}
-                      localVideoCreate={props?.localVideoCreate}
-                  />
+                  <div style={{position: "relative", width: "100%", height: "100%"}}>
+                    <TalkingIndicator
+                        trackAssignment={element}
+                        isTalking={props?.isTalking}
+                        streamId={props?.trackAssignment.streamId}
+                        talkers={props?.talkers}
+                    />
+                    <VideoCard
+                        isMobileView={isMobileView}
+                        trackAssignment={element}
+                        autoPlay
+                        name={participantName}
+                        streamName={props?.streamName}
+                        isPublished={props?.isPublished}
+                        isPlayOnly={props?.isPlayOnly}
+                        isMyMicMuted={props?.isMyMicMuted}
+                        isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                        allParticipants={props?.allParticipants}
+                        setAudioLevelListener={props?.setAudioLevelListener}
+                        setParticipantIdMuted={props?.setParticipantIdMuted}
+                        turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                        turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                        turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                        pinVideo={props?.pinVideo}
+                        isAdmin={props?.isAdmin}
+                        publishStreamId={props?.publishStreamId}
+                        localVideo={props?.localVideo}
+                        localVideoCreate={props?.localVideoCreate}
+                    />
+                  </div>
+                  </div>
                 </div>
-              </div>
+                );
+                }
+                })}
+              </>
           );
         }
-      })}
-      </>
-    );
-  }
 
-  const othersCard = () => {
-    return (
-      <>
-      {showOthers ? (
-        <div className="unpinned">
-        <div className="single-video-container  others-tile-wrapper">
-        <OthersCard
-            publishStreamId={props?.publishStreamId}
-            allParticipants={props?.allParticipants}
-            playingParticipants = {playingParticipants}
+        const othersCard = () => {
+          return (
+              <>
+                {showOthers ? (
+                    <div className="unpinned">
+                      <div className="single-video-container  others-tile-wrapper">
+                        <OthersCard
+                            publishStreamId={props?.publishStreamId}
+                            allParticipants={props?.allParticipants}
+                            playingParticipants={playingParticipants}
         />
         </div>
       </div>
