@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Backdrop, Box, CircularProgress, Grid} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
@@ -399,7 +399,7 @@ function AntMedia(props) {
 
     const [audioTracks, setAudioTracks] = useState([]);
 
-    const [talkers, setTalkers] = useState([]);
+    const talkers = useRef([]);
     const [isPublished, setIsPublished] = useState(false);
     const [isPlayed, setIsPlayed] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
@@ -464,8 +464,8 @@ function AntMedia(props) {
   // open or close the mute participant dialog.
   const [isBecomePublisherConfirmationDialogOpen, setBecomePublisherConfirmationDialogOpen] = React.useState(false);
 
-    const [publishStats, setPublishStats] = React.useState(null);
-    const [playStats, setPlayStats] = React.useState(null);
+    const publishStats = useRef(null);
+    const playStats = useRef(null);
 
     const [isReconnectionInProgress, setIsReconnectionInProgress] = React.useState(false);
 
@@ -786,8 +786,8 @@ function AntMedia(props) {
 
         // Calculate the packet loss percentage
         let packageLostPercentage = 0;
-        console.log("publishStats:", publishStats);
-        if (publishStats !== null) {
+        console.log("publishStats:", publishStats.current);
+        if (publishStats.current !== null) {
             let deltaPackageLost = oldTotalPacketsLost - totalPacketsLost;
             let deltaPackageReceived = oldPackageReceived - packageReceived;
 
@@ -1646,7 +1646,7 @@ function AntMedia(props) {
 
         // if the playStats is null, it means that it is the first time to get the stats
         // so we don't need to check the connection quality for playback
-        if (playStats !== null) {
+        if (playStats.current !== null) {
 
             // Calculate total bytes received
             totalBytesReceived = obj.totalBytesReceivedCount;
@@ -1685,7 +1685,7 @@ function AntMedia(props) {
 
         let updatedPlayStats = {totalPacketsLost: totalPacketsLost, videoPacketsLost: videoPacketsLost, audioPacketsLost: audioPacketsLost, totalBytesReceived: totalBytesReceived, incomingBitrate: incomingBitrate, inboundRtpList: obj.inboundRtpList};
         console.log("playStats:", updatedPlayStats);
-        setPlayStats(updatedPlayStats);
+        playStats.current = updatedPlayStats;
     }
 
     function checkConnectionQualityForPublish(obj) {
@@ -1697,10 +1697,10 @@ function AntMedia(props) {
         let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
 
         let packageLostPercentage = 0;
-        console.log("publishStats:", publishStats);
-        if (publishStats !== null) {
-            let deltaPackageLost = packageLost - publishStats.packageLost;
-            let deltaPackageSent = packageSent - publishStats.packageSent;
+        console.log("publishStats:", publishStats.current);
+        if (publishStats.current !== null) {
+            let deltaPackageLost = packageLost - publishStats.current.packageLost;
+            let deltaPackageSent = packageSent - publishStats.current.packageSent;
 
             if (deltaPackageLost > 0) {
                 packageLostPercentage = ((deltaPackageLost / parseInt(deltaPackageSent)) * 100).toPrecision(3);
@@ -1715,7 +1715,7 @@ function AntMedia(props) {
             displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
         }
 
-        setPublishStats({packageLost: packageLost, packageSent: packageSent});
+        publishStats.current = {packageLost: packageLost, packageSent: packageSent};
     }
 
     //TODO : add receive stats
@@ -2301,7 +2301,9 @@ function AntMedia(props) {
                     }
                 });
 
-                setAllParticipants(tempAllParticipants);
+                if (!_.isEqual(allParticipants, tempAllParticipants)) {
+                    setAllParticipants(tempAllParticipants);
+                }
 
                 currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
 
@@ -2327,21 +2329,12 @@ function AntMedia(props) {
                 }
 
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
-                // xxx to be able to reduce render
-                if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
-                  return;
-                }
                 clearInterval(timeoutRef.current);
                 timeoutRef.current = setTimeout(() => {
-                    setTalkers([]);
+                    talkers.current = [];
                 }, 1000);
                 //console.log(JSON.stringify(notificationEvent.payload));
-                setTalkers((oldTalkers) => {
-                    const newTalkers = notificationEvent.payload
-                        .filter((p) => p.trackId !== "" && p.audioLevel < 60)
-                        .map((p) => p.trackId);
-                    return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
-                });
+                updateTalkers(notificationEvent);
             } else if (eventType === "TRACK_LIST_UPDATED") {
                 console.info("TRACK_LIST_UPDATED -> ", obj);
 
@@ -2379,6 +2372,17 @@ function AntMedia(props) {
             }
         }
     }
+
+    const updateTalkers = (notificationEvent) => {
+        const newTalkers = notificationEvent.payload
+            .filter((p) => p.trackId !== "" && p.audioLevel < 60)
+            .map((p) => p.trackId);
+
+        // Only update if there's a difference
+        if (!_.isEqual(talkers.current, newTalkers)) {
+            talkers.current = newTalkers;
+        }
+    };
 
     function displayRoleUpdateMessage(streamId, oldRole, newRole) {
         if (isAdmin !== true || oldRole === null || oldRole === undefined || newRole === null || newRole === undefined || oldRole === newRole) {
@@ -3143,7 +3147,7 @@ function AntMedia(props) {
                             setSelectedBackgroundMode={(mode) => setSelectedBackgroundMode(mode)}
                             videoSendResolution={videoSendResolution}
                             setVideoSendResolution={(resolution) => setVideoSendResolution(resolution)}
-                            talkers={talkers}
+                            talkers={talkers.current}
                             isPublished={isPublished}
                             allParticipants={allParticipants}
                             setAudioLevelListener={(listener, period) => setAudioLevelListener(listener, period)}

@@ -1,6 +1,6 @@
-import React, {useEffect, useRef} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { styled } from "@mui/material/styles";
-import {useTheme} from "@mui/material";
+import { useTheme } from "@mui/material";
 
 const TalkingIndicatorWrapper = styled("div")(({ isVisible, borderColor }) => ({
     borderColor: borderColor,
@@ -16,15 +16,29 @@ const TalkingIndicatorWrapper = styled("div")(({ isVisible, borderColor }) => ({
 const TalkingIndicator = (props) => {
     const theme = useTheme();
     const timeoutRef = useRef(null);
-    const [isTalking, setIsTalking] = React.useState(false);
+    const [isTalking, setIsTalking] = useState(false);
+    const [localTalkers, setLocalTalkers] = useState([]);
+
+    useEffect(() => {
+        // Monitor updates to talkers using polling or callbacks
+        const interval = setInterval(() => {
+            if (!props.talkers.current) return;
+            const updatedTalkers = props.talkers.current || [];
+            if (JSON.stringify(updatedTalkers) !== JSON.stringify(localTalkers)) {
+                setLocalTalkers(updatedTalkers);
+            }
+        }, 1000); // Poll every 1000ms
+
+        return () => clearInterval(interval);
+    }, [props.talkers, localTalkers]);
 
     useEffect(() => {
         if (props?.trackAssignment.isMine && props?.isPublished && !props?.isPlayOnly) {
             props?.setAudioLevelListener((value) => {
                 // sounds under 0.01 are probably background noise
                 if (value >= 0.01) {
-                    if (isTalking === false) setIsTalking(true);
-                    clearInterval(timeoutRef.current);
+                    if (!isTalking) setIsTalking(true);
+                    clearTimeout(timeoutRef.current);
                     timeoutRef.current = setTimeout(() => {
                         setIsTalking(false);
                     }, 1500);
@@ -34,7 +48,7 @@ const TalkingIndicator = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props?.isPublished]);
 
-    const isVisible = isTalking || (props?.talkers && props?.talkers.includes(props?.streamId));
+    const isVisible = isTalking || (localTalkers && localTalkers.includes(props?.streamId));
 
     return <TalkingIndicatorWrapper isVisible={isVisible} borderColor={theme.palette.themeColor[20]} />;
 };
