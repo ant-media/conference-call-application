@@ -48,7 +48,7 @@ class RestHelper:
             "playListItemList": [
                 {
                     "type": "VoD",
-                    "streamUrl": "https://github.com/ant-media/conference-call-application/raw/refs/heads/refactorPlayOnlySpeedTest/static/speedTestVideo/speed-test-sample-video.mp4",
+                    "streamUrl": "https://github.com/ant-media/conference-call-application/raw/refs/heads/main/static/speedTestVideo/speed-test-sample-video.mp4",
                     "name": "speedTestSampleStream",
                     "seekTimeInMs": 0,
                     "durationInMs": 60000
@@ -75,7 +75,9 @@ class RestHelper:
 
   def getVoDFor(self, streamId):
     resp = self.session.get(self.rest_url +"/request?_path="+self.app_name+"/rest/v2/vods/list/0/5")
+    print("get_vod_for "+str(streamId+":"+str(resp.text)))
     json_data = json.loads(resp.text)
+
     
     for item in json_data:
       if item["streamId"] == streamId:
