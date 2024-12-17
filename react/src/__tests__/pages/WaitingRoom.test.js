@@ -1,6 +1,18 @@
 import { render } from '@testing-library/react';
 import React from "react";
 import WaitingRoom from "../../pages/WaitingRoom";
+import { ConferenceContext } from 'pages/AntMedia';
+
+const contextValue = {
+  initialized: true,
+  setLocalVideo: jest.fn(),
+  localVideoCreate: jest.fn(),
+  setIsJoining: jest.fn(),
+  joinRoom: jest.fn(),
+  localVideo: {},
+  setSpeedTestObject: jest.fn(),
+  makeId: jest.fn(),
+};
 
 const props = {
   isPlayOnly: false,
@@ -51,6 +63,7 @@ const props = {
 // Mock the useContext hook
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
+  useContext: jest.fn(),
 }));
 
 jest.mock('utils', () => ({
@@ -88,6 +101,12 @@ describe('Waiting Room Component', () => {
   beforeEach(() => {
     // Reset the mock implementation before each test
     jest.clearAllMocks();
+    React.useContext.mockImplementation(input => {
+      if (input === ConferenceContext) {
+        return contextValue;
+      }
+      return jest.requireActual('react').useContext(input);
+    });
   });
 
 

@@ -201,7 +201,8 @@ function OptionButton(props) {
 
         {props?.isPlayOnly === false
         && process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true' ?
-            <MenuItem onClick={() => { props?.handleEffectsOpen(!props?.effectsDrawerOpen); handleClose(); }}>
+            <MenuItem onClick={() => { props?.handleEffectsOpen(!props?.effectsDrawerOpen); handleClose(); }}
+              id="virtual-effects">
               <ListItemIcon>
                 <SvgIcon size={36} name={"background-replacement"} color={theme.palette?.iconColor?.primary} />
               </ListItemIcon>
