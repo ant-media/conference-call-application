@@ -82,7 +82,6 @@ export function LayoutSettingsDialog(props) {
 
     if (mode === "tiled") {
       //unpin the pinned video
-      props.allParticipants = props?.allParticipants || {};
       Object.keys(props?.allParticipants).forEach(streamId => {
         if (typeof props?.allParticipants[streamId].pinned === 'undefined'
           && props?.allParticipants[streamId].pinned === true) {

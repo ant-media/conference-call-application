@@ -270,7 +270,7 @@ function WaitingRoom(props) {
                              id={"speed-test-modal-circle-progress-bar"}
                              sx={(speedTestModalButtonVisibility) ? {
                              display: 'none'
-                        } : {display: 'block'}} value={props?.speedTestObject?.progressValue}/>
+                        } : {display: 'block'}} value={props?.speedTestObject?.progressValue ?? ""}/>
                     </Box>
                     <Typography id="modal-modal-error-description" sx={{
                         mt: 2,
@@ -427,7 +427,7 @@ function WaitingRoom(props) {
                                         required
                                         fullWidth
                                         color="primary"
-                                        value={props.streamName}
+                                        value={props?.streamName ?? ""}
                                         variant="outlined"
                                         placeholder={t("Your name")}
                                         readOnly={true}
@@ -438,7 +438,7 @@ function WaitingRoom(props) {
                                         required
                                         fullWidth
                                         color="primary"
-                                        value={props?.streamName}
+                                        value={props?.streamName ?? ""}
                                         variant="outlined"
                                         onChange={(e) => props?.setStreamName(e.target.value)}
                                         placeholder={t("Your name")}

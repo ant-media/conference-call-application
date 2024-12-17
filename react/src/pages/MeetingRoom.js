@@ -85,7 +85,6 @@ const MeetingRoom = React.memo((props) => {
 
   function getPinnedParticipant() {
     let firstPinnedParticipant;
-    props.allParticipants = props?.allParticipants || {};
     Object.keys(props?.allParticipants).forEach(streamId => {
       let participant = props?.allParticipants[streamId];
       if (typeof participant.isPinned !== 'undefined'
@@ -263,6 +262,7 @@ const MeetingRoom = React.memo((props) => {
             stopRecord={props?.stopRecord}
             effectsDrawerOpen={props?.effectsDrawerOpen}
             handleEffectsOpen={props?.handleEffectsOpen}
+            globals={props?.globals}
         />
       </>
   );

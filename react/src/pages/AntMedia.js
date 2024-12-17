@@ -3041,7 +3041,7 @@ function AntMedia(props) {
                             open={isJoining}
                             //onClick={handleClose}
                         >
-                            <Stack item alignItems='center' justify='center' alignContent='center'>
+                            <Stack alignItems='center' justify='center' alignContent='center'>
                                 <CircularProgress size={52} color="inherit"/>
                                 { isNoSreamExist && isPlayOnly ?
                                     <span style={{margin: '27px', fontSize: 18, fontWeight: 'normal'}}>
@@ -3060,7 +3060,7 @@ function AntMedia(props) {
                             open={isReconnectionInProgress}
                             //onClick={handleClose}
                         >
-                            <Stack item alignItems='center' justify='center' alignContent='center'>
+                            <Stack alignItems='center' justify='center' alignContent='center'>
                                 <CircularProgress size={52} color="inherit"/>
                                 <span style={{margin: '27px', fontSize: 18, fontWeight: 'normal'}}>{t("Reconnecting...")}</span>
                             </Stack>

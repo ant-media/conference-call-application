@@ -273,6 +273,29 @@ function VideoCard(props) {
         );
     }
 
+    const filterVideoProps = (props) => {
+        const allowedProps = [
+            'autoPlay',
+            'controls',
+            'loop',
+            'muted',
+            'playsInline',
+            'poster',
+            'preload',
+            'src',
+            'width',
+            'height',
+        ];
+        return Object.keys(props)
+            .filter((key) => allowedProps.includes(key))
+            .reduce((obj, key) => {
+                obj[key] = props[key];
+                return obj;
+            }, {});
+    };
+
+    const videoProps = filterVideoProps(props);
+
     return isMine || isVideoTrack ? (
         <>
         <Grid
@@ -310,7 +333,7 @@ function VideoCard(props) {
         <>
             <video
                 style={{ display: "none" }}
-                {...props}
+                {...videoProps}
                 ref={refVideo}
                 playsInline
             ></video>

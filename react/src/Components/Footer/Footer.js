@@ -282,6 +282,7 @@ function Footer(props) {
                           setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
                           videoSendResolution={props?.videoSendResolution}
                           setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
+                          globals={props?.globals}
                       />
                     </Grid>
                   ) : null}

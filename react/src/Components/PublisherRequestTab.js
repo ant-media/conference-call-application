@@ -20,7 +20,11 @@ const PinBtn = styled(Button)(({ theme }) => ({
 }));
 
 function PublisherRequestTab(props) {
+    return (
+        <div></div>
+    );
 
+    /*
     const getPublisherRequestItem = (videoId) => {
         return (
             <Grid
@@ -75,6 +79,8 @@ function PublisherRequestTab(props) {
             </Stack>
         </div>
     );
+
+     */
 
 }
 

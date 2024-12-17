@@ -109,19 +109,20 @@ function InfoButton(props) {
                 </StyledMenuItem>
 
                 {props?.isPlayOnly === false ? (
-                    <>
+                    <div>
                         <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color="#fff">
                             {t('Resolution')}
                         </Typography>
                         <StyledMenuItem>
                             <StyledListItemText>{getResolution()}</StyledListItemText>
                         </StyledMenuItem>
-                    </>
+                    </div>
                 ) : (
                     <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color="#fff">
                         {t('You are in play only mode')}
                     </Typography>
                 )}
+
             </Menu>
         </>
     );
