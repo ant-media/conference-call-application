@@ -191,7 +191,7 @@ function OptionButton(props) {
 
         {props?.isPlayOnly === false
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
-          <MenuItem onClick={() => handleDialogOpen()}>
+          <MenuItem onClick={() => handleDialogOpen()} id="call-settings">
             <ListItemIcon>
               <SvgIcon size={36} name={"call-settings"} color={theme.palette?.iconColor?.primary}/>
             </ListItemIcon>
