@@ -48,7 +48,7 @@ function OthersCard(props) {
   const others = othersNames;//.sort();
 
   return (
-    <div className="others-tile-inner" style={{background: theme.palette.themeColor[71]}}>
+    <div className="others-tile-inner" style={{background: theme.palette.themeColor?.[71]}}>
       <CustomizedAvatarGroup sx={{justifyContent: "center"}}>
         {others.map(({username}, index) => {
           if (username?.length > 0) {

@@ -71,7 +71,7 @@ function MicButton(props) {
           <SvgIcon
               size={40}
               name={props?.isMicMuted ? 'muted-microphone' : 'microphone'}
-              color={props?.isMicMuted ? theme.palette.iconColor.primary : theme.palette.darkIconColor.primary}
+              color={props?.isMicMuted ? theme.palette.iconColor?.primary : theme.palette.darkIconColor?.primary}
           />
         </CustomizedBtn>
       </Tooltip>
