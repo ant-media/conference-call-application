@@ -3005,6 +3005,30 @@ function AntMedia(props) {
     }
     window.makeFullScreen = makeFullScreen;
 
+    const handleMuteParticipant = React.useCallback((participant) => {
+        setParticipantIdMuted(participant);
+    }, []);
+
+    const handleTurnOnYourMicNotification = React.useCallback((participant) => {
+        turnOnYourMicNotification(participant);
+    }, []);
+
+    const handleTurnOffYourMicNotification = React.useCallback((participant) => {
+        turnOffYourMicNotification(participant);
+    }, []);
+
+    const handleTurnOffYourCamNotification = React.useCallback((participant) => {
+        turnOffYourCamNotification(participant);
+    }, []);
+
+    const handlePinVideo = React.useCallback((streamId) => {
+        pinVideo(streamId);
+    }, []);
+
+    const handleLocalVideoCreate = React.useCallback((tempLocalVideo) => {
+        localVideoCreate(tempLocalVideo);
+    }, []);
+
     return (!initialized ? <>
             <Grid
                 container
@@ -3123,11 +3147,11 @@ function AntMedia(props) {
                             isPublished={isPublished}
                             allParticipants={allParticipants}
                             setAudioLevelListener={(listener, period) => setAudioLevelListener(listener, period)}
-                            setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
-                            turnOnYourMicNotification={(streamId) => turnOnYourMicNotification(streamId)}
-                            turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
-                            turnOffYourCamNotification={(streamId) => turnOffYourCamNotification(streamId)}
-                            pinVideo={(streamId) => pinVideo(streamId)}
+                            setParticipantIdMuted={(participant) => handleMuteParticipant(participant)}
+                            turnOnYourMicNotification={(streamId) => handleTurnOnYourMicNotification(streamId)}
+                            turnOffYourMicNotification={(streamId) => handleTurnOffYourMicNotification(streamId)}
+                            turnOffYourCamNotification={(streamId) => handleTurnOffYourCamNotification(streamId)}
+                            pinVideo={(streamId) => handlePinVideo(streamId)}
                             isAdmin={isAdmin}
                             publishStreamId={publishStreamId}
                         />
@@ -3139,16 +3163,15 @@ function AntMedia(props) {
                                 effectsDrawerOpen={effectsDrawerOpen}
                                 publisherRequestListDrawerOpen={publisherRequestListDrawerOpen}
                                 showEmojis={showEmojis}
-                                sendReactions={sendReactions}
-                                setShowEmojis={setShowEmojis}
+                                sendReactions={(reaction) => sendReactions(reaction)}
+                                setShowEmojis={(show) => setShowEmojis(show)}
                                 globals={globals}
                                 audioTracks={audioTracks}
                                 participantIdMuted={participantIdMuted}
                                 isMuteParticipantDialogOpen={isMuteParticipantDialogOpen}
-                                turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
-                                setMuteParticipantDialogOpen={setMuteParticipantDialogOpen}
+                                setMuteParticipantDialogOpen={(open) => setMuteParticipantDialogOpen(open)}
                                 publishStreamId={publishStreamId}
-                                pinVideo={(streamId) => pinVideo(streamId)}
+                                pinVideo={(streamId) => handlePinVideo(streamId)}
                                 allParticipants={allParticipants}
                                 participantUpdated={participantUpdated}
                                 videoTrackAssignments={videoTrackAssignments}
@@ -3159,38 +3182,39 @@ function AntMedia(props) {
                                 isPlayOnly={isPlayOnly}
                                 isMyMicMuted={isMyMicMuted}
                                 isMyCamTurnedOff={isMyCamTurnedOff}
-                                setAudioLevelListener={setAudioLevelListener}
-                                setParticipantIdMuted={setParticipantIdMuted}
-                                turnOnYourMicNotification={turnOnYourMicNotification}
-                                turnOffYourCamNotification={turnOffYourCamNotification}
+                                setAudioLevelListener={(listener, period) => setAudioLevelListener(listener, period)}
+                                setParticipantIdMuted={(participant) => handleMuteParticipant(participant)}
+                                turnOnYourMicNotification={(streamId) => handleTurnOnYourMicNotification(streamId)}
+                                turnOffYourMicNotification={(streamId) => handleTurnOffYourMicNotification(streamId)}
+                                turnOffYourCamNotification={(streamId) => handleTurnOffYourCamNotification(streamId)}
                                 isAdmin={isAdmin}
                                 localVideo={localVideo}
-                                localVideoCreate={localVideoCreate}
+                                localVideoCreate={(tempLocalVideo) => localVideoCreate(tempLocalVideo)}
                                 isRecordPluginActive={isRecordPluginActive}
                                 isEnterDirectly={isEnterDirectly}
                                 cameraButtonDisabled={cameraButtonDisabled}
-                                checkAndTurnOffLocalCamera={checkAndTurnOffLocalCamera}
-                                checkAndTurnOnLocalCamera={checkAndTurnOnLocalCamera}
-                                toggleMic={toggleMic}
+                                checkAndTurnOffLocalCamera={(streamId) => checkAndTurnOffLocalCamera(streamId)}
+                                checkAndTurnOnLocalCamera={(streamId) => checkAndTurnOnLocalCamera(streamId)}
+                                toggleMic={(mute) => toggleMic(mute)}
                                 microphoneButtonDisabled={microphoneButtonDisabled}
                                 isScreenShared={isScreenShared}
-                                handleStartScreenShare={handleStartScreenShare}
-                                handleStopScreenShare={handleStopScreenShare}
+                                handleStartScreenShare={()=>handleStartScreenShare()}
+                                handleStopScreenShare={()=>handleStopScreenShare()}
                                 numberOfUnReadMessages={numberOfUnReadMessages}
-                                toggleSetNumberOfUnreadMessages={toggleSetNumberOfUnreadMessages}
-                                handleMessageDrawerOpen={handleMessageDrawerOpen}
+                                toggleSetNumberOfUnreadMessages={(value) => toggleSetNumberOfUnreadMessages(value)}
+                                handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
                                 participantCount={participantCount}
-                                handleParticipantListOpen={handleParticipantListOpen}
+                                handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
                                 requestSpeakerList={requestSpeakerList}
-                                handlePublisherRequestListOpen={handlePublisherRequestListOpen}
+                                handlePublisherRequestListOpen={(open) => setPublisherRequestListDrawerOpen(open)}
                                 handlePublisherRequest={()=>{}}
-                                setLeftTheRoom={setLeftTheRoom}
-                                addFakeParticipant={addFakeParticipant}
-                                removeFakeParticipant={removeFakeParticipant}
-                                fakeReconnect={fakeReconnect}
+                                setLeftTheRoom={(left) => setLeftTheRoom(left)}
+                                addFakeParticipant={() => addFakeParticipant()}
+                                removeFakeParticipant={() => removeFakeParticipant()}
+                                fakeReconnect={() => fakeReconnect()}
                                 isBroadcasting={isBroadcasting}
-                                handleSetDesiredTileCount={handleSetDesiredTileCount}
-                                handleBackgroundReplacement={handleBackgroundReplacement}
+                                handleSetDesiredTileCount={(count) => handleSetDesiredTileCount(count)}
+                                handleBackgroundReplacement={(mode)=>handleBackgroundReplacement(mode)}
                                 microphoneSelected={(mic) => microphoneSelected(mic)}
                                 devices={devices}
                                 selectedCamera={selectedCamera}
@@ -3201,9 +3225,9 @@ function AntMedia(props) {
                                 videoSendResolution={videoSendResolution}
                                 setVideoSendResolution={(resolution) => setVideoSendResolution(resolution)}
                                 isRecordPluginInstalled={isRecordPluginInstalled}
-                                startRecord={startRecord}
-                                stopRecord={stopRecord}
-                                handleEffectsOpen={handleEffectsOpen}
+                                startRecord={()=>startRecord()}
+                                stopRecord={()=>stopRecord()}
+                                handleEffectsOpen={(open) => handleEffectsOpen(open)}
                             />
                             <MessageDrawer
                                 messages={messages}
@@ -3218,7 +3242,7 @@ function AntMedia(props) {
                             <ParticipantListDrawer
                                 globals={globals}
                                 isAdmin={isAdmin}
-                                pinVideo={(streamId) => pinVideo(streamId)}
+                                pinVideo={(streamId) => handlePinVideo(streamId)}
                                 makeListenerAgain={(streamId) => {}}
                                 videoTrackAssignments={videoTrackAssignments}
                                 presenterButtonStreamIdInProcess={presenterButtonStreamIdInProcess}
@@ -3230,7 +3254,7 @@ function AntMedia(props) {
                                 publishStreamId={publishStreamId}
                                 muteLocalMic={()=>muteLocalMic()}
                                 turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
-                                setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
+                                setParticipantIdMuted={(participant) => handleMuteParticipant(participant)}
                                 pagedParticipants={pagedParticipants}
                                 updateAllParticipantsPagination={(value) => updateAllParticipantsPagination(value)}
                                 participantListDrawerOpen={participantListDrawerOpen}
