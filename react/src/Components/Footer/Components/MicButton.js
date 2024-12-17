@@ -1,10 +1,10 @@
 import React from 'react';
-import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
 import { useSnackbar } from 'notistack-v2-maintained';
 import { Tooltip } from '@mui/material';
-import { styled, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import {CustomizedBtn} from "../../CustomizedBtn";
 
 export const roundStyle = {
   width: { xs: 36, md: 46 },
@@ -15,20 +15,6 @@ export const roundStyle = {
   borderRadius: '50%',
   padding: '4px',
 };
-
-export const CustomizedBtn = styled(Button)(({ theme }) => ({
-  '&.footer-icon-button': {
-    height: '100%',
-    [theme.breakpoints.down('sm')]: {
-      padding: 8,
-      minWidth: 'unset',
-      width: '100%',
-    },
-    '& > svg': {
-      width: 36,
-    },
-  },
-}));
 
 function MicButton(props) {
   const { enqueueSnackbar } = useSnackbar();

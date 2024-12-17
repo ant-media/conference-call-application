@@ -5,20 +5,7 @@ import { SvgIcon } from "../../SvgIcon";
 import { Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useSnackbar } from "notistack-v2-maintained";
-
-const CustomizedBtn = styled(Button)(({ theme }) => ({
-  "&.footer-icon-button": {
-    height: "100%",
-    [theme.breakpoints.down("sm")]: {
-      padding: 8,
-      minWidth: "unset",
-      width: "100%",
-    },
-    "& > svg": {
-      width: 36,
-    },
-  },
-}));
+import {CustomizedBtn} from "../../CustomizedBtn";
 
 function CameraButton(props) {
   const { t } = useTranslation();

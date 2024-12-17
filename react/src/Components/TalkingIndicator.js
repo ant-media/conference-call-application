@@ -50,7 +50,7 @@ const TalkingIndicator = (props) => {
 
     const isVisible = isTalking || (localTalkers && localTalkers.includes(props?.streamId));
 
-    return <TalkingIndicatorWrapper isVisible={isVisible} borderColor={theme.palette.themeColor[20]} />;
+    return <TalkingIndicatorWrapper isVisible={isVisible} borderColor={theme.palette.themeColor?.[20]} />;
 };
 
 export default TalkingIndicator;

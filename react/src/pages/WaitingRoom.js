@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React from "react";
 import {
     Box,
     Button,
@@ -11,11 +11,12 @@ import {
     Typography,
 } from "@mui/material";
 import VideoCard from "Components/Cards/VideoCard";
-import MicButton, {CustomizedBtn, roundStyle,} from "Components/Footer/Components/MicButton";
+import MicButton, {roundStyle,} from "Components/Footer/Components/MicButton";
 import CameraButton from "Components/Footer/Components/CameraButton";
 import {useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import SettingsDialog from "Components/Footer/Components/SettingsDialog";
+import {CustomizedBtn} from "Components/CustomizedBtn";
 
 import {SvgIcon} from "Components/SvgIcon";
 import {useSnackbar} from "notistack-v2-maintained";

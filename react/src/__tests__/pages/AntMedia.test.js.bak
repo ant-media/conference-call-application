@@ -21,8 +21,8 @@ jest.mock('Components/WebSocketProvider', () => ({
   useWebSocket: jest.fn(),
 }));
 
-jest.mock('notistack', () => ({
-  ...jest.requireActual('notistack'),
+jest.mock('notistack-v2-maintained', () => ({
+  ...jest.requireActual('notistack-v2-maintained'),
   useSnackbar: jest.fn(),
   SnackbarProvider: ({ children }) => <div></div>,
 }));

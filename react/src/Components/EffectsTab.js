@@ -2,10 +2,10 @@ import React from "react";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import { SvgIcon } from "./SvgIcon";
-import {CustomizedBtn} from "./Footer/Components/MicButton";
 import {useTheme} from "@mui/material";
 import {useSnackbar} from "notistack-v2-maintained";
 import {useTranslation} from "react-i18next";
+import {CustomizedBtn} from "./CustomizedBtn";
 
 function EffectsTab({ setVirtualBackgroundImage, handleBackgroundReplacement }) {
   const { t } = useTranslation();
