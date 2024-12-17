@@ -1398,7 +1398,7 @@ class TestJoinLeave(unittest.TestCase):
 
     
 
-  def test_talking_people_frame(self):
+  def _test_talking_people_frame(self):
     self.chrome.close_all()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")

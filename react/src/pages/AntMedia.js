@@ -2353,12 +2353,14 @@ function AntMedia(props) {
                 }, 1000);
                 //console.log(JSON.stringify(notificationEvent.payload));
                 */
+               /*
                 setTalkers((oldTalkers) => {
                     const newTalkers = notificationEvent.payload
                         .filter((p) => p.trackId !== "" && p.audioLevel < 60)
                         .map((p) => p.trackId);
                     return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
                 });
+                */
             } else if (eventType === "TRACK_LIST_UPDATED") {
                 console.info("TRACK_LIST_UPDATED -> ", obj);
 
