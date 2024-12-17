@@ -18,8 +18,6 @@ class TestJoinLeave(unittest.TestCase):
   def setUp(self):
     print("----------------\n", self._testMethodName, " starting...")
 
-
-
     self.is_local = False
     #self.is_local = True
     self.verbose = False
@@ -34,23 +32,17 @@ class TestJoinLeave(unittest.TestCase):
     self.rest_helper.login()
 
 
-    wait = self.chrome.get_wait()
     
     self.addCleanup(self.check_test_outcome)
-
-
-    #wait.until(lambda x: len(self.rest_helper.get_broadcasts()) == 0)
-    #print("broadcasts are empty")
 
   def check_test_outcome(self):
       outcome = self._outcome
       if outcome.errors or outcome.failures:
         print(f"Test '{self._testMethodName}' FAILED.")
-        self.chrome.save_ss_as_file("failed-"+self._testMethodName+".png")
-
-
 
   def tearDown(self):
+    self.chrome.save_ss_as_file("last-scene-"+self._testMethodName+".png")
+    self.chrome.close_all()
 
     try:
         subprocess.run(["pkill", "java"], check=True)
@@ -61,6 +53,11 @@ class TestJoinLeave(unittest.TestCase):
     except FileNotFoundError:
         print("pkill command not found on the system.")
     time.sleep(10)
+
+
+    wait = self.chrome.get_wait()
+    #wait.until(lambda x: len(self.rest_helper.get_broadcasts()) == 0)
+    #print("broadcasts are empty")
   
     print(self._testMethodName, " ending...\n","----------------")
 
@@ -282,7 +279,7 @@ class TestJoinLeave(unittest.TestCase):
 
     assert(waiting_gallery.is_displayed())
 
-    self.chrome.close_all()
+    
 
   def test_home_page_create_random_room(self):
     app = "/"+self.test_app_name
@@ -294,7 +291,7 @@ class TestJoinLeave(unittest.TestCase):
     waiting_gallery = self.chrome.get_element_with_retry(By.ID, "waiting-room")
     assert(waiting_gallery.is_displayed())
 
-    self.chrome.close_all()
+    
 
   def test_camera_mic_setting_in_waiting_room(self):
     room = "room"+str(random.randint(100, 999))
@@ -347,7 +344,7 @@ class TestJoinLeave(unittest.TestCase):
  
     meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
     assert(meeting_gallery.is_displayed())
-    self.chrome.close_all()
+    
 
   def test_join_as_camera_mic_off(self):
       room = "room"+str(random.randint(100, 999))
@@ -371,7 +368,7 @@ class TestJoinLeave(unittest.TestCase):
   
       meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
       assert(meeting_gallery.is_displayed())
-      self.chrome.close_all()
+      
 
   #this test will not work on local since we have camera and mic in local
   def test_join_without_camera_mic(self):
@@ -413,13 +410,13 @@ class TestJoinLeave(unittest.TestCase):
   
       meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
       assert(meeting_gallery.is_displayed())
-      self.chrome.close_all()
+      
     
 
   def test_join_room(self):
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)   
-    self.chrome.close_all()
+    
 
   def set_and_test_tile_count(self, limit):
       print("set_track_limit -> count: "+str(limit))
@@ -441,7 +438,7 @@ class TestJoinLeave(unittest.TestCase):
     time.sleep(5)
     self.set_and_test_tile_count(12)
 
-    self.chrome.close_all()
+    
 
   def assertLocalVideoAvailable(self):
     publishStreamId = self.get_publishStreamId()
@@ -564,7 +561,7 @@ class TestJoinLeave(unittest.TestCase):
     others_tile = self.chrome.get_element_with_retry(By.CLASS_NAME, 'others-tile-inner', retries=10, wait_time=3)
     assert(others_tile.is_displayed())
 
-    self.chrome.close_all()
+    
 
   # it tooks too long to get videoTrackAssignments so we need to wait for it
   def get_publishStreamId(self, index=0):
@@ -612,7 +609,7 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_videoTrackAssignments()) == 1)
 
-    self.chrome.close_all()
+    
 
   def test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
@@ -645,7 +642,7 @@ class TestJoinLeave(unittest.TestCase):
     for track_stat in stats['inboundRtpList']:
       assert(track_stat['bytesReceived'] > 0)
 
-    self.chrome.close_all()
+    
 
   def is_first_participant_pinned(self):
     conference = self.get_conference()
@@ -742,7 +739,7 @@ class TestJoinLeave(unittest.TestCase):
     
 
 
-    self.chrome.close_all()
+    
 
   def test_reconnection_while_screen_sharing(self):
     room = "room"+str(random.randint(100, 999))
@@ -817,7 +814,7 @@ class TestJoinLeave(unittest.TestCase):
       time.sleep(2)
 
 
-    self.chrome.close_all()
+    
 
 
 
@@ -874,7 +871,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
     self.kill_participants_with_test_tool(process)
-    self.chrome.close_all()
+    
 
   def test_get_debugme_info(self):
     room = "room"+str(random.randint(100, 999))
@@ -891,7 +888,7 @@ class TestJoinLeave(unittest.TestCase):
     time.sleep(5)
     self.print_message()
 
-    self.chrome.close_all()
+    
 
 
   def is_avatar_displayed_for(self, stream_id):
@@ -976,7 +973,7 @@ class TestJoinLeave(unittest.TestCase):
 
     print("mic on done")
 
-    self.chrome.close_all()
+    
 
   def get_snackbar_content(self):
     snackbar = self.chrome.get_element_with_retry(By.CLASS_NAME, "notistack-Snackbar")
@@ -1048,7 +1045,7 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: self.rest_helper.get_vod_for(room+"_composite") is not None)
 
-    self.chrome.close_all()
+    
 
 
   def test_tiled_layout_test(self):
@@ -1089,7 +1086,7 @@ class TestJoinLeave(unittest.TestCase):
     self.kill_participants_with_test_tool(process)
   
  
-    self.chrome.close_all()
+    
 
   def test_pinned_layout_test(self):
     self.chrome.makeFullScreen()
@@ -1140,7 +1137,7 @@ class TestJoinLeave(unittest.TestCase):
     self.kill_participants_with_test_tool(process)
   
  
-    self.chrome.close_all()
+    
 
 
   #FIXME uncomment test
@@ -1247,7 +1244,7 @@ class TestJoinLeave(unittest.TestCase):
     assert ("participantB" in inner_html)
   
  
-    self.chrome.close_all()
+    
   
 
 
@@ -1343,7 +1340,7 @@ class TestJoinLeave(unittest.TestCase):
     inner_html = pinned_video_card.get_attribute("innerHTML") 
     assert ("participantB" in inner_html)
 
-    self.chrome.close_all()
+    
 
 
   def test_mute_on_video_card(self):
@@ -1399,7 +1396,7 @@ class TestJoinLeave(unittest.TestCase):
     participantB_video_card = self.get_video_container_by_stream_name("participantB")
     wait.until(lambda x: not self.chrome.is_nested_element_exist(participantB_video_card, By.XPATH, "//div[@aria-label='mic is muted']"))
 
-    self.chrome.close_all()
+    
 
   def test_talking_people_frame(self):
     self.chrome.close_all()
@@ -1447,7 +1444,7 @@ class TestJoinLeave(unittest.TestCase):
     talking_indicator = self.chrome.get_element_in_element(participantB_video_card, By.CLASS_NAME, "talking-indicator-light", wait_until_clickable=False)
     wait.until(lambda x: not talking_indicator.is_displayed())
 
-    self.chrome.close_all()
+    
 
     
   def test_video_track_assignment(self):
@@ -1529,7 +1526,7 @@ class TestJoinLeave(unittest.TestCase):
       )
       )
 
-    self.chrome.close_all()
+    
 
 
   def test_camera_mic_setting_in_meeting_room(self):
@@ -1575,7 +1572,7 @@ class TestJoinLeave(unittest.TestCase):
     meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
     assert(meeting_gallery.is_displayed())
 
-    self.chrome.close_all()
+    
 
   def _test_chat_messages(self):
     message_A = "hello from A"
@@ -1656,7 +1653,7 @@ class TestJoinLeave(unittest.TestCase):
     assert(message_C in last_message.get_attribute("innerHTML"))    
 
     
-    self.chrome.close_all()
+    
 
   def test_reactions(self):
     reaction_A = "💖"
@@ -1717,7 +1714,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_2)
     wait.until(lambda x: self.chrome.is_element_displayed(By.XPATH, f"//div[text()='{reaction_C}']/br/following-sibling::span[text()='participantC']"))
 
-    self.chrome.close_all()
+    
 
 
   def test_background_replacement(self):
@@ -1758,7 +1755,7 @@ class TestJoinLeave(unittest.TestCase):
     meeting_gallery = self.chrome.get_element_with_retry(By.ID, "meeting-gallery")
     assert(meeting_gallery.is_displayed())
 
-    self.chrome.close_all()
+    
 
   def rgb_to_hex(self, rgb_string):
     # Extract RGB values from the string
@@ -1849,7 +1846,7 @@ class TestJoinLeave(unittest.TestCase):
     assert("#001D1A" == self.rgb_to_hex(background_color))
 
 
-    self.chrome.close_all()
+    
 
 
   def test_language(self):
@@ -1916,7 +1913,7 @@ class TestJoinLeave(unittest.TestCase):
     
 
 
-    self.chrome.close_all()
+    
 
 if __name__ == '__main__':
     unittest.main()
