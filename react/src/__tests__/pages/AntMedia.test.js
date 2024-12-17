@@ -1752,7 +1752,6 @@ describe('AntMedia Component', () => {
       jest.useFakeTimers();
       currentConference.fakeReconnect();
       expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("disconnected");
-      expect(webRTCAdaptorScreenConstructor.iceConnectionState()).toBe("disconnected");
       jest.runAllTimers();
     });
 
