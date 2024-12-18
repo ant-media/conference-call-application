@@ -1,8 +1,6 @@
 // src/EffectsDrawer.test.js
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ConferenceContext } from 'pages/AntMedia';
-import CameraButton from 'Components/Footer/Components/CameraButton';
 import EffectsDrawer from "../../../../Components/EffectsDrawer";
 
 // Mock the props
