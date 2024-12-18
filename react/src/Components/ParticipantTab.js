@@ -17,7 +17,7 @@ const ParticipantName = styled(Typography)(({ theme }) => ({
 
 const PinBtn = styled(Button)(({ theme }) => ({
   "&:hover": {
-    backgroundColor: theme.palette.themeColor[50],
+    backgroundColor: theme.palette.themeColor?.[50],
   },
 }));
 

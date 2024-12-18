@@ -5,12 +5,12 @@ import {Grid, Typography, useTheme} from '@mui/material';
 import {SvgIcon} from './SvgIcon';
 
 const AntSnackInfo = styled(Grid)(({theme}) => ({
-  backgroundColor: theme.palette.themeColor[60],
+  backgroundColor: theme.palette.themeColor?.[60],
   borderRadius: 6,
   padding: 8,
 }));
 const AntSnackMessage = styled(Grid)(({theme}) => ({
-  backgroundColor: theme.palette.themeColor[60],
+  backgroundColor: theme.palette.themeColor?.[60],
   borderRadius: 6,
   padding: '16px 16px 12px 16px',
   cursor: 'pointer',
@@ -36,7 +36,7 @@ const SnackMessage = forwardRef((props, ref) => {
               {icon}
             </Grid>
           )}
-          <Typography variant="subtitle2" color={theme.palette.themeColor[0]}>
+          <Typography variant="subtitle2" color={theme.palette.themeColor?.[0]}>
             {message}
           </Typography>
         </AntSnackInfo>
@@ -52,7 +52,7 @@ const SnackMessage = forwardRef((props, ref) => {
           <Grid container alignItems="center">
             <SvgIcon size={32} color={'#fff'} name={'message-off'}/>
             <Typography sx={{ml: 0.5}} variant="subtitle2"
-                        color={theme.palette.themeColor[0]}>{`${sender}`}</Typography>
+                        color={theme.palette.themeColor?.[0]}>{`${sender}`}</Typography>
           </Grid>
           <Grid container sx={{mt: 1}} style={{marginLeft: 6}}>
             <Typography
@@ -65,7 +65,7 @@ const SnackMessage = forwardRef((props, ref) => {
                 WebkitBoxOrient: 'vertical',
                 overflowWrap: 'anywhere'
               }}
-              color={theme.palette.themeColor[0]}
+              color={theme.palette.themeColor?.[0]}
             >
               {message}
             </Typography>

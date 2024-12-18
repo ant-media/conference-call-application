@@ -14,7 +14,7 @@ const PublisherRequestName = styled(Typography)(({ theme }) => ({
 //hover color of allow or deny
 const PinBtn = styled(Button)(({ theme }) => ({
     "&:hover": {
-        backgroundColor: theme.palette.themeColor[50],
+        backgroundColor: theme.palette.themeColor?.[50],
         color: "#fff",
     },
 }));

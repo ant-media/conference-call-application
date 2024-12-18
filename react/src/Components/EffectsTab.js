@@ -42,7 +42,7 @@ function EffectsTab({ setVirtualBackgroundImage, handleBackgroundReplacement }) 
       <Grid item key={i}>
         <CustomizedBtn
           style={{
-            background: theme.palette.themeColor[60],
+            background: theme.palette.themeColor?.[60],
             marginRight: 10,
             marginBottom: 10,
             position: 'relative'
@@ -209,21 +209,21 @@ function EffectsTab({ setVirtualBackgroundImage, handleBackgroundReplacement }) 
             </Grid>
             <Grid container>
               <CustomizedBtn
-                style={{background: theme.palette.themeColor[60], marginRight: 10}}
+                style={{background: theme.palette.themeColor?.[60], marginRight: 10}}
                 id="remove-effect-button" onClick={(e) => {
                 handleBackgroundReplacement("none");
               }}>
                 <SvgIcon size={40} name={'remove-effect'} color="#fff"/>
               </CustomizedBtn>
               <CustomizedBtn
-                style={{background: theme.palette.themeColor[60], marginRight: 10}}
+                style={{background: theme.palette.themeColor?.[60], marginRight: 10}}
                 id="slight-blur-button" onClick={(e) => {
                 handleBackgroundReplacement("slight-blur");
               }}>
                 <SvgIcon size={40} name={'slight-blur'} color="#fff"/>
               </CustomizedBtn>
               <CustomizedBtn
-                style={{background: theme.palette.themeColor[60], marginRight: 10}}
+                style={{background: theme.palette.themeColor?.[60], marginRight: 10}}
                 id="blur-button" onClick={(e) => {
                 handleBackgroundReplacement("blur");
               }}>
@@ -238,7 +238,7 @@ function EffectsTab({ setVirtualBackgroundImage, handleBackgroundReplacement }) 
               <Grid item key={"add-background-image"}>
                 <CustomizedBtn
                   style={{
-                    background: theme.palette.themeColor[60],
+                    background: theme.palette.themeColor?.[60],
                     marginRight: 10,
                     marginBottom: 10,
                     width: 40,

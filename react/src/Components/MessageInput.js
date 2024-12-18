@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 const MessageInputContainer = styled(Grid)(({ theme }) => ({
   padding: "16px 16px 8px 16px",
-  background: theme.palette.themeColor[70],
+  background: theme.palette.themeColor?.[70],
   [theme.breakpoints.down('sm')]: {
     width: '100%',
     padding: "16px 0px 8px 0px",
@@ -15,10 +15,10 @@ const MessageInputContainer = styled(Grid)(({ theme }) => ({
 const MessageTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: 30,
-    backgroundColor: theme.palette.themeColor[60],
+    backgroundColor: theme.palette.themeColor?.[60],
   },
   "& .MuiOutlinedInput-input::placeholder": {
-    color: theme.palette.themeColor[90],
+    color: theme.palette.themeColor?.[90],
     fontWeight: 400,
   },
   "& .MuiOutlinedInput-notchedOutline": {

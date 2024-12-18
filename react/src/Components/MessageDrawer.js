@@ -13,7 +13,7 @@ const AntDrawer = styled(Drawer)(({ theme }) => (getAntDrawerStyle(theme)));
 const MessageGrid = styled(Grid)(({ theme }) => ({
   position: 'relative',
   padding: 16,
-  background: theme.palette.themeColor[70],
+  background: theme.palette.themeColor?.[70],
   borderRadius: 10,
 }));
 const TabGrid = styled(Grid)(({ theme }) => ({

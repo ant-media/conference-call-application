@@ -7,7 +7,7 @@ import {styled, useTheme} from "@mui/material/styles";
 import {t} from "i18next";
 
 const CustomizedAvatar = styled(Avatar)(({theme}) => ({
-  border: `3px solid ${theme.palette.themeColor[85]} !important`,
+  border: `3px solid ${theme.palette.themeColor?.[85]} !important`,
   color: "#fff",
   width: 44,
   height: 44,
@@ -20,8 +20,8 @@ const CustomizedAvatar = styled(Avatar)(({theme}) => ({
 
 const CustomizedAvatarGroup = styled(AvatarGroup)(({theme}) => ({
   "& div:not(.regular-avatar)": {
-    border: `3px solid ${theme.palette.themeColor[85]} !important`,
-    backgroundColor: theme.palette.themeColor[80],
+    border: `3px solid ${theme.palette.themeColor?.[85]} !important`,
+    backgroundColor: theme.palette.themeColor?.[80],
     color: "#fff",
     width: 44,
     height: 44,

@@ -24,7 +24,7 @@ import FakeReconnectButton from "./Components/FakeReconnectButton";
 
 const getCustomizedGridStyle = (theme) => {
   let customizedGridStyle = {
-    backgroundColor: theme.palette.themeColor[80],
+    backgroundColor: theme.palette.themeColor?.[80],
     position: "fixed",
     bottom: 0,
     left: 0,

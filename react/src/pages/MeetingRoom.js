@@ -219,7 +219,7 @@ const MeetingRoom = React.memo((props) => {
                     height: 46,
                   }}>
                     <ReactionBarSelector reactions={reactionList} iconSize={28}
-                                         style={{backgroundColor: theme.palette.themeColor[70]}} onSelect={sendEmoji}/>
+                                         style={{backgroundColor: theme.palette.themeColor?.[70]}} onSelect={sendEmoji}/>
                   </div>)
               }
               <Footer
