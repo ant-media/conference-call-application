@@ -63,7 +63,7 @@ export default function SettingsDialog(props) {
   }, [props?.devices]);
 
   return (
-    <Dialog onClose={handleClose} open={props?.open} fullScreen={fullScreen} maxWidth={'sm'}>
+    <Dialog onClose={handleClose} open={props?.open} fullScreen={fullScreen} maxWidth={'sm'} id="settings-dialog">
       <AntDialogTitle onClose={handleClose}>{t('Set Camera and Microphone')}</AntDialogTitle>
       <DialogContent>
         <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -76,7 +76,7 @@ export default function SettingsDialog(props) {
                 <Select
                   autoFocus={props?.selectFocus === 'camera'}
                   fullWidth
-                  id="demo-dialog-native"
+                  id="setting-dialog-camera-select"
                   variant="outlined"
                   value={props?.selectedCamera}
                   onChange={e => switchVideoMode(e.target.value)}
@@ -104,7 +104,14 @@ export default function SettingsDialog(props) {
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
-                <Select variant="outlined" fullWidth value={props?.videoSendResolution} onChange={e => props?.setVideoSendResolution(e.target.value)} sx={{ color: '#fff' }}>
+                <Select
+                    variant="outlined"
+                    fullWidth
+                    value={props?.videoSendResolution}
+                    onChange={e => props?.setVideoSendResolution(e.target.value)}
+                    sx={{ color: '#fff' }}
+                    id="setting-dialog-resolution-select"
+                >
                   <MenuItem key="auto" value="auto">
                     {t('Auto')}
                   </MenuItem>

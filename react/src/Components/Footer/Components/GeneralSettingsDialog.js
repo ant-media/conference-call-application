@@ -65,6 +65,7 @@ function GeneralSettingsDialog({
                     <Grid item xs={10}>
                       <Select
                           fullWidth
+                          id="language-select"
                           variant="outlined"
                           value={currentLanguage}
                           onChange={(e) => switchLanguage(e.target.value)}
@@ -89,6 +90,7 @@ function GeneralSettingsDialog({
                     <Grid item xs={10}>
                       <Select
                           fullWidth
+                          id="theme-select"
                           variant="outlined"
                           value={currentTheme}
                           onChange={(e) => switchTheme(e.target.value)}

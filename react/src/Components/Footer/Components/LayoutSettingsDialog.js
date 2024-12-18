@@ -89,14 +89,8 @@ export function LayoutSettingsDialog(props) {
         }
       });
     } else if (mode === "sidebar") {
-      const participants = document.querySelectorAll(
-        ".single-video-container.not-pinned video"
-      );
-      const firstParticipant =
-        participants.length > 1 ? participants[1] : participants[0];
-
-      //pin the first participant
-      props?.pinVideo(firstParticipant?.id ? firstParticipant.streamId : "localVideo");
+      //pins your video
+      props?.pinVideo(props?.videoTrackAssignments[0]?.streamId);
     }
   };
   const radioLabel = (label, icon) => {
