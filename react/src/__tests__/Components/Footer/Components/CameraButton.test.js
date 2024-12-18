@@ -4,15 +4,9 @@ import { render } from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
 import CameraButton from 'Components/Footer/Components/CameraButton';
 
-// Mock the context value
-const contextValue = {
-  cameraButtonDisabled: true,
-};
-
 // Mock the useContext hook
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
-  useContext: jest.fn(),
 }));
 
 describe('Camera Button Component', () => {
@@ -20,28 +14,28 @@ describe('Camera Button Component', () => {
   beforeEach(() => {
     // Reset the mock implementation before each test
     jest.clearAllMocks();
-
-    React.useContext.mockImplementation(input => {
-      if (input === ConferenceContext) {
-        return contextValue;
-      }
-      return jest.requireActual('react').useContext(input);
-    });
   });
 
 
   it('renders without crashing', () => {
     render(
-      <CameraButton />
+      <CameraButton
+          cameraButtonDisabled={true}
+          isCamTurnedOff={true}
+          onTurnOffCamera={jest.fn()}
+          onTurnOnCamera= {jest.fn()}
+      />
     );
   });
 
   it('check if camera button disabled if no cam available ', () => {
-
-    contextValue.cameraButtonDisabled = true;
-
     const { container, getByText, getByRole } = render(
-      <CameraButton />
+      <CameraButton
+          cameraButtonDisabled={true}
+          isCamTurnedOff={true}
+          onTurnOffCamera={jest.fn()}
+          onTurnOnCamera= {jest.fn()}
+      />
     );
 
     console.log(container.outerHTML);
@@ -53,11 +47,13 @@ describe('Camera Button Component', () => {
   });
 
   it('check if camera button enabled if cam devices are available ', () => {
-
-    contextValue.cameraButtonDisabled = false;
-
     const { container, getByText, getByRole } = render(
-      <CameraButton />
+      <CameraButton
+          cameraButtonDisabled={false}
+          isCamTurnedOff={true}
+          onTurnOffCamera={jest.fn()}
+          onTurnOnCamera= {jest.fn()}
+      />
     );
 
     console.log(container.outerHTML);

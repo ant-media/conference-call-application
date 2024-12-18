@@ -4,11 +4,10 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import {styled, useTheme} from "@mui/material/styles";
-import {ConferenceContext} from "pages/AntMedia";
 import {t} from "i18next";
 
 const CustomizedAvatar = styled(Avatar)(({theme}) => ({
-  border: `3px solid ${theme.palette.themeColor[85]} !important`,
+  border: `3px solid ${theme.palette.themeColor?.[85]} !important`,
   color: "#fff",
   width: 44,
   height: 44,
@@ -21,8 +20,8 @@ const CustomizedAvatar = styled(Avatar)(({theme}) => ({
 
 const CustomizedAvatarGroup = styled(AvatarGroup)(({theme}) => ({
   "& div:not(.regular-avatar)": {
-    border: `3px solid ${theme.palette.themeColor[85]} !important`,
-    backgroundColor: theme.palette.themeColor[80],
+    border: `3px solid ${theme.palette.themeColor?.[85]} !important`,
+    backgroundColor: theme.palette.themeColor?.[80],
     color: "#fff",
     width: 44,
     height: 44,
@@ -36,13 +35,12 @@ const CustomizedAvatarGroup = styled(AvatarGroup)(({theme}) => ({
 
 
 function OthersCard(props) {
-  const conference = React.useContext(ConferenceContext)
   const theme = useTheme();
 
   const othersNames = [];
 
-  for (const [streamId, broadcastObject] of Object.entries(conference.allParticipants)) {
-    if (streamId !== conference.publishStreamId && !props.playingParticipants.find(e => e.streamId === streamId)) {
+  for (const [streamId, broadcastObject] of Object.entries(props?.allParticipants)) {
+    if (streamId !== props?.publishStreamId && !props?.playingParticipants.find(e => e.streamId === streamId)) {
       othersNames.push(broadcastObject.name);
     }
   }
@@ -50,7 +48,7 @@ function OthersCard(props) {
   const others = othersNames;//.sort();
 
   return (
-    <div className="others-tile-inner" style={{background: theme.palette.themeColor[71]}}>
+    <div className="others-tile-inner" style={{background: theme.palette.themeColor?.[71]}}>
       <CustomizedAvatarGroup sx={{justifyContent: "center"}}>
         {others.map(({username}, index) => {
           if (username?.length > 0) {

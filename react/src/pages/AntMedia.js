@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Backdrop, Box, CircularProgress, Grid} from "@mui/material";
 import {useBeforeUnload, useParams} from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
 import _ from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
-import {useSnackbar} from "notistack";
+import {useSnackbar} from "notistack-v2-maintained";
 import LeftTheRoom from "./LeftTheRoom";
 import {getUrlParameter, VideoEffect, WebRTCAdaptor} from "@antmedia/webrtc_adaptor";
 import {SvgIcon} from "../Components/SvgIcon";
@@ -400,7 +400,7 @@ function AntMedia(props) {
 
     const [audioTracks, setAudioTracks] = useState([]);
 
-    const [talkers, setTalkers] = useState([]);
+    const talkers = useRef([]);
     const [isPublished, setIsPublished] = useState(false);
     const [isPlayed, setIsPlayed] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
@@ -465,8 +465,8 @@ function AntMedia(props) {
   // open or close the mute participant dialog.
   const [isBecomePublisherConfirmationDialogOpen, setBecomePublisherConfirmationDialogOpen] = React.useState(false);
 
-    const [publishStats, setPublishStats] = React.useState(null);
-    const [playStats, setPlayStats] = React.useState(null);
+    const publishStats = useRef(null);
+    const playStats = useRef(null);
 
     const [isReconnectionInProgress, setIsReconnectionInProgress] = React.useState(false);
 
@@ -787,8 +787,8 @@ function AntMedia(props) {
 
         // Calculate the packet loss percentage
         let packageLostPercentage = 0;
-        console.log("publishStats:", publishStats);
-        if (publishStats !== null) {
+        console.log("publishStats:", publishStats.current);
+        if (publishStats.current !== null) {
             let deltaPackageLost = oldTotalPacketsLost - totalPacketsLost;
             let deltaPackageReceived = oldPackageReceived - packageReceived;
 
@@ -1214,20 +1214,12 @@ function AntMedia(props) {
         console.log("************* fake reconnect");
         let orginal = webRTCAdaptor.iceConnectionState;
         webRTCAdaptor.iceConnectionState = () => "disconnected";
+
         webRTCAdaptor.reconnectIfRequired();
 
-        if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
-            screenShareWebRtcAdaptor.current.iceConnectionState = () => "disconnected";
-            screenShareWebRtcAdaptor.current.reconnectIfRequired();
-        }
-        
         setTimeout(() => {
             webRTCAdaptor.iceConnectionState = orginal;
-            if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
-                screenShareWebRtcAdaptor.current.iceConnectionState = orginal;
-            }
         }, 5000);
-        
     }
 
     function addFakeParticipant() {
@@ -1655,7 +1647,7 @@ function AntMedia(props) {
 
         // if the playStats is null, it means that it is the first time to get the stats
         // so we don't need to check the connection quality for playback
-        if (playStats !== null) {
+        if (playStats.current !== null) {
 
             // Calculate total bytes received
             totalBytesReceived = obj.totalBytesReceivedCount;
@@ -1694,7 +1686,7 @@ function AntMedia(props) {
 
         let updatedPlayStats = {totalPacketsLost: totalPacketsLost, videoPacketsLost: videoPacketsLost, audioPacketsLost: audioPacketsLost, totalBytesReceived: totalBytesReceived, incomingBitrate: incomingBitrate, inboundRtpList: obj.inboundRtpList};
         console.log("playStats:", updatedPlayStats);
-        setPlayStats(updatedPlayStats);
+        playStats.current = updatedPlayStats;
     }
 
     function checkConnectionQualityForPublish(obj) {
@@ -1706,10 +1698,10 @@ function AntMedia(props) {
         let packageSent = parseInt(obj.totalVideoPacketsSent) + parseInt(obj.totalAudioPacketsSent);
 
         let packageLostPercentage = 0;
-        console.log("publishStats:", publishStats);
-        if (publishStats !== null) {
-            let deltaPackageLost = packageLost - publishStats.packageLost;
-            let deltaPackageSent = packageSent - publishStats.packageSent;
+        console.log("publishStats:", publishStats.current);
+        if (publishStats.current !== null) {
+            let deltaPackageLost = packageLost - publishStats.current.packageLost;
+            let deltaPackageSent = packageSent - publishStats.current.packageSent;
 
             if (deltaPackageLost > 0) {
                 packageLostPercentage = ((deltaPackageLost / parseInt(deltaPackageSent)) * 100).toPrecision(3);
@@ -1724,7 +1716,7 @@ function AntMedia(props) {
             displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
         }
 
-        setPublishStats({packageLost: packageLost, packageSent: packageSent});
+        publishStats.current = {packageLost: packageLost, packageSent: packageSent};
     }
 
     //TODO : add receive stats
@@ -1870,12 +1862,6 @@ function AntMedia(props) {
             allParticipants[streamId] = broadcastObject;
             handleNotifyUnpinUser(streamId !== publishStreamId ? streamId : publishStreamId);
             setParticipantUpdated(!participantUpdated);
-
-            let vta = videoTrackAssignments.find(el => el.streamId == streamId);
-            if (vta) {
-                webRTCAdaptor?.assignVideoTrack(vta.videoLabel, streamId, false);
-            }
-
             return;
         }
 
@@ -2316,7 +2302,9 @@ function AntMedia(props) {
                     }
                 });
 
-                setAllParticipants(tempAllParticipants);
+                if (!_.isEqual(allParticipants, tempAllParticipants)) {
+                    setAllParticipants(tempAllParticipants);
+                }
 
                 currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
 
@@ -2342,23 +2330,12 @@ function AntMedia(props) {
                 }
 
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
-                // FIXME: to be able to reduce render
-                if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
-                  return;
-                }
-                /*
                 clearInterval(timeoutRef.current);
                 timeoutRef.current = setTimeout(() => {
-                    setTalkers([]);
+                    talkers.current = [];
                 }, 1000);
                 //console.log(JSON.stringify(notificationEvent.payload));
-                */
-                setTalkers((oldTalkers) => {
-                    const newTalkers = notificationEvent.payload
-                        .filter((p) => p.trackId !== "" && p.audioLevel < 60)
-                        .map((p) => p.trackId);
-                    return _.isEqual(oldTalkers, newTalkers) ? oldTalkers : newTalkers;
-                });
+                updateTalkers(notificationEvent);
             } else if (eventType === "TRACK_LIST_UPDATED") {
                 console.info("TRACK_LIST_UPDATED -> ", obj);
 
@@ -2396,6 +2373,17 @@ function AntMedia(props) {
             }
         }
     }
+
+    const updateTalkers = (notificationEvent) => {
+        const newTalkers = notificationEvent.payload
+            .filter((p) => p.trackId !== "" && p.audioLevel < 60)
+            .map((p) => p.trackId);
+
+        // Only update if there's a difference
+        if (!_.isEqual(talkers.current, newTalkers)) {
+            talkers.current = newTalkers;
+        }
+    };
 
     function displayRoleUpdateMessage(streamId, oldRole, newRole) {
         if (isAdmin !== true || oldRole === null || oldRole === undefined || newRole === null || newRole === undefined || oldRole === newRole) {
@@ -2865,8 +2853,6 @@ function AntMedia(props) {
         sendMessage(JSON.stringify(jsCmd));
     }
 
-    
-
     const showReactions = React.useCallback((streamId, streamName, reactionRequest, allParticipants) => {
         let reaction = '😀';
 
@@ -2896,6 +2882,14 @@ function AntMedia(props) {
         showReactions(publishStreamId, streamName, reaction, allParticipants);
     },[handleSendNotificationEvent, publishStreamId, showReactions, allParticipants]);
 
+    const toggleMic = (mute) => {
+        if (mute) {
+            muteLocalMic();
+        } else {
+            unmuteLocalMic();
+        }
+    };
+
     function muteLocalMic() {
         webRTCAdaptor?.muteLocalMic();
         updateUserStatusMetadata(true, !isMyCamTurnedOff);
@@ -2910,10 +2904,6 @@ function AntMedia(props) {
         setIsMyMicMuted(false);
 
         handleSendNotificationEvent("MIC_UNMUTED", publishStreamId);
-    }
-
-    function setMicAudioLevel(audioLevel) {
-        webRTCAdaptor.setVolumeLevel(audioLevel);
     }
 
     const setAudioLevelListener = (listener, period) => {
@@ -3019,6 +3009,10 @@ function AntMedia(props) {
         }
     }
     window.makeFullScreen = makeFullScreen;
+
+    function setMicAudioLevel(audioLevel) {
+        webRTCAdaptor?.setVolumeLevel(audioLevel);
+    }
 
     return (!initialized ? <>
             <Grid
@@ -3190,7 +3184,7 @@ function AntMedia(props) {
                             open={isJoining}
                             //onClick={handleClose}
                         >
-                            <Stack item alignItems='center' justify='center' alignContent='center'>
+                            <Stack alignItems='center' justify='center' alignContent='center'>
                                 <CircularProgress size={52} color="inherit"/>
                                 { isNoSreamExist && isPlayOnly ?
                                     <span style={{margin: '27px', fontSize: 18, fontWeight: 'normal'}}>
@@ -3209,7 +3203,7 @@ function AntMedia(props) {
                             open={isReconnectionInProgress}
                             //onClick={handleClose}
                         >
-                            <Stack item alignItems='center' justify='center' alignContent='center'>
+                            <Stack alignItems='center' justify='center' alignContent='center'>
                                 <CircularProgress size={52} color="inherit"/>
                                 <span style={{margin: '27px', fontSize: 18, fontWeight: 'normal'}}>{t("Reconnecting...")}</span>
                             </Stack>
@@ -3230,15 +3224,173 @@ function AntMedia(props) {
                     ):null}
 
                     {leftTheRoom ? (
-                        <LeftTheRoom withError={leaveRoomWithError} />
+                        <LeftTheRoom
+                            withError={leaveRoomWithError}
+                            handleLeaveFromRoom={() => handleLeaveFromRoom()}
+                        />
                     ) : waitingOrMeetingRoom === "waiting" ? (
-                        <WaitingRoom/>
+                        <WaitingRoom
+                            isPlayOnly={isPlayOnly}
+                            initialized={initialized}
+                            localVideoCreate={(tempLocalVideo) => localVideoCreate(tempLocalVideo)}
+                            localVideo={localVideo}
+                            streamName={streamName}
+                            setStreamName={(name) => setStreamName(name)}
+                            makeid={(length)=>makeid(length)}
+                            setSpeedTestObject={(speedTestObject) => setSpeedTestObject(speedTestObject)}
+                            speedTestStreamId={speedTestStreamId}
+                            startSpeedTest={()=>startSpeedTest()}
+                            stopSpeedTest={()=>stopSpeedTest()}
+                            setIsJoining={(isJoining) => setIsJoining(isJoining)}
+                            joinRoom={(roomName, generatedStreamId) => joinRoom(roomName, generatedStreamId)}
+                            speedTestObject={speedTestObject}
+                            setWaitingOrMeetingRoom={(room) => setWaitingOrMeetingRoom(room)}
+                            handleBackgroundReplacement={(mode)=>handleBackgroundReplacement(mode)}
+                            isMyCamTurnedOff={isMyCamTurnedOff}
+                            cameraButtonDisabled={cameraButtonDisabled}
+                            checkAndTurnOffLocalCamera={(streamId) => checkAndTurnOffLocalCamera(streamId)}
+                            checkAndTurnOnLocalCamera={(streamId) => checkAndTurnOnLocalCamera(streamId)}
+                            isMyMicMuted={isMyMicMuted}
+                            toggleMic={(mute) => toggleMic(mute)}
+                            microphoneButtonDisabled={microphoneButtonDisabled}
+                            microphoneSelected={(mic) => microphoneSelected(mic)}
+                            devices={devices}
+                            selectedCamera={selectedCamera}
+                            cameraSelected={(camera) => cameraSelected(camera)}
+                            selectedMicrophone={selectedMicrophone}
+                            selectedBackgroundMode={selectedBackgroundMode}
+                            setSelectedBackgroundMode={(mode) => setSelectedBackgroundMode(mode)}
+                            videoSendResolution={videoSendResolution}
+                            setVideoSendResolution={(resolution) => setVideoSendResolution(resolution)}
+                            talkers={talkers.current}
+                            isPublished={isPublished}
+                            allParticipants={allParticipants}
+                            setAudioLevelListener={(listener, period) => setAudioLevelListener(listener, period)}
+                            setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
+                            turnOnYourMicNotification={(streamId) => turnOnYourMicNotification(streamId)}
+                            turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
+                            turnOffYourCamNotification={(streamId) => turnOffYourCamNotification(streamId)}
+                            pinVideo={(streamId) => pinVideo(streamId)}
+                            isAdmin={isAdmin}
+                            publishStreamId={publishStreamId}
+                        />
                     ) : (
                         <>
-                            <MeetingRoom/>
-                            <MessageDrawer/>
-                            <ParticipantListDrawer/>
-                            <EffectsDrawer/>
+                            <MeetingRoom
+                                messageDrawerOpen={messageDrawerOpen}
+                                participantListDrawerOpen={participantListDrawerOpen}
+                                effectsDrawerOpen={effectsDrawerOpen}
+                                publisherRequestListDrawerOpen={publisherRequestListDrawerOpen}
+                                showEmojis={showEmojis}
+                                sendReactions={(reaction) => sendReactions(reaction)}
+                                setShowEmojis={(show) => setShowEmojis(show)}
+                                globals={globals}
+                                audioTracks={audioTracks}
+                                participantIdMuted={participantIdMuted}
+                                isMuteParticipantDialogOpen={isMuteParticipantDialogOpen}
+                                setMuteParticipantDialogOpen={(open) => setMuteParticipantDialogOpen(open)}
+                                publishStreamId={publishStreamId}
+                                pinVideo={(streamId) => pinVideo(streamId)}
+                                allParticipants={allParticipants}
+                                participantUpdated={participantUpdated}
+                                videoTrackAssignments={videoTrackAssignments}
+                                updateMaxVideoTrackCount={updateMaxVideoTrackCount}
+                                talkers={talkers}
+                                streamName={streamName}
+                                isPublished={isPublished}
+                                isPlayOnly={isPlayOnly}
+                                isMyMicMuted={isMyMicMuted}
+                                isMyCamTurnedOff={isMyCamTurnedOff}
+                                setAudioLevelListener={(listener, period) => setAudioLevelListener(listener, period)}
+                                setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
+                                turnOnYourMicNotification={(streamId) => turnOnYourMicNotification(streamId)}
+                                turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
+                                turnOffYourCamNotification={(streamId) => turnOffYourCamNotification(streamId)}
+                                isAdmin={isAdmin}
+                                localVideo={localVideo}
+                                localVideoCreate={(tempLocalVideo) => localVideoCreate(tempLocalVideo)}
+                                isRecordPluginActive={isRecordPluginActive}
+                                isEnterDirectly={isEnterDirectly}
+                                cameraButtonDisabled={cameraButtonDisabled}
+                                checkAndTurnOffLocalCamera={(streamId) => checkAndTurnOffLocalCamera(streamId)}
+                                checkAndTurnOnLocalCamera={(streamId) => checkAndTurnOnLocalCamera(streamId)}
+                                toggleMic={(mute) => toggleMic(mute)}
+                                microphoneButtonDisabled={microphoneButtonDisabled}
+                                isScreenShared={isScreenShared}
+                                handleStartScreenShare={()=>handleStartScreenShare()}
+                                handleStopScreenShare={()=>handleStopScreenShare()}
+                                numberOfUnReadMessages={numberOfUnReadMessages}
+                                toggleSetNumberOfUnreadMessages={(value) => toggleSetNumberOfUnreadMessages(value)}
+                                handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
+                                participantCount={participantCount}
+                                handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
+                                requestSpeakerList={requestSpeakerList}
+                                handlePublisherRequestListOpen={(open) => setPublisherRequestListDrawerOpen(open)}
+                                handlePublisherRequest={()=>{}}
+                                setLeftTheRoom={(left) => setLeftTheRoom(left)}
+                                addFakeParticipant={() => addFakeParticipant()}
+                                removeFakeParticipant={() => removeFakeParticipant()}
+                                fakeReconnect={() => fakeReconnect()}
+                                isBroadcasting={isBroadcasting}
+                                handleSetDesiredTileCount={(count) => handleSetDesiredTileCount(count)}
+                                handleBackgroundReplacement={(mode)=>handleBackgroundReplacement(mode)}
+                                microphoneSelected={(mic) => microphoneSelected(mic)}
+                                devices={devices}
+                                selectedCamera={selectedCamera}
+                                cameraSelected={(camera) => cameraSelected(camera)}
+                                selectedMicrophone={selectedMicrophone}
+                                selectedBackgroundMode={selectedBackgroundMode}
+                                setSelectedBackgroundMode={(mode) => setSelectedBackgroundMode(mode)}
+                                videoSendResolution={videoSendResolution}
+                                setVideoSendResolution={(resolution) => setVideoSendResolution(resolution)}
+                                isRecordPluginInstalled={isRecordPluginInstalled}
+                                startRecord={()=>startRecord()}
+                                stopRecord={()=>stopRecord()}
+                                handleEffectsOpen={(open) => handleEffectsOpen(open)}
+                            />
+                            <MessageDrawer
+                                messages={messages}
+                                sendMessage={(message) => handleSendMessage(message)}
+                                handleSetMessages={(messages) => handleSetMessages(messages)}
+                                messageDrawerOpen={messageDrawerOpen}
+                                handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
+                                handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
+                                handleEffectsOpen={(open) => handleEffectsOpen(open)}
+                                setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
+                            />
+                            <ParticipantListDrawer
+                                globals={globals}
+                                isAdmin={isAdmin}
+                                pinVideo={(streamId) => pinVideo(streamId)}
+                                makeListenerAgain={(streamId) => {}}
+                                videoTrackAssignments={videoTrackAssignments}
+                                presenterButtonStreamIdInProcess={presenterButtonStreamIdInProcess}
+                                presenterButtonDisabled={presenterButtonDisabled}
+                                makeParticipantPresenter={(streamId) => makeParticipantPresenter(streamId)}
+                                makeParticipantUndoPresenter={(streamId) => makeParticipantUndoPresenter(streamId)}
+                                participantCount={participantCount}
+                                isMyMicMuted={isMyMicMuted}
+                                publishStreamId={publishStreamId}
+                                muteLocalMic={()=>muteLocalMic()}
+                                turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
+                                setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
+                                pagedParticipants={pagedParticipants}
+                                updateAllParticipantsPagination={(value) => updateAllParticipantsPagination(value)}
+                                participantListDrawerOpen={participantListDrawerOpen}
+                                handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
+                                handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
+                                handleEffectsOpen={(open) => handleEffectsOpen(open)}
+                                setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
+                            />
+                            <EffectsDrawer
+                                effectsDrawerOpen={effectsDrawerOpen}
+                                setVirtualBackgroundImage={(img)=>setVirtualBackgroundImage(img)}
+                                handleBackgroundReplacement={(mode)=>handleBackgroundReplacement(mode)}
+                                handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
+                                handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
+                                handleEffectsOpen={(open) => handleEffectsOpen(open)}
+                                setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
+                            />
                             <PublisherRequestListDrawer/>
                         </>
                     )}

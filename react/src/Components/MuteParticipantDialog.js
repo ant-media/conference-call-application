@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {useContext} from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -7,35 +6,33 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import {useTheme} from '@mui/material/styles';
-import {ConferenceContext} from "../pages/AntMedia";
 
-export default function MuteParticipantDialog() {
+export default function MuteParticipantDialog({isMuteParticipantDialogOpen, setMuteParticipantDialogOpen, participantIdMuted, setParticipantIdMuted, turnOffYourMicNotification}) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const conference = useContext(ConferenceContext);
 
   const handleClose = () => {
-    conference?.setMuteParticipantDialogOpen(false);
-    conference?.setParticipantIdMuted({streamName: "", streamId: ""});
+    setMuteParticipantDialogOpen(false);
+    setParticipantIdMuted({streamName: "", streamId: ""});
   };
 
   const handleMute = () => {
-    conference?.setMuteParticipantDialogOpen(false);
-    conference?.turnOffYourMicNotification(conference?.participantIdMuted?.streamId);
-    conference?.setParticipantIdMuted({streamName: "", streamId: ""});
+    setMuteParticipantDialogOpen(false);
+    turnOffYourMicNotification(participantIdMuted?.streamId);
+    setParticipantIdMuted({streamName: "", streamId: ""});
   }
 
   return (
     <Dialog
       fullScreen={fullScreen}
-      open={conference?.isMuteParticipantDialogOpen}
+      open={isMuteParticipantDialogOpen}
       onClose={handleClose}
       aria-labelledby="responsive-dialog-title"
     >
       <DialogContent>
         <DialogContentText>
-          Mute {conference?.participantIdMuted?.streamName} for everyone in the call?
-          Only {conference?.participantIdMuted?.streamName} can unmute themselves.
+          Mute {participantIdMuted?.streamName} for everyone in the call?
+          Only {participantIdMuted?.streamName} can unmute themselves.
         </DialogContentText>
       </DialogContent>
       <DialogActions>

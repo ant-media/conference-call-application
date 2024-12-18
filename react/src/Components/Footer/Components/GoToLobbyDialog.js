@@ -45,11 +45,8 @@ export function GoToLobbyDialog(props) {
     onClose();
   };
 
-
-
   const goToLobbyClicked = (e) =>{
     onGoToLobbyClicked()
-
   }
 
   return (

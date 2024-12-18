@@ -16,25 +16,9 @@ const mockOpfsRoot = {
   })),
 };
 
-const contextValue = {
-  allParticipants: {
-    'test-stream-id': {
-      role: 'host',
-      participantID: 'test-participant-id',
-      streamID: 'test-stream-id',
-      videoTrack: 'test-video-track',
-      audioTrack: 'test-audio-track',
-      videoLabel: 'test-video-label',
-    },
-  },
-  publishStreamId: 'test-stream-id',
-  setVirtualBackgroundImage: jest.fn(),
-};
-
 // Mock the useContext hook
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
-  useContext: jest.fn(),
 }));
 
 describe('Effects Tab Component', () => {
@@ -49,19 +33,15 @@ describe('Effects Tab Component', () => {
       },
       writable: true,
     });
-
-    React.useContext.mockImplementation(input => {
-      if (input === ConferenceContext) {
-        return contextValue;
-      }
-      return jest.requireActual('react').useContext(input);
-    });
   });
 
   it('renders without crashing', () => {
     render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-          <EffectsTab />
+          <EffectsTab
+              setVirtualBackgroundImage={jest.fn()}
+              handleBackgroundReplacement={jest.fn()}
+          />
         </ThemeProvider>
       );
   });
@@ -69,14 +49,18 @@ describe('Effects Tab Component', () => {
   describe('getBackgroundImages', () => {
     it('returns an empty array when no environment variable or custom images are provided', () => {
       process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = undefined;
+      const setVirtualBackgroundImageMock = jest.fn();
       const {getByTestId} = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
-            <EffectsTab />
+            <EffectsTab
+                setVirtualBackgroundImage={setVirtualBackgroundImageMock}
+                handleBackgroundReplacement={jest.fn()}
+            />
           </ThemeProvider>
       );
       let customVirtualBackgroundButton = getByTestId('custom-virtual-background-button');
       customVirtualBackgroundButton.click();
-      expect(contextValue.setVirtualBackgroundImage).toHaveBeenCalled();
+      expect(setVirtualBackgroundImageMock).toHaveBeenCalled();
     });
 
 
