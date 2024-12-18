@@ -211,9 +211,12 @@ const MeetingRoom = React.memo((props) => {
               {props?.showEmojis && (
                   <div id="meeting-reactions" style={{
                     position: isComponentMode() ? "absolute" : "fixed",
-                    bottom: 80,
+                    bottom: 100,
+                    left: "50%",
+                    transform: "translate(-50%, 50%)",
                     display: "flex",
                     alignItems: "center",
+                    justifyContent: "center",
                     padding: 16,
                     zIndex: 666,
                     height: 46,
