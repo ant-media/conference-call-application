@@ -139,7 +139,15 @@ export default function SettingsDialog(props) {
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
-                <Select autoFocus={props?.selectFocus === 'audio'} variant="outlined" fullWidth value={props?.selectedMicrophone} onChange={e => switchAudioMode(e.target.value)} sx={{ color: '#fff' }}>
+                <Select
+                    autoFocus={props?.selectFocus === 'audio'}
+                    variant="outlined"
+                    fullWidth
+                    value={props?.selectedMicrophone}
+                    onChange={e => switchAudioMode(e.target.value)}
+                    sx={{ color: '#fff' }}
+                    id="setting-dialog-mic-select"
+                >
                   {props?.devices && props?.devices?.length > 0 && props?.devices
                     .filter(device => device.kind === 'audioinput')
                     .map(device => (
