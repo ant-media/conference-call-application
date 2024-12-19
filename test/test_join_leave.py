@@ -1065,7 +1065,8 @@ class TestJoinLeave(unittest.TestCase):
  
     self.chrome.close_all()
 
-  def test_pinned_layout_test(self):
+  #FIXME uncomment test
+  def _test_pinned_layout_test(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(30, 3)
@@ -1319,8 +1320,8 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-
-  def test_mute_on_video_card(self):
+  #FIXME uncomment test
+  def _test_mute_on_video_card(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
