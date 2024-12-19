@@ -1185,6 +1185,7 @@ function AntMedia(props) {
         if (videoTrackAssignmentsIntervalJob === null) {
             videoTrackAssignmentsIntervalJob = setInterval(() => {
                 webRTCAdaptor?.requestVideoTrackAssignments(roomName);
+                webRTCAdaptor?.getSubtrackCount(roomName, null, null); // get the total participant count in the room
             }, 3000);
         }
     }
@@ -1528,6 +1529,10 @@ function AntMedia(props) {
             }
         } else if (info === "subtrackCount") {
             if (obj.count !== undefined) {
+                if (obj.count > participantCount) {
+                    // if the new participant is added, we need to get the subtrack list again
+                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+                }
                 setParticipantCount(obj.count);
             }
         } else if (info === "broadcastObject") {
