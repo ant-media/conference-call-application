@@ -2925,6 +2925,58 @@ describe('AntMedia Component', () => {
     });
   });
 
+  describe('checkVideoTrackHealth', () => {
+    it('returns true if the camera is turned off by the user', async () => {
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.isMyCamTurnedOff = true;
+      currentConference.mediaManager = {
+        localStream: {
+          getAudioTracks: jest.fn().mockReturnValue([]),
+          getVideoTracks: jest.fn().mockReturnValue([
+            {id: "tracka1", kind: "video", label: "videoTrack1", muted: true},
+          ]),
+        }
+      };
+      expect(currentConference.checkVideoTrackHealth()).toBe(true);
+    });
+
+    it('returns false if the camera is turned on and the video track is not muted', async () => {
+      render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+              <MockChild/>
+            </AntMedia>
+          </ThemeProvider>);
+
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      currentConference.isMyCamTurnedOff = false;
+      currentConference.mediaManager = {
+        localStream: {
+          getAudioTracks: jest.fn().mockReturnValue([]),
+          getVideoTracks: jest.fn().mockReturnValue([
+            {id: "tracka1", kind: "video", label: "videoTrack1", muted: true},
+          ]),
+        }
+      };
+      expect(currentConference.checkVideoTrackHealth()).toBe(true);
+    });
+  });
+
   it('sets and fills play stats list correctly', async () => {
     const mockStats = {
       currentRoundTripTime: 100,
@@ -3452,5 +3504,4 @@ describe('AntMedia Component', () => {
       });
     });
   });
-
 });
