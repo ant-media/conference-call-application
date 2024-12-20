@@ -15,11 +15,20 @@ import psutil
 
 class TestWebinarScenario(unittest.TestCase):
   def setUp(self):
+    self.is_local = False
+    #self.is_local = True
     print(self._testMethodName, " starting...")
     self.url = os.environ.get('SERVER_URL')
     self.test_app_name = os.environ.get('TEST_APP_NAME')
+    self.user = os.environ.get('AMS_USER')
+    self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
+    self.chrome.init(not self.is_local)
     self.chrome.init(True)
+    self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
+    self.rest_helper.login()
+    self.rest_helper.create_broadcast_for_play_only_speed_test()
+    self.rest_helper.start_broadcast("speedTestSampleStream")
     #self.startLoadTest()
 
   def tearDown(self):
@@ -33,95 +42,92 @@ class TestWebinarScenario(unittest.TestCase):
     load_test_thread = threading.Thread(target=start_load_test)
     load_test_thread.start()
 
-  def join_room_as_admin(self, participant, room):
+  def join_room_as_admin(self, participant, room, skip_speed_test=False):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=host&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=host&streamName=" + participant + ("&enterDirectly=true" if skip_speed_test else ""))
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
 
     join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
-
-    time.sleep(5)
-
     self.chrome.click_element(join_button)
 
-    time.sleep(5)
 
-    speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
-    assert(speedTestCircularProgress.is_displayed())
+    if not skip_speed_test:
+      time.sleep(5)
+      speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
+      assert(speedTestCircularProgress.is_displayed())
 
-    time.sleep(5)
+      time.sleep(5)
 
-    timeoutCounter = 0
+      timeoutCounter = 0
 
-    isSpeedTestFinished = False
-    isSpeedTestFailed = False
+      isSpeedTestFinished = False
+      isSpeedTestFailed = False
 
-    while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
-      time.sleep(1)
-      timeoutCounter += 1
-      script = "return window.conference.speedTestObject;"
-      result_json = self.chrome.execute_script(script)
-      if result_json is not None:
-        isSpeedTestFinished = result_json["isfinished"]
-        isSpeedTestFailed = result_json["isfailed"]
+      while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
+        time.sleep(1)
+        timeoutCounter += 1
+        script = "return window.conference.speedTestObject;"
+        result_json = self.chrome.execute_script(script)
+        if result_json is not None:
+          isSpeedTestFinished = result_json["isfinished"]
+          isSpeedTestFailed = result_json["isfailed"]
 
-    speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
+      speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
 
-    self.chrome.print_ss_as_base64()
+      self.chrome.print_ss_as_base64()
 
-    self.chrome.click_element(speedTestModalJoinButton)
-
+      self.chrome.click_element(speedTestModalJoinButton)
+    
     meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
     assert(meeting_gallery.is_displayed())
 
     return handle
   
-  def join_room_as_presenter(self, participant, room):
+  def join_room_as_presenter(self, participant, room, skip_speed_test=False):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=speaker&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=speaker&streamName=" + participant + ("&enterDirectly=true" if skip_speed_test else ""))
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
 
     join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
 
-    time.sleep(5)
-
     self.chrome.click_element(join_button)
 
-    time.sleep(5)
+    if not skip_speed_test:
+      time.sleep(5)
 
-    speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
-    assert(speedTestCircularProgress.is_displayed())
+      speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
+      assert(speedTestCircularProgress.is_displayed())
 
-    time.sleep(5)
+      time.sleep(5)
 
-    timeoutCounter = 0
+      timeoutCounter = 0
 
-    isSpeedTestFinished = False
-    isSpeedTestFailed = False
+      isSpeedTestFinished = False
+      isSpeedTestFailed = False
 
-    while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
-      time.sleep(1)
-      timeoutCounter += 1
-      script = "return window.conference.speedTestObject;"
-      result_json = self.chrome.execute_script(script)
-      if result_json is not None:
-        isSpeedTestFinished = result_json["isfinished"]
-        isSpeedTestFailed = result_json["isfailed"]
+      while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
+        time.sleep(1)
+        timeoutCounter += 1
+        script = "return window.conference.speedTestObject;"
+        result_json = self.chrome.execute_script(script)
+        if result_json is not None:
+          isSpeedTestFinished = result_json["isfinished"]
+          isSpeedTestFailed = result_json["isfailed"]
 
-    speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
+      speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
 
-    self.chrome.click_element(speedTestModalJoinButton)
+      self.chrome.click_element(speedTestModalJoinButton)
 
  
     meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
@@ -130,47 +136,47 @@ class TestWebinarScenario(unittest.TestCase):
 
     return handle
   
-  def join_room_as_player(self, participant, room):
+  def join_room_as_player(self, participant, room, skip_speed_test=False):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName="+participant)
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName=" + participant + ("&enterDirectly=true" if skip_speed_test else ""))
     
+    wait = self.chrome.get_wait()
+
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
 
     join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
 
-    time.sleep(5)
-
     self.chrome.click_element(join_button)
 
-    time.sleep(5)
+    if not skip_speed_test:
+      time.sleep(5)
 
-    speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
-    assert(speedTestCircularProgress.is_displayed())
+      speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
+      wait.until(lambda x: speedTestCircularProgress.is_displayed())
 
-    time.sleep(5)
+      time.sleep(5)
 
-    timeoutCounter = 0
+      timeoutCounter = 0
 
-    isSpeedTestFinished = False
-    isSpeedTestFailed = False
+      isSpeedTestFinished = False
+      isSpeedTestFailed = False
 
-    while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
-      time.sleep(1)
-      timeoutCounter += 1
-      script = "return window.conference.speedTestObject;"
-      result_json = self.chrome.execute_script(script)
-      if result_json is not None:
-        isSpeedTestFinished = result_json["isfinished"]
-        isSpeedTestFailed = result_json["isfailed"]
+      while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
+        time.sleep(1)
+        timeoutCounter += 1
+        script = "return window.conference.speedTestObject;"
+        result_json = self.chrome.execute_script(script)
+        if result_json is not None:
+          isSpeedTestFinished = result_json["isfinished"]
+          isSpeedTestFailed = result_json["isfailed"]
 
-    speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
+      speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
 
-    self.chrome.click_element(speedTestModalJoinButton)
-
+      self.chrome.click_element(speedTestModalJoinButton)
  
     meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
@@ -257,6 +263,22 @@ class TestWebinarScenario(unittest.TestCase):
       return []
 
     return result_json
+  
+  def get_video_container_by_stream_name(self, stream_name):
+    # Get all video card elements
+    video_cards = self.chrome.get_all_elements(By.CSS_SELECTOR, "div.single-video-container")
+
+    # Loop through each video card
+    for video_card in video_cards:
+        # Get the innerHTML of the video card
+        inner_html = video_card.get_attribute("innerHTML")
+        
+        # Check if the stream_name is present in the innerHTML
+        if stream_name in inner_html:
+            return video_card
+    
+    # If no matching video card is found, return None
+    return None
   
   def get_conference(self):
     script = "return window.conference;"
@@ -756,6 +778,70 @@ class TestWebinarScenario(unittest.TestCase):
     self.chrome.switch_to_tab(handle_player_A)
     wait.until(lambda x: len(self.get_participants()) == 1)
 
+    self.chrome.close_all()
+
+  def test_admin_video_card_controls(self):
+    # create a room and join as admin and presenter
+    room = "room"+str(random.randint(100, 999))
+    handle_admin = self.join_room_as_admin("adminA", room, skip_speed_test=True)   
+    handle_presenter = self.join_room_as_presenter("presenterA", room, skip_speed_test=True)
+
+    assert(handle_presenter == self.chrome.get_current_tab_id())
+
+    presenterId = self.get_publishStreamId()
+
+    assert(self.chrome.get_element_with_retry(By.ID,presenterId).is_displayed())
+
+    wait = self.chrome.get_wait()
+
+    # check if both participants are in the room and see each other
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+    self.chrome.switch_to_tab(handle_admin)
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+
+    wait.until(lambda x: len(self.chrome.get_all_elements(By.CSS_SELECTOR, "div.single-video-container.not-pinned")) == 2)
+
+    presenterA_video_card = self.get_video_container_by_stream_name("presenterA")
+
+    #check muted icon is not visible
+    assert(not self.chrome.is_nested_element_exist(presenterA_video_card, By.XPATH, ".//div[@aria-label='mic is muted']"))
+
+    #mute presenterA
+    mute_button = self.chrome.get_element_in_element(presenterA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='mute']", wait_until_clickable=False)
+    mute_button.click()
+
+    #check muted icon will be visible
+    wait.until(lambda x: self.chrome.get_element_in_element(presenterA_video_card, By.XPATH, ".//div[@aria-label='mic is muted']") is not None)
+
+    #mute presenterA
+    unmute_button = self.chrome.get_element_in_element(presenterA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='unmute']", wait_until_clickable=False)
+    unmute_button.click()
+
+    #check muted icon will be disappeared
+    wait.until(lambda x: not self.chrome.is_nested_element_exist(presenterA_video_card, By.XPATH, ".//div[@aria-label='mic is muted']"))
+
+    #turn off presenterA camera
+    turn_off_button = self.chrome.get_element_in_element(presenterA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='turn-off-camera']", wait_until_clickable=False)
+    turn_off_button.click()
+
+    #check turn off button returned turn on
+    wait.until(lambda x: self.chrome.get_element_in_element(presenterA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='turn-on-camera']") is not None)
+    
+
+    self.chrome.switch_to_tab(handle_presenter)
+    camera_button = self.chrome.get_element_with_retry(By.ID, "camera-button")
+    camera_button.click()
+
+
+    self.chrome.switch_to_tab(handle_admin)
+
+    #check turn off button returned turn on
+    wait.until(lambda x: self.chrome.get_element_in_element(presenterA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='turn-off-camera']") is not None)
+   
+    
     self.chrome.close_all()
 
 if __name__ == '__main__':

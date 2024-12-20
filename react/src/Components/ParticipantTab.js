@@ -6,8 +6,9 @@ import Button from "@mui/material/Button";
 import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
-import {CircularProgress} from "@mui/material";
+import {CircularProgress, Pagination} from "@mui/material";
 import {WebinarRoles} from "../WebinarRoles";
+import {parseMetaData} from "../utils";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: theme.palette.textColor,
@@ -25,9 +26,51 @@ function ParticipantTab(props) {
   const conference = React.useContext(ConferenceContext);
   const theme = useTheme();
 
+  const paginationUpdate = (event, value) => {
+    conference?.updateAllParticipantsPagination(value);
+  }
+
+  const handleToggleMic = (isMicMuted, streamId, streamName) => {
+    if (streamId === conference?.publishStreamId && !conference?.isMyMicMuted) {
+      conference?.muteLocalMic();
+      return;
+    }
+
+    const participant = {
+      streamId: streamId,
+      streamName: streamName,
+    };
+    conference?.setParticipantIdMuted(participant);
+    if (!isMicMuted) {
+      conference?.turnOffYourMicNotification(participant.streamId);
+    }
+  };
+
+  const getMuteParticipantButton = (streamId) => {
+    let micMuted = false;
+    if (streamId === conference?.publishStreamId) {
+      micMuted = conference?.isMyMicMuted;
+    } else {
+      micMuted =parseMetaData(conference.pagedParticipants[streamId]?.metaData, "isMicMuted");
+    }
+    let name = conference.pagedParticipants[streamId]?.name;
+
+    return (
+        <PinBtn
+            id={"mic-toggle-participant-"+streamId}
+            data-testid={"mic-toggle-participant-" + streamId}
+            sx={{ width: 28, pt: 1, pb: 1 }}
+            onClick={() => { handleToggleMic(micMuted, streamId, name) }
+            }
+        >
+          <SvgIcon size={28} name={micMuted ? "muted-microphone" :  "microphone"} color={theme.palette?.participantListIcon?.primary} />
+        </PinBtn>
+    )
+  }
+
   const getAdminButtons = (streamId, assignedVideoCardId) => {
       let publishStreamId = (streamId === "localVideo") ? conference.publishStreamId : streamId;
-      let role = conference.allParticipants[publishStreamId]?.role;
+      let role = conference.pagedParticipants[publishStreamId]?.role;
 
     return (
       <div id={'admin-button-group-'+streamId}>
@@ -47,7 +90,7 @@ function ParticipantTab(props) {
   { ( role === WebinarRoles.Host || role === WebinarRoles.Speaker || role === WebinarRoles.TempListener ) && conference?.isAdmin === true ?(
     <PinBtn
       id={"add-presenter-"+streamId}
-      data-testid="add-presenter-test-stream-id"
+      data-testid={"add-presenter-"+streamId}
       disabled={conference?.presenterButtonDisabled.includes(streamId)}
       sx={{ width: 28, pt: 1, pb: 1 }}
       onClick={() => { conference?.makeParticipantPresenter(publishStreamId) }
@@ -97,7 +140,7 @@ function ParticipantTab(props) {
         </Grid>
         <Grid item>
           <div style={{display: 'flex'}}>
-            {(typeof conference.allParticipants[streamId]?.isPinned !== "undefined") && (conference.allParticipants[streamId]?.isPinned === true) ? (
+            {(typeof conference.pagedParticipants[streamId]?.isPinned !== "undefined") && (conference.pagedParticipants[streamId]?.isPinned === true) ? (
               <PinBtn
                 id={"unpin-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
@@ -122,6 +165,9 @@ function ParticipantTab(props) {
               {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
                 getAdminButtons(streamId, assignedVideoCardId)
               ) : null}
+              {process.env.REACT_APP_PARTICIPANT_TAB_MUTE_PARTICIPANT_BUTTON_ENABLED === "true" ? (
+                  getMuteParticipantButton(streamId)
+              ) : null}
             </div>
           </div>
         </Grid>
@@ -139,20 +185,32 @@ function ParticipantTab(props) {
             variant="body2"
             style={{marginLeft: 4, fontWeight: 500}}
           >
-            {Object.keys(conference.allParticipants).length}
+            {conference?.participantCount}
           </ParticipantName>
         </Grid>
-        {conference.isPlayOnly === false ? getParticipantItem(conference.publishStreamId, "You") : ""}
-        {Object.entries(conference.allParticipants).map(([streamId, broadcastObject]) => {
+        {Object.entries(conference.pagedParticipants).map(([streamId, broadcastObject]) => {
           if (conference.publishStreamId !== streamId) {
-            var assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
+            let assignedVideoCardId = conference?.videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
             return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
           } else {
-            return "";
+            return getParticipantItem(conference.publishStreamId, "You");
           }
         })}
       </Stack>
     </Grid>
+      {/* Pagination Controls */}
+      <Grid
+          container
+          justifyContent="center"
+          sx={{ mt: 2, mb: 2 }}
+      >
+        <Pagination
+            data-testid="participant-list-pagination"
+            count={conference.globals.participantListPagination.totalPage}
+            page={conference.globals.participantListPagination.currentPage}
+            onChange={paginationUpdate}
+        />
+      </Grid>
     </>
   );
 
