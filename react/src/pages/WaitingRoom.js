@@ -76,8 +76,6 @@ function WaitingRoom(props) {
     }, [conference.initialized]);
 
     function joinRoom(e) {
-        e.preventDefault();
-
         let isVideoTrackHealthy = conference?.checkVideoTrackHealth();
         if (!isVideoTrackHealthy) {
             enqueueSnackbar(
@@ -95,6 +93,7 @@ function WaitingRoom(props) {
             return;
         }
         if (conference.localVideo === null && conference.isPlayOnly === false) {
+            e.preventDefault();
             enqueueSnackbar(
                 {
                     message: t(

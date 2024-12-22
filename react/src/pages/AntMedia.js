@@ -475,7 +475,6 @@ function AntMedia(props) {
     const [isNoSreamExist, setIsNoSreamExist] = React.useState(false);
 
 
-
     const {t} = useTranslation();
 
     const theme = useTheme();
@@ -2834,7 +2833,9 @@ function AntMedia(props) {
             // When we first open home page, React will call this function and local stream is null at that time.
             // So, we need to catch the error.
             try {
-                webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, value);
+                webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, value, () => {
+                    console.log("Camera selection callback");
+                });
             } catch (e) {
                 console.log("Local stream is not ready yet.");
             }
@@ -2948,7 +2949,13 @@ function AntMedia(props) {
             return true;
         }
         // if the camera is turned on and the video track is muted, then there is a problem with the camera
-        return !webRTCAdaptor?.mediaManager?.localStream?.getVideoTracks()[0].muted;
+        let localStream = webRTCAdaptor?.mediaManager?.localStream;
+        if(localStream == null || webRTCAdaptor?.mediaManager?.localStream.getVideoTracks()[0].muted) {
+            //camera is not working properly
+            return false;
+        }
+
+        return true;
     }
 
     const getTrackStats = React.useCallback(() => { // eslint-disable-line  no-unused-vars 
