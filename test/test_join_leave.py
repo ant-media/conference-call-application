@@ -240,8 +240,7 @@ class TestJoinLeave(unittest.TestCase):
     stop_recording_button = self.chrome.get_element(By.ID, "stop-recording-button")
     return stop_recording_button
   
-  #FIXME uncomment test
-  def _test_home_page_create_room(self):
+  def test_home_page_create_room(self):
     room = "room"+str(random.randint(100, 999))
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
@@ -259,8 +258,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_home_page_create_random_room(self):
+  def test_home_page_create_random_room(self):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
@@ -272,8 +270,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_camera_mic_setting_in_waiting_room(self):
+  def test_camera_mic_setting_in_waiting_room(self):
     room = "room"+str(random.randint(100, 999))
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
@@ -326,8 +323,7 @@ class TestJoinLeave(unittest.TestCase):
     assert(meeting_gallery.is_displayed())
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_join_as_camera_mic_off(self):
+  def test_join_as_camera_mic_off(self):
       room = "room"+str(random.randint(100, 999))
       app = "/"+self.test_app_name
       if self.url.endswith("localhost:3000"):
@@ -352,8 +348,7 @@ class TestJoinLeave(unittest.TestCase):
       self.chrome.close_all()
 
   #this test will not work on local since we have camera and mic in local
-  #FIXME uncomment test
-  def _test_join_without_camera_mic(self):
+  def test_join_without_camera_mic(self):
       self.chrome.close_all()
       self.chrome = Browser()
       self.chrome.init(True, False)
@@ -395,8 +390,7 @@ class TestJoinLeave(unittest.TestCase):
       self.chrome.close_all()
     
 
-  #FIXME uncomment test
-  def _test_join_room(self):
+  def test_join_room(self):
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)   
     self.chrome.close_all()
@@ -408,8 +402,7 @@ class TestJoinLeave(unittest.TestCase):
       wait.until(lambda x: self.get_tile_count() == limit)
       print("video_track_limit: "+str(limit))
   
-  #FIXME uncomment test
-  def _test_tile_count(self):
+  def test_tile_count(self):
     #self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
@@ -511,8 +504,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.mouse_click_on(reaction_button)
 
 
-  #FIXME uncomment test
-  def _test_others_tile(self):
+  def test_others_tile(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -563,8 +555,7 @@ class TestJoinLeave(unittest.TestCase):
     else:
       return self.get_publishStreamId(index=index+1)
 
-  #FIXME uncomment test
-  def _test_join_room_2_participants(self):
+  def test_join_room_2_participants(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -597,8 +588,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_with_stats(self):
+  def test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -649,8 +639,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.click_element(participant_list_button)
     time.sleep(2)
 
-  #FIXME uncomment test
-  def _test_screen_share(self):
+  def test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -729,8 +718,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_reconnection_while_screen_sharing(self):
+  def test_reconnection_while_screen_sharing(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -808,8 +796,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
 
-  #FIXME uncomment test
-  def _test_join_room_N_participants(self):
+  def test_join_room_N_participants(self):
     self.chrome.makeFullScreen()
     N = 5
     room = "room"+str(random.randint(100, 999))
@@ -863,8 +850,7 @@ class TestJoinLeave(unittest.TestCase):
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_get_debugme_info(self):
+  def test_get_debugme_info(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -893,8 +879,7 @@ class TestJoinLeave(unittest.TestCase):
   def is_mic_off_displayed_for(self, stream_id):
     return self.chrome.is_element_exist(By.ID, "mic-muted-"+stream_id)
  
-  #FIXME uncomment test
-  def _test_on_off_mic_cam(self):
+  def test_on_off_mic_cam(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1040,8 +1025,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  #FIXME uncomment test
-  def _test_tiled_layout_test(self):
+  def test_tiled_layout_test(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(30, 3)
@@ -1242,8 +1226,7 @@ class TestJoinLeave(unittest.TestCase):
   
 
 
-  #FIXME uncomment test
-  def _test_pin_on_participant_list(self):
+  def test_pin_on_participant_list(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1393,8 +1376,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_talking_people_frame(self):
+  def test_talking_people_frame(self):
     self.chrome.close_all()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
@@ -1443,8 +1425,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
     
-  #FIXME uncomment test
-  def _test_video_track_assignment(self):
+  def test_video_track_assignment(self):
     self.chrome.close_all()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
@@ -1526,8 +1507,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  #FIXME uncomment test
-  def _test_camera_mic_setting_in_meeting_room(self):
+  def test_camera_mic_setting_in_meeting_room(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 
@@ -1653,8 +1633,7 @@ class TestJoinLeave(unittest.TestCase):
     
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_reactions(self):
+  def test_reactions(self):
     reaction_A = "💖"
     reaction_B = "👍🏼"
     reaction_C = "🎉"
@@ -1716,8 +1695,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  #FIXME uncomment test
-  def _test_background_replacement(self):
+  def test_background_replacement(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 
@@ -1766,8 +1744,7 @@ class TestJoinLeave(unittest.TestCase):
     return color
 
 
-  #FIXME uncomment test
-  def _test_theme(self):
+  def test_theme(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 
@@ -1850,8 +1827,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  #FIXME uncomment test
-  def _test_language(self):
+  def test_language(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 
