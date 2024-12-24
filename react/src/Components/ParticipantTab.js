@@ -9,6 +9,9 @@ import { ConferenceContext } from "pages/AntMedia";
 import {CircularProgress, Pagination} from "@mui/material";
 import {WebinarRoles} from "../WebinarRoles";
 import {parseMetaData} from "../utils";
+import Select from '@mui/material/Select';
+import { MenuItem } from '@mui/material';
+import EditableLabel from "./EditableLabel";
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
   color: theme.palette.textColor,
@@ -51,7 +54,7 @@ function ParticipantTab(props) {
     if (streamId === conference?.publishStreamId) {
       micMuted = conference?.isMyMicMuted;
     } else {
-      micMuted =parseMetaData(conference.pagedParticipants[streamId]?.metaData, "isMicMuted");
+      micMuted = parseMetaData(conference.pagedParticipants[streamId]?.metaData, "isMicMuted");
     }
     let name = conference.pagedParticipants[streamId]?.name;
 
@@ -74,7 +77,7 @@ function ParticipantTab(props) {
 
     return (
       <div id={'admin-button-group-'+streamId}>
-      {( role === WebinarRoles.ActiveHost || role === WebinarRoles.ActiveSpeaker || role === WebinarRoles.ActiveTempListener ) && conference?.isAdmin === true ? (
+      {( false &&  role === WebinarRoles.ActiveHost || role === WebinarRoles.ActiveSpeaker || role === WebinarRoles.ActiveTempListener ) && conference?.isAdmin === true ? (
       <PinBtn
         id={"remove-presenter-"+streamId}
         data-testid="remove-presenter-test-stream-id"
@@ -87,7 +90,7 @@ function ParticipantTab(props) {
           <SvgIcon size={28} name="unpresenter" color={theme.palette?.participantListIcon?.primary} />}
       </PinBtn>
     ) : null}
-  { ( role === WebinarRoles.Host || role === WebinarRoles.Speaker || role === WebinarRoles.TempListener ) && conference?.isAdmin === true ?(
+  { false && ( role === WebinarRoles.Host || role === WebinarRoles.Speaker || role === WebinarRoles.TempListener ) && conference?.isAdmin === true ?(
     <PinBtn
       id={"add-presenter-"+streamId}
       data-testid={"add-presenter-"+streamId}
@@ -101,7 +104,7 @@ function ParticipantTab(props) {
         <SvgIcon size={28} name="presenter" color={theme.palette?.participantListIcon?.primary} />}
     </PinBtn>
   ) : null}
-  { ( role === WebinarRoles.TempListener || role === WebinarRoles.ActiveTempListener ) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ? (
+  { (role === WebinarRoles.TempListener || role === WebinarRoles.ActiveTempListener ) && conference?.isAdmin === true  && assignedVideoCardId !== 'localVideo' ? (
     <PinBtn
       sx={{ minWidth: "unset", pt: 1, pb: 1 }}
       onClick={() => conference?.makeListenerAgain(publishStreamId)}
@@ -117,6 +120,8 @@ function ParticipantTab(props) {
       assignedVideoCardId = "localVideo";
     }
 
+    let role = conference.pagedParticipants[streamId]?.role;
+
     return (
       <Grid
         id={"participant-item-" + streamId}
@@ -127,16 +132,23 @@ function ParticipantTab(props) {
         style={{ borderBottomWidth: 1 }}
         sx={{ borderColor: "primary.main" }}
       >
-        <Grid item sx={{ pr: 1,  maxWidth: "60%" }}>
+        <Grid item sx={{ pr: 1,  maxWidth: "60%", minWidth: "60%",}}>
           <ParticipantName
               variant="body1"
               sx={{
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                display: "block"
+                display: "block",
+                textAlign: "left",
               }}
           >{name}</ParticipantName>
+        </Grid>
+        <Grid>
+          { conference?.isAdmin === true ?(
+            <EditableLabel value={role} 
+            onChange={(value)=>conference?.updateParticipantRole(streamId, value)}/>
+          ) : null}
         </Grid>
         <Grid item>
           <div style={{display: 'flex'}}>
