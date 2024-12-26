@@ -117,12 +117,12 @@ function LayoutPinned (props) {
       {pinnedVideo()}
       { (!isMobile) ?
           <div id="unpinned-gallery">
-            {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {conference?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
             {videoCards(false)}
             {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
           </div>
           : <><div id="unpinned-gallery">
-            {conference?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {conference?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
             {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
           </div>
             {videoCards(true)}
