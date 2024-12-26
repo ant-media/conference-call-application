@@ -55,6 +55,18 @@ const contextValue = {
       metaData: {
         isMuted: false
       }
+    },
+    'test-play-only-stream-id': {
+      role: 'host',
+      participantID: 'test-play-only-participant-id',
+      streamID: 'test-play-only-stream-id',
+      videoTrack: 'test-play-only-video-track',
+      audioTrack: 'test-play-only-audio-track',
+      videoLabel: 'test-play-only-video-label',
+      metaData: {
+        isMuted: false
+      },
+      status: "created"
     }
   },
   isAdmin: true,
@@ -179,6 +191,17 @@ describe('ParticipantTab Component', () => {
     expect(contextValue.muteLocalMic).not.toHaveBeenCalled();
     expect(contextValue.setParticipantIdMuted).toHaveBeenCalled();
     expect(contextValue.turnOffYourMicNotification).toHaveBeenCalled();
+  });
+
+  it('render play only participat icon', () => {
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <ParticipantTab />
+        </ThemeProvider>
+    );
+
+    const playOnlyParticipant = getByTestId('playonly-test-play-only-stream-id');
+    expect(playOnlyParticipant).toBeInTheDocument();
   });
   
 });
