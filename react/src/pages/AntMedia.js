@@ -1491,7 +1491,6 @@ function AntMedia(props) {
 
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
-                allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
                 pagedParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
             });
 
