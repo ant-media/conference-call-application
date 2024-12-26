@@ -40,12 +40,30 @@ describe('Pinned Layout Component', () => {
   });
 
 
-  it('renders without crashing', () => {
+  it('renders without crashing in desktop view', () => {
+    jest.mock('react-device-detect', () => ({
+      isMobile: false,
+    }));
+
     const { container, getByText, getByRole } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
             <LayoutPinned />
         </ThemeProvider>
       );
+
+    console.log(container.outerHTML);
+  });
+
+  it('renders without crashing in mobile view', () => {
+    jest.mock('react-device-detect', () => ({
+      isMobile: true
+    }));
+    
+    const { container, getByText, getByRole } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <LayoutPinned />
+        </ThemeProvider>
+    );
 
     console.log(container.outerHTML);
   });
