@@ -41,6 +41,9 @@ describe('Pinned Layout Component', () => {
 
 
   it('renders without crashing in desktop view', () => {
+    contextValue.allParticipants[`p1`] = {streamId: `p1`, name: `test1`};
+    contextValue.videoTrackAssignments.push({streamId: `p1`, videoLabel: `test1`, track: null, name: `test1`});
+
     jest.mock('react-device-detect', () => ({
       isMobile: false,
     }));
@@ -55,10 +58,13 @@ describe('Pinned Layout Component', () => {
   });
 
   it('renders without crashing in mobile view', () => {
+    contextValue.allParticipants[`p1`] = {streamId: `p1`, name: `test1`};
+    contextValue.videoTrackAssignments.push({streamId: `p1`, videoLabel: `test1`, track: null, name: `test1`});
+
     jest.mock('react-device-detect', () => ({
       isMobile: true
     }));
-    
+
     const { container, getByText, getByRole } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
           <LayoutPinned />
