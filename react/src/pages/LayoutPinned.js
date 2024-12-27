@@ -3,8 +3,6 @@ import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
 import React from "react";
 import { ConferenceContext } from "./AntMedia";
-import {isMobile} from "react-device-detect";
-
 
 function LayoutPinned (props) {
   const conference = React.useContext(ConferenceContext);
@@ -115,7 +113,7 @@ function LayoutPinned (props) {
   return (
     <>
       {pinnedVideo()}
-      { (!isMobile) ?
+      { (!props?.isMobile) ?
           <div id="unpinned-gallery">
             {conference?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
             {videoCards(false)}
