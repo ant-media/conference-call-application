@@ -1171,6 +1171,11 @@ function AntMedia(props) {
 
         if (!isPlayOnly) {
             handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
+        } else if (process.env.REACT_APP_SHOW_PLAY_ONLY_PARTICIPANTS === "true") {
+            // if the user is in playOnly mode, it will join the room with the generated stream id
+            // so we can get the list of play only participants in the room
+            webRTCAdaptor?.joinRoom(roomName, generatedStreamId, null, streamName, role, getUserStatusMetadata());
+            console.log("Play only mode is active, joining the room with the generated stream id");
         }
 
         webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode, '{}', role);
@@ -1180,6 +1185,7 @@ function AntMedia(props) {
         if (videoTrackAssignmentsIntervalJob === null) {
             videoTrackAssignmentsIntervalJob = setInterval(() => {
                 webRTCAdaptor?.requestVideoTrackAssignments(roomName);
+                webRTCAdaptor?.getSubtrackCount(roomName, null, null); // get the total participant count in the room
             }, 3000);
         }
     }
@@ -1524,6 +1530,10 @@ function AntMedia(props) {
             }
         } else if (info === "subtrackCount") {
             if (obj.count !== undefined) {
+                if (obj.count > participantCount) {
+                    // if the new participant is added, we need to get the subtrack list again
+                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+                }
                 setParticipantCount(obj.count);
             }
         } else if (info === "broadcastObject") {
@@ -2591,6 +2601,10 @@ function AntMedia(props) {
             handleStopScreenShare();
         }
 
+        if (process.env.REACT_APP_SHOW_PLAY_ONLY_PARTICIPANTS === "true") {
+            webRTCAdaptor?.leaveFromRoom(roomName, publishStreamId);
+        }
+
         playLeaveRoomSound();
 
         setWaitingOrMeetingRoom("waiting");
@@ -3282,6 +3296,7 @@ function AntMedia(props) {
                         processUpdatedStatsForPlaySpeedTest,
                         speedTestCounter,
                         showInfoSnackbarWithLatency,
+                        setRoomName,
                         setPublishStreamId
                     }}
                 >
