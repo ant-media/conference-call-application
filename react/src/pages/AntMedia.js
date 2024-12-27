@@ -2156,11 +2156,11 @@ function AntMedia(props) {
             setIsPlayOnly(false);
             setInitialized(false);
             setWaitingOrMeetingRoom("waiting");
-            joinRoom(roomName, publishStreamId);
         }
     }
 
     function approveBecomeSpeakerRequest(streamId) {
+        setRequestSpeakerList(requestSpeakerList.filter((item) => item !== streamId));
         handleSendNotificationEvent("APPROVE_BECOME_PUBLISHER", roomName, {
             senderStreamId: streamId
         });
@@ -2168,6 +2168,7 @@ function AntMedia(props) {
     }
 
     function rejectBecomeSpeakerRequest(streamId) {
+        setRequestSpeakerList(requestSpeakerList.filter((item) => item !== streamId))
         handleSendNotificationEvent("REJECT_BECOME_PUBLISHER", roomName, {
             senderStreamId: streamId
         });

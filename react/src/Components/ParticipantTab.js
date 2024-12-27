@@ -127,7 +127,7 @@ function ParticipantTab(props) {
         style={{ borderBottomWidth: 1 }}
         sx={{ borderColor: "primary.main" }}
       >
-        <Grid item sx={{ pr: 1,  maxWidth: "60%" }}>
+        <Grid item sx={{ pr: 1,  maxWidth: "40%" }}>
           <ParticipantName
               variant="body1"
               sx={{
@@ -162,14 +162,14 @@ function ParticipantTab(props) {
                 <SvgIcon size={28} name="pin" color={theme.palette?.participantListIcon?.primary}/>
               </PinBtn>
             )}
-            <div>
-              {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
-                getAdminButtons(streamId, assignedVideoCardId)
-              ) : null}
-              {process.env.REACT_APP_PARTICIPANT_TAB_MUTE_PARTICIPANT_BUTTON_ENABLED === "true" ? (
-                  getMuteParticipantButton(streamId)
-              ) : null}
-            </div>
+              <div style={{display: 'flex'}}>
+                {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && conference?.isAdmin === true ? (
+                    getAdminButtons(streamId, assignedVideoCardId)
+                ) : null}
+                {process.env.REACT_APP_PARTICIPANT_TAB_MUTE_PARTICIPANT_BUTTON_ENABLED === "true" ? (
+                    getMuteParticipantButton(streamId)
+                ) : null}
+              </div>
             </> : <PinBtn
                 id={"playonly-" + streamId}
                 data-testid={"playonly-" + streamId}

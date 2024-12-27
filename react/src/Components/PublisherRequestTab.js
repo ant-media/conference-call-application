@@ -41,7 +41,8 @@ function PublisherRequestTab(props) {
                     <PinBtn
                         data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.approveBecomeSpeakerRequest(streamId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== streamId))}}
+                        onClick={() => {conference?.approveBecomeSpeakerRequest(streamId);}
+                    }
                     >
                         Allow
                     </PinBtn>
@@ -49,7 +50,10 @@ function PublisherRequestTab(props) {
                     <PinBtn
                         data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.rejectBecomeSpeakerRequest(streamId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== streamId))}}
+                        onClick={() => {
+                            conference?.rejectBecomeSpeakerRequest(streamId);
+                        }
+                    }
                     >
                         Deny
                     </PinBtn>
