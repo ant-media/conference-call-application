@@ -24,10 +24,10 @@ function PublisherRequestTab(props) {
     const conference = useContext(ConferenceContext);
     const theme = useTheme();
 
-    const getPublisherRequestItem = (videoId) => {
+    const getPublisherRequestItem = (streamId) => {
         return (
             <Grid
-                key={videoId}
+                key={streamId}
                 container
                 alignItems="center"
                 justifyContent="space-between"
@@ -35,21 +35,21 @@ function PublisherRequestTab(props) {
                 sx={{ borderColor: "primary.main" }}
             >
                 <Grid item sx={{ pr: 1 }}>
-                    <PublisherRequestName variant="body1">{videoId}</PublisherRequestName>
+                    <PublisherRequestName variant="body1">{streamId}</PublisherRequestName>
                 </Grid>
                 <Grid item>
                     <PinBtn
-                        data-testid={"approve-become-speaker-"+videoId}
+                        data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.approveBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== videoId))}}
+                        onClick={() => {conference?.approveBecomeSpeakerRequest(streamId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== streamId))}}
                     >
                         Allow
                     </PinBtn>
 
                     <PinBtn
-                        data-testid={"reject-become-speaker-"+videoId}
+                        data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.rejectBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== videoId))}}
+                        onClick={() => {conference?.rejectBecomeSpeakerRequest(streamId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item !== streamId))}}
                     >
                         Deny
                     </PinBtn>
