@@ -13,6 +13,7 @@ import {isComponentMode} from "../utils";
 import BecomePublisherConfirmationDialog from "../Components/BecomePublisherConfirmationDialog";
 import RecordingButton from "../Components/RecordingButton";
 import {Container} from "@mui/material";
+import {isMobile} from "react-device-detect";
 
 function debounce(fn, ms) {
   let timer;
@@ -131,6 +132,7 @@ const MeetingRoom = React.memo((props) => {
                   pinnedParticipant={firstPinnedParticipant}
                   width={gallerySize.w}
                   height={gallerySize.h}
+                  isMobile={isMobile}
               />)
               :
               (<LayoutTiled
