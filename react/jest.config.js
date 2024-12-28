@@ -1,7 +1,10 @@
 module.exports = {
     collectCoverage: true,
     coverageReporters: ["json", "lcov", "text", "clover"],
-    collectCoverageFrom: ['src/Components/*.js','src/pages/*.js'],
+    collectCoverageFrom: [
+        'src/Components/**/*.{js,jsx,ts,tsx}', // Include subdirectories and multiple extensions
+        'src/pages/**/*.{js,jsx,ts,tsx}',     // Same for 'pages' directory
+    ],
     coverageDirectory: 'coverage',
     testEnvironment: 'jest-fixed-jsdom',
     setupFiles: ['<rootDir>/.jest/setEnvVars.js'],

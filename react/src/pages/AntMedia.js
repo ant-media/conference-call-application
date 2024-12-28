@@ -3280,17 +3280,15 @@ function AntMedia(props) {
                             publishStreamId={publishStreamId}
                         />
                     ) : (
+                        /* istanbul ignore next */
                         <>
-                            /* istanbul ignore next */
                             <MeetingRoom
                                 messageDrawerOpen={messageDrawerOpen}
                                 participantListDrawerOpen={participantListDrawerOpen}
                                 effectsDrawerOpen={effectsDrawerOpen}
                                 publisherRequestListDrawerOpen={publisherRequestListDrawerOpen}
                                 showEmojis={showEmojis}
-                                /* istanbul ignore next */
                                 sendReactions={(reaction) => sendReactions(reaction)}
-                                /* istanbul ignore next */
                                 setShowEmojis={(show) => setShowEmojis(show)}
                                 globals={globals}
                                 audioTracks={audioTracks}

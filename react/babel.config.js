@@ -8,6 +8,7 @@ module.exports = {
         ['@babel/preset-react', {runtime: 'automatic'}],
     ],
     plugins: [
-        ['babel-plugin-react-compiler', ReactCompilerConfig]
+        ['babel-plugin-react-compiler', ReactCompilerConfig],
+        'babel-plugin-istanbul'
     ]
 };
