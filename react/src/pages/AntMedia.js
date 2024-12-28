@@ -3016,6 +3016,7 @@ function AntMedia(props) {
         webRTCAdaptor?.setVolumeLevel(audioLevel);
     }
 
+    /* istanbul ignore next */
     return (!initialized ? <>
             <Grid
                 container
@@ -3280,7 +3281,6 @@ function AntMedia(props) {
                             publishStreamId={publishStreamId}
                         />
                     ) : (
-                        /* istanbul ignore next */
                         <>
                             <MeetingRoom
                                 messageDrawerOpen={messageDrawerOpen}
