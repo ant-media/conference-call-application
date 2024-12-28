@@ -24,6 +24,7 @@ import {getUrlParameter} from "@antmedia/webrtc_adaptor";
 import {getRootAttribute, isComponentMode} from "utils";
 import {useTheme} from "@mui/material/styles";
 import TalkingIndicator from "../Components/TalkingIndicator";
+import {ConferenceContext} from "./AntMedia";
 
 
 function getPublishStreamId() {
@@ -39,6 +40,7 @@ if (enterDirectly == null || typeof enterDirectly === "undefined") {
 function WaitingRoom(props) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
+    window.conference = React.useContext(ConferenceContext);
     const publishStreamId = getPublishStreamId()
     const {t} = useTranslation();
     const [dialogOpen, setDialogOpen] = React.useState(false);
