@@ -4,7 +4,7 @@ import { render, act, waitFor, screen } from '@testing-library/react';
 import AntMedia from 'pages/AntMedia';
 import { useWebSocket } from 'Components/WebSocketProvider';
 import { useSnackbar} from "notistack-v2-maintained";
-import { ConferenceContext } from "pages/AntMedia";
+import { UnitTestContext } from "pages/AntMedia";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
@@ -121,7 +121,7 @@ jest.mock('Components/EffectsDrawer', () => ({ value }) => <div data-testid="moc
 
 
 const MockChild = () => {
-  const conference = React.useContext(ConferenceContext);
+  const conference = React.useContext(UnitTestContext);
   currentConference = conference;
 
   //console.log(conference);
@@ -1120,15 +1120,15 @@ describe('AntMedia Component', () => {
     };
 
     const TestComponent = () => {
-      const conference = React.useContext(ConferenceContext);
+      const conference = React.useContext(UnitTestContext);
       conference.removeAllRemoteParticipants();
       return null;
     };
 
     render(
-        <ConferenceContext.Provider value={contextValue}>
+        <UnitTestContext.Provider value={contextValue}>
           <TestComponent />
-        </ConferenceContext.Provider>
+        </UnitTestContext.Provider>
     );
 
     expect(contextValue.removeAllRemoteParticipants).toHaveBeenCalled();
@@ -1535,7 +1535,7 @@ describe('AntMedia Component', () => {
     let currentConference;
 
     const MockChild = () => {
-      const conference = React.useContext(ConferenceContext);
+      const conference = React.useContext(UnitTestContext);
       currentConference = conference;
       return <div>Mock Child</div>;
     };
