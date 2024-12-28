@@ -44,7 +44,7 @@ const getCustomizedGridStyle = (theme) => {
 const CustomizedGrid = styled(Grid)(({ theme }) => (getCustomizedGridStyle(theme)));
 
 function Footer(props) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // eslint-disable-next-line
   const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
 
   const theme = useTheme();

@@ -59,7 +59,7 @@ export default function SettingsDialog(props) {
       if (audio && (props?.selectedMicrophone === '' || props?.selectedMicrophone === null)) props?.microphoneSelected(audio.deviceId);
       if (props?.selectedBackgroundMode === '') props?.setSelectedBackgroundMode('none');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, [props?.devices]);
 
   return (

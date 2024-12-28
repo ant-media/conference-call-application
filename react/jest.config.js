@@ -31,13 +31,4 @@ module.exports = {
     transformIgnorePatterns: [
         "node_modules/(?!@ngrx|(?!deck.gl)|ng-dynamic)"
     ],
-    // Enable ESLint plugin for React Compiler
-    plugins: [
-        'eslint-plugin-react-compiler',
-    ],
-    // Add rule overrides if required
-    rules: {
-        'react-compiler/react-compiler': 'error',
-        'react-compiler/transform': 'warn', // Change to 'error' if stricter enforcement is needed
-    },
 };

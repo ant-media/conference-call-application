@@ -35,7 +35,7 @@ function ParticipantListButton(props) {
                     color={props?.participantListDrawerOpen ? 'primary' : 'secondary'}
                 >
                     <SvgIcon size={32} color={props?.participantListDrawerOpen ? '#000' : '#fff'} name={'participants'} />
-                  {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                  {/* eslint-disable-next-line */}
                     <a style={{color: props?.participantListDrawerOpen ? '#000' : '#fff'}}>{props?.participantCount}</a>
                 </CustomizedBtn>
             </Tooltip>

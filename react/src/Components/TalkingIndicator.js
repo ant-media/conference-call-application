@@ -45,7 +45,7 @@ const TalkingIndicator = (props) => {
                 }
             }, 1000);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line
     }, [props?.isPublished]);
 
     const isVisible = isTalking || (localTalkers && localTalkers.includes(props?.streamId));

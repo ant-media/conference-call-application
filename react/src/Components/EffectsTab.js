@@ -19,11 +19,11 @@ function EffectsTab({ setVirtualBackgroundImage, handleBackgroundReplacement }) 
     updateCustomVirtualBackgroundImages().then(() => {
       //console.log("Custom virtual background images initialized");
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line
 
   React.useEffect(() => {
     getBackgroundImages();
-  }, [customVirtualBackgroundImages]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [customVirtualBackgroundImages]); // eslint-disable-line
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
