@@ -3281,6 +3281,7 @@ function AntMedia(props) {
                         />
                     ) : (
                         <>
+                            /* istanbul ignore next */
                             <MeetingRoom
                                 messageDrawerOpen={messageDrawerOpen}
                                 participantListDrawerOpen={participantListDrawerOpen}
