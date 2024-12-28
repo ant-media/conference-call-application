@@ -3038,7 +3038,7 @@ function AntMedia(props) {
                 justifyContent="center"
                 alignItems={"center"}
             >
-                {props.isTest === "true" &&
+                {props.isTest &&
                     <UnitTestContext.Provider
                         value={{
                             isScreenShared,
