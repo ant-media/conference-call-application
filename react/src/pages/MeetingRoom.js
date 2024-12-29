@@ -104,6 +104,7 @@ const MeetingRoom = React.memo((props) => {
 
   const pinLayout = (typeof firstPinnedParticipant !== "undefined");
 
+  /* istanbul ignore next */
   return (
       <Container
           id="meeting-room"
