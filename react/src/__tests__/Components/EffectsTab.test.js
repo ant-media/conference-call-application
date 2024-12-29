@@ -46,24 +46,65 @@ describe('Effects Tab Component', () => {
       );
   });
 
-  describe('getBackgroundImages', () => {
-    it('returns an empty array when no environment variable or custom images are provided', () => {
-      process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = undefined;
-      const setVirtualBackgroundImageMock = jest.fn();
-      const {getByTestId} = render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <EffectsTab
-                setVirtualBackgroundImage={setVirtualBackgroundImageMock}
-                handleBackgroundReplacement={jest.fn()}
-            />
-          </ThemeProvider>
-      );
-      let customVirtualBackgroundButton = getByTestId('custom-virtual-background-button');
-      customVirtualBackgroundButton.click();
-      expect(setVirtualBackgroundImageMock).toHaveBeenCalled();
-    });
+  it('returns an empty array when no environment variable or custom images are provided', () => {
+    process.env.REACT_APP_VIRTUAL_BACKGROUND_IMAGES = undefined;
+    const setVirtualBackgroundImageMock = jest.fn();
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <EffectsTab
+              setVirtualBackgroundImage={setVirtualBackgroundImageMock}
+              handleBackgroundReplacement={jest.fn()}
+          />
+        </ThemeProvider>
+    );
+    let customVirtualBackgroundButton = getByTestId('custom-virtual-background-button');
+    customVirtualBackgroundButton.click();
+    expect(setVirtualBackgroundImageMock).toHaveBeenCalled();
+  });
 
+  it('test remove effect button ', () => {
+    const handleBackgroundReplacementMock = jest.fn();
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <EffectsTab
+              setVirtualBackgroundImage={jest.fn()}
+              handleBackgroundReplacement={handleBackgroundReplacementMock}
+          />
+        </ThemeProvider>
+    );
+    let removeEffectButton = getByTestId('remove-effect-button');
+    removeEffectButton.click();
+    expect(handleBackgroundReplacementMock).toHaveBeenCalled();
+  });
 
+  it('test slight blur button', () => {
+    const handleBackgroundReplacementMock = jest.fn();
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <EffectsTab
+              setVirtualBackgroundImage={jest.fn()}
+              handleBackgroundReplacement={handleBackgroundReplacementMock}
+          />
+        </ThemeProvider>
+    );
+    let slightBlurButton = getByTestId('slight-blur-button');
+    slightBlurButton.click();
+    expect(handleBackgroundReplacementMock).toHaveBeenCalled();
+  });
+
+  it('test blur button', () => {
+    const handleBackgroundReplacementMock = jest.fn();
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <EffectsTab
+              setVirtualBackgroundImage={jest.fn()}
+              handleBackgroundReplacement={handleBackgroundReplacementMock}
+          />
+        </ThemeProvider>
+    );
+    let blurButton = getByTestId('blur-button');
+    blurButton.click();
+    expect(handleBackgroundReplacementMock).toHaveBeenCalled();
   });
 
 });

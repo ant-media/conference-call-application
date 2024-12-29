@@ -210,21 +210,21 @@ function EffectsTab({ setVirtualBackgroundImage, handleBackgroundReplacement }) 
             <Grid container>
               <CustomizedBtn
                 style={{background: theme.palette.themeColor?.[60], marginRight: 10}}
-                id="remove-effect-button" onClick={(e) => {
+                id="remove-effect-button" data-testid="remove-effect-button" onClick={(e) => {
                 handleBackgroundReplacement("none");
               }}>
                 <SvgIcon size={40} name={'remove-effect'} color="#fff"/>
               </CustomizedBtn>
               <CustomizedBtn
                 style={{background: theme.palette.themeColor?.[60], marginRight: 10}}
-                id="slight-blur-button" onClick={(e) => {
+                id="slight-blur-button" data-testid="slight-blur-button" onClick={(e) => {
                 handleBackgroundReplacement("slight-blur");
               }}>
                 <SvgIcon size={40} name={'slight-blur'} color="#fff"/>
               </CustomizedBtn>
               <CustomizedBtn
                 style={{background: theme.palette.themeColor?.[60], marginRight: 10}}
-                id="blur-button" onClick={(e) => {
+                id="blur-button" data-testid="blur-button" onClick={(e) => {
                 handleBackgroundReplacement("blur");
               }}>
                 <SvgIcon size={40} name={'blur'} color="#fff"/>
