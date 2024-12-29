@@ -26,6 +26,15 @@ describe('Camera Button Component', () => {
           onTurnOnCamera= {jest.fn()}
       />
     );
+
+    render(
+        <CameraButton
+            cameraButtonDisabled={false}
+            isCamTurnedOff={false}
+            onTurnOffCamera={jest.fn()}
+            onTurnOnCamera= {jest.fn()}
+        />
+    );
   });
 
   it('check if camera button disabled if no cam available ', () => {

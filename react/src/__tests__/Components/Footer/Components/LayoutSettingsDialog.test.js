@@ -26,7 +26,16 @@ describe('Layout Settings Dialog Component', () => {
               desiredTileCount: 6,
               trackEvents: [],
             }}
-            allParticipants={[]}
+            allParticipants={{
+                "participant-1": {
+                role: "host",
+                participantID: "participant-1",
+                streamID: "stream-1",
+                videoTrack: "video-track-1",
+                audioTrack: "audio-track-1",
+                videoLabel: "label-1",
+            },
+            }}
             pinVideo={jest.fn()}
             handleSetDesiredTileCount={jest.fn()}
         />
