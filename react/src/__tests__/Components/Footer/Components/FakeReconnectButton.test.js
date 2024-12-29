@@ -1,9 +1,6 @@
 // src/Components/Footer/Components/FakeReconnectButton.test.js
 import React from 'react';
 import {act, render} from '@testing-library/react';
-import { ConferenceContext } from 'pages/AntMedia';
-import ParticipantListButton from 'Components/Footer/Components/ParticipantListButton';
-import { random } from 'lodash';
 import FakeReconnectButton from "../../../../Components/Footer/Components/FakeReconnectButton";
 
 // Mock the useContext hook
