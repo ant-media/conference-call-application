@@ -24,6 +24,8 @@ function FakeReconnectButton(props) {
     return (
         <Tooltip title={t("Fake Reconnect")} placement="top">
             <CustomizedBtn
+                id="fake-reconnect-button"
+                data-testid="fake-reconnect-button"
                 onClick={props?.onFakeReconnect}
                 variant="contained"
                 className={props?.footer ? "footer-icon-button" : ""}
