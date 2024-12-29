@@ -23,7 +23,7 @@ function RequestPublishButton(props) {
     return (
         <>
             <Tooltip title={t('Request becoming publisher')} placement="top">
-                <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e) => { handlePublisherRequest(); }}>
+                <CustomizedBtn id="request-publish-button" data-testid="request-publish-button" className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e) => { handlePublisherRequest(); }}>
                     <SvgIcon size={32} name={'raise-hand'} color="#fff" />
                 </CustomizedBtn>
             </Tooltip>

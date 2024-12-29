@@ -31,6 +31,8 @@ function PublisherRequestListButton({ footer, requestSpeakerList, publisherReque
                 variant="contained"
                 className={footer ? 'footer-icon-button' : ''}
                 color={publisherRequestListDrawerOpen ? 'primary' : 'secondary'}
+                id="publisher-request-list-button"
+                data-testid="publisher-request-list-button"
             >
                 <SvgIcon size={32} color={publisherRequestListDrawerOpen ? '#000' : '#fff'} name={'raise-hand'} />
                 {requestSpeakerList.length}
