@@ -372,7 +372,6 @@ jobs:
       run: |
         cd webapp
         ls -alh
-        ls -alh target/
         mvn -e deploy -DskipTests --quiet --settings ../mvn-settings.xml
         sleep 60
       env:
