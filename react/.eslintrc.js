@@ -5,5 +5,6 @@ module.exports = {
     rules: {
         'react-compiler/react-compiler': 'error',
     },
+    parser: "babel-eslint",
 };
 
