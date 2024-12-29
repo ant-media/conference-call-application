@@ -47,6 +47,7 @@ function MicButton(props) {
       <Tooltip title={t(props?.isMicMuted ? 'Turn on microphone' : 'Turn off microphone')} placement="top">
         <CustomizedBtn
             id="mic-button"
+            data-testid="mic-button"
             disabled={props?.microphoneButtonDisabled}
             className={props?.footer ? 'footer-icon-button' : ''}
             variant="contained"

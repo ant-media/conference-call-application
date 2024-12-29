@@ -27,6 +27,38 @@ describe('Microphone Button Component', () => {
     );
   });
 
+  it('test handleMicToggle with mic is off', () => {
+    let mockToggleMic = jest.fn();
+
+    const { getByTestId } = render(
+        <MicButton
+            isMicMuted={false}
+            toggleMic={mockToggleMic}
+            microphoneButtonDisabled={false}
+        />
+    );
+
+    let micButton = getByTestId("mic-button");
+    micButton.click();
+    expect(mockToggleMic).toHaveBeenCalled();
+  });
+
+  it('test handleMicToggle with mic is on', () => {
+    let mockToggleMic = jest.fn();
+
+    const { getByTestId } = render(
+        <MicButton
+            isMicMuted={true}
+            toggleMic={mockToggleMic}
+            microphoneButtonDisabled={false}
+        />
+    );
+
+    let micButton = getByTestId("mic-button");
+    micButton.click();
+    expect(mockToggleMic).toHaveBeenCalled();
+  });
+
   it('check if microphone button disabled if no mic device available ', () => {
 
     const { container, getByText, getByRole } = render(

@@ -56,6 +56,7 @@ function CameraButton(props) {
       >
         <CustomizedBtn
             id="camera-button"
+            data-testid="camera-button"
             className={props?.footer ? "footer-icon-button" : ""}
             variant="contained"
             color={props?.isCamTurnedOff ? "error" : "primary"}
