@@ -84,9 +84,11 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       closeStream: jest.fn(),
       closeWebSocket: jest.fn(),
       playStats: {},
+      leaveFromRoom: jest.fn(),
       enableEffect: jest.fn(),
       setSelectedVideoEffect: jest.fn(),
       setBlurEffectRange: jest.fn(),
+      joinRoom: jest.fn(),
       getSubtrackCount: jest.fn(),
       setVolumeLevel: jest.fn(),
     }
@@ -499,13 +501,17 @@ describe('AntMedia Component', () => {
       currentConference.handleSetDesiredTileCount(5);
     });
 
-    expect(currentConference.globals.desiredTileCount == 5);
+    await waitFor(() => {
+      expect(currentConference.globals.desiredTileCount).toBe(5);
+    });
 
     await act(async () => {
       currentConference.updateMaxVideoTrackCount(7);
     });
 
-    expect(currentConference.globals.maxVideoTrackCount === 7);
+    await waitFor(() => {
+      expect(currentConference.globals.maxVideoTrackCount).toBe(7);
+    });
 
     consoleSpy.mockRestore();
 
@@ -1144,12 +1150,28 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
 
+    let roomName = "room";
+    let publishStreamId = "publishStreamId";
+
+    await act(async () => {
+      currentConference.setRoomName(roomName);
+    });
+
+    await act(async () => {
+      currentConference.setPublishStreamId(publishStreamId);
+    });
+
+    await act(async () => {
+      process.env.REACT_APP_SHOW_PLAY_ONLY_PARTICIPANTS = 'true';
+    });
+
     await act(async () => {
       currentConference.handleLeaveFromRoom();
     });
 
     expect(webRTCAdaptorConstructor.stop).toHaveBeenCalled();
     expect(webRTCAdaptorConstructor.closeStream).toHaveBeenCalled();
+    expect(webRTCAdaptorConstructor.leaveFromRoom).toHaveBeenCalledWith(roomName, publishStreamId);
 
   });
 
@@ -3450,6 +3472,35 @@ describe('AntMedia Component', () => {
         expect(currentConference.participantCount).toBe(12);
       });
     });
+  });
+
+  it('test play only participant join room', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setIsPlayOnly(true);
+    });
+
+    await act(async () => {
+      process.env.REACT_APP_SHOW_PLAY_ONLY_PARTICIPANTS = "true";
+    });
+
+    await waitFor(() => {
+      currentConference.joinRoom("room", "publishStreamId");
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith("Play only mode is active, joining the room with the generated stream id");
+
+    consoleSpy.mockRestore();
   });
 
 });

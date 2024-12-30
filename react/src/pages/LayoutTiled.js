@@ -167,7 +167,7 @@ function LayoutTiled(props) {
 
   return (
       <>
-        {props?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+        {props?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
         {videoCards()}
         {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
       </>

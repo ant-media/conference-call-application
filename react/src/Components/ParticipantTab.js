@@ -156,6 +156,7 @@ function ParticipantTab({
         </Grid>
         <Grid item>
           <div style={{display: 'flex'}}>
+            {pagedParticipants[streamId]?.status !== "created" ? <>
             {(typeof pagedParticipants[streamId]?.isPinned !== "undefined") && (pagedParticipants[streamId]?.isPinned === true) ? (
               <PinBtn
                 id={"unpin-" + streamId}
@@ -185,6 +186,13 @@ function ParticipantTab({
                   getMuteParticipantButton(streamId)
               ) : null}
             </div>
+            </> : <PinBtn
+                id={"playonly-" + streamId}
+                data-testid={"playonly-" + streamId}
+                sx={{minWidth: "unset", pt: 1, pb: 1}}
+            >
+              <SvgIcon size={28} name="eye" color={theme.palette?.participantListIcon?.primary}/>
+            </PinBtn> }
           </div>
         </Grid>
       </Grid>

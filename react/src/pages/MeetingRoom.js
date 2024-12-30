@@ -13,6 +13,7 @@ import BecomePublisherConfirmationDialog from "../Components/BecomePublisherConf
 import RecordingButton from "../Components/RecordingButton";
 import TalkingIndicator from "../Components/TalkingIndicator";
 import {Container} from "@mui/material";
+import {isMobile} from "react-device-detect";
 
 function debounce(fn, ms) {
   let timer;
@@ -120,15 +121,8 @@ const MeetingRoom = React.memo((props) => {
             turnOffYourMicNotification={(streamId)=>props?.turnOffYourMicNotification(streamId)}
         />
         <BecomePublisherConfirmationDialog/>
+
         {props?.audioTracks.map((audioTrackAssignment, index) => (
-            <div style={{position: "relative", width: "100%", height: "100%"}}>
-              <TalkingIndicator
-                  isTalking={props?.isTalking}
-                  streamId={audioTrackAssignment.streamId}
-                  trackAssignment={audioTrackAssignment}
-                  talkers={props?.talkers}
-                  setAudioLevelListener={props?.setAudioLevelListener}
-              />
                 <VideoCard
                     key={index}
                     trackAssignment={audioTrackAssignment}
@@ -151,7 +145,6 @@ const MeetingRoom = React.memo((props) => {
                     localVideo={props?.localVideo}
                     localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
                 />
-              </div>
               ))}
               <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
                 {pinLayout ?

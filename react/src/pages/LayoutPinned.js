@@ -5,7 +5,6 @@ import React from "react";
 import {isMobile} from "react-device-detect";
 import TalkingIndicator from "../Components/TalkingIndicator";
 
-
 function LayoutPinned (props) {
 
   const pinnedParticipant = props.videoTrackAssignments.find(e => e.streamId === props.pinnedParticipant?.streamId);
@@ -167,14 +166,14 @@ function LayoutPinned (props) {
   return (
     <>
       {pinnedVideo()}
-      { (!isMobile) ?
+      { (!props?.isMobile) ?
           <div id="unpinned-gallery">
-            {props?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {props?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
             {videoCards(false)}
             {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
           </div>
           : <><div id="unpinned-gallery">
-            {props?.videoTrackAssignments.length === 0 ? <p>There is no active publisher right now.</p> : null}
+            {props?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
             {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
           </div>
             {videoCards(true)}
