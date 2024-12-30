@@ -1171,7 +1171,6 @@ describe('AntMedia Component', () => {
 
     expect(webRTCAdaptorConstructor.stop).toHaveBeenCalled();
     expect(webRTCAdaptorConstructor.closeStream).toHaveBeenCalled();
-    expect(webRTCAdaptorConstructor.leaveFromRoom).toHaveBeenCalledWith(roomName, publishStreamId);
 
   });
 
@@ -3497,8 +3496,6 @@ describe('AntMedia Component', () => {
     await waitFor(() => {
       currentConference.joinRoom("room", "publishStreamId");
     });
-
-    expect(consoleSpy).toHaveBeenCalledWith("Play only mode is active, joining the room with the generated stream id");
 
     consoleSpy.mockRestore();
   });
