@@ -16,7 +16,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Get versions data from repo
-      run: wget -O maven-metadata.xml https://oss.sonatype.org/service/local/repositories/snapshots/content/io/antmedia/webrtc/ConferenceCall/maven-metadata.xml       
+      run: wget -O maven-metadata.xml https://oss.sonatype.org/service/local/repositories/release/content/io/antmedia/webrtc/ConferenceCall/maven-metadata.xml       
 
     - name: Download war File
       run: |
