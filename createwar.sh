@@ -1,5 +1,5 @@
 cd react
-npm install
+npm install --legacy-peer-deps
 npm run build
 cd ..
 rm webapp/src/main/webapp/static/css/*

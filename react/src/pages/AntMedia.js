@@ -5,7 +5,7 @@ import WaitingRoom from "./WaitingRoom";
 import _ from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
-import {useSnackbar} from "notistack-v2-maintained";
+import {useSnackbar} from 'notistack';
 import LeftTheRoom from "./LeftTheRoom";
 import {getUrlParameter, VideoEffect, WebRTCAdaptor} from "@antmedia/webrtc_adaptor";
 import {SvgIcon} from "../Components/SvgIcon";

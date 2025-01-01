@@ -3,7 +3,7 @@ import "./App.css";
 import {CssBaseline, ThemeProvider} from "@mui/material";
 import theme from "./styles/theme";
 import React from "react";
-import {SnackbarProvider} from "notistack-v2-maintained";
+import {SnackbarProvider} from 'notistack';
 import AntSnackBar from "Components/AntSnackBar";
 import {initReactI18next} from "react-i18next";
 import i18n from "i18next";
