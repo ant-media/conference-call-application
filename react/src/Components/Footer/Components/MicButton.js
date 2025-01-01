@@ -1,6 +1,6 @@
 import React from 'react';
 import { SvgIcon } from '../../SvgIcon';
-import { useSnackbar } from 'notistack-v2-maintained';
+import { useSnackbar } from 'notistack';
 import { Tooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';

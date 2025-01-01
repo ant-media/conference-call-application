@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import { SvgIcon } from "./SvgIcon";
 import {useTheme} from "@mui/material";
-import {useSnackbar} from "notistack-v2-maintained";
+import {useSnackbar} from 'notistack';
 import {useTranslation} from "react-i18next";
 import {CustomizedBtn} from "./CustomizedBtn";
 

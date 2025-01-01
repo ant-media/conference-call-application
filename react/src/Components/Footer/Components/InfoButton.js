@@ -7,7 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import { ListItemIcon, ListItemText, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from 'notistack-v2-maintained';
+import { useSnackbar } from 'notistack';
 
 const StyledListItemText = styled(ListItemText)(({ theme }) => ({
     '& .MuiListItemText-primary': {

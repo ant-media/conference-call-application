@@ -19,7 +19,7 @@ import SettingsDialog from "Components/Footer/Components/SettingsDialog";
 import {CustomizedBtn} from "Components/CustomizedBtn";
 
 import {SvgIcon} from "Components/SvgIcon";
-import {useSnackbar} from "notistack-v2-maintained";
+import {useSnackbar} from 'notistack';
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
 import {getRootAttribute, isComponentMode} from "utils";
 import {useTheme} from "@mui/material/styles";

@@ -4,7 +4,7 @@ import { styled, useTheme } from "@mui/material/styles";
 import { SvgIcon } from "../../SvgIcon";
 import { Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useSnackbar } from "notistack-v2-maintained";
+import { useSnackbar } from 'notistack';
 import {CustomizedBtn} from "../../CustomizedBtn";
 
 function CameraButton(props) {

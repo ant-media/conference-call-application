@@ -3,10 +3,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
 import CameraButton from 'Components/Footer/Components/CameraButton';
-import {useSnackbar} from "notistack-v2-maintained";
+import {useSnackbar} from 'notistack';
 
-jest.mock('notistack-v2-maintained', () => ({
-  ...jest.requireActual('notistack-v2-maintained'),
+jest.mock('notistack', () => ({
+  ...jest.requireActual('notistack'),
   useSnackbar: jest.fn(),
   SnackbarProvider: ({ children }) => <div></div>,
 }));
