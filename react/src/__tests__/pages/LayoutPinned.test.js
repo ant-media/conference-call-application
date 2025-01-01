@@ -40,12 +40,32 @@ describe('Pinned Layout Component', () => {
   });
 
 
-  it('renders without crashing', () => {
+  it('renders without crashing in desktop view', () => {
+    contextValue.allParticipants[`p1`] = {streamId: `p1`, name: `test1`};
+    contextValue.videoTrackAssignments.push({streamId: `p1`, videoLabel: `test1`, track: null, name: `test1`});
+
     const { container, getByText, getByRole } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutPinned />
+            <LayoutPinned
+                isMobile={false}
+            />
         </ThemeProvider>
       );
+
+    console.log(container.outerHTML);
+  });
+
+  it('renders without crashing in mobile view', () => {
+    contextValue.allParticipants[`p1`] = {streamId: `p1`, name: `test1`};
+    contextValue.videoTrackAssignments.push({streamId: `p1`, videoLabel: `test1`, track: null, name: `test1`});
+
+    const { container, getByText, getByRole } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <LayoutPinned
+              isMobile={true}
+          />
+        </ThemeProvider>
+    );
 
     console.log(container.outerHTML);
   });
