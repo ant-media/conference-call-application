@@ -1,5 +1,5 @@
 cd react
-npm install
+npm install --legacy-peer-deps
 npm run build
 cd ..
 if [ -d "webapp/src/main/webapp/static" ] && [ "$(ls -A webapp/src/main/webapp/static)" ]; then
