@@ -5,7 +5,7 @@ import { SvgIcon } from "../../SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import { Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useSnackbar } from "notistack";
+import { useSnackbar } from 'notistack';
 
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({

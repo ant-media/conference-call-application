@@ -85,7 +85,6 @@ export function LayoutSettingsDialog(props) {
 
     if (mode === "tiled") {
       //unpin the pinned video
-      conference.allParticipants = conference.allParticipants || {};
       Object.keys(conference.allParticipants).forEach(streamId => {
         if (typeof conference.allParticipants[streamId].pinned === 'undefined'
           && conference.allParticipants[streamId].pinned === true) {

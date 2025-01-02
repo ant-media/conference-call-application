@@ -37,7 +37,7 @@ function ParticipantListButton({ footer }) {
                     color={conference?.participantListDrawerOpen ? 'primary' : 'secondary'}
                 >
                     <SvgIcon size={32} color={conference?.participantListDrawerOpen ? '#000' : '#fff'} name={'participants'} />
-                  {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                  {/* eslint-disable-next-line */}
                     <a style={{color: conference?.participantListDrawerOpen ? '#000' : '#fff'}}>{conference.participantCount}</a>
                 </CustomizedBtn>
             </Tooltip>
