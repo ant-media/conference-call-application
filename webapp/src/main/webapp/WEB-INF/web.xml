@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+          http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	version="3.0">
+
+	<!-- The display-name element contains a short name that is intended to 
+		be displayed by tools. The display name need not be unique. -->
+	<display-name>ConferenceCall</display-name>
+
+	<!-- The context-param element contains the declaration of a web application's 
+		servlet context initialization parameters. -->
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>/ConferenceCall</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>org.red5.logging.ContextLoggingListener
+		</listener-class>
+	</listener>
+	
+	<context-param>
+        <param-name>logbackDisableServletContainerInitializer</param-name>
+        <param-value>true</param-value>
+    </context-param>
+	
+
+	<listener>
+		<listener-class>io.antmedia.filter.TokenSessionFilter</listener-class>
+	</listener>
+	<!--  Put RestProxyFilter to the top of the Filter list -->
+	<filter>
+		<filter-name>RestProxyFilter</filter-name>
+		<filter-class>io.antmedia.filter.RestProxyFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>RestProxyFilter</filter-name>
+		<url-pattern>/rest/v2/broadcasts/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>TokenFilter</filter-name>
+		<filter-class>io.antmedia.filter.TokenFilterManager</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>TokenFilter</filter-name>
+		<url-pattern>/streams/*</url-pattern>
+	</filter-mapping>
+	
+	<filter>
+		<filter-name>HttpForwardFilter</filter-name>
+		<filter-class>io.antmedia.filter.HttpForwardFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>HttpForwardFilter</filter-name>
+		<url-pattern>/streams/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>HlsStatisticsFilter</filter-name>
+		<filter-class>io.antmedia.filter.HlsStatisticsFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>HlsStatisticsFilter</filter-name>
+		<url-pattern>/streams/*</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>CorsFilter</filter-name>
+		<filter-class>io.antmedia.filter.CorsHeaderFilter</filter-class>
+		<init-param>
+		    <param-name>cors.allowed.origins</param-name>
+		    <param-value>*</param-value>
+		 </init-param>
+		 <init-param>
+		 	<param-name>cors.allowed.methods</param-name>
+		 	<param-value>GET,POST,HEAD,OPTIONS,PUT,DELETE</param-value>
+		 </init-param>
+		 
+		 <!-- cors.allowed.origins -> * and credentials are not supported at the same time.  
+		 If you set to cors.allowed.origins to specific domains and support credentials open the below lines
+		 <init-param>
+            <param-name>cors.support.credentials</param-name>
+            <param-value>true</param-value>
+         </init-param>
+         -->
+		 <init-param>
+		 	<param-name>cors.allowed.headers</param-name>
+            <param-value>Accept, Origin, X-Requested-With, Access-Control-Request-Headers, Content-Type, Access-Control-Request-Method, Authorization</param-value>
+         </init-param>
+         <async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>CorsFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+
+	<servlet>
+		<servlet-name>jersey-serlvet</servlet-name>
+		<servlet-class>
+			org.glassfish.jersey.servlet.ServletContainer
+		</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>io.antmedia.rest</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.provider.classnames</param-name>
+			<param-value>org.glassfish.jersey.media.multipart.MultiPartFeature
+			</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>jersey-serlvet</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>chunked-transfer-servlet</servlet-name>
+		<servlet-class>io.antmedia.servlet.ChunkedTransferServlet</servlet-class>
+		<async-supported>true</async-supported>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>chunked-transfer-servlet</servlet-name>
+		<url-pattern>/chunked/*</url-pattern>
+		<url-pattern>*.mpd</url-pattern>
+		<url-pattern>*.m4s</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>hls-upload-servlet</servlet-name>
+		<servlet-class>io.antmedia.servlet.UploadHLSChunk</servlet-class>
+		<async-supported>true</async-supported>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>hls-upload-servlet</servlet-name>
+		<url-pattern>/hls-upload/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>jsp</servlet-name>
+		<url-pattern>*.html</url-pattern>
+	</servlet-mapping>
+
+	<mime-mapping>
+		<extension>m3u8</extension>
+		<mime-type>application/x-mpegURL</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>ts</extension>
+		<mime-type>video/MP2T</mime-type>
+	</mime-mapping>
+	
+	<mime-mapping>
+		<extension>mpd</extension>
+		<mime-type>application/dash+xml</mime-type>
+	</mime-mapping>
+	
+	<mime-mapping>
+		<extension>m4s</extension>
+		<mime-type>video/iso.segment</mime-type>
+	</mime-mapping>
+	
+	<mime-mapping>
+		<extension>mjs</extension>
+		<mime-type>text/javascript</mime-type>
+	</mime-mapping>
+
+	<filter>
+		<filter-name>RestJWTAuthenticationFilter</filter-name>
+		<filter-class>io.antmedia.filter.JWTFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>RestJWTAuthenticationFilter</filter-name>
+		<url-pattern>/rest/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>RestAuthenticationFiler</filter-name>
+		<filter-class>io.antmedia.filter.IPFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>RestAuthenticationFiler</filter-name>
+		<url-pattern>/rest/*</url-pattern>
+		
+		<!-- Add chunked servlet security filter. I'm not sure it's a good idea but it provides just simple protection  -->
+		<url-pattern>/chunked/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>ExpiresFilter</filter-name>
+		<filter-class>org.apache.catalina.filters.ExpiresFilter</filter-class>
+		<init-param>
+			<param-name>ExpiresByType application/x-mpegURL</param-name>
+			<param-value>access plus 0 seconds</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ExpiresByType application/dash+xml</param-name>
+			<param-value>access plus 0 seconds</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ExpiresByType video/MP2T</param-name>
+			<param-value>access plus 10 seconds</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ExpiresByType video/iso.segment</param-name>
+			<param-value>access plus 10 seconds</param-value>
+		</init-param>
+		 <async-supported>true</async-supported>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>ExpiresFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+	</filter-mapping>
+
+	<!-- The security-constraint element is used to associate security constraints 
+		with one or more web resource collections -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Forbidden</web-resource-name>
+			<url-pattern>/streams/</url-pattern>
+		</web-resource-collection>
+		<auth-constraint />
+	</security-constraint>
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/spa.jsp</location>
+	</error-page>
+</web-app>
