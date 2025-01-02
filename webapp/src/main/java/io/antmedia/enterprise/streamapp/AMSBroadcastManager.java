@@ -34,25 +34,7 @@ public class AMSBroadcastManager implements ApplicationContextAware {
 
         IAntMediaStreamHandler app = getApplication();
         appSettings = app.getAppSettings();
-
-        Object circleSettingsString = appSettings.getCustomSetting("circle");
-        if (circleSettingsString == null) {
-            logger.error("Using default settings for Conference Room Settings because no Circle settings in the AppSettings");
-
-            conferenceRoomSettings = new ConferenceRoomSettings();
-        }
-        else {
-            try {
-                conferenceRoomSettings = gson.fromJson(circleSettingsString.toString(), ConferenceRoomSettings.class);
-            }
-            catch (Exception e)
-            {
-                logger.error("Invalid Conference room settings, using default conference room settings");
-                conferenceRoomSettings = new ConferenceRoomSettings();
-            }
-        }
-        conferenceRoomSettings.init();
-
+        fetchConferenceRoomSettings();
     }
 
     public AntMediaApplicationAdapter getApplication() {
@@ -101,6 +83,36 @@ public class AMSBroadcastManager implements ApplicationContextAware {
         }
 
         return result;
+    }
+
+    public void fetchConferenceRoomSettings() {
+        Object circleSettingsString = appSettings.getCustomSetting("circle");
+        if (circleSettingsString == null) {
+            logger.error("Using default settings for Conference Room Settings because no Circle settings in the AppSettings");
+
+            conferenceRoomSettings = new ConferenceRoomSettings();
+        }
+        else {
+            try {
+                conferenceRoomSettings = gson.fromJson(circleSettingsString.toString(), ConferenceRoomSettings.class);
+            }
+            catch (Exception e)
+            {
+                logger.error("Invalid Conference room settings, using default conference room settings");
+                conferenceRoomSettings = new ConferenceRoomSettings();
+            }
+        }
+        conferenceRoomSettings.init();
+
+        String participantVisibilityMatrix = appSettings.getParticipantVisibilityMatrix().toString();
+
+        if (participantVisibilityMatrix != null && conferenceRoomSettings.getParticipantVisibilityMatrix() == null) {
+            conferenceRoomSettings.setParticipantVisibilityMatrix(participantVisibilityMatrix);
+        }
+
+        int maxVideoTrackCount = appSettings.getMaxVideoTrackCount();
+
+        conferenceRoomSettings.setMaxVideoTrackCount(maxVideoTrackCount);
     }
 
     public ConferenceRoomSettings getConferenceRoomSettings() {
