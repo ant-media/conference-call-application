@@ -24,6 +24,7 @@ import {getUrlParameter} from "@antmedia/webrtc_adaptor";
 import {getRootAttribute, isComponentMode} from "utils";
 import {useTheme} from "@mui/material/styles";
 import TalkingIndicator from "../Components/TalkingIndicator";
+import {UnitTestContext} from "./AntMedia";
 
 
 function getPublishStreamId() {
@@ -54,6 +55,8 @@ function WaitingRoom(props) {
     const roomName = id;
 
     const {enqueueSnackbar} = useSnackbar();
+
+    window.conference = React.useContext(UnitTestContext);
 
     // This is a temporary video track assignment for local video
     // It is used to show local video in the waiting room

@@ -3039,7 +3039,6 @@ function AntMedia(props) {
                 justifyContent="center"
                 alignItems={"center"}
             >
-                {props.isTest &&
                     <UnitTestContext.Provider
                         value={{
                             isScreenShared,
@@ -3177,8 +3176,6 @@ function AntMedia(props) {
                         }}
                     >
                         {props.children}
-                    </UnitTestContext.Provider>
-                    }
                     <UnauthrorizedDialog
                         onClose={handleUnauthorizedDialogExitClicked}
                         open={unAuthorizedDialogOpen}
@@ -3402,6 +3399,7 @@ function AntMedia(props) {
                             <PublisherRequestListDrawer/>
                         </>
                     )}
+                    </UnitTestContext.Provider>
             </Grid>
         </Grid>
     );
