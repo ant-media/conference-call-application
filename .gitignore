@@ -6,5 +6,6 @@ webapp/src/main/webapp/
 react/.env.development
 react/.idea/workspace.xml
 react/.env.fakeeh
+react/package-lock.json
 test/run.sh
 test/runw.sh
