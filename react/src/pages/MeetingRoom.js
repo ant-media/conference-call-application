@@ -29,13 +29,14 @@ function debounce(fn, ms) {
 
 
 const MeetingRoom = React.memo((props) => {
+  const unitTestContext = React.useContext(UnitTestContext);
   const [gallerySize, setGallerySize] = React.useState({"w": 100, "h": 100});
 
   const theme = useTheme();
 
   React.useEffect(() => {
     handleGalleryResize(false);
-    window.conference = React.useContext(UnitTestContext);
+    window.conference = unitTestContext;
   }, [props?.videoTrackAssignments, props?.allParticipants, props?.participantUpdated]);
 
   React.useEffect(() => {
