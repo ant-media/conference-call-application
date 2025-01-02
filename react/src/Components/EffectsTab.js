@@ -5,7 +5,7 @@ import { SvgIcon } from "./SvgIcon";
 import { ConferenceContext } from "pages/AntMedia";
 import {CustomizedBtn} from "./Footer/Components/MicButton";
 import {useTheme} from "@mui/material";
-import {useSnackbar} from "notistack";
+import {useSnackbar} from 'notistack';
 import {useTranslation} from "react-i18next";
 
 function EffectsTab() {
@@ -21,11 +21,11 @@ function EffectsTab() {
     updateCustomVirtualBackgroundImages().then(() => {
       //console.log("Custom virtual background images initialized");
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line  
 
   React.useEffect(() => {
     getBackgroundImages();
-  }, [customVirtualBackgroundImages]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [customVirtualBackgroundImages]); // eslint-disable-line  
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];

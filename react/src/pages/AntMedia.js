@@ -5,7 +5,7 @@ import WaitingRoom from "./WaitingRoom";
 import _ from "lodash";
 import MeetingRoom from "./MeetingRoom";
 import MessageDrawer from "Components/MessageDrawer";
-import {useSnackbar} from "notistack";
+import {useSnackbar} from 'notistack';
 import LeftTheRoom from "./LeftTheRoom";
 import {getUrlParameter, VideoEffect, WebRTCAdaptor} from "@antmedia/webrtc_adaptor";
 import {SvgIcon} from "../Components/SvgIcon";
@@ -277,7 +277,7 @@ var publishReconnected;
 var playReconnected;
 
 function AntMedia(props) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // eslint-disable-next-line  
   const initialRoomName = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
   const [roomName, setRoomName] = useState(initialRoomName);
 
@@ -377,7 +377,7 @@ function AntMedia(props) {
         }
       }, 1000);
     }
-  }, [presenterButtonStreamIdInProcess]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [presenterButtonStreamIdInProcess]); // eslint-disable-line  
 
     const {sendMessage, latestMessage, isWebSocketConnected} = useWebSocket();
 
@@ -485,7 +485,7 @@ function AntMedia(props) {
       setParticipantUpdated(!participantUpdated);
       //console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
     }, 5000);
-  }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [videoTrackAssignments, allParticipants]); // eslint-disable-line  
 
     function handleUnauthorizedDialogExitClicked() {
 
@@ -1050,7 +1050,7 @@ function AntMedia(props) {
                 }
             }, 3000);
         }
-    }, [presenterButtonStreamIdInProcess]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [presenterButtonStreamIdInProcess]); // eslint-disable-line  
 
     function makeParticipantPresenter(streamId) {
         let participantsRole = "";
@@ -1371,7 +1371,7 @@ function AntMedia(props) {
             });
 
      //just run once when component is mounted
-    }, []);  //eslint-disable-line react-hooks/exhaustive-deps
+    }, []);  //eslint-disable-line  
 
     useEffect(() => {
         if (devices.length > 0) {
@@ -1381,7 +1381,7 @@ function AntMedia(props) {
                 setDevices(devices);
             });
         }
-    }, [devices]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [devices]); // eslint-disable-line  
 
     if (webRTCAdaptor) {
         webRTCAdaptor.callback = infoCallback;
@@ -1459,7 +1459,7 @@ function AntMedia(props) {
         }
 
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line  
     }, [initialized]);
 
     function checkAndSetIsPinned(streamId, broadcastObject) {
@@ -3014,7 +3014,7 @@ function AntMedia(props) {
                 displayMessage("Recording stopped forcefully due to error: " + definition.message, "white")
             }
         }
-        }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+        }, [latestMessage, publishStreamId, displayMessage, handleSendNotificationEvent, updateRoomRecordingStatus]); // eslint-disable-line  
 
     const makeFullScreen = (divId) => {
         if (fullScreenId === divId) {

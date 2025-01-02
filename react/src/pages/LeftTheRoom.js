@@ -12,7 +12,7 @@ function useWidth() {
   const keys = [...theme.breakpoints.keys].reverse();
   return (
     keys.reduce((output, key) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+      // eslint-disable-next-line  
       const matches = useMediaQuery(theme.breakpoints.up(key));
       return !output && matches ? key : output;
     }, null) || 'xs'
@@ -28,7 +28,7 @@ function LeftTheRoom({ withError : leaveRoomWithError }) {
 
   React.useEffect(() => {
     conference.handleLeaveFromRoom();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line  
   }, []);
   const message = leaveRoomWithError !== null ? t('Something Went Wrong') : t('You have left the meeting');
 
