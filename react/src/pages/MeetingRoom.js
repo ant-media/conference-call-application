@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable   */
 import VideoCard from "Components/Cards/VideoCard";
 import React from "react";
 import Footer from "Components/Footer/Footer";

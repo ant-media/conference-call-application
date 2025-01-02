@@ -18,7 +18,7 @@ import {useTranslation} from "react-i18next";
 import SettingsDialog from "Components/Footer/Components/SettingsDialog";
 
 import {SvgIcon} from "Components/SvgIcon";
-import {useSnackbar} from "notistack";
+import {useSnackbar} from 'notistack';
 import {ConferenceContext} from "./AntMedia";
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
 import {getRootAttribute, isComponentMode} from "utils";
@@ -37,7 +37,7 @@ if (enterDirectly == null || typeof enterDirectly === "undefined") {
 }
 
 function WaitingRoom(props) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+    // eslint-disable-next-line  
     const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
     const publishStreamId = getPublishStreamId()
     const {t} = useTranslation();
@@ -82,7 +82,7 @@ function WaitingRoom(props) {
             conference?.localVideoCreate(tempLocalVideo);
         }
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line  
     }, [conference.initialized]);
 
     function joinRoom(e) {

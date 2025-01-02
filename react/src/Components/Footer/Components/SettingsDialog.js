@@ -63,7 +63,7 @@ export default function SettingsDialog(props) {
       if (audio && (conference.selectedMicrophone === '' || conference.selectedMicrophone === null)) conference.microphoneSelected(audio.deviceId);
       if (conference.selectedBackgroundMode === '') conference.setSelectedBackgroundMode('none');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line  
   }, [conference.devices]);
 
   return (

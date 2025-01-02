@@ -3,7 +3,7 @@ import React from 'react';
 import { render, act, waitFor, screen } from '@testing-library/react';
 import AntMedia from 'pages/AntMedia';
 import { useWebSocket } from 'Components/WebSocketProvider';
-import { useSnackbar} from "notistack";
+import { useSnackbar} from 'notistack';
 import { ConferenceContext } from "pages/AntMedia";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";

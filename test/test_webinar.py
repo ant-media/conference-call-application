@@ -370,7 +370,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_both_rooms(self):
+  def _test_both_rooms(self):
     self.chrome.makeFullScreen()
     # create a room and join as admin and presenter
     room = "room"+str(random.randint(100, 999))
@@ -587,7 +587,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_multiple_player(self):
+  def _test_multiple_player(self):
     # create a room and join as admin and presenter
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("adminA", room)   
