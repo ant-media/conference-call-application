@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 import {ConferenceContext} from "../pages/AntMedia";
 
@@ -22,11 +22,12 @@ const PinBtn = styled(Button)(({ theme }) => ({
 
 function PublisherRequestTab(props) {
     const conference = useContext(ConferenceContext);
+    const theme = useTheme();
 
-    const getPublisherRequestItem = (videoId) => {
+    const getPublisherRequestItem = (streamId) => {
         return (
             <Grid
-                key={videoId}
+                key={streamId}
                 container
                 alignItems="center"
                 justifyContent="space-between"
@@ -34,19 +35,25 @@ function PublisherRequestTab(props) {
                 sx={{ borderColor: "primary.main" }}
             >
                 <Grid item sx={{ pr: 1 }}>
-                    <PublisherRequestName variant="body1">{videoId}</PublisherRequestName>
+                    <PublisherRequestName variant="body1">{streamId}</PublisherRequestName>
                 </Grid>
                 <Grid item>
                     <PinBtn
+                        data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.approveBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {conference?.approveBecomeSpeakerRequest(streamId);}
+                    }
                     >
                         Allow
                     </PinBtn>
 
                     <PinBtn
+                        data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.rejectSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {
+                            conference?.rejectBecomeSpeakerRequest(streamId);
+                        }
+                    }
                     >
                         Deny
                     </PinBtn>

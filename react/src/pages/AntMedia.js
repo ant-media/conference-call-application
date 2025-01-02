@@ -1347,31 +1347,32 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-
-
-            reconnecting = false;
-            publishReconnected = true;
-            playReconnected = true;
-            console.log("++ createWebRTCAdaptor");
-            //here we check if audio or video device available and wait result
-            //according to the result we modify mediaConstraints
-
-            checkDevices().then(() => {
-                    var adaptor = new WebRTCAdaptor({
-                    websocket_url: websocketURL,
-                    mediaConstraints: mediaConstraints,
-                    peerconnection_config: peerconnection_config,
-                    isPlayMode: isPlayOnly, // onlyDataChannel: isPlayOnly,
-                    debug: true,
-                    callback: infoCallback,
-                    callbackError: errorCallback,
-                    purposeForTest: "main-adaptor"
-                    });
-                    setWebRTCAdaptor(adaptor)
-            });
-
+        createWebRTCAdaptor();
      //just run once when component is mounted
     }, []);  //eslint-disable-line  
+
+    function createWebRTCAdaptor() {
+        reconnecting = false;
+        publishReconnected = true;
+        playReconnected = true;
+        console.log("++ createWebRTCAdaptor");
+        //here we check if audio or video device available and wait result
+        //according to the result we modify mediaConstraints
+
+        checkDevices().then(() => {
+            var adaptor = new WebRTCAdaptor({
+                websocket_url: websocketURL,
+                mediaConstraints: mediaConstraints,
+                peerconnection_config: peerconnection_config,
+                isPlayMode: isPlayOnly, // onlyDataChannel: isPlayOnly,
+                debug: true,
+                callback: infoCallback,
+                callbackError: errorCallback,
+                purposeForTest: "main-adaptor"
+            });
+            setWebRTCAdaptor(adaptor)
+        });
+    }
 
     useEffect(() => {
         if (devices.length > 0) {
@@ -2134,6 +2135,45 @@ function AntMedia(props) {
         }
     }
 
+  function handlePublisherRequest() {
+    if (!isPlayOnly) {
+      return;
+    }
+    handleSendNotificationEvent("REQUEST_BECOME_PUBLISHER", roomName, {
+      senderStreamId: publishStreamId, senderStreamName: streamName
+    });
+  }
+
+    function makeListenerAgain(streamId) {
+        handleSendNotificationEvent("MAKE_LISTENER_AGAIN", roomName, {
+            senderStreamId: streamId
+        });
+        updateParticipantRole(streamId, WebinarRoles.Listener);
+    }
+
+    function handleStartBecomePublisher() {
+        if (isPlayOnly) {
+            setIsPlayOnly(false);
+            setInitialized(false);
+            setWaitingOrMeetingRoom("waiting");
+        }
+    }
+
+    function approveBecomeSpeakerRequest(streamId) {
+        setRequestSpeakerList(requestSpeakerList.filter((item) => item !== streamId));
+        handleSendNotificationEvent("APPROVE_BECOME_PUBLISHER", roomName, {
+            senderStreamId: streamId
+        });
+        updateParticipantRole(streamId, WebinarRoles.TempListener);
+    }
+
+    function rejectBecomeSpeakerRequest(streamId) {
+        setRequestSpeakerList(requestSpeakerList.filter((item) => item !== streamId))
+        handleSendNotificationEvent("REJECT_BECOME_PUBLISHER", roomName, {
+            senderStreamId: streamId
+        });
+    }
+
     function handleSendMessage(message) {
         if (publishStreamId || isPlayOnly) {
             let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
@@ -2201,6 +2241,34 @@ function AntMedia(props) {
     React.useEffect(() => {
         updateUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
     }, [role]);
+
+    React.useEffect(() => {
+        // we need to empty participant array. if we are going to leave it in the first place.
+        setVideoTrackAssignments([]);
+        setAllParticipants({});
+
+        clearInterval(audioListenerIntervalJob);
+        audioListenerIntervalJob = null;
+
+        if (isPlayOnly) {
+            webRTCAdaptor?.stop(publishStreamId);
+        }
+        webRTCAdaptor?.stop(roomName);
+
+        if (isPlayOnly) {
+            webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
+        }
+        //close streams fully to not encounter webcam light
+        webRTCAdaptor?.closeStream();
+
+        if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
+            handleStopScreenShare();
+        }
+
+        createWebRTCAdaptor();
+
+        setWaitingOrMeetingRoom("waiting");
+    }, [isPlayOnly]);
 
     function handleNotificationEvent(obj) {
         var notificationEvent = JSON.parse(obj.data);
@@ -2403,6 +2471,41 @@ function AntMedia(props) {
                     webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
                 }
                 setParticipantUpdated(!participantUpdated);
+            } else if (eventType === "REQUEST_BECOME_PUBLISHER") {
+                if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
+                    if (requestSpeakerList.includes(notificationEvent.senderStreamId)) {
+                        console.log("Request is already received from ", notificationEvent.senderStreamId);
+                        return;
+                    }
+                    setRequestSpeakerList((oldRequestSpeakerList) => {
+                        return [...oldRequestSpeakerList, notificationEvent.senderStreamId];
+                    });
+                    showInfoSnackbarWithLatency(notificationEvent.senderStreamId + t(" is requesting to become a speaker"));
+                }
+            } else if (eventType === "MAKE_LISTENER_AGAIN") {
+                if (role === WebinarRoles.TempListener || role === WebinarRoles.ActiveTempListener) {
+                    showInfoSnackbarWithLatency(t("You are made listener again"));
+                    mediaConstraints = {
+                        video: false, audio: false,
+                    };
+                    setIsPlayed(false);
+                    setRole(WebinarRoles.Listener);
+                    setIsPlayOnly(true);
+                }
+            } else if (eventType === "APPROVE_BECOME_PUBLISHER") {
+                if (role === WebinarRoles.Listener && notificationEvent.senderStreamId === publishStreamId) {
+                    showInfoSnackbarWithLatency(t("Your request to become a speaker is approved"));
+                    mediaConstraints = {
+                        // setting constraints here breaks source switching on firefox.
+                        video: videoQualityConstraints.video, audio: audioQualityConstraints.audio,
+                    };
+                    setRole(WebinarRoles.TempListener);
+                    setIsPlayOnly(false);
+                }
+            } else if (eventType === "REJECT_BECOME_PUBLISHER") {
+                if (role === WebinarRoles.Listener && notificationEvent.senderStreamId === publishStreamId) {
+                    showInfoSnackbarWithLatency(t("Your request to become a speaker is rejected"));
+                }
             }
         }
     }
@@ -2414,34 +2517,26 @@ function AntMedia(props) {
         }
 
         if (oldRole.includes("active") && !newRole.includes("active")) {
-            setTimeout(() => {
-                enqueueSnackbar({
-                    message: streamId + t(" is removed from the listening room"),
-                    variant: 'info',
-                    icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                    anchorOrigin: {
-                        vertical: "top",
-                        horizontal: "right",
-                    },
-                }, {
-                    autoHideDuration: 1000,
-                });
-            }, 1000);
+            showInfoSnackbarWithLatency(streamId + t(" is removed from the listening room"));
         } else if (!oldRole.includes("active") && newRole.includes("active")) {
-            setTimeout(() => {
-                enqueueSnackbar({
-                    message: streamId + t(" is added to the listening room"),
-                    variant: 'info',
-                    icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                    anchorOrigin: {
-                        vertical: "top",
-                        horizontal: "right",
-                    },
-                }, {
-                    autoHideDuration: 1000,
-                });
-            }, 1000);
+            showInfoSnackbarWithLatency(streamId + t(" is added to the listening room"));
         }
+    }
+
+    function showInfoSnackbarWithLatency(message) {
+        setTimeout(() => {
+            enqueueSnackbar({
+                message: message,
+                variant: 'info',
+                icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
+                anchorOrigin: {
+                    vertical: "top",
+                    horizontal: "right",
+                },
+            }, {
+                autoHideDuration: 1000,
+            });
+        }, 1000);
     }
 
     function checkScreenSharingStatus() {
@@ -3170,6 +3265,11 @@ function AntMedia(props) {
                         stopSpeedTest,
                         statsList,
                         getTrackStats,
+                        handlePublisherRequest,
+                        handleStartBecomePublisher,
+                        approveBecomeSpeakerRequest,
+                        rejectBecomeSpeakerRequest,
+                        makeListenerAgain,
                         isBroadcasting,
                         playStats,
                         checkAndSetIsPinned,
@@ -3181,6 +3281,14 @@ function AntMedia(props) {
                         checkAndUpdateVideoAudioSourcesForPublishSpeedTest,
                         fetchImageAsBlob,
                         setAndEnableVirtualBackgroundImage,
+                        setMessageDrawerOpen,
+                        setParticipantListDrawerOpen,
+                        setEffectsDrawerOpen,
+                        updateParticipantRole,
+                        setInitialized,
+                        setRole,
+                        handleNotificationEvent,
+                        updateBroadcastRole,
                         setAndFillPlayStatsList,
                         setAndFillPublishStatsList,
                         setSpeedTestObjectFailed,
@@ -3188,6 +3296,7 @@ function AntMedia(props) {
                         calculateThePlaySpeedTestResult,
                         processUpdatedStatsForPlaySpeedTest,
                         speedTestCounter,
+                        showInfoSnackbarWithLatency,
                         setRoomName,
                         setPublishStreamId
                     }}
