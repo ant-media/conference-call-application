@@ -14,6 +14,7 @@ import RecordingButton from "../Components/RecordingButton";
 import TalkingIndicator from "../Components/TalkingIndicator";
 import {Container} from "@mui/material";
 import {isMobile} from "react-device-detect";
+import {UnitTestContext} from "./AntMedia";
 
 function debounce(fn, ms) {
   let timer;
@@ -34,6 +35,7 @@ const MeetingRoom = React.memo((props) => {
 
   React.useEffect(() => {
     handleGalleryResize(false);
+    window.conference = React.useContext(UnitTestContext);
   }, [props?.videoTrackAssignments, props?.allParticipants, props?.participantUpdated]);
 
   React.useEffect(() => {
