@@ -338,8 +338,6 @@ function AntMedia(props) {
     const [microphoneButtonDisabled, setMicrophoneButtonDisabled] = React.useState(false);
     const [cameraButtonDisabled, setCameraButtonDisabled] = React.useState(false);
 
-    const [settings, setSettings] = React.useState();
-
     const [screenSharingInProgress, setScreenSharingInProgress] = React.useState(false);
 
   const [requestSpeakerList, setRequestSpeakerList] = React.useState([]);
@@ -2966,7 +2964,6 @@ function AntMedia(props) {
                 console.log("--maxVideoTrackCountFromAppSettings: ", localSettings?.maxVideoTrackCount);
                 setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount > 0 ? localSettings?.maxVideoTrackCount+1 : 6);
             }
-            setSettings(localSettings);
         } else if (obj.command === "startRecordingResponse") {
             console.log("Incoming startRecordingResponse:", obj);
             definition = JSON.parse(obj.definition);
@@ -3175,8 +3172,7 @@ function AntMedia(props) {
                             processUpdatedStatsForPlaySpeedTest,
                             speedTestCounter,
                             setRoomName,
-                            setPublishStreamId,
-                            settings
+                            setPublishStreamId
                         }}
                     >
                         {props.children}
