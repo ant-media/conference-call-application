@@ -1,52 +1,44 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import { ConferenceContext } from 'pages/AntMedia';
-import OthersCard from 'Components/Cards/OthersCard';
-import theme from "styles/theme";
-import { ThemeProvider } from '@mui/material/styles';
-import {ThemeList} from "styles/themeList";
+import React from "react";
+import { render } from "@testing-library/react";
+import OthersCard from "Components/Cards/OthersCard";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
-// Mock the context value
-const contextValue = {
-  allParticipants: {
-    'test-stream-id': {
-      role: 'host',
-      participantID: 'test-participant-id',
-      streamID: 'test-stream-id',
-      videoTrack: 'test-video-track',
-      audioTrack: 'test-audio-track',
-      videoLabel: 'test-video-label',
+// Mock theme with required properties
+const mockTheme = createTheme({
+  palette: {
+    themeColor: {
+      71: "#123456", // Replace with a mock color
+      80: "#654321",
+      85: "#abcdef",
     },
   },
-  publishStreamId: 'test-stream-id',
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 960,
+      lg: 1280,
+      xl: 1920,
+    },
+  },
+});
+
+// Mock props for the component
+const props = {
+  allParticipants: {
+    "test-stream-id": { name: "John Doe" },
+    "another-stream-id": { name: "Jane Smith" },
+  },
+  publishStreamId: "test-stream-id",
+  playingParticipants: [{ streamId: "test-stream-id" }],
 };
 
-// Mock the useContext hook
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useContext: jest.fn(),
-}));
-
-describe('OthersCard Component', () => {
-
-  beforeEach(() => {
-    // Reset the mock implementation before each test
-    jest.clearAllMocks();
-
-    React.useContext.mockImplementation(input => {
-      if (input === ConferenceContext) {
-        return contextValue;
-      }
-      return jest.requireActual('react').useContext(input);
-    });
-  });
-
-  it('renders without crashing', () => {
+describe("OthersCard Component", () => {
+  it("renders without crashing", () => {
     render(
-      <ThemeProvider theme={theme(ThemeList.Green)}>
-        <OthersCard/>
-      </ThemeProvider>
+        <ThemeProvider theme={mockTheme}>
+          <OthersCard {...props} />
+        </ThemeProvider>
     );
   });
-
 });

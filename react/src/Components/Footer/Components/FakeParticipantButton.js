@@ -1,47 +1,26 @@
-import React, { useContext } from 'react';
-import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
-import { ConferenceContext } from 'pages/AntMedia';
-import { Tooltip } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { Tooltip } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import {CustomizedBtn} from "../../CustomizedBtn";
 
-const CustomizedBtn = styled(Button)(({ theme }) => ({
-  '&.footer-icon-button':{
-    height: '100%',
-    [theme.breakpoints.down('sm')]:{
-      padding:8,
-      minWidth: 'unset',
-      width: '100%',
-      '& > svg': {
-        width: 36
-      },
-    },
-  }
-}));
+function FakeParticipantButton(props) {
+    const { t } = useTranslation();
 
-function FakeParticipantButton({ footer, increment, ...props }) {
-  const {t} = useTranslation();
-  const conference = useContext(ConferenceContext);
-  return (
-      <Tooltip title={t((increment?'Add':'Remove')+' Fake Participant')} placement="top">
-        <CustomizedBtn
-          onClick={() => {
-            console.log("add/remove");
-            if(increment) {
-              conference?.addFakeParticipant();
-            }
-            else {
-              conference?.removeFakeParticipant();
-            }
-          }}
-          variant="contained"
-          className={footer ? 'footer-icon-button' : ''}
-          color='secondary'
+    return (
+        <Tooltip
+            title={t((props.increment ? "Add" : "Remove") + " Fake Participant")}
+            placement="top"
         >
-          {increment ? "+" : "-"}
-        </CustomizedBtn>
-      </Tooltip>
-  );
+            <CustomizedBtn
+                onClick={props?.onAction}
+                variant="contained"
+                className={props?.footer ? "footer-icon-button" : ""}
+                color="secondary"
+            >
+                {props?.increment ? "+" : "-"}
+            </CustomizedBtn>
+        </Tooltip>
+    );
 }
 
 export default FakeParticipantButton;

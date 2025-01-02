@@ -1,6 +1,6 @@
 codesigning.asc
 .DS_Store
-webapp/src/main/webapp/
+webapp/src/main/webapp/static/
 .vscode/
 
 react/.env.development
