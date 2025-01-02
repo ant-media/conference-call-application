@@ -7,7 +7,6 @@ import RecordingButton from "../../Components/RecordingButton";
 // Mock the useContext hook
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
-  useContext: jest.fn(),
 }));
 
 describe('Recording Button Component', () => {
@@ -15,13 +14,6 @@ describe('Recording Button Component', () => {
   beforeEach(() => {
     // Reset the mock implementation before each test
     jest.clearAllMocks();
-
-    React.useContext.mockImplementation(input => {
-      if (input === ConferenceContext) {
-        return contextValue;
-      }
-      return jest.requireActual('react').useContext(input);
-    });
   });
 
 

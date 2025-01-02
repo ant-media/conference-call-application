@@ -1,10 +1,9 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { SvgIcon } from '../../SvgIcon';
 import { Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { ConferenceContext } from 'pages/AntMedia';
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
     '&.footer-icon-button':{
@@ -20,22 +19,23 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
     }
 }));
 
-function PublisherRequestListButton({ footer, ...props }) {
+function PublisherRequestListButton({ footer, requestSpeakerList, publisherRequestListDrawerOpen, handlePublisherRequestListOpen }) {
     const {t} = useTranslation();
-    const conference = useContext(ConferenceContext);
 
     return (
         <Tooltip title={t('Publisher Request List')} placement="top">
             <CustomizedBtn
                 onClick={() => {
-                    conference?.handlePublisherRequestListOpen(!conference?.publisherRequestListDrawerOpen);
+                    handlePublisherRequestListOpen(!publisherRequestListDrawerOpen);
                 }}
                 variant="contained"
                 className={footer ? 'footer-icon-button' : ''}
-                color={conference?.publisherRequestListDrawerOpen ? 'primary' : 'secondary'}
+                color={publisherRequestListDrawerOpen ? 'primary' : 'secondary'}
+                id="publisher-request-list-button"
+                data-testid="publisher-request-list-button"
             >
-                <SvgIcon size={32} color={conference?.publisherRequestListDrawerOpen ? '#000' : '#fff'} name={'raise-hand'} />
-                {conference.requestSpeakerList.length}
+                <SvgIcon size={32} color={publisherRequestListDrawerOpen ? '#000' : '#fff'} name={'raise-hand'} />
+                {requestSpeakerList.length}
             </CustomizedBtn>
         </Tooltip>
     );

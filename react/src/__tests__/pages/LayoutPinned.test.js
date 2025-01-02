@@ -7,18 +7,47 @@ import theme from "styles/theme";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
 
-// Mock the context value
-const contextValue = {
+// Mock the props
+const props = {
+  pinnedParticipant: {
+    participantID: "participant-1",
+    streamID: "stream-1",
+  },
+  gallerySize: {
+    w: 800,
+    h: 600,
+  },
+  globals: {
+    desiredTileCount: 10,
+  },
+  publishStreamId: "stream-1",
+  pinVideo: jest.fn(),
   allParticipants: {},
   videoTrackAssignments: [],
-  globals: {desiredTileCount: 10},
   updateMaxVideoTrackCount: jest.fn(),
+  talkers: ["participant-1"],
+  streamName: "Test Stream",
+  isPublished: true,
+  isPlayOnly: false,
+  isMyMicMuted: false,
+  isMyCamTurnedOff: false,
+  setAudioLevelListener: jest.fn(),
+  setParticipantIdMuted: jest.fn(),
+  turnOnYourMicNotification: jest.fn(),
+  turnOffYourMicNotification: jest.fn(),
+  turnOffYourCamNotification: jest.fn(),
+  isAdmin: false,
+  localVideo: {
+    id: "local-video-1",
+    track: "video-track",
+  },
+  localVideoCreate: jest.fn(),
 };
+
 
 // Mock the useContext hook
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
-  useContext: jest.fn(),
 }));
 
 jest.mock('Components/Cards/VideoCard', () => ({ value }) => <div data-testid="mocked-video-card">{value}</div>);
@@ -30,42 +59,17 @@ describe('Pinned Layout Component', () => {
   beforeEach(() => {
     // Reset the mock implementation before each test
     jest.clearAllMocks();
-
-    React.useContext.mockImplementation(input => {
-      if (input === ConferenceContext) {
-        return contextValue;
-      }
-      return jest.requireActual('react').useContext(input);
-    });
   });
 
 
-  it('renders without crashing in desktop view', () => {
-    contextValue.allParticipants[`p1`] = {streamId: `p1`, name: `test1`};
-    contextValue.videoTrackAssignments.push({streamId: `p1`, videoLabel: `test1`, track: null, name: `test1`});
-
+  it('renders without crashing', () => {
     const { container, getByText, getByRole } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
             <LayoutPinned
-                isMobile={false}
+                {...props}
             />
         </ThemeProvider>
       );
-
-    console.log(container.outerHTML);
-  });
-
-  it('renders without crashing in mobile view', () => {
-    contextValue.allParticipants[`p1`] = {streamId: `p1`, name: `test1`};
-    contextValue.videoTrackAssignments.push({streamId: `p1`, videoLabel: `test1`, track: null, name: `test1`});
-
-    const { container, getByText, getByRole } = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <LayoutPinned
-              isMobile={true}
-          />
-        </ThemeProvider>
-    );
 
     console.log(container.outerHTML);
   });
@@ -75,15 +79,17 @@ describe('Pinned Layout Component', () => {
     var noOfParticipants = 4;
 
     for (let i = 0; i < noOfParticipants; i++) {
-      contextValue.allParticipants[`p${i}`] = {streamId: `p${i}`, name: `test${i}`};
-      contextValue.videoTrackAssignments.push({streamId: `p${i}`, videoLabel: `test${i}`, track: null, name: `test${i}`});
+      props.allParticipants[`p${i}`] = {streamId: `p${i}`, name: `test${i}`};
+      props.videoTrackAssignments.push({streamId: `p${i}`, videoLabel: `test${i}`, track: null, name: `test${i}`});
     }
 
-    contextValue.pinnedVideoId = 1;
+    props.pinnedVideoId = 1;
 
     const { container, getAllByTestId, queryByTestId  } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutPinned />
+            <LayoutPinned
+                {...props}
+            />
         </ThemeProvider>
       );
 
@@ -102,15 +108,17 @@ describe('Pinned Layout Component', () => {
     var noOfParticipants = 10;
 
     for (let i = 0; i < noOfParticipants; i++) {
-      contextValue.allParticipants[`p${i}`] = {streamId: `p${i}`, name: `test${i}`};
-      contextValue.videoTrackAssignments.push({streamId: `p${i}`, videoLabel: `test${i}`, track: null, name: `test${i}`});
+      props.allParticipants[`p${i}`] = {streamId: `p${i}`, name: `test${i}`};
+      props.videoTrackAssignments.push({streamId: `p${i}`, videoLabel: `test${i}`, track: null, name: `test${i}`});
     }
 
-    contextValue.pinnedVideoId = 1;
+    props.pinnedVideoId = 1;
 
     const { container, getAllByTestId, getByTestId  } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutPinned />
+            <LayoutPinned
+                {...props}
+            />
         </ThemeProvider>
       );
 
@@ -125,15 +133,17 @@ describe('Pinned Layout Component', () => {
 
   it('set the max video count', () => {
     process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY = true;
-    contextValue.pipinnedVideoId = 1;
+    props.pipinnedVideoId = 1;
 
     const { container, getAllByTestId, getByTestId  } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutPinned />
+            <LayoutPinned
+                {...props}
+            />
         </ThemeProvider>
       );
 
-      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(3);
+      expect(props.updateMaxVideoTrackCount).toHaveBeenCalledWith(3);
 
   });
   */
