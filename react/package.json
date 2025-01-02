@@ -1,6 +1,6 @@
 {
   "name": "antmedia-cra",
-  "version": "2.12.0-SNAPSHOT",
+  "version": "3.0.0-SNAPSHOT",
   "private": true,
   "homepage": ".",
   "dependencies": {
@@ -70,6 +70,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
+    "@testing-library/dom": "^10.4.0",
     "babel-plugin-istanbul": "^7.0.0",
     "babel-plugin-react-compiler": "^19.0.0-beta-37ed2a7-20241206",
     "codecov": "^3.8.2",
