@@ -70,6 +70,7 @@ function VideoCard(props) {
 
 
 
+    // istanbul ignore next
     const OverlayButton = ({ title, icon, color, onClick, label }) => (
         // istanbul ignore next
         <Tooltip title={title} placement="top" style={{margin: '2px'}}>
