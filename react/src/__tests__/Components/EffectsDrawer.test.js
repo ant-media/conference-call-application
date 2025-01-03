@@ -1,7 +1,7 @@
 // src/EffectsDrawer.test.js
 import React from 'react';
 import { render } from '@testing-library/react';
-import EffectsDrawer from "../../../../Components/EffectsDrawer";
+import EffectsDrawer from "../../Components/EffectsDrawer";
 
 // Mock the props
 const props = {
@@ -28,7 +28,7 @@ jest.mock('react', () => ({
   ...jest.requireActual('react'),
 }));
 
-describe('Camera Button Component', () => {
+describe('Effects Drawer Component', () => {
 
   beforeEach(() => {
     // Reset the mock implementation before each test
