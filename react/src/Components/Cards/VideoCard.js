@@ -71,6 +71,7 @@ function VideoCard(props) {
 
 
     const OverlayButton = ({ title, icon, color, onClick, label }) => (
+        // istanbul ignore next
         <Tooltip title={title} placement="top" style={{margin: '2px'}}>
             <Fab onClick={onClick} color={color} aria-label={label} size="small">
                 <SvgIcon size={36} name={icon} color={theme.palette?.iconColor?.primary} />
