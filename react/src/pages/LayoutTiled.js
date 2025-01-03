@@ -94,7 +94,6 @@ function LayoutTiled(props) {
             }
 
             //console.log("cw:"+cardWidth+" ch:"+cardHeight);
-            /* istanbul ignore next */
             return (
               <div
                   className="single-video-container not-pinned"

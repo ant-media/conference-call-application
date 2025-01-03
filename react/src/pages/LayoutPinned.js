@@ -30,7 +30,6 @@ function LayoutPinned (props) {
       playingParticipants.push(props.videoTrackAssignments.find(e => e.streamId === pinnedParticipant.streamId));
       pinnedParticipantName = props?.allParticipants[pinnedParticipant.streamId]?.name;
     }
-    /* istanbul ignore next */
     return (
       pinnedParticipant ? (
         <div className="single-video-container pinned keep-ratio">
@@ -100,7 +99,6 @@ function LayoutPinned (props) {
         if(element?.streamId !== pinnedParticipant?.streamId && playingParticipantsCount < maxPlayingParticipantsCount) {
           playingParticipantsCount ++;
           playingParticipants.push(element);
-          /* istanbul ignore next */
           return (
               <div className="unpinned" key={index}>
                 <div className="single-video-container">
@@ -144,7 +142,6 @@ function LayoutPinned (props) {
         }
 
         const othersCard = () => {
-          /* istanbul ignore next */
           return (
               <>
                 {showOthers ? (

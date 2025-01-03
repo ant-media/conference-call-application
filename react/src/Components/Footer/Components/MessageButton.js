@@ -23,7 +23,7 @@ function MessageButton(props) {
   const {t} = useTranslation();
   return (
     <Badge
-      badgeContent={props?.numberOfUnReadMessages}
+      badgeContent={isNaN(props?.numberOfUnReadMessages) ? 0 : props?.numberOfUnReadMessages}
       color="primary"
       anchorOrigin={{
         vertical: 'top',

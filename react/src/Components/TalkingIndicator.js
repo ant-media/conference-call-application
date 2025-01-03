@@ -4,6 +4,7 @@ import { useTheme } from "@mui/material";
 
 const TalkingIndicatorWrapper = styled("div")(({ isVisible, borderColor }) => ({
     borderColor: borderColor,
+    color: borderColor,
     display: isVisible ? "block" : "none",
     border: "2px solid",
     position: "absolute",
@@ -11,6 +12,7 @@ const TalkingIndicatorWrapper = styled("div")(({ isVisible, borderColor }) => ({
     width: "100%",
     pointerEvents: "none",
     zIndex: 2,
+    borderRadius: "8px",
 }));
 
 const TalkingIndicator = (props) => {
