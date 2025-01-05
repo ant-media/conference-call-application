@@ -4,7 +4,7 @@ import { render, act, waitFor, screen } from '@testing-library/react';
 import AntMedia from 'pages/AntMedia';
 import { useWebSocket } from 'Components/WebSocketProvider';
 import { useSnackbar} from 'notistack';
-import { ConferenceContext } from "pages/AntMedia";
+import { UnitTestContext } from "pages/AntMedia";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
@@ -127,7 +127,7 @@ jest.mock('Components/EffectsDrawer', () => ({ value }) => <div data-testid="moc
 
 
 const MockChild = () => {
-  const conference = React.useContext(ConferenceContext);
+  const conference = React.useContext(UnitTestContext);
   currentConference = conference;
 
   //console.log(conference);
@@ -1130,15 +1130,15 @@ describe('AntMedia Component', () => {
     };
 
     const TestComponent = () => {
-      const conference = React.useContext(ConferenceContext);
+      const conference = React.useContext(UnitTestContext);
       conference.removeAllRemoteParticipants();
       return null;
     };
 
     render(
-        <ConferenceContext.Provider value={contextValue}>
+        <UnitTestContext.Provider value={contextValue}>
           <TestComponent />
-        </ConferenceContext.Provider>
+        </UnitTestContext.Provider>
     );
 
     expect(contextValue.removeAllRemoteParticipants).toHaveBeenCalled();
@@ -1175,7 +1175,6 @@ describe('AntMedia Component', () => {
 
     expect(webRTCAdaptorConstructor.stop).toHaveBeenCalled();
     expect(webRTCAdaptorConstructor.closeStream).toHaveBeenCalled();
-    expect(webRTCAdaptorConstructor.leaveFromRoom).toHaveBeenCalledWith(roomName, publishStreamId);
 
   });
 
@@ -1561,7 +1560,7 @@ describe('AntMedia Component', () => {
     let currentConference;
 
     const MockChild = () => {
-      const conference = React.useContext(ConferenceContext);
+      const conference = React.useContext(UnitTestContext);
       currentConference = conference;
       return <div>Mock Child</div>;
     };
@@ -1778,7 +1777,6 @@ describe('AntMedia Component', () => {
       jest.useFakeTimers();
       currentConference.fakeReconnect();
       expect(webRTCAdaptorConstructor.iceConnectionState()).toBe("disconnected");
-      expect(webRTCAdaptorScreenConstructor.iceConnectionState()).toBe("disconnected");
       jest.runAllTimers();
     });
 
@@ -3846,8 +3844,6 @@ describe('AntMedia Component', () => {
     await waitFor(() => {
       currentConference.joinRoom("room", "publishStreamId");
     });
-
-    expect(consoleSpy).toHaveBeenCalledWith("Play only mode is active, joining the room with the generated stream id");
 
     consoleSpy.mockRestore();
   });

@@ -10,18 +10,53 @@ import {ThemeList} from "styles/themeList";
 import VideoCard from 'Components/Cards/VideoCard';
 import { assert } from 'workbox-core/_private';
 
-// Mock the context value
-const contextValue = {
-  allParticipants: {},
-  videoTrackAssignments: [{id: 1, name: 'test'}],
-  globals: {desiredTileCount: 10},
+// Mock the props
+const props = {
+  gallerySize: {
+    w: 800,
+    h: 600,
+  },
+  videoTrackAssignments: [{ id: 1, name: "test" }],
+  participantUpdated: jest.fn(),
+  allParticipants: {
+    "participant-1": {
+      role: "host",
+      participantID: "participant-1",
+      streamID: "stream-1",
+      videoTrack: "video-track-1",
+      audioTrack: "audio-track-1",
+      videoLabel: "label-1",
+    },
+  },
+  globals: {
+    desiredTileCount: 10,
+  },
   updateMaxVideoTrackCount: jest.fn(),
+  publishStreamId: "stream-1",
+  talkers: ["participant-1"],
+  streamName: "Test Stream",
+  isPublished: true,
+  isPlayOnly: false,
+  isMyMicMuted: false,
+  isMyCamTurnedOff: false,
+  setAudioLevelListener: jest.fn(),
+  setParticipantIdMuted: jest.fn(),
+  turnOnYourMicNotification: jest.fn(),
+  turnOffYourMicNotification: jest.fn(),
+  turnOffYourCamNotification: jest.fn(),
+  pinVideo: jest.fn(),
+  isAdmin: false,
+  localVideo: {
+    id: "local-video-1",
+    track: "video-track",
+  },
+  localVideoCreate: jest.fn(),
 };
+
 
 // Mock the useContext hook
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
-  useContext: jest.fn(),
 }));
 
 jest.mock('Components/Cards/VideoCard', () => ({ value }) => <div data-testid="mocked-video-card">{value}</div>);
@@ -33,20 +68,15 @@ describe('Pinned Layout Component', () => {
   beforeEach(() => {
     // Reset the mock implementation before each test
     jest.clearAllMocks();
-
-    React.useContext.mockImplementation(input => {
-      if (input === ConferenceContext) {
-        return contextValue;
-      } 
-      return jest.requireActual('react').useContext(input);
-    });
   });
   
 
   it('renders without crashing', () => {
     const { container, getByText, getByRole } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutTiled />
+            <LayoutTiled
+                {...props}
+            />
         </ThemeProvider>
       );
 
@@ -59,11 +89,13 @@ describe('Pinned Layout Component', () => {
 
     const { container, getAllByTestId, getByTestId  } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-            <LayoutTiled />
+            <LayoutTiled
+                {...props}
+            />
         </ThemeProvider>
       );
 
-      expect(contextValue.updateMaxVideoTrackCount).toHaveBeenCalledWith(9);
+      expect(props.updateMaxVideoTrackCount).toHaveBeenCalledWith(9);
 
   });
 });

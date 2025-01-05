@@ -1,11 +1,10 @@
-import React, {useContext} from "react";
+import React from "react";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
-import {ConferenceContext} from "../pages/AntMedia";
 
 const PublisherRequestName = styled(Typography)(({ theme }) => ({
     color: "#000",
@@ -15,13 +14,12 @@ const PublisherRequestName = styled(Typography)(({ theme }) => ({
 //hover color of allow or deny
 const PinBtn = styled(Button)(({ theme }) => ({
     "&:hover": {
-        backgroundColor: theme.palette.themeColor[50],
+        backgroundColor: theme.palette.themeColor?.[50],
         color: "#fff",
     },
 }));
 
 function PublisherRequestTab(props) {
-    const conference = useContext(ConferenceContext);
     const theme = useTheme();
 
     const getPublisherRequestItem = (streamId) => {
@@ -41,8 +39,7 @@ function PublisherRequestTab(props) {
                     <PinBtn
                         data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.approveBecomeSpeakerRequest(streamId);}
-                    }
+                        onClick={() => {props?.approveBecomeSpeakerRequest(videoId);}}
                     >
                         Allow
                     </PinBtn>
@@ -50,10 +47,7 @@ function PublisherRequestTab(props) {
                     <PinBtn
                         data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {
-                            conference?.rejectBecomeSpeakerRequest(streamId);
-                        }
-                    }
+                        onClick={() => {props?.rejectSpeakerRequest(videoId);}}
                     >
                         Deny
                     </PinBtn>
@@ -71,11 +65,11 @@ function PublisherRequestTab(props) {
                         variant="body2"
                         style={{marginLeft: 8, fontWeight: 500}}
                     >
-                        {conference?.requestSpeakerList.length}
+                        {props?.requestSpeakerList.length}
                     </PublisherRequestName>
                 </Grid>
-                {conference?.requestSpeakerList.map((streamId) => {
-                    if (conference?.publishStreamId !== streamId) {
+                {props?.requestSpeakerList.map((streamId) => {
+                    if (props?.publishStreamId !== streamId) {
                         return getPublisherRequestItem(streamId);
                     } else {
                         return "";
