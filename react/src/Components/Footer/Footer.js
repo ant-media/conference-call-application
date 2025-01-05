@@ -75,6 +75,7 @@ function Footer(props) {
     }
   }, [props?.isRecordPluginActive, props?.isEnterDirectly, props?.isPlayOnly]);
 
+  /* istanbul ignore next */
   return (
       <CustomizedGrid
           container

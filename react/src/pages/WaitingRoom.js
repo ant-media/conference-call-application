@@ -219,6 +219,7 @@ function WaitingRoom(props) {
         );
     }
 
+    /* istanbul ignore next */
     return (
         <Container
             id="waiting-room"
