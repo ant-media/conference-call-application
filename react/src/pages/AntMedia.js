@@ -1361,7 +1361,7 @@ function AntMedia(props) {
             });
 
      //just run once when component is mounted
-    }, []);  //eslint-disable-line 
+    }, []);  //eslint-disable-line
 
     useEffect(() => {
         if (devices.length > 0) {
@@ -1786,13 +1786,16 @@ function AntMedia(props) {
         } else if (error.indexOf("no_stream_exist") !== -1) {
             setIsNoSreamExist(true);
         } else if (error.indexOf("streamIdInUse") !== -1) {
-            streamIdInUseCounter++;
-            if (streamIdInUseCounter > 3) {
-                console.log("This stream id is already in use. You may be logged in on another device.");
-                setLeaveRoomWithError("Streaming is already active with your username. Please check that you're not using it in another browser tab.");
-                setLeftTheRoom(true);
-                setIsJoining(false);
-                setIsReconnectionInProgress(false);
+            // if the stream id is in use when reconnection, don't display the error
+            if (!reconnecting) {
+                streamIdInUseCounter++;
+                if (streamIdInUseCounter > 3) {
+                    console.log("This stream id is already in use. You may be logged in on another device.");
+                    setLeaveRoomWithError("Streaming is already active with your username. Please check that you're not using it in another browser tab.");
+                    setLeftTheRoom(true);
+                    setIsJoining(false);
+                    setIsReconnectionInProgress(false);
+                }
             }
         } else if (error.indexOf("data_channel_error") !== -1) {
             errorMessage = "There was a error during data channel communication";
@@ -3176,7 +3179,8 @@ function AntMedia(props) {
                             speedTestCounter,
                             setRoomName,
                             setPublishStreamId,
-                            settings
+                            settings,
+                            setReconnectingForUnitTests
                         }}
                     >
                         {props.children}
