@@ -75,7 +75,12 @@ const PublisherRequestListDrawer = React.memo(props => {
                 <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
                     <TabPanel value={value} index={0}>
                         <TabGrid container>
-                            <PublisherRequestTab />
+                            <PublisherRequestTab
+                                approveBecomeSpeakerRequest={(streamId) => props?.approveBecomeSpeakerRequest(streamId)}
+                                rejectBecomeSpeakerRequest={(streamId) => props?.rejectBecomeSpeakerRequest(streamId)}
+                                requestSpeakerList={props?.requestSpeakerList}
+                                publishStreamId={props?.publishStreamId}
+                            />
                         </TabGrid>
                     </TabPanel>
                 </Grid>

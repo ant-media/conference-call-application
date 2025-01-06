@@ -20,8 +20,6 @@ const PinBtn = styled(Button)(({ theme }) => ({
 }));
 
 function PublisherRequestTab(props) {
-    const theme = useTheme();
-
     const getPublisherRequestItem = (streamId) => {
         return (
             <Grid
@@ -39,7 +37,7 @@ function PublisherRequestTab(props) {
                     <PinBtn
                         data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {props?.approveBecomeSpeakerRequest(videoId);}}
+                        onClick={() => {props?.approveBecomeSpeakerRequest(streamId);}}
                     >
                         Allow
                     </PinBtn>
@@ -47,7 +45,7 @@ function PublisherRequestTab(props) {
                     <PinBtn
                         data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {props?.rejectSpeakerRequest(videoId);}}
+                        onClick={() => {props?.rejectBecomeSpeakerRequest(streamId);}}
                     >
                         Deny
                     </PinBtn>
