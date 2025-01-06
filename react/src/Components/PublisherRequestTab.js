@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import {styled, useTheme} from "@mui/material/styles";
+import {styled} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 
 const PublisherRequestName = styled(Typography)(({ theme }) => ({

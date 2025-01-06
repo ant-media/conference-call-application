@@ -1343,31 +1343,32 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
+        createWebRTCAdaptor();
+        //just run once when component is mounted
+    }, []);  //eslint-disable-line
 
+    function createWebRTCAdaptor() {
+        reconnecting = false;
+        publishReconnected = true;
+        playReconnected = true;
+        console.log("++ createWebRTCAdaptor");
+        //here we check if audio or video device available and wait result
+        //according to the result we modify mediaConstraints
 
-            reconnecting = false;
-            publishReconnected = true;
-            playReconnected = true;
-            console.log("++ createWebRTCAdaptor");
-            //here we check if audio or video device available and wait result
-            //according to the result we modify mediaConstraints
-
-            checkDevices().then(() => {
-                    var adaptor = new WebRTCAdaptor({
-                    websocket_url: websocketURL,
-                    mediaConstraints: mediaConstraints,
-                    peerconnection_config: peerconnection_config,
-                    isPlayMode: isPlayOnly, // onlyDataChannel: isPlayOnly,
-                    debug: true,
-                    callback: infoCallback,
-                    callbackError: errorCallback,
-                    purposeForTest: "main-adaptor"
-                    });
-                    setWebRTCAdaptor(adaptor)
+        checkDevices().then(() => {
+            var adaptor = new WebRTCAdaptor({
+                websocket_url: websocketURL,
+                mediaConstraints: mediaConstraints,
+                peerconnection_config: peerconnection_config,
+                isPlayMode: isPlayOnly, // onlyDataChannel: isPlayOnly,
+                debug: true,
+                callback: infoCallback,
+                callbackError: errorCallback,
+                purposeForTest: "main-adaptor"
             });
-
-     //just run once when component is mounted
-    }, []);  //eslint-disable-line 
+            setWebRTCAdaptor(adaptor)
+        });
+    }
 
     useEffect(() => {
         if (devices.length > 0) {
