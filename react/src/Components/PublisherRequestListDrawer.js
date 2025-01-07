@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Drawer from '@mui/material/Drawer';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import {  Grid,  Tabs, Tab } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseDrawerButton from './DrawerButton';
@@ -12,7 +12,7 @@ const AntDrawer = styled(Drawer)(({ theme }) => (getAntDrawerStyle(theme)));
 const PublisherRequestListGrid = styled(Grid)(({ theme }) => ({
     position: 'relative',
     padding: 16,
-    background: theme.palette.themeColor70,
+    background: theme.palette.themeColor[70],
     borderRadius: 10,
 }));
 const TabGrid = styled(Grid)(({ theme }) => ({
@@ -75,7 +75,12 @@ const PublisherRequestListDrawer = React.memo(props => {
                 <Grid item container justifyContent="space-between" alignItems="center" style={{ flex: '1 1 auto', overflowY: 'hidden' }}>
                     <TabPanel value={value} index={0}>
                         <TabGrid container>
-                            <PublisherRequestTab />
+                            <PublisherRequestTab
+                                approveBecomeSpeakerRequest={(streamId) => props?.approveBecomeSpeakerRequest(streamId)}
+                                rejectBecomeSpeakerRequest={(streamId) => props?.rejectBecomeSpeakerRequest(streamId)}
+                                requestSpeakerList={props?.requestSpeakerList}
+                                publishStreamId={props?.publishStreamId}
+                            />
                         </TabGrid>
                     </TabPanel>
                 </Grid>

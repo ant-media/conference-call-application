@@ -8,11 +8,6 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import {useTheme} from '@mui/material/styles';
 
 export default function BecomePublisherConfirmationDialog(props) {
-  return (
-      <div></div>
-  );
-
-  /*
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -23,7 +18,7 @@ export default function BecomePublisherConfirmationDialog(props) {
   const approveBecomePublisher = () => {
     props?.setBecomePublisherConfirmationDialogOpen(false);
     props?.handleStartBecomePublisher();
-          }
+  }
 
   return (
     <Dialog
@@ -47,6 +42,4 @@ export default function BecomePublisherConfirmationDialog(props) {
       </DialogActions>
     </Dialog>
   );
-
-   */
 }
