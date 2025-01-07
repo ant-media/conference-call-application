@@ -3179,8 +3179,7 @@ function AntMedia(props) {
                             speedTestCounter,
                             setRoomName,
                             setPublishStreamId,
-                            settings,
-                            setReconnectingForUnitTests
+                            settings
                         }}
                     >
                         {props.children}
