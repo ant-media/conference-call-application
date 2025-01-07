@@ -143,7 +143,7 @@ function ParticipantTab({
         style={{ borderBottomWidth: 1 }}
         sx={{ borderColor: "primary.main" }}
       >
-        <Grid item sx={{ pr: 1,  maxWidth: "60%" }}>
+        <Grid item sx={{ pr: 1,  maxWidth: "40%" }}>
           <ParticipantName
               variant="body1"
               sx={{
@@ -178,7 +178,7 @@ function ParticipantTab({
                 <SvgIcon size={28} name="pin" color={theme.palette?.participantListIcon?.primary}/>
               </PinBtn>
             )}
-            <div>
+            <div style={{display: 'flex'}}>
               {process.env.REACT_APP_PARTICIPANT_TAB_ADMIN_MODE_ENABLED === "true" && isAdmin === true ? (
                 getAdminButtons(streamId, assignedVideoCardId, publishStreamId)
               ) : null}

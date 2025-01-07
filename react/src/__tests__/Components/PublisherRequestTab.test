@@ -1,0 +1,90 @@
+// src/PublisherRequestTab.tet.js
+
+import React from 'react';
+import { render } from '@testing-library/react';
+import PublisherRequestTab from "../../Components/PublisherRequestTab";
+import theme from "../../styles/theme";
+import {ThemeList} from "../../styles/themeList";
+import {ThemeProvider} from "@mui/material";
+
+// Mock the useContext hook
+jest.mock('react', () => ({
+    ...jest.requireActual('react'),
+    useContext: jest.fn(),
+}));
+
+
+describe('Publisher Request Tab Component', () => {
+
+    beforeEach(() => {
+        // Reset the mock implementation before each test
+        jest.clearAllMocks();
+    });
+
+
+    it('renders without crashing', () => {
+        render(
+            <ThemeProvider theme={theme(ThemeList.Green)}>
+                <PublisherRequestTab
+                    approveBecomeSpeakerRequest={jest.fn()}
+                    rejectBecomeSpeakerRequest={jest.fn()}
+                    requestSpeakerList={["test1", "test2"]}
+                    publishStreamId={"test0"}
+                />
+            </ThemeProvider>
+        );
+    });
+
+    it('renders the publisher request items', () => {
+        const { getByText } = render(
+            <ThemeProvider theme={theme(ThemeList.Green)}>
+                <PublisherRequestTab
+                    approveBecomeSpeakerRequest={jest.fn()}
+                    rejectBecomeSpeakerRequest={jest.fn()}
+                    requestSpeakerList={["test1", "test2"]}
+                    publishStreamId={"test0"}
+                />
+            </ThemeProvider>
+        );
+
+        expect(getByText('test1')).toBeInTheDocument();
+        expect(getByText('test2')).toBeInTheDocument();
+    });
+
+    it('calls the approveBecomeSpeakerRequest function when the allow button is clicked', () => {
+        let mockApproveBecomeSpeakerRequest = jest.fn();
+
+        const { getByTestId } = render(
+            <ThemeProvider theme={theme(ThemeList.Green)}>
+                <PublisherRequestTab
+                    approveBecomeSpeakerRequest={mockApproveBecomeSpeakerRequest}
+                    rejectBecomeSpeakerRequest={jest.fn()}
+                    requestSpeakerList={["test1", "test2"]}
+                    publishStreamId={"test0"}
+                />
+            </ThemeProvider>
+        );
+
+        getByTestId('approve-become-speaker-test1').click();
+        expect(mockApproveBecomeSpeakerRequest).toHaveBeenCalledWith('test1');
+    });
+
+    it('calls the rejectBecomeSpeakerRequest function when the deny button is clicked', () => {
+        let mockRejectBecomeSpeakerRequest = jest.fn();
+
+        const { getByTestId } = render(
+            <ThemeProvider theme={theme(ThemeList.Green)}>
+                <PublisherRequestTab
+                    approveBecomeSpeakerRequest={jest.fn()}
+                    rejectBecomeSpeakerRequest={mockRejectBecomeSpeakerRequest}
+                    requestSpeakerList={["test1", "test2"]}
+                    publishStreamId={"test0"}
+                />
+            </ThemeProvider>
+        );
+
+        getByTestId('reject-become-speaker-test1').click();
+        expect(mockRejectBecomeSpeakerRequest).toHaveBeenCalledWith('test1');
+    });
+
+});
