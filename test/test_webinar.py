@@ -184,6 +184,14 @@ class TestWebinarScenario(unittest.TestCase):
 
     return handle
   
+  def accept_raising_hand_request(self, participant):
+    accept_button = self.chrome.get_element_with_retry(By.ID,"approve-become-speaker-"+participant)
+    self.chrome.click_element(accept_button)
+
+  def reject_raising_hand_request(self, participant):
+    reject_button = self.chrome.get_element_with_retry(By.ID,"reject-become-speaker-"+participant)
+    self.chrome.click_element(reject_button)
+  
   def add_presenter_to_listener_room(self, presenter):
     add_button = self.chrome.get_element(By.ID,"add-presenter-"+presenter)
     self.chrome.click_element(add_button)
@@ -752,6 +760,56 @@ class TestWebinarScenario(unittest.TestCase):
     wait.until(lambda x: self.chrome.get_element_in_element(presenterA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='turn-off-camera']") is not None)
    
     
+    self.chrome.close_all()
+
+  def test_raising_hand(self):
+    # create a room and join as admin and 2 players
+    room = "room"+str(random.randint(100, 999))
+    handle_admin = self.join_room_as_admin("admin", room)
+    handle_player_A = self.join_room_as_player("playerA", room)
+    handle_player_B = self.join_room_as_player("playerB", room)
+
+    wait = self.chrome.get_wait()
+
+    # switch to playerA and raise hand
+    self.chrome.switch_to_tab(handle_player_A)
+
+    raise_hand_button = self.chrome.get_element_with_retry(By.ID, "request-to-publisher-button")
+    self.chrome.click_element(raise_hand_button)
+
+    # switch to admin and check if playerA is in the request list
+    self.chrome.switch_to_tab(handle_admin)
+
+    self.open_close_publisher_request_list_drawer()
+
+    time.sleep(15)
+
+    self.accept_raising_hand_request("playerA")
+
+    # switch to playerA and join the room
+    self.chrome.switch_to_tab(handle_player_A)
+
+    join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
+    self.chrome.click_element(join_button)
+    
+    time.sleep(5)
+
+    meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
+
+    assert(meeting_gallery.is_displayed())
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+    # switch to admin and join the room
+    self.chrome.switch_to_tab(handle_admin)
+
+    wait.until(lambda x: len(self.get_participants()) == 2)
+
+    # switch to playerB and join the room
+    self.chrome.switch_to_tab(handle_player_B)
+
+    wait.until(lambda x: len(self.get_participants()) == 0)
+
     self.chrome.close_all()
 
 if __name__ == '__main__':
