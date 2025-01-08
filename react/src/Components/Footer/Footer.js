@@ -222,7 +222,9 @@ function Footer(props) {
                       <RequestPublishButton
                           footer={true}
                           rounded={false}
-                          handlePublisherRequest={()=>props?.handlePublisherRequest()}
+                          handlePublisherRequest={()=> {
+                            props?.handlePublisherRequest()
+                          }}
                       />
                     </Grid>
                     : null}
