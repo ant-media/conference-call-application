@@ -1839,7 +1839,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_create_meeting_with_password(self):
+  def test_create_meeting_with_password(self):
     wait = WebDriverWait(self.chrome, 10)
     roomPassword = "123123"
 
