@@ -2,6 +2,9 @@ import { render } from '@testing-library/react';
 import React from "react";
 import WaitingRoom from "../../pages/WaitingRoom";
 import { ConferenceContext } from 'pages/AntMedia';
+import theme from "../../styles/theme";
+import {ThemeList} from "../../styles/themeList";
+import {ThemeProvider} from "@mui/material";
 
 const contextValue = {
   initialized: true,

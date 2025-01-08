@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
+import {styled} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 
 const PublisherRequestName = styled(Typography)(({ theme }) => ({
@@ -20,15 +20,10 @@ const PinBtn = styled(Button)(({ theme }) => ({
 }));
 
 function PublisherRequestTab(props) {
-    return (
-        <div></div>
-    );
-
-    /*
-    const getPublisherRequestItem = (videoId) => {
+    const getPublisherRequestItem = (streamId) => {
         return (
             <Grid
-                key={videoId}
+                key={streamId}
                 container
                 alignItems="center"
                 justifyContent="space-between"
@@ -36,19 +31,21 @@ function PublisherRequestTab(props) {
                 sx={{ borderColor: "primary.main" }}
             >
                 <Grid item sx={{ pr: 1 }}>
-                    <PublisherRequestName variant="body1">{videoId}</PublisherRequestName>
+                    <PublisherRequestName variant="body1">{streamId}</PublisherRequestName>
                 </Grid>
                 <Grid item>
                     <PinBtn
+                        data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {props?.approveBecomeSpeakerRequest(videoId); props?.setRequestSpeakerList(props?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {props?.approveBecomeSpeakerRequest(streamId);}}
                     >
                         Allow
                     </PinBtn>
 
                     <PinBtn
+                        data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {props?.rejectSpeakerRequest(videoId); props?.setRequestSpeakerList(props?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {props?.rejectBecomeSpeakerRequest(streamId);}}
                     >
                         Deny
                     </PinBtn>
@@ -79,8 +76,6 @@ function PublisherRequestTab(props) {
             </Stack>
         </div>
     );
-
-     */
 
 }
 

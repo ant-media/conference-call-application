@@ -23,6 +23,7 @@ import {useSnackbar} from 'notistack';
 import {getUrlParameter} from "@antmedia/webrtc_adaptor";
 import {getRootAttribute, isComponentMode} from "utils";
 import {useTheme} from "@mui/material/styles";
+import {WebinarRoles} from "../WebinarRoles";
 import TalkingIndicator from "../Components/TalkingIndicator";
 import {UnitTestContext} from "./AntMedia";
 
@@ -69,6 +70,15 @@ function WaitingRoom(props) {
     };
 
     React.useEffect(() => {
+        if (conference.role === WebinarRoles.TempListener) {
+            const tempLocalVideo = document.getElementById("localVideo");
+            conference?.localVideoCreate(tempLocalVideo);
+            console.log("TempListener local video created");
+        }
+    }, []);
+
+    React.useEffect(() => {
+
         if (!props?.isPlayOnly && props?.initialized) {
             const tempLocalVideo = document.getElementById("localVideo");
             props?.localVideoCreate(tempLocalVideo);
@@ -309,7 +319,7 @@ function WaitingRoom(props) {
             <Grid
                 container
                 spacing={4}
-                justifyContent="space-between"
+                justifyContent={conference.role !== WebinarRoles.TempListener ? "space-between" : "center"}
                 alignItems={"center"}
             >
 
@@ -404,9 +414,31 @@ function WaitingRoom(props) {
                                 "You can choose whether to open your camera and microphone before you get into room"
                             )}
                         </Typography>
+                        {conference.role === WebinarRoles.TempListener ? (
+                            <form
+                                data-testid="temp-listener-join-form"
+                                onSubmit={(e) => {
+                                e.preventDefault();
+                                joinRoom(e);
+                            }}>
+                            <Grid container justifyContent={"center"}>
+                                <Grid item sm={6} xs={12}>
+                                    <Button
+                                        fullWidth
+                                        color="secondary"
+                                        variant="contained"
+                                        type="submit"
+                                        id="room_join_button"
+                                    >
+                                        {t("I'm ready to join")}
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                            </form>) : null}
                     </Grid>
                     : null}
 
+                {conference.role !== WebinarRoles.TempListener ? (
                 <Grid item md={props?.isPlayOnly === false ? 4 : 12}>
                     <Grid container justifyContent={"center"}>
                         <Grid container justifyContent={"center"}>
@@ -432,6 +464,7 @@ function WaitingRoom(props) {
                         </Grid>
 
                         <form
+                            data-testid="join-form"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 joinRoom(e);
@@ -478,6 +511,7 @@ function WaitingRoom(props) {
                         </form>
                     </Grid>
                 </Grid>
+                ) : null}
             </Grid>
         </Container>
     );
