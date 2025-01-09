@@ -3398,6 +3398,7 @@ function AntMedia(props) {
                             pinVideo={(streamId) => pinVideo(streamId)}
                             isAdmin={isAdmin}
                             publishStreamId={publishStreamId}
+                            role={role}
                         />
                     ) : (
                         <>
