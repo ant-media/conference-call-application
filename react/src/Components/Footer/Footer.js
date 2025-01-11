@@ -111,6 +111,7 @@ function Footer(props) {
                           globals={props?.globals}
                           allParticipants={props?.allParticipants}
                           pinVideo={(streamId) => props?.pinVideo(streamId)}
+                          pinFirstVideo={props?.pinFirstVideo}
                           handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
                           isAdmin={props?.isAdmin}
                           isRecordPluginActive={props?.isRecordPluginActive}
