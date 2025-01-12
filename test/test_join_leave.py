@@ -1594,16 +1594,22 @@ class TestJoinLeave(unittest.TestCase):
     last_message = messages[-1]
     assert(message_A in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     #check messages on B and C
     self.chrome.switch_to_tab(handle_2)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_A in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     self.chrome.switch_to_tab(handle_3)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_A in last_message.get_attribute("innerHTML"))
+
+    time.sleep(1)
 
     #send message from B
     self.chrome.switch_to_tab(handle_2)
@@ -1612,16 +1618,22 @@ class TestJoinLeave(unittest.TestCase):
     last_message = messages[-1]
     assert(message_B in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     #check messages on A and C
     self.chrome.switch_to_tab(handle_2)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_B in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     self.chrome.switch_to_tab(handle_3)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_B in last_message.get_attribute("innerHTML"))
+
+    time.sleep(1)
 
     #send message from C
     self.send_message(message_C)
@@ -1629,11 +1641,15 @@ class TestJoinLeave(unittest.TestCase):
     last_message = messages[-1]
     assert(message_C in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     #check messages on A and B
     self.chrome.switch_to_tab(handle_1)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_C in last_message.get_attribute("innerHTML"))
+
+    time.sleep(1)
 
     self.chrome.switch_to_tab(handle_2)
     messages = self.chrome.get_all_elements(By.ID, "message")
