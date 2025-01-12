@@ -370,7 +370,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_both_rooms(self):
+  def test_both_rooms(self):
     self.chrome.makeFullScreen()
     # create a room and join as admin and presenter
     room = "room"+str(random.randint(100, 999))
@@ -489,7 +489,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     assert(localVideo.is_displayed())
 
-  def _test_with_stats(self):
+  def test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_as_presenter("participantA", room)
     handle_2 = self.join_room_as_presenter("participantB", room)
@@ -525,7 +525,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_pin_scenario(self):
+  def test_pin_scenario(self):
     # create a room and join as admin and 3 presenters
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("adminA", room)   
@@ -587,7 +587,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_multiple_player(self):
+  def test_multiple_player(self):
     # create a room and join as admin and presenter
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("adminA", room)   
@@ -690,7 +690,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_admin_video_card_controls(self):
+  def test_admin_video_card_controls(self):
     # create a room and join as admin and presenter
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("adminA", room, skip_speed_test=True)   
