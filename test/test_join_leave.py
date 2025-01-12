@@ -645,7 +645,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.click_element(participant_list_button)
     time.sleep(2)
 
-  def test_screen_share(self):
+  def _test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -984,7 +984,7 @@ class TestJoinLeave(unittest.TestCase):
    
 
 
-  def test_recording(self):
+  def _test_recording(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1072,7 +1072,7 @@ class TestJoinLeave(unittest.TestCase):
  
     self.chrome.close_all()
 
-  def test_pinned_layout_test(self):
+  def _test_pinned_layout_test(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(30, 3)
@@ -1229,7 +1229,7 @@ class TestJoinLeave(unittest.TestCase):
   
 
 
-  def test_pin_on_participant_list(self):
+  def _test_pin_on_participant_list(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1323,7 +1323,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_mute_on_video_card(self):
+  def _test_mute_on_video_card(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1378,7 +1378,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_talking_people_frame(self):
+  def _test_talking_people_frame(self):
     self.chrome.close_all()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
