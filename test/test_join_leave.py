@@ -1695,6 +1695,8 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_3)
     wait.until(lambda x: self.chrome.is_element_displayed(By.XPATH, f"//div[text()='{reaction_A}']/br/following-sibling::span[text()='participantA']"))
 
+    time.sleep(1)
+
     #send reaction from B
     self.chrome.switch_to_tab(handle_2)
     self.send_reaction(reaction_B)
@@ -1706,6 +1708,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_3)
     wait.until(lambda x: self.chrome.is_element_displayed(By.XPATH, f"//div[text()='{reaction_B}']/br/following-sibling::span[text()='participantB']"))
 
+    time.sleep(1)
 
     #send reaction from C
     self.send_reaction(reaction_C)
