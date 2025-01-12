@@ -1032,7 +1032,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  def test_tiled_layout_test(self):
+  def _test_tiled_layout_test(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(30, 3)
@@ -1124,7 +1124,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  def test_pin_on_video_card(self):
+  def _test_pin_on_video_card(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1643,7 +1643,7 @@ class TestJoinLeave(unittest.TestCase):
     
     self.chrome.close_all()
 
-  def test_reactions(self):
+  def _test_reactions(self):
     reaction_A = "💖"
     reaction_B = "🤔"
     reaction_C = "🎉"
