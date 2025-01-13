@@ -3401,6 +3401,7 @@ function AntMedia(props) {
                             pinVideo={(streamId) => pinVideo(streamId)}
                             isAdmin={isAdmin}
                             publishStreamId={publishStreamId}
+                            role={role}
                         />
                     ) : (
                         <>
@@ -3454,7 +3455,7 @@ function AntMedia(props) {
                                 handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
                                 requestSpeakerList={requestSpeakerList}
                                 handlePublisherRequestListOpen={(open) => setPublisherRequestListDrawerOpen(open)}
-                                handlePublisherRequest={()=>{}}
+                                handlePublisherRequest={()=>handlePublisherRequest()}
                                 setLeftTheRoom={(left) => setLeftTheRoom(left)}
                                 addFakeParticipant={() => addFakeParticipant()}
                                 removeFakeParticipant={() => removeFakeParticipant()}
@@ -3523,10 +3524,15 @@ function AntMedia(props) {
                                 setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
                             />
                             <PublisherRequestListDrawer
+                                publisherRequestListDrawerOpen={publisherRequestListDrawerOpen}
                                 approveBecomeSpeakerRequest={(streamId) => approveBecomeSpeakerRequest(streamId)}
                                 rejectBecomeSpeakerRequest={(streamId) => rejectBecomeSpeakerRequest(streamId)}
                                 requestSpeakerList={requestSpeakerList}
                                 publishStreamId={publishStreamId}
+                                handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
+                                handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
+                                handleEffectsOpen={(open) => handleEffectsOpen(open)}
+                                setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
                             />
                         </>
                     )}
