@@ -645,8 +645,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.click_element(participant_list_button)
     time.sleep(2)
   
-  #FIXME test in headles mode
-  def _test_screen_share(self):
+  def test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
