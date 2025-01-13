@@ -37,6 +37,7 @@ function PublisherRequestTab(props) {
                 </Grid>
                 <Grid item>
                     <PinBtn
+                        id={"approve-become-speaker-"+streamId}
                         data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                         onClick={() => {props?.approveBecomeSpeakerRequest(streamId);}}
@@ -45,6 +46,7 @@ function PublisherRequestTab(props) {
                     </PinBtn>
 
                     <PinBtn
+                        id={"reject-become-speaker-"+streamId}
                         data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                         onClick={() => {props?.rejectBecomeSpeakerRequest(streamId);}}

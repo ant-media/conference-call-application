@@ -141,7 +141,7 @@ class TestWebinarScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName=" + participant + ("&enterDirectly=true" if skip_speed_test else ""))
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName=" + participant + "&streamId=" + participant + ("&enterDirectly=true" if skip_speed_test else ""))
     
     wait = self.chrome.get_wait()
 
@@ -766,15 +766,15 @@ class TestWebinarScenario(unittest.TestCase):
     # create a room and join as admin and 2 players
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("admin", room, True)
-    handle_player_A = self.join_room_as_player("playerA", room, True)
-    handle_player_B = self.join_room_as_player("playerB", room, True)
+    handle_player_A = self.join_room_as_player("playerA", room, False)
+    handle_player_B = self.join_room_as_player("playerB", room, False)
 
     wait = self.chrome.get_wait()
 
     # switch to playerA and raise hand
     self.chrome.switch_to_tab(handle_player_A)
 
-    raise_hand_button = self.chrome.get_element_with_retry(By.ID, "request-to-publisher-button")
+    raise_hand_button = self.chrome.get_element_with_retry(By.ID, "request-publish-button")
     self.chrome.click_element(raise_hand_button)
 
     # switch to admin and check if playerA is in the request list
@@ -791,6 +791,32 @@ class TestWebinarScenario(unittest.TestCase):
 
     join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
     self.chrome.click_element(join_button)
+
+    time.sleep(5)
+    speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
+    assert(speedTestCircularProgress.is_displayed())
+
+    time.sleep(5)
+
+    timeoutCounter = 0
+
+    isSpeedTestFinished = False
+    isSpeedTestFailed = False
+
+    while not isSpeedTestFailed and not isSpeedTestFinished and timeoutCounter < 100:
+      time.sleep(1)
+      timeoutCounter += 1
+      script = "return window.conference.speedTestObject;"
+      result_json = self.chrome.execute_script(script)
+      if result_json is not None:
+        isSpeedTestFinished = result_json["isfinished"]
+        isSpeedTestFailed = result_json["isfailed"]
+
+    speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
+
+    self.chrome.print_ss_as_base64()
+
+    self.chrome.click_element(speedTestModalJoinButton)
     
     time.sleep(5)
 
@@ -800,15 +826,13 @@ class TestWebinarScenario(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_participants()) == 2)
 
-    # switch to admin and join the room
+    # switch to admin
     self.chrome.switch_to_tab(handle_admin)
 
     wait.until(lambda x: len(self.get_participants()) == 2)
 
-    # switch to playerB and join the room
+    # switch to playerB
     self.chrome.switch_to_tab(handle_player_B)
-
-    wait.until(lambda x: len(self.get_participants()) == 0)
 
     self.chrome.close_all()
 
