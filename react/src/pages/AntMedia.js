@@ -1175,6 +1175,11 @@ function AntMedia(props) {
 
         if (!isPlayOnly) {
             handlePublish(generatedStreamId, token, subscriberId, subscriberCode);
+        } else if (process.env.REACT_APP_SHOW_PLAY_ONLY_PARTICIPANTS === "true") {
+            // if the user is in playOnly mode, it will join the room with the generated stream id
+            // so we can get the list of play only participants in the room
+            webRTCAdaptor?.joinRoom(roomName, generatedStreamId, null, streamName, role, getUserStatusMetadata());
+            console.log("Play only mode is active, joining the room with the generated stream id");
         }
 
         webRTCAdaptor?.play(roomName, token, roomName, null, subscriberId, subscriberCode, '{}', role);
@@ -1184,6 +1189,7 @@ function AntMedia(props) {
         if (videoTrackAssignmentsIntervalJob === null) {
             videoTrackAssignmentsIntervalJob = setInterval(() => {
                 webRTCAdaptor?.requestVideoTrackAssignments(roomName);
+                webRTCAdaptor?.getSubtrackCount(roomName, null, null); // get the total participant count in the room
             }, 3000);
         }
     }
@@ -1337,31 +1343,32 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
+        createWebRTCAdaptor();
+        //just run once when component is mounted
+    }, []);  //eslint-disable-line
 
+    function createWebRTCAdaptor() {
+        reconnecting = false;
+        publishReconnected = true;
+        playReconnected = true;
+        console.log("++ createWebRTCAdaptor");
+        //here we check if audio or video device available and wait result
+        //according to the result we modify mediaConstraints
 
-            reconnecting = false;
-            publishReconnected = true;
-            playReconnected = true;
-            console.log("++ createWebRTCAdaptor");
-            //here we check if audio or video device available and wait result
-            //according to the result we modify mediaConstraints
-
-            checkDevices().then(() => {
-                    var adaptor = new WebRTCAdaptor({
-                    websocket_url: websocketURL,
-                    mediaConstraints: mediaConstraints,
-                    peerconnection_config: peerconnection_config,
-                    isPlayMode: isPlayOnly, // onlyDataChannel: isPlayOnly,
-                    debug: true,
-                    callback: infoCallback,
-                    callbackError: errorCallback,
-                    purposeForTest: "main-adaptor"
-                    });
-                    setWebRTCAdaptor(adaptor)
+        checkDevices().then(() => {
+            var adaptor = new WebRTCAdaptor({
+                websocket_url: websocketURL,
+                mediaConstraints: mediaConstraints,
+                peerconnection_config: peerconnection_config,
+                isPlayMode: isPlayOnly, // onlyDataChannel: isPlayOnly,
+                debug: true,
+                callback: infoCallback,
+                callbackError: errorCallback,
+                purposeForTest: "main-adaptor"
             });
-
-     //just run once when component is mounted
-    }, []);  //eslint-disable-line 
+            setWebRTCAdaptor(adaptor)
+        });
+    }
 
     useEffect(() => {
         if (devices.length > 0) {
@@ -1519,6 +1526,10 @@ function AntMedia(props) {
             }
         } else if (info === "subtrackCount") {
             if (obj.count !== undefined) {
+                if (obj.count > participantCount) {
+                    // if the new participant is added, we need to get the subtrack list again
+                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+                }
                 setParticipantCount(obj.count);
             }
         } else if (info === "broadcastObject") {
@@ -2114,6 +2125,45 @@ function AntMedia(props) {
         }
     }
 
+    function handlePublisherRequest() {
+        if (!isPlayOnly) {
+            return;
+        }
+        handleSendNotificationEvent("REQUEST_BECOME_PUBLISHER", roomName, {
+            senderStreamId: publishStreamId, senderStreamName: streamName
+        });
+    }
+
+    function makeListenerAgain(streamId) {
+        handleSendNotificationEvent("MAKE_LISTENER_AGAIN", roomName, {
+            senderStreamId: streamId
+        });
+        updateParticipantRole(streamId, WebinarRoles.Listener);
+    }
+
+    function handleStartBecomePublisher() {
+        if (isPlayOnly) {
+            setIsPlayOnly(false);
+            setInitialized(false);
+            setWaitingOrMeetingRoom("waiting");
+        }
+    }
+
+    function approveBecomeSpeakerRequest(streamId) {
+        setRequestSpeakerList(requestSpeakerList.filter((item) => item !== streamId));
+        handleSendNotificationEvent("APPROVE_BECOME_PUBLISHER", roomName, {
+            senderStreamId: streamId
+        });
+        updateParticipantRole(streamId, WebinarRoles.TempListener);
+    }
+
+    function rejectBecomeSpeakerRequest(streamId) {
+        setRequestSpeakerList(requestSpeakerList.filter((item) => item !== streamId))
+        handleSendNotificationEvent("REJECT_BECOME_PUBLISHER", roomName, {
+            senderStreamId: streamId
+        });
+    }
+
     function handleSendMessage(message) {
         if (publishStreamId || isPlayOnly) {
             let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
@@ -2182,6 +2232,34 @@ function AntMedia(props) {
         updateUserStatusMetadata(isMyMicMuted, !isMyCamTurnedOff);
     }, [role]);
 
+    React.useEffect(() => {
+        // we need to empty participant array. if we are going to leave it in the first place.
+        setVideoTrackAssignments([]);
+        setAllParticipants({});
+
+        clearInterval(audioListenerIntervalJob);
+        audioListenerIntervalJob = null;
+
+        if (isPlayOnly) {
+            webRTCAdaptor?.stop(publishStreamId);
+        }
+        webRTCAdaptor?.stop(roomName);
+
+        if (isPlayOnly) {
+            webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
+        }
+        //close streams fully to not encounter webcam light
+        webRTCAdaptor?.closeStream();
+
+        if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
+            handleStopScreenShare();
+        }
+
+        createWebRTCAdaptor();
+
+        setWaitingOrMeetingRoom("waiting");
+    }, [isPlayOnly]);
+
     function handleNotificationEvent(obj) {
         var notificationEvent = JSON.parse(obj.data);
         //console.log("handleNotificationEvent:", notificationEvent);
@@ -2195,12 +2273,12 @@ function AntMedia(props) {
                 setIsRecordPluginActive(true);
             } else if (eventType === "RECORDING_TURNED_OFF") {
                 setIsRecordPluginActive(false);
-          } else if (eventType === "BROADCAST_ON" && eventStreamId === publishStreamId) {
-            setIsBroadcasting(true);
-            console.log("BROADCAST_ON");
-          } else if (eventType === "BROADCAST_OFF" && eventStreamId === publishStreamId) {
-            setIsBroadcasting(false);
-            console.log("BROADCAST_OFF");
+            } else if (eventType === "BROADCAST_ON" && eventStreamId === publishStreamId) {
+                setIsBroadcasting(true);
+                console.log("BROADCAST_ON");
+            } else if (eventType === "BROADCAST_OFF" && eventStreamId === publishStreamId) {
+                setIsBroadcasting(false);
+                console.log("BROADCAST_OFF");
             } else if (eventType === "MESSAGE_RECEIVED") {
                 // if message arrives from myself or footer message button is disabled then we are not going to show it.
                 if (notificationEvent.senderId === publishStreamId || process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'false') {
@@ -2328,9 +2406,9 @@ function AntMedia(props) {
 
                 // check if there is any difference between old and new assignments
                 if (!_.isEqual(currentVideoTrackAssignments, videoTrackAssignments)) {
-                        setVideoTrackAssignments(currentVideoTrackAssignments);
-                        requestSyncAdministrativeFields();
-                        setParticipantUpdated(!participantUpdated);
+                    setVideoTrackAssignments(currentVideoTrackAssignments);
+                    requestSyncAdministrativeFields();
+                    setParticipantUpdated(!participantUpdated);
                 }
 
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
@@ -2349,7 +2427,7 @@ function AntMedia(props) {
 
                 console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
 
-                console.log("UPDATE_PARTICIPANT_ROLE is received by "+publishStreamId);
+                console.log("UPDATE_PARTICIPANT_ROLE is received by " + publishStreamId);
 
 
                 let updatedParticipant = allParticipants[notificationEvent.streamId];
@@ -2374,6 +2452,41 @@ function AntMedia(props) {
                     webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
                 }
                 setParticipantUpdated(!participantUpdated);
+            } else if (eventType === "REQUEST_BECOME_PUBLISHER") {
+                if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
+                    if (requestSpeakerList.includes(notificationEvent.senderStreamId)) {
+                        console.log("Request is already received from ", notificationEvent.senderStreamId);
+                        return;
+                    }
+                    setRequestSpeakerList((oldRequestSpeakerList) => {
+                        return [...oldRequestSpeakerList, notificationEvent.senderStreamId];
+                    });
+                    showInfoSnackbarWithLatency(notificationEvent.senderStreamId + t(" is requesting to become a speaker"));
+                }
+            } else if (eventType === "MAKE_LISTENER_AGAIN") {
+                if (role === WebinarRoles.TempListener || role === WebinarRoles.ActiveTempListener) {
+                    showInfoSnackbarWithLatency(t("You are made listener again"));
+                    mediaConstraints = {
+                        video: false, audio: false,
+                    };
+                    setIsPlayed(false);
+                    setRole(WebinarRoles.Listener);
+                    setIsPlayOnly(true);
+                }
+            } else if (eventType === "APPROVE_BECOME_PUBLISHER") {
+                if (role === WebinarRoles.Listener && notificationEvent.senderStreamId === publishStreamId) {
+                    showInfoSnackbarWithLatency(t("Your request to become a speaker is approved"));
+                    mediaConstraints = {
+                        // setting constraints here breaks source switching on firefox.
+                        video: videoQualityConstraints.video, audio: audioQualityConstraints.audio,
+                    };
+                    setRole(WebinarRoles.TempListener);
+                    setIsPlayOnly(false);
+                }
+            } else if (eventType === "REJECT_BECOME_PUBLISHER") {
+                if (role === WebinarRoles.Listener && notificationEvent.senderStreamId === publishStreamId) {
+                    showInfoSnackbarWithLatency(t("Your request to become a speaker is rejected"));
+                }
             }
         }
     }
@@ -2396,34 +2509,26 @@ function AntMedia(props) {
         }
 
         if (oldRole.includes("active") && !newRole.includes("active")) {
-            setTimeout(() => {
-                enqueueSnackbar({
-                    message: streamId + t(" is removed from the listening room"),
-                    variant: 'info',
-                    icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                    anchorOrigin: {
-                        vertical: "top",
-                        horizontal: "right",
-                    },
-                }, {
-                    autoHideDuration: 1000,
-                });
-            }, 1000);
+            showInfoSnackbarWithLatency(streamId + t(" is removed from the listening room"));
         } else if (!oldRole.includes("active") && newRole.includes("active")) {
-            setTimeout(() => {
-                enqueueSnackbar({
-                    message: streamId + t(" is added to the listening room"),
-                    variant: 'info',
-                    icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
-                    anchorOrigin: {
-                        vertical: "top",
-                        horizontal: "right",
-                    },
-                }, {
-                    autoHideDuration: 1000,
-                });
-            }, 1000);
+            showInfoSnackbarWithLatency(streamId + t(" is added to the listening room"));
         }
+    }
+
+    function showInfoSnackbarWithLatency(message) {
+        setTimeout(() => {
+            enqueueSnackbar({
+                message: message,
+                variant: 'info',
+                icon: <SvgIcon size={24} name={'info'} color="#fff"/>,
+                anchorOrigin: {
+                    vertical: "top",
+                    horizontal: "right",
+                },
+            }, {
+                autoHideDuration: 5000,
+            });
+        }, 1000);
     }
 
     function checkScreenSharingStatus() {
@@ -2487,6 +2592,10 @@ function AntMedia(props) {
 
         if (isScreenShared && screenShareWebRtcAdaptor.current != null) {
             handleStopScreenShare();
+        }
+
+        if (process.env.REACT_APP_SHOW_PLAY_ONLY_PARTICIPANTS === "true") {
+            webRTCAdaptor?.leaveFromRoom(roomName, publishStreamId);
         }
 
         playLeaveRoomSound();
@@ -3176,7 +3285,14 @@ function AntMedia(props) {
                             speedTestCounter,
                             setRoomName,
                             setPublishStreamId,
-                            settings
+                            settings,
+                            setRole,
+                            handleNotificationEvent,
+                            approveBecomeSpeakerRequest,
+                            rejectBecomeSpeakerRequest,
+                            handleStartBecomePublisher,
+                            handlePublisherRequest,
+                            makeListenerAgain
                         }}
                     >
                         {props.children}
@@ -3356,6 +3472,9 @@ function AntMedia(props) {
                                 startRecord={()=>startRecord()}
                                 stopRecord={()=>stopRecord()}
                                 handleEffectsOpen={(open) => handleEffectsOpen(open)}
+                                setBecomePublisherConfirmationDialogOpen={(open)=>setBecomePublisherConfirmationDialogOpen(open)}
+                                handleStartBecomePublisher={()=>handleStartBecomePublisher()}
+                                isBecomePublisherConfirmationDialogOpen={isBecomePublisherConfirmationDialogOpen}
                             />
                             <MessageDrawer
                                 messages={messages}
@@ -3371,7 +3490,7 @@ function AntMedia(props) {
                                 globals={globals}
                                 isAdmin={isAdmin}
                                 pinVideo={(streamId) => pinVideo(streamId)}
-                                makeListenerAgain={(streamId) => {}}
+                                makeListenerAgain={(streamId) => makeListenerAgain(streamId)}
                                 videoTrackAssignments={videoTrackAssignments}
                                 presenterButtonStreamIdInProcess={presenterButtonStreamIdInProcess}
                                 presenterButtonDisabled={presenterButtonDisabled}
@@ -3400,7 +3519,12 @@ function AntMedia(props) {
                                 handleEffectsOpen={(open) => handleEffectsOpen(open)}
                                 setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
                             />
-                            <PublisherRequestListDrawer/>
+                            <PublisherRequestListDrawer
+                                approveBecomeSpeakerRequest={(streamId) => approveBecomeSpeakerRequest(streamId)}
+                                rejectBecomeSpeakerRequest={(streamId) => rejectBecomeSpeakerRequest(streamId)}
+                                requestSpeakerList={requestSpeakerList}
+                                publishStreamId={publishStreamId}
+                            />
                         </>
                     )}
                     </UnitTestContext.Provider>

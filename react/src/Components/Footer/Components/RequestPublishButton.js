@@ -2,7 +2,7 @@ import React from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
 import { Tooltip } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import {CustomizedBtn} from "../../CustomizedBtn";
 
@@ -17,6 +17,7 @@ export const roundStyle = {
 };
 
 function RequestPublishButton(props) {
+    const theme = useTheme();
     const { rounded, footer, handlePublisherRequest } = props;
     const { t } = useTranslation();
 
@@ -24,7 +25,7 @@ function RequestPublishButton(props) {
         <>
             <Tooltip title={t('Request becoming publisher')} placement="top">
                 <CustomizedBtn id="request-publish-button" data-testid="request-publish-button" className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e) => { handlePublisherRequest(); }}>
-                    <SvgIcon size={32} name={'raise-hand'} color="#fff" />
+                    <SvgIcon size={32} name={'raise-hand'} color={theme.palette?.iconColor?.primary} />
                 </CustomizedBtn>
             </Tooltip>
         </>

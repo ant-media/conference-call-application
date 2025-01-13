@@ -123,7 +123,11 @@ const MeetingRoom = React.memo((props) => {
             setParticipantIdMuted={(participant)=>props?.setParticipantIdMuted(participant)}
             turnOffYourMicNotification={(streamId)=>props?.turnOffYourMicNotification(streamId)}
         />
-        <BecomePublisherConfirmationDialog/>
+        <BecomePublisherConfirmationDialog
+            setBecomePublisherConfirmationDialogOpen={(open)=>props?.setBecomePublisherConfirmationDialogOpen(open)}
+            handleStartBecomePublisher={()=>props?.handleStartBecomePublisher()}
+            isBecomePublisherConfirmationDialogOpen={props?.isBecomePublisherConfirmationDialogOpen}
+        />
 
         {props?.audioTracks.map((audioTrackAssignment, index) => (
                 <VideoCard
