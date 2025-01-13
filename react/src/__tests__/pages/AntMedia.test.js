@@ -2275,6 +2275,37 @@ describe('AntMedia Component', () => {
     consoleSpy.mockRestore();
   });
 
+  it('streamIdInUseCounter is not incremented due to reconnection is true', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    const {container} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>);
+
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("reconnection_attempt_for_player");
+    });
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+      webRTCAdaptorConstructor.callbackError("streamIdInUse", "Stream ID is in use");
+    });
+
+    expect(consoleSpy).not.toHaveBeenCalledWith("This stream id is already in use. You may be logged in on another device.");
+
+    consoleSpy.mockRestore();
+  });
+
   it('updates allParticipants and participantUpdated when subtrackList is provided', async () => {
     const { container } = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
