@@ -272,6 +272,7 @@ function Footer(props) {
                     <Grid item xs={0}>
                       <MoreOptionsButton
                           footer={true}
+                          isAdmin={props?.isAdmin}
                           isPlayOnly={props?.isPlayOnly}
                           isScreenShared={props?.isScreenShared}
                           handleStartScreenShare={props?.handleStartScreenShare}

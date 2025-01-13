@@ -214,7 +214,7 @@ function MoreOptionsButton(props) {
                       <ListItemIcon>
                           <SvgIcon size={36} name={"raise-hand"} color={"white"} />
                       </ListItemIcon>
-                      <ListItemText id={"publisher-request-list-button"}>{t("Publisher Request List")}</ListItemText>
+                      <ListItemText id={"more-options-publisher-request-list-button"}>{t("Publisher Request List")}</ListItemText>
                   </MenuItem>
                   : null}
 
