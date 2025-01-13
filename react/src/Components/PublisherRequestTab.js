@@ -1,11 +1,10 @@
-import React, {useContext} from "react";
+import React from "react";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
+import {styled} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
-import {ConferenceContext} from "../pages/AntMedia";
 
 const PublisherRequestName = styled(Typography)(({ theme }) => ({
     color: "#000",
@@ -15,18 +14,16 @@ const PublisherRequestName = styled(Typography)(({ theme }) => ({
 //hover color of allow or deny
 const PinBtn = styled(Button)(({ theme }) => ({
     "&:hover": {
-        backgroundColor: theme.palette.themeColor[50],
+        backgroundColor: theme.palette.themeColor?.[50],
         color: "#fff",
     },
 }));
 
 function PublisherRequestTab(props) {
-    const conference = useContext(ConferenceContext);
-
-    const getPublisherRequestItem = (videoId) => {
+    const getPublisherRequestItem = (streamId) => {
         return (
             <Grid
-                key={videoId}
+                key={streamId}
                 container
                 alignItems="center"
                 justifyContent="space-between"
@@ -34,19 +31,21 @@ function PublisherRequestTab(props) {
                 sx={{ borderColor: "primary.main" }}
             >
                 <Grid item sx={{ pr: 1 }}>
-                    <PublisherRequestName variant="body1">{videoId}</PublisherRequestName>
+                    <PublisherRequestName variant="body1">{streamId}</PublisherRequestName>
                 </Grid>
                 <Grid item>
                     <PinBtn
+                        data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.approveBecomeSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {props?.approveBecomeSpeakerRequest(streamId);}}
                     >
                         Allow
                     </PinBtn>
 
                     <PinBtn
+                        data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference?.rejectSpeakerRequest(videoId); conference?.setRequestSpeakerList(conference?.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {props?.rejectBecomeSpeakerRequest(streamId);}}
                     >
                         Deny
                     </PinBtn>
@@ -64,11 +63,11 @@ function PublisherRequestTab(props) {
                         variant="body2"
                         style={{marginLeft: 8, fontWeight: 500}}
                     >
-                        {conference?.requestSpeakerList.length}
+                        {props?.requestSpeakerList.length}
                     </PublisherRequestName>
                 </Grid>
-                {conference?.requestSpeakerList.map((streamId) => {
-                    if (conference?.publishStreamId !== streamId) {
+                {props?.requestSpeakerList.map((streamId) => {
+                    if (props?.publishStreamId !== streamId) {
                         return getPublisherRequestItem(streamId);
                     } else {
                         return "";
