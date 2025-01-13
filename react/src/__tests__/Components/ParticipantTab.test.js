@@ -182,13 +182,6 @@ describe('ParticipantTab Component', () => {
     beforeEach(() => {
       // Reset the mock implementation before each test
       jest.clearAllMocks();
-
-      React.useContext.mockImplementation(input => {
-        if (input === ConferenceContext) {
-          return contextValue;
-        }
-        return jest.requireActual('react').useContext(input);
-      });
     });
 
     it('calls handleScroll and updates state when bottom is reached', async () => {
@@ -196,7 +189,9 @@ describe('ParticipantTab Component', () => {
 
       const { container } = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
-            <ParticipantTab />
+            <ParticipantTab
+                {...props}
+            />
           </ThemeProvider>
       );
 
@@ -213,8 +208,8 @@ describe('ParticipantTab Component', () => {
 
       // Check if setIsBottom was called and loadMoreParticipants is triggered
       await waitFor(() => {
-        expect(contextValue.updateAllParticipantsPagination).toHaveBeenCalledWith(
-            contextValue.globals.participantListPagination.currentPage + 1
+        expect(props.updateAllParticipantsPagination).toHaveBeenCalledWith(
+            props.globals.participantListPagination.currentPage + 1
         );
       });
       jest.clearAllTimers()
@@ -223,7 +218,9 @@ describe('ParticipantTab Component', () => {
     it('does not call loadMoreParticipants if not at the bottom', () => {
       const { container } = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
-            <ParticipantTab />
+            <ParticipantTab
+                {...props}
+            />
           </ThemeProvider>
       );
 
@@ -236,7 +233,7 @@ describe('ParticipantTab Component', () => {
       fireEvent.scroll(scrollContainer);
 
       // Ensure loadMoreParticipants is not triggered
-      expect(contextValue.updateAllParticipantsPagination).not.toHaveBeenCalled();
+      expect(props.updateAllParticipantsPagination).not.toHaveBeenCalled();
     });
 
   });

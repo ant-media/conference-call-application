@@ -69,7 +69,7 @@ function ParticipantTab({
 
     // Fetch next participants
     await new Promise(resolve => setTimeout(resolve, 1000));
-    await conference?.updateAllParticipantsPagination(conference?.globals.participantListPagination.currentPage + 1);
+    await updateAllParticipantsPagination(globals.participantListPagination.currentPage + 1);
     setLoading(false);
   };
 
