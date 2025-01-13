@@ -3,11 +3,11 @@ import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import {styled} from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
 
 const PublisherRequestName = styled(Typography)(({ theme }) => ({
-    color: "#000",
+    color: theme.palette?.participantListIcon?.primary,
     fontWeight: 500,
     fontSize: 14,
 }));
@@ -20,6 +20,8 @@ const PinBtn = styled(Button)(({ theme }) => ({
 }));
 
 function PublisherRequestTab(props) {
+    const theme = useTheme();
+
     const getPublisherRequestItem = (streamId) => {
         return (
             <Grid
@@ -35,6 +37,7 @@ function PublisherRequestTab(props) {
                 </Grid>
                 <Grid item>
                     <PinBtn
+                        id={"approve-become-speaker-"+streamId}
                         data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                         onClick={() => {props?.approveBecomeSpeakerRequest(streamId);}}
@@ -43,6 +46,7 @@ function PublisherRequestTab(props) {
                     </PinBtn>
 
                     <PinBtn
+                        id={"reject-become-speaker-"+streamId}
                         data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
                         onClick={() => {props?.rejectBecomeSpeakerRequest(streamId);}}
@@ -58,10 +62,10 @@ function PublisherRequestTab(props) {
         <div style={{width: "100%", overflowY: "auto"}}>
             <Stack sx={{width: "100%",}} spacing={2}>
                 <Grid container>
-                    <SvgIcon size={28} name="participants" color="#000"/>
+                    <SvgIcon size={28} name="participants" color={theme.palette?.participantListIcon?.primary}/>
                     <PublisherRequestName
                         variant="body2"
-                        style={{marginLeft: 8, fontWeight: 500}}
+                        style={{marginLeft: 8, fontWeight: 500, color: theme.palette?.participantListIcon?.primary}}
                     >
                         {props?.requestSpeakerList.length}
                     </PublisherRequestName>

@@ -214,7 +214,7 @@ function MoreOptionsButton(props) {
                       <ListItemIcon>
                           <SvgIcon size={36} name={"raise-hand"} color={"white"} />
                       </ListItemIcon>
-                      <ListItemText id={"publisher-request-list-button"}>{t("Publisher Request List")}</ListItemText>
+                      <ListItemText id={"more-options-publisher-request-list-button"}>{t("Publisher Request List")}</ListItemText>
                   </MenuItem>
                   : null}
 
@@ -225,7 +225,7 @@ function MoreOptionsButton(props) {
                       <ListItemIcon>
                           <SvgIcon size={36} name={"raise-hand"} color={"white"} />
                       </ListItemIcon>
-                      <ListItemText id={"request-to-publisher-button"}>{t("Request becoming publisher")}</ListItemText>
+                      <ListItemText id={"more-options-request-publish-button"}>{t("Request becoming publisher")}</ListItemText>
                   </MenuItem>
                   : null}
 

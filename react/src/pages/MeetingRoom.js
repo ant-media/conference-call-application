@@ -252,7 +252,7 @@ const MeetingRoom = React.memo((props) => {
                   requestSpeakerList={props?.requestSpeakerList}
                   publisherRequestListDrawerOpen={props?.publisherRequestListDrawerOpen}
                   handlePublisherRequestListOpen={props?.handlePublisherRequestListOpen}
-                  handlePublisherRequest={props?.handlePublisherRequest}
+                  handlePublisherRequest={()=> {props?.handlePublisherRequest()}}
                   setLeftTheRoom={props?.setLeftTheRoom}
                   addFakeParticipant={props?.addFakeParticipant}
                   removeFakeParticipant={props?.removeFakeParticipant}
