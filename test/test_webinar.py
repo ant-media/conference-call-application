@@ -762,6 +762,16 @@ class TestWebinarScenario(unittest.TestCase):
     
     self.chrome.close_all()
 
+  def get_request_publish_button(self):
+    rp_button = None
+    if(self.chrome.is_element_exist(By.ID, "request-publish-button")):
+      rp_button = self.chrome.get_element(By.ID, "request-publish-button")
+    else:
+      more_button = self.chrome.get_element_with_retry(By.ID, "more-button")
+      self.chrome.click_element(more_button)
+      rp_button = self.chrome.get_element_with_retry(By.ID, "more-options-request-publish-button")
+    return rp_button
+
   def test_raising_hand(self):
     # create a room and join as admin and 2 players
     room = "room"+str(random.randint(100, 999))
@@ -774,7 +784,7 @@ class TestWebinarScenario(unittest.TestCase):
     # switch to playerA and raise hand
     self.chrome.switch_to_tab(handle_player_A)
 
-    raise_hand_button = self.chrome.get_element_with_retry(By.ID, "request-publish-button")
+    raise_hand_button = self.get_request_publish_button()
     self.chrome.click_element(raise_hand_button)
 
     # switch to admin and check if playerA is in the request list
