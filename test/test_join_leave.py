@@ -77,7 +77,7 @@ class TestJoinLeave(unittest.TestCase):
         print("Process already terminated.")
 
     # Call `pkill java` to ensure no stray Java processes are left running
-    '''
+    
     try:
         subprocess.run(["pkill", "java"], check=True)
         print("pkill java executed successfully.")
@@ -85,7 +85,7 @@ class TestJoinLeave(unittest.TestCase):
         print(f"Error executing pkill java: {e}")
     except FileNotFoundError:
         print("pkill command not found on the system.")
-    '''
+    
     print(f"After killing process: {process.pid}")
 
 
