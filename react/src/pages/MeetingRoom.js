@@ -261,6 +261,7 @@ const MeetingRoom = React.memo((props) => {
                   handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
                   allParticipants={props?.allParticipants}
                   pinVideo={(streamId)=>props?.pinVideo(streamId)}
+                  pinFirstVideo={props?.pinFirstVideo}
                   handleBackgroundReplacement={props?.handleBackgroundReplacement}
                   microphoneSelected={(mic) => props?.microphoneSelected(mic)}
                   devices={props?.devices}

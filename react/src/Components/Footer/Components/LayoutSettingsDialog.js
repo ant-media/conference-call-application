@@ -90,7 +90,7 @@ export function LayoutSettingsDialog(props) {
       });
     } else if (mode === "sidebar") {
       //pins your video
-      props?.pinVideo(props?.videoTrackAssignments[0]?.streamId);
+      props?.pinFirstVideo();
     }
   };
   const radioLabel = (label, icon) => {
@@ -148,7 +148,7 @@ export function LayoutSettingsDialog(props) {
             <FormControl sx={{width: "100%"}}>
               <RadioGroup
                 aria-labelledby="layout-radio-buttons"
-                defaultValue={"sidebar"}
+                defaultValue={"tiled"}
                 value={layout}
                 onChange={changeLayout}
                 name="layout-radio-buttons-group"
