@@ -37,7 +37,7 @@ class TestJoinLeave(unittest.TestCase):
     #print("broadcasts are empty")
 
 
-  def tearDown(self):
+  def _tearDown(self):
     print(self._testMethodName, " ending...\n","----------------")
 
   def create_participants_with_test_tool(self, participant_name, room, count):
@@ -77,6 +77,7 @@ class TestJoinLeave(unittest.TestCase):
         print("Process already terminated.")
 
     # Call `pkill java` to ensure no stray Java processes are left running
+    
     try:
         subprocess.run(["pkill", "java"], check=True)
         print("pkill java executed successfully.")
@@ -84,7 +85,7 @@ class TestJoinLeave(unittest.TestCase):
         print(f"Error executing pkill java: {e}")
     except FileNotFoundError:
         print("pkill command not found on the system.")
-
+    
     print(f"After killing process: {process.pid}")
 
 
@@ -181,8 +182,12 @@ class TestJoinLeave(unittest.TestCase):
     change_layout_button = self.chrome.get_element_with_retry(By.ID, "change-layout-button")
     self.chrome.click_element(change_layout_button)
 
+    time.sleep(1)
+
     change_layout_button = self.chrome.get_element_with_retry(By.XPATH, "//input[@type='radio' and @value='"+type+"']")
     self.chrome.click_element(change_layout_button)
+
+    time.sleep(1)
 
     layout_dialog_close_button = self.chrome.get_element_with_retry(By.ID, "layout-dialog-close-button")
     self.chrome.click_element(layout_dialog_close_button)
@@ -240,7 +245,7 @@ class TestJoinLeave(unittest.TestCase):
     stop_recording_button = self.chrome.get_element(By.ID, "stop-recording-button")
     return stop_recording_button
   
-  def _test_home_page_create_room(self):
+  def test_home_page_create_room(self):
     room = "room"+str(random.randint(100, 999))
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
@@ -258,7 +263,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_home_page_create_random_room(self):
+  def test_home_page_create_random_room(self):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
@@ -270,7 +275,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_camera_mic_setting_in_waiting_room(self):
+  def test_camera_mic_setting_in_waiting_room(self):
     room = "room"+str(random.randint(100, 999))
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
@@ -323,7 +328,7 @@ class TestJoinLeave(unittest.TestCase):
     assert(meeting_gallery.is_displayed())
     self.chrome.close_all()
 
-  def _test_join_as_camera_mic_off(self):
+  def test_join_as_camera_mic_off(self):
       room = "room"+str(random.randint(100, 999))
       app = "/"+self.test_app_name
       if self.url.endswith("localhost:3000"):
@@ -348,7 +353,7 @@ class TestJoinLeave(unittest.TestCase):
       self.chrome.close_all()
 
   #this test will not work on local since we have camera and mic in local
-  def _test_join_without_camera_mic(self):
+  def test_join_without_camera_mic(self):
       self.chrome.close_all()
       self.chrome = Browser()
       self.chrome.init(True, False)
@@ -402,7 +407,7 @@ class TestJoinLeave(unittest.TestCase):
       wait.until(lambda x: self.get_tile_count() == limit)
       print("video_track_limit: "+str(limit))
   
-  def _test_tile_count(self):
+  def test_tile_count(self):
     #self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     self.join_room_in_new_tab("participantA", room)
@@ -499,11 +504,12 @@ class TestJoinLeave(unittest.TestCase):
   def send_reaction(self, reaction):
     reaction_button = self.chrome.get_element(By.XPATH, "//button[@type='button' and @aria-label='Emoji reactions']")
     reaction_button.click()
-
     reaction_button = self.chrome.get_element(By.XPATH, "//div[text()='" + reaction + "']")
+    print("before click:"+reaction)
     self.chrome.mouse_click_on(reaction_button)
+    print("after click:"+reaction)
 
-
+  #FIXME: rerun test
   def _test_others_tile(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
@@ -588,7 +594,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_with_stats(self):
+  def test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -638,8 +644,8 @@ class TestJoinLeave(unittest.TestCase):
     
     self.chrome.click_element(participant_list_button)
     time.sleep(2)
-
-  def _test_screen_share(self):
+  
+  def test_screen_share(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -658,7 +664,11 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_1)
 
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+    wait.until(lambda x: 
+          (len(self.get_videoTrackAssignments()) == 2)
+          and
+          (self.get_videoTrackAssignments()[1]["streamId"].startswith("participantB"))
+    )
 
     participantB_stream_id = self.get_videoTrackAssignments()[1]["streamId"]
 
@@ -678,13 +688,9 @@ class TestJoinLeave(unittest.TestCase):
           and 
           (2 == len(backend_assignments))
           and
-          (backend_assignments[0]["assigned_stream_id"] == participantA_share_stream_id)
+          (self.get_background_assignment_for(backend_assignments, participantA_share_stream_id)["reserved"])
           and
-          (backend_assignments[0]["reserved"])
-          and
-          (backend_assignments[1]["assigned_stream_id"] == participantA_stream_id)
-          and
-          (not backend_assignments[1]["reserved"])
+          (not self.get_background_assignment_for(backend_assignments, participantA_stream_id)["reserved"])
     )
     
     #now share your video
@@ -700,25 +706,25 @@ class TestJoinLeave(unittest.TestCase):
           and 
           (3 == len(backend_assignments))
           and
-          (backend_assignments[0]["assigned_stream_id"] == participantA_share_stream_id)
+          (self.get_background_assignment_for(backend_assignments, participantA_share_stream_id)["reserved"])
           and
-          (backend_assignments[0]["reserved"])
+          (self.get_background_assignment_for(backend_assignments, participantB_share_stream_id)["reserved"])
           and
-          (backend_assignments[1]["assigned_stream_id"] == participantB_share_stream_id)
-          and
-          (backend_assignments[1]["reserved"])
-          and
-          (backend_assignments[2]["assigned_stream_id"] == participantA_stream_id)
-          and
-          (not backend_assignments[2]["reserved"])
+          (not self.get_background_assignment_for(backend_assignments, participantA_stream_id)["reserved"])
     )
-
-    
 
 
     self.chrome.close_all()
 
-  def _test_reconnection_while_screen_sharing(self):
+  def get_background_assignment_for(self, backend_assignments, stream_id):
+    print("getttt:"+stream_id)
+    for assignment in backend_assignments:
+        if assignment["assigned_stream_id"] == stream_id:
+            return assignment
+
+    return None
+
+  def test_reconnection_while_screen_sharing(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -851,7 +857,7 @@ class TestJoinLeave(unittest.TestCase):
     self.kill_participants_with_test_tool(process)
     self.chrome.close_all()
 
-  def _test_get_debugme_info(self):
+  def test_get_debugme_info(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -978,7 +984,7 @@ class TestJoinLeave(unittest.TestCase):
    
 
 
-  def _test_recording(self):
+  def test_recording(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1021,11 +1027,12 @@ class TestJoinLeave(unittest.TestCase):
 
     wait.until(lambda x: "Recording is stopped successfully" in self.get_snackbar_content())
 
-    wait.until(lambda x: self.rest_helper.get_vod_for(room+"_composite") is not None)
+    wait.until(lambda x: self.rest_helper.getVoDFor(room+"_composite") is not None)
 
     self.chrome.close_all()
 
 
+  #FIXME test in headles mode
   def _test_tiled_layout_test(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
@@ -1066,8 +1073,7 @@ class TestJoinLeave(unittest.TestCase):
  
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_pinned_layout_test(self):
+  def test_pinned_layout_test(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(30, 3)
@@ -1118,8 +1124,7 @@ class TestJoinLeave(unittest.TestCase):
  
     self.chrome.close_all()
 
-
-  #FIXME uncomment test
+  #FIXME: the buttons are appears on mouse hovers the card. This causes some issue in headless mode 
   def _test_pin_on_video_card(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -1144,6 +1149,7 @@ class TestJoinLeave(unittest.TestCase):
     #pin yourself
     print("pin participantA")
     participantA_video_card = self.get_video_container_by_stream_name("participantA")
+    self.chrome.move_to_element(participantA_video_card)
     participantA_pin_button = self.chrome.get_element_in_element(participantA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='pin']", wait_until_clickable=False)
     participantA_pin_button.click()
    
@@ -1169,10 +1175,11 @@ class TestJoinLeave(unittest.TestCase):
     print("participantB_video_card:"+participantB_video_card.get_attribute("innerHTML"))
     self.chrome.move_to_element(participantB_video_card)
     participantB_pin_button = self.chrome.get_element_in_element(participantB_video_card, By.XPATH, ".//button[@type='button' and @aria-label='pin']")
-    self.chrome.move_to_element(participantB_video_card)
-    self.chrome.save_ss_as_file("test_pin_on_video_card-1.png")
+    button_position = self.chrome.execute_script("return arguments[0].getBoundingClientRect();", participantB_pin_button)
+    print("Button position:", button_position)
     time.sleep(1)
     participantB_pin_button.click()
+
 
     wait.until(lambda x: self.chrome.is_element_exist(By.CSS_SELECTOR, "div.single-video-container.pinned"))
 
@@ -1227,7 +1234,7 @@ class TestJoinLeave(unittest.TestCase):
   
 
 
-  def _test_pin_on_participant_list(self):
+  def test_pin_on_participant_list(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1321,8 +1328,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  #FIXME uncomment test
-  def _test_mute_on_video_card(self):
+  def test_mute_on_video_card(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1377,12 +1383,14 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_talking_people_frame(self):
+  def test_talking_people_frame(self):
     self.chrome.close_all()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
     self.chrome = Browser()
     self.chrome.init(not self.is_local, mic_file=fake_audio_file_path)
+
+    wait = self.chrome.get_wait()
 
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -1394,9 +1402,17 @@ class TestJoinLeave(unittest.TestCase):
 
     self.assertLocalVideoAvailable()
 
-    wait = self.chrome.get_wait()
+    participantA_stream_id = self.get_videoTrackAssignments()[1]["streamId"]
 
-    wait.until(lambda x: len(self.get_videoTrackAssignments()) == 2)
+    self.chrome.switch_to_tab(handle_1)
+
+    wait.until(lambda x: 
+          (len(self.get_videoTrackAssignments()) == 2)
+          and
+          (self.get_videoTrackAssignments()[1]["streamId"].startswith("participantB"))
+    )
+
+    participantB_stream_id = self.get_videoTrackAssignments()[1]["streamId"]
 
     self.set_audio_level(1)
 
@@ -1407,9 +1423,8 @@ class TestJoinLeave(unittest.TestCase):
     wait.until(lambda x: len(self.chrome.get_all_elements(By.CSS_SELECTOR, "div.single-video-container.not-pinned")) == 2)
 
 
-    #switch participantA tab check green frame appear
-    participantB_video_card = self.get_video_container_by_stream_name("participantB")
-    talking_indicator = self.chrome.get_element_in_element(participantB_video_card, By.CLASS_NAME, "talking-indicator-light", wait_until_clickable=False)
+    #switch participantA tab check green frame appear    
+    talking_indicator = self.chrome.get_element(By.ID, participantB_stream_id+"-is-talking")
     wait.until(lambda x: talking_indicator.is_displayed())
 
     #switch participantB tab and mute
@@ -1419,14 +1434,13 @@ class TestJoinLeave(unittest.TestCase):
     
     #switch participantA tab check green frame disappear
     self.chrome.switch_to_tab(handle_1)
-    participantB_video_card = self.get_video_container_by_stream_name("participantB")
-    talking_indicator = self.chrome.get_element_in_element(participantB_video_card, By.CLASS_NAME, "talking-indicator-light", wait_until_clickable=False)
+    talking_indicator = self.chrome.get_element(By.ID, participantB_stream_id+"-is-talking")
     wait.until(lambda x: not talking_indicator.is_displayed())
 
     self.chrome.close_all()
 
     
-  def _test_video_track_assignment(self):
+  def test_video_track_assignment(self):
     self.chrome.close_all()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
@@ -1508,7 +1522,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  def _test_camera_mic_setting_in_meeting_room(self):
+  def test_camera_mic_setting_in_meeting_room(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 
@@ -1553,7 +1567,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_chat_messages(self):
+  def test_chat_messages(self):
     message_A = "hello from A"
     message_B = "hello from B"
     message_C = "hello from C"
@@ -1585,16 +1599,22 @@ class TestJoinLeave(unittest.TestCase):
     last_message = messages[-1]
     assert(message_A in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     #check messages on B and C
     self.chrome.switch_to_tab(handle_2)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_A in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     self.chrome.switch_to_tab(handle_3)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_A in last_message.get_attribute("innerHTML"))
+
+    time.sleep(1)
 
     #send message from B
     self.chrome.switch_to_tab(handle_2)
@@ -1603,16 +1623,22 @@ class TestJoinLeave(unittest.TestCase):
     last_message = messages[-1]
     assert(message_B in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     #check messages on A and C
     self.chrome.switch_to_tab(handle_2)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_B in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     self.chrome.switch_to_tab(handle_3)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_B in last_message.get_attribute("innerHTML"))
+
+    time.sleep(1)
 
     #send message from C
     self.send_message(message_C)
@@ -1620,11 +1646,15 @@ class TestJoinLeave(unittest.TestCase):
     last_message = messages[-1]
     assert(message_C in last_message.get_attribute("innerHTML"))
 
+    time.sleep(1)
+
     #check messages on A and B
     self.chrome.switch_to_tab(handle_1)
     messages = self.chrome.get_all_elements(By.ID, "message")
     last_message = messages[-1]
     assert(message_C in last_message.get_attribute("innerHTML"))
+
+    time.sleep(1)
 
     self.chrome.switch_to_tab(handle_2)
     messages = self.chrome.get_all_elements(By.ID, "message")
@@ -1634,9 +1664,10 @@ class TestJoinLeave(unittest.TestCase):
     
     self.chrome.close_all()
 
+  #FIXME: test in headless mode
   def _test_reactions(self):
     reaction_A = "💖"
-    reaction_B = "👍🏼"
+    reaction_B = "🤔"
     reaction_C = "🎉"
 
 
@@ -1670,6 +1701,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_3)
     wait.until(lambda x: self.chrome.is_element_displayed(By.XPATH, f"//div[text()='{reaction_A}']/br/following-sibling::span[text()='participantA']"))
 
+    time.sleep(1)
 
     #send reaction from B
     self.chrome.switch_to_tab(handle_2)
@@ -1682,6 +1714,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.switch_to_tab(handle_3)
     wait.until(lambda x: self.chrome.is_element_displayed(By.XPATH, f"//div[text()='{reaction_B}']/br/following-sibling::span[text()='participantB']"))
 
+    time.sleep(1)
 
     #send reaction from C
     self.send_reaction(reaction_C)
@@ -1696,7 +1729,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  def _test_background_replacement(self):
+  def test_background_replacement(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 
@@ -1745,7 +1778,7 @@ class TestJoinLeave(unittest.TestCase):
     return color
 
 
-  def _test_theme(self):
+  def test_theme(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 
@@ -1828,7 +1861,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  def _test_language(self):
+  def test_language(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 

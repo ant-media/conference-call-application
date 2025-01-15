@@ -1864,6 +1864,10 @@ function AntMedia(props) {
         console.log("***** " + error)
     }
 
+    function pinFirstVideo() {
+        pinVideo(videoTrackAssignments[0].streamId)
+    }
+
     function pinVideo(streamId) {
         // id is for pinning user.
         let videoLabel;
@@ -1880,6 +1884,11 @@ function AntMedia(props) {
             allParticipants[streamId] = broadcastObject;
             handleNotifyUnpinUser(streamId !== publishStreamId ? streamId : publishStreamId);
             setParticipantUpdated(!participantUpdated);
+
+            let vta = videoTrackAssignments.find(el => el.streamId == streamId);
+            if (vta) {
+                webRTCAdaptor?.assignVideoTrack(vta.videoLabel, streamId, false);
+            }
             return;
         }
 
@@ -1914,7 +1923,11 @@ function AntMedia(props) {
                 videoLabel = nextAvailableVideoLabel;
             }
 
-            webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
+            setTimeout(() => {
+                webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
+            }, 1000);
+            
+
         }
 
         Object.keys(allParticipants).forEach(id => {
@@ -2169,10 +2182,12 @@ function AntMedia(props) {
 
     function handleSendMessage(message) {
         if (publishStreamId || isPlayOnly) {
-            let iceState = webRTCAdaptor?.iceConnectionState(publishStreamId);
+
+            let streamId = isPlayOnly ? roomName : publishStreamId;
+            let iceState = webRTCAdaptor?.iceConnectionState(streamId);
             if (iceState !== null && iceState !== "failed" && iceState !== "disconnected") {
                 if (message === "debugme") {
-                    webRTCAdaptor?.getDebugInfo(publishStreamId);
+                    webRTCAdaptor?.getDebugInfo(streamId);
                     return;
                 } else if (message === "clearme") {
                     setMessages([]);
@@ -2180,11 +2195,11 @@ function AntMedia(props) {
                 }
 
 
-                webRTCAdaptor?.sendData(publishStreamId, JSON.stringify({
+                webRTCAdaptor?.sendData(streamId, JSON.stringify({
                     eventType: "MESSAGE_RECEIVED",
                     message: message,
                     name: streamName,
-                    senderId: publishStreamId,
+                    senderId: streamId,
                     date: new Date().toString()
                 }));
             }
@@ -2535,7 +2550,6 @@ function AntMedia(props) {
     }
 
     function checkScreenSharingStatus() {
-
         const broadcastObjectsArray = Object.values(allParticipants);
         broadcastObjectsArray.forEach((broadcastObject) => {
             if (broadcastObject.isScreenShared === true && typeof broadcastObject.isPinned === "undefined") {
@@ -3420,6 +3434,7 @@ function AntMedia(props) {
                                 setMuteParticipantDialogOpen={(open) => setMuteParticipantDialogOpen(open)}
                                 publishStreamId={publishStreamId}
                                 pinVideo={(streamId) => pinVideo(streamId)}
+                                pinFirstVideo={pinFirstVideo}
                                 allParticipants={allParticipants}
                                 participantUpdated={participantUpdated}
                                 videoTrackAssignments={videoTrackAssignments}
