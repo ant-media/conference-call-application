@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
-import {CircularProgress, Pagination} from "@mui/material";
+import {CircularProgress} from "@mui/material";
 import {WebinarRoles} from "../WebinarRoles";
 import {parseMetaData} from "../utils";
 
@@ -41,10 +41,37 @@ function ParticipantTab({
                           updateAllParticipantsPagination
 }) {
   const theme = useTheme();
+  const [loading, setLoading] = React.useState(false); // Track loading state
+  const scrollContainerRef = React.useRef(null);
+  const [isBottom, setIsBottom] = React.useState(false);
 
-  const paginationUpdate = (event, value) => {
-    updateAllParticipantsPagination(value);
-  }
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const isAtBottom =
+          container.scrollHeight - container.scrollTop <= container.clientHeight;
+      setIsBottom(isAtBottom);
+    }
+  };
+
+  React.useEffect(() => {
+    if (isBottom) {
+      loadMoreParticipants().then(r => {
+        console.log("More participants loaded");
+      })
+    }
+  }, [isBottom]);
+
+  // Infinite scroll logic
+  const loadMoreParticipants = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    // Fetch next participants
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await updateAllParticipantsPagination(globals.participantListPagination.currentPage + 1);
+    setLoading(false);
+  };
 
   const handleToggleMic = (isMicMuted, streamId, streamName) => {
     if (streamId === publishStreamId && !isMyMicMuted) {
@@ -201,8 +228,11 @@ function ParticipantTab({
 
   return (
     <>
-    <Grid container sx={{mt: 1}} id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}}>
-      <Stack sx={{width: "100%",}} spacing={2}>
+    <Grid container sx={{mt: 1}} id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}} ref={scrollContainerRef} onScroll={handleScroll}>
+      <Stack
+          sx={{width: "100%",}}
+          spacing={2}
+      >
         <Grid container>
           <SvgIcon size={28} name="participants" color={theme.palette?.participantListIcon?.primary}/>
           <ParticipantName
@@ -222,19 +252,10 @@ function ParticipantTab({
         })}
       </Stack>
     </Grid>
-      {/* Pagination Controls */}
-      <Grid
-          container
-          justifyContent="center"
-          sx={{ mt: 2, mb: 2 }}
-      >
-        <Pagination
-            data-testid="participant-list-pagination"
-            count={globals.participantListPagination.totalPage}
-            page={globals.participantListPagination.currentPage}
-            onChange={paginationUpdate}
-        />
-      </Grid>
+    {/* Infinite Scroll Trigger */}
+    <div style={{ height: "50px" }}>
+      {loading && <CircularProgress />}
+    </div>
     </>
   );
 
