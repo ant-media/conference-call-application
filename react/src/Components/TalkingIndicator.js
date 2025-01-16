@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { styled } from "@mui/material/styles";
 import { useTheme } from "@mui/material";
 
-const TalkingIndicatorWrapper = styled("div")(({ isVisible, borderColor }) => ({
+const TalkingIndicatorWrapper = styled("div")(({ isVisible, borderColor, id }) => ({
     borderColor: borderColor,
     color: borderColor,
     display: isVisible ? "block" : "none",
@@ -13,6 +13,7 @@ const TalkingIndicatorWrapper = styled("div")(({ isVisible, borderColor }) => ({
     pointerEvents: "none",
     zIndex: 2,
     borderRadius: "8px",
+    id: id,
 }));
 
 const TalkingIndicator = (props) => {
@@ -52,7 +53,7 @@ const TalkingIndicator = (props) => {
 
     const isVisible = isTalking || (localTalkers && localTalkers.includes(props?.streamId));
 
-    return <TalkingIndicatorWrapper isVisible={isVisible} borderColor={theme.palette.themeColor?.[20]} />;
+    return <TalkingIndicatorWrapper isVisible={isVisible} borderColor={theme.palette.themeColor?.[20]} id={props?.streamId+"-is-talking"} />;
 };
 
 export default TalkingIndicator;
