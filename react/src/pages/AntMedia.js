@@ -29,6 +29,11 @@ import Stack from "@mui/material/Stack";
 // don't use it in the production code
 export const UnitTestContext = React.createContext(null);
 
+const IN_PAGE = "inPage";
+const IN_ASSIGNMENT = "inAssignmet";
+const IN_CACHE = "inCache";
+
+
 const globals = {
     //this settings is to keep consistent with the sdk until backend for the app is setup
     // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
@@ -147,7 +152,7 @@ if (!onlyDataChannel) {
     onlyDataChannel = getUrlParameter("onlyDataChannel");
 }
 
-if (onlyDataChannel == null || typeof onlyDataChannel === "undefined") {
+if (isNull(onlyDataChannel)) {
     onlyDataChannel = false;
 } else {
     onlyDataChannel = (onlyDataChannel === "true");
@@ -158,7 +163,7 @@ if (!initialPlayOnly) {
     initialPlayOnly = getUrlParameter("playOnly");
 }
 
-if (initialPlayOnly == null || typeof initialPlayOnly === "undefined") {
+if (isNull(initialPlayOnly)) {
     initialPlayOnly = false;
 } else {
     initialPlayOnly = (initialPlayOnly === "true");
@@ -174,7 +179,7 @@ if (!admin) {
     admin = getUrlParameter("admin");
 }
 
-if (admin == null || typeof admin === "undefined") {
+if (isNull(admin)) {
     admin = false;
 } else {
     admin = (admin === "true");
@@ -183,7 +188,7 @@ if (admin == null || typeof admin === "undefined") {
 function getToken() {
     const dataToken = document.getElementById("root")?.getAttribute("data-token");
     let token = (dataToken) ? dataToken : getUrlParameter("token");
-    if (token === null || typeof token === "undefined") {
+    if (isNull(token)) {
         token = "";
     }
     return token;
@@ -194,16 +199,20 @@ var token = getToken();
 function getRole() {
     const dataRole = document.getElementById("root")?.getAttribute("data-role");
     let role = (dataRole) ? dataRole : getUrlParameter("role");
-    if (role === null || typeof role === "undefined") {
+    if (isNull(role)) {
         role = WebinarRoles.Default;
     }
     return role;
 }
 
+function isNull(obj) {
+    return obj === null || typeof obj === 'undefined';
+}
+
 var roleInit = getRole();
 
 var enterDirectly = getUrlParameter("enterDirectly");
-if (enterDirectly == null || typeof enterDirectly === "undefined") {
+if (isNull(enterDirectly)) {
     enterDirectly = false;
 }
 var subscriberId = getUrlParameter("subscriberId");
@@ -977,10 +986,10 @@ function AntMedia(props) {
         setSelectedDevices(selectedDevices);
 
         try {
-            if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && typeof publishStreamId != 'undefined') {
+            if (webRTCAdaptor !== null && currentCameraDeviceId !== selectedDevices.videoDeviceId && !isNull(publishStreamId)) {
                 webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, selectedDevices.videoDeviceId);
             }
-            if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && typeof publishStreamId != 'undefined') {
+            if (webRTCAdaptor !== null && (currentAudioDeviceId !== selectedDevices.audioDeviceId || selectedDevices.audioDeviceId === 'default') && !isNull(publishStreamId)) {
                 webRTCAdaptor?.switchAudioInputSource(publishStreamId, selectedDevices.audioDeviceId);
             }
         } catch (error) {
@@ -1060,7 +1069,7 @@ function AntMedia(props) {
         let participantsNewRole = "";
         let broadcastObject = allParticipants[streamId];
 
-        if (broadcastObject !== null && broadcastObject !== undefined) {
+        if (!isNull(broadcastObject)) {
             participantsRole = broadcastObject.role;
         }
 
@@ -1091,7 +1100,7 @@ function AntMedia(props) {
         let participantsNewRole = "";
         let broadcastObject = allParticipants[streamId];
 
-        if (broadcastObject !== null && broadcastObject !== undefined) {
+        if (!isNull(broadcastObject)) {
             participantsRole = broadcastObject.role;
         }
 
@@ -1289,10 +1298,10 @@ function AntMedia(props) {
     }
 
     function handleMainTrackBroadcastObject(broadcastObject) {
-        if (broadcastObject.metaData !== undefined && broadcastObject.metaData !== null) {
+        if (!isNull(broadcastObject.metaData)) {
             let brodcastStatusMetadata = JSON.parse(broadcastObject.metaData);
 
-            if (brodcastStatusMetadata.isRecording !== undefined && brodcastStatusMetadata.isRecording !== null) {
+            if (!isNull(brodcastStatusMetadata.isRecording)) {
                 setIsRecordPluginActive(brodcastStatusMetadata.isRecording);
             }
         }
@@ -1306,7 +1315,7 @@ function AntMedia(props) {
         if (!streamName) {
             broadcastObject.name = broadcastObject.streamId
         }
-        if (metaDataStr === "" || metaDataStr === null || metaDataStr === undefined) {
+        if (metaDataStr === "" || isNull(metaDataStr)) {
             broadcastObject.metaData = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
         }
 
@@ -1317,6 +1326,10 @@ function AntMedia(props) {
 
         broadcastObject.isScreenShared = metaData.isScreenShared;
         let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
+        if(isNull(filteredBroadcastObject.status) || filteredBroadcastObject.status != IN_PAGE) {
+            filteredBroadcastObject.status = IN_ASSIGNMENT;
+        }
+        filteredBroadcastObject.statusUpdateTime = Date.now();
         allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject; //TODO: optimize
         pagedParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
@@ -1329,7 +1342,7 @@ function AntMedia(props) {
     // TODO: instead of filterBroadcastObject, we can implement eqivalent function instead of _.isEqual
     function filterBroadcastObject(broadcastObject) {
         let tempBroadcastObject = broadcastObject;
-        if (tempBroadcastObject !== null && tempBroadcastObject !== undefined) {
+        if (!isNull(tempBroadcastObject)) {
             tempBroadcastObject.receivedBytes = -1;
             tempBroadcastObject.duration = -1;
             tempBroadcastObject.bitrate = -1;
@@ -1398,7 +1411,7 @@ function AntMedia(props) {
 
         navigator.mediaDevices.getDisplayMedia(getMediaConstraints("screenConstraints", 20))
             .then((stream) => {
-                if (stream !== null && stream !== undefined && stream.getVideoTracks().length > 0) {
+                if (stream !== null && !isNull(stream) && stream.getVideoTracks().length > 0) {
                     // it handles the stop screen sharing event
                     stream.getVideoTracks()[0].addEventListener('ended', () => {
                         handleStopScreenShare();
@@ -1460,7 +1473,7 @@ function AntMedia(props) {
 
     function checkAndSetIsPinned(streamId, broadcastObject) {
         let existingBroadcastObject = allParticipants[streamId];
-        if (existingBroadcastObject !== null && existingBroadcastObject !== undefined) {
+        if (!isNull(existingBroadcastObject)) {
             broadcastObject.isPinned = existingBroadcastObject.isPinned;
         }
         return broadcastObject;
@@ -1484,7 +1497,7 @@ function AntMedia(props) {
                 handleSubtrackBroadcastObject(broadcastObject);
 
                 let metaDataStr = broadcastObject.metaData;
-                if (metaDataStr === "" || metaDataStr === null || metaDataStr === undefined) {
+                if (metaDataStr === "" || isNull(metaDataStr)) {
                     metaDataStr = "{\"isMicMuted\":false,\"isCameraOn\":true,\"isScreenShared\":false,\"playOnly\":false}"
                 }
 
@@ -1493,8 +1506,9 @@ function AntMedia(props) {
 
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
+                filterBroadcastObject.status = IN_PAGE;
+                filterBroadcastObject.statusUpdateTime = Date.now();
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
-                filterBroadcastObject.isPaged = true;
                 pagedParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
             });
 
@@ -1524,8 +1538,11 @@ function AntMedia(props) {
                 setAllParticipants(allParticipantsTemp);
                 setParticipantUpdated(!participantUpdated);
             }
+
+            checkScreenSharingStatus();
+
         } else if (info === "subtrackCount") {
-            if (obj.count !== undefined) {
+            if (!isNull(obj.count)) {
                 if (obj.count > participantCount) {
                     // if the new participant is added, we need to get the subtrack list again
                     webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
@@ -1533,7 +1550,7 @@ function AntMedia(props) {
                 setParticipantCount(obj.count);
             }
         } else if (info === "broadcastObject") {
-            if (obj.broadcast === undefined) {
+            if (isNull(obj.broadcast)) {
                 return;
             }
 
@@ -1557,7 +1574,7 @@ function AntMedia(props) {
 
             if (reconnecting) {
                 // we need to set the local video again after the reconnection
-                let newLocalVideo = document.getElementById((typeof publishStreamId === "undefined") ? "localVideo" : publishStreamId);
+                let newLocalVideo = document.getElementById(isNull(publishStreamId) ? "localVideo" : publishStreamId);
                 localVideoCreate(newLocalVideo);
                 // we need to set the setVideoCameraSource to be able to update sender source after the reconnection
                 webRTCAdaptor.mediaManager.setVideoCameraSource(publishStreamId, webRTCAdaptor.mediaManager.mediaConstraints, null, true);
@@ -1653,7 +1670,7 @@ function AntMedia(props) {
     }
 
     function checkConnectionQualityForPlay(obj) {
-        if (obj.inboundRtpList === undefined || obj.inboundRtpList === null || obj.inboundRtpList.length === 0) {
+        if (isNull(obj.inboundRtpList) || obj.inboundRtpList.length === 0) {
             // it means that there is no incoming stream so we don't need to check the connection quality for playback
             return;
         }
@@ -1767,7 +1784,7 @@ function AntMedia(props) {
     function errorCallback(error, message) {
         //some of the possible errors, NotFoundError, SecurityError,PermissionDeniedError
         var errorMessage = JSON.stringify(error);
-        if (typeof message != "undefined") {
+        if (!isNull(message)) {
             errorMessage = message;
         }
         if (error.indexOf("no_active_streams_in_room") !== -1) {
@@ -1870,7 +1887,8 @@ function AntMedia(props) {
 
 
     function unpinVideo() {
-        webRTCAdaptor?.assignVideoTrack(currentPinInfo.videoLabel, currentPinInfo.streamId, false);
+        webRTCAdaptor?.assignVideoTrack(currentPinInfo?.videoLabel, currentPinInfo?.streamId, false);
+        console.log(currentPinInfo?.videoLabel + " assigment removed from " + currentPinInfo?.streamId);
         setCurrentPinInfo(null);
         setParticipantUpdated(!participantUpdated);
     }
@@ -1880,13 +1898,13 @@ function AntMedia(props) {
         let videoLabel;
         let broadcastObject = allParticipants[streamId];
 
-        if (broadcastObject === null || broadcastObject === undefined) {
+        if (isNull(broadcastObject)) {
             console.error("Cannot find broadcast object for streamId: " + streamId);
             return;
         }
 
         // if we already pin the targeted user then we are going to remove it from pinned video.
-        if ((typeof broadcastObject.isPinned !== "undefined") && (broadcastObject.isPinned === true)) {
+        if (!isNull(broadcastObject.isPinned) && (broadcastObject.isPinned === true)) {
             unpinVideo();
         }
 
@@ -1911,10 +1929,10 @@ function AntMedia(props) {
                 }
             }
 
-            if (nextAvailableVideoLabel === undefined && videoTrackAssignments.length > videoTrackAssignmentStartIndex) {
+            if (isNull(nextAvailableVideoLabel) && videoTrackAssignments.length > videoTrackAssignmentStartIndex) {
                 // if there is no available video track, we use the first video track
                 videoLabel = videoTrackAssignments[videoTrackAssignmentStartIndex]?.videoLabel
-            } else if (nextAvailableVideoLabel === undefined) {
+            } else if (isNull(nextAvailableVideoLabel)) {
                 console.error("Cannot find available video track for pinning user.");
                 return;
             } else {
@@ -1922,6 +1940,7 @@ function AntMedia(props) {
             }
 
             setTimeout(() => {
+                console.log(videoLabel + " is assigned to " + streamId);
                 webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
             }, 1000);
 
@@ -1930,7 +1949,7 @@ function AntMedia(props) {
 
         Object.keys(allParticipants).forEach(id => {
             let participant = allParticipants[id];
-            if (typeof participant.isPinned !== 'undefined' && participant.isPinned === true) {
+            if (!isNull(participant.isPinned) && participant.isPinned === true) {
 
                 participant.isPinned = false;
                 allParticipants[id] = participant;
@@ -2086,7 +2105,7 @@ function AntMedia(props) {
     }
 
     function getLang() {
-        if (navigator.languages !== undefined) return navigator.languages[0];
+        if (!isNull(navigator.languages)) return navigator.languages[0];
         return navigator.language;
     }
 
@@ -2380,8 +2399,6 @@ function AntMedia(props) {
 
                 let tempAllParticipants = { ...allParticipants };
 
-                console.log("deneme 1:", tempAllParticipants);
-
                 // This function checks the case 1 and case 2
                 currentVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
                     let assignment;
@@ -2392,7 +2409,7 @@ function AntMedia(props) {
                         }
                     });
 
-                    if (tempVideoTrackAssignment.isMine || tempVideoTrackAssignment.isFake || assignment !== undefined) {
+                    if (tempVideoTrackAssignment.isMine || tempVideoTrackAssignment.isFake || !isNull(assignment)) {
                         if (isVideoLabelExists(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)) {
                             console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
                         } else {
@@ -2403,23 +2420,21 @@ function AntMedia(props) {
                     
                     //check the assigned stream id still has assignment. If not remove from all participants.
                     //This is the way to understand pinned but not paged streams leaving. For example screen share 
-                    if(false && !tempVideoTrackAssignment.isMine && tempVideoTrackAssignment.streamId !== roomName) {
-                        let vta = receivedVideoTrackAssignments.find(el => el.streamId == tempVideoTrackAssignment.streamId);
-                        console.log("deneme 1.5:", vta);
-
-                        if(typeof vta == 'undefined' && tempAllParticipants[tempVideoTrackAssignment.streamId].isPaged == false) {
-                            console.log("deneme 2: --> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
-                            console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
-                            delete tempAllParticipants[tempVideoTrackAssignment.streamId];
+                    if(!tempVideoTrackAssignment.isMine && tempVideoTrackAssignment.streamId !== roomName) {
+                        let vta = receivedVideoTrackAssignments.find(el => el.trackId == tempVideoTrackAssignment.streamId);
+                        if(isNull(vta)) {
+                            let broadcastObject = tempAllParticipants[tempVideoTrackAssignment.streamId];
+                            if(!isNull(broadcastObject)) {
+                                console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
+                                broadcastObject.status = IN_CACHE;
+                                broadcastObject.statusUpdateTime = Date.now();
+                            }
                         }
                     }                    
                 });
 
                 if (!_.isEqual(allParticipants, tempAllParticipants)) {
                     setAllParticipants(tempAllParticipants);
-
-                    console.log("deneme 3:", tempAllParticipants);
-
                 }
 
                 currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
@@ -2466,7 +2481,7 @@ function AntMedia(props) {
 
                 let updatedParticipant = allParticipants[notificationEvent.streamId];
 
-                if (updatedParticipant === null || updatedParticipant === undefined) {
+                if (isNull(updatedParticipant)) {
                     console.warn("Cannot find broadcast object for streamId: " + notificationEvent.streamId, " in allParticipants. Updated participant list request is sent.");
                     webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
                     return;
@@ -2537,7 +2552,7 @@ function AntMedia(props) {
     };
 
     function displayRoleUpdateMessage(streamId, oldRole, newRole) {
-        if (isAdmin !== true || oldRole === null || oldRole === undefined || newRole === null || newRole === undefined || oldRole === newRole) {
+        if (isAdmin !== true || isNull(oldRole)|| isNull(newRole) || oldRole === newRole) {
             console.log("Role update message is not displayed. Admin: ", isAdmin, " Old Role: ", oldRole, " New Role: ", newRole);
             return;
         }
@@ -2570,16 +2585,16 @@ function AntMedia(props) {
         
         //if currently pinned broadcast is not in all participants(we added also video trck assigned ones)
         //then unpin it. It may leave for example in schreen share
-        if(typeof currentPinInfo !== 'undefined') {
+        if(!isNull(currentPinInfo)) {
             let broadcastObject = broadcastObjectsArray.find(el => el.streamId == currentPinInfo.streamId);
-            if (typeof broadcastObject == 'undefined') {
+            if (isNull(broadcastObject) || broadcastObject.status == IN_CACHE) {
                 unpinVideo();
             }
         }
         
         //if the updated all participants(we added also video trck assigned ones) has a schreen share not pinned, pin it
         broadcastObjectsArray.forEach((broadcastObject) => {
-            if (broadcastObject.isScreenShared === true && typeof broadcastObject.isPinned === "undefined") {
+            if (broadcastObject.isScreenShared === true && isNull(broadcastObject.isPinned)) {
                 pinVideo(broadcastObject.streamId);
             }
         })
@@ -2761,7 +2776,7 @@ function AntMedia(props) {
         addMeAsParticipant(publishStreamId);
 
         let currentStreamName = streamName;
-        if (streamName === "" || streamName === undefined || streamName === null) {
+        if (streamName === "" || isNull(streamName)) {
             currentStreamName = "Anonymous"
         }
 
@@ -2847,7 +2862,7 @@ function AntMedia(props) {
     };
 
     function setVirtualBackgroundImage(url) {
-        if (url === undefined || url === null || url === "") {
+        if (isNull(url) || url === "") {
             return;
         } else if (url.startsWith("data:image")) {
             setAndEnableVirtualBackgroundImage(url);
@@ -2869,7 +2884,7 @@ function AntMedia(props) {
         }
 
         console.log("Virtual background image url: " + imageUrl);
-        if (imageUrl !== undefined && imageUrl !== null && imageUrl !== "") {
+        if (!isNull(imageUrl) && imageUrl !== "") {
             virtualBackgroundImage.src = imageUrl;
         } else {
             virtualBackgroundImage.src = "virtual-background0.png";
@@ -2963,11 +2978,11 @@ function AntMedia(props) {
     }, [selectedCamera, selectedMicrophone]);
 
     const setSelectedDevices = React.useCallback((devices) => {
-        if (devices.videoDeviceId !== null && devices.videoDeviceId !== undefined) {
+        if (!isNull(devices.videoDeviceId)) {
             setSelectedCamera(devices.videoDeviceId);
             localStorage.setItem("selectedCamera", devices.videoDeviceId);
         }
-        if (devices.audioDeviceId !== null && devices.audioDeviceId !== undefined) {
+        if (!isNull(devices.audioDeviceId)) {
             setSelectedMicrophone(devices.audioDeviceId);
             localStorage.setItem("selectedMicrophone", devices.audioDeviceId);
         }
@@ -3013,7 +3028,7 @@ function AntMedia(props) {
     const showReactions = React.useCallback((streamId, streamName, reactionRequest, allParticipants) => {
         let reaction = '😀';
 
-        if (reactions[reactionRequest] !== undefined) {
+        if (!isNull(reactions[reactionRequest])) {
             reaction = reactions[reactionRequest];
         }
 
@@ -3066,7 +3081,7 @@ function AntMedia(props) {
     const setAudioLevelListener = (listener, period) => {
         if (audioListenerIntervalJob == null) {
             audioListenerIntervalJob = setInterval(() => {
-                if (webRTCAdaptor?.remotePeerConnection[publishStreamId] !== undefined && webRTCAdaptor?.remotePeerConnection[publishStreamId] !== null) {
+                if (!isNull(webRTCAdaptor?.remotePeerConnection[publishStreamId])) {
                     webRTCAdaptor?.remotePeerConnection[publishStreamId].getStats(null).then(stats => {
                         for (const stat of stats.values()) {
                             if (stat.type === 'media-source' && stat.kind === 'audio') {
@@ -3082,7 +3097,7 @@ function AntMedia(props) {
     function localVideoCreate(tempLocalVideo) {
         // it can be null when we first open the page
         // due to the fact that local stream is not ready yet.
-        if (typeof tempLocalVideo !== "undefined" && tempLocalVideo !== null) {
+        if (!isNull(tempLocalVideo)) {
             setLocalVideo(tempLocalVideo);
             webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
             webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
@@ -3115,7 +3130,7 @@ function AntMedia(props) {
             var localSettings = JSON.parse(obj.settings);
             console.log("--isRecordingFeatureAvailable: ", localSettings?.isRecordingFeatureAvailable);
             setIsRecordPluginInstalled(localSettings?.isRecordingFeatureAvailable);
-            if (localSettings?.maxVideoTrackCount !== undefined && localSettings?.maxVideoTrackCount !== null) {
+            if (!isNull(localSettings?.maxVideoTrackCount)) {
                 console.log("--maxVideoTrackCountFromAppSettings: ", localSettings?.maxVideoTrackCount);
                 setAppSettingsMaxVideoTrackCount(localSettings?.maxVideoTrackCount > 0 ? localSettings?.maxVideoTrackCount + 1 : 6);
             }
@@ -3521,6 +3536,7 @@ function AntMedia(props) {
                             setBecomePublisherConfirmationDialogOpen={(open) => setBecomePublisherConfirmationDialogOpen(open)}
                             handleStartBecomePublisher={() => handleStartBecomePublisher()}
                             isBecomePublisherConfirmationDialogOpen={isBecomePublisherConfirmationDialogOpen}
+                            currentPinInfo={currentPinInfo}
                         />
                         <MessageDrawer
                             messages={messages}
