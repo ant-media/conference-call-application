@@ -1,10 +1,12 @@
-import { render } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from "react";
 import WaitingRoom from "../../pages/WaitingRoom";
 import { ConferenceContext } from 'pages/AntMedia';
 import theme from "../../styles/theme";
 import {ThemeList} from "../../styles/themeList";
 import {ThemeProvider} from "@mui/material";
+import { useSnackbar} from 'notistack';
+
 
 const contextValue = {
   initialized: true,
@@ -61,7 +63,7 @@ const props = {
   turnOffYourCamNotification: jest.fn(),
   pinVideo: jest.fn(),
   isAdmin: false,
-  publishStreamId: "test-stream-id",
+  publishStreamId: "test-stream-id",  
 };
 
 // Mock the useContext hook
@@ -120,20 +122,18 @@ describe('Waiting Room Component', () => {
     useSnackbar.mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
   });
 
-
-
   it('renders WaitingRoom component without crashing', () => {
     render(<WaitingRoom/>);
   });
 
-    it('should click join room button', () => {
-      const {getByTestId} = render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <WaitingRoom/>
-          </ThemeProvider>);
-        getByTestId('join-room-button').click();
+  it('should click join room button', () => {
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <WaitingRoom/>
+        </ThemeProvider>);
+      getByTestId('join-room-button').click();
 
-    });
+  });
 
   it('shows error if the camera is not working', async () => {
     contextValue.checkVideoTrackHealth.mockReturnValue(false);
@@ -174,11 +174,13 @@ describe('Waiting Room Component', () => {
 
     const {getByTestId} = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-          <WaitingRoom />
+          <WaitingRoom 
+            checkVideoTrackHealth = {jest.fn().mockReturnValue(false)}
+          />
         </ThemeProvider>
     )
 
-    fireEvent.submit(getByTestId('form'));
+    fireEvent.submit(getByTestId('join-form'));
 
     expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -194,11 +196,13 @@ describe('Waiting Room Component', () => {
 
     const {getByTestId} = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
-          <WaitingRoom />
+          <WaitingRoom 
+            checkVideoTrackHealth = {jest.fn().mockReturnValue(false)}
+          />
         </ThemeProvider>
     )
 
-    fireEvent.submit(getByTestId('form'));
+    fireEvent.submit(getByTestId('join-form'));
 
     expect(mockEnqueueSnackbar).not.toHaveBeenCalledWith(
         expect.objectContaining({

@@ -3211,6 +3211,7 @@ function AntMedia(props) {
                             publishStreamId,
                             isMyMicMuted,
                             isMyCamTurnedOff,
+                            setIsMyCamTurnedOff,
                             sendReactions,
                             setSelectedBackgroundMode,
                             setIsVideoEffectRunning,
@@ -3325,7 +3326,8 @@ function AntMedia(props) {
                             rejectBecomeSpeakerRequest,
                             handleStartBecomePublisher,
                             handlePublisherRequest,
-                            makeListenerAgain
+                            makeListenerAgain,
+                            checkVideoTrackHealth
                         }}
                     >
                         {props.children}

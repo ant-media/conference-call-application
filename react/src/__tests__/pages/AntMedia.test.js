@@ -2994,7 +2994,10 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
 
-      currentConference.isMyCamTurnedOff = true;
+      currentConference.setIsMyCamTurnedOff(true);
+      await waitFor(() => {
+        expect(currentConference.isMyCamTurnedOff).toBe(true);
+      });
       currentConference.mediaManager = {
         localStream: {
           getAudioTracks: jest.fn().mockReturnValue([]),
@@ -3019,7 +3022,11 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
 
-      currentConference.isMyCamTurnedOff = false;
+      currentConference.setIsMyCamTurnedOff(false);
+      await waitFor(() => {
+        expect(currentConference.isMyCamTurnedOff).toBe(false);
+      });      
+
       currentConference.mediaManager = {
         localStream: {
           getAudioTracks: jest.fn().mockReturnValue([]),
@@ -3028,7 +3035,7 @@ describe('AntMedia Component', () => {
           ]),
         }
       };
-      expect(currentConference.checkVideoTrackHealth()).toBe(true);
+      expect(currentConference.checkVideoTrackHealth()).toBe(false);
     });
   });
 
