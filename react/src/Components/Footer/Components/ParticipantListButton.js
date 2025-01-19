@@ -4,7 +4,6 @@ import { styled } from '@mui/material/styles';
 import { SvgIcon } from '../../SvgIcon';
 import { Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { ConferenceContext } from 'pages/AntMedia';
 
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
@@ -21,24 +20,23 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-function ParticipantListButton({ footer }) {
-    const conference = React.useContext(ConferenceContext);
+function ParticipantListButton(props) {
     const {t} = useTranslation();
 
     return (
             <Tooltip title={t('Participant List')} placement="top">
                 <CustomizedBtn
                     onClick={() => {
-                        conference?.handleParticipantListOpen(!conference?.participantListDrawerOpen);
+                        props?.handleParticipantListOpen(!props?.participantListDrawerOpen);
                     }}
                     id="participant-list-button"
                     variant="contained"
-                    className={footer ? 'footer-icon-button' : ''}
-                    color={conference?.participantListDrawerOpen ? 'primary' : 'secondary'}
+                    className={props?.footer ? 'footer-icon-button' : ''}
+                    color={props?.participantListDrawerOpen ? 'primary' : 'secondary'}
                 >
-                    <SvgIcon size={32} color={conference?.participantListDrawerOpen ? '#000' : '#fff'} name={'participants'} />
-                  {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                    <a style={{color: conference?.participantListDrawerOpen ? '#000' : '#fff'}}>{conference.participantCount}</a>
+                    <SvgIcon size={32} color={props?.participantListDrawerOpen ? '#000' : '#fff'} name={'participants'} />
+                  {/* eslint-disable-next-line */}
+                    <a style={{color: props?.participantListDrawerOpen ? '#000' : '#fff'}}>{props?.participantCount}</a>
                 </CustomizedBtn>
             </Tooltip>
         );

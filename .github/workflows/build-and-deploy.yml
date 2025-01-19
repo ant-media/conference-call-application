@@ -87,10 +87,16 @@ jobs:
         sed -i "s#^REACT_APP_TURN_SERVER_URL=.*#REACT_APP_TURN_SERVER_URL=\"turn:${{ secrets.STAGING_TURN_URL }}\"#" .env.production
         sed -i "s#^REACT_APP_TURN_SERVER_USERNAME=.*#REACT_APP_TURN_SERVER_USERNAME=\"${{ secrets.STAGING_TURN_USERNAME }}\"#" .env.production
         sed -i "s#^REACT_APP_TURN_SERVER_CREDENTIAL=.*#REACT_APP_TURN_SERVER_CREDENTIAL=\"${{ secrets.STAGING_TURN_PASSWORD }}\"#" .env.production
-        npm install
+        npm install --force
         npm run build
         cd ..
-        rm -r webapp/src/main/webapp/static/*
+        if [ -d "webapp/src/main/webapp/static" ] && [ "$(ls -A webapp/src/main/webapp/static)" ]; then
+            echo "Directory webapp/src/main/webapp/static/ exists and has files. Removing files..."
+            rm -rf webapp/src/main/webapp/static/*
+            echo "All files in webapp/src/main/webapp/static/ have been removed."
+        else
+            echo "Directory webapp/src/main/webapp/static/ is either empty or does not exist. No files to remove."
+        fi
         cp -a react/build/. webapp/src/main/webapp
 
     - name: Build Maven project for webinar
@@ -112,10 +118,16 @@ jobs:
         sed -i "s#^REACT_APP_TURN_SERVER_URL=.*#REACT_APP_TURN_SERVER_URL=\"turn:${{ secrets.STAGING_TURN_URL }}\"#" .env.production
         sed -i "s#^REACT_APP_TURN_SERVER_USERNAME=.*#REACT_APP_TURN_SERVER_USERNAME=\"${{ secrets.STAGING_TURN_USERNAME }}\"#" .env.production
         sed -i "s#^REACT_APP_TURN_SERVER_CREDENTIAL=.*#REACT_APP_TURN_SERVER_CREDENTIAL=\"${{ secrets.STAGING_TURN_PASSWORD }}\"#" .env.production
-        npm install
+        npm install --force
         npm run build
         cd ..
-        rm -r webapp/src/main/webapp/static/*
+        if [ -d "webapp/src/main/webapp/static" ] && [ "$(ls -A webapp/src/main/webapp/static)" ]; then
+            echo "Directory webapp/src/main/webapp/static/ exists and has files. Removing files..."
+            rm -rf webapp/src/main/webapp/static/*
+            echo "All files in webapp/src/main/webapp/static/ have been removed."
+        else
+            echo "Directory webapp/src/main/webapp/static/ is either empty or does not exist. No files to remove."
+        fi
         cp -a react/build/. webapp/src/main/webapp
 
     - name: Build Maven project for conferencing
@@ -175,7 +187,7 @@ jobs:
           echo "ls:"
           ls -al
           cd react
-          npm install --include=dev
+          npm install --include=dev --force
           npm test
 
       - name: Upload coverage to Codecov
@@ -362,17 +374,22 @@ jobs:
         sed -i "s#^REACT_APP_TURN_SERVER_URL=.*#REACT_APP_TURN_SERVER_URL=\"turn:${{ secrets.STAGING_TURN_URL }}\"#" .env.production
         sed -i "s#^REACT_APP_TURN_SERVER_USERNAME=.*#REACT_APP_TURN_SERVER_USERNAME=\"${{ secrets.STAGING_TURN_USERNAME }}\"#" .env.production
         sed -i "s#^REACT_APP_TURN_SERVER_CREDENTIAL=.*#REACT_APP_TURN_SERVER_CREDENTIAL=\"${{ secrets.STAGING_TURN_PASSWORD }}\"#" .env.production
-        npm install
+        npm install --force
         npm run build
         cd ..
-        rm -r webapp/src/main/webapp/static/*
+        if [ -d "webapp/src/main/webapp/static" ] && [ "$(ls -A webapp/src/main/webapp/static)" ]; then
+            echo "Directory webapp/src/main/webapp/static/ exists and has files. Removing files..."
+            rm -rf webapp/src/main/webapp/static/*
+            echo "All files in webapp/src/main/webapp/static/ have been removed."
+        else
+            echo "Directory webapp/src/main/webapp/static/ is either empty or does not exist. No files to remove."
+        fi
         cp -a react/build/. webapp/src/main/webapp
 
     - name: Publish to Maven Central
       run: |
         cd webapp
         ls -alh
-        ls -alh target/
         mvn -e deploy -DskipTests --quiet --settings ../mvn-settings.xml
         sleep 60
       env:
@@ -381,7 +398,7 @@ jobs:
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MVN_GPG_PASSPHRASE }}
 
     - name: Get versions data from repo
-      run: wget -O maven-metadata.xml https://oss.sonatype.org/service/local/repositories/snapshots/content/io/antmedia/ant-media-server/maven-metadata.xml       
+      run: wget -O maven-metadata.xml https://oss.sonatype.org/service/local/repositories/snapshots/content/io/antmedia/webrtc/ConferenceCall/maven-metadata.xml       
     - name: Install jq
       run: sudo apt-get install jq -y
     - name: Download war File
