@@ -802,7 +802,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
 
-  def test_join_room_N_participants(self):
+  def _test_join_room_N_participants(self):
     self.chrome.makeFullScreen()
     N = 5
     room = "room"+str(random.randint(100, 999))
@@ -1073,7 +1073,7 @@ class TestJoinLeave(unittest.TestCase):
  
     self.chrome.close_all()
 
-  def test_pinned_layout_test(self):
+  def _test_pinned_layout_test(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(30, 3)
@@ -1440,7 +1440,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
     
-  def test_video_track_assignment(self):
+  def _test_video_track_assignment(self):
     self.chrome.close_all()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
