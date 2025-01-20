@@ -1,10 +1,12 @@
-import { render } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from "react";
 import WaitingRoom from "../../pages/WaitingRoom";
 import { ConferenceContext } from 'pages/AntMedia';
 import theme from "../../styles/theme";
 import {ThemeList} from "../../styles/themeList";
 import {ThemeProvider} from "@mui/material";
+import { useSnackbar} from 'notistack';
+
 
 const contextValue = {
   initialized: true,
@@ -15,6 +17,7 @@ const contextValue = {
   localVideo: {},
   setSpeedTestObject: jest.fn(),
   makeId: jest.fn(),
+  checkVideoTrackHealth: jest.fn().mockReturnValue(false),
 };
 
 const props = {
@@ -60,13 +63,17 @@ const props = {
   turnOffYourCamNotification: jest.fn(),
   pinVideo: jest.fn(),
   isAdmin: false,
-  publishStreamId: "test-stream-id",
+  publishStreamId: "test-stream-id",  
 };
 
 // Mock the useContext hook
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
   useContext: jest.fn(),
+}));
+
+jest.mock('notistack', () => ({
+  useSnackbar: jest.fn(),
 }));
 
 jest.mock('utils', () => ({
@@ -110,16 +117,100 @@ describe('Waiting Room Component', () => {
       }
       return jest.requireActual('react').useContext(input);
     });
+
+    const mockEnqueueSnackbar = jest.fn();
+    useSnackbar.mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
   });
 
-
-
   it('renders WaitingRoom component without crashing', () => {
-    render(<WaitingRoom
-        /*{...props}*/
-    />);
-    //const linkElement = screen.getByText(/What's your name?/i);
-    //expect(linkElement).toBeInTheDocument();
+    render(<WaitingRoom/>);
+  });
+
+  it('should click join room button', () => {
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <WaitingRoom/>
+        </ThemeProvider>);
+      getByTestId('join-room-button').click();
+
+  });
+
+  it('shows error if the camera is not working', async () => {
+    contextValue.checkVideoTrackHealth.mockReturnValue(false);
+
+    const mockEnqueueSnackbar = jest.fn();
+
+    jest.mock('notistack', () => ({
+      useSnackbar: () => {
+        return {
+          enqueueSnackbar: mockEnqueueSnackbar,
+        };
+      },
+    }));
+
+    const { getByTestId } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <WaitingRoom />
+        </ThemeProvider>
+    );
+
+    fireEvent.click(getByTestId('join-room-button'));
+
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).not.toHaveBeenCalledWith(
+          {
+            message: "Your camera is not working properly. Please check your camera settings",
+            variant: "error",
+            icon: expect.anything(),
+          },
+          expect.any(Object)
+      );
+    });
+  });
+
+  it('shows error message if camera is not working properly', () => {
+    const mockEnqueueSnackbar = jest.fn();
+    useSnackbar.mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
+
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <WaitingRoom 
+            checkVideoTrackHealth = {jest.fn().mockReturnValue(false)}
+          />
+        </ThemeProvider>
+    )
+
+    fireEvent.submit(getByTestId('join-form'));
+
+    expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Your camera is not working properly. Please check your camera settings",
+        }),
+        expect.any(Object)
+    );
+  });
+
+  it('shows info message if microphone and camera permissions are not allowed', () => {
+    const mockEnqueueSnackbar = jest.fn();
+    useSnackbar.mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
+
+    const {getByTestId} = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <WaitingRoom 
+            checkVideoTrackHealth = {jest.fn().mockReturnValue(false)}
+          />
+        </ThemeProvider>
+    )
+
+    fireEvent.submit(getByTestId('join-form'));
+
+    expect(mockEnqueueSnackbar).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "You need to allow microphone and camera permissions before joining",
+        }),
+        expect.any(Object)
+    );
+
   });
 
 });

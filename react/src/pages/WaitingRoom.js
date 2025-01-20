@@ -88,6 +88,22 @@ function WaitingRoom(props) {
     }, [props?.initialized]);
 
     function joinRoom(e) {
+        let isVideoTrackHealthy = props?.checkVideoTrackHealth();
+        if (!isVideoTrackHealthy) {
+            enqueueSnackbar(
+                {
+                    message: t(
+                        "Your camera is not working properly. Please check your camera settings"
+                    ),
+                    variant: "error",
+                    icon: <SvgIcon size={24} name={"muted-camera"} color="#fff"/>,
+                },
+                {
+                    autoHideDuration: 1500,
+                }
+            );
+            return;
+        }
         if (props?.localVideo === null && props?.isPlayOnly === false) {
             e.preventDefault();
             enqueueSnackbar(
@@ -503,6 +519,7 @@ function WaitingRoom(props) {
                                         variant="contained"
                                         type="submit"
                                         id="room_join_button"
+                                        data-testid="join-room-button"
                                     >
                                         {t("I'm ready to join")}
                                     </Button>
