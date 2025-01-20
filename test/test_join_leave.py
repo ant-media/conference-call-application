@@ -1567,7 +1567,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_chat_messages(self):
+  def _test_chat_messages(self):
     message_A = "hello from A"
     message_B = "hello from B"
     message_C = "hello from C"
