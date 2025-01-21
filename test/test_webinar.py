@@ -153,14 +153,12 @@ class TestWebinarScenario(unittest.TestCase):
     self.chrome.click_element(join_button)
 
     if not skip_speed_test:
+      time.sleep(5)
+
+      self.chrome.save_ss_as_file("join_room_as_player-1.png")
+
       speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
-      wait.until(lambda x: 
-                speedTestCircularProgress.is_displayed()
-                and 
-                (html_content := self.chrome.page_source)
-                and 
-                (print("html_content:"+html_content))
-                )
+      wait.until(lambda x: speedTestCircularProgress.is_displayed())
 
       time.sleep(5)
 
