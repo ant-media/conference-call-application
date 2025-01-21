@@ -3064,8 +3064,8 @@ function AntMedia(props) {
     }
 
     function checkVideoTrackHealth() {
-        // if the camera is turned off by the user, no need to check it
-        if (isMyCamTurnedOff) {
+        // if the camera is turned off by the user or play only, no need to check it
+        if (isMyCamTurnedOff || isPlayOnly) {
             return true;
         }
         // if the camera is turned on and the video track is muted, then there is a problem with the camera
