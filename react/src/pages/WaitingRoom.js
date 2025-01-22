@@ -38,6 +38,11 @@ if (enterDirectly == null || typeof enterDirectly === "undefined") {
     enterDirectly = false;
 }
 
+var skipSpeedTest = getUrlParameter("skipSpeedTest");
+if (skipSpeedTest == null || typeof skipSpeedTest === "undefined") {
+    skipSpeedTest = false;
+}
+
 function WaitingRoom(props) {
     // eslint-disable-next-line
     const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
@@ -128,7 +133,7 @@ function WaitingRoom(props) {
             streamId = publishStreamId;
         }
 
-        if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true' && enterDirectly === false) {
+        if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true' && enterDirectly === false && skipSpeedTest == false) {
             let speedTestObjectDefault = {};
             speedTestObjectDefault.message = "Please wait while we are testing your connection speed";
             speedTestObjectDefault.isfinished = false;
