@@ -44,6 +44,7 @@ class Browser:
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
   def open_in_new_tab(self, url):
+    print("url opening:" + url)
     self.driver.switch_to.new_window('tab')
     self.driver.get(url)
     return self.driver.current_window_handle
