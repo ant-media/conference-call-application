@@ -490,8 +490,7 @@ function AntMedia(props) {
     const [isNoSreamExist, setIsNoSreamExist] = React.useState(false);
 
 
-
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
     const theme = useTheme();
 
@@ -2994,7 +2993,9 @@ function AntMedia(props) {
             // When we first open home page, React will call this function and local stream is null at that time.
             // So, we need to catch the error.
             try {
-                webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, value);
+                webRTCAdaptor?.switchVideoCameraCapture(publishStreamId, value, () => {
+                    console.log("Camera selection callback");
+                });
             } catch (e) {
                 console.log("Local stream is not ready yet.");
             }
@@ -3102,6 +3103,21 @@ function AntMedia(props) {
             webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
             webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
         }
+    }
+
+    function checkVideoTrackHealth() {
+        // if the camera is turned off by the user or play only, no need to check it
+        if (isMyCamTurnedOff || isPlayOnly) {
+            return true;
+        }
+        // if the camera is turned on and the video track is muted, then there is a problem with the camera
+        let localStream = webRTCAdaptor?.mediaManager?.localStream;
+        if(localStream == null || webRTCAdaptor?.mediaManager?.localStream.getVideoTracks()[0].muted) {
+            //camera is not working properly
+            return false;
+        }
+
+        return true;
     }
 
     const getTrackStats = React.useCallback(() => { // eslint-disable-line  no-unused-vars 
@@ -3237,6 +3253,7 @@ function AntMedia(props) {
                     publishStreamId,
                     isMyMicMuted,
                     isMyCamTurnedOff,
+                    setIsMyCamTurnedOff,
                     sendReactions,
                     setSelectedBackgroundMode,
                     setIsVideoEffectRunning,
@@ -3351,7 +3368,8 @@ function AntMedia(props) {
                     rejectBecomeSpeakerRequest,
                     handleStartBecomePublisher,
                     handlePublisherRequest,
-                    makeListenerAgain
+                    makeListenerAgain,
+                    checkVideoTrackHealth
                 }}
             >
                 {props.children}
@@ -3458,6 +3476,7 @@ function AntMedia(props) {
                         isAdmin={isAdmin}
                         publishStreamId={publishStreamId}
                         role={role}
+                        checkVideoTrackHealth={checkVideoTrackHealth}
                     />
                 ) : (
                     <>
