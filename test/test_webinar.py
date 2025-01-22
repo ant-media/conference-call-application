@@ -798,8 +798,8 @@ class TestWebinarScenario(unittest.TestCase):
     # create a room and join as admin and 2 players
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("admin", room, True)
-    handle_player_A = self.join_room_as_player("playerA", room, False)
-    handle_player_B = self.join_room_as_player("playerB", room, False)
+    handle_player_A = self.join_room_as_player("playerA", room, True)
+    handle_player_B = self.join_room_as_player("playerB", room, True)
 
     wait = self.chrome.get_wait()
 
