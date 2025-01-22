@@ -31,8 +31,25 @@ class TestWebinarScenario(unittest.TestCase):
     self.rest_helper.start_broadcast("speedTestSampleStream")
     #self.startLoadTest()
 
+    # Start logging CPU and RAM usage in a separate thread
+    self.keep_running = True
+    self.monitor_thread = threading.Thread(target=self.log_resource_usage)
+    self.monitor_thread.start()
+
+  def log_resource_usage(self):
+    """Log CPU and RAM usage periodically."""
+    while self.keep_running:
+      cpu_usage = psutil.cpu_percent(interval=1)  # Measure CPU usage over 1 second
+      ram_usage = psutil.virtual_memory().percent  # Get RAM usage percentage
+      test_name = self._testMethodName  # Get the current test name
+      print(f"[{test_name}] CPU Usage: {cpu_usage}% | RAM Usage: {ram_usage}%")
+      time.sleep(5)  # Log every 5 seconds (adjust as needed)
+
   def tearDown(self):
-    print(self._testMethodName, " ending...")
+    """Ensure the monitoring thread stops after tests."""
+    self.keep_running = False
+    self.monitor_thread.join()
+    print(self._testMethodName, " ending...\n","----------------")
 
   def startLoadTest(self):
     def start_load_test():
