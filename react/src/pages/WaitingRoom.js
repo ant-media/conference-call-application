@@ -38,6 +38,11 @@ if (enterDirectly == null || typeof enterDirectly === "undefined") {
     enterDirectly = false;
 }
 
+var skipSpeedTest = getUrlParameter("skipSpeedTest");
+if (skipSpeedTest == null || typeof skipSpeedTest === "undefined") {
+    skipSpeedTest = false;
+}
+
 function WaitingRoom(props) {
     // eslint-disable-next-line
     const id = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
@@ -88,6 +93,22 @@ function WaitingRoom(props) {
     }, [props?.initialized]);
 
     function joinRoom(e) {
+        let isVideoTrackHealthy = props?.checkVideoTrackHealth();
+        if (!isVideoTrackHealthy) {
+            enqueueSnackbar(
+                {
+                    message: t(
+                        "Your camera is not working properly. Please check your camera settings"
+                    ),
+                    variant: "error",
+                    icon: <SvgIcon size={24} name={"muted-camera"} color="#fff"/>,
+                },
+                {
+                    autoHideDuration: 1500,
+                }
+            );
+            return;
+        }
         if (props?.localVideo === null && props?.isPlayOnly === false) {
             e.preventDefault();
             enqueueSnackbar(
@@ -112,7 +133,7 @@ function WaitingRoom(props) {
             streamId = publishStreamId;
         }
 
-        if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true' && enterDirectly === false) {
+        if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true' && enterDirectly === false && skipSpeedTest == false) {
             let speedTestObjectDefault = {};
             speedTestObjectDefault.message = "Please wait while we are testing your connection speed";
             speedTestObjectDefault.isfinished = false;
@@ -503,6 +524,7 @@ function WaitingRoom(props) {
                                         variant="contained"
                                         type="submit"
                                         id="room_join_button"
+                                        data-testid="join-room-button"
                                     >
                                         {t("I'm ready to join")}
                                     </Button>
