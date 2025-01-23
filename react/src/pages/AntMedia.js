@@ -30,7 +30,7 @@ import Stack from "@mui/material/Stack";
 export const UnitTestContext = React.createContext(null);
 
 const IN_PAGE = "inPage";
-const IN_ASSIGNMENT = "inAssignmet";
+const IN_ASSIGNMENT = "inAssignment";
 const IN_CACHE = "inCache";
 
 
@@ -1307,7 +1307,7 @@ function AntMedia(props) {
     }
 
 
-    function handleSubtrackBroadcastObject(broadcastObject) {
+    function handleSubtrackBroadcastObject(broadcastObject, isPaged) {
         let streamName = broadcastObject.name;
         let metaDataStr = broadcastObject.metaData;
         // Handle adding external stream as subtrack via REST case. If this is not done tile is not rendered by circle.
@@ -1325,7 +1325,10 @@ function AntMedia(props) {
 
         broadcastObject.isScreenShared = metaData.isScreenShared;
         let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
-        if(isNull(filteredBroadcastObject.status) || filteredBroadcastObject.status != IN_PAGE) {
+        if(isPaged) {
+            filteredBroadcastObject.status = IN_PAGE;
+        }
+        else {
             filteredBroadcastObject.status = IN_ASSIGNMENT;
         }
         filteredBroadcastObject.statusUpdateTime = Date.now();
@@ -1493,7 +1496,7 @@ function AntMedia(props) {
             subtrackList.forEach(subTrack => {
                 let broadcastObject = JSON.parse(subTrack);
 
-                handleSubtrackBroadcastObject(broadcastObject);
+                handleSubtrackBroadcastObject(broadcastObject, true);
 
                 let metaDataStr = broadcastObject.metaData;
                 if (metaDataStr === "" || isNull(metaDataStr)) {
@@ -1505,8 +1508,6 @@ function AntMedia(props) {
 
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
-                filterBroadcastObject.status = IN_PAGE;
-                filterBroadcastObject.statusUpdateTime = Date.now();
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
                 pagedParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
             });
@@ -1519,6 +1520,8 @@ function AntMedia(props) {
             Object.keys(allParticipants).forEach(participantId => {
                 if (participantVTAByStreamId.has(participantId) && !allParticipantsTemp[participantId]) {
                     allParticipantsTemp[participantId] = allParticipants[participantId];
+                    allParticipantsTemp[participantId].status = IN_ASSIGNMENT;
+                    allParticipantsTemp[participantId].statusUpdateTime = Date.now();
                 }
             });
 
@@ -1558,7 +1561,7 @@ function AntMedia(props) {
             if (obj.streamId === roomName) { //maintrack object
                 handleMainTrackBroadcastObject(broadcastObject);
             } else { //subtrack object
-                handleSubtrackBroadcastObject(broadcastObject);
+                handleSubtrackBroadcastObject(broadcastObject, false);
             }
 
             console.log(obj.broadcast);
