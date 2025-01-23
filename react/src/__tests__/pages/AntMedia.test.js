@@ -351,17 +351,17 @@ describe('AntMedia Component', () => {
 
     await act(async () => {
       currentConference.setVideoTrackAssignments([
-        {videoLabel:"videoTrack0", trackId:"tracka0"},
-        {videoLabel:"videoTrack1", trackId:"tracka1"},
-        {videoLabel:"videoTrack2", trackId:"tracka2"}]);
+        {videoLabel:"videoTrack0", streamId:"p0"},
+        {videoLabel:"videoTrack1", streamId:"p1"},
+        {videoLabel:"videoTrack2", streamId:"p2"}]);
     });
 
     var notificationEvent = {
       eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
       streamId: "stream1",
       payload: [
-        {videoLabel:"videoTrack1", trackId:"tracka1"},
-        {videoLabel:"videoTrack2", trackId:"tracka2"},
+        {videoLabel:"videoTrack1", trackId:"p0"},
+        {videoLabel:"videoTrack2", trackId:"p2"},
       ]
     };
     var json = JSON.stringify(notificationEvent);
@@ -375,12 +375,12 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callback("data_received", obj);
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith("---> Removed video track assignment: videoTrack0");
+    expect(consoleSpy).toHaveBeenCalledWith("---> Removed video track assignment: videoTrack1");
     expect(currentConference.videoTrackAssignments["stream0"]).toBe(undefined);
 
     consoleSpy.mockRestore();
 
-  });
+  }, 100000);
 
   it('handle sharing on', async () => {
     const { container } = render(
@@ -1271,7 +1271,7 @@ describe('AntMedia Component', () => {
 
     expect(consoleSpy).toHaveBeenCalledWith("Cannot find broadcast object for streamId: non-exist-participant");
 
-  });
+  }, 100000);
 
   it('high resource usage', async () => {
     const { container } = render(

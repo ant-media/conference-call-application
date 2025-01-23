@@ -1904,7 +1904,9 @@ function AntMedia(props) {
 
         // if we already pin the targeted user then we are going to remove it from pinned video.
         if (!isNull(broadcastObject.isPinned) && (broadcastObject.isPinned === true)) {
-            unpinVideo();
+            unpinVideo(broadcastObject);
+            broadcastObject.isPinned = false;
+            return;
         }
 
         // if there is no pinned video we are going to pin the targeted user.
