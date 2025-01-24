@@ -522,7 +522,7 @@ class TestJoinLeave(unittest.TestCase):
     print("after click:"+reaction)
 
   #FIXME: rerun test
-  def _test_others_tile(self):
+  def test_others_tile(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
@@ -814,7 +814,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
 
-  def _test_join_room_N_participants(self):
+  def test_join_room_N_participants(self):
     self.chrome.makeFullScreen()
     N = 5
     room = "room"+str(random.randint(100, 999))
@@ -1045,7 +1045,7 @@ class TestJoinLeave(unittest.TestCase):
 
 
   #FIXME test in headles mode
-  def _test_tiled_layout_test(self):
+  def test_tiled_layout_test(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(30, 3)
@@ -1085,7 +1085,7 @@ class TestJoinLeave(unittest.TestCase):
  
     self.chrome.close_all()
 
-  def _test_pinned_layout_test(self):
+  def test_pinned_layout_test(self):
     self.chrome.makeFullScreen()
     room = "room"+str(random.randint(100, 999))
     wait = self.chrome.get_wait(30, 3)
@@ -1452,7 +1452,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
     
-  def _test_video_track_assignment(self):
+  def test_video_track_assignment(self):
     self.chrome.close_all()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
