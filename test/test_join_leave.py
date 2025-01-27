@@ -20,7 +20,7 @@ class TestJoinLeave(unittest.TestCase):
   def setUp(self):
       print("----------------\n", self._testMethodName, " starting...")
       self.is_local = False
-      self.is_local = True
+      #self.is_local = True
       self.verbose = False
       self.url = os.environ.get('SERVER_URL')
       self.test_app_name = os.environ.get('TEST_APP_NAME')
