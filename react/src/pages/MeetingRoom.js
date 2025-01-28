@@ -95,6 +95,7 @@ const MeetingRoom = React.memo((props) => {
       let participant = props?.allParticipants[streamId];
       if (typeof participant.isPinned !== 'undefined'
         && participant.isPinned === true
+        && participant.status !== "inCache"
         && typeof firstPinnedParticipant === 'undefined') {
 
         firstPinnedParticipant = props?.allParticipants[streamId];

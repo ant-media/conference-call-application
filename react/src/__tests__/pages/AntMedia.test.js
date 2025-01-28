@@ -12,6 +12,7 @@ import { times } from 'lodash';
 import { useParams } from 'react-router-dom';
 import {VideoEffect} from "@antmedia/webrtc_adaptor";
 import {WebinarRoles} from "../../WebinarRoles";
+import { assert } from 'workbox-core/_private';
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
@@ -351,17 +352,17 @@ describe('AntMedia Component', () => {
 
     await act(async () => {
       currentConference.setVideoTrackAssignments([
-        {videoLabel:"videoTrack0", trackId:"tracka0"},
-        {videoLabel:"videoTrack1", trackId:"tracka1"},
-        {videoLabel:"videoTrack2", trackId:"tracka2"}]);
+        {videoLabel:"videoTrack0", streamId:"p0"},
+        {videoLabel:"videoTrack1", streamId:"p1"},
+        {videoLabel:"videoTrack2", streamId:"p2"}]);
     });
 
     var notificationEvent = {
       eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
       streamId: "stream1",
       payload: [
-        {videoLabel:"videoTrack1", trackId:"tracka1"},
-        {videoLabel:"videoTrack2", trackId:"tracka2"},
+        {videoLabel:"videoTrack1", trackId:"p0"},
+        {videoLabel:"videoTrack2", trackId:"p2"},
       ]
     };
     var json = JSON.stringify(notificationEvent);
@@ -375,7 +376,7 @@ describe('AntMedia Component', () => {
       webRTCAdaptorConstructor.callback("data_received", obj);
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith("---> Removed video track assignment: videoTrack0");
+    expect(consoleSpy).toHaveBeenCalledWith("---> Removed video track assignment: videoTrack1");
     expect(currentConference.videoTrackAssignments["stream0"]).toBe(undefined);
 
     consoleSpy.mockRestore();
@@ -3938,4 +3939,109 @@ describe('AntMedia Component', () => {
     consoleSpy.mockRestore();
   });
 
+
+  it('test all participant elements states', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    var subtrackList = [
+      JSON.stringify({ streamId: 'stream1', metaData: JSON.stringify({ isScreenShared: false }) }),
+      JSON.stringify({ streamId: 'stream2', metaData: JSON.stringify({ isScreenShared: false }) })
+    ];
+    var obj = { subtrackList };
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback('subtrackList', obj);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.participantUpdated).toBe(false);
+    });
+
+
+    expect(Object.keys(currentConference.allParticipants)).toHaveLength(2);
+    expect(currentConference.allParticipants['stream1'].status).toBe("inPage");
+    expect(currentConference.allParticipants['stream2'].status).toBe("inPage");
+
+    var obj = {};
+    let broadcastObject = {streamId: "stream3", name: "stream3", metaData: JSON.stringify({isScreenShared: false})};
+    let broadcastObjectMessage = JSON.stringify(broadcastObject);
+
+    obj.broadcast = broadcastObjectMessage;
+    obj.streamId = "stream3";
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("broadcastObject", obj);
+    });
+
+    expect(Object.keys(currentConference.allParticipants)).toHaveLength(3);
+    expect(currentConference.allParticipants['stream1'].status).toBe("inPage");
+    expect(currentConference.allParticipants['stream2'].status).toBe("inPage");
+    expect(currentConference.allParticipants['stream3'].status).toBe("inAssignment");
+
+    currentConference.videoTrackAssignments.push({streamId: "stream1", videoLabel: "videoTrack1"});
+    currentConference.videoTrackAssignments.push({streamId: "stream2", videoLabel: "videoTrack2"});
+    currentConference.videoTrackAssignments.push({streamId: "stream3", videoLabel: "videoTrack3"});
+
+
+    var notificationEvent = {
+      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
+      streamId: "room1",
+      payload: [
+        {videoLabel:"videoTrack1", trackId:"stream1"},
+        {videoLabel:"videoTrack2", trackId:"stream2"},
+      ]
+    };
+    var json = JSON.stringify(notificationEvent);
+
+    obj = {};
+    obj.data = json;
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback("data_received", obj);
+    });
+
+    
+    expect(Object.keys(currentConference.allParticipants)).toHaveLength(3);
+    expect(currentConference.allParticipants['stream1'].status).toBe("inPage");
+    expect(currentConference.allParticipants['stream2'].status).toBe("inPage");
+    expect(currentConference.allParticipants['stream3'].status).toBe("inCache");
+
+
+    await act(() => {
+      currentConference.setVideoTrackAssignments([]);
+    });
+    currentConference.videoTrackAssignments.push({streamId: "stream1", videoLabel: "videoTrack1"});
+    currentConference.videoTrackAssignments.push({streamId: "stream3", videoLabel: "videoTrack3"});
+
+    var subtrackList = [
+      JSON.stringify({ streamId: 'stream3', metaData: JSON.stringify({ isScreenShared: false }) }),
+      JSON.stringify({ streamId: 'stream4', metaData: JSON.stringify({ isScreenShared: false }) })
+    ];
+    var obj = { subtrackList };
+
+    await act(async () => {
+      webRTCAdaptorConstructor.callback('subtrackList', obj);
+    });
+
+    
+    expect(Object.keys(currentConference.allParticipants)).toHaveLength(3);
+    expect(currentConference.allParticipants['stream1'].status).toBe("inAssignment");
+    expect(currentConference.allParticipants['stream3'].status).toBe("inPage");
+    expect(currentConference.allParticipants['stream4'].status).toBe("inPage");
+
+
+    consoleSpy.mockRestore();
+  });
+
 });
+
+
