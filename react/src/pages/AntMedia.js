@@ -1385,6 +1385,7 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
+      if(initialized)
         if (devices.length > 0) {
             checkAndUpdateVideoAudioSources();
         } else {
@@ -1392,7 +1393,7 @@ function AntMedia(props) {
                 setDevices(devices);
             });
         }
-    }, [devices]); // eslint-disable-line 
+    }, [devices,initialized]); // eslint-disable-line 
 
     if (webRTCAdaptor) {
         webRTCAdaptor.callback = infoCallback;
