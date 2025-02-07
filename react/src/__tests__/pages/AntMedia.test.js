@@ -4041,7 +4041,25 @@ describe('AntMedia Component', () => {
 
     consoleSpy.mockRestore();
   });
+  it('test test', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
+    await act(async () => {
+      currentConference.setInitialized(false);
+    });
 
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+    webRTCAdaptorConstructor.checkAndUpdateVideoAudioSources = jest.fn();
+
+    expect(webRTCAdaptorConstructor.checkAndUpdateVideoAudioSources).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
 });
 
 
