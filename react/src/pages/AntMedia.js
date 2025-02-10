@@ -2458,11 +2458,11 @@ function AntMedia(props) {
                 checkScreenSharingStatus();
 
                 // check if there is any difference between old and new assignments
-                if (!_.isEqual(currentVideoTrackAssignments, videoTrackAssignments)) {
+                //if (!_.isEqual(currentVideoTrackAssignments, videoTrackAssignments)) {
                     setVideoTrackAssignments(currentVideoTrackAssignments);
                     requestSyncAdministrativeFields();
                     setParticipantUpdated(!participantUpdated);
-                }
+                //}
 
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
                 clearInterval(timeoutRef.current);
