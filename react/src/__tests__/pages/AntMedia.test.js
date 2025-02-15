@@ -8,7 +8,7 @@ import { UnitTestContext } from "pages/AntMedia";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
-import { times } from 'lodash';
+import { times, update } from 'lodash';
 import { useParams } from 'react-router-dom';
 import {VideoEffect} from "@antmedia/webrtc_adaptor";
 import {WebinarRoles} from "../../WebinarRoles";
@@ -4041,7 +4041,42 @@ describe('AntMedia Component', () => {
 
     consoleSpy.mockRestore();
   });
+  it('dont ', async () => {
+    const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+
+    const mockDevices = [
+      { kind: 'videoinput', deviceId: 'camera1' },
+    ];
+
+    const updateMetaData = jest.spyOn(webRTCAdaptorConstructor, 'updateStreamMetaData').mockImplementation();
+
+    await act(async () => {
+      currentConference.setInitialized(false);
+    });
+
+    await act(async () => {
+      currentConference.setDevices(mockDevices);
+    });
+
+    jest.useFakeTimers();
+    setTimeout(() => {
+      expect(updateMetaData).not.toHaveBeenCalled();
+    }, 2000);
+
+    jest.runAllTimers();
+
+    consoleSpy.mockRestore();
+  });
 });
 
 
