@@ -49,8 +49,9 @@ function ParticipantTab({
     const container = scrollContainerRef.current;
     if (container) {
       const isAtBottom =
-          container.scrollHeight - container.scrollTop <= container.clientHeight;
-      setIsBottom(isAtBottom);
+          container.scrollHeight - container.scrollTop <= container.clientHeight * 1.1;
+
+          setIsBottom(isAtBottom);
     }
   };
 
@@ -228,10 +229,10 @@ function ParticipantTab({
 
   return (
     <>
-    <Grid container sx={{mt: 1}} id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}} ref={scrollContainerRef} onScroll={handleScroll}>
+    <Grid container sx={{mt: 1}} id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}}>
       <Stack
           sx={{width: "100%",}}
-          spacing={2}
+          spacing={3}
       >
         <Grid container>
           <SvgIcon size={28} name="participants" color={theme.palette?.participantListIcon?.primary}/>
@@ -242,14 +243,16 @@ function ParticipantTab({
             {participantCount}
           </ParticipantName>
         </Grid>
-        {Object.entries(pagedParticipants).map(([streamId, broadcastObject]) => {
-          if (publishStreamId !== streamId) {
-            let assignedVideoCardId = videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
-            return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
-          } else {
-            return getParticipantItem(publishStreamId, "You");
-          }
-        })}
+        <Stack id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}} 
+          ref={scrollContainerRef} onScroll={handleScroll}>
+          {getParticipantItem(publishStreamId, "You")}
+          {Object.entries(pagedParticipants).map(([streamId, broadcastObject]) => {
+            if (publishStreamId !== streamId) {
+              let assignedVideoCardId = videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
+              return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
+            } 
+          })}
+        </Stack>
       </Stack>
     </Grid>
     {/* Infinite Scroll Trigger */}

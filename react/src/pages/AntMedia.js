@@ -43,8 +43,7 @@ const globals = {
     //pagination is used to keep track of the current page and the total page of the participants list
     participantListPagination: {
         currentPage: 1,
-        pageSize: 15,
-        totalPage: 1,
+        pageSize: 20,
         offset: 1
     }
 };
@@ -1478,7 +1477,7 @@ function AntMedia(props) {
             setInitialized(true);
         } else if (info === "subtrackList") {
             let subtrackList = obj.subtrackList;
-            let allParticipantsTemp = {};
+            let allParticipantsTemp = allParticipants;
             if (!isPlayOnly && publishStreamId) {
                 allParticipantsTemp[publishStreamId] = { name: "You" };
             }
@@ -2283,7 +2282,7 @@ function AntMedia(props) {
             handleStopScreenShare();
         }
 
-        createWebRTCAdaptor();
+        //createWebRTCAdaptor();
 
         setWaitingOrMeetingRoom("waiting");
     }, [isPlayOnly]);
@@ -2823,19 +2822,6 @@ function AntMedia(props) {
             currentPage = 1;
         }
 
-        // we calculate the total page count for pagination
-        if (participantCount === 0) {
-            // if we are play only user and there is no participant then total page is 1
-            globals.participantListPagination.totalPage = 1;
-        } else {
-            globals.participantListPagination.totalPage = Math.floor(participantCount / globals.participantListPagination.pageSize)
-                + (participantCount % globals.participantListPagination.pageSize > 0 ? 1 : 0);
-        }
-
-        if (currentPage > globals.participantListPagination.totalPage) {
-            currentPage = globals.participantListPagination.totalPage;
-        }
-
         globals.participantListPagination.currentPage = currentPage;
         globals.participantListPagination.offset = (globals.participantListPagination.currentPage - 1) * globals.participantListPagination.pageSize;
 
@@ -2949,7 +2935,7 @@ function AntMedia(props) {
         if (isVideoEffectRunning) {
             webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
         } else {
-            webRTCAdaptor?.turnOffLocalCamera(streamId);
+            webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
 
         updateUserStatusMetadata(isMyMicMuted, false);
