@@ -43,8 +43,7 @@ const globals = {
     //pagination is used to keep track of the current page and the total page of the participants list
     participantListPagination: {
         currentPage: 1,
-        pageSize: 15,
-        totalPage: 1,
+        pageSize: 20,
         offset: 1
     }
 };
@@ -404,11 +403,6 @@ function AntMedia(props) {
      */
     const [allParticipants, setAllParticipants] = useState({});
 
-    /*
-     * pagedParticipants: is a dictionary of (streamId, broadcastObject) for participants in the participant list drawer.
-     * subtrackList callback (which is return of getSubtracks request) for roomName has subtrackList and
-     * we use it to fill this dictionary. It's a subset of allParticipants.
-     */
     const [pagedParticipants, setPagedParticipants] = useState({});
 
     const [participantCount, setParticipantCount] = useState(1); // 1 is for the local participant
@@ -1321,7 +1315,6 @@ function AntMedia(props) {
         let metaData = JSON.parse(broadcastObject.metaData);
 
         let allParticipantsTemp = { ...allParticipants };
-        let pagedParticipantsTemp = { ...pagedParticipants };
 
         broadcastObject.isScreenShared = metaData.isScreenShared;
         let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
@@ -1333,9 +1326,7 @@ function AntMedia(props) {
         }
         filteredBroadcastObject.statusUpdateTime = Date.now();
         allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject; //TODO: optimize
-        pagedParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
-            setPagedParticipants(pagedParticipantsTemp);
             setAllParticipants(allParticipantsTemp);
             setParticipantUpdated(!participantUpdated);
         }
@@ -1486,8 +1477,7 @@ function AntMedia(props) {
             setInitialized(true);
         } else if (info === "subtrackList") {
             let subtrackList = obj.subtrackList;
-            let allParticipantsTemp = {};
-            let pagedParticipantsTemp = {};
+            let allParticipantsTemp = allParticipants;
             if (!isPlayOnly && publishStreamId) {
                 allParticipantsTemp[publishStreamId] = { name: "You" };
             }
@@ -1509,7 +1499,6 @@ function AntMedia(props) {
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
                 filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
-                pagedParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
             });
 
             // Subtrack list is pagination based, but we need to keep participants who have video track assignments but not in the subtrack list
@@ -1530,12 +1519,8 @@ function AntMedia(props) {
                 let broadcastObject = allParticipants[streamId];
                 if (broadcastObject.isFake === true) {
                     allParticipantsTemp[streamId] = broadcastObject;
-                    pagedParticipantsTemp[streamId] = broadcastObject;
                 }
             });
-            if (!_.isEqual(pagedParticipantsTemp, pagedParticipants)) {
-                setPagedParticipants(pagedParticipantsTemp);
-            }
             if (!_.isEqual(allParticipantsTemp, allParticipants)) {
                 setAllParticipants(allParticipantsTemp);
                 setParticipantUpdated(!participantUpdated);
@@ -2297,7 +2282,7 @@ function AntMedia(props) {
             handleStopScreenShare();
         }
 
-        createWebRTCAdaptor();
+        //createWebRTCAdaptor();
 
         setWaitingOrMeetingRoom("waiting");
     }, [isPlayOnly]);
@@ -2637,7 +2622,6 @@ function AntMedia(props) {
         // we need to empty participant array. if we are going to leave it in the first place.
         setVideoTrackAssignments([]);
         setAllParticipants({});
-        setPagedParticipants({});
 
         clearInterval(audioListenerIntervalJob);
         audioListenerIntervalJob = null;
@@ -2740,7 +2724,6 @@ function AntMedia(props) {
             console.log("removeAllRemoteParticipants setAllParticipants:" + JSON.stringify(allParticipantsTemp));
             setAllParticipants(allParticipantsTemp);
         }
-        setPagedParticipants({});
         setParticipantUpdated(!participantUpdated);
     }
 
@@ -2837,19 +2820,6 @@ function AntMedia(props) {
     function updateAllParticipantsPagination(currentPage) {
         if (currentPage <= 0) {
             currentPage = 1;
-        }
-
-        // we calculate the total page count for pagination
-        if (participantCount === 0) {
-            // if we are play only user and there is no participant then total page is 1
-            globals.participantListPagination.totalPage = 1;
-        } else {
-            globals.participantListPagination.totalPage = Math.floor(participantCount / globals.participantListPagination.pageSize)
-                + (participantCount % globals.participantListPagination.pageSize > 0 ? 1 : 0);
-        }
-
-        if (currentPage > globals.participantListPagination.totalPage) {
-            currentPage = globals.participantListPagination.totalPage;
         }
 
         globals.participantListPagination.currentPage = currentPage;
@@ -2965,7 +2935,7 @@ function AntMedia(props) {
         if (isVideoEffectRunning) {
             webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
         } else {
-            webRTCAdaptor?.turnOffLocalCamera(streamId);
+            webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
 
         updateUserStatusMetadata(isMyMicMuted, false);
@@ -3130,6 +3100,17 @@ function AntMedia(props) {
         return webRTCAdaptor.remotePeerConnectionStats[roomName];
 
     }, [webRTCAdaptor?.remotePeerConnectionStats, roomName]);
+
+    //Here we update paged participants if necessary
+    React.useEffect(() => { 
+        const tempPagedParticipants = Object.fromEntries(
+            Object.entries(allParticipants).filter(([key, value]) => value.status === IN_PAGE)
+        );
+
+        if(!_.isEqual(pagedParticipants, tempPagedParticipants)) {
+            setPagedParticipants(tempPagedParticipants);
+        }
+    }, [allParticipants]);
 
     React.useEffect(() => {
         //gets the setting from the server through websocket
