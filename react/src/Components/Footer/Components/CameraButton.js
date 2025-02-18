@@ -20,10 +20,10 @@ function CameraButton(props) {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <SvgIcon
               size={24}
-              name={isTurningOff ? "camera-off" : "camera"}
+              name={isTurningOff ? "camera" : "camera-off"}
               color="#fff"
           />
-          {isTurningOff ? t("Camera turned off") : t("Camera turned on")}
+          {isTurningOff ? t("Camera turned on") : t("Camera turned off")}
         </div>
     );
 
