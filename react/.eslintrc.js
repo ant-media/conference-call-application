@@ -1,8 +1,30 @@
 module.exports = {
-    plugins: [
-        'react-compiler',
-    ],
-    rules: {
-        'react-compiler/react-compiler': 'error',
+    env: {
+        browser: true,
+        es6: true,
+        node: true
     },
+    extends: [
+        'eslint:recommended',
+        'plugin:react/recommended'
+    ],
+    plugins: [
+        'react',
+        'react-compiler'
+    ],
+    parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        ecmaFeatures: {
+            jsx: true
+        }
+    },
+    rules: {
+        'react-compiler/react-compiler': 'error'
+    },
+    settings: {
+        react: {
+            version: 'detect'
+        }
+    }
 };
