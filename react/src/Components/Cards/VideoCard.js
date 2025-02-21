@@ -129,7 +129,14 @@ function VideoCard(props) {
             icon={props.pinned ? "unpin" : "pin"}
             color="primary"
             label={props.pinned ? "unpin" : "pin"}
-            onClick={() => props?.pinVideo(props.trackAssignment.streamId)}
+            onClick={() => {
+                if(props.pinned) {
+                    props?.unpinVideo();
+                } 
+                else {
+                    props?.pinVideo(props.trackAssignment.streamId);
+                }
+            }}
         />
     );
 

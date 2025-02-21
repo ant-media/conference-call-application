@@ -89,25 +89,9 @@ const MeetingRoom = React.memo((props) => {
     }
   }
 
-  function getPinnedParticipant() {
-    let firstPinnedParticipant;
-    Object.keys(props?.allParticipants).forEach(streamId => {
-      let participant = props?.allParticipants[streamId];
-      if (typeof participant.isPinned !== 'undefined'
-        && participant.isPinned === true
-        && participant.status !== "inCache"
-        && typeof firstPinnedParticipant === 'undefined') {
+  const pinnedParticipant = props?.allParticipants[props.currentPinInfo?.streamId];
 
-        firstPinnedParticipant = props?.allParticipants[streamId];
-        return firstPinnedParticipant;
-      }
-    });
-    return firstPinnedParticipant;
-  }
-
-  const firstPinnedParticipant = getPinnedParticipant();
-
-  const pinLayout = (typeof firstPinnedParticipant !== "undefined");
+  const pinLayout = (typeof pinnedParticipant !== "undefined");
 
   /* istanbul ignore next */
   return (
@@ -144,25 +128,26 @@ const MeetingRoom = React.memo((props) => {
                     isMyCamTurnedOff={props?.isMyCamTurnedOff}
                     allParticipants={props?.allParticipants}
                     setParticipantIdMuted={(participant) => props?.setParticipantIdMuted(participant)}
-                    turnOnYourMicNotification={(streamId) =>props?.turnOnYourMicNotification(streamId)}
-                    turnOffYourMicNotification={(streamId) =>props?.turnOffYourMicNotification(streamId)}
-                    turnOffYourCamNotification={(streamId) =>props?.turnOffYourCamNotification(streamId)}
-                    pinVideo={(streamId)=>props?.pinVideo(streamId)}
+                    turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                    turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                    turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                    pinVideo={props?.pinVideo}
                     isAdmin={props?.isAdmin}
                     publishStreamId={props?.publishStreamId}
                     localVideo={props?.localVideo}
-                    localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
+                    localVideoCreate={props?.localVideoCreate}
                 />
               ))}
               <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
                 {pinLayout ?
                     (<LayoutPinned
-                        pinnedParticipant={firstPinnedParticipant}
+                        pinnedParticipant={pinnedParticipant}
                         width={gallerySize.w}
                         height={gallerySize.h}
                         globals={props?.globals}
                         publishStreamId={props?.publishStreamId}
-                        pinVideo={(streamId)=>props?.pinVideo(streamId)}
+                        pinVideo={props?.pinVideo}
+                        unpinVideo={() => props?.unpinVideo}
                         allParticipants={props?.allParticipants}
                         videoTrackAssignments={props?.videoTrackAssignments}
                         updateMaxVideoTrackCount={props?.updateMaxVideoTrackCount}
@@ -202,7 +187,8 @@ const MeetingRoom = React.memo((props) => {
                         turnOnYourMicNotification={props?.turnOnYourMicNotification}
                         turnOffYourMicNotification={props?.turnOffYourMicNotification}
                         turnOffYourCamNotification={props?.turnOffYourCamNotification}
-                        pinVideo={(streamId)=>props?.pinVideo(streamId)}
+                        pinVideo={props?.pinVideo}
+                        unpinVideo={props?.unpinVideo}
                         isAdmin={props?.isAdmin}
                         localVideo={props?.localVideo}
                         localVideoCreate={props?.localVideoCreate}
