@@ -3376,7 +3376,9 @@ function AntMedia(props) {
                     handleStartBecomePublisher,
                     handlePublisherRequest,
                     makeListenerAgain,
-                    checkVideoTrackHealth
+                    checkVideoTrackHealth,
+                    currentPinInfo,
+                    unpinVideo
                 }}
             >
                 {props.children}
