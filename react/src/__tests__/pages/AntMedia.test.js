@@ -3337,7 +3337,7 @@ describe('AntMedia Component', () => {
     });
   });
 
-  describe('updateAllParticipantsPagination', () => {
+  describe('loadMoreParticipants', () => {
     it('sets currentPage to 1 if currentPage is less than or equal to 0', async () => {
       const { container } = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
@@ -3351,7 +3351,7 @@ describe('AntMedia Component', () => {
         expect(webRTCAdaptorConstructor).not.toBe(undefined);
       });
 
-      currentConference.updateAllParticipantsPagination(0);
+      currentConference.loadMoreParticipants(0);
       expect(currentConference.globals.participantListPagination.currentPage).toBe(1);
     });
 
@@ -3372,7 +3372,7 @@ describe('AntMedia Component', () => {
         currentConference.setParticipantCount(25);
       });
       currentConference.globals.participantListPagination.pageSize = 10;
-      currentConference.updateAllParticipantsPagination(1);
+      currentConference.loadMoreParticipants(1);
       expect(currentConference.globals.participantListPagination.totalPage).toBe(3);
     });
 
@@ -3396,7 +3396,7 @@ describe('AntMedia Component', () => {
         expect(currentConference.participantCount).toBe(25);
       });
       currentConference.globals.participantListPagination.pageSize = 10;
-      currentConference.updateAllParticipantsPagination(5);
+      currentConference.loadMoreParticipants(5);
       expect(currentConference.globals.participantListPagination.currentPage).toBe(3);
     });
 
@@ -3420,7 +3420,7 @@ describe('AntMedia Component', () => {
         expect(currentConference.participantCount).toBe(25);
       });
       currentConference.globals.participantListPagination.pageSize = 10;
-      currentConference.updateAllParticipantsPagination(2);
+      currentConference.loadMoreParticipants(2);
     });
 
     it('calls getSubtracks with correct parameters', async () => {
@@ -3447,7 +3447,7 @@ describe('AntMedia Component', () => {
         expect(currentConference.participantCount).toBe(25);
       });
       currentConference.globals.participantListPagination.pageSize = 10;
-      currentConference.updateAllParticipantsPagination(2);
+      currentConference.loadMoreParticipants(2);
     });
 
     it('update participant count, when we receive new subtrack count', async () => {

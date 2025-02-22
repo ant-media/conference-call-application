@@ -39,7 +39,7 @@ function ParticipantTab({
                           turnOffYourMicNotification,
                           setParticipantIdMuted,
                           pagedParticipants,
-                          updateAllParticipantsPagination,
+                          loadMoreParticipants,
                           currentPinInfo
 }) {
   const theme = useTheme();
@@ -59,20 +59,20 @@ function ParticipantTab({
 
   React.useEffect(() => {
     if (isBottom) {
-      loadMoreParticipants().then(r => {
+      loadMoreParticipantsInternal().then(r => {
         console.log("More participants loaded");
       })
     }
   }, [isBottom]);
 
   // Infinite scroll logic
-  const loadMoreParticipants = async () => {
+  const loadMoreParticipantsInternal = async () => {
     if (loading) return;
     setLoading(true);
 
     // Fetch next participants
     await new Promise(resolve => setTimeout(resolve, 1000));
-    await updateAllParticipantsPagination(globals.participantListPagination.currentPage + 1);
+    await loadMoreParticipants();
     setLoading(false);
   };
 
@@ -246,7 +246,7 @@ function ParticipantTab({
           </ParticipantName>
         </Grid>
         <Stack id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}} 
-          ref={scrollContainerRef} onScroll={handleScroll}>
+          ref={scrollContainerRef} onScroll={handleScroll} spacing={2}>
           {getParticipantItem(publishStreamId, "You")}
           {Object.entries(pagedParticipants).map(([streamId, broadcastObject]) => {
             if (publishStreamId !== streamId) {

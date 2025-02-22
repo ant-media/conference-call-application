@@ -32,6 +32,7 @@ export const UnitTestContext = React.createContext(null);
 const IN_PAGE = "inPage";
 const IN_ASSIGNMENT = "inAssignment";
 const IN_CACHE = "inCache";
+const INITIAL_SUBTRACK_SIZE = 15
 
 
 const globals = {
@@ -42,9 +43,8 @@ const globals = {
     trackEvents: [],
     //pagination is used to keep track of the current page and the total page of the participants list
     participantListPagination: {
-        currentPage: 1,
-        pageSize: 20,
-        offset: 1
+        currentPagePosition: INITIAL_SUBTRACK_SIZE,
+        loadingStepSize: 5,
     }
 };
 
@@ -1134,7 +1134,8 @@ function AntMedia(props) {
             );
             console.log("UPDATE_PARTICIPANT_ROLE event sent by " + publishStreamId);
 
-            webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+            //FIXME
+            //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
         }, 2000);
     }
 
@@ -1522,7 +1523,9 @@ function AntMedia(props) {
             if (!isNull(obj.count)) {
                 if (obj.count > participantCount) {
                     // if the new participant is added, we need to get the subtrack list again
-                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+                    
+                    //FIXME
+                    //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
                 }
                 setParticipantCount(obj.count);
             }
@@ -1543,6 +1546,10 @@ function AntMedia(props) {
         } else if (info === "newTrackAvailable") {
             console.log("newTrackAvailable:", obj);
             handlePlayVideo(obj);
+        } else if (info === "subtrackAdded") {
+            console.log("subtrack added:", obj);
+        } else if (info === "subtrackRemoved") {
+            console.log("subtrack removed:", obj);
         } else if (info === "publish_started") {
             setIsPublished(true);
             streamIdInUseCounter = 0;
@@ -1555,7 +1562,7 @@ function AntMedia(props) {
                 localVideoCreate(newLocalVideo);
                 // we need to set the setVideoCameraSource to be able to update sender source after the reconnection
                 webRTCAdaptor.mediaManager.setVideoCameraSource(publishStreamId, webRTCAdaptor.mediaManager.mediaConstraints, null, true);
-                webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+                webRTCAdaptor?.getSubtracks(roomName, null, 0, INITIAL_SUBTRACK_SIZE);  
                 publishReconnected = true;
                 reconnecting = !(publishReconnected && playReconnected);
                 setIsReconnectionInProgress(reconnecting);
@@ -1585,7 +1592,7 @@ function AntMedia(props) {
             setIsNoSreamExist(false);
             webRTCAdaptor?.getBroadcastObject(roomName);
             webRTCAdaptor?.getSubtrackCount(roomName, null, null);
-            webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+            webRTCAdaptor?.getSubtracks(roomName, null, 0, INITIAL_SUBTRACK_SIZE);
             requestVideoTrackAssignmentsInterval();
 
             if (isPlayOnly) {
@@ -1626,7 +1633,7 @@ function AntMedia(props) {
             console.log("iceConnectionState Changed: ", JSON.stringify(obj))
         } else if (info === "reconnection_attempt_for_player") {
             console.log("Reconnection attempt for player")
-            if (isPlayOnly && isNoSreamExist) { // xxx
+            if (isPlayOnly && isNoSreamExist) { 
                 console.log("Reconnection attempt for player with no stream existmfor play only mode.")
             } else {
                 playReconnected = false;
@@ -2448,7 +2455,8 @@ function AntMedia(props) {
                 console.info("TRACK_LIST_UPDATED -> ", obj);
 
                 webRTCAdaptor?.getSubtrackCount(roomName, null, null);
-                webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+                //FIXME
+                //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
             } else if (eventType === "UPDATE_PARTICIPANT_ROLE") {
 
                 console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
@@ -2460,7 +2468,8 @@ function AntMedia(props) {
 
                 if (isNull(updatedParticipant)) {
                     console.warn("Cannot find broadcast object for streamId: " + notificationEvent.streamId, " in allParticipants. Updated participant list request is sent.");
-                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+                    //FIXME
+                    //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
                     return;
                 }
 
@@ -2475,7 +2484,8 @@ function AntMedia(props) {
                     setRole(notificationEvent.role);
                 } else {
                     console.log("UPDATE_PARTICIPANT_ROLE event received and subtracks are queried");
-                    webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+                    //FIXME
+                    //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
                 }
                 setParticipantUpdated(!participantUpdated);
             } else if (eventType === "REQUEST_BECOME_PUBLISHER") {
@@ -2816,20 +2826,11 @@ function AntMedia(props) {
         return isExist;
     }
 
-    React.useEffect(() => {
-        updateAllParticipantsPagination(globals.participantListPagination.currentPage);
-    }, [participantCount]);
+    function loadMoreParticipants() {
 
-    function updateAllParticipantsPagination(currentPage) {
-        if (currentPage <= 0) {
-            currentPage = 1;
-        }
-
-        globals.participantListPagination.currentPage = currentPage;
-        globals.participantListPagination.offset = (globals.participantListPagination.currentPage - 1) * globals.participantListPagination.pageSize;
-
-        // we need to get the subtracks for the new page
-        webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.pageSize);
+        let size = Math.min(globals.participantListPagination.loadingStepSize, participantCount - globals.participantListPagination.currentPagePosition);
+        webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.currentPagePosition, size);
+        globals.participantListPagination.currentPagePosition += size;
     }
 
     const fetchImageAsBlob = async (url) => {
@@ -3333,7 +3334,7 @@ function AntMedia(props) {
                     isBroadcasting,
                     playStats,
                     setMicAudioLevel,
-                    updateAllParticipantsPagination,
+                    loadMoreParticipants,
                     pagedParticipants,
                     participantCount,
                     setParticipantCount,
@@ -3576,7 +3577,7 @@ function AntMedia(props) {
                             turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
                             setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
                             pagedParticipants={pagedParticipants}
-                            updateAllParticipantsPagination={(value) => updateAllParticipantsPagination(value)}
+                            loadMoreParticipants={loadMoreParticipants}
                             participantListDrawerOpen={participantListDrawerOpen}
                             handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
                             handleParticipantListOpen={(open) => handleParticipantListOpen(open)}

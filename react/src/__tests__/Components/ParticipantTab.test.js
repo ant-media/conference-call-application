@@ -70,7 +70,7 @@ const props = {
       },
     },
   },
-  updateAllParticipantsPagination: jest.fn(),
+  loadMoreParticipants: jest.fn(),
 };
 
 // Mock the useContext hook
@@ -208,7 +208,7 @@ describe('ParticipantTab Component', () => {
 
       // Check if setIsBottom was called and loadMoreParticipants is triggered
       await waitFor(() => {
-        expect(props.updateAllParticipantsPagination).toHaveBeenCalledWith(
+        expect(props.loadMoreParticipants).toHaveBeenCalledWith(
             props.globals.participantListPagination.currentPage + 1
         );
       });
@@ -233,7 +233,7 @@ describe('ParticipantTab Component', () => {
       fireEvent.scroll(scrollContainer);
 
       // Ensure loadMoreParticipants is not triggered
-      expect(props.updateAllParticipantsPagination).not.toHaveBeenCalled();
+      expect(props.loadMoreParticipants).not.toHaveBeenCalled();
     });
 
   });
