@@ -105,6 +105,8 @@ class Browser:
             else:
                 print(f"Element not found by {by} with value {value} after {retries} attempts: {e}")
                 #print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
+                self.save_ss_as_file("not-found.png")
+
                 raise
             
   def get_all_elements(self, by, value):

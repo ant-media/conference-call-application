@@ -122,15 +122,15 @@ function LayoutTiled(props) {
                       isMyMicMuted={props?.isMyMicMuted}
                       isMyCamTurnedOff={props?.isMyCamTurnedOff}
                       allParticipants={props?.allParticipants}
-                      setParticipantIdMuted={(participant) => props?.setParticipantIdMuted(participant)}
-                      turnOnYourMicNotification={(streamId) =>props?.turnOnYourMicNotification(streamId)}
-                      turnOffYourMicNotification={(streamId) =>props?.turnOffYourMicNotification(streamId)}
-                      turnOffYourCamNotification={(streamId) =>props?.turnOffYourCamNotification(streamId)}
-                      pinVideo={(streamId)=>props?.pinVideo(streamId)}
+                      setParticipantIdMuted={props?.setParticipantIdMuted}
+                      turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                      turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                      turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                      pinVideo={props?.pinVideo}
                       isAdmin={props?.isAdmin}
                       publishStreamId={props?.publishStreamId}
                       localVideo={props?.localVideo}
-                      localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
+                      localVideoCreate={props?.localVideoCreate}
                   />
                 </div>
               </div>
