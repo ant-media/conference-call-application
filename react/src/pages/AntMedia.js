@@ -3357,7 +3357,6 @@ function AntMedia(props) {
                     playStats,
                     setDevices,
                     updateUserStatusMetadata,
-                    checkAndSetIsPinned,
                     setMicAudioLevel,
                     updateAllParticipantsPagination,
                     pagedParticipants,

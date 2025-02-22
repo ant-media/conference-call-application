@@ -8,7 +8,7 @@ import { UnitTestContext } from "pages/AntMedia";
 import { ThemeProvider } from '@mui/material/styles';
 import {ThemeList} from "styles/themeList";
 import theme from "styles/theme";
-import { times, update } from 'lodash';
+import { times } from 'lodash';
 import { useParams } from 'react-router-dom';
 import {VideoEffect} from "@antmedia/webrtc_adaptor";
 import {WebinarRoles} from "../../WebinarRoles";
@@ -3953,7 +3953,7 @@ describe('AntMedia Component', () => {
 
     consoleSpy.mockRestore();
   });
-  it('dont ', async () => {
+  it('test not updating devices unless initialized ', async () => {
     const { container } = render(
         <AntMedia isTest={true}>
           <MockChild/>
