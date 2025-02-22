@@ -167,7 +167,7 @@ function OptionButton(props) {
         }}
       >
         {process.env.REACT_APP_OPTION_MENU_GENERAL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
-        <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
+        <MenuItem key="general-settings" onClick={() => handleGeneralSettingsDialogOpen()}>
           <ListItemIcon>
             <SvgIcon size={36} name={"settings"} color={theme.palette?.iconColor?.primary}/>
           </ListItemIcon>
@@ -180,7 +180,7 @@ function OptionButton(props) {
             : null}
 
         {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
-        <MenuItem onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
+        <MenuItem key="layout"  onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
           <ListItemIcon>
             <SvgIcon size={36} name={"layout"} color={theme.palette?.iconColor?.primary}/>
           </ListItemIcon>
@@ -192,7 +192,7 @@ function OptionButton(props) {
 
         {props?.isPlayOnly === false
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
-          <MenuItem onClick={() => handleDialogOpen()} id="call-settings">
+          <MenuItem key="call-settings" onClick={() => handleDialogOpen()} id="call-settings">
             <ListItemIcon>
               <SvgIcon size={36} name={"call-settings"} color={theme.palette?.iconColor?.primary}/>
             </ListItemIcon>
@@ -202,7 +202,7 @@ function OptionButton(props) {
 
         {props?.isPlayOnly === false
         && process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true' ?
-            <MenuItem onClick={() => { props?.handleEffectsOpen(!props?.effectsDrawerOpen); handleClose(); }}
+            <MenuItem key="background-replacement" onClick={() => { props?.handleEffectsOpen(!props?.effectsDrawerOpen); handleClose(); }}
               id="virtual-effects">
               <ListItemIcon>
                 <SvgIcon size={36} name={"background-replacement"} color={theme.palette?.iconColor?.primary} />
@@ -214,7 +214,7 @@ function OptionButton(props) {
         {process.env.REACT_APP_RECORDING_MANAGED_BY_ADMIN === 'false' || props?.isAdmin === true ?
           [
             (props?.isRecordPluginActive === false && props?.isRecordPluginInstalled === true) &&
-            (<MenuItem onClick={() => { props?.startRecord(); handleClose(); } } id="start-recording-button"
+            (<MenuItem key="start-recording" onClick={() => { props?.startRecord(); handleClose(); } } id="start-recording-button"
             >
               <ListItemIcon>
                 <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />
@@ -224,7 +224,7 @@ function OptionButton(props) {
             ),
 
             (props?.isRecordPluginActive === true && props?.isRecordPluginInstalled === true) &&
-            (<MenuItem onClick={() => { props?.stopRecord(); handleClose(); }} id="stop-recording-button"
+            (<MenuItem key="stop-recording" onClick={() => { props?.stopRecord(); handleClose(); }} id="stop-recording-button"
           >
             <ListItemIcon>
               <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />
@@ -237,6 +237,7 @@ function OptionButton(props) {
 
         {process.env.REACT_APP_OPTION_MENU_REPORT_PROBLEM_BUTTON_VISIBILITY === 'true' ?
           <MenuItem
+            key="report-problem"
             component={"a"}
             href={process.env.REACT_APP_REPORT_PROBLEM_URL}
             target={"_blank"}
