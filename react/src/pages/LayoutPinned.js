@@ -44,16 +44,11 @@ function LayoutPinned (props) {
             />
             <VideoCard
               trackAssignment={pinnedParticipant}
-                autoPlay
-                name={
-                  pinnedParticipantName
-                }
-                pinned
-                onHandlePin={() => {
-                  props.pinVideo(
-                    pinnedParticipant.streamId
-                  );
-                }}
+              autoPlay
+              name={
+                pinnedParticipantName
+              }
+              pinned
               streamName={props?.streamName}
               isPublished={props?.isPublished}
               isPlayOnly={props?.isPlayOnly}
@@ -65,6 +60,7 @@ function LayoutPinned (props) {
               turnOffYourMicNotification={(streamId) =>props?.turnOffYourMicNotification(streamId)}
               turnOffYourCamNotification={(streamId) =>props?.turnOffYourCamNotification(streamId)}
               pinVideo={(streamId)=>props?.pinVideo(streamId)}
+              unpinVideo={() => props?.unpinVideo}
               isAdmin={props?.isAdmin}
               publishStreamId={props?.publishStreamId}
               localVideo={props?.localVideo}
@@ -128,6 +124,7 @@ function LayoutPinned (props) {
                         turnOffYourMicNotification={(streamId) =>props?.turnOffYourMicNotification(streamId)}
                         turnOffYourCamNotification={(streamId) =>props?.turnOffYourCamNotification(streamId)}
                         pinVideo={(streamId)=>props?.pinVideo(streamId)}
+                        unpinVideo={() => props?.unpinVideo}
                         isAdmin={props?.isAdmin}
                         publishStreamId={props?.publishStreamId}
                         localVideo={props?.localVideo}

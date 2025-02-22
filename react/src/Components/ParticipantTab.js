@@ -25,6 +25,7 @@ function ParticipantTab({
                           globals,
                           isAdmin,
                           pinVideo,
+                          unpinVideo,
                           makeListenerAgain,
                           videoTrackAssignments,
                           presenterButtonStreamIdInProcess,
@@ -38,7 +39,8 @@ function ParticipantTab({
                           turnOffYourMicNotification,
                           setParticipantIdMuted,
                           pagedParticipants,
-                          updateAllParticipantsPagination
+                          updateAllParticipantsPagination,
+                          currentPinInfo
 }) {
   const theme = useTheme();
 
@@ -157,12 +159,12 @@ function ParticipantTab({
         <Grid item>
           <div style={{display: 'flex'}}>
             {pagedParticipants[streamId]?.status !== "created" ? <>
-            {(typeof pagedParticipants[streamId]?.isPinned !== "undefined") && (pagedParticipants[streamId]?.isPinned === true) ? (
+            {(streamId === currentPinInfo?.streamId) ? (
               <PinBtn
                 id={"unpin-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
                 onClick={(e) => {
-                  pinVideo(streamId);
+                  unpinVideo();
                 }}
               >
                 <SvgIcon size={28} name="unpin" color={theme.palette?.participantListIcon?.primary}/>
