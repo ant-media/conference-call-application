@@ -192,12 +192,13 @@ class TestWebinarScenario(unittest.TestCase):
         if result_json is not None:
           isSpeedTestFinished = result_json["isfinished"]
           isSpeedTestFailed = result_json["isfailed"]
+          print("player speed test test isFinished:" + str(isSpeedTestFinished) + " isFailed:"+ str(isSpeedTestFailed))
 
       speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
 
       self.chrome.save_ss_as_file("join_room_as_player-1.png")
 
-      self.chrome.click_element(speedTestModalJoinButton)
+      self.chrome.mouse_click_on(speedTestModalJoinButton)
  
     meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
@@ -323,7 +324,7 @@ class TestWebinarScenario(unittest.TestCase):
     if index == 500:
       return ""
     
-    print("mustafa get_publishStreamId index: "+str(index))
+    print("get_publishStreamId index: "+str(index))
     conference = self.get_conference()
     print("conference: "+str(conference))
 

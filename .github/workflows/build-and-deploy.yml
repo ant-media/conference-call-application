@@ -264,6 +264,13 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/test/**/*.png
 
+      - name: Upload log files as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser_log
+          path: /tmp/*.log
+
   webinar-integration-tests:  
     needs: [build] 
     runs-on: ubuntu-latest
