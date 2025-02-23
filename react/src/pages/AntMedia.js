@@ -457,6 +457,20 @@ function AntMedia(props) {
     const speedTestCounter = React.useRef(0);
     const speedTestForPlayWebRtcAdaptor = React.useRef(null);
     const statsList = React.useRef([]);
+    const isFirstRunForPlayOnly = React.useRef(true);
+
+
+    // Added this debug function to catch the getUserMedia calls
+    const debugGetUserMedia = () => {
+        const oldGetUserMedia = navigator.mediaDevices.getUserMedia;
+        navigator.mediaDevices.getUserMedia = function() {
+            console.trace("getUserMedia called");
+            return oldGetUserMedia.apply(this, arguments);
+        };
+    };
+    React.useEffect(() => {
+        debugGetUserMedia();
+    }, []);
 
     // video send resolution for publishing
     // possible values: "auto", "highDefinition", "standartDefinition", "lowDefinition"
@@ -1378,9 +1392,9 @@ function AntMedia(props) {
                 debug: true,
                 callback: infoCallback,
                 callbackError: errorCallback,
-                purposeForTest: "main-adaptor"
+                purposeForTest: "main-adaptor",
             });
-            setWebRTCAdaptor(adaptor)
+            setWebRTCAdaptor(adaptor);
         });
     }
 
@@ -2275,6 +2289,13 @@ function AntMedia(props) {
     }, [role]);
 
     React.useEffect(() => {
+        // All React hooks are executed at the first render of the component.
+        // So, this function creates another webRTCAdaptor instance at the first run.
+        // This solution is a common pattern but we might need to question why our effect is problematic at the first run.
+        if (isFirstRunForPlayOnly.current) {
+            isFirstRunForPlayOnly.current = false;
+            return;
+        }
         // we need to empty participant array. if we are going to leave it in the first place.
         setVideoTrackAssignments([]);
         setAllParticipants({});
@@ -2298,7 +2319,7 @@ function AntMedia(props) {
         }
 
         createWebRTCAdaptor();
-
+        
         setWaitingOrMeetingRoom("waiting");
     }, [isPlayOnly]);
 
