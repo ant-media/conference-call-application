@@ -3948,7 +3948,42 @@ describe('AntMedia Component', () => {
 
     consoleSpy.mockRestore();
   });
+  it('test not updating devices unless initialized ', async () => {
+    const { container } = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>);
 
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+
+    const mockDevices = [
+      { kind: 'videoinput', deviceId: 'camera1' },
+    ];
+
+    const updateMetaData = jest.spyOn(webRTCAdaptorConstructor, 'updateStreamMetaData').mockImplementation();
+
+    await act(async () => {
+      currentConference.setInitialized(false);
+    });
+
+    await act(async () => {
+      currentConference.setDevices(mockDevices);
+    });
+
+    jest.useFakeTimers();
+    setTimeout(() => {
+      expect(updateMetaData).not.toHaveBeenCalled();
+    }, 2000);
+
+    jest.runAllTimers();
+
+    consoleSpy.mockRestore();
+  });
 });
 
 

@@ -1376,14 +1376,18 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-        if (devices.length > 0) {
-            checkAndUpdateVideoAudioSources();
-        } else {
-            navigator.mediaDevices.enumerateDevices().then(devices => {
-                setDevices(devices);
-            });
-        }
-    }, [devices]); // eslint-disable-line 
+    if(!initialized)
+        return;
+  
+    if (devices.length > 0) {
+        console.log("updating audio video sources");
+        checkAndUpdateVideoAudioSources();
+    } else {
+        navigator.mediaDevices.enumerateDevices().then(devices => {
+            setDevices(devices);
+        });
+    }
+    }, [devices,initialized]); // eslint-disable-line 
 
     if (webRTCAdaptor) {
         webRTCAdaptor.callback = infoCallback;
@@ -3333,6 +3337,8 @@ function AntMedia(props) {
                     getTrackStats,
                     isBroadcasting,
                     playStats,
+                    setDevices,
+                    updateUserStatusMetadata,
                     setMicAudioLevel,
                     loadMoreParticipants,
                     pagedParticipants,
@@ -3359,6 +3365,7 @@ function AntMedia(props) {
                     handlePublisherRequest,
                     makeListenerAgain,
                     checkVideoTrackHealth,
+                    setInitialized,
                     currentPinInfo,
                     unpinVideo
                 }}
