@@ -2319,7 +2319,7 @@ function AntMedia(props) {
         }
 
         createWebRTCAdaptor();
-        
+
         setWaitingOrMeetingRoom("waiting");
     }, [isPlayOnly]);
 
