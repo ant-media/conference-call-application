@@ -28,10 +28,6 @@ import Stack from "@mui/material/Stack";
 // UnitTestContext is used to pass the globals object to the unit tests
 // don't use it in the production code
 export const UnitTestContext = React.createContext(null);
-
-const IN_PAGE = "inPage";
-const IN_ASSIGNMENT = "inAssignment";
-const IN_CACHE = "inCache";
 const INITIAL_SUBTRACK_SIZE = 15
 
 
@@ -43,7 +39,7 @@ const globals = {
     trackEvents: [],
     //pagination is used to keep track of the current page and the total page of the participants list
     participantListPagination: {
-        currentPagePosition: INITIAL_SUBTRACK_SIZE,
+        currentPagePosition: INITIAL_SUBTRACK_SIZE - 1, //remove you
         loadingStepSize: 5,
     }
 };
@@ -1134,8 +1130,7 @@ function AntMedia(props) {
             );
             console.log("UPDATE_PARTICIPANT_ROLE event sent by " + publishStreamId);
 
-            //FIXME
-            //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
+            webRTCAdaptor?.getBroadcastObject(streamId);
         }, 2000);
     }
 
@@ -1317,15 +1312,13 @@ function AntMedia(props) {
         let allParticipantsTemp = { ...allParticipants };
 
         broadcastObject.parsedMetaData = metaData;
-        let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
-        if(isPaged) {
-            filteredBroadcastObject.status = IN_PAGE;
+        broadcastObject.isPaged = (!isNull(broadcastObject.isPaged) && broadcastObject.isPaged) || isPaged;
+
+        if (broadcastObject.streamId === publishStreamId) {
+            broadcastObject.name = "You";
         }
-        else {
-            filteredBroadcastObject.status = IN_ASSIGNMENT;
-        }
-        filteredBroadcastObject.statusUpdateTime = Date.now();
-        allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject; //TODO: optimize
+
+        allParticipantsTemp[broadcastObject.streamId] = broadcastObject; //TODO: optimize
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
             setAllParticipants(allParticipantsTemp);
             setParticipantUpdated(!participantUpdated);
@@ -1335,15 +1328,7 @@ function AntMedia(props) {
     // TODO: instead of filterBroadcastObject, we can implement eqivalent function instead of _.isEqual
     function filterBroadcastObject(broadcastObject) {
         let tempBroadcastObject = broadcastObject;
-        if (!isNull(tempBroadcastObject)) {
-            tempBroadcastObject.receivedBytes = -1;
-            tempBroadcastObject.duration = -1;
-            tempBroadcastObject.bitrate = -1;
-            tempBroadcastObject.updateTime = -1;
-        }
-        if (tempBroadcastObject.streamId === publishStreamId) {
-            tempBroadcastObject.name = "You";
-        }
+        
         return tempBroadcastObject;
     }
 
@@ -1473,6 +1458,7 @@ function AntMedia(props) {
             setInitialized(true);
         } else if (info === "subtrackList") {
             let subtrackList = obj.subtrackList;
+            console.log("subtrackList:", subtrackList);
             let allParticipantsTemp = allParticipants;
             if (!isPlayOnly && publishStreamId) {
                 allParticipantsTemp[publishStreamId] = allParticipants[publishStreamId];
@@ -1504,15 +1490,13 @@ function AntMedia(props) {
             Object.keys(allParticipants).forEach(participantId => {
                 if (participantVTAByStreamId.has(participantId) && !allParticipantsTemp[participantId]) {
                     allParticipantsTemp[participantId] = allParticipants[participantId];
-                    allParticipantsTemp[participantId].status = IN_ASSIGNMENT;
-                    allParticipantsTemp[participantId].statusUpdateTime = Date.now();
                 }
             });
 
             // add fake participants into the new list
             Object.keys(allParticipants).forEach(streamId => {
                 let broadcastObject = allParticipants[streamId];
-                if (broadcastObject.isFake === true) {
+                if (!isNull(broadcastObject.isFake) && broadcastObject.isFake === true) {
                     allParticipantsTemp[streamId] = broadcastObject;
                 }
             });
@@ -1525,13 +1509,7 @@ function AntMedia(props) {
 
         } else if (info === "subtrackCount") {
             if (!isNull(obj.count)) {
-                if (obj.count > participantCount) {
-                    // if the new participant is added, we need to get the subtrack list again
-                    
-                    //FIXME
-                    //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
-                }
-                setParticipantCount(obj.count);
+                updateParticipantCountAndList(obj.count);
             }
         } else if (info === "broadcastObject") {
             if (isNull(obj.broadcast)) {
@@ -1554,6 +1532,9 @@ function AntMedia(props) {
             console.log("subtrack added:", obj);
         } else if (info === "subtrackRemoved") {
             console.log("subtrack removed:", obj);
+            let allParticipantsTemp = { ...allParticipants };
+            delete allParticipantsTemp[obj.trackId]; 
+            setAllParticipants(allParticipantsTemp);
         } else if (info === "publish_started") {
             setIsPublished(true);
             streamIdInUseCounter = 0;
@@ -2397,28 +2378,7 @@ function AntMedia(props) {
                         } else {
                             tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
                         }
-                    } 
-
-                    
-                    //check the assigned stream id still has assignment. If not remove from all participants.
-                    //This is the way to understand pinned but not paged streams leaving. For example screen share 
-                    if(!tempVideoTrackAssignment.isMine && tempVideoTrackAssignment.streamId !== roomName) {
-                        let vta = receivedVideoTrackAssignments.find(el => el.trackId == tempVideoTrackAssignment.streamId);
-                        let broadcastObject = tempAllParticipants[tempVideoTrackAssignment.streamId];
-                        if(isNull(vta)) {
-                            if(!isNull(broadcastObject)) {
-                                console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel+ " for "+broadcastObject.streamId);
-                                broadcastObject.status = IN_CACHE;
-                                broadcastObject.statusUpdateTime = Date.now();
-                            }
-                        }
-                        else {
-                            if(!isNull(broadcastObject) && broadcastObject.status !== IN_PAGE) {
-                                broadcastObject.status = IN_ASSIGNMENT;
-                                broadcastObject.statusUpdateTime = Date.now();
-                            }
-                        }
-                    }                    
+                    }                
                 });
 
                 if (!_.isEqual(allParticipants, tempAllParticipants)) {
@@ -2457,10 +2417,7 @@ function AntMedia(props) {
                 updateTalkers(notificationEvent);
             } else if (eventType === "TRACK_LIST_UPDATED") {
                 console.info("TRACK_LIST_UPDATED -> ", obj);
-
                 webRTCAdaptor?.getSubtrackCount(roomName, null, null);
-                //FIXME
-                //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
             } else if (eventType === "UPDATE_PARTICIPANT_ROLE") {
 
                 console.log("UPDATE_PARTICIPANT_ROLE -> ", obj);
@@ -2472,8 +2429,7 @@ function AntMedia(props) {
 
                 if (isNull(updatedParticipant)) {
                     console.warn("Cannot find broadcast object for streamId: " + notificationEvent.streamId, " in allParticipants. Updated participant list request is sent.");
-                    //FIXME
-                    //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
+                    webRTCAdaptor?.getBroadcastObject(notificationEvent.streamId);
                     return;
                 }
 
@@ -2488,8 +2444,7 @@ function AntMedia(props) {
                     setRole(notificationEvent.role);
                 } else {
                     console.log("UPDATE_PARTICIPANT_ROLE event received and subtracks are queried");
-                    //FIXME
-                    //webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.offset, globals.participantListPagination.loadingStepSize);
+                    webRTCAdaptor.getBroadcastObject(notificationEvent.streamId);
                 }
                 setParticipantUpdated(!participantUpdated);
             } else if (eventType === "REQUEST_BECOME_PUBLISHER") {
@@ -2542,6 +2497,14 @@ function AntMedia(props) {
         }
     };
 
+    function updateParticipantCountAndList(newParticipantCount) {
+        setParticipantCount(newParticipantCount);
+        if (INITIAL_SUBTRACK_SIZE > newParticipantCount) {
+            // if the new participant is added, we need to get the subtrack list again
+            webRTCAdaptor?.getSubtracks(roomName, null, 0, INITIAL_SUBTRACK_SIZE);
+        }
+    }
+
     function displayRoleUpdateMessage(streamId, oldRole, newRole) {
         if (isAdmin !== true || isNull(oldRole)|| isNull(newRole) || oldRole === newRole) {
             console.log("Role update message is not displayed. Admin: ", isAdmin, " Old Role: ", oldRole, " New Role: ", newRole);
@@ -2579,7 +2542,7 @@ function AntMedia(props) {
         if(!isNull(currentPinInfo)) {
             let broadcastObject = broadcastObjectsArray.find(el => el.streamId == currentPinInfo.streamId);
             console.log("sill "+currentPinInfo.streamId+" broadcastObject:", broadcastObject)
-            if (isNull(broadcastObject) || (broadcastObject.status == IN_CACHE && Date.now() - broadcastObject.statusUpdateTime > 3000)) {
+            if (isNull(broadcastObject)) {
                 unpinVideo();
             }
         }
@@ -2833,6 +2796,11 @@ function AntMedia(props) {
     function loadMoreParticipants() {
 
         let size = Math.min(globals.participantListPagination.loadingStepSize, participantCount - globals.participantListPagination.currentPagePosition);
+        if(size === 0) {
+            //FIXME: This is an ugly hack to get element because of ordering issue
+            globals.participantListPagination.currentPagePosition = 0;
+            size = globals.participantListPagination.loadingStepSize;
+        } 
         webRTCAdaptor?.getSubtracks(roomName, null, globals.participantListPagination.currentPagePosition, size);
         globals.participantListPagination.currentPagePosition += size;
     }
@@ -3112,7 +3080,7 @@ function AntMedia(props) {
     //Here we update paged participants if necessary
     React.useEffect(() => { 
         const tempPagedParticipants = Object.fromEntries(
-            Object.entries(allParticipants).filter(([key, value]) => value.status === IN_PAGE)
+            Object.entries(allParticipants).filter(([key, value]) => value.isPaged)
         );
 
         if(!_.isEqual(pagedParticipants, tempPagedParticipants)) {
