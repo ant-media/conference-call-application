@@ -3080,7 +3080,7 @@ function AntMedia(props) {
     //Here we update paged participants if necessary
     React.useEffect(() => { 
         const tempPagedParticipants = Object.fromEntries(
-            Object.entries(allParticipants).filter(([key, value]) => value.isPaged)
+            Object.entries(allParticipants).filter(([key, value]) => !isNull(value?.isPaged) && value.isPaged)
         );
 
         if(!_.isEqual(pagedParticipants, tempPagedParticipants)) {
