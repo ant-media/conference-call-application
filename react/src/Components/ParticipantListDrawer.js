@@ -46,6 +46,7 @@ const ParticipantListDrawer = React.memo((props) => {
               globals={props?.globals}
               isAdmin={props?.isAdmin}
               pinVideo={(streamId) => props?.pinVideo(streamId)}
+              unpinVideo={props?.unpinVideo}
               makeListenerAgain={(streamId) => props?.makeListenerAgain(streamId)}
               videoTrackAssignments={props?.videoTrackAssignments}
               presenterButtonStreamIdInProcess={props?.presenterButtonStreamIdInProcess}
@@ -60,6 +61,7 @@ const ParticipantListDrawer = React.memo((props) => {
               setParticipantIdMuted={(participant) => props?.setParticipantIdMuted(participant)}
               pagedParticipants={props?.pagedParticipants}
               updateAllParticipantsPagination={(value) => props?.updateAllParticipantsPagination(value)}
+              currentPinInfo={props?.currentPinInfo}
           />
           </TabGrid>
         </Grid>

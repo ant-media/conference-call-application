@@ -13,7 +13,7 @@ import ParticipantListDrawer from "../Components/ParticipantListDrawer";
 import EffectsDrawer from "../Components/EffectsDrawer";
 import { useTranslation } from "react-i18next";
 
-import { getRootAttribute, isComponentMode } from "../utils";
+import { getRootAttribute, isComponentMode, parseMetaData } from "../utils";
 import floating from "../external/floating.js";
 import { UnauthrorizedDialog } from "Components/Footer/Components/UnauthorizedDialog";
 import { useWebSocket } from 'Components/WebSocketProvider';
@@ -1264,8 +1264,7 @@ function AntMedia(props) {
             name: "name_" + suffix,
             streamId: "streamId_" + suffix,
             metaData: JSON.stringify({ isCameraOn: false }),
-            isPinned: undefined,
-            isScreenShared: undefined,
+            parseMetaData: {isScreenShared: undefined},
             isFake: true,
             status: "livestream"
         };
@@ -1337,7 +1336,7 @@ function AntMedia(props) {
         let allParticipantsTemp = { ...allParticipants };
         let pagedParticipantsTemp = { ...pagedParticipants };
 
-        broadcastObject.isScreenShared = metaData.isScreenShared;
+        broadcastObject.parsedMetaData = metaData;
         let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
         if(isPaged) {
             filteredBroadcastObject.status = IN_PAGE;
@@ -1399,14 +1398,18 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-        if (devices.length > 0) {
-            checkAndUpdateVideoAudioSources();
-        } else {
-            navigator.mediaDevices.enumerateDevices().then(devices => {
-                setDevices(devices);
-            });
-        }
-    }, [devices]); // eslint-disable-line 
+    if(!initialized)
+        return;
+  
+    if (devices.length > 0) {
+        console.log("updating audio video sources");
+        checkAndUpdateVideoAudioSources();
+    } else {
+        navigator.mediaDevices.enumerateDevices().then(devices => {
+            setDevices(devices);
+        });
+    }
+    }, [devices,initialized]); // eslint-disable-line 
 
     if (webRTCAdaptor) {
         webRTCAdaptor.callback = infoCallback;
@@ -1487,14 +1490,6 @@ function AntMedia(props) {
         // eslint-disable-next-line 
     }, [initialized]);
 
-    function checkAndSetIsPinned(streamId, broadcastObject) {
-        let existingBroadcastObject = allParticipants[streamId];
-        if (!isNull(existingBroadcastObject)) {
-            broadcastObject.isPinned = existingBroadcastObject.isPinned;
-        }
-        return broadcastObject;
-    }
-
     function infoCallback(info, obj) {
         if (info === "initialized") {
             setInitialized(true);
@@ -1503,7 +1498,7 @@ function AntMedia(props) {
             let allParticipantsTemp = {};
             let pagedParticipantsTemp = {};
             if (!isPlayOnly && publishStreamId) {
-                allParticipantsTemp[publishStreamId] = { name: "You" };
+                allParticipantsTemp[publishStreamId] = allParticipants[publishStreamId];
             }
 
             // We are getting the subtracks of the room and adding them to the allParticipantsTemp
@@ -1518,10 +1513,9 @@ function AntMedia(props) {
                 }
 
                 let metaData = JSON.parse(metaDataStr);
-                broadcastObject.isScreenShared = metaData.isScreenShared;
+                broadcastObject.parsedMetaData = metaData;
 
                 let filteredBroadcastObject = filterBroadcastObject(broadcastObject);
-                filteredBroadcastObject = checkAndSetIsPinned(filteredBroadcastObject.streamId, filteredBroadcastObject);
                 allParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
                 pagedParticipantsTemp[filteredBroadcastObject.streamId] = filteredBroadcastObject;
             });
@@ -1903,27 +1897,30 @@ function AntMedia(props) {
 
 
     function unpinVideo() {
+        console.log("*** unpin request for ");
+        console.trace();
         webRTCAdaptor?.assignVideoTrack(currentPinInfo?.videoLabel, currentPinInfo?.streamId, false);
         console.log(currentPinInfo?.videoLabel + " assigment removed from " + currentPinInfo?.streamId);
         setCurrentPinInfo(null);
         setParticipantUpdated(!participantUpdated);
     }
 
-    function pinVideo(streamId) {
+    function pinVideo(streamId){
+        console.log("*** pin request for "+streamId);
+        console.trace();
         // id is for pinning user.
         let videoLabel;
         let broadcastObject = allParticipants[streamId];
 
         if (isNull(broadcastObject)) {
             console.error("Cannot find broadcast object for streamId: " + streamId);
+            webRTCAdaptor?.getBroadcastObject(streamId);
             return;
         }
 
-        // if we already pin the targeted user then we are going to remove it from pinned video.
-        if (!isNull(broadcastObject.isPinned) && (broadcastObject.isPinned === true)) {
-            unpinVideo(broadcastObject);
-            broadcastObject.isPinned = false;
-            return;
+        if(!isNull(currentPinInfo)) {
+            console.log(currentPinInfo?.videoLabel + " assigment will be removed from " + currentPinInfo?.streamId);
+            unpinVideo();
         }
 
         // if there is no pinned video we are going to pin the targeted user.
@@ -1933,56 +1930,45 @@ function AntMedia(props) {
         }
 
         if (videoLabel !== "localVideo") {
-            let nextAvailableVideoLabel;
-
             // if we are publisher, the first video track is reserved for local video, so we start from 1
             // if we are play only, the first video track is not reserved for local video, so we start from 0
             let videoTrackAssignmentStartIndex = (isPlayOnly) ? 0 : 1;
 
-            for (let i = videoTrackAssignmentStartIndex; i < videoTrackAssignments.length; i++) {
-                // if the video track is not reserved, we can assign it to the pinned user
-                if (videoTrackAssignments[i].isReserved === false) {
-                    nextAvailableVideoLabel = videoTrackAssignments[i]?.videoLabel;
-                    break;
-                }
-            }
+            videoLabel = videoTrackAssignments[videoTrackAssignmentStartIndex]?.videoLabel;
 
-            if (isNull(nextAvailableVideoLabel) && videoTrackAssignments.length > videoTrackAssignmentStartIndex) {
-                // if there is no available video track, we use the first video track
-                videoLabel = videoTrackAssignments[videoTrackAssignmentStartIndex]?.videoLabel
-            } else if (isNull(nextAvailableVideoLabel)) {
-                console.error("Cannot find available video track for pinning user.");
-                return;
-            } else {
-                videoLabel = nextAvailableVideoLabel;
-            }
-
-            setTimeout(() => {
-                console.log(videoLabel + " is assigned to " + streamId);
-                webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
-            }, 1000);
-
+            checkAndAssignVideoTrack(videoLabel, streamId);         
 
         }
 
-        Object.keys(allParticipants).forEach(id => {
-            let participant = allParticipants[id];
-            if (!isNull(participant.isPinned) && participant.isPinned === true) {
-
-                participant.isPinned = false;
-                allParticipants[id] = participant;
-            }
-        });
-
-        broadcastObject.isPinned = true;
         allParticipants[streamId] = broadcastObject;
 
         handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
 
-        let pinInfo = {videoLabel:videoLabel, streamId:streamId}
+        let pinInfo = {videoLabel:videoLabel, streamId:streamId, pinningTime:Date.now()}
         setCurrentPinInfo(pinInfo);
 
         setParticipantUpdated(!participantUpdated);
+    };
+
+    function checkAndAssignVideoTrack(videoLabel, streamId) {
+        let assigningVideoTrack = videoTrackAssignments.find(el => el.videoLabel == videoLabel);
+
+        //if it is already assigned to the stream id, just return  
+        if(assigningVideoTrack.isReserved && assigningVideoTrack.streamId === streamId) {
+            console.log(videoLabel + " is assigned to " + streamId);
+            return;
+        }
+        else {
+            //assign to the stream id, and check after timeou if assigned, otherwise retry
+
+            webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
+            console.log(videoLabel + " will be assigned to " + streamId);
+
+            setTimeout(() => {
+                checkAndAssignVideoTrack(videoLabel, streamId)
+            }, 1000);
+        }
+        
     }
 
     function turnOffYourCamNotification(participantId) {
@@ -1994,7 +1980,7 @@ function AntMedia(props) {
                 senderStreamId: publishStreamId
             }
         );
-    }
+    };
 
     function turnOnYourMicNotification(participantId) {
         handleSendNotificationEvent(
@@ -2005,7 +1991,7 @@ function AntMedia(props) {
                 senderStreamId: publishStreamId
             }
         );
-    }
+    };
 
     function handleNotifyPinUser(id) {
         if (id === "localVideo") {
@@ -2047,7 +2033,7 @@ function AntMedia(props) {
         handleSendNotificationEvent("TURN_YOUR_MIC_OFF", publishStreamId, {
             streamId: participantId, senderStreamId: publishStreamId
         });
-    }
+    };
 
     function startRecord() {
 
@@ -2447,11 +2433,17 @@ function AntMedia(props) {
                     //This is the way to understand pinned but not paged streams leaving. For example screen share 
                     if(!tempVideoTrackAssignment.isMine && tempVideoTrackAssignment.streamId !== roomName) {
                         let vta = receivedVideoTrackAssignments.find(el => el.trackId == tempVideoTrackAssignment.streamId);
+                        let broadcastObject = tempAllParticipants[tempVideoTrackAssignment.streamId];
                         if(isNull(vta)) {
-                            let broadcastObject = tempAllParticipants[tempVideoTrackAssignment.streamId];
                             if(!isNull(broadcastObject)) {
-                                console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
+                                console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel+ " for "+broadcastObject.streamId);
                                 broadcastObject.status = IN_CACHE;
+                                broadcastObject.statusUpdateTime = Date.now();
+                            }
+                        }
+                        else {
+                            if(!isNull(broadcastObject) && broadcastObject.status !== IN_PAGE) {
+                                broadcastObject.status = IN_ASSIGNMENT;
                                 broadcastObject.statusUpdateTime = Date.now();
                             }
                         }
@@ -2608,21 +2600,36 @@ function AntMedia(props) {
     function checkScreenSharingStatus() {
         const broadcastObjectsArray = Object.values(allParticipants);
         
-        //if currently pinned broadcast is not in all participants(we added also video trck assigned ones)
+        //if currently pinned broadcast is not in all participants(we added also video track assigned ones)
         //then unpin it. It may leave for example in schreen share
         if(!isNull(currentPinInfo)) {
             let broadcastObject = broadcastObjectsArray.find(el => el.streamId == currentPinInfo.streamId);
-            if (isNull(broadcastObject) || broadcastObject.status == IN_CACHE) {
+            console.log("sill "+currentPinInfo.streamId+" broadcastObject:", broadcastObject)
+            if (isNull(broadcastObject) || (broadcastObject.status == IN_CACHE && Date.now() - broadcastObject.statusUpdateTime > 3000)) {
                 unpinVideo();
             }
         }
         
-        //if the updated all participants(we added also video trck assigned ones) has a schreen share not pinned, pin it
+        let lastlySharedScreen;
+        let lastlySharedScreenTime = 0;
+        //if the updated all participants(we added also video trcak assigned ones) has a screen share not pinned, pin it
         broadcastObjectsArray.forEach((broadcastObject) => {
-            if (broadcastObject.isScreenShared === true && isNull(broadcastObject.isPinned)) {
-                pinVideo(broadcastObject.streamId);
+            if (broadcastObject.parsedMetaData.isScreenShared === true 
+                && broadcastObject.startTime > lastlySharedScreenTime) 
+            {
+                lastlySharedScreen = broadcastObject.streamId;
+                lastlySharedScreenTime = broadcastObject.startTime;
             }
-        })
+        });
+
+        if(!isNull(lastlySharedScreen)) {
+            //here we check if someone pinned manually after screen share
+            if(!isNull(currentPinInfo) && currentPinInfo.pinningTime >= lastlySharedScreenTime) {
+                return;
+            }
+
+            pinVideo(lastlySharedScreen);
+        }
     }
 
     function getUserStatusMetadata(isMicMuted, isCameraOn, isScreenShareActive) {
@@ -2755,7 +2762,7 @@ function AntMedia(props) {
 
         let allParticipantsTemp = {};
         if (!isPlayOnly) {
-            allParticipantsTemp[publishStreamId] = { name: "You" };
+            allParticipantsTemp[publishStreamId] = allParticipants[publishStreamId];
         }
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
             console.log("removeAllRemoteParticipants setAllParticipants:" + JSON.stringify(allParticipantsTemp));
@@ -2784,7 +2791,7 @@ function AntMedia(props) {
 
         let allParticipantsTemp = { ...allParticipants };
         allParticipantsTemp[publishStreamId] = {
-            streamId: publishStreamId, name: "You", isPinned: false, isScreenShared: false, status: "livestream"
+            streamId: publishStreamId, name: "You", parsedMetaData: {isScreenShared: false}, status: "livestream"
         };
 
         if (!_.isEqual(allParticipantsTemp, allParticipants)) {
@@ -3121,7 +3128,7 @@ function AntMedia(props) {
         }
     }
 
-    function localVideoCreate(tempLocalVideo) {
+    const localVideoCreate = React.useCallback((tempLocalVideo) => {
         // it can be null when we first open the page
         // due to the fact that local stream is not ready yet.
         if (!isNull(tempLocalVideo)) {
@@ -3129,7 +3136,7 @@ function AntMedia(props) {
             webRTCAdaptor.mediaManager.localVideo = tempLocalVideo;
             webRTCAdaptor.mediaManager.localVideo.srcObject = webRTCAdaptor.mediaManager.localStream;
         }
-    }
+    }, [webRTCAdaptor]);
 
     function checkVideoTrackHealth() {
         // if the camera is turned off by the user or play only, no need to check it
@@ -3369,7 +3376,8 @@ function AntMedia(props) {
                     getTrackStats,
                     isBroadcasting,
                     playStats,
-                    checkAndSetIsPinned,
+                    setDevices,
+                    updateUserStatusMetadata,
                     setMicAudioLevel,
                     updateAllParticipantsPagination,
                     pagedParticipants,
@@ -3395,7 +3403,10 @@ function AntMedia(props) {
                     handleStartBecomePublisher,
                     handlePublisherRequest,
                     makeListenerAgain,
-                    checkVideoTrackHealth
+                    checkVideoTrackHealth,
+                    setInitialized,
+                    currentPinInfo,
+                    unpinVideo
                 }}
             >
                 {props.children}
@@ -3495,7 +3506,7 @@ function AntMedia(props) {
                         allParticipants={allParticipants}
                         setAudioLevelListener={(listener, period) => setAudioLevelListener(listener, period)}
                         setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
-                        turnOnYourMicNotification={(streamId) => turnOnYourMicNotification(streamId)}
+                        turnOnYourMicNotification={turnOnYourMicNotification}
                         turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
                         turnOffYourCamNotification={(streamId) => turnOffYourCamNotification(streamId)}
                         pinVideo={(streamId) => pinVideo(streamId)}
@@ -3520,7 +3531,8 @@ function AntMedia(props) {
                             isMuteParticipantDialogOpen={isMuteParticipantDialogOpen}
                             setMuteParticipantDialogOpen={(open) => setMuteParticipantDialogOpen(open)}
                             publishStreamId={publishStreamId}
-                            pinVideo={(streamId) => pinVideo(streamId)}
+                            pinVideo={pinVideo}
+                            unpinVideo={unpinVideo}
                             pinFirstVideo={pinFirstVideo}
                             allParticipants={allParticipants}
                             participantUpdated={participantUpdated}
@@ -3533,13 +3545,13 @@ function AntMedia(props) {
                             isMyMicMuted={isMyMicMuted}
                             isMyCamTurnedOff={isMyCamTurnedOff}
                             setAudioLevelListener={(listener, period) => setAudioLevelListener(listener, period)}
-                            setParticipantIdMuted={(participant) => setParticipantIdMuted(participant)}
+                            setParticipantIdMuted={setParticipantIdMuted}
                             turnOnYourMicNotification={(streamId) => turnOnYourMicNotification(streamId)}
-                            turnOffYourMicNotification={(streamId) => turnOffYourMicNotification(streamId)}
-                            turnOffYourCamNotification={(streamId) => turnOffYourCamNotification(streamId)}
+                            turnOffYourMicNotification={turnOffYourMicNotification}
+                            turnOffYourCamNotification={turnOffYourCamNotification}
                             isAdmin={isAdmin}
                             localVideo={localVideo}
-                            localVideoCreate={(tempLocalVideo) => localVideoCreate(tempLocalVideo)}
+                            localVideoCreate={localVideoCreate}
                             isRecordPluginActive={isRecordPluginActive}
                             isEnterDirectly={isEnterDirectly}
                             cameraButtonDisabled={cameraButtonDisabled}
@@ -3597,6 +3609,7 @@ function AntMedia(props) {
                             globals={globals}
                             isAdmin={isAdmin}
                             pinVideo={(streamId) => pinVideo(streamId)}
+                            unpinVideo={unpinVideo}
                             makeListenerAgain={(streamId) => makeListenerAgain(streamId)}
                             videoTrackAssignments={videoTrackAssignments}
                             presenterButtonStreamIdInProcess={presenterButtonStreamIdInProcess}
@@ -3616,15 +3629,16 @@ function AntMedia(props) {
                             handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
                             handleEffectsOpen={(open) => handleEffectsOpen(open)}
                             setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
+                            currentPinInfo={currentPinInfo}
                         />
                         <EffectsDrawer
                             effectsDrawerOpen={effectsDrawerOpen}
-                            setVirtualBackgroundImage={(img) => setVirtualBackgroundImage(img)}
-                            handleBackgroundReplacement={(mode) => handleBackgroundReplacement(mode)}
-                            handleMessageDrawerOpen={(open) => handleMessageDrawerOpen(open)}
-                            handleParticipantListOpen={(open) => handleParticipantListOpen(open)}
-                            handleEffectsOpen={(open) => handleEffectsOpen(open)}
-                            setPublisherRequestListDrawerOpen={(open) => setPublisherRequestListDrawerOpen(open)}
+                            setVirtualBackgroundImage={setVirtualBackgroundImage}
+                            handleBackgroundReplacement={handleBackgroundReplacement}
+                            handleMessageDrawerOpen={handleMessageDrawerOpen}
+                            handleParticipantListOpen={handleParticipantListOpen}
+                            handleEffectsOpen={handleEffectsOpen}
+                            setPublisherRequestListDrawerOpen={setPublisherRequestListDrawerOpen}
                         />
                         <PublisherRequestListDrawer
                             publisherRequestListDrawerOpen={publisherRequestListDrawerOpen}
