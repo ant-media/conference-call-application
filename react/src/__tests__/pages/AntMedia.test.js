@@ -17,7 +17,16 @@ import { assert } from 'workbox-core/_private';
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
 var websocketURL = "ws://localhost:5080/Conference/websocket";
+var oldAdaptor;
 
+// We'll store references here for easy access in tests
+const createdAdaptors = {
+  main: [],
+  screen: [],
+  publishSpeedTest: [],
+  publishSpeedTestPlayOnly: [],
+  playSpeedTest: []
+};
 jest.mock('Components/WebSocketProvider', () => ({
   ...jest.requireActual('Components/WebSocketProvider'),
   useWebSocket: jest.fn(),
@@ -96,6 +105,14 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       joinRoom: jest.fn(),
       getSubtrackCount: jest.fn(),
       setVolumeLevel: jest.fn(),
+      mediaManager: {
+        localStream: {
+          getTracks: () => [],
+          getVideoTracks: () => []
+        }
+      },
+      getUserMedia: jest.fn().mockResolvedValue({}),
+      checkWebRTCPermissions: jest.fn().mockResolvedValue(true)
     }
 
     for (var key in params) {
@@ -104,20 +121,30 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       }
     }
 
+    // If we test the methods that creates new adaptor on the fly we might need to keep the old adaptor for comparison
+    if (createdAdaptors.main.length > 0) {
+      oldAdaptor = createdAdaptors.main[createdAdaptors.main.length - 1];
+    }
+
     if (params.purposeForTest === "main-adaptor") {
       webRTCAdaptorConstructor = mockAdaptor;
+      createdAdaptors.main.push(mockAdaptor);
     }
     else if(params.purposeForTest === "screen-share") {
       webRTCAdaptorScreenConstructor = mockAdaptor;
+      createdAdaptors.screen.push(mockAdaptor);
     }
     else if (params.purposeForTest === "publish-speed-test-play-only") {
       webRTCAdaptorPublishSpeedTestPlayOnlyConstructor = mockAdaptor;
+      createdAdaptors.publishSpeedTestPlayOnly.push(mockAdaptor);
     }
     else if (params.purposeForTest === "publish-speed-test") {
       webRTCAdaptorPublishSpeedTestConstructor = mockAdaptor;
+      createdAdaptors.publishSpeedTest.push(mockAdaptor);
     }
     else if (params.purposeForTest === "play-speed-test") {
       webRTCAdaptorPlaySpeedTestConstructor = mockAdaptor;
+      createdAdaptors.playSpeedTest.push(mockAdaptor);
     }
     return mockAdaptor;
   }),
@@ -3563,6 +3590,98 @@ describe('AntMedia Component', () => {
     expect(currentConference.updateParticipantRole).toHaveBeenCalledWith(streamId, WebinarRoles.Listener);
   });
    */
+
+  it('should not run playOnly effect on initial mount', async () => {
+    const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true}>
+                <MockChild/>
+            </AntMedia>
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    // Verify initial mount doesn't trigger the effect's main logic
+    expect(webRTCAdaptorConstructor.stop).not.toHaveBeenCalled();
+    expect(webRTCAdaptorConstructor.turnOffLocalCamera).not.toHaveBeenCalled();
+    expect(webRTCAdaptorConstructor.closeStream).not.toHaveBeenCalled();
+});
+
+  it('should run playOnly effect when isPlayOnly changes after mount', async () => {
+
+    const mockLocalStorage = {
+      getItem: jest.fn().mockImplementation((key) => {
+          if (key === 'selectedCamera') return 'camera1'; 
+          if (key === 'selectedMicrophone') return 'microphone1';
+          return null;
+      }),
+      setItem: jest.fn()
+    };
+    Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
+      
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+        { deviceId: 'camera1', kind: 'videoinput' },
+        { deviceId: 'microphone1', kind: 'audioinput' }
+    ]);
+
+    const { render1 } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+            <AntMedia isTest={true} isPlayOnly={false}>
+                <MockChild/>
+            </AntMedia>
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setIsPlayOnly(true);
+    });
+
+    await waitFor(() => {
+      console.log('Initadasdasdasdad:', createdAdaptors.main.length);
+
+      //We need to check the old adaptor's methods to be able to test this effect because old adaptor is being stopped and new one will be created. However our initialization is done and timing is not working if we try to test directly webrtcAdaptorConstructor here.
+      expect(oldAdaptor.stop).toHaveBeenCalled();
+      expect(oldAdaptor.turnOffLocalCamera).toHaveBeenCalled();
+      expect(oldAdaptor.closeStream).toHaveBeenCalled();
+    });
+  });
+
+  it('should clear participants and intervals when isPlayOnly changes', async () => {
+      const { rerender } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+              <AntMedia isTest={true} isPlayOnly={false}>
+                  <MockChild/>
+              </AntMedia>
+          </ThemeProvider>
+      );
+
+      await waitFor(() => {
+          expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      // Set some initial participants
+      await act(async () => {
+          currentConference.setVideoTrackAssignments(['track1', 'track2']);
+          currentConference.setAllParticipants({ participant1: {}, participant2: {} });
+      });
+      
+      await act(async () => {
+        currentConference.setIsPlayOnly(true);
+      });
+
+      // Verify participants are cleared
+      await waitFor(() => {
+          expect(currentConference.videoTrackAssignments).toEqual([]);
+          expect(currentConference.allParticipants).toEqual({});
+      });
+  });
 
   it('starts becoming publisher if in play only mode', async () => {
     const {container} = render(

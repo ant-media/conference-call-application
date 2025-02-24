@@ -1398,17 +1398,17 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-    if(!initialized)
-        return;
-  
-    if (devices.length > 0) {
-        console.log("updating audio video sources");
-        checkAndUpdateVideoAudioSources();
-    } else {
-        navigator.mediaDevices.enumerateDevices().then(devices => {
-            setDevices(devices);
-        });
-    }
+        if(!initialized)
+            return;
+    
+        if (devices.length > 0) {
+            console.log("updating audio video sources");
+            checkAndUpdateVideoAudioSources();
+        } else {
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+                setDevices(devices);
+            });
+        }
     }, [devices,initialized]); // eslint-disable-line 
 
     if (webRTCAdaptor) {
@@ -3406,6 +3406,7 @@ function AntMedia(props) {
                     checkVideoTrackHealth,
                     setInitialized,
                     currentPinInfo,
+                    setAllParticipants,
                     unpinVideo
                 }}
             >
