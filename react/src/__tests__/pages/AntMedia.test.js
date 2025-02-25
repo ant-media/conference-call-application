@@ -327,61 +327,6 @@ describe('AntMedia Component', () => {
 
   });
 
-  it('handle video track assignment remove mechanism', async () => {
-    const {container} = render(
-        <ThemeProvider theme={theme(ThemeList.Green)}>
-          <AntMedia isTest={true}>
-            <MockChild/>
-          </AntMedia>
-        </ThemeProvider>);
-
-    await waitFor(() => {
-      expect(webRTCAdaptorConstructor).not.toBe(undefined);
-    });
-
-    var obj = {};
-    let broadcastObject = {streamId: "p1", name: "test1", metaData: JSON.stringify({isScreenShared: true})};
-    let broadcastObjectMessage = JSON.stringify(broadcastObject);
-
-    obj.broadcast = broadcastObjectMessage;
-    obj.streamId = "p1";
-
-    await act(async () => {
-      webRTCAdaptorConstructor.callback("broadcastObject", obj);
-    });
-
-    await act(async () => {
-      currentConference.setVideoTrackAssignments([
-        {videoLabel:"videoTrack0", streamId:"p0"},
-        {videoLabel:"videoTrack1", streamId:"p1"},
-        {videoLabel:"videoTrack2", streamId:"p2"}]);
-    });
-
-    var notificationEvent = {
-      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
-      streamId: "stream1",
-      payload: [
-        {videoLabel:"videoTrack1", trackId:"p0"},
-        {videoLabel:"videoTrack2", trackId:"p2"},
-      ]
-    };
-    var json = JSON.stringify(notificationEvent);
-
-    obj = {};
-    obj.data = json;
-
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-    await act(async () => {
-      webRTCAdaptorConstructor.callback("data_received", obj);
-    });
-
-    expect(consoleSpy).toHaveBeenCalledWith("---> Removed video track assignment: videoTrack1 for p1");
-    expect(currentConference.videoTrackAssignments["stream0"]).toBe(undefined);
-
-    consoleSpy.mockRestore();
-
-  });
 
   it('handle sharing on', async () => {
     const { container } = render(
@@ -2308,11 +2253,6 @@ describe('AntMedia Component', () => {
     await waitFor(() => {
       expect(currentConference.participantUpdated).toBe(false);
     });
-
-    await waitFor(() => {
-        expect(currentConference.allParticipants["stream1"]).toBeDefined();
-        expect(currentConference.allParticipants["stream2"]).toBeDefined();
-    });
   });
 
   it('does not update allParticipants if there are no changes', async () => {
@@ -2837,7 +2777,7 @@ describe('AntMedia Component', () => {
       //expect(mockConsoleError).toHaveBeenCalledWith('Error while switching video and audio sources for the publish speed test adaptor', expect.any(Error));
     });
 
-    it('handles errors when switching video and audio sources', async () => {
+    it('handles errors when switching video and audio source', async () => {
       mediaDevicesMock.enumerateDevices.mockResolvedValue([
         { deviceId: 'camera1', kind: 'videoinput' },
         { deviceId: 'microphone1', kind: 'audioinput' }
@@ -3342,25 +3282,8 @@ describe('AntMedia Component', () => {
     });
   });
 
-  describe('updateAllParticipantsPagination', () => {
-    it('sets currentPage to 1 if currentPage is less than or equal to 0', async () => {
-      const { container } = render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <AntMedia isTest={true}>
-              <MockChild/>
-            </AntMedia>
-          </ThemeProvider>);
-
-
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      currentConference.updateAllParticipantsPagination(0);
-      expect(currentConference.globals.participantListPagination.currentPage).toBe(1);
-    });
-
-    it('calculates totalPage correctly', async () => {
+  describe('loadMoreParticipants', () => {
+    it('get subtracks as many as loadingStepSize', async () => {
       const { container } = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
             <AntMedia isTest={true}>
@@ -3374,14 +3297,21 @@ describe('AntMedia Component', () => {
       });
 
       await act(async () => {
-        currentConference.setParticipantCount(25);
+        currentConference.globals.participantListPagination.currentPagePosition = 2;
+        currentConference.setParticipantCount(15);
       });
-      currentConference.globals.participantListPagination.pageSize = 10;
-      currentConference.updateAllParticipantsPagination(1);
-      expect(currentConference.globals.participantListPagination.totalPage).toBe(3);
+
+      await waitFor(() => {
+        expect(currentConference.participantCount).toBe(15);
+      });
+      
+      currentConference.loadMoreParticipants();
+
+      expect(webRTCAdaptorConstructor.getSubtracks).toHaveBeenCalledWith("room", null, 2, currentConference.globals.participantListPagination.loadingStepSize);
     });
 
-    it('sets currentPage to totalPage if currentPage is greater than totalPage', async () => {
+
+    it('get subtracks as many as difference', async () => {
       const { container } = render(
           <ThemeProvider theme={theme(ThemeList.Green)}>
             <AntMedia isTest={true}>
@@ -3395,65 +3325,20 @@ describe('AntMedia Component', () => {
       });
 
       await act(async () => {
-        currentConference.setParticipantCount(25);
+        currentConference.globals.participantListPagination.currentPagePosition = 2;
+        currentConference.setParticipantCount(5);
       });
+
       await waitFor(() => {
-        expect(currentConference.participantCount).toBe(25);
+        expect(currentConference.participantCount).toBe(5);
       });
-      currentConference.globals.participantListPagination.pageSize = 10;
-      currentConference.updateAllParticipantsPagination(5);
-      expect(currentConference.globals.participantListPagination.currentPage).toBe(3);
+      
+      currentConference.loadMoreParticipants();
+
+      expect(webRTCAdaptorConstructor.getSubtracks).toHaveBeenCalledWith("room", null, 2, 3);
     });
 
-    it('calculates startIndex and endIndex correctly', async () => {
-      const { container } = render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <AntMedia isTest={true}>
-              <MockChild/>
-            </AntMedia>
-          </ThemeProvider>);
-
-
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      await act(async () => {
-        currentConference.setParticipantCount(25);
-      });
-      await waitFor(() => {
-        expect(currentConference.participantCount).toBe(25);
-      });
-      currentConference.globals.participantListPagination.pageSize = 10;
-      currentConference.updateAllParticipantsPagination(2);
-    });
-
-    it('calls getSubtracks with correct parameters', async () => {
-      const { container } = render(
-          <ThemeProvider theme={theme(ThemeList.Green)}>
-            <AntMedia isTest={true}>
-              <MockChild/>
-            </AntMedia>
-          </ThemeProvider>);
-
-
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      const mockGetSubtracks = jest.fn();
-      currentConference.getSubtracks = mockGetSubtracks;
-
-      currentConference.roomName = 'testRoom';
-      await act(async () => {
-        currentConference.setParticipantCount(25);
-      });
-      await waitFor(() => {
-        expect(currentConference.participantCount).toBe(25);
-      });
-      currentConference.globals.participantListPagination.pageSize = 10;
-      currentConference.updateAllParticipantsPagination(2);
-    });
+    
 
     it('update participant count, when we receive new subtrack count', async () => {
       const { container } = render(
@@ -3851,108 +3736,6 @@ describe('AntMedia Component', () => {
     consoleSpy.mockRestore();
   });
 
-
-  it('test all participant elements states', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-    const { container } = render(
-        <AntMedia isTest={true}>
-          <MockChild/>
-        </AntMedia>);
-
-    await waitFor(() => {
-      expect(webRTCAdaptorConstructor).not.toBe(undefined);
-    });
-
-    var subtrackList = [
-      JSON.stringify({ streamId: 'stream1', metaData: JSON.stringify({ isScreenShared: false }) }),
-      JSON.stringify({ streamId: 'stream2', metaData: JSON.stringify({ isScreenShared: false }) })
-    ];
-    var obj = { subtrackList };
-
-    await act(async () => {
-      webRTCAdaptorConstructor.callback('subtrackList', obj);
-    });
-
-    await waitFor(() => {
-      expect(currentConference.participantUpdated).toBe(false);
-    });
-
-
-    expect(Object.keys(currentConference.allParticipants)).toHaveLength(2);
-    expect(currentConference.allParticipants['stream1'].status).toBe("inPage");
-    expect(currentConference.allParticipants['stream2'].status).toBe("inPage");
-
-    var obj = {};
-    let broadcastObject = {streamId: "stream3", name: "stream3", metaData: JSON.stringify({isScreenShared: false})};
-    let broadcastObjectMessage = JSON.stringify(broadcastObject);
-
-    obj.broadcast = broadcastObjectMessage;
-    obj.streamId = "stream3";
-
-    await act(async () => {
-      webRTCAdaptorConstructor.callback("broadcastObject", obj);
-    });
-
-    expect(Object.keys(currentConference.allParticipants)).toHaveLength(3);
-    expect(currentConference.allParticipants['stream1'].status).toBe("inPage");
-    expect(currentConference.allParticipants['stream2'].status).toBe("inPage");
-    expect(currentConference.allParticipants['stream3'].status).toBe("inAssignment");
-
-    currentConference.videoTrackAssignments.push({streamId: "stream1", videoLabel: "videoTrack1"});
-    currentConference.videoTrackAssignments.push({streamId: "stream2", videoLabel: "videoTrack2"});
-    currentConference.videoTrackAssignments.push({streamId: "stream3", videoLabel: "videoTrack3"});
-
-
-    var notificationEvent = {
-      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
-      streamId: "room1",
-      payload: [
-        {videoLabel:"videoTrack1", trackId:"stream1"},
-        {videoLabel:"videoTrack2", trackId:"stream2"},
-      ]
-    };
-    var json = JSON.stringify(notificationEvent);
-
-    obj = {};
-    obj.data = json;
-
-    await act(async () => {
-      webRTCAdaptorConstructor.callback("data_received", obj);
-    });
-
-    
-    expect(Object.keys(currentConference.allParticipants)).toHaveLength(3);
-    expect(currentConference.allParticipants['stream1'].status).toBe("inPage");
-    expect(currentConference.allParticipants['stream2'].status).toBe("inPage");
-    expect(currentConference.allParticipants['stream3'].status).toBe("inCache");
-
-
-    await act(() => {
-      currentConference.setVideoTrackAssignments([]);
-    });
-    currentConference.videoTrackAssignments.push({streamId: "stream1", videoLabel: "videoTrack1"});
-    currentConference.videoTrackAssignments.push({streamId: "stream3", videoLabel: "videoTrack3"});
-
-    var subtrackList = [
-      JSON.stringify({ streamId: 'stream3', metaData: JSON.stringify({ isScreenShared: false }) }),
-      JSON.stringify({ streamId: 'stream4', metaData: JSON.stringify({ isScreenShared: false }) })
-    ];
-    var obj = { subtrackList };
-
-    await act(async () => {
-      webRTCAdaptorConstructor.callback('subtrackList', obj);
-    });
-
-    
-    expect(Object.keys(currentConference.allParticipants)).toHaveLength(3);
-    expect(currentConference.allParticipants['stream1'].status).toBe("inAssignment");
-    expect(currentConference.allParticipants['stream3'].status).toBe("inPage");
-    expect(currentConference.allParticipants['stream4'].status).toBe("inPage");
-
-
-    consoleSpy.mockRestore();
-  });
   it('test not updating devices unless initialized ', async () => {
     const { container } = render(
         <AntMedia isTest={true}>

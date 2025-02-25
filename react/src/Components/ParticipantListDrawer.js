@@ -60,7 +60,7 @@ const ParticipantListDrawer = React.memo((props) => {
               turnOffYourMicNotification={(streamId) => props?.turnOffYourMicNotification(streamId)}
               setParticipantIdMuted={(participant) => props?.setParticipantIdMuted(participant)}
               pagedParticipants={props?.pagedParticipants}
-              updateAllParticipantsPagination={(value) => props?.updateAllParticipantsPagination(value)}
+              loadMoreParticipants={props?.loadMoreParticipants}
               currentPinInfo={props?.currentPinInfo}
           />
           </TabGrid>

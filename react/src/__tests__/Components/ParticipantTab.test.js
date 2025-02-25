@@ -1,5 +1,6 @@
+// src/ParticipantTab.test.js
 import React from 'react';
-import { render } from '@testing-library/react';
+import {fireEvent, render, waitFor} from '@testing-library/react';
 import { ConferenceContext } from 'pages/AntMedia';
 import ParticipantTab from 'Components/ParticipantTab';
 import theme from "styles/theme";
@@ -69,7 +70,7 @@ const props = {
       },
     },
   },
-  updateAllParticipantsPagination: jest.fn(),
+  loadMoreParticipants: jest.fn(),
 };
 
 // Mock the useContext hook
@@ -176,5 +177,62 @@ describe('ParticipantTab Component', () => {
     expect(props.setParticipantIdMuted).toHaveBeenCalled();
     expect(props.turnOffYourMicNotification).toHaveBeenCalled();
   });
-  
+
+  describe('ParticipantTab handleScroll', () => {
+    beforeEach(() => {
+      // Reset the mock implementation before each test
+      jest.clearAllMocks();
+    });
+
+    it('calls handleScroll and updates state when bottom is reached', async () => {
+      jest.useFakeTimers();
+
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <ParticipantTab
+                {...props}
+            />
+          </ThemeProvider>
+      );
+
+      // Mock the scroll container
+      const scrollContainer = container.querySelector('#paper-props');
+      Object.defineProperty(scrollContainer, 'scrollHeight', { value: 200, writable: true });
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 200, writable: true });
+      Object.defineProperty(scrollContainer, 'scrollTop', { value: 99, writable: true });
+
+      // Simulate scroll event
+      fireEvent.scroll(scrollContainer);
+
+      jest.advanceTimersByTime(1000);
+
+      // Check if setIsBottom was called and loadMoreParticipants is triggered
+      await waitFor(() => {
+        expect(props.loadMoreParticipants).toHaveBeenCalled();
+      });
+      jest.clearAllTimers()
+    });
+
+    it('does not call loadMoreParticipants if not at the bottom', () => {
+      const { container } = render(
+          <ThemeProvider theme={theme(ThemeList.Green)}>
+            <ParticipantTab
+                {...props}
+            />
+          </ThemeProvider>
+      );
+
+      const scrollContainer = container.querySelector('#paper-props');
+      Object.defineProperty(scrollContainer, 'scrollHeight', { value: 200, writable: true });
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, writable: true });
+      Object.defineProperty(scrollContainer, 'scrollTop', { value: 50, writable: true });
+
+      // Simulate scroll event
+      fireEvent.scroll(scrollContainer);
+
+      // Ensure loadMoreParticipants is not triggered
+      expect(props.loadMoreParticipants).not.toHaveBeenCalled();
+    });
+
+  });
 });

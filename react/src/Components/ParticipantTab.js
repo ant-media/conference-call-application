@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
-import {CircularProgress, Pagination} from "@mui/material";
+import {CircularProgress} from "@mui/material";
 import {WebinarRoles} from "../WebinarRoles";
 import {parseMetaData} from "../utils";
 
@@ -39,14 +39,42 @@ function ParticipantTab({
                           turnOffYourMicNotification,
                           setParticipantIdMuted,
                           pagedParticipants,
-                          updateAllParticipantsPagination,
+                          loadMoreParticipants,
                           currentPinInfo
 }) {
   const theme = useTheme();
+  const [loading, setLoading] = React.useState(false); // Track loading state
+  const scrollContainerRef = React.useRef(null);
+  const [isBottom, setIsBottom] = React.useState(false);
 
-  const paginationUpdate = (event, value) => {
-    updateAllParticipantsPagination(value);
-  }
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const isAtBottom =
+          container.scrollHeight - container.scrollTop <= container.clientHeight * 1.1;
+
+          setIsBottom(isAtBottom);
+    }
+  };
+
+  React.useEffect(() => {
+    if (isBottom) {
+      loadMoreParticipantsInternal().then(r => {
+        console.log("More participants loaded");
+      })
+    }
+  }, [isBottom]);
+
+  // Infinite scroll logic
+  const loadMoreParticipantsInternal = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    // Fetch next participants
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadMoreParticipants();
+    setLoading(false);
+  };
 
   const handleToggleMic = (isMicMuted, streamId, streamName) => {
     if (streamId === publishStreamId && !isMyMicMuted) {
@@ -203,8 +231,11 @@ function ParticipantTab({
 
   return (
     <>
-    <Grid container sx={{mt: 1}} id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}}>
-      <Stack sx={{width: "100%",}} spacing={2}>
+    <Grid container sx={{mt: 1}} style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}}>
+      <Stack
+          sx={{width: "100%",}}
+          spacing={3}
+      >
         <Grid container>
           <SvgIcon size={28} name="participants" color={theme.palette?.participantListIcon?.primary}/>
           <ParticipantName
@@ -214,29 +245,22 @@ function ParticipantTab({
             {participantCount}
           </ParticipantName>
         </Grid>
-        {Object.entries(pagedParticipants).map(([streamId, broadcastObject]) => {
-          if (publishStreamId !== streamId) {
-            let assignedVideoCardId = videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
-            return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
-          } else {
-            return getParticipantItem(publishStreamId, "You");
-          }
-        })}
+        <Stack id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}} 
+          ref={scrollContainerRef} onScroll={handleScroll} spacing={2}>
+          {getParticipantItem(publishStreamId, "You")}
+          {Object.entries(pagedParticipants).map(([streamId, broadcastObject]) => {
+            if (publishStreamId !== streamId) {
+              let assignedVideoCardId = videoTrackAssignments?.find(vta => vta.streamId === streamId)?.videoLabel;
+              return getParticipantItem(streamId, broadcastObject.name, assignedVideoCardId);
+            } 
+          })}
+        </Stack>
       </Stack>
     </Grid>
-      {/* Pagination Controls */}
-      <Grid
-          container
-          justifyContent="center"
-          sx={{ mt: 2, mb: 2 }}
-      >
-        <Pagination
-            data-testid="participant-list-pagination"
-            count={globals.participantListPagination.totalPage}
-            page={globals.participantListPagination.currentPage}
-            onChange={paginationUpdate}
-        />
-      </Grid>
+    {/* Infinite Scroll Trigger */}
+    <div style={{ height: "50px" }}>
+      {loading && <CircularProgress />}
+    </div>
     </>
   );
 
