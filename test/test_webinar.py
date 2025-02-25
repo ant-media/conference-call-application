@@ -24,7 +24,6 @@ class TestWebinarScenario(unittest.TestCase):
     self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
     self.chrome.init(not self.is_local)
-    self.chrome.init(True)
     self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
     self.rest_helper.login()
     self.rest_helper.create_broadcast_for_play_only_speed_test()

@@ -1312,7 +1312,7 @@ function AntMedia(props) {
         let allParticipantsTemp = { ...allParticipants };
 
         broadcastObject.parsedMetaData = metaData;
-        broadcastObject.isPaged = (!isNull(broadcastObject.isPaged) && broadcastObject.isPaged) || isPaged;
+        broadcastObject.isPaged = true; //(!isNull(broadcastObject.isPaged) && broadcastObject.isPaged) || isPaged;
 
         if (broadcastObject.streamId === publishStreamId) {
             broadcastObject.name = "You";
