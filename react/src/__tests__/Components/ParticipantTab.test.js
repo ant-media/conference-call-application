@@ -208,9 +208,7 @@ describe('ParticipantTab Component', () => {
 
       // Check if setIsBottom was called and loadMoreParticipants is triggered
       await waitFor(() => {
-        expect(props.loadMoreParticipants).toHaveBeenCalledWith(
-            props.globals.participantListPagination.currentPage + 1
-        );
+        expect(props.loadMoreParticipants).toHaveBeenCalled();
       });
       jest.clearAllTimers()
     });

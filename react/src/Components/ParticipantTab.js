@@ -231,7 +231,7 @@ function ParticipantTab({
 
   return (
     <>
-    <Grid container sx={{mt: 1}} id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}}>
+    <Grid container sx={{mt: 1}} style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}}>
       <Stack
           sx={{width: "100%",}}
           spacing={3}
