@@ -1496,7 +1496,7 @@ function AntMedia(props) {
             // add fake participants into the new list
             Object.keys(allParticipants).forEach(streamId => {
                 let broadcastObject = allParticipants[streamId];
-                if (!isNull(broadcastObject.isFake) && broadcastObject.isFake === true) {
+                if (!isNull(broadcastObject?.isFake) && broadcastObject?.isFake === true) {
                     allParticipantsTemp[streamId] = broadcastObject;
                 }
             });
@@ -1509,6 +1509,7 @@ function AntMedia(props) {
 
         } else if (info === "subtrackCount") {
             if (!isNull(obj.count)) {
+                console.log("subtrackCount:"+obj.count);
                 updateParticipantCountAndList(obj.count);
             }
         } else if (info === "broadcastObject") {
@@ -1530,16 +1531,25 @@ function AntMedia(props) {
             handlePlayVideo(obj);
         } else if (info === "subtrackAdded") {
             console.log("subtrack added:", obj);
+            if(obj.trackId.endsWith("_presentation") && isNull(allParticipants[obj.trackId])) {
+                console.log("screen share added:" + obj.trackId);
+                webRTCAdaptor?.getBroadcastObject(obj.trackId);
+            }
         } else if (info === "subtrackRemoved") {
             console.log("subtrack removed:", obj);
-            let allParticipantsTemp = { ...allParticipants };
-            delete allParticipantsTemp[obj.trackId]; 
-            setAllParticipants(allParticipantsTemp);
+
+            //this is the way to syncronize the state update
+            setAllParticipants((prevParticipants) => {
+                let allParticipantsTemp = { ...prevParticipants };
+                delete allParticipantsTemp[obj.trackId];
+                return allParticipantsTemp;
+            });
         } else if (info === "publish_started") {
             setIsPublished(true);
             streamIdInUseCounter = 0;
             console.log("**** publish started:" + reconnecting);
             updateMaxVideoTrackCount(appSettingsMaxVideoTrackCount);
+            webRTCAdaptor?.getSubtracks(roomName, null, 0, INITIAL_SUBTRACK_SIZE);  
 
             if (reconnecting) {
                 // we need to set the local video again after the reconnection
@@ -1547,7 +1557,6 @@ function AntMedia(props) {
                 localVideoCreate(newLocalVideo);
                 // we need to set the setVideoCameraSource to be able to update sender source after the reconnection
                 webRTCAdaptor.mediaManager.setVideoCameraSource(publishStreamId, webRTCAdaptor.mediaManager.mediaConstraints, null, true);
-                webRTCAdaptor?.getSubtracks(roomName, null, 0, INITIAL_SUBTRACK_SIZE);  
                 publishReconnected = true;
                 reconnecting = !(publishReconnected && playReconnected);
                 setIsReconnectionInProgress(reconnecting);
@@ -2498,11 +2507,12 @@ function AntMedia(props) {
     };
 
     function updateParticipantCountAndList(newParticipantCount) {
-        setParticipantCount(newParticipantCount);
-        if (INITIAL_SUBTRACK_SIZE > newParticipantCount) {
+        if (participantCount != newParticipantCount &&
+            INITIAL_SUBTRACK_SIZE > Math.min(newParticipantCount, Object.entries(pagedParticipants).length)) {
             // if the new participant is added, we need to get the subtrack list again
             webRTCAdaptor?.getSubtracks(roomName, null, 0, INITIAL_SUBTRACK_SIZE);
         }
+        setParticipantCount(newParticipantCount);
     }
 
     function displayRoleUpdateMessage(streamId, oldRole, newRole) {
@@ -2551,8 +2561,8 @@ function AntMedia(props) {
         let lastlySharedScreenTime = 0;
         //if the updated all participants(we added also video trcak assigned ones) has a screen share not pinned, pin it
         broadcastObjectsArray.forEach((broadcastObject) => {
-            if (broadcastObject.parsedMetaData.isScreenShared === true 
-                && broadcastObject.startTime > lastlySharedScreenTime) 
+            if (broadcastObject?.parsedMetaData.isScreenShared === true 
+                && broadcastObject?.startTime > lastlySharedScreenTime) 
             {
                 lastlySharedScreen = broadcastObject.streamId;
                 lastlySharedScreenTime = broadcastObject.startTime;
