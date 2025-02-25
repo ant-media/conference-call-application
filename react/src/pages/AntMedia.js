@@ -39,7 +39,7 @@ const globals = {
     trackEvents: [],
     //pagination is used to keep track of the current page and the total page of the participants list
     participantListPagination: {
-        currentPagePosition: INITIAL_SUBTRACK_SIZE - 1, //remove you
+        currentPagePosition: INITIAL_SUBTRACK_SIZE,
         loadingStepSize: 5,
     }
 };
