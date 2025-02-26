@@ -147,7 +147,7 @@ const MeetingRoom = React.memo((props) => {
                         globals={props?.globals}
                         publishStreamId={props?.publishStreamId}
                         pinVideo={props?.pinVideo}
-                        unpinVideo={() => props?.unpinVideo}
+                        unpinVideo={props?.unpinVideo}
                         allParticipants={props?.allParticipants}
                         videoTrackAssignments={props?.videoTrackAssignments}
                         updateMaxVideoTrackCount={props?.updateMaxVideoTrackCount}

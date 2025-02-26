@@ -1361,17 +1361,17 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-    if(!initialized)
-        return;
-  
-    if (devices.length > 0) {
-        console.log("updating audio video sources");
-        checkAndUpdateVideoAudioSources();
-    } else {
-        navigator.mediaDevices.enumerateDevices().then(devices => {
-            setDevices(devices);
-        });
-    }
+        if(!initialized)
+            return;
+    
+        if (devices.length > 0) {
+            console.log("updating audio video sources");
+            checkAndUpdateVideoAudioSources();
+        } else {
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+                setDevices(devices);
+            });
+        }
     }, [devices,initialized]); // eslint-disable-line 
 
     if (webRTCAdaptor) {
@@ -1877,7 +1877,6 @@ function AntMedia(props) {
         console.log("*** pin request for "+streamId);
         console.trace();
         // id is for pinning user.
-        let videoLabel;
         let broadcastObject = allParticipants[streamId];
 
         if (isNull(broadcastObject)) {
@@ -1891,39 +1890,30 @@ function AntMedia(props) {
             unpinVideo();
         }
 
-        // if there is no pinned video we are going to pin the targeted user.
-        // and we need to inform pinned user.
-        if (streamId === publishStreamId) {
-            videoLabel = "localVideo";
-        }
-
-        if (videoLabel !== "localVideo") {
-            // if we are publisher, the first video track is reserved for local video, so we start from 1
-            // if we are play only, the first video track is not reserved for local video, so we start from 0
-            let videoTrackAssignmentStartIndex = (isPlayOnly) ? 0 : 1;
-
-            videoLabel = videoTrackAssignments[videoTrackAssignmentStartIndex]?.videoLabel;
-
-            checkAndAssignVideoTrack(videoLabel, streamId);         
-
-        }
-
-        allParticipants[streamId] = broadcastObject;
-
-        handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
-
-        let pinInfo = {videoLabel:videoLabel, streamId:streamId, pinningTime:Date.now()}
-        setCurrentPinInfo(pinInfo);
-
-        setParticipantUpdated(!participantUpdated);
+        checkAndAssignVideoTrack(streamId);
     };
 
-    function checkAndAssignVideoTrack(videoLabel, streamId) {
+    function checkAndAssignVideoTrack(streamId) {
+        let videoLabel = getTheAssigningVideoLabel(streamId === publishStreamId);
+        if(isNull(videoLabel)) {
+            //there is no track to assign.
+            return;
+        }
+
         let assigningVideoTrack = videoTrackAssignments.find(el => el.videoLabel == videoLabel);
 
+        console.log("debug:"+videoLabel+" t:"+assigningVideoTrack);
+
         //if it is already assigned to the stream id, just return  
-        if(assigningVideoTrack.isReserved && assigningVideoTrack.streamId === streamId) {
+        if((assigningVideoTrack?.isMine || assigningVideoTrack?.isReserved) && assigningVideoTrack.streamId === streamId) {
             console.log(videoLabel + " is assigned to " + streamId);
+
+            handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
+
+            let pinInfo = {videoLabel:videoLabel, streamId:streamId, pinningTime:Date.now()}
+            setCurrentPinInfo(pinInfo);
+
+            setParticipantUpdated(!participantUpdated);
             return;
         }
         else {
@@ -1933,10 +1923,29 @@ function AntMedia(props) {
             console.log(videoLabel + " will be assigned to " + streamId);
 
             setTimeout(() => {
-                checkAndAssignVideoTrack(videoLabel, streamId)
+                checkAndAssignVideoTrack(streamId)
             }, 1000);
         }
         
+    }
+
+    function getTheAssigningVideoLabel(isLocalVideo) {
+        let videoLabel;
+
+        if (isLocalVideo) {
+            videoLabel = "localVideo";
+        }
+        else {
+            // if we are publisher, the first video track is reserved for local video, so we start from 1
+            // if we are play only, the first video track is not reserved for local video, so we start from 0
+            let videoTrackAssignmentStartIndex = (isPlayOnly) ? 0 : 1;
+
+            console.log("debug:",videoTrackAssignments)
+
+            videoLabel = videoTrackAssignments[videoTrackAssignmentStartIndex]?.videoLabel;
+        }
+
+        return videoLabel;
     }
 
     function turnOffYourCamNotification(participantId) {
@@ -2550,7 +2559,7 @@ function AntMedia(props) {
         //if currently pinned broadcast is not in all participants(we added also video track assigned ones)
         //then unpin it. It may leave for example in schreen share
         if(!isNull(currentPinInfo)) {
-            let broadcastObject = broadcastObjectsArray.find(el => el.streamId == currentPinInfo.streamId);
+            let broadcastObject = broadcastObjectsArray.find(el => el.streamId == currentPinInfo?.streamId);
             console.log("sill "+currentPinInfo.streamId+" broadcastObject:", broadcastObject)
             if (isNull(broadcastObject)) {
                 unpinVideo();
@@ -2904,14 +2913,14 @@ function AntMedia(props) {
         });
     }
 
-    function checkAndTurnOnLocalCamera(streamId) {
+    function checkAndTurnOnLocalCamera() {
         if (isVideoEffectRunning) {
             webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
         } else {
-            webRTCAdaptor?.turnOnLocalCamera(streamId);
+            webRTCAdaptor?.turnOnLocalCamera(publishStreamId);
         }
 
-        updateUserStatusMetadata(isMyMicMuted, true);
+        updateUserStatusMetadata(isMyCamTurnedOff, false);
         setIsMyCamTurnedOff(false);
 
         handleSendNotificationEvent("CAM_TURNED_ON", publishStreamId);
@@ -2924,7 +2933,7 @@ function AntMedia(props) {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
 
-        updateUserStatusMetadata(isMyMicMuted, false);
+        updateUserStatusMetadata(isMyCamTurnedOff, true);
         setIsMyCamTurnedOff(true);
 
         handleSendNotificationEvent("CAM_TURNED_OFF", publishStreamId);

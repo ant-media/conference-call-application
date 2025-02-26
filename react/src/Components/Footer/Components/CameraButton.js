@@ -33,9 +33,9 @@ function CameraButton(props) {
     });
 
     if (isTurningOff) {
-      props?.onTurnOnCamera();
-    } else {
       props?.onTurnOffCamera();
+    } else {
+      props?.onTurnOnCamera();
     }
   };
 
@@ -62,7 +62,7 @@ function CameraButton(props) {
             color={props?.isCamTurnedOff ? "error" : "primary"}
             sx={props?.rounded ? roundStyle : {}}
             disabled={props?.cameraButtonDisabled}
-            onClick={(e) => handleCameraToggle(e, props?.isCamTurnedOff)}
+            onClick={(e) => handleCameraToggle(e, !props?.isCamTurnedOff)}
         >
           <SvgIcon
               size={40}

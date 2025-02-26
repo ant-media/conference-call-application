@@ -245,7 +245,7 @@ function ParticipantTab({
             {participantCount}
           </ParticipantName>
         </Grid>
-        <Stack id="paper-props" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'auto'}} 
+        <Stack id="participant-scroll" style={{flexWrap: 'nowrap', flex: 'auto', overflowY: 'scroll'}} 
           ref={scrollContainerRef} onScroll={handleScroll} spacing={2}>
           {getParticipantItem(publishStreamId, "You")}
           {Object.entries(pagedParticipants).map(([streamId, broadcastObject]) => {
@@ -258,7 +258,7 @@ function ParticipantTab({
       </Stack>
     </Grid>
     {/* Infinite Scroll Trigger */}
-    <div style={{ height: "50px" }}>
+    <div style={{ height: "200px" }}>
       {loading && <CircularProgress />}
     </div>
     </>
