@@ -30,7 +30,6 @@ import Stack from "@mui/material/Stack";
 export const UnitTestContext = React.createContext(null);
 const INITIAL_SUBTRACK_SIZE = 15
 
-
 const globals = {
     //this settings is to keep consistent with the sdk until backend for the app is setup
     // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
@@ -1685,10 +1684,10 @@ function AntMedia(props) {
             let frameDropRate = (framesDropped / framesReceived) * 100;
 
             // Determine network status warnings
-            if (rtt > 0.15 || frameDropRate > 5) {
+            if (rtt > 0.3 || frameDropRate > 5) {
                 console.warn(`rtt: ${rtt}, average frameDropRate: ${frameDropRate}`);
                 displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
-            } else if (rtt > 0.1 || frameDropRate > 2.5) {
+            } else if (rtt > 0.2 || frameDropRate > 2.5) {
                 console.warn(`rtt: ${rtt}, average frameDropRate: ${frameDropRate}`);
                 displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
             }
@@ -1718,10 +1717,10 @@ function AntMedia(props) {
             }
         }
 
-        if (rtt >= 0.15 || packageLostPercentage >= 2.5 || jitter >= 0.08) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
+        if (rtt >= 0.3 || packageLostPercentage >= 2.5 || jitter >= 0.08) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
             displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
-        } else if (rtt >= 0.1 || packageLostPercentage >= 1.5 || jitter >= 0.05) {
+        } else if (rtt >= 0.2 || packageLostPercentage >= 1.5 || jitter >= 0.05) {
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter);
             displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
         }
@@ -1873,6 +1872,15 @@ function AntMedia(props) {
         setParticipantUpdated(!participantUpdated);
     }
 
+
+
+    /**
+     * important !!!
+     * pin video requires to call twice. 
+     * In the first call it assignes the first videoTrack to the stream
+     * In the second call it is set as pinned
+     */
+
     function pinVideo(streamId){
         console.log("*** pin request for "+streamId);
         console.trace();
@@ -1885,49 +1893,44 @@ function AntMedia(props) {
             return;
         }
 
-        if(!isNull(currentPinInfo)) {
+        //if we get another pin request and the previous one is completed, unpin the previous
+        if(!isNull(currentPinInfo) && currentPinInfo.streamId !== streamId) {
             console.log(currentPinInfo?.videoLabel + " assigment will be removed from " + currentPinInfo?.streamId);
-            unpinVideo();
+            unpinVideo(); 
         }
 
-        checkAndAssignVideoTrack(streamId);
-    };
-
-    function checkAndAssignVideoTrack(streamId) {
         let videoLabel = getTheAssigningVideoLabel(streamId === publishStreamId);
+        console.log("debug:"+videoLabel+" t:", videoTrackAssignments);
+
         if(isNull(videoLabel)) {
-            //there is no track to assign.
+            //there is no track to assign. this may happen you are only one and share your screen. 
+            // because new track creation may take time. This will be called again.
+            console.log("there is no track to assign");
             return;
         }
 
         let assigningVideoTrack = videoTrackAssignments.find(el => el.videoLabel == videoLabel);
 
-        console.log("debug:"+videoLabel+" t:"+assigningVideoTrack);
-
-        //if it is already assigned to the stream id, just return  
-        if((assigningVideoTrack?.isMine || assigningVideoTrack?.isReserved) && assigningVideoTrack.streamId === streamId) {
-            console.log(videoLabel + " is assigned to " + streamId);
-
+        //if there is a video track set pin info as pinning, we will make it pinned when assignment will be reserved 
+        if(!isNull(assigningVideoTrack)) {
             handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
 
             let pinInfo = {videoLabel:videoLabel, streamId:streamId, pinningTime:Date.now()}
             setCurrentPinInfo(pinInfo);
-
             setParticipantUpdated(!participantUpdated);
-            return;
+        }
+
+        //if the video track reserved to the stream id update status as pinned
+        if((assigningVideoTrack?.isMine || assigningVideoTrack?.isReserved) && assigningVideoTrack.streamId === streamId) {
+            console.log(videoLabel + " is assigned to " + streamId);
         }
         else {
-            //assign to the stream id, and check after timeou if assigned, otherwise retry
-
+            //send reservation request for the stream id
             webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
             console.log(videoLabel + " will be assigned to " + streamId);
-
-            setTimeout(() => {
-                checkAndAssignVideoTrack(streamId)
-            }, 1000);
         }
-        
-    }
+    };
+
 
     function getTheAssigningVideoLabel(isLocalVideo) {
         let videoLabel;
@@ -1939,9 +1942,6 @@ function AntMedia(props) {
             // if we are publisher, the first video track is reserved for local video, so we start from 1
             // if we are play only, the first video track is not reserved for local video, so we start from 0
             let videoTrackAssignmentStartIndex = (isPlayOnly) ? 0 : 1;
-
-            console.log("debug:",videoTrackAssignments)
-
             videoLabel = videoTrackAssignments[videoTrackAssignmentStartIndex]?.videoLabel;
         }
 

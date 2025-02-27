@@ -12,7 +12,7 @@ import { times } from 'lodash';
 import { useParams } from 'react-router-dom';
 import {VideoEffect} from "@antmedia/webrtc_adaptor";
 import {WebinarRoles} from "../../WebinarRoles";
-import { assert } from 'workbox-core/_private';
+import { assert, timeout } from 'workbox-core/_private';
 
 var webRTCAdaptorConstructor, webRTCAdaptorScreenConstructor, webRTCAdaptorPublishSpeedTestPlayOnlyConstructor, webRTCAdaptorPublishSpeedTestConstructor, webRTCAdaptorPlaySpeedTestConstructor;
 var currentConference;
@@ -1156,7 +1156,6 @@ describe('AntMedia Component', () => {
     });
   });
 
-  /*
   it('screen sharing test', async () => {
     const {container} = render(
         <ThemeProvider theme={theme(ThemeList.Green)}>
@@ -1168,6 +1167,9 @@ describe('AntMedia Component', () => {
     await waitFor(() => {
       expect(webRTCAdaptorConstructor).not.toBe(undefined);
     });
+
+    jest.useRealTimers();
+
 
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
     currentConference.setParticipantUpdated = jest.fn();
@@ -1186,6 +1188,11 @@ describe('AntMedia Component', () => {
       ]);
     });
 
+    await waitFor(() => {
+      expect(currentConference.videoTrackAssignments[1].isReserved).toBe(false);
+    });
+
+    console.log("currentConference.videoTrackAssignments 1:", currentConference.videoTrackAssignments);
 
     // testing pinning
     await act(async () => {
@@ -1194,33 +1201,46 @@ describe('AntMedia Component', () => {
 
     expect(webRTCAdaptorConstructor.assignVideoTrack).toHaveBeenCalledWith("videoTrack0", "participant3", true);
 
-    //assume we assigned videotrack0 to participant3 here
-    var notificationEvent = {
-      eventType: "VIDEO_TRACK_ASSIGNMENT_LIST",
-      streamId: "stream1",
-      payload: [
-        {videoLabel:"videoTrack0", trackId:"participant3", isReserved:true},
-        {videoLabel:"videoTrack1", trackId:"participant2", isReserved:false},
-        {videoLabel:"videoTrack2", trackId:"participant1", isReserved:false},
-      ]
-    };
-    var json = JSON.stringify(notificationEvent);
 
-    let obj = {};
-    obj.data = json;
+    //assume we assigned videotrack0 to participant3 here
 
     await act(async () => {
-      webRTCAdaptorConstructor.callback("data_received", obj);
+      currentConference.setVideoTrackAssignments([
+        {videoLabel: "localvideo", streamId: "participant0", videoTrackId: "localvideo", audioTrackId: "audioTrack0", isReserved: false},
+        {videoLabel: "videoTrack0", streamId: "participant3", videoTrackId: "videoTrack0", audioTrackId: "audioTrack1", isReserved: true},
+        {videoLabel: "videoTrack1", streamId: "participant2", videoTrackId: "videoTrack1", audioTrackId: "audioTrack2", isReserved: false},
+        {videoLabel: "videoTrack2", streamId: "participant1", videoTrackId: "videoTrack2", audioTrackId: "audioTrack3", isReserved: false}
+      ]);
+    });
+
+    await waitFor(() => {
+      expect(currentConference.videoTrackAssignments[1].isReserved).toBe(true);
+    });
+
+    console.log("currentConference.videoTrackAssignments 2:", currentConference.videoTrackAssignments);
+
+    // testing pinning
+    await act(async () => {
+      currentConference.pinVideo("participant3");
     });
     
     await waitFor(() => {
       expect(currentConference.currentPinInfo.streamId).toBe('participant3');
-    }, {timeout:5000});
+    });
+
+    await act(async () => {
+      currentConference.setVideoTrackAssignments([
+        {videoLabel: "localvideo", streamId: "participant0", videoTrackId: "localvideo", audioTrackId: "audioTrack0", isReserved: false},
+        {videoLabel: "videoTrack0", streamId: "participant2", videoTrackId: "videoTrack0", audioTrackId: "audioTrack1", isReserved: true},
+        {videoLabel: "videoTrack1", streamId: "participant3", videoTrackId: "videoTrack1", audioTrackId: "audioTrack2", isReserved: false},
+        {videoLabel: "videoTrack2", streamId: "participant1", videoTrackId: "videoTrack2", audioTrackId: "audioTrack3", isReserved: false}
+      ]);
+    });
 
     // testing pinning while another participant is pinned
     await act(async () => {
       currentConference.pinVideo("participant2");
-    });
+    }); 
 
     expect(currentConference.currentPinInfo.streamId).toBe('participant2');
 
@@ -1239,8 +1259,7 @@ describe('AntMedia Component', () => {
 
     expect(consoleSpy).toHaveBeenCalledWith("Cannot find broadcast object for streamId: non-exist-participant");
 
-  }, 10000);
-  */
+  });
 
   it('high resource usage', async () => {
     const { container } = render(
