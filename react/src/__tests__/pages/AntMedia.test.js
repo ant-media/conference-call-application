@@ -1822,15 +1822,15 @@ describe('AntMedia Component', () => {
 
     await act(async () => {
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
-      mockStats.videoRoundTripTime = '0.150';
-      mockStats.audioRoundTripTime = '0.160';
+      mockStats.videoRoundTripTime = '0.300';
+      mockStats.audioRoundTripTime = '0.310';
 
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(weak_msg);
 
-      mockStats.videoRoundTripTime = '0.120';
-      mockStats.audioRoundTripTime = '0.130';
+      mockStats.videoRoundTripTime = '0.200';
+      mockStats.audioRoundTripTime = '0.210';
 
       webRTCAdaptorConstructor.callback("updated_stats", mockStats);
 
