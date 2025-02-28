@@ -2920,7 +2920,7 @@ function AntMedia(props) {
             webRTCAdaptor?.turnOnLocalCamera(publishStreamId);
         }
 
-        updateUserStatusMetadata(isMyCamTurnedOff, false);
+        updateUserStatusMetadata(isMyMicMuted, true);
         setIsMyCamTurnedOff(false);
 
         handleSendNotificationEvent("CAM_TURNED_ON", publishStreamId);
@@ -2933,7 +2933,7 @@ function AntMedia(props) {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
 
-        updateUserStatusMetadata(isMyCamTurnedOff, true);
+        updateUserStatusMetadata(isMyMicMuted, false);
         setIsMyCamTurnedOff(true);
 
         handleSendNotificationEvent("CAM_TURNED_OFF", publishStreamId);
