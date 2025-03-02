@@ -1543,6 +1543,11 @@ function AntMedia(props) {
                 delete allParticipantsTemp[obj.trackId];
                 return allParticipantsTemp;
             });
+
+            if(!isNull(currentPinInfo) && currentPinInfo.streamId === obj.trackId) {
+                console.log("currently pinned stream is removed:" + obj.trackId);
+                unpinVideo();
+            }
         } else if (info === "publish_started") {
             setIsPublished(true);
             streamIdInUseCounter = 0;
@@ -2416,7 +2421,7 @@ function AntMedia(props) {
                         webRTCAdaptor?.getBroadcastObject(vta.trackId);
                     }
                 });
-
+                
                 checkScreenSharingStatus();
 
                 // check if there is any difference between old and new assignments
@@ -2554,31 +2559,35 @@ function AntMedia(props) {
     }
 
     function checkScreenSharingStatus() {
-        const broadcastObjectsArray = Object.values(allParticipants);
-        
-        //if currently pinned broadcast is not in all participants(we added also video track assigned ones)
-        //then unpin it. It may leave for example in schreen share
+
+        //we might already send assignVideoTrack to server but it might be before track creation. Here we check and resend
         if(!isNull(currentPinInfo)) {
-            let broadcastObject = broadcastObjectsArray.find(el => el.streamId == currentPinInfo?.streamId);
-            console.log("sill "+currentPinInfo.streamId+" broadcastObject:", broadcastObject)
-            if (isNull(broadcastObject)) {
-                unpinVideo();
+            let assignedVideoTrack = videoTrackAssignments.find(el => el.videoLabel == currentPinInfo.videoLabel);
+            if(assignedVideoTrack?.streamId !== currentPinInfo.streamId) {
+                //send reservation request for the stream id
+                webRTCAdaptor?.assignVideoTrack(currentPinInfo.videoLabel, currentPinInfo.streamId, true);
+                console.log(currentPinInfo.videoLabel + " will be assigned to " + currentPinInfo.streamId+" (retry)");
             }
         }
-        
+
+        const broadcastObjectsArray = Object.values(allParticipants);      
+
         let lastlySharedScreen;
         let lastlySharedScreenTime = 0;
         //if the updated all participants(we added also video trcak assigned ones) has a screen share not pinned, pin it
         broadcastObjectsArray.forEach((broadcastObject) => {
             if (broadcastObject?.parsedMetaData.isScreenShared === true 
-                && broadcastObject?.startTime > lastlySharedScreenTime) 
+                && broadcastObject?.startTime >= lastlySharedScreenTime) 
             {
                 lastlySharedScreen = broadcastObject.streamId;
                 lastlySharedScreenTime = broadcastObject.startTime;
             }
         });
 
+        console.log("lastlySharedScreen:"+lastlySharedScreen);
+
         if(!isNull(lastlySharedScreen)) {
+            console.log("currentPinInfo:",currentPinInfo);
             //here we check if someone pinned manually after screen share
             if(!isNull(currentPinInfo) && currentPinInfo.pinningTime >= lastlySharedScreenTime) {
                 return;
