@@ -152,7 +152,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     return handle
   
-  def join_room_as_player(self, participant, room, skip_speed_test=False):
+  def join_room_as_player(self, participant, room, skip_speed_test=True):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
