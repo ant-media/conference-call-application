@@ -91,7 +91,7 @@ const MeetingRoom = React.memo((props) => {
 
   const pinnedParticipant = props?.allParticipants[props.currentPinInfo?.streamId];
 
-  const pinLayout = (typeof pinnedParticipant !== "undefined");
+  const pinLayout = (typeof props.currentPinInfo !== "undefined" && props.currentPinInfo?.pinned);
 
   /* istanbul ignore next */
   return (
@@ -147,7 +147,7 @@ const MeetingRoom = React.memo((props) => {
                         globals={props?.globals}
                         publishStreamId={props?.publishStreamId}
                         pinVideo={props?.pinVideo}
-                        unpinVideo={() => props?.unpinVideo}
+                        unpinVideo={props?.unpinVideo}
                         allParticipants={props?.allParticipants}
                         videoTrackAssignments={props?.videoTrackAssignments}
                         updateMaxVideoTrackCount={props?.updateMaxVideoTrackCount}

@@ -30,7 +30,6 @@ import Stack from "@mui/material/Stack";
 export const UnitTestContext = React.createContext(null);
 const INITIAL_SUBTRACK_SIZE = 15
 
-
 const globals = {
     //this settings is to keep consistent with the sdk until backend for the app is setup
     // maxVideoTrackCount is the tracks i can see excluding my own local video.so the use is actually seeing 3 videos when their own local video is included.
@@ -1361,17 +1360,17 @@ function AntMedia(props) {
     }
 
     useEffect(() => {
-    if(!initialized)
-        return;
-  
-    if (devices.length > 0) {
-        console.log("updating audio video sources");
-        checkAndUpdateVideoAudioSources();
-    } else {
-        navigator.mediaDevices.enumerateDevices().then(devices => {
-            setDevices(devices);
-        });
-    }
+        if(!initialized)
+            return;
+    
+        if (devices.length > 0) {
+            console.log("updating audio video sources");
+            checkAndUpdateVideoAudioSources();
+        } else {
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+                setDevices(devices);
+            });
+        }
     }, [devices,initialized]); // eslint-disable-line 
 
     if (webRTCAdaptor) {
@@ -1544,6 +1543,11 @@ function AntMedia(props) {
                 delete allParticipantsTemp[obj.trackId];
                 return allParticipantsTemp;
             });
+
+            if(!isNull(currentPinInfo) && currentPinInfo.streamId === obj.trackId) {
+                console.log("currently pinned stream is removed:" + obj.trackId);
+                unpinVideo(false);
+            }
         } else if (info === "publish_started") {
             setIsPublished(true);
             streamIdInUseCounter = 0;
@@ -1685,10 +1689,10 @@ function AntMedia(props) {
             let frameDropRate = (framesDropped / framesReceived) * 100;
 
             // Determine network status warnings
-            if (rtt > 0.15 || frameDropRate > 5) {
+            if (rtt > 0.3 || frameDropRate > 5) {
                 console.warn(`rtt: ${rtt}, average frameDropRate: ${frameDropRate}`);
                 displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
-            } else if (rtt > 0.1 || frameDropRate > 2.5) {
+            } else if (rtt > 0.2 || frameDropRate > 2.5) {
                 console.warn(`rtt: ${rtt}, average frameDropRate: ${frameDropRate}`);
                 displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
             }
@@ -1718,10 +1722,10 @@ function AntMedia(props) {
             }
         }
 
-        if (rtt >= 0.15 || packageLostPercentage >= 2.5 || jitter >= 0.08) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
+        if (rtt >= 0.3 || packageLostPercentage >= 2.5 || jitter >= 0.08) { //|| ((outgoingBitrate / 100) * 80) >= obj.availableOutgoingBitrate
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter); // + " Available Bandwidth kbps :", obj.availableOutgoingBitrate, "Outgoing Bandwidth kbps:", outgoingBitrate);
             displayPoorNetworkConnectionWarning("Network connection is weak. You may encounter connection drop!");
-        } else if (rtt >= 0.1 || packageLostPercentage >= 1.5 || jitter >= 0.05) {
+        } else if (rtt >= 0.2 || packageLostPercentage >= 1.5 || jitter >= 0.05) {
             console.warn("rtt:" + rtt + " packageLostPercentage:" + packageLostPercentage + " jitter:" + jitter);
             displayPoorNetworkConnectionWarning("Network connection is not stable. Please check your connection!");
         }
@@ -1864,20 +1868,35 @@ function AntMedia(props) {
     }
 
 
-    function unpinVideo() {
-        console.log("*** unpin request for ");
+    function unpinVideo(isManual) {
+        console.log("*** unpin request isManual:" + isManual);
         console.trace();
-        webRTCAdaptor?.assignVideoTrack(currentPinInfo?.videoLabel, currentPinInfo?.streamId, false);
-        console.log(currentPinInfo?.videoLabel + " assigment removed from " + currentPinInfo?.streamId);
-        setCurrentPinInfo(null);
+        if(isManual && isNull(currentPinInfo) && currentPinInfo.streamId.endsWith("_presentation")) {
+            let currentPinInfoTemp = currentPinInfo;
+            currentPinInfoTemp.pinned = false;
+            setCurrentPinInfo(currentPinInfoTemp);
+        }
+        else {
+            webRTCAdaptor?.assignVideoTrack(currentPinInfo?.videoLabel, currentPinInfo?.streamId, false);
+            console.log(currentPinInfo?.videoLabel + " assigment removed from " + currentPinInfo?.streamId);
+            setCurrentPinInfo(null);
+        }
         setParticipantUpdated(!participantUpdated);
     }
+
+
+
+    /**
+     * important !!!
+     * pin video requires to call twice. 
+     * In the first call it assignes the first videoTrack to the stream
+     * In the second call it is set as pinned
+     */
 
     function pinVideo(streamId){
         console.log("*** pin request for "+streamId);
         console.trace();
         // id is for pinning user.
-        let videoLabel;
         let broadcastObject = allParticipants[streamId];
 
         if (isNull(broadcastObject)) {
@@ -1886,57 +1905,59 @@ function AntMedia(props) {
             return;
         }
 
-        if(!isNull(currentPinInfo)) {
+        //if we get another pin request and the previous one is completed, unpin the previous
+        if(!isNull(currentPinInfo) && currentPinInfo.streamId !== streamId) {
             console.log(currentPinInfo?.videoLabel + " assigment will be removed from " + currentPinInfo?.streamId);
-            unpinVideo();
+            unpinVideo(false); 
         }
 
-        // if there is no pinned video we are going to pin the targeted user.
-        // and we need to inform pinned user.
-        if (streamId === publishStreamId) {
+        let videoLabel = getTheAssigningVideoLabel(streamId === publishStreamId);
+        console.log("debug:"+videoLabel+" t:", videoTrackAssignments);
+
+        if(isNull(videoLabel)) {
+            //there is no track to assign. this may happen you are only one and share your screen. 
+            // because new track creation may take time. This will be called again.
+            console.log("there is no track to assign");
+            return;
+        }
+
+        let assigningVideoTrack = videoTrackAssignments.find(el => el.videoLabel == videoLabel);
+
+        //if there is a video track set pin info as pinning, we will make it pinned when assignment will be reserved 
+        if(!isNull(assigningVideoTrack)) {
+            handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
+
+            let pinInfo = {videoLabel:videoLabel, streamId:streamId, pinningTime:Date.now(), pinned:true}
+            setCurrentPinInfo(pinInfo);
+            setParticipantUpdated(!participantUpdated);
+        }
+
+        //if the video track reserved to the stream id update status as pinned
+        if((assigningVideoTrack?.isMine || assigningVideoTrack?.isReserved) && assigningVideoTrack.streamId === streamId) {
+            console.log(videoLabel + " is assigned to " + streamId);
+        }
+        else {
+            //send reservation request for the stream id
+            webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
+            console.log(videoLabel + " will be assigned to " + streamId);
+        }
+    };
+
+
+    function getTheAssigningVideoLabel(isLocalVideo) {
+        let videoLabel;
+
+        if (isLocalVideo) {
             videoLabel = "localVideo";
         }
-
-        if (videoLabel !== "localVideo") {
+        else {
             // if we are publisher, the first video track is reserved for local video, so we start from 1
             // if we are play only, the first video track is not reserved for local video, so we start from 0
             let videoTrackAssignmentStartIndex = (isPlayOnly) ? 0 : 1;
-
             videoLabel = videoTrackAssignments[videoTrackAssignmentStartIndex]?.videoLabel;
-
-            checkAndAssignVideoTrack(videoLabel, streamId);         
-
         }
 
-        allParticipants[streamId] = broadcastObject;
-
-        handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
-
-        let pinInfo = {videoLabel:videoLabel, streamId:streamId, pinningTime:Date.now()}
-        setCurrentPinInfo(pinInfo);
-
-        setParticipantUpdated(!participantUpdated);
-    };
-
-    function checkAndAssignVideoTrack(videoLabel, streamId) {
-        let assigningVideoTrack = videoTrackAssignments.find(el => el.videoLabel == videoLabel);
-
-        //if it is already assigned to the stream id, just return  
-        if(assigningVideoTrack.isReserved && assigningVideoTrack.streamId === streamId) {
-            console.log(videoLabel + " is assigned to " + streamId);
-            return;
-        }
-        else {
-            //assign to the stream id, and check after timeou if assigned, otherwise retry
-
-            webRTCAdaptor?.assignVideoTrack(videoLabel, streamId, true);
-            console.log(videoLabel + " will be assigned to " + streamId);
-
-            setTimeout(() => {
-                checkAndAssignVideoTrack(videoLabel, streamId)
-            }, 1000);
-        }
-        
+        return videoLabel;
     }
 
     function turnOffYourCamNotification(participantId) {
@@ -2407,7 +2428,7 @@ function AntMedia(props) {
                         webRTCAdaptor?.getBroadcastObject(vta.trackId);
                     }
                 });
-
+                
                 checkScreenSharingStatus();
 
                 // check if there is any difference between old and new assignments
@@ -2545,31 +2566,35 @@ function AntMedia(props) {
     }
 
     function checkScreenSharingStatus() {
-        const broadcastObjectsArray = Object.values(allParticipants);
-        
-        //if currently pinned broadcast is not in all participants(we added also video track assigned ones)
-        //then unpin it. It may leave for example in schreen share
+
+        //we might already send assignVideoTrack to server but it might be before track creation. Here we check and resend
         if(!isNull(currentPinInfo)) {
-            let broadcastObject = broadcastObjectsArray.find(el => el.streamId == currentPinInfo.streamId);
-            console.log("sill "+currentPinInfo.streamId+" broadcastObject:", broadcastObject)
-            if (isNull(broadcastObject)) {
-                unpinVideo();
+            let assignedVideoTrack = videoTrackAssignments.find(el => el.videoLabel == currentPinInfo.videoLabel);
+            if(assignedVideoTrack?.streamId !== currentPinInfo.streamId) {
+                //send reservation request for the stream id
+                webRTCAdaptor?.assignVideoTrack(currentPinInfo.videoLabel, currentPinInfo.streamId, true);
+                console.log(currentPinInfo.videoLabel + " will be assigned to " + currentPinInfo.streamId+" (retry)");
             }
         }
-        
+
+        const broadcastObjectsArray = Object.values(allParticipants);      
+
         let lastlySharedScreen;
         let lastlySharedScreenTime = 0;
         //if the updated all participants(we added also video trcak assigned ones) has a screen share not pinned, pin it
         broadcastObjectsArray.forEach((broadcastObject) => {
             if (broadcastObject?.parsedMetaData.isScreenShared === true 
-                && broadcastObject?.startTime > lastlySharedScreenTime) 
+                && broadcastObject?.startTime >= lastlySharedScreenTime) 
             {
                 lastlySharedScreen = broadcastObject.streamId;
                 lastlySharedScreenTime = broadcastObject.startTime;
             }
         });
 
+        console.log("lastlySharedScreen:"+lastlySharedScreen);
+
         if(!isNull(lastlySharedScreen)) {
+            console.log("currentPinInfo:",currentPinInfo);
             //here we check if someone pinned manually after screen share
             if(!isNull(currentPinInfo) && currentPinInfo.pinningTime >= lastlySharedScreenTime) {
                 return;
@@ -2904,11 +2929,11 @@ function AntMedia(props) {
         });
     }
 
-    function checkAndTurnOnLocalCamera(streamId) {
+    function checkAndTurnOnLocalCamera() {
         if (isVideoEffectRunning) {
             webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
         } else {
-            webRTCAdaptor?.turnOnLocalCamera(streamId);
+            webRTCAdaptor?.turnOnLocalCamera(publishStreamId);
         }
 
         updateUserStatusMetadata(isMyMicMuted, true);

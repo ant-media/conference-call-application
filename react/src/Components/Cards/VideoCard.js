@@ -131,7 +131,7 @@ function VideoCard(props) {
             label={props.pinned ? "unpin" : "pin"}
             onClick={() => {
                 if(props.pinned) {
-                    props?.unpinVideo();
+                    props?.unpinVideo(true);
                 } 
                 else {
                     props?.pinVideo(props.trackAssignment.streamId);

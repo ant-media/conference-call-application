@@ -196,7 +196,7 @@ describe('ParticipantTab Component', () => {
       );
 
       // Mock the scroll container
-      const scrollContainer = container.querySelector('#paper-props');
+      const scrollContainer = container.querySelector('#participant-scroll');
       Object.defineProperty(scrollContainer, 'scrollHeight', { value: 200, writable: true });
       Object.defineProperty(scrollContainer, 'clientHeight', { value: 200, writable: true });
       Object.defineProperty(scrollContainer, 'scrollTop', { value: 99, writable: true });
@@ -222,7 +222,7 @@ describe('ParticipantTab Component', () => {
           </ThemeProvider>
       );
 
-      const scrollContainer = container.querySelector('#paper-props');
+      const scrollContainer = container.querySelector('#participant-scroll');
       Object.defineProperty(scrollContainer, 'scrollHeight', { value: 200, writable: true });
       Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, writable: true });
       Object.defineProperty(scrollContainer, 'scrollTop', { value: 50, writable: true });
