@@ -124,7 +124,7 @@ function LayoutPinned (props) {
                         turnOffYourMicNotification={(streamId) =>props?.turnOffYourMicNotification(streamId)}
                         turnOffYourCamNotification={(streamId) =>props?.turnOffYourCamNotification(streamId)}
                         pinVideo={(streamId)=>props?.pinVideo(streamId)}
-                        unpinVideo={() => props?.unpinVideo}
+                        unpinVideo={props?.unpinVideo}
                         isAdmin={props?.isAdmin}
                         publishStreamId={props?.publishStreamId}
                         localVideo={props?.localVideo}

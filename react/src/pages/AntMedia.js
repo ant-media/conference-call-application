@@ -1546,7 +1546,7 @@ function AntMedia(props) {
 
             if(!isNull(currentPinInfo) && currentPinInfo.streamId === obj.trackId) {
                 console.log("currently pinned stream is removed:" + obj.trackId);
-                unpinVideo();
+                unpinVideo(false);
             }
         } else if (info === "publish_started") {
             setIsPublished(true);
@@ -1868,12 +1868,19 @@ function AntMedia(props) {
     }
 
 
-    function unpinVideo() {
-        console.log("*** unpin request for ");
+    function unpinVideo(isManual) {
+        console.log("*** unpin request isManual:" + isManual);
         console.trace();
-        webRTCAdaptor?.assignVideoTrack(currentPinInfo?.videoLabel, currentPinInfo?.streamId, false);
-        console.log(currentPinInfo?.videoLabel + " assigment removed from " + currentPinInfo?.streamId);
-        setCurrentPinInfo(null);
+        if(!isManual) {
+            webRTCAdaptor?.assignVideoTrack(currentPinInfo?.videoLabel, currentPinInfo?.streamId, false);
+            console.log(currentPinInfo?.videoLabel + " assigment removed from " + currentPinInfo?.streamId);
+            setCurrentPinInfo(null);
+        }
+        else {
+            let currentPinInfoTemp = currentPinInfo;
+            currentPinInfoTemp.pinned = false;
+            setCurrentPinInfo(currentPinInfoTemp);
+        }
         setParticipantUpdated(!participantUpdated);
     }
 
@@ -1901,7 +1908,7 @@ function AntMedia(props) {
         //if we get another pin request and the previous one is completed, unpin the previous
         if(!isNull(currentPinInfo) && currentPinInfo.streamId !== streamId) {
             console.log(currentPinInfo?.videoLabel + " assigment will be removed from " + currentPinInfo?.streamId);
-            unpinVideo(); 
+            unpinVideo(false); 
         }
 
         let videoLabel = getTheAssigningVideoLabel(streamId === publishStreamId);
@@ -1920,7 +1927,7 @@ function AntMedia(props) {
         if(!isNull(assigningVideoTrack)) {
             handleNotifyPinUser(streamId !== publishStreamId ? streamId : publishStreamId);
 
-            let pinInfo = {videoLabel:videoLabel, streamId:streamId, pinningTime:Date.now()}
+            let pinInfo = {videoLabel:videoLabel, streamId:streamId, pinningTime:Date.now(), pinned:true}
             setCurrentPinInfo(pinInfo);
             setParticipantUpdated(!participantUpdated);
         }

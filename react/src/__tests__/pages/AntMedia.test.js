@@ -1247,7 +1247,7 @@ describe('AntMedia Component', () => {
 
     // testing unpinning
     await act(async () => {
-      currentConference.unpinVideo();
+      currentConference.unpinVideo(false);
     });
 
     expect(currentConference.currentPinInfo).toBe(null);

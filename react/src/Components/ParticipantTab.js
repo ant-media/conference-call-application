@@ -192,7 +192,7 @@ function ParticipantTab({
                 id={"unpin-" + streamId}
                 sx={{minWidth: "unset", pt: 1, pb: 1}}
                 onClick={(e) => {
-                  unpinVideo();
+                  unpinVideo(true);
                 }}
               >
                 <SvgIcon size={28} name="unpin" color={theme.palette?.participantListIcon?.primary}/>
