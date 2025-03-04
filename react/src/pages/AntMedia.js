@@ -1871,15 +1871,15 @@ function AntMedia(props) {
     function unpinVideo(isManual) {
         console.log("*** unpin request isManual:" + isManual);
         console.trace();
-        if(!isManual) {
-            webRTCAdaptor?.assignVideoTrack(currentPinInfo?.videoLabel, currentPinInfo?.streamId, false);
-            console.log(currentPinInfo?.videoLabel + " assigment removed from " + currentPinInfo?.streamId);
-            setCurrentPinInfo(null);
-        }
-        else {
+        if(isManual && isNull(currentPinInfo) && currentPinInfo.streamId.endsWith("_presentation")) {
             let currentPinInfoTemp = currentPinInfo;
             currentPinInfoTemp.pinned = false;
             setCurrentPinInfo(currentPinInfoTemp);
+        }
+        else {
+            webRTCAdaptor?.assignVideoTrack(currentPinInfo?.videoLabel, currentPinInfo?.streamId, false);
+            console.log(currentPinInfo?.videoLabel + " assigment removed from " + currentPinInfo?.streamId);
+            setCurrentPinInfo(null);
         }
         setParticipantUpdated(!participantUpdated);
     }
