@@ -449,19 +449,6 @@ function AntMedia(props) {
     const statsList = React.useRef([]);
     const isFirstRunForPlayOnly = React.useRef(true);
 
-
-    // Added this debug function to catch the getUserMedia calls
-    const debugGetUserMedia = () => {
-        const oldGetUserMedia = navigator.mediaDevices.getUserMedia;
-        navigator.mediaDevices.getUserMedia = function() {
-            console.trace("getUserMedia called");
-            return oldGetUserMedia.apply(this, arguments);
-        };
-    };
-    React.useEffect(() => {
-        debugGetUserMedia();
-    }, []);
-
     // video send resolution for publishing
     // possible values: "auto", "highDefinition", "standartDefinition", "lowDefinition"
     const [videoSendResolution, setVideoSendResolution] = React.useState(localStorage.getItem("videoSendResolution") ? localStorage.getItem("videoSendResolution") : "auto");
