@@ -739,6 +739,12 @@ class TestJoinLeave(unittest.TestCase):
     return None
 
   def test_reconnection_while_screen_sharing(self):
+    self.chrome.close_all()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
+    self.chrome = Browser()
+    self.chrome.init(not self.is_local, mic_file=fake_audio_file_path)
+
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
