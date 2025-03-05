@@ -20,14 +20,17 @@ class TestJoinLeave(unittest.TestCase):
   def setUp(self):
       print("----------------\n", self._testMethodName, " starting...")
       self.is_local = False
-      #self.is_local = True
+      self.is_local = True
       self.verbose = False
       self.url = os.environ.get('SERVER_URL')
       self.test_app_name = os.environ.get('TEST_APP_NAME')
       self.user = os.environ.get('AMS_USER')
       self.password = os.environ.get('AMS_PASSWORD')
       self.chrome = Browser()
-      self.chrome.init(not self.is_local)
+      current_dir = os.path.dirname(os.path.abspath(__file__))
+      fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
+      self.chrome = Browser()
+      self.chrome.init(not self.is_local, mic_file=fake_audio_file_path)
       self.chrome.makeFullScreen()
       self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
       self.rest_helper.login()
@@ -739,12 +742,6 @@ class TestJoinLeave(unittest.TestCase):
     return None
 
   def test_reconnection_while_screen_sharing(self):
-    self.chrome.close_all()
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
-    self.chrome = Browser()
-    self.chrome.init(not self.is_local, mic_file=fake_audio_file_path)
-
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
