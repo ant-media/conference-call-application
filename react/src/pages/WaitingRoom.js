@@ -80,7 +80,7 @@ function WaitingRoom(props) {
             props?.localVideoCreate(tempLocalVideo);
             console.log("TempListener local video created");
         }
-    }, []);
+    }, [props.isPlayOnly]);
 
     React.useEffect(() => {
 

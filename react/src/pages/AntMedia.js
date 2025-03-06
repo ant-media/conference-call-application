@@ -2286,7 +2286,10 @@ function AntMedia(props) {
             handleStopScreenShare();
         }
 
-        //createWebRTCAdaptor();
+        if(role === WebinarRoles.TempListener) {
+            createWebRTCAdaptor();
+            webRTCAdaptor?.mediaManager.getDevices();
+        }
 
         setWaitingOrMeetingRoom("waiting");
     }, [isPlayOnly]);

@@ -374,8 +374,8 @@ class TestWebinarScenario(unittest.TestCase):
  
   def test_presenter_room(self):
     room = "room"+str(random.randint(100, 999))
-    handle_admin = self.join_room_as_admin("adminA", room)   
-    handle_presenter = self.join_room_as_presenter("presenterA", room)
+    handle_admin = self.join_room_as_admin("adminA", room, skip_speed_test=False)   
+    handle_presenter = self.join_room_as_presenter("presenterA", room, skip_speed_test=False)
 
     assert(handle_presenter == self.chrome.get_current_tab_id())
 
@@ -393,13 +393,15 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.switch_to_tab(handle_presenter)
 
+    time.sleep(1)
+
     self.leave_room()
 
     self.chrome.switch_to_tab(handle_admin)
 
     wait.until(lambda x: len(self.get_participants()) == 1)
 
-    self.chrome.close_all()
+    #self.chrome.close_all()
 
   def test_both_rooms(self):
     self.chrome.makeFullScreen()
