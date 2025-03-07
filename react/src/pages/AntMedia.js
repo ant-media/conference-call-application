@@ -2287,8 +2287,8 @@ function AntMedia(props) {
         }
 
         if(role === WebinarRoles.TempListener) {
+            setInitialized(false);
             createWebRTCAdaptor();
-            webRTCAdaptor?.mediaManager.getDevices();
         }
 
         setWaitingOrMeetingRoom("waiting");
