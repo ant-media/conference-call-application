@@ -472,4 +472,379 @@ describe('useSpeedTest Hook', () => {
       progressValue: 60
     });
   });
+
+  it('creates WebRTC adaptor for play when isPlayOnly is true', () => {
+    const playOnlyProps = {
+      ...defaultProps,
+      isPlayOnly: true
+    };
+
+    const { result } = renderHook(() => useSpeedTest(playOnlyProps));
+
+    act(() => {
+      result.current.startSpeedTest();
+    });
+
+    expect(result.current.speedTestInProgress).toBe(true);
+    // WebRTCAdaptor constructor should be called with play-specific parameters
+    expect(require('@antmedia/webrtc_adaptor').WebRTCAdaptor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        purposeForTest: 'play-speed-test'
+      })
+    );
+  });
+
+  it('creates WebRTC adaptor for publish when isPlayOnly is false', () => {
+    const { result } = renderHook(() => useSpeedTest(defaultProps));
+
+    act(() => {
+      result.current.startSpeedTest();
+    });
+
+    expect(result.current.speedTestInProgress).toBe(true);
+    // WebRTCAdaptor constructor should be called with publish-specific parameters
+    expect(require('@antmedia/webrtc_adaptor').WebRTCAdaptor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        purposeForTest: 'publish-speed-test'
+      })
+    );
+  });
+
+  it('handles initialized callback for publish adaptor', () => {
+    const { result } = renderHook(() => useSpeedTest(defaultProps));
+    
+    // Capture the callback function when WebRTCAdaptor is constructed
+    const mockCallback = jest.fn();
+    require('@antmedia/webrtc_adaptor').WebRTCAdaptor.mockImplementationOnce(config => {
+      mockCallback.mockImplementation(config.callback);
+      return {
+        publish: jest.fn(),
+        enableStats: jest.fn(),
+        stop: jest.fn(),
+        closeStream: jest.fn(),
+        closeWebSocket: jest.fn()
+      };
+    });
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Simulate the initialized callback
+    act(() => {
+      result.current.speedTestForPublishWebRtcAdaptorInfoCallback('initialized');
+    });
+    
+    expect(result.current.speedTestCounter.current).toBe(0);
+    expect(result.current.speedTestObject.progressValue).toBe(10);
+  });
+
+  it('handles publish_started callback for publish adaptor', () => {
+    const { result } = renderHook(() => useSpeedTest(defaultProps));
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Directly test the callback handler
+    act(() => {
+      result.current.speedTestForPublishWebRtcAdaptorInfoCallback('publish_started');
+    });
+    
+    expect(result.current.speedTestCounter.current).toBe(0);
+    expect(result.current.speedTestObject.progressValue).toBe(20);
+  });
+
+  it('handles play_started callback for play adaptor', () => {
+    const { result } = renderHook(() => useSpeedTest({...defaultProps, isPlayOnly: true}));
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Mock the WebRTCAdaptor callback directly
+    const webRtcAdaptor = require('@antmedia/webrtc_adaptor').WebRTCAdaptor.mock.instances[0];
+    // Call the callback function that was passed to WebRTCAdaptor
+    const callbackFunction = require('@antmedia/webrtc_adaptor').WebRTCAdaptor.mock.calls[0][0].callback;
+    
+    act(() => {
+      callbackFunction('play_started');
+    });
+    
+    expect(result.current.speedTestObject.progressValue).toBe(20);
+  });
+
+  it('handles updated_stats callback for publish adaptor with sufficient iterations', () => {
+    const { result } = renderHook(() => useSpeedTest(defaultProps));
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Setup the scenario where we already have enough stats
+    result.current.speedTestCounter.current = 3;
+    result.current.statsList.current = [{}, {}, {}, {}];
+    
+    // Call the callback function that was passed to WebRTCAdaptor
+    const callbackFunction = require('@antmedia/webrtc_adaptor').WebRTCAdaptor.mock.calls[0][0].callback;
+    
+    act(() => {
+      callbackFunction('updated_stats', {});
+    });
+    
+    // The test passes if we don't get an error, as the actual implementation would call calculateThePublishSpeedTestResult
+  });
+
+  it('handles error callback for publish adaptor', () => {
+    const { result } = renderHook(() => useSpeedTest(defaultProps));
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Call the error callback function that was passed to WebRTCAdaptor
+    const errorCallbackFunction = require('@antmedia/webrtc_adaptor').WebRTCAdaptor.mock.calls[0][0].callbackError;
+    
+    act(() => {
+      errorCallbackFunction('test-error', 'test-message');
+    });
+    
+    expect(result.current.speedTestObject.isfailed).toBe(true);
+    expect(result.current.speedTestObject.errorMessage).toContain('test-error');
+  });
+
+  it('handles error callback for play adaptor', () => {
+    const { result } = renderHook(() => useSpeedTest({...defaultProps, isPlayOnly: true}));
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Call the error callback function that was passed to WebRTCAdaptor
+    const errorCallbackFunction = require('@antmedia/webrtc_adaptor').WebRTCAdaptor.mock.calls[0][0].callbackError;
+    
+    act(() => {
+      errorCallbackFunction('test-error', 'test-message');
+    });
+    
+    expect(result.current.speedTestObject.isfailed).toBe(true);
+    expect(result.current.speedTestObject.errorMessage).toContain('test-error');
+  });
+
+  it('calculates publish speed test result with good connection', () => {
+    const { result } = renderHook(() => useSpeedTest(defaultProps));
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Prepare mock stats for a good connection
+    result.current.statsList.current = [
+      {
+        videoRoundTripTime: '0.02',
+        audioRoundTripTime: '0.02',
+        videoPacketsLost: '0',
+        totalVideoPacketsSent: '1000',
+        totalAudioPacketsSent: '1000',
+        audioPacketsLost: '0',
+        videoJitter: '0.01',
+        audioJitter: '0.01',
+        currentOutgoingBitrate: '500000'
+      },
+      {
+        videoRoundTripTime: '0.02',
+        audioRoundTripTime: '0.02',
+        videoPacketsLost: '0',
+        totalVideoPacketsSent: '1000',
+        totalAudioPacketsSent: '1000',
+        audioPacketsLost: '0',
+        videoJitter: '0.01',
+        audioJitter: '0.01',
+        currentOutgoingBitrate: '500000'
+      },
+      {
+        videoRoundTripTime: '0.02',
+        audioRoundTripTime: '0.02',
+        videoPacketsLost: '0',
+        totalVideoPacketsSent: '1000',
+        totalAudioPacketsSent: '1000',
+        audioPacketsLost: '0',
+        videoJitter: '0.01',
+        audioJitter: '0.01',
+        currentOutgoingBitrate: '500000'
+      }
+    ];
+    
+    // Call the function via the callback to ensure it's properly called
+    const callbackFunction = require('@antmedia/webrtc_adaptor').WebRTCAdaptor.mock.calls[0][0].callback;
+    
+    act(() => {
+      // Simulate a scenario that would trigger calculateThePublishSpeedTestResult
+      result.current.speedTestCounter.current = 4;
+      callbackFunction('updated_stats', {});
+    });
+    
+    // Test that the calculation happened correctly
+    expect(result.current.speedTestObject.isfinished).toBe(true);
+    expect(result.current.speedTestObject.progressValue).toBe(100);
+  });
+
+  it('calculates publish speed test result with moderate connection', () => {
+    const { result } = renderHook(() => useSpeedTest(defaultProps));
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Prepare mock stats for a moderate connection
+    result.current.statsList.current = [
+      {
+        videoRoundTripTime: '0.15',
+        audioRoundTripTime: '0.15',
+        videoPacketsLost: '20',
+        totalVideoPacketsSent: '1000',
+        totalAudioPacketsSent: '1000',
+        audioPacketsLost: '20',
+        videoJitter: '0.09',
+        audioJitter: '0.09',
+        currentOutgoingBitrate: '300000'
+      },
+      {
+        videoRoundTripTime: '0.15',
+        audioRoundTripTime: '0.15',
+        videoPacketsLost: '20',
+        totalVideoPacketsSent: '1000',
+        totalAudioPacketsSent: '1000',
+        audioPacketsLost: '20',
+        videoJitter: '0.09',
+        audioJitter: '0.09',
+        currentOutgoingBitrate: '300000'
+      },
+      {
+        videoRoundTripTime: '0.15',
+        audioRoundTripTime: '0.15',
+        videoPacketsLost: '20',
+        totalVideoPacketsSent: '1000',
+        totalAudioPacketsSent: '1000',
+        audioPacketsLost: '20',
+        videoJitter: '0.09',
+        audioJitter: '0.09',
+        currentOutgoingBitrate: '300000'
+      }
+    ];
+    
+    act(() => {
+      result.current.calculateThePublishSpeedTestResult();
+    });
+    
+    expect(result.current.speedTestObject.message).toBe('Your connection is moderate, occasional disruptions may occur');
+    expect(result.current.speedTestObject.isfinished).toBe(true);
+    expect(result.current.speedTestObject.progressValue).toBe(100);
+  });
+
+  it('calculates publish speed test result with poor connection', () => {
+    const { result } = renderHook(() => useSpeedTest(defaultProps));
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Prepare mock stats for a poor connection
+    result.current.statsList.current = [
+      {
+        videoRoundTripTime: '0.3',
+        audioRoundTripTime: '0.3',
+        videoPacketsLost: '50',
+        totalVideoPacketsSent: '1000',
+        totalAudioPacketsSent: '1000',
+        audioPacketsLost: '50',
+        videoJitter: '0.25',
+        audioJitter: '0.25',
+        currentOutgoingBitrate: '150000'
+      },
+      {
+        videoRoundTripTime: '0.3',
+        audioRoundTripTime: '0.3',
+        videoPacketsLost: '50',
+        totalVideoPacketsSent: '1000',
+        totalAudioPacketsSent: '1000',
+        audioPacketsLost: '50',
+        videoJitter: '0.25',
+        audioJitter: '0.25',
+        currentOutgoingBitrate: '150000'
+      },
+      {
+        videoRoundTripTime: '0.3',
+        audioRoundTripTime: '0.3',
+        videoPacketsLost: '50',
+        totalVideoPacketsSent: '1000',
+        totalAudioPacketsSent: '1000',
+        audioPacketsLost: '50',
+        videoJitter: '0.25',
+        audioJitter: '0.25',
+        currentOutgoingBitrate: '150000'
+      }
+    ];
+    
+    act(() => {
+      result.current.calculateThePublishSpeedTestResult();
+    });
+    
+    expect(result.current.speedTestObject.message).toBe('Your connection quality is poor. You may experience interruptions');
+    expect(result.current.speedTestObject.isfinished).toBe(true);
+    expect(result.current.speedTestObject.progressValue).toBe(100);
+  });
+
+  it('handles negative values in stats calculations', () => {
+    const { result } = renderHook(() => useSpeedTest(defaultProps));
+    
+    act(() => {
+      result.current.startSpeedTest();
+    });
+    
+    // Prepare mock stats with negative values
+    result.current.statsList.current = [
+      {
+        videoRoundTripTime: '-1',
+        audioRoundTripTime: '-1',
+        videoPacketsLost: '-10',
+        totalVideoPacketsSent: '-100',
+        totalAudioPacketsSent: '-100',
+        audioPacketsLost: '-10',
+        videoJitter: '-1',
+        audioJitter: '-1',
+        currentOutgoingBitrate: '-1'
+      },
+      {
+        videoRoundTripTime: '-1',
+        audioRoundTripTime: '-1',
+        videoPacketsLost: '-10',
+        totalVideoPacketsSent: '-100',
+        totalAudioPacketsSent: '-100',
+        audioPacketsLost: '-10',
+        videoJitter: '-1',
+        audioJitter: '-1',
+        currentOutgoingBitrate: '-1'
+      },
+      {
+        videoRoundTripTime: '-1',
+        audioRoundTripTime: '-1',
+        videoPacketsLost: '-10',
+        totalVideoPacketsSent: '-100',
+        totalAudioPacketsSent: '-100',
+        audioPacketsLost: '-10',
+        videoJitter: '-1',
+        audioJitter: '-1',
+        currentOutgoingBitrate: '-1'
+      }
+    ];
+    
+    // Should not throw errors with negative values
+    act(() => {
+      result.current.calculateThePublishSpeedTestResult();
+    });
+    
+    // All negative values should be converted to 0
+    expect(result.current.speedTestObject.isfinished).toBe(true);
+  });
 }); 

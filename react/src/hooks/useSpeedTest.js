@@ -43,7 +43,7 @@ export default function useSpeedTest(props) {
       
       // Set a timeout to handle stuck tests
       setTimeout(() => {
-        if (speedTestProgress < 40) {
+        if (speedTestProgress.current < 40) {
           // It means that it's stuck before publish started
           stopSpeedTest();
           setSpeedTestObjectFailed("Speed test failed. It may be due to firewall, wi-fi or network restrictions. Change your network or Try again");
@@ -466,11 +466,13 @@ export default function useSpeedTest(props) {
     setSpeedTestObject,
     setAndFillPlayStatsList,
     setAndFillPublishStatsList,
+    speedTestForPublishWebRtcAdaptorInfoCallback,
     speedTestCounter,
     statsList,
     calculateThePlaySpeedTestResult,
     processUpdatedStatsForPlaySpeedTest,
     setSpeedTestObjectFailed,
+    calculateThePublishSpeedTestResult,
     setSpeedTestObjectProgress,
   };
 } 
