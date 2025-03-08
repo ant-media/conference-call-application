@@ -74,13 +74,6 @@ function WaitingRoom(props) {
         isMine: true
     };
 
-    React.useEffect(() => {
-        if (props?.role === WebinarRoles.TempListener) {
-            const tempLocalVideo = document.getElementById("localVideo");
-            props?.localVideoCreate(tempLocalVideo);
-            console.log("TempListener local video created");
-        }
-    }, []);
 
     React.useEffect(() => {
 
