@@ -7,6 +7,6 @@ react/.env.development
 react/.idea/workspace.xml
 react/.env.fakeeh
 react/package-lock.json
-test/run.sh
+test/run.sh 
 test/runw.sh
 test/create_test_room.sh
