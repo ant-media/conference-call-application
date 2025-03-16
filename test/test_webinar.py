@@ -401,7 +401,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     wait.until(lambda x: len(self.get_participants()) == 1)
 
-    #self.chrome.close_all()
+    self.chrome.close_all()
 
   def test_both_rooms(self):
     self.chrome.makeFullScreen()
