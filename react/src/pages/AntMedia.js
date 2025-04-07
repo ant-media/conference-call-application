@@ -497,6 +497,18 @@ function AntMedia(props) {
 
     }
 
+    // Added this debug function to catch the getUserMedia calls
+    const debugGetUserMedia = () => {
+        const oldGetUserMedia = navigator.mediaDevices.getUserMedia;
+        navigator.mediaDevices.getUserMedia = function() {
+            console.trace("getUserMedia called");
+            return oldGetUserMedia.apply(this, arguments);
+        };
+    };
+    React.useEffect(() => {
+        debugGetUserMedia();
+    }, []);
+
     /*
       * This function performs the following tasks:
       * 1. It creates two new WebRTCAdaptor instances for publish and play.
@@ -2934,7 +2946,7 @@ function AntMedia(props) {
 
     function checkAndTurnOnLocalCamera() {
         if (isVideoEffectRunning) {
-            webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
+            webRTCAdaptor?.turnOnEffectCamera(publishStreamId);
         } else {
             webRTCAdaptor?.turnOnLocalCamera(publishStreamId);
         }
@@ -2947,7 +2959,7 @@ function AntMedia(props) {
 
     function checkAndTurnOffLocalCamera(streamId) {
         if (isVideoEffectRunning) {
-            webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
+            webRTCAdaptor?.turnOffEffectCamera();
         } else {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
