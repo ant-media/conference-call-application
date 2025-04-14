@@ -497,18 +497,6 @@ function AntMedia(props) {
 
     }
 
-    // Added this debug function to catch the getUserMedia calls
-    const debugGetUserMedia = () => {
-        const oldGetUserMedia = navigator.mediaDevices.getUserMedia;
-        navigator.mediaDevices.getUserMedia = function() {
-            console.trace("getUserMedia called");
-            return oldGetUserMedia.apply(this, arguments);
-        };
-    };
-    React.useEffect(() => {
-        debugGetUserMedia();
-    }, []);
-
     /*
       * This function performs the following tasks:
       * 1. It creates two new WebRTCAdaptor instances for publish and play.
