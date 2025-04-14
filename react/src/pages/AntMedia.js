@@ -352,6 +352,7 @@ function AntMedia(props) {
     const [appSettingsMaxVideoTrackCount, setAppSettingsMaxVideoTrackCount] = React.useState(6);
     const [currentPinInfo, setCurrentPinInfo] = React.useState();
 
+    const isFirstRunForPlayOnly = React.useRef(true);
 
     const [reactions] = useState({
         'sparkling_heart': '💖',
@@ -2264,6 +2265,11 @@ function AntMedia(props) {
     }, [role]);
 
     React.useEffect(() => {
+        if (isFirstRunForPlayOnly.current) {
+            isFirstRunForPlayOnly.current = false;
+            return;
+        }
+
         // we need to empty participant array. if we are going to leave it in the first place.
         setVideoTrackAssignments([]);
         setAllParticipants({});
@@ -3372,6 +3378,7 @@ function AntMedia(props) {
                     makeListenerAgain,
                     checkVideoTrackHealth,
                     setInitialized,
+                    setAllParticipants,
                     currentPinInfo,
                     unpinVideo
                 }}
