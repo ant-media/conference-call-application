@@ -2934,7 +2934,7 @@ function AntMedia(props) {
 
     function checkAndTurnOnLocalCamera() {
         if (isVideoEffectRunning) {
-            webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
+            webRTCAdaptor?.turnOnEffectCamera(publishStreamId);
         } else {
             webRTCAdaptor?.turnOnLocalCamera(publishStreamId);
         }
@@ -2947,7 +2947,7 @@ function AntMedia(props) {
 
     function checkAndTurnOffLocalCamera(streamId) {
         if (isVideoEffectRunning) {
-            webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
+            webRTCAdaptor?.turnOffEffectCamera();
         } else {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
         }
