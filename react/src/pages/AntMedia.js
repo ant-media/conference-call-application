@@ -2946,11 +2946,7 @@ function AntMedia(props) {
     }
 
     function checkAndTurnOffLocalCamera(streamId) {
-        if (isVideoEffectRunning) {
-            webRTCAdaptor?.turnOffEffectCamera();
-        } else {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
-        }
 
         updateUserStatusMetadata(isMyMicMuted, false);
         setIsMyCamTurnedOff(true);
