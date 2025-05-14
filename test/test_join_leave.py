@@ -290,7 +290,7 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def _test_camera_mic_setting_in_waiting_room(self):
+  def test_camera_mic_setting_in_waiting_room(self):
     room = "room"+str(random.randint(100, 999))
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
@@ -1752,7 +1752,7 @@ class TestJoinLeave(unittest.TestCase):
     self.chrome.close_all()
 
 
-  def _test_background_replacement(self):
+  def test_background_replacement(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 
