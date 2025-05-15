@@ -3,7 +3,7 @@ import "./App.css";
 import {CssBaseline, ThemeProvider} from "@mui/material";
 import theme from "./styles/theme";
 import React from "react";
-import {SnackbarProvider} from "notistack";
+import {SnackbarProvider} from 'notistack';
 import AntSnackBar from "Components/AntSnackBar";
 import {initReactI18next} from "react-i18next";
 import i18n from "i18next";
@@ -31,6 +31,10 @@ if (availableLanguagesList.includes(preferredLanguage)) {
 i18n.changeLanguage(preferredLanguage).then(r => console.log("Language is set to", preferredLanguage));
 
 let selectedTheme = localStorage.getItem('selectedTheme');
+if (process.env.REACT_APP_FORCE_THEME !== undefined && process.env.REACT_APP_FORCE_THEME !== "") {
+  selectedTheme = process.env.REACT_APP_FORCE_THEME;
+  localStorage.setItem('selectedTheme', selectedTheme);
+}
 if (!selectedTheme) {
   selectedTheme = ThemeList.Green;
   localStorage.setItem('selectedTheme', selectedTheme);

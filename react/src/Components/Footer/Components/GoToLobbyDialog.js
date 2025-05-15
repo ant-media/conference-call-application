@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 const AntDialogTitle = props => {
   const { children, onClose, ...other } = props;
 
-  
+
   return (
     <DialogTitle {...other}>
       {children}
@@ -24,7 +24,7 @@ const AntDialogTitle = props => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={'close'} color={'white'} />
+          <SvgIcon size={30} name={'close'} color={'#fff'} />
         </Button>
       ) : null}
     </DialogTitle>
@@ -44,25 +44,22 @@ export function GoToLobbyDialog(props) {
   const handleClose = (event, reason) => {
     onClose();
   };
- 
-
 
   const goToLobbyClicked = (e) =>{
     onGoToLobbyClicked()
-
   }
 
   return (
     <Dialog onClose={handleClose} open={open}  maxWidth={'sm'}>
       <AntDialogTitle onClose={handleClose}>{t('Share this Url with Your Attendees')}</AntDialogTitle>
       <DialogContent>
-       
+
       <div style={{ display: 'flex', flexDirection: 'column' }}>
       <a
       href={url}
       title={url} // Tooltip showing the full URL on hover
       style={{
-        color: 'white',
+        color: '#fff',
         fontSize: '1em',
         cursor: 'pointer',
         display: 'inline-block',

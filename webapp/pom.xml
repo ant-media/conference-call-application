@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>io.antmedia</groupId>
 		<artifactId>parent</artifactId>
-		<version>2.11.3</version>
+		<version>2.13.0</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.antmedia.webrtc</groupId>
@@ -13,6 +13,8 @@
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.build.timestamp.format>yyyyMMdd_HHmm</maven.build.timestamp.format>
+		<buildNumber>${maven.build.timestamp}</buildNumber>
 	</properties>
 	<developers>
     		<developer>
@@ -90,6 +92,14 @@
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>${maven-war-plugin.version}</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Build>${project.parent.version}</Implementation-Build>
+							<Build-Number>${buildNumber}</Build-Number>
+						</manifestEntries>
+					</archive>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -152,7 +162,7 @@
 		<dependency>
 			<groupId>io.antmedia</groupId>
 			<artifactId>ant-media-server</artifactId>
-			<version>2.11.3</version>
+			<version>${project.parent.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -228,8 +238,20 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+	<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.10.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${mockito-core.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-	<description>StreamApp for Ant Media Server</description>
+	<description>Circle for Ant Media Server</description>
 	<organization>
 		<name>Ant Media</name>
 		<url>http://antmedia.io</url>

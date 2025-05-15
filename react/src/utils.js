@@ -26,17 +26,21 @@ export function urlify(text) {
     return parts;
 }
 
-export function getRoomNameAttribute() {
-   // if it returns data-room-name element, it means that we are using conference app in component mode
-  return document.getElementById("root")?.getAttribute("data-room-name");
-}
-
-export function getWebSocketURLAttribute() {
-    //if it exists, it means it is in component mode
-    return document.getElementById("root")?.getAttribute("data-websocket-url")
-}
-
 export function isComponentMode() {
     //if it exists, it means it is in component mode
     return (document.getElementById("root")?.getAttribute("usage-mode") === "component");
+}
+
+export function getRootAttribute(attribute) {
+    return document.getElementById("root")?.getAttribute(attribute);
+}
+
+export function parseMetaData(metaData, key) {
+    if (!metaData) return false;
+    try {
+        const parsed = JSON.parse(metaData);
+        return parsed[key] || false;
+    } catch {
+        return false;
+    }
 }

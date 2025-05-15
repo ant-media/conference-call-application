@@ -47,6 +47,30 @@ form {
   box-shadow: inset 0 0 0 10px;
   color: #e5e6e7;
 }
+
+
+#participant-scroll::-webkit-scrollbar {
+  width: 12px;
+}
+
+#participant-scroll:hover {
+  overflow-y: overlay;
+}
+#participant-scroll::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+  display: none;
+}
+#participant-scroll::-webkit-scrollbar-corner {
+  background-color: initial;
+}
+#participant-scroll::-webkit-scrollbar-thumb {
+  background-clip: content-box;
+  border: 4px solid transparent;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 10px;
+  color: #e5e6e7;
+}
 .App-header {
   min-height: 100vh;
   padding: 24px 50px;

@@ -134,8 +134,18 @@
 		<url-pattern>*.mpd</url-pattern>
 		<url-pattern>*.m4s</url-pattern>
 	</servlet-mapping>
-	
-	
+
+	<servlet>
+		<servlet-name>hls-upload-servlet</servlet-name>
+		<servlet-class>io.antmedia.servlet.UploadHLSChunk</servlet-class>
+		<async-supported>true</async-supported>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>hls-upload-servlet</servlet-name>
+		<url-pattern>/hls-upload/*</url-pattern>
+	</servlet-mapping>
+
 	<servlet-mapping>
 		<servlet-name>jsp</servlet-name>
 		<url-pattern>*.html</url-pattern>

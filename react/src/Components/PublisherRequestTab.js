@@ -1,32 +1,31 @@
-import React, {useContext} from "react";
+import React from "react";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import { SvgIcon } from "./SvgIcon";
-import {ConferenceContext} from "../pages/AntMedia";
 
 const PublisherRequestName = styled(Typography)(({ theme }) => ({
-    color: "black",
+    color: theme.palette?.participantListIcon?.primary,
     fontWeight: 500,
     fontSize: 14,
 }));
-//hover color of allow or denay
+//hover color of allow or deny
 const PinBtn = styled(Button)(({ theme }) => ({
     "&:hover": {
-        backgroundColor: theme.palette.green[50],
-        color: "white",
+        backgroundColor: theme.palette.themeColor?.[50],
+        color: "#fff",
     },
 }));
 
 function PublisherRequestTab(props) {
-    const conference = useContext(ConferenceContext);
+    const theme = useTheme();
 
-    const getPublisherRequestItem = (videoId) => {
+    const getPublisherRequestItem = (streamId) => {
         return (
             <Grid
-                key={videoId}
+                key={streamId}
                 container
                 alignItems="center"
                 justifyContent="space-between"
@@ -34,19 +33,23 @@ function PublisherRequestTab(props) {
                 sx={{ borderColor: "primary.main" }}
             >
                 <Grid item sx={{ pr: 1 }}>
-                    <PublisherRequestName variant="body1">{videoId}</PublisherRequestName>
+                    <PublisherRequestName variant="body1">{streamId}</PublisherRequestName>
                 </Grid>
                 <Grid item>
                     <PinBtn
+                        id={"approve-become-speaker-"+streamId}
+                        data-testid={"approve-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference.approveBecomeSpeakerRequest(videoId); conference.setRequestSpeakerList(conference.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {props?.approveBecomeSpeakerRequest(streamId);}}
                     >
                         Allow
                     </PinBtn>
 
                     <PinBtn
+                        id={"reject-become-speaker-"+streamId}
+                        data-testid={"reject-become-speaker-"+streamId}
                         sx={{ minWidth: "unset", pt: 1, pb: 1 }}
-                        onClick={() => {conference.rejectSpeakerRequest(videoId); conference.setRequestSpeakerList(conference.requestSpeakerList.filter((item) => item.streamId !== videoId))}}
+                        onClick={() => {props?.rejectBecomeSpeakerRequest(streamId);}}
                     >
                         Deny
                     </PinBtn>
@@ -59,16 +62,16 @@ function PublisherRequestTab(props) {
         <div style={{width: "100%", overflowY: "auto"}}>
             <Stack sx={{width: "100%",}} spacing={2}>
                 <Grid container>
-                    <SvgIcon size={28} name="participants" color="black"/>
+                    <SvgIcon size={28} name="participants" color={theme.palette?.participantListIcon?.primary}/>
                     <PublisherRequestName
                         variant="body2"
-                        style={{marginLeft: 8, fontWeight: 500}}
+                        style={{marginLeft: 8, fontWeight: 500, color: theme.palette?.participantListIcon?.primary}}
                     >
-                        {conference.requestSpeakerList.length}
+                        {props?.requestSpeakerList.length}
                     </PublisherRequestName>
                 </Grid>
-                {conference.requestSpeakerList.map(({streamId}, index) => {
-                    if (conference.publishStreamId !== streamId) {
+                {props?.requestSpeakerList.map((streamId) => {
+                    if (props?.publishStreamId !== streamId) {
                         return getPublisherRequestItem(streamId);
                     } else {
                         return "";

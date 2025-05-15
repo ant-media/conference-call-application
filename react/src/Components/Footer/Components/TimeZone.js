@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 
 import { Typography } from "@mui/material";
-import { ConferenceContext } from "pages/AntMedia";
+import {useTheme} from "@mui/material/styles";
 
-function TimeZone(props) {
-  const conference = React.useContext(ConferenceContext);
+function TimeZone({ isBroadcasting }) {
+  const theme = useTheme();
 
   let time = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });
-  let [currentTime, changeTime] = useState(time);
+  let [currentTime, changeTime] = React.useState(time);
   function checkTime() {
     time = new Date().toLocaleTimeString([], {
       hour: "2-digit",
@@ -21,11 +21,11 @@ function TimeZone(props) {
   setInterval(checkTime, 1000);
   return (
     <div>
-      {process.env.REACT_APP_TIME_ZONE_LIVE_TEXT_VISIBILITY === "true" && conference?.isBroadcasting === true ? (
-            <Typography color="#FF0000" variant="h6">
-              Live
-            </Typography>) : null}
-    <Typography color="#ffffff" variant="h6">
+      {process.env.REACT_APP_TIME_ZONE_LIVE_TEXT_VISIBILITY === "true" && isBroadcasting === true ? (
+          <Typography color="#FF0000" variant="h6">
+            Live
+          </Typography>) : null}
+    <Typography color={theme.palette.text.primary} variant="h6">
       {currentTime}
     </Typography>
     </div>

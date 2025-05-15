@@ -1,7 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import Button from "@mui/material/Button";
 import { SvgIcon } from "../../SvgIcon";
-import { ConferenceContext } from "pages/AntMedia";
 import { Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
@@ -20,31 +19,30 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-function ShareScreenButton({ footer, ...props }) {
+function ShareScreenButton(props) {
   const { t } = useTranslation();
-  const conference = useContext(ConferenceContext);
 
   return (
     <Tooltip
-      title={conference.isScreenShared ? t("You are presenting") : t("Present now")}
+      title={props?.isScreenShared ? t("You are presenting") : t("Present now")}
       placement="top"
     >
       <CustomizedBtn
-        className={footer ? "footer-icon-button" : ""}
+        className={props?.footer ? "footer-icon-button" : ""}
         id = "share-screen-button"
         onClick={() => {
-          if (conference.isScreenShared) {
-            conference.handleStopScreenShare();
+          if (props?.isScreenShared) {
+            props?.handleStopScreenShare();
           } else {
-            conference.handleStartScreenShare();
+            props?.handleStartScreenShare();
             // send other that you are sharing screen.
           }
         }}
         variant="contained"
-        color={conference.isScreenShared ? "primary" : "secondary"}
+        color={props?.isScreenShared ? "primary" : "secondary"}
       >
         <SvgIcon
-          color={conference.isScreenShared ? "black" : "white"}
+          color={props?.isScreenShared ? "#000" : "#fff"}
           size={40}
           name={"share-screen-off"}
         />
