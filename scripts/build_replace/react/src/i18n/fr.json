@@ -90,5 +90,9 @@
   "Virtual Effects": "Effets virtuels",
   "Image is uploaded successfully.": "L'image a été téléchargée avec succès.",
   "Image size cannot exceed more than 1MB.": "La taille de l'image ne peut dépasser 1 Mo.",
+  "Publisher Request List": "Liste des demandes d'éditeur",
+  "Request becoming publisher": "Demande pour devenir éditeur",
+  " is removed from the listening room": " est retiré(e) de la salle d'écoute",
+  " is added to the listening room": " est ajouté(e) à la salle d'écoute",
   "You've been accepted to the meeting. The recruiter is waiting for you to join.": "Vous avez été accepté à la réunion. Le recruteur vous attend pour rejoindre. \n\nVeuillez entrer votre nom. Cela sera visible pour l'hôte et les autres participants."
 }

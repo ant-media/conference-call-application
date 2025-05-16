@@ -90,5 +90,9 @@
   "Virtual Effects": "Virtual Effects",
   "Image is uploaded successfully.": "Image is uploaded successfully.",
   "Image size cannot exceed more than 1MB.": "Image size cannot exceed more than 1MB.",
+  "Publisher Request List": "Publisher Request List",
+  "Request becoming publisher": "Request becoming publisher",
+  " is removed from the listening room": " is removed from the listening room",
+  " is added to the listening room": " is added to the listening room",
   "You've been accepted to the meeting. The recruiter is waiting for you to join.": "You’ve been accepted to the meeting. The recruiter is waiting for you to join. \n\nPlease enter your name. This will be visible to the host and other participants."
 }
