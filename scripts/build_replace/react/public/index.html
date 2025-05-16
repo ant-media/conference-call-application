@@ -1,135 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <link rel="icon" href="%PUBLIC_URL%/favicon-32x32.png"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="theme-color" content="#000000"/>
-    <meta
-            name="description"
-            content="Beehire Live Interview Application"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png"/>
-    <!--
+	<meta charset="utf-8"/>
+	<link rel="icon" href="%PUBLIC_URL%/favicon-32x32.png"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<meta name="theme-color" content="#000000"/>
+	<meta
+			name="description"
+			content="Beehire Live Interview Application"
+	/>
+	<link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png"/>
+	<!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json"/>
-    <!--
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json"/>
+	<!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
       Only files inside the `public` folder can be referenced from the HTML.
-
       Unlike "/favicon-32x32.png" or "favicon-32x32.png", "%PUBLIC_URL%/favicon-32x32.png" will
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <meta
-            name="description"
-            content="With an end-to-end latency of ~0.5 seconds, Beehire Live Interview Application supports your critical business streaming needs."
-    />
-    <meta
-            content="Live Interview App By Beehire"
-            name="title"
-    />
-    <title>
-      Live Interview App By Beehire
-    </title>
+	<meta
+			name="description"
+			content="With an end-to-end latency of ~0.5 seconds, Beehire Live Interview Application supports your critical business streaming needs."
+	/>
+	<meta
+			content="Live Interview App By Beehire"
+			name="title"
+	/>
+	<title>
+		Live Interview App By Beehire
+	</title>
+  <script>
+    // Function to extract query parameter from URL
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
 
-    <script>
-      // Function to extract query parameter from URL
-      function getQueryParam(name) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(name);
+    function selectLanguage(value) {
+      const languages = ['en', 'fr', 'nl', 'de', 'pt'];
+      if (languages.includes(value)) {
+        const previousLanguage = localStorage.getItem("i18nextLng");
+        if (previousLanguage !== value) {
+          localStorage.setItem("i18nextLng", value);
+        }
+      }
+    }
+  
+    // Function to set participant name if it exists
+    let participantNameValueSet = false;
+    function setParticipantName() {
+      // console.log('running');
+      const participantName = getQueryParam('name');
+      if (participantName !== null && participantName !== undefined) {
+        const participantNameInput = document.getElementById('participant_name');
+        if (participantNameInput && participantNameInput.value.trim() !== '' && participantNameInput.value !== participantName) {
+          participantNameValueSet = true;
+        }
+        if (!participantNameValueSet && participantNameInput && participantNameInput.value.trim() === '') {
+          conference.setStreamName(participantName);
+        }
       }
 
-      function selectLanguage(value) {
-        const languages = ['en', 'fr', 'nl', 'de', 'pt'];
-        if (languages.includes(value)) {
-          const previousLanguage = localStorage.getItem("i18nextLng");
-          if (previousLanguage !== value) {
-            localStorage.setItem("i18nextLng", value);
-          }
+      const shouldJoinMeeting = getQueryParam('wait');
+      if (shouldJoinMeeting === 'true') {
+        const text = (window.translate) ? window.translate("You've been accepted to the meeting. The recruiter is waiting for you to join.") : null;
+        const waitingRoomSubtitleText = document.querySelector("#root > div > div > div > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-md-4.css-1yg725n > div > div.MuiGrid-root.MuiGrid-container.css-eiccwj > h6");
+        if (text && waitingRoomSubtitleText && waitingRoomSubtitleText.innerText !== text) {
+          waitingRoomSubtitleText.innerText = text;
         }
       }
-    
-      // Function to set participant name if it exists
-      let participantNameValueSet = false;
-      function setParticipantName() {
-        // console.log('running');
-        const participantName = getQueryParam('name');
-        if (participantName !== null && participantName !== undefined) {
-          const participantNameInput = document.getElementById('participant_name');
-          if (participantNameInput && participantNameInput.value.trim() !== '' && participantNameInput.value !== participantName) {
-            participantNameValueSet = true;
-          }
-          if (!participantNameValueSet && participantNameInput && participantNameInput.value.trim() === '') {
-            conference.setStreamName(participantName);
-          }
-        }
 
-        const shouldJoinMeeting = getQueryParam('wait');
-        if (shouldJoinMeeting === 'true') {
-          const text = (window.translate) ? window.translate("You've been accepted to the meeting. The recruiter is waiting for you to join.") : null;
-          const waitingRoomSubtitleText = document.querySelector("#root > div > div > div > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-md-4.css-1yg725n > div > div.MuiGrid-root.MuiGrid-container.css-eiccwj > h6");
-          if (text && waitingRoomSubtitleText && waitingRoomSubtitleText.innerText !== text) {
-            waitingRoomSubtitleText.innerText = text;
-          }
-        }
+      const selectedLanguage = getQueryParam('lang');
+      if (selectedLanguage !== null && selectedLanguage !== undefined) {
+        selectLanguage(selectedLanguage);
+      }
 
-        const selectedLanguage = getQueryParam('lang');
-        if (selectedLanguage !== null && selectedLanguage !== undefined) {
-          selectLanguage(selectedLanguage);
-        }
-  
-        const rejoinMeetingButton = document.querySelector("#root > div > div > div > div > div.MuiGrid-root.MuiGrid-container.MuiGrid-spacing-xs-2.css-gl43ya > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-8.MuiGrid-grid-sm-6.MuiGrid-grid-md-5.MuiGrid-grid-lg-2.css-1kglrs6");
-        if (rejoinMeetingButton && rejoinMeetingButton.style.display !== 'none') {
-          rejoinMeetingButton.style.flexBasis = '0';
-          rejoinMeetingButton.style.width = '0';
-          rejoinMeetingButton.style.display = 'none';
-        }
-  
-        const inMeetingInfoButton = document.querySelector("#info-button");
-        if (inMeetingInfoButton) {
-          inMeetingInfoButton.style.display = 'none';
-        }
-  
-        const inMeetingIdText = document.querySelector("#root > div > div > div > div.MuiGrid-root.MuiGrid-container > div:nth-child(1) > div > p");
-        if (inMeetingIdText) {
-          inMeetingIdText.style.display = 'none';
-        }
+      const rejoinMeetingButton = document.querySelector("#root > div > div > div > div > div.MuiGrid-root.MuiGrid-container.MuiGrid-spacing-xs-2.css-gl43ya > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-8.MuiGrid-grid-sm-6.MuiGrid-grid-md-5.MuiGrid-grid-lg-2.css-1kglrs6");
+      if (rejoinMeetingButton && rejoinMeetingButton.style.display !== 'none') {
+        rejoinMeetingButton.style.flexBasis = '0';
+        rejoinMeetingButton.style.width = '0';
+        rejoinMeetingButton.style.display = 'none';
       }
-  
-      let selectedTheme = localStorage.getItem('selectedTheme');
-      if (!selectedTheme) {
-        selectedTheme = 'gray';
-        localStorage.setItem('selectedTheme', selectedTheme);
+
+      const inMeetingInfoButton = document.querySelector("#info-button");
+      if (inMeetingInfoButton) {
+        inMeetingInfoButton.style.display = 'none';
       }
-      setParticipantName();
-      setInterval(() => {setParticipantName()}, 100);
-  
-      if (new URLSearchParams(window.location.search).get('iframe') !== 'true') {
-        setInterval(function() {
-          fetch('https://live-v2-scheduler.beehire.com/api/server-ping', { mode: 'no-cors' })
-            .then(response => console.log(response))
-            .catch(error => console.error(error));
-        }, 30000);
+
+      const inMeetingIdText = document.querySelector("#root > div > div > div > div.MuiGrid-root.MuiGrid-container > div:nth-child(1) > div > p");
+      if (inMeetingIdText) {
+        inMeetingIdText.style.display = 'none';
       }
-    </script>
+    }
+
+    let selectedTheme = localStorage.getItem('selectedTheme');
+    if (!selectedTheme) {
+      selectedTheme = 'gray';
+      localStorage.setItem('selectedTheme', selectedTheme);
+    }
+    setParticipantName();
+    setInterval(() => {setParticipantName()}, 100);
+
+    if (new URLSearchParams(window.location.search).get('iframe') !== 'true') {
+      setInterval(function() {
+        fetch('https://live-v2-scheduler.beehire.com/api/server-ping', { mode: 'no-cors' })
+          .then(response => console.log(response))
+          .catch(error => console.error(error));
+      }, 30000);
+    }
+  </script>
 </head>
-<body>
-<noscript>You need to enable JavaScript to run this app.</noscript>
-<!-- Possible values are component and standalone -->
-<div id="root" usage-mode="standalone"></div>
-<!--
-  This HTML file is a template.
-  If you open it directly in the browser, you will see an empty page.
-
-  You can add webfonts, meta tags, or analytics to this file.
-  The build step will place the bundled scripts into the <body> tag.
-
-  To begin the development, run `npm start` or `yarn start`.
-  To create a production bundle, use `npm run build` or `yarn build`.
--->
+<body> <!--style="background-color: #f1f5f9;"-->
+	<noscript>You need to enable JavaScript to run this app.</noscript>
+	<!-- Possible values are component and standalone -->
+	<div id="root" usage-mode="standalone"></div>
 </body>
 </html>
+
+<!-- data-websocket-url="ws://localhost:5080/Conference/websocket" -->
+<!-- data-websocket-url="wss://circle.antmedia.io/Conference/websocket" -->
