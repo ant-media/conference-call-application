@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { SvgIcon } from '../../SvgIcon';
+import { ConferenceContext } from 'pages/AntMedia';
 import { Tooltip, Badge } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -19,11 +20,12 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   }
 }));
 
-function MessageButton(props) {
+function MessageButton({ footer, ...props }) {
   const {t} = useTranslation();
+  const conference = useContext(ConferenceContext);
   return (
     <Badge
-      badgeContent={isNaN(props?.numberOfUnReadMessages) ? 0 : props?.numberOfUnReadMessages}
+      badgeContent={conference?.numberOfUnReadMessages}
       color="primary"
       anchorOrigin={{
         vertical: 'top',
@@ -34,17 +36,17 @@ function MessageButton(props) {
       <Tooltip title={t('Chat with everyone')} placement="top">
         <CustomizedBtn
           onClick={() => {
-            if (!props?.messageDrawerOpen) {
-                props?.toggleSetNumberOfUnreadMessages(0);
+            if (!conference?.messageDrawerOpen) {
+              conference?.toggleSetNumberOfUnreadMessages(0);
             }
-              props?.handleMessageDrawerOpen(!props?.messageDrawerOpen);
+            conference?.handleMessageDrawerOpen(!conference?.messageDrawerOpen);
           }}
           variant="contained"
-          className={props?.footer ? 'footer-icon-button' : ''}
-          color={props?.messageDrawerOpen ? 'primary' : 'secondary'}
+          className={footer ? 'footer-icon-button' : ''}
+          color={conference?.messageDrawerOpen ? 'primary' : 'secondary'}
           id="messages-button"
         >
-          <SvgIcon size={40} color={props?.messageDrawerOpen ? '#000' : '#fff'} name={'message-off'} />
+          <SvgIcon size={40} color={conference?.messageDrawerOpen ? '#000' : '#fff'} name={'message-off'} />
         </CustomizedBtn>
       </Tooltip>
     </Badge>

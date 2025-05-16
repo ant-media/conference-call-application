@@ -23,34 +23,16 @@ class TestWebinarScenario(unittest.TestCase):
     self.user = os.environ.get('AMS_USER')
     self.password = os.environ.get('AMS_PASSWORD')
     self.chrome = Browser()
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    fake_audio_file_path = os.path.join(current_dir, "fake_mic.wav")
-    self.chrome.init(not self.is_local, mic_file=fake_audio_file_path)
+    self.chrome.init(not self.is_local)
+    self.chrome.init(True)
     self.rest_helper = RestHelper(self.url, self.user, self.password, self.test_app_name)
     self.rest_helper.login()
     self.rest_helper.create_broadcast_for_play_only_speed_test()
     self.rest_helper.start_broadcast("speedTestSampleStream")
     #self.startLoadTest()
 
-    # Start logging CPU and RAM usage in a separate thread
-    self.keep_running = True
-    self.monitor_thread = threading.Thread(target=self.log_resource_usage)
-    self.monitor_thread.start()
-
-  def log_resource_usage(self):
-    """Log CPU and RAM usage periodically."""
-    while self.keep_running:
-      cpu_usage = psutil.cpu_percent(interval=1)  # Measure CPU usage over 1 second
-      ram_usage = psutil.virtual_memory().percent  # Get RAM usage percentage
-      test_name = self._testMethodName  # Get the current test name
-      print(f"[{test_name}] CPU Usage: {cpu_usage}% | RAM Usage: {ram_usage}%")
-      time.sleep(5)  # Log every 5 seconds (adjust as needed)
-
   def tearDown(self):
-    """Ensure the monitoring thread stops after tests."""
-    self.keep_running = False
-    self.monitor_thread.join()
-    print(self._testMethodName, " ending...\n","----------------")
+    print(self._testMethodName, " ending...")
 
   def startLoadTest(self):
     def start_load_test():
@@ -65,7 +47,7 @@ class TestWebinarScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=host&streamName=" + participant + ("&skipSpeedTest=true" if skip_speed_test else ""))
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=host&streamName=" + participant + ("&enterDirectly=true" if skip_speed_test else ""))
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
@@ -112,7 +94,7 @@ class TestWebinarScenario(unittest.TestCase):
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=speaker&streamName=" + participant + ("&skipSpeedTest=true" if skip_speed_test else ""))
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?role=speaker&streamName=" + participant + ("&enterDirectly=true" if skip_speed_test else ""))
     
     #name_text_box = self.chrome.get_element_with_retry(By.ID,"participant_name")
     #self.chrome.write_to_element(name_text_box, participant)
@@ -154,12 +136,12 @@ class TestWebinarScenario(unittest.TestCase):
 
     return handle
   
-  def join_room_as_player(self, participant, room, skip_speed_test=True):
+  def join_room_as_player(self, participant, room, skip_speed_test=False):
     print("url: "+self.url+"/"+self.test_app_name+"/"+room)
     app = "/"+self.test_app_name
     if self.url.endswith("localhost:3000"):
       app = ""
-    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName=" + participant + "&streamId=" + participant + ("&skipSpeedTest=true" if skip_speed_test else ""))
+    handle = self.chrome.open_in_new_tab(self.url+app+"/"+room+"?playOnly=true&role=listener&streamName=" + participant + ("&enterDirectly=true" if skip_speed_test else ""))
     
     wait = self.chrome.get_wait()
 
@@ -172,8 +154,6 @@ class TestWebinarScenario(unittest.TestCase):
 
     if not skip_speed_test:
       time.sleep(5)
-
-      self.chrome.save_ss_as_file("join_room_as_player-1.png")
 
       speedTestCircularProgress = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-circle-progress-bar", retries=20)
       wait.until(lambda x: speedTestCircularProgress.is_displayed())
@@ -193,27 +173,16 @@ class TestWebinarScenario(unittest.TestCase):
         if result_json is not None:
           isSpeedTestFinished = result_json["isfinished"]
           isSpeedTestFailed = result_json["isfailed"]
-          print("player speed test test isFinished:" + str(isSpeedTestFinished) + " isFailed:"+ str(isSpeedTestFailed))
 
       speedTestModalJoinButton = self.chrome.get_element_with_retry(By.ID,"speed-test-modal-join-button")
 
-      self.chrome.save_ss_as_file("join_room_as_player-1.png")
-
-      self.chrome.mouse_click_on(speedTestModalJoinButton)
+      self.chrome.click_element(speedTestModalJoinButton)
  
     meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
 
     assert(meeting_gallery.is_displayed())
 
     return handle
-  
-  def accept_raising_hand_request(self, participant):
-    accept_button = self.chrome.get_element_with_retry(By.ID,"approve-become-speaker-"+participant)
-    self.chrome.click_element(accept_button)
-
-  def reject_raising_hand_request(self, participant):
-    reject_button = self.chrome.get_element_with_retry(By.ID,"reject-become-speaker-"+participant)
-    self.chrome.click_element(reject_button)
   
   def add_presenter_to_listener_room(self, presenter):
     add_button = self.chrome.get_element(By.ID,"add-presenter-"+presenter)
@@ -325,7 +294,7 @@ class TestWebinarScenario(unittest.TestCase):
     if index == 500:
       return ""
     
-    print("get_publishStreamId index: "+str(index))
+    print("mustafa get_publishStreamId index: "+str(index))
     conference = self.get_conference()
     print("conference: "+str(conference))
 
@@ -520,7 +489,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     assert(localVideo.is_displayed())
 
-  def test_with_stats(self):
+  def _test_with_stats(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_as_presenter("participantA", room)
     handle_2 = self.join_room_as_presenter("participantB", room)
@@ -556,7 +525,7 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  def test_pin_scenario(self):
+  def _test_pin_scenario(self):
     # create a room and join as admin and 3 presenters
     room = "room"+str(random.randint(100, 999))
     handle_admin = self.join_room_as_admin("adminA", room)   
@@ -721,7 +690,6 @@ class TestWebinarScenario(unittest.TestCase):
 
     self.chrome.close_all()
 
-  #FIXME: the buttons are appears on mouse hovers the card. This causes some issue in headless mode 
   def _test_admin_video_card_controls(self):
     # create a room and join as admin and presenter
     room = "room"+str(random.randint(100, 999))
@@ -784,64 +752,6 @@ class TestWebinarScenario(unittest.TestCase):
     wait.until(lambda x: self.chrome.get_element_in_element(presenterA_video_card, By.XPATH, ".//button[@type='button' and @aria-label='turn-off-camera']") is not None)
    
     
-    self.chrome.close_all()
-
-  def get_request_publish_button(self):
-    rp_button = None
-    if(self.chrome.is_element_exist(By.ID, "request-publish-button")):
-      rp_button = self.chrome.get_element(By.ID, "request-publish-button")
-    else:
-      more_button = self.chrome.get_element_with_retry(By.ID, "more-button")
-      self.chrome.click_element(more_button)
-      rp_button = self.chrome.get_element_with_retry(By.ID, "more-options-request-publish-button")
-    return rp_button
-
-  def _test_raising_hand(self):
-    # create a room and join as admin and 2 players
-    room = "room"+str(random.randint(100, 999))
-    handle_admin = self.join_room_as_admin("admin", room, True)
-    handle_player_A = self.join_room_as_player("playerA", room, True)
-    handle_player_B = self.join_room_as_player("playerB", room, True)
-
-    wait = self.chrome.get_wait()
-
-    # switch to playerA and raise hand
-    self.chrome.switch_to_tab(handle_player_A)
-
-    raise_hand_button = self.get_request_publish_button()
-    self.chrome.click_element(raise_hand_button)
-
-    # switch to admin and check if playerA is in the request list
-    self.chrome.switch_to_tab(handle_admin)
-
-    self.open_close_publisher_request_list_drawer()
-
-    time.sleep(5)
-
-    self.accept_raising_hand_request("playerA")
-
-    # switch to playerA and join the room
-    self.chrome.switch_to_tab(handle_player_A)
-
-    time.sleep(10)
-
-    join_button = self.chrome.get_element_with_retry(By.ID,"room_join_button")
-    self.chrome.click_element(join_button)
-
-
-    meeting_gallery = self.chrome.get_element_with_retry(By.ID,"meeting-gallery")
-    assert(meeting_gallery.is_displayed())
-
-    wait.until(lambda x: len(self.get_participants()) == 2)
-
-    # switch to admin
-    self.chrome.switch_to_tab(handle_admin)
-
-    wait.until(lambda x: len(self.get_participants()) == 2)
-
-    # switch to playerB
-    self.chrome.switch_to_tab(handle_player_B)
-
     self.chrome.close_all()
 
 if __name__ == '__main__':

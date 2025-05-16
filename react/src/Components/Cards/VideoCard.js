@@ -1,5 +1,6 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useState, useRef } from "react";
 import { alpha, styled } from "@mui/material/styles";
+import { ConferenceContext } from "pages/AntMedia";
 import DummyCard from "./DummyCard";
 import { Grid, Typography, useTheme, Box, Tooltip, Fab } from "@mui/material";
 import { SvgIcon } from "../SvgIcon";
@@ -20,22 +21,19 @@ const CustomizedBox = styled(Box)(({ theme }) => ({
 }));
 
 function VideoCard(props) {
+    const conference = useContext(ConferenceContext);
     const { t } = useTranslation();
     const [displayHover, setDisplayHover] = useState(false);
+    const [isTalking, setIsTalking] = useState(false);
     const theme = useTheme();
+    const timeoutRef = useRef(null);
 
     const refVideo = useCallback((node) => {
         if (node && props.trackAssignment.track) {
-            const newStream = new MediaStream([props.trackAssignment.track]);
-            if (node.srcObject !== newStream) {
-                node.srcObject = newStream;
-                node.play().catch((e) =>
-                    console.error("Video playback failed:", e)
-                );
-            }
+            node.srcObject = new MediaStream([props.trackAssignment.track]);
+            node.play().catch((e) => console.error("Video playback failed:", e));
         }
     }, [props.trackAssignment.track]);
-
 
     const cardBtnStyle = {
         display: "flex",
@@ -51,29 +49,41 @@ function VideoCard(props) {
     const isVideoTrack = props.trackAssignment.track?.kind === "video";
 
     const micMuted = isMine
-        ? props?.isMyMicMuted
+        ? conference?.isMyMicMuted
         : parseMetaData(
-            props?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
+            conference?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
             "isMicMuted"
         );
 
     const useAvatar = isMine
-        ? props?.isMyCamTurnedOff
+        ? conference?.isMyCamTurnedOff
         : !parseMetaData(
-            props?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
+            conference?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
             "isCameraOn"
         ) &&
         !parseMetaData(
-            props?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
+            conference?.allParticipants?.[props.trackAssignment.streamId]?.metaData,
             "isScreenShared"
         );
 
+    useEffect(() => {
+        if (props?.trackAssignment.isMine && conference.isPublished && !conference.isPlayOnly) {
+            conference.setAudioLevelListener((value) => {
+                // sounds under 0.01 are probably background noise
+                if (value >= 0.01) {
+                    if (isTalking === false) setIsTalking(true);
+                    clearInterval(timeoutRef.current);
+                    timeoutRef.current = setTimeout(() => {
+                        setIsTalking(false);
+                    }, 1500);
+                }
+            }, 1000);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conference.isPublished]);
 
-
-    // istanbul ignore next
     const OverlayButton = ({ title, icon, color, onClick, label }) => (
-        // istanbul ignore next
-        <Tooltip title={title} placement="top" style={{margin: '2px'}}>
+        <Tooltip title={title} placement="top">
             <Fab onClick={onClick} color={color} aria-label={label} size="small">
                 <SvgIcon size={36} name={icon} color={theme.palette?.iconColor?.primary} />
             </Fab>
@@ -86,10 +96,10 @@ function VideoCard(props) {
                 streamId: props.trackAssignment.streamId,
                 streamName: props.name,
             };
-            props?.setParticipantIdMuted(participant);
+            conference?.setParticipantIdMuted(participant);
             micMuted
-                ? props?.turnOnYourMicNotification(participant.streamId)
-                : props?.turnOffYourMicNotification(participant.streamId);
+                ? conference?.turnOnYourMicNotification(participant.streamId)
+                : conference?.turnOffYourMicNotification(participant.streamId);
         };
 
         const handleToggleCam = () => {
@@ -97,13 +107,13 @@ function VideoCard(props) {
                 streamId: props.trackAssignment.streamId,
                 streamName: props.name,
             };
-            props?.setParticipantIdMuted(participant);
-            props?.turnOffYourCamNotification(participant.streamId);
+            conference?.setParticipantIdMuted(participant);
+            conference?.turnOffYourCamNotification(participant.streamId);
         };
 
         return (
             <>
-                {(!useAvatar && process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true") && (
+                {(process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true") && (
                     <OverlayButton
                         title={`Camera ${useAvatar ? "off" : "on"} ${props.name}`}
                         icon={useAvatar ? "camera-off" : "camera"}
@@ -123,30 +133,22 @@ function VideoCard(props) {
         );
     };
 
-    const PinButton = () => (
+    const PinButton = ({ }) => (
         <OverlayButton
             title={`${props.pinned ? t("unpin") : t("pin")} ${props.name}`}
             icon={props.pinned ? "unpin" : "pin"}
             color="primary"
             label={props.pinned ? "unpin" : "pin"}
-            onClick={() => {
-                if(props.pinned) {
-                    props?.unpinVideo(true);
-                } 
-                else {
-                    props?.pinVideo(props.trackAssignment.streamId);
-                }
-            }}
+            onClick={() => conference.pinVideo(props.trackAssignment.streamId)}
         />
     );
 
-    const renderOverlayButtons = useCallback(() => {
+    const renderOverlayButtons = () => {
         if (props.hidePin) return null;
 
-        const isAdminMode =
-            process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true";
+        const isAdminMode = process.env.REACT_APP_VIDEO_OVERLAY_ADMIN_MODE_ENABLED === "true";
         const isAdministrativeButtonsVisible =
-            !props?.trackAssignment.isMine && (!isAdminMode || props?.isAdmin);
+            !props?.trackAssignment.isMine && (!isAdminMode || conference.isAdmin);
 
         return (
             <Grid
@@ -165,26 +167,15 @@ function VideoCard(props) {
                 }}
             >
                 <Grid container justifyContent="center" alignItems="center" wrap="nowrap">
-                    <Grid
-                        item
-                        container
-                        justifyContent="center"
-                        alignItems="center"
-                        columnSpacing={0.5}
-                    >
+                    <Grid item container justifyContent="center" alignItems="center" columnSpacing={0.5}>
                         {!isMobile && !isTablet && <PinButton props={props} />}
-                        {isAdministrativeButtonsVisible && (
-                            <AdministrativeButtons props={props} micMuted={micMuted} useAvatar={useAvatar}/>
-                        )}
+                        {isAdministrativeButtonsVisible && <AdministrativeButtons props={props} micMuted={micMuted} useAvatar={useAvatar}/>}
                     </Grid>
                 </Grid>
             </Grid>
         );
-    }, [displayHover, props]);
+    };
 
-    const videoStyle = React.useMemo(() => ({
-        objectFit: "contain",
-    }), []);
 
     const renderAvatarOrPlayer = () => (
         <>
@@ -199,6 +190,7 @@ function VideoCard(props) {
                         height: "100%",
                         transform: isMine ? "rotateY(180deg)" : "none",
                     }}
+
                 >
                     <CustomizedVideo
                         {...props}
@@ -208,7 +200,7 @@ function VideoCard(props) {
                         ref={refVideo}
                         playsInline
                         muted
-                        style={videoStyle}
+                        style={{ objectFit: "contain" }}
                     />
                 </Grid>
             )}
@@ -246,16 +238,12 @@ function VideoCard(props) {
         </Grid>
     );
 
-    React.useEffect(() => {
-        let tempLocalVideo = document.getElementById(
-            typeof props?.publishStreamId === "undefined"
-                ? "localVideo"
-                : props?.publishStreamId
-        );
-        if (props.trackAssignment.isMine && props?.localVideo !== tempLocalVideo) {
-            props?.localVideoCreate(tempLocalVideo);
+    const setLocalVideo = () => {
+        let tempLocalVideo = document.getElementById((typeof conference?.publishStreamId === "undefined")? "localVideo" : conference?.publishStreamId);
+        if(props.trackAssignment.isMine && conference.localVideo !== tempLocalVideo) {
+            conference?.localVideoCreate(tempLocalVideo);
         }
-    }, [props.trackAssignment.isMine, props.publishStreamId, props.localVideo, props.localVideoCreate]);
+    }
 
     const overlayVideoTitle = () => {
         return (
@@ -267,7 +255,7 @@ function VideoCard(props) {
                             ? `${props?.trackAssignment.isMine
                                 ? props.trackAssignment.streamId +
                                 " " +
-                                props?.streamName
+                                conference.streamName
                                 : props.trackAssignment.streamId + " " + props.trackAssignment.track?.id
                             }`
                             : ""}
@@ -277,44 +265,19 @@ function VideoCard(props) {
         );
     }
 
-    const filterVideoProps = (props) => {
-        const allowedProps = [
-            'autoPlay',
-            'controls',
-            'loop',
-            'muted',
-            'playsInline',
-            'poster',
-            'preload',
-            'src',
-            'width',
-            'height',
-        ];
-        return Object.keys(props)
-            .filter((key) => allowedProps.includes(key))
-            .reduce((obj, key) => {
-                obj[key] = props[key];
-                return obj;
-            }, {});
-    };
-
-    const videoProps = filterVideoProps(props);
-
-    const handleMouseEnter = useCallback(() => {
-        setDisplayHover(true);
-    }, []);
-
-    const handleMouseLeave = useCallback(() => {
-        setDisplayHover(false);
-    }, []);
-
-    const cardStyle = React.useMemo(() => ({
-        height: props.isMobileView ? "40%" : "100%",
-        width: props.isMobileView ? "20%" : "100%",
-        position: "relative",
-        borderRadius: 4,
-        overflow: "hidden",
-    }), [props.isMobileView]);
+    const isTalkingFrame = () => {
+        return (
+            <div
+                className="talking-indicator-light"
+                style={{
+                    borderColor: theme.palette.themeColor[20],
+                    ...(isTalking || conference.talkers.includes(props.trackAssignment.streamId)
+                        ? {}
+                        : { display: "none" }),
+                }}
+            />
+        );
+    }
 
     return isMine || isVideoTrack ? (
         <>
@@ -325,17 +288,25 @@ function VideoCard(props) {
                 width: "100%",
                 position: "relative",
             }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={() => setDisplayHover(true)}
+            onMouseLeave={() => setDisplayHover(false)}
         >
             {renderOverlayButtons()}
             <div
                 className="single-video-card"
                 id={'card-'+(props.trackAssignment.streamId !== undefined ? props?.trackAssignment.streamId : "")}
-                style={cardStyle}
+                style={{
+                    height: props.isMobileView ? "40%" : "100%",
+                    width: props.isMobileView ? "20%" : "100%",
+                    position: "relative",
+                    borderRadius: 4,
+                    overflow: "hidden",
+                }}
             >
                 {renderAvatarOrPlayer()}
                 {renderParticipantStatus()}
+                {setLocalVideo()}
+                {isTalkingFrame()}
                 {overlayVideoTitle()}
             </div>
         </Grid>
@@ -345,7 +316,7 @@ function VideoCard(props) {
         <>
             <video
                 style={{ display: "none" }}
-                {...videoProps}
+                {...props}
                 ref={refVideo}
                 playsInline
             ></video>
@@ -353,4 +324,4 @@ function VideoCard(props) {
     );
 };
 
-export default React.memo(VideoCard);
+export default VideoCard;

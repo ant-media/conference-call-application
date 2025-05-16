@@ -1,8 +1,8 @@
-/* eslint-disable */
+/* eslint-disable react-hooks/exhaustive-deps */
 import VideoCard from "Components/Cards/VideoCard";
 import OthersCard from "Components/Cards/OthersCard";
 import React from "react";
-import TalkingIndicator from "../Components/TalkingIndicator";
+import { ConferenceContext } from "./AntMedia";
 
 function calculateLayout(
   containerWidth,
@@ -46,13 +46,14 @@ function calculateLayout(
 }
 
 function LayoutTiled(props) {
+  const conference = React.useContext(ConferenceContext);
 
   const aspectRatio = 16 / 9;
   const [cardWidth, setCardWidth] = React.useState(500*aspectRatio);
   const [cardHeight, setCardHeight] = React.useState(500);
 
   React.useEffect(() => {
-    const videoCount = props?.videoTrackAssignments.length+1
+    const videoCount = conference.videoTrackAssignments.length+1
 
 
     const {width, height} = calculateLayout(
@@ -66,14 +67,14 @@ function LayoutTiled(props) {
     setCardHeight(height - 8);
 
     //console.log("***** W:"+cardWidth+" H:"+cardHeight+" props.width:"+props.width+" width:"+width+" cols:"+cols+" vc:"+videoCount);
-  }, [props?.videoTrackAssignments, props.width, props.height, props?.participantUpdated]);
+  }, [conference.videoTrackAssignments, props.width, props.height, conference.participantUpdated]);
 
-  const showOthers = Object.keys(props?.allParticipants).length > props?.globals.desiredTileCount;
-  let trackCount = props?.globals.desiredTileCount - 1; //remove you
-  props?.updateMaxVideoTrackCount(showOthers ? trackCount - 1 : trackCount); //remove others if we show
+  const showOthers = Object.keys(conference.allParticipants).length > conference.globals.desiredTileCount;
+  let trackCount = conference.globals.desiredTileCount - 1; //remove you
+  conference.updateMaxVideoTrackCount(showOthers ? trackCount - 1 : trackCount); //remove others if we show
 
-  const playingParticipantsCount = props?.videoTrackAssignments.length;
-  const playingParticipants = props?.videoTrackAssignments.slice(0, playingParticipantsCount);
+  const playingParticipantsCount = conference.videoTrackAssignments.length;
+  const playingParticipants = conference.videoTrackAssignments.slice(0, playingParticipantsCount);
 
   const videoCards = () => {
     return (
@@ -82,19 +83,18 @@ function LayoutTiled(props) {
           playingParticipants.map((element, index) => {
             let isPlayOnly
             try {
-              isPlayOnly = JSON.parse(props?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
+              isPlayOnly = JSON.parse(conference?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
             } catch (e) {
               isPlayOnly = false;
             }
 
-            let participantName = props?.allParticipants[element?.streamId]?.name;
+            let participantName = conference?.allParticipants[element?.streamId]?.name;
 
             if (participantName === "" || typeof participantName === 'undefined' || isPlayOnly || participantName === "Anonymous") {
               return null;
             }
 
             //console.log("cw:"+cardWidth+" ch:"+cardHeight);
-            /* istanbul ignore next */
             return (
               <div
                   className="single-video-container not-pinned"
@@ -104,35 +104,11 @@ function LayoutTiled(props) {
                     height: cardHeight + "px",
                   }}
               >
-                <div style={{position: "relative", width: "100%", height: "100%"}}>
-                  <TalkingIndicator
-                      trackAssignment={element}
-                      isTalking={props?.isTalking}
-                      streamId={element.streamId}
-                      talkers={props?.talkers}
-                      setAudioLevelListener={props?.setAudioLevelListener}
-                  />
-                  <VideoCard
-                      trackAssignment={element}
-                      autoPlay
-                      name={participantName}
-                      streamName={props?.streamName}
-                      isPublished={props?.isPublished}
-                      isPlayOnly={props?.isPlayOnly}
-                      isMyMicMuted={props?.isMyMicMuted}
-                      isMyCamTurnedOff={props?.isMyCamTurnedOff}
-                      allParticipants={props?.allParticipants}
-                      setParticipantIdMuted={(participant) => props?.setParticipantIdMuted(participant)}
-                      turnOnYourMicNotification={(streamId) =>props?.turnOnYourMicNotification(streamId)}
-                      turnOffYourMicNotification={(streamId) =>props?.turnOffYourMicNotification(streamId)}
-                      turnOffYourCamNotification={(streamId) =>props?.turnOffYourCamNotification(streamId)}
-                      pinVideo={props?.pinVideo}
-                      isAdmin={props?.isAdmin}
-                      publishStreamId={props?.publishStreamId}
-                      localVideo={props?.localVideo}
-                      localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
-                  />
-                </div>
+                <VideoCard
+                    trackAssignment={element}
+                    autoPlay
+                    name={participantName}
+                />
               </div>
               )
           })
@@ -154,9 +130,7 @@ function LayoutTiled(props) {
                   }}
               >
                 <OthersCard
-                    publishStreamId={props?.publishStreamId}
-                    allParticipants={props?.allParticipants}
-                    playingParticipants = {playingParticipants}
+                  playingParticipants = {playingParticipants}
                 />
               </div>
             ) : null
@@ -167,7 +141,7 @@ function LayoutTiled(props) {
 
   return (
       <>
-        {props?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
+        {conference?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
         {videoCards()}
         {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
       </>

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useContext} from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -6,24 +7,26 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import {useTheme} from '@mui/material/styles';
+import {ConferenceContext} from "../pages/AntMedia";
 
-export default function BecomePublisherConfirmationDialog(props) {
+export default function BecomePublisherConfirmationDialog() {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const conference = useContext(ConferenceContext);
 
   const handleClose = () => {
-    props?.setBecomePublisherConfirmationDialogOpen(false);
+    conference?.setBecomePublisherConfirmationDialogOpen(false);
   };
 
   const approveBecomePublisher = () => {
-    props?.setBecomePublisherConfirmationDialogOpen(false);
-    props?.handleStartBecomePublisher();
-  }
+    conference?.setBecomePublisherConfirmationDialogOpen(false);
+    conference?.handleStartBecomePublisher();
+          }
 
   return (
     <Dialog
       fullScreen={fullScreen}
-      open={props?.isBecomePublisherConfirmationDialogOpen}
+      open={conference?.isBecomePublisherConfirmationDialogOpen}
       onClose={handleClose}
       aria-labelledby="responsive-dialog-title"
     >

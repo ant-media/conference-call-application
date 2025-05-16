@@ -18,6 +18,7 @@ import {
   useTheme,
 } from "@mui/material";
 
+import {ConferenceContext} from 'pages/AntMedia';
 import {useTranslation} from "react-i18next";
 import {SvgIcon} from "Components/SvgIcon";
 import debounce from "lodash/debounce";
@@ -63,9 +64,11 @@ const AntDialogTitle = (props) => {
 
 export function LayoutSettingsDialog(props) {
   const {t} = useTranslation();
+  const {onClose, selectedValue, open} = props;
+  const conference = React.useContext(ConferenceContext);
 
   const [value, setValue] = React.useState(
-    props?.globals.maxVideoTrackCount
+    conference.globals.maxVideoTrackCount
   );
   const [layout, setLayout] = React.useState( "tiled"); //just for radioo buttons
 
@@ -73,7 +76,7 @@ export function LayoutSettingsDialog(props) {
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
   const handleClose = () => {
-    props?.onClose(props?.selectedValue);
+    onClose(selectedValue);
   };
 
   const changeLayout = (event) => {
@@ -82,15 +85,16 @@ export function LayoutSettingsDialog(props) {
 
     if (mode === "tiled") {
       //unpin the pinned video
-      Object.keys(props?.allParticipants).forEach(streamId => {
-        if (typeof props?.allParticipants[streamId].pinned === 'undefined'
-          && props?.allParticipants[streamId].pinned === true) {
-          props?.pinVideo(streamId);
+      conference.allParticipants = conference.allParticipants || {};
+      Object.keys(conference.allParticipants).forEach(streamId => {
+        if (typeof conference.allParticipants[streamId].pinned === 'undefined'
+          && conference.allParticipants[streamId].pinned === true) {
+          conference.pinVideo(streamId);
         }
       });
     } else if (mode === "sidebar") {
       //pins your video
-      props?.pinFirstVideo();
+      conference.pinVideo(conference.videoTrackAssignments[0]?.streamId);
     }
   };
   const radioLabel = (label, icon) => {
@@ -121,7 +125,7 @@ export function LayoutSettingsDialog(props) {
     );
   };
   const handleMaxVideoTrackCountChange = (count) => {
-    props?.handleSetDesiredTileCount(count);
+    conference.handleSetDesiredTileCount(count);
   };
   const debouncedHandleMaxVideoTrackCountChange = debounce(
     handleMaxVideoTrackCountChange,
@@ -132,7 +136,7 @@ export function LayoutSettingsDialog(props) {
   return (
     <Dialog
       onClose={handleClose}
-      open={props?.open}
+      open={open}
       fullScreen={fullScreen}
       maxWidth={"xs"}
     >
@@ -148,7 +152,7 @@ export function LayoutSettingsDialog(props) {
             <FormControl sx={{width: "100%"}}>
               <RadioGroup
                 aria-labelledby="layout-radio-buttons"
-                defaultValue={"tiled"}
+                defaultValue={"sidebar"}
                 value={layout}
                 onChange={changeLayout}
                 name="layout-radio-buttons-group"

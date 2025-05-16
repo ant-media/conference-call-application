@@ -6,9 +6,16 @@ import MoreOptionsButton from 'Components/Footer/Components/MoreOptionsButton';
 import { random } from 'lodash';
 import { assert } from 'workbox-core/_private';
 
+// Mock the context value
+const contextValue = {
+  allParticipants: {},
+  globals:{maxVideoTrackCount: 5},
+};
+
 // Mock the useContext hook
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
+  useContext: jest.fn(),
 }));
 
 describe('ParticipantList Button Component', () => {
@@ -16,70 +23,25 @@ describe('ParticipantList Button Component', () => {
   beforeEach(() => {
     // Reset the mock implementation before each test
     jest.clearAllMocks();
+
+    React.useContext.mockImplementation(input => {
+      if (input === ConferenceContext) {
+        return contextValue;
+      } 
+      return jest.requireActual('react').useContext(input);
+    });
   });
   
 
   it('renders without crashing', () => {
     render(
-        <MoreOptionsButton
-            isPlayOnly={false}
-            isScreenShared={false}
-            handleStartScreenShare={jest.fn()}
-            handleStopScreenShare={jest.fn()}
-            showEmojis={false}
-            setShowEmojis={jest.fn()}
-            messageDrawerOpen={false}
-            toggleSetNumberOfUnreadMessages={jest.fn()}
-            handleMessageDrawerOpen={jest.fn()}
-            participantListDrawerOpen={false}
-            handlePublisherRequestListOpen={jest.fn()}
-            publisherRequestListDrawerOpen={false}
-            handlePublisherRequest={jest.fn()}
-            handleBackgroundReplacement={jest.fn()}
-            microphoneSelected={jest.fn()}
-            devices={[]}
-            selectedCamera={'default'}
-            cameraSelected={jest.fn()}
-            selectedMicrophone={'default'}
-            selectedBackgroundMode={'default'}
-            setSelectedBackgroundMode={jest.fn()}
-            videoSendResolution={'default'}
-            setVideoSendResolution={jest.fn()}
-            globals={{}}
-            handleParticipantListOpen={jest.fn()}
-        />
+        <MoreOptionsButton />
       );
   });
 
   it('click the button', () => {
     const { container, getByTestId } = render(
-        <MoreOptionsButton
-            isPlayOnly={false}
-            isScreenShared={false}
-            handleStartScreenShare={jest.fn()}
-            handleStopScreenShare={jest.fn()}
-            showEmojis={false}
-            setShowEmojis={jest.fn()}
-            messageDrawerOpen={false}
-            toggleSetNumberOfUnreadMessages={jest.fn()}
-            handleMessageDrawerOpen={jest.fn()}
-            participantListDrawerOpen={false}
-            handlePublisherRequestListOpen={jest.fn()}
-            publisherRequestListDrawerOpen={false}
-            handlePublisherRequest={jest.fn()}
-            handleBackgroundReplacement={jest.fn()}
-            microphoneSelected={jest.fn()}
-            devices={[]}
-            selectedCamera={'default'}
-            cameraSelected={jest.fn()}
-            selectedMicrophone={'default'}
-            selectedBackgroundMode={'default'}
-            setSelectedBackgroundMode={jest.fn()}
-            videoSendResolution={'default'}
-            setVideoSendResolution={jest.fn()}
-            globals={{}}
-            handleParticipantListOpen={jest.fn()}
-        />
+        <MoreOptionsButton />
     );
 
     console.log(container.outerHTML);

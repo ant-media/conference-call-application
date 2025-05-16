@@ -3,10 +3,11 @@ import { Grid, IconButton, InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import EmojiPicker, {Emoji, EmojiStyle} from 'emoji-picker-react';
 import { useTranslation } from "react-i18next";
+import { ConferenceContext } from 'pages/AntMedia';
 
 const MessageInputContainer = styled(Grid)(({ theme }) => ({
   padding: "16px 16px 8px 16px",
-  background: theme.palette.themeColor?.[70],
+  background: theme.palette.themeColor[70],
   [theme.breakpoints.down('sm')]: {
     width: '100%',
     padding: "16px 0px 8px 0px",
@@ -15,25 +16,26 @@ const MessageInputContainer = styled(Grid)(({ theme }) => ({
 const MessageTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: 30,
-    backgroundColor: theme.palette.themeColor?.[60],
+    backgroundColor: theme.palette.themeColor[60],
   },
   "& .MuiOutlinedInput-input::placeholder": {
-    color: theme.palette.themeColor?.[90],
+    color: theme.palette.themeColor[90],
     fontWeight: 400,
   },
   "& .MuiOutlinedInput-notchedOutline": {
     borderRadius: 30,
   },
 }));
-const MessageInput = React.memo(({ handleSendMessage, handleSetMessages }) => {
+const MessageInput = React.memo(() => {
+  const conference = React.useContext(ConferenceContext);
 
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const sendMessage = () => {
     if (text) {
-      handleSendMessage(text);
-      handleSetMessages({
+      conference.handleSendMessage(text);
+      conference?.handleSetMessages({
         name: "You",
         message: text,
         date: new Date().toString()

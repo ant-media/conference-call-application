@@ -3,10 +3,4 @@ module.exports = {
       '@babel/preset-env',
       ['@babel/preset-react', {runtime: 'automatic'}],
     ],
-    plugins: [
-        ['babel-plugin-react-compiler', {
-            'react-compiler/react-compiler': 'error',
-        }],
-        'babel-plugin-istanbul'
-    ]
   };

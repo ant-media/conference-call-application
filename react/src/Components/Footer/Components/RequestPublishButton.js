@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Button from '@mui/material/Button';
 import { SvgIcon } from '../../SvgIcon';
 import { Tooltip } from '@mui/material';
-import {styled, useTheme} from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import {CustomizedBtn} from "../../CustomizedBtn";
+import { useSnackbar } from 'notistack';
+import { ConferenceContext} from "../../../pages/AntMedia";
 
 export const roundStyle = {
     width: { xs: 36, md: 46 },
@@ -16,16 +17,32 @@ export const roundStyle = {
     padding: '4px',
 };
 
+export const CustomizedBtn = styled(Button)(({ theme }) => ({
+    '&.footer-icon-button': {
+        height: '100%',
+        [theme.breakpoints.down('sm')]: {
+            padding: 8,
+            minWidth: 'unset',
+            width: '100%',
+        },
+        '& > svg': {
+            width: 36
+        },
+    }
+}));
+
+
 function RequestPublishButton(props) {
-    const theme = useTheme();
-    const { rounded, footer, handlePublisherRequest } = props;
+    const { rounded, footer } = props;
+    const conference = useContext(ConferenceContext);
     const { t } = useTranslation();
+    const { enqueueSnackbar } = useSnackbar();
 
     return (
         <>
             <Tooltip title={t('Request becoming publisher')} placement="top">
-                <CustomizedBtn id="request-publish-button" data-testid="request-publish-button" className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e) => { handlePublisherRequest(); }}>
-                    <SvgIcon size={32} name={'raise-hand'} color={theme.palette?.iconColor?.primary} />
+                <CustomizedBtn className={footer ? 'footer-icon-button' : ''} variant="contained" sx={rounded ? roundStyle : {}} color="secondary" onClick={(e) => { conference?.handlePublisherRequest(); }}>
+                    <SvgIcon size={32} name={'raise-hand'} color="#fff" />
                 </CustomizedBtn>
             </Tooltip>
         </>
