@@ -98,11 +98,12 @@
       }
     }
 
-    let selectedTheme = localStorage.getItem('selectedTheme');
-    if (!selectedTheme) {
-      selectedTheme = 'gray';
-      localStorage.setItem('selectedTheme', selectedTheme);
-    }
+    // let selectedTheme = localStorage.getItem('selectedTheme');
+    // if (!selectedTheme) {
+    //   selectedTheme = 'gray';
+    //   localStorage.setItem('selectedTheme', selectedTheme);
+    // }
+    
     setParticipantName();
     setInterval(() => {setParticipantName()}, 100);
 
