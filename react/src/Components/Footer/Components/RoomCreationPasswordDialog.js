@@ -65,6 +65,7 @@ export function RoomCreationPasswordDialog(props) {
           placeholder="Enter room name"
         /> */}
       <Input
+          id={'room_creation_password'}
           style={{marginTop:'15px'}}
           type='password'
           value={password}

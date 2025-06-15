@@ -122,9 +122,8 @@ public class WebSocketApplicationHandler
 	}
 
 	private void setConferenceRoomSettings(){
-		if(context != null){
-			conferenceRoomSettings = (ConferenceRoomSettings) context.getBean("conferenceRoomSettings");
-		}
+		getAMSBroadcastManager().fetchConferenceRoomSettings();
+		conferenceRoomSettings = getAMSBroadcastManager().getConferenceRoomSettings();
 	}
 
 	private void setAppSettings() {
@@ -323,17 +322,6 @@ public class WebSocketApplicationHandler
 	}
 
 	private void responseRoomSettings(Session session) {
-
-		String participantVisibilityMatrix = appSettings.getParticipantVisibilityMatrix().toString();
-
-		if (participantVisibilityMatrix != null) {
-			conferenceRoomSettings.setParticipantVisibilityMatrix(participantVisibilityMatrix);
-		}
-
-		int maxVideoTrackCount = appSettings.getMaxVideoTrackCount();
-
-		conferenceRoomSettings.setMaxVideoTrackCount(maxVideoTrackCount);
-
 		JSONObject jsonResponse = new JSONObject();
 		jsonResponse.put(WebSocketConstants.COMMAND, WebSocketApplicationConstants.SET_SETTINGS_COMMAND);
 		jsonResponse.put(WebSocketApplicationConstants.SETTINGS, gsonOnlyExposedFields.toJson(conferenceRoomSettings));

@@ -1,6 +1,8 @@
 from browser import Browser
 from selenium.webdriver.common.by import By
 from rest_helper import RestHelper 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 import subprocess
@@ -127,6 +129,16 @@ class TestJoinLeave(unittest.TestCase):
 
     assert(meeting_gallery.is_displayed())
 
+    return handle
+  
+  def open_home_page_in_new_tab(self, participant):
+    print("url: "+self.url+"/"+self.test_app_name+"/")
+    app = "/"+self.test_app_name
+    if self.url.endswith("localhost:3000"):
+      app = ""
+    
+    handle = self.chrome.open_in_new_tab(self.url + app + "/")
+    
     return handle
     
   def get_videoTrackAssignments(self, expected_value=None):
@@ -1885,6 +1897,71 @@ class TestJoinLeave(unittest.TestCase):
 
     self.chrome.close_all()
 
+  def test_create_meeting_with_password(self):
+    wait = WebDriverWait(self.chrome, 10)
+    roomPassword = "123123"
+
+    # create room without password
+    room = "room"+str(random.randint(100, 999))
+    handle_0 = self.open_home_page_in_new_tab("participantA")
+
+    create_meeting_element = wait.until(
+      EC.element_to_be_clickable((By.XPATH, "//Typography[text()='Create Meeting']"))
+    )
+
+    create_meeting_element.click()
+
+    time.sleep(1)
+
+    localVideo = self.chrome.get_element_with_retry(By.ID, 'localVideo')
+
+    assert(localVideo.is_displayed())
+
+    self.chrome.close_all()
+
+    # join room with password
+    self.rest_helper
+    time.sleep(10)
+    app_settings = self.rest_helper.call_get_app_settings(self.test_app_name)
+    app_settings["customSettings"] = {
+      "circle":{
+        "roomCreationPassword": roomPassword
+        }
+      }
+    response = self.rest_helper.call_set_app_settings(self.test_app_name, app_settings)
+    assert(response["success"])
+    time.sleep(10)
+
+    room = "room"+str(random.randint(100, 999))
+    handle_1 = self.open_home_page_in_new_tab("participantB")
+
+    create_meeting_element = wait.until(
+      EC.element_to_be_clickable((By.XPATH, "//Typography[text()='Create Meeting']"))
+    )
+
+    create_meeting_element.click()
+    
+    time.sleep(1)
+
+    input_field = wait.until(
+        EC.presence_of_element_located((By.ID, "room_creation_password"))
+    )
+
+    input_field.send_keys(roomPassword)
+
+    create_room_button = wait.until(
+        EC.element_to_be_clickable((By.ID, "create_room_button"))
+    )
+
+    create_room_button.click()
+
+    time.sleep(1)
+
+    localVideo = self.chrome.get_element_with_retry(By.ID, 'localVideo')
+
+    assert(localVideo.is_displayed())
+
+    self.chrome.close_all()
 
   def test_language(self):
     room = "room"+str(random.randint(100, 999))
