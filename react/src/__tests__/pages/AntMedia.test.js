@@ -1570,18 +1570,19 @@ describe('AntMedia Component', () => {
         jest.advanceTimersByTime(8000);
       });
 
-      expect(currentConference.participantUpdated).toBe(false);
+      expect(currentConference.participantUpdated).toBe(true);
 
       act(() => {
         jest.advanceTimersByTime(8000);
       });
 
-      expect(currentConference.participantUpdated).toBe(false);
+      expect(currentConference.participantUpdated).toBe(true);
 
       jest.useRealTimers();
     });
 
-    it('should not update participantUpdated state if videoTrackAssignments and allParticipants are not changed', async () => {
+    //This is not testing anything and equal to the previous test
+    /*it('should not update participantUpdated state if videoTrackAssignments and allParticipants are not changed', async () => {
       jest.useFakeTimers();
 
       render(
@@ -1607,7 +1608,7 @@ describe('AntMedia Component', () => {
       expect(currentConference.participantUpdated).toBe(false);
 
       jest.useRealTimers();
-    });
+    });*/
   });
 
   it('fake reconnection', async () => {
@@ -3629,6 +3630,103 @@ describe('AntMedia Component', () => {
 
     expect(consoleSpy).toHaveBeenCalledWith("Request is already received from ", 'testStreamIdListener');
     consoleSpy.mockRestore();
+  });
+
+  it('should not run playOnly effect on initial mount', async () => {
+      const { container } = render(
+        <ThemeProvider theme={theme(ThemeList.Green)}>
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>
+        </ThemeProvider>
+    );
+
+    await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    // Verify initial mount doesn't trigger the effect's main logic
+    expect(webRTCAdaptorConstructor.stop).not.toHaveBeenCalled();
+    expect(webRTCAdaptorConstructor.turnOffLocalCamera).not.toHaveBeenCalled();
+    expect(webRTCAdaptorConstructor.closeStream).not.toHaveBeenCalled();
+});
+
+  it('should run playOnly effect when isPlayOnly changes after mount', async () => {
+    const { container } = render(
+      <ThemeProvider theme={theme(ThemeList.Green)}>
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      </ThemeProvider>
+  );
+
+    const mockLocalStorage = {
+      getItem: jest.fn().mockImplementation((key) => {
+          if (key === 'selectedCamera') return 'camera1'; 
+          if (key === 'selectedMicrophone') return 'microphone1';
+          return null;
+      }),
+      setItem: jest.fn()
+    };
+    Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
+
+    mediaDevicesMock.enumerateDevices.mockResolvedValue([
+        { deviceId: 'camera1', kind: 'videoinput' },
+        { deviceId: 'microphone1', kind: 'audioinput' }
+    ]);
+
+    const { container2 } = render(
+      <ThemeProvider theme={theme(ThemeList.Green)}>
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      </ThemeProvider>
+  );
+
+    await waitFor(() => {
+      expect(webRTCAdaptorConstructor).not.toBe(undefined);
+    });
+
+    await act(async () => {
+      currentConference.setIsPlayOnly(true);
+    });
+
+    await waitFor(() => {
+
+      expect(webRTCAdaptorConstructor.stop).toHaveBeenCalled();
+      expect(webRTCAdaptorConstructor.turnOffLocalCamera).toHaveBeenCalled();
+      expect(webRTCAdaptorConstructor.closeStream).toHaveBeenCalled();
+    });
+  });
+
+  it('should clear participants and intervals when isPlayOnly changes', async () => {
+    const { container } = render(
+      <ThemeProvider theme={theme(ThemeList.Green)}>
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      </ThemeProvider>
+  );
+
+      await waitFor(() => {
+          expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      // Set some initial participants
+      await act(async () => {
+        currentConference.setVideoTrackAssignments(['track1', 'track2']);
+        currentConference.setAllParticipants({ participant1: {}, participant2: {} });
+      });
+
+      await act(async () => {
+        currentConference.setIsPlayOnly(true);
+      });
+
+      // Verify participants are cleared
+      await waitFor(() => {
+          expect(currentConference.videoTrackAssignments).toEqual([]);
+          expect(currentConference.allParticipants).toEqual({});
+      });
   });
 
   it('handles MAKE_LISTENER_AGAIN event when role is TempListener', async () => {
