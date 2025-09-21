@@ -54,8 +54,11 @@ function LayoutPinned (props) {
   const videoCards = (isMobileView) => {
     const pinnedParticipantName = conference?.allParticipants[pinnedParticipant?.streamId]?.name;
     const sortSharingStreamToTop = (a, b) => {
+      console.log("Sorting video tracks. Pinned participant: ", pinnedParticipantName);
+      console.log("Comparing:", conference?.allParticipants[a?.streamId]?.name, "and", conference?.allParticipants[b?.streamId]?.name);
       const leftComp = conference?.allParticipants[a?.streamId]?.name && pinnedParticipantName && conference?.allParticipants[a?.streamId]?.name.trim() === pinnedParticipantName.split('-')[0].trim() ? 1 : 0;
       const rightComp = conference?.allParticipants[b?.streamId]?.name && pinnedParticipantName && conference?.allParticipants[b?.streamId]?.name.trim() === pinnedParticipantName.split('-')[0].trim() ? 1 : 0;
+      console.log("Sort result:", rightComp - leftComp);
       return rightComp - leftComp;
     }
     return (
