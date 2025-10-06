@@ -46,4 +46,8 @@ Moreover, the application has been designed to be fully mobile-friendly from gro
 * Share it with anyone you want to start video conferencing!
 ![Screen-Shot-2022-06-08-at-11 11 11-AM-1024x726](https://user-images.githubusercontent.com/6155330/194052520-4742c23d-2b7f-4ca1-8c99-e30120a37af3.png)
 
+## License
+
+This project is licensed under the Apache License 2.0 (see LICENSE file for details).  
+It requires Ant Media Server Community/Enterprise Edition to run.
 
