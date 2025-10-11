@@ -107,13 +107,13 @@
     setParticipantName();
     setInterval(() => {setParticipantName()}, 100);
 
-    if (new URLSearchParams(window.location.search).get('iframe') !== 'true') {
-      setInterval(function() {
-        fetch('https://live-v2-scheduler.beehire.com/api/server-ping', { mode: 'no-cors' })
-          .then(response => console.log(response))
-          .catch(error => console.error(error));
-      }, 30000);
-    }
+    // if (new URLSearchParams(window.location.search).get('iframe') !== 'true') {
+    //   setInterval(function() {
+    //     fetch('https://live-v2-scheduler.beehire.com/api/server-ping', { mode: 'no-cors' })
+    //       .then(response => console.log(response))
+    //       .catch(error => console.error(error));
+    //   }, 30000);
+    // }
   </script>
 </head>
 <body> <!--style="background-color: #f1f5f9;"-->
