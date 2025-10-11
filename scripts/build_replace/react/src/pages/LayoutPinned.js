@@ -54,12 +54,47 @@ function LayoutPinned (props) {
   const videoCards = (isMobileView) => {
     const pinnedParticipantName = conference?.allParticipants[pinnedParticipant?.streamId]?.name;
     const sortSharingStreamToTop = (a, b) => {
-      console.log("Sorting video tracks. Pinned participant: ", pinnedParticipantName);
-      console.log("Comparing:", conference?.allParticipants[a?.streamId]?.name, "and", conference?.allParticipants[b?.streamId]?.name);
-      const leftComp = conference?.allParticipants[a?.streamId]?.name && pinnedParticipantName && conference?.allParticipants[a?.streamId]?.name.trim() === pinnedParticipantName.split('-')[0].trim() ? 1 : 0;
-      const rightComp = conference?.allParticipants[b?.streamId]?.name && pinnedParticipantName && conference?.allParticipants[b?.streamId]?.name.trim() === pinnedParticipantName.split('-')[0].trim() ? 1 : 0;
-      console.log("Sort result:", rightComp - leftComp);
-      return rightComp - leftComp;
+      const participantA = conference.allParticipants[a.streamId];
+      const participantB = conference.allParticipants[b.streamId];
+
+      // if participant info is not available, don't change order
+      if (!participantA || !participantB) {
+        console.log("Sort: Participant info not available for", a.streamId, "or", b.streamId);
+        return 0;
+      }
+
+      const pinnedParticipantDetails = conference.allParticipants[pinnedParticipant?.streamId];
+      console.log("Sort: Pinned participant details:", pinnedParticipantDetails);
+
+
+      // Check if the pinned participant is sharing their screen.
+      if (pinnedParticipantDetails?.isScreenShared) {
+        console.log("Sort: Pinned participant is screen sharing");
+        // The screen share streamId is usually in the format {base_stream_id}_presentation.
+        const screenSharerBaseStreamId = pinnedParticipant.streamId.replace('_presentation', '');
+        console.log("Sort: Screen sharer base stream ID:", screenSharerBaseStreamId);
+
+
+        // We want to move the screen sharer's main video feed to the top of the unpinned participants.
+        if (participantA.streamId === screenSharerBaseStreamId) {
+          console.log("Sort: Moving", participantA.name, "to top");
+          return -1; // a should be sorted before b
+        }
+        if (participantB.streamId === screenSharerBaseStreamId) {
+          console.log("Sort: Moving", participantB.name, "to top");
+          return 1; // b should be sorted before a
+        }
+      }
+
+      // For other cases, sort alphabetically by name for a consistent order.
+      if (participantA.name < participantB.name) {
+        return -1;
+      }
+      if (participantA.name > participantB.name) {
+        return 1;
+      }
+
+      return 0;
     }
     return (
       <>

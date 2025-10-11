@@ -2051,12 +2051,10 @@ function AntMedia(props) {
     }
 
     function handleStopScreenShare() {
-        console.log("Stopping screen share. Adapter:", screenShareWebRtcAdaptor.current);
         setIsScreenShared(false);
         screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
         screenShareWebRtcAdaptor.current.closeStream();
         screenShareWebRtcAdaptor.current.closeWebSocket();
-        console.log("Screen share stopped.");
     }
 
     function handleSetMessages(newMessage) {
