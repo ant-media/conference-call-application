@@ -2294,62 +2294,35 @@ function AntMedia(props) {
 
                 console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(receivedVideoTrackAssignments));
 
-                // Remove empty trackId assignments
-                //receivedVideoTrackAssignments = receivedVideoTrackAssignments.filter((vta) => vta.trackId !== "");
+                const labelToTrackMap = new Map(videoTrackAssignments.map(vta => [vta.videoLabel, vta.track]));
 
-                let currentVideoTrackAssignments = [...videoTrackAssignments];
+                let newVideoTrackAssignments = receivedVideoTrackAssignments.map(vta => ({
+                  videoLabel: vta.videoLabel,
+                  streamId: vta.trackId,
+                  track: labelToTrackMap.get(vta.videoLabel) || null, // Preserve the track
+                  isReserved: vta.reserved,
+                  isMine: false,
+                  isFake: false,
+                }));
 
-                let tempVideoTrackAssignmentsNew = [];
+                const localVideoAssignment = videoTrackAssignments.find(vta => vta.isMine);
+                if (localVideoAssignment) {
+                  if (!newVideoTrackAssignments.find(vta => vta.videoLabel === localVideoAssignment.videoLabel)) {
+                    newVideoTrackAssignments.push(localVideoAssignment);
+                  }
+                }
 
-                let tempAllParticipants = {...allParticipants};
+                const fakeParticipants = videoTrackAssignments.filter(vta => vta.isFake);
+                newVideoTrackAssignments.push(...fakeParticipants);
 
-                // This function checks the case 1 and case 2
-                currentVideoTrackAssignments.forEach(tempVideoTrackAssignment => {
-                    let assignment;
 
-                    receivedVideoTrackAssignments.forEach(videoTrackAssignment => {
-                        if (tempVideoTrackAssignment.videoLabel === videoTrackAssignment.videoLabel) {
-                            assignment = videoTrackAssignment;
-                        }
-                    });
-
-                    if (tempVideoTrackAssignment.isMine || tempVideoTrackAssignment.isFake || assignment !== undefined) {
-                        if (isVideoLabelExists(tempVideoTrackAssignment.videoLabel, tempVideoTrackAssignmentsNew)) {
-                            console.error("Video label is already exist: " + tempVideoTrackAssignment.videoLabel);
-                        } else {
-                            tempVideoTrackAssignmentsNew.push(tempVideoTrackAssignment);
-                        }
-
-                    } else {
-                        console.log("---> Removed video track assignment: " + tempVideoTrackAssignment.videoLabel);
-                        delete tempAllParticipants[tempVideoTrackAssignment.streamId];
-                    }
-                });
-
-                setAllParticipants(tempAllParticipants);
-
-                currentVideoTrackAssignments = [...tempVideoTrackAssignmentsNew];
-
-                // update participants according to current assignments
-                receivedVideoTrackAssignments.forEach(vta => {
-                    let existingAssignment = currentVideoTrackAssignments.find(oldVTA => oldVTA.videoLabel === vta.videoLabel);
-                    if (existingAssignment) {
-                        existingAssignment.streamId = vta.trackId;
-                        existingAssignment.isReserved = vta.reserved;
-                    }
-                    if (!allParticipants[vta.trackId]) {
-                        webRTCAdaptor?.getBroadcastObject(vta.trackId);
-                    }
-                });
+                if (!_.isEqual(newVideoTrackAssignments, videoTrackAssignments)) {
+                  setVideoTrackAssignments(newVideoTrackAssignments);
+                  requestSyncAdministrativeFields();
+                  setParticipantUpdated(!participantUpdated);
+                }
 
                 checkScreenSharingStatus();
-
-                // check if there is any difference between old and new assignments
-                if (!_.isEqual(currentVideoTrackAssignments, videoTrackAssignments)) {
-                        setVideoTrackAssignments(currentVideoTrackAssignments);
-                        requestSyncAdministrativeFields();
-                        setParticipantUpdated(!participantUpdated);
-                }
 
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
                 // FIXME: to be able to reduce render

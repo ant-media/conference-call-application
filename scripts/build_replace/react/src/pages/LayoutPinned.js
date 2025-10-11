@@ -31,7 +31,7 @@ function LayoutPinned (props) {
       pinnedParticipantName = conference?.allParticipants[pinnedParticipant.streamId]?.name;
     }
     return (
-      pinnedParticipant && pinnedParticipant.trackId ? (
+      pinnedParticipant ? (
         <div className="single-video-container pinned keep-ratio">
           <VideoCard
             trackAssignment={pinnedParticipant}
@@ -92,7 +92,7 @@ function LayoutPinned (props) {
       <>
       {
       // eslint-disable-next-line
-      conference.videoTrackAssignments.sort(sortSharingStreamToTop).filter(element => element.trackId).map((element, index) => {
+      conference.videoTrackAssignments.sort(sortSharingStreamToTop).map((element, index) => {
 
         let isPlayOnly;
 
