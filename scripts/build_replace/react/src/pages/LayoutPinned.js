@@ -31,7 +31,7 @@ function LayoutPinned (props) {
       pinnedParticipantName = conference?.allParticipants[pinnedParticipant.streamId]?.name;
     }
     return (
-      pinnedParticipant ? (
+      pinnedParticipant && pinnedParticipant.trackId ? (
         <div className="single-video-container pinned keep-ratio">
           <VideoCard
             trackAssignment={pinnedParticipant}
