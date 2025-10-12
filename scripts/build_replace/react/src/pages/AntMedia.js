@@ -2052,19 +2052,35 @@ function AntMedia(props) {
 
     function handleStopScreenShare() {
         console.log("[StopScreenShare] handleStopScreenShare called");
-        let notEvent = {
-            streamId: screenShareStreamId.current, eventType: "SCREEN_SHARED_OFF"
-        };
-        console.info("[StopScreenShare] Sending SCREEN_SHARED_OFF notification:", notEvent);
-        webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
+        if (screenShareStreamId.current) {
+            // Immediately update the local participant state to un-pin the screen share
+            const participant = allParticipants[screenShareStreamId.current];
+            if (participant) {
+                participant.isPinned = false;
+                setAllParticipants(currentParticipants => ({
+                    ...currentParticipants,
+                    [screenShareStreamId.current]: participant
+                }));
+                // This will trigger a re-render and should switch the layout
+                setParticipantUpdated(val => !val);
+            }
 
-        setIsScreenShared(false);
-        screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
-        screenShareWebRtcAdaptor.current.closeStream();
-        screenShareWebRtcAdaptor.current.closeWebSocket();
-        screenShareWebRtcAdaptor.current = null;
-        screenShareStreamId.current = null;
-        console.log("[StopScreenShare] Screen share stopped and cleaned up.");
+            // Send a notification to others that screen sharing has stopped.
+            let notEvent = {
+                streamId: screenShareStreamId.current, eventType: "SCREEN_SHARED_OFF"
+            };
+            console.info("[StopScreenShare] Sending SCREEN_SHARED_OFF notification:", notEvent);
+            webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
+
+            // Stop the screen sharing stream.
+            screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
+            screenShareWebRtcAdaptor.current.closeStream();
+            screenShareWebRtcAdaptor.current.closeWebSocket();
+            screenShareWebRtcAdaptor.current = null;
+            screenShareStreamId.current = null;
+            setIsScreenShared(false);
+            console.log("[StopScreenShare] Screen share stopped and cleaned up.");
+        }
     }
 
     function handleSetMessages(newMessage) {
@@ -2321,6 +2337,12 @@ function AntMedia(props) {
 
                     // Update existing tracks and add new ones
                     receivedVTA.forEach(vta => {
+                        // Do not process tracks with empty trackId
+                        if (!vta.trackId || vta.trackId.length === 0) {
+                            console.log(`Received VTA with empty trackId, skipping: ${vta.videoLabel}`);
+                            return;
+                        }
+
                         const existingVTA = newVTA.find(v => v.videoLabel === vta.videoLabel);
                         if (existingVTA) {
                             // Update trackId if it's different
