@@ -109,7 +109,7 @@ function LayoutTiled(props) {
                   }}
               >
                 <OthersCard
-                  playingParticipants = {playingParticipants}
+                  playingParticipants = {props.participants}
                 />
               </div>
             ) : null
