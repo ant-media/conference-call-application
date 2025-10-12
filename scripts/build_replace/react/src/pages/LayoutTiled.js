@@ -53,8 +53,7 @@ function LayoutTiled(props) {
   const [cardHeight, setCardHeight] = React.useState(500);
 
   React.useEffect(() => {
-    const videoCount = conference.videoTrackAssignments.length+1
-
+    const videoCount = props.participants.length;
 
     const {width, height} = calculateLayout(
         props.width,
@@ -66,54 +65,34 @@ function LayoutTiled(props) {
     setCardWidth(width - 8);
     setCardHeight(height - 8);
 
-    //console.log("***** W:"+cardWidth+" H:"+cardHeight+" props.width:"+props.width+" width:"+width+" cols:"+cols+" vc:"+videoCount);
-  }, [conference.videoTrackAssignments, props.width, props.height, conference.participantUpdated]);
+  }, [props.participants, props.width, props.height]);
 
   const showOthers = Object.keys(conference.allParticipants).length > conference.globals.desiredTileCount;
   let trackCount = conference.globals.desiredTileCount - 1; //remove you
   conference.updateMaxVideoTrackCount(showOthers ? trackCount - 1 : trackCount); //remove others if we show
 
-  const playingParticipantsCount = conference.videoTrackAssignments.length;
-  const playingParticipants = conference.videoTrackAssignments.slice(0, playingParticipantsCount);
-
   const videoCards = () => {
     return (
-      <>
-        {
-          playingParticipants.map((element, index) => {
-            let isPlayOnly
-            try {
-              isPlayOnly = JSON.parse(conference?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
-            } catch (e) {
-              isPlayOnly = false;
-            }
-
-            let participantName = conference?.allParticipants[element?.streamId]?.name;
-
-            if (participantName === "" || typeof participantName === 'undefined' || isPlayOnly || participantName === "Anonymous") {
-              return null;
-            }
-
-            //console.log("cw:"+cardWidth+" ch:"+cardHeight);
+        <>
+          {props.participants.map((element) => {
             return (
-              <div
-                  className="single-video-container not-pinned"
-                  key={element.streamId}
-                  style={{
-                    width: cardWidth + "px",
-                    height: cardHeight + "px",
-                  }}
-              >
-                <VideoCard
-                    trackAssignment={element}
-                    autoPlay
-                    name={participantName}
-                />
-              </div>
-              )
-          })
-        }
-      </>
+                <div
+                    className="single-video-container not-pinned"
+                    key={element.streamId}
+                    style={{
+                      width: cardWidth + "px",
+                      height: cardHeight + "px",
+                    }}
+                >
+                  <VideoCard
+                      trackAssignment={element}
+                      autoPlay
+                      name={element.name}
+                  />
+                </div>
+            )
+          })}
+        </>
     );
   }
 

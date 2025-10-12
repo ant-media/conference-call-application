@@ -120,6 +120,7 @@ const MeetingRoom = React.memo((props) => {
           {pinLayout ?
               (<LayoutPinned
                   pinnedParticipant={firstPinnedParticipant}
+                  participants={conference.participants}
                   width={gallerySize.w}
                   height={gallerySize.h}
                   isMobile={isMobile}
@@ -128,6 +129,7 @@ const MeetingRoom = React.memo((props) => {
               (<LayoutTiled
                   width={gallerySize.w}
                   height={gallerySize.h}
+                  participants={conference.participants}
               />)
           }
         </div>

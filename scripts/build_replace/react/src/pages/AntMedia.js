@@ -404,6 +404,7 @@ function AntMedia(props) {
     const [isPublished, setIsPublished] = useState(false);
     const [isPlayed, setIsPlayed] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
+    const [participants, setParticipants] = useState([]);
 
     const [selectedCamera, setSelectedCamera] = React.useState(localStorage.getItem('selectedCamera'));
     const [selectedMicrophone, setSelectedMicrophone] = React.useState(localStorage.getItem('selectedMicrophone'));
@@ -481,11 +482,46 @@ function AntMedia(props) {
     const theme = useTheme();
 
   useEffect(() => {
-    setTimeout(() => {
-      setParticipantUpdated(!participantUpdated);
-      //console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
-    }, 5000);
-  }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
+    const pinnedParticipant = Object.values(allParticipants).find(p => p.isPinned);
+
+    const getParticipants = () => {
+      let participants = videoTrackAssignments
+        .map((vta) => {
+          const participant = allParticipants[vta.streamId];
+          if (participant) {
+            return { ...vta, ...participant };
+          }
+          return vta;
+        })
+        .filter((p) => {
+          let isPlayOnly;
+          try {
+            isPlayOnly = JSON.parse(p?.metaData)?.isPlayOnly;
+          } catch (e) {
+            isPlayOnly = false;
+          }
+          return p.name && p.name !== "" && !isPlayOnly && p.name !== "Anonymous";
+        });
+
+      // Custom sort logic
+      participants.sort((a, b) => {
+        if (pinnedParticipant?.isScreenShared) {
+          const screenSharerBaseStreamId = pinnedParticipant.streamId.replace('_presentation', '');
+          if (a.streamId === screenSharerBaseStreamId) return -1;
+          if (b.streamId === screenSharerBaseStreamId) return 1;
+        }
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+      });
+
+      return participants;
+    };
+
+    setParticipants(getParticipants());
+    setParticipantUpdated(val => !val);
+
+  }, [videoTrackAssignments, allParticipants]);
 
     function handleUnauthorizedDialogExitClicked() {
 
@@ -3114,6 +3150,7 @@ function AntMedia(props) {
                         numberOfUnReadMessages,
                         participantUpdated,
                         allParticipants,
+                        participants,
                         globals,
                         isPlayOnly,
                         setIsPlayOnly,
