@@ -2051,10 +2051,19 @@ function AntMedia(props) {
     }
 
     function handleStopScreenShare() {
+        console.log("handleStopScreenShare called");
+        let notEvent = {
+            streamId: screenShareStreamId.current, eventType: "SCREEN_SHARED_OFF"
+        };
+        console.info("send notification event", notEvent);
+        webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
+
         setIsScreenShared(false);
         screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
         screenShareWebRtcAdaptor.current.closeStream();
         screenShareWebRtcAdaptor.current.closeWebSocket();
+        screenShareWebRtcAdaptor.current = null;
+        screenShareStreamId.current = null;
     }
 
     function handleSetMessages(newMessage) {
@@ -2283,48 +2292,59 @@ function AntMedia(props) {
                 if (notificationEvent.streamId === publishStreamId && !isScreenShared) {
                     updateVideoSendResolution(false);
                 }
+            } else if (eventType === "SCREEN_SHARED_OFF") {
+                console.log("Received SCREEN_SHARED_OFF for", notificationEvent.streamId);
+                let participant = allParticipants[notificationEvent.streamId];
+                if (participant && participant.isPinned) {
+                    console.log("Unpinning screen share video:", notificationEvent.streamId);
+                    pinVideo(notificationEvent.streamId); //this will unpin
+                }
             } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
 
-                // There are 2 operations here:
-                // 1. VTA available in both sides -> Update
-                // 2. VTA available in the current state but not in the new list -> Remove
-                // We don't need to add new VTA because it will be added by the handlePlayVideo function
+            // There are 2 operations here:
+            // 1. VTA available in both sides -> Update
+            // 2. VTA available in the current state but not in the new list -> Remove
+            // We don't need to add new VTA because it will be added by the handlePlayVideo function
 
-                let receivedVideoTrackAssignments = notificationEvent.payload;
+            let receivedVideoTrackAssignments = notificationEvent.payload;
 
-                console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(receivedVideoTrackAssignments));
+            console.info("Received VTA list:", JSON.stringify(receivedVideoTrackAssignments));
+            console.info("Current VTA list:", JSON.stringify(videoTrackAssignments));
 
-                const labelToTrackMap = new Map(videoTrackAssignments.map(vta => [vta.videoLabel, vta.track]));
+            const labelToTrackMap = new Map(videoTrackAssignments.map(vta => [vta.videoLabel, vta.track]));
+            const localVideoAssignment = videoTrackAssignments.find(vta => vta.isMine);
 
-                let newVideoTrackAssignments = receivedVideoTrackAssignments.map(vta => ({
-                  videoLabel: vta.videoLabel,
-                  streamId: vta.trackId,
-                  track: labelToTrackMap.get(vta.videoLabel) || null, // Preserve the track
-                  isReserved: vta.reserved,
-                  isMine: false,
-                  isFake: false,
-                }));
+            let newVideoTrackAssignments = receivedVideoTrackAssignments.map(vta => {
+              const isLocal = localVideoAssignment && vta.videoLabel === localVideoAssignment.videoLabel;
+              return {
+                videoLabel: vta.videoLabel,
+                streamId: isLocal ? localVideoAssignment.streamId : vta.trackId,
+                track: labelToTrackMap.get(vta.videoLabel) || null,
+                isReserved: vta.reserved,
+                isMine: isLocal,
+                isFake: false,
+              };
+            });
 
-                const localVideoAssignment = videoTrackAssignments.find(vta => vta.isMine);
-                if (localVideoAssignment) {
-                  if (!newVideoTrackAssignments.find(vta => vta.videoLabel === localVideoAssignment.videoLabel)) {
-                    newVideoTrackAssignments.push(localVideoAssignment);
-                  }
-                }
+            // If the local user was not in the received list, add it back.
+            if (localVideoAssignment && !newVideoTrackAssignments.some(vta => vta.isMine)) {
+                newVideoTrackAssignments.push(localVideoAssignment);
+            }
 
-                const fakeParticipants = videoTrackAssignments.filter(vta => vta.isFake);
-                newVideoTrackAssignments.push(...fakeParticipants);
+            const fakeParticipants = videoTrackAssignments.filter(vta => vta.isFake);
+            newVideoTrackAssignments.push(...fakeParticipants);
 
 
-                if (!_.isEqual(newVideoTrackAssignments, videoTrackAssignments)) {
-                  setVideoTrackAssignments(newVideoTrackAssignments);
-                  requestSyncAdministrativeFields();
-                  setParticipantUpdated(!participantUpdated);
-                }
+            if (!_.isEqual(newVideoTrackAssignments, videoTrackAssignments)) {
+              console.info("Setting new VTA list:", JSON.stringify(newVideoTrackAssignments));
+              setVideoTrackAssignments(newVideoTrackAssignments);
+              requestSyncAdministrativeFields();
+              setParticipantUpdated(!participantUpdated);
+            }
 
-                checkScreenSharingStatus();
+            checkScreenSharingStatus();
 
-            } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
+        } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
                 // FIXME: to be able to reduce render
                 if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
                   return;
