@@ -2329,58 +2329,51 @@ function AntMedia(props) {
                 console.info("Current VTA list before update:", JSON.stringify(videoTrackAssignments));
 
                 setVideoTrackAssignments(currentVTA => {
-                    const newVTA = [...currentVTA];
-                    const localAssignment = newVTA.find(v => v.isMine);
+                    console.info("Received VTA list:", JSON.stringify(receivedVTA));
+                    console.info("Current VTA list before update:", JSON.stringify(currentVTA));
 
-                    // Create a map of received VTAs for efficient lookup
-                    const receivedVTAMap = new Map(receivedVTA.map(v => [v.videoLabel, v]));
+                    // Create a map of the current tracks by streamId for easy lookup.
+                    const currentTracksByStreamId = new Map(currentVTA.map(v => [v.streamId, v.track]));
 
-                    // Update existing tracks and add new ones
-                    receivedVTA.forEach(vta => {
-                        // Do not process tracks with empty trackId
-                        if (!vta.trackId || vta.trackId.length === 0) {
-                            console.log(`Received VTA with empty trackId, skipping: ${vta.videoLabel}`);
-                            return;
-                        }
+                    // Build the new VTA list from the received data.
+                    let newVTA = receivedVTA
+                        .filter(vta => vta.trackId && vta.trackId.length > 0) // Filter out invalid assignments
+                        .map(vta => ({
+                            videoLabel: vta.videoLabel,
+                            streamId: vta.trackId,
+                            // Preserve the track if we already have it for this streamId.
+                            track: currentTracksByStreamId.get(vta.trackId) || null,
+                            isReserved: vta.reserved,
+                            isMine: false, // Will be corrected below
+                            isFake: false,
+                        }));
 
-                        const existingVTA = newVTA.find(v => v.videoLabel === vta.videoLabel);
-                        if (existingVTA) {
-                            // Update trackId if it's different
-                            if (existingVTA.streamId !== vta.trackId) {
-                                console.log(`Updating trackId for ${vta.videoLabel} from ${existingVTA.streamId} to ${vta.trackId}`);
-                                existingVTA.streamId = vta.trackId;
-                            }
+                    // Find the local user's assignment from the *current* state.
+                    const localAssignment = currentVTA.find(v => v.isMine);
+
+                    if (localAssignment) {
+                        // Check if the local user is in the new list.
+                        const localInNew = newVTA.find(v => v.streamId === localAssignment.streamId);
+                        if (localInNew) {
+                            // If yes, just mark it as 'isMine'.
+                            localInNew.isMine = true;
                         } else {
-                            // Add new VTA, but don't add the local user again if they are already present
-                            if (!localAssignment || vta.videoLabel !== localAssignment.videoLabel) {
-                                console.log(`Adding new VTA: ${vta.videoLabel}`);
-                                newVTA.push({
-                                    videoLabel: vta.videoLabel,
-                                    streamId: vta.trackId,
-                                    track: null,
-                                    isReserved: vta.reserved,
-                                    isMine: false,
-                                    isFake: false,
-                                });
-                            }
+                            // If not, add it back. This is crucial.
+                            console.log("Local user not in received VTA, adding it back.");
+                            newVTA.push(localAssignment);
                         }
-                    });
+                    }
 
-                    // Remove tracks that are no longer in the received list, but preserve the local user and fakes
-                    const filteredVTA = newVTA.filter(vta => {
-                        const isInReceived = receivedVTAMap.has(vta.videoLabel);
-                        const isLocalOrFake = vta.isMine || vta.isFake;
-                        if (!isInReceived && !isLocalOrFake) {
-                            console.log(`Removing stale VTA: ${vta.videoLabel}`);
-                        }
-                        return isInReceived || isLocalOrFake;
-                    });
+                    // Preserve any fake participants from the current state.
+                    const fakeParticipants = currentVTA.filter(vta => vta.isFake);
+                    newVTA.push(...fakeParticipants);
 
-                    if (!_.isEqual(filteredVTA, currentVTA)) {
-                        console.info("Setting new VTA list:", JSON.stringify(filteredVTA));
+
+                    if (!_.isEqual(newVTA, currentVTA)) {
+                        console.info("Setting new VTA list (streamId-keyed):", JSON.stringify(newVTA));
                         setParticipantUpdated(p => !p);
                         requestSyncAdministrativeFields();
-                        return filteredVTA;
+                        return newVTA;
                     }
 
                     return currentVTA;
