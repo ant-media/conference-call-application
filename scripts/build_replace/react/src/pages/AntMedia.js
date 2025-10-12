@@ -405,6 +405,7 @@ function AntMedia(props) {
     const [isPlayed, setIsPlayed] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
     const [participants, setParticipants] = useState([]);
+    const [pendingTracks, setPendingTracks] = React.useState(new Map());
 
     const [selectedCamera, setSelectedCamera] = React.useState(localStorage.getItem('selectedCamera'));
     const [selectedMicrophone, setSelectedMicrophone] = React.useState(localStorage.getItem('selectedMicrophone'));
@@ -2365,37 +2366,31 @@ function AntMedia(props) {
                 console.info("Current VTA list before update:", JSON.stringify(videoTrackAssignments));
 
                 setVideoTrackAssignments(currentVTA => {
-                    console.info("Received VTA list:", JSON.stringify(receivedVTA));
-                    console.info("Current VTA list before update:", JSON.stringify(currentVTA));
+                    const newPendingTracks = new Map(pendingTracks);
 
-                    const receivedVTAMap = new Map(receivedVTA.map(v => [v.videoLabel, v]));
-                    const stitchedVTA = [...currentVTA];
-
-                    // First pass: stitch the streamId to the track object for new tracks.
-                    stitchedVTA.forEach(assignment => {
-                        if (assignment.streamId === "room") {
-                            const serverAssignment = receivedVTAMap.get(assignment.videoLabel);
-                            if (serverAssignment && serverAssignment.trackId) {
-                                console.log(`Stitching streamId for ${assignment.videoLabel}: from 'room' to '${serverAssignment.trackId}'`);
-                                assignment.streamId = serverAssignment.trackId;
-                            }
-                        }
-                    });
-
-                    // Create a map of the now-stitched tracks by streamId.
-                    const stitchedTracksByStreamId = new Map(stitchedVTA.map(v => [v.streamId, v.track]));
-
-                    // Build the new VTA list from the received data, ensuring tracks are preserved.
+                    // Build the new VTA list from the server data
                     let newVTA = receivedVTA
-                        .filter(vta => vta.trackId && vta.trackId.length > 0) // Filter out invalid assignments
-                        .map(vta => ({
-                            videoLabel: vta.videoLabel,
-                            streamId: vta.trackId,
-                            track: stitchedTracksByStreamId.get(vta.trackId) || null,
-                            isReserved: vta.reserved,
-                            isMine: false,
-                            isFake: false,
-                        }));
+                        .filter(vta => vta.trackId && vta.trackId.length > 0)
+                        .map(vta => {
+                            // Check if there's a pending track for this videoLabel
+                            const pendingTrack = newPendingTracks.get(vta.videoLabel);
+                            if (pendingTrack) {
+                                console.log(`Found pending track for ${vta.videoLabel}, assigning to ${vta.trackId}`);
+                                newPendingTracks.delete(vta.videoLabel); // Consume the track
+                            }
+
+                            // Try to find the track from the current VTA if it wasn't pending
+                            const currentAssignment = currentVTA.find(c => c.streamId === vta.trackId);
+
+                            return {
+                                videoLabel: vta.videoLabel,
+                                streamId: vta.trackId,
+                                track: pendingTrack || currentAssignment?.track || null,
+                                isReserved: vta.reserved,
+                                isMine: false, // Will be corrected below
+                                isFake: false,
+                            };
+                        });
 
                     // Preserve the local user from the original current state.
                     const localAssignment = currentVTA.find(v => v.isMine);
@@ -2403,12 +2398,10 @@ function AntMedia(props) {
                         const localInNew = newVTA.find(v => v.streamId === localAssignment.streamId);
                         if (localInNew) {
                             localInNew.isMine = true;
-                            // Make sure the local track is preserved if it exists
                             if (localAssignment.track) {
                                 localInNew.track = localAssignment.track;
                             }
                         } else {
-                            console.log("Local user not in received VTA, adding it back.");
                             newVTA.push(localAssignment);
                         }
                     }
@@ -2417,8 +2410,14 @@ function AntMedia(props) {
                     const fakeParticipants = currentVTA.filter(vta => vta.isFake);
                     newVTA.push(...fakeParticipants);
 
+                    // Update the pending tracks state
+                    if (newPendingTracks.size !== pendingTracks.size) {
+                        setPendingTracks(newPendingTracks);
+                    }
+
+                    // Only update if the list has actually changed
                     if (!_.isEqual(newVTA, currentVTA)) {
-                        console.info("Setting new VTA list (stitched):", JSON.stringify(newVTA));
+                        console.info("Setting new VTA list:", JSON.stringify(newVTA));
                         setParticipantUpdated(p => !p);
                         requestSyncAdministrativeFields();
                         return newVTA;
@@ -2716,34 +2715,22 @@ function AntMedia(props) {
 
     function handlePlayVideo(obj) {
         console.log("handlePlayVideo: " + JSON.stringify(obj));
-        let index = obj?.trackId?.substring("ARDAMSx".length);
-        globals.trackEvents.push({track: obj.track.id, event: "added"});
+        const videoLabel = obj?.trackId?.substring("ARDAMSx".length);
+        globals.trackEvents.push({ track: obj.track.id, event: "added" });
 
         if (obj.track.kind === "audio") {
-            var newAudioTrack = {
-                id: index, track: obj.track, streamId: obj.streamId
+            const newAudioTrack = {
+                id: videoLabel,
+                track: obj.track,
+                streamId: obj.streamId,
             };
-
-            //append new audio track, track id should be unique because of audio track limitation
-            let temp = audioTracks;
-            temp.push(newAudioTrack);
-            setAudioTracks(temp);
+            setAudioTracks(prev => [...prev, newAudioTrack]);
         } else if (obj.track.kind === "video") {
-            let newVideoTrackAssignment = {
-                videoLabel: index, track: obj.track, streamId: obj.streamId, isReserved: false
-            };
-
-            if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
-                console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
-            } else {
-                console.log("add vta:"+newVideoTrackAssignment.videoLabel)
-                setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
-                setParticipantUpdated(!participantUpdated);
-                console.log("document.hidden",document.hidden);
-                if (document.hidden) {
-                    playJoinRoomSound();
-                }
-            }
+            // Instead of directly adding to videoTrackAssignments,
+            // let's add it to a temporary pending list.
+            // The VIDEO_TRACK_ASSIGNMENT_LIST handler will then pick it up.
+            console.log(`Track with label ${videoLabel} is pending`);
+            setPendingTracks(prev => new Map(prev).set(videoLabel, obj.track));
         }
     }
 
