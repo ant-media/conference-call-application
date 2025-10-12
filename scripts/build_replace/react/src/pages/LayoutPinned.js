@@ -59,21 +59,30 @@ function LayoutPinned (props) {
 
       // if participant info is not available, don't change order
       if (!participantA || !participantB) {
+        console.log("[Sort] Participant info not available for", a.streamId, "or", b.streamId);
         return 0;
       }
 
       const pinnedParticipantDetails = conference.allParticipants[pinnedParticipant?.streamId];
+      console.log(`[Sort] Pinned Participant: ${pinnedParticipant?.streamId}`, pinnedParticipantDetails);
+
 
       // Check if the pinned participant is sharing their screen.
       if (pinnedParticipantDetails?.isScreenShared) {
+        console.log(`[Sort] Pinned participant is screen sharing.`);
         // The screen share streamId is usually in the format {base_stream_id}_presentation.
         const screenSharerBaseStreamId = pinnedParticipant.streamId.replace('_presentation', '');
+        console.log(`[Sort] Screen sharer's base stream ID: ${screenSharerBaseStreamId}`);
+        console.log(`[Sort] Comparing A: ${participantA.streamId} vs B: ${participantB.streamId}`);
+
 
         // We want to move the screen sharer's main video feed to the top of the unpinned participants.
         if (participantA.streamId === screenSharerBaseStreamId) {
+          console.log(`[Sort] Match found for A. Moving ${participantA.name} to top.`);
           return -1; // a should be sorted before b
         }
         if (participantB.streamId === screenSharerBaseStreamId) {
+          console.log(`[Sort] Match found for B. Moving ${participantB.name} to top.`);
           return 1; // b should be sorted before a
         }
       }
