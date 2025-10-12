@@ -2051,11 +2051,11 @@ function AntMedia(props) {
     }
 
     function handleStopScreenShare() {
-        console.log("handleStopScreenShare called");
+        console.log("[StopScreenShare] handleStopScreenShare called");
         let notEvent = {
             streamId: screenShareStreamId.current, eventType: "SCREEN_SHARED_OFF"
         };
-        console.info("send notification event", notEvent);
+        console.info("[StopScreenShare] Sending SCREEN_SHARED_OFF notification:", notEvent);
         webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
 
         setIsScreenShared(false);
@@ -2064,6 +2064,7 @@ function AntMedia(props) {
         screenShareWebRtcAdaptor.current.closeWebSocket();
         screenShareWebRtcAdaptor.current = null;
         screenShareStreamId.current = null;
+        console.log("[StopScreenShare] Screen share stopped and cleaned up.");
     }
 
     function handleSetMessages(newMessage) {
