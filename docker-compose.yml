@@ -6,7 +6,7 @@ services:
       context: ./
       dockerfile: ./Dockerfile
       args:
-        AntMediaServer: ant-media-server-enterprise-2.15.0-20250805_0738.zip
+        # AntMediaServer: ant-media-server-enterprise-2.15.0-20250805_0738.zip
         LicenseKey: ${LICENSE_KEY}
     env_file:
       - .env
@@ -20,10 +20,3 @@ services:
       - "5443:5443" # HTTPS
       - "1935:1935" # RTMP
       - "5554:5554/udp" # WebRTC
-#   volumes:
-#      - ./plugins:/usr/local/antmedia/plugins
-#volumes:
-#  antmedia_vol:
-#    external: true
-#    name:
-#      antmedia_volume
