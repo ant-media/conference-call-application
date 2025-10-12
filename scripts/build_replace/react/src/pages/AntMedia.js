@@ -406,6 +406,7 @@ function AntMedia(props) {
     const [isJoining, setIsJoining] = useState(false);
     const [participants, setParticipants] = useState([]);
     const [pendingTracks, setPendingTracks] = React.useState(new Map());
+    const recentlyStoppedStream = React.useRef(null);
 
     const [selectedCamera, setSelectedCamera] = React.useState(localStorage.getItem('selectedCamera'));
     const [selectedMicrophone, setSelectedMicrophone] = React.useState(localStorage.getItem('selectedMicrophone'));
@@ -2090,30 +2091,37 @@ function AntMedia(props) {
     function handleStopScreenShare() {
         console.log("[StopScreenShare] handleStopScreenShare called");
         if (screenShareStreamId.current) {
-            // Immediately update the local participant state to un-pin the screen share
-            const participant = allParticipants[screenShareStreamId.current];
-            if (participant) {
-                participant.isPinned = false;
-                setAllParticipants(currentParticipants => ({
-                    ...currentParticipants,
-                    [screenShareStreamId.current]: participant
-                }));
-                // This will trigger a re-render and should switch the layout
-                setParticipantUpdated(val => !val);
-            }
+            const stoppedStreamId = screenShareStreamId.current;
+            recentlyStoppedStream.current = stoppedStreamId;
+            setTimeout(() => recentlyStoppedStream.current = null, 5000); // Clear after 5 seconds
+
+            // Immediately remove the screen share from the video assignments to prevent AbortError
+            setVideoTrackAssignments(currentAssignments =>
+                currentAssignments.filter(a => a.streamId !== stoppedStreamId)
+            );
+
+            // Also remove from allParticipants
+            setAllParticipants(currentParticipants => {
+                const newParticipants = { ...currentParticipants };
+                delete newParticipants[stoppedStreamId];
+                return newParticipants;
+            });
 
             // Send a notification to others that screen sharing has stopped.
             let notEvent = {
-                streamId: screenShareStreamId.current, eventType: "SCREEN_SHARED_OFF"
+                streamId: stoppedStreamId, eventType: "SCREEN_SHARED_OFF"
             };
             console.info("[StopScreenShare] Sending SCREEN_SHARED_OFF notification:", notEvent);
             webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
 
             // Stop the screen sharing stream.
-            screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
-            screenShareWebRtcAdaptor.current.closeStream();
-            screenShareWebRtcAdaptor.current.closeWebSocket();
-            screenShareWebRtcAdaptor.current = null;
+            if (screenShareWebRtcAdaptor.current) {
+                screenShareWebRtcAdaptor.current.stop(stoppedStreamId);
+                screenShareWebRtcAdaptor.current.closeStream();
+                screenShareWebRtcAdaptor.current.closeWebSocket();
+                screenShareWebRtcAdaptor.current = null;
+            }
+            
             screenShareStreamId.current = null;
             setIsScreenShared(false);
             console.log("[StopScreenShare] Screen share stopped and cleaned up.");
@@ -2353,13 +2361,6 @@ function AntMedia(props) {
                     console.log("Unpinning screen share video:", notificationEvent.streamId);
                     pinVideo(notificationEvent.streamId); //this will unpin
                 }
-            } else if (eventType === "SCREEN_SHARED_OFF") {
-                console.log("Received SCREEN_SHARED_OFF for", notificationEvent.streamId);
-                let participant = allParticipants[notificationEvent.streamId];
-                if (participant && participant.isPinned) {
-                    console.log("Unpinning screen share video:", notificationEvent.streamId);
-                    pinVideo(notificationEvent.streamId); //this will unpin
-                }
             } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
                 const receivedVTA = notificationEvent.payload;
                 console.info("Received VTA list:", JSON.stringify(receivedVTA));
@@ -2370,7 +2371,7 @@ function AntMedia(props) {
 
                     // Build the new VTA list from the server data
                     let newVTA = receivedVTA
-                        .filter(vta => vta.trackId && vta.trackId.length > 0)
+                        .filter(vta => vta.trackId && vta.trackId.length > 0 && vta.trackId !== recentlyStoppedStream.current)
                         .map(vta => {
                             // Check if there's a pending track for this videoLabel
                             const pendingTrack = newPendingTracks.get(vta.videoLabel);
