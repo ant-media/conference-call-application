@@ -2332,45 +2332,57 @@ function AntMedia(props) {
                     console.info("Received VTA list:", JSON.stringify(receivedVTA));
                     console.info("Current VTA list before update:", JSON.stringify(currentVTA));
 
-                    // Create a map of the current tracks by streamId for easy lookup.
-                    const currentTracksByStreamId = new Map(currentVTA.map(v => [v.streamId, v.track]));
+                    const receivedVTAMap = new Map(receivedVTA.map(v => [v.videoLabel, v]));
+                    const stitchedVTA = [...currentVTA];
 
-                    // Build the new VTA list from the received data.
+                    // First pass: stitch the streamId to the track object for new tracks.
+                    stitchedVTA.forEach(assignment => {
+                        if (assignment.streamId === "room") {
+                            const serverAssignment = receivedVTAMap.get(assignment.videoLabel);
+                            if (serverAssignment && serverAssignment.trackId) {
+                                console.log(`Stitching streamId for ${assignment.videoLabel}: from 'room' to '${serverAssignment.trackId}'`);
+                                assignment.streamId = serverAssignment.trackId;
+                            }
+                        }
+                    });
+
+                    // Create a map of the now-stitched tracks by streamId.
+                    const stitchedTracksByStreamId = new Map(stitchedVTA.map(v => [v.streamId, v.track]));
+
+                    // Build the new VTA list from the received data, ensuring tracks are preserved.
                     let newVTA = receivedVTA
                         .filter(vta => vta.trackId && vta.trackId.length > 0) // Filter out invalid assignments
                         .map(vta => ({
                             videoLabel: vta.videoLabel,
                             streamId: vta.trackId,
-                            // Preserve the track if we already have it for this streamId.
-                            track: currentTracksByStreamId.get(vta.trackId) || null,
+                            track: stitchedTracksByStreamId.get(vta.trackId) || null,
                             isReserved: vta.reserved,
-                            isMine: false, // Will be corrected below
+                            isMine: false,
                             isFake: false,
                         }));
 
-                    // Find the local user's assignment from the *current* state.
+                    // Preserve the local user from the original current state.
                     const localAssignment = currentVTA.find(v => v.isMine);
-
                     if (localAssignment) {
-                        // Check if the local user is in the new list.
                         const localInNew = newVTA.find(v => v.streamId === localAssignment.streamId);
                         if (localInNew) {
-                            // If yes, just mark it as 'isMine'.
                             localInNew.isMine = true;
+                            // Make sure the local track is preserved if it exists
+                            if (localAssignment.track) {
+                                localInNew.track = localAssignment.track;
+                            }
                         } else {
-                            // If not, add it back. This is crucial.
                             console.log("Local user not in received VTA, adding it back.");
                             newVTA.push(localAssignment);
                         }
                     }
 
-                    // Preserve any fake participants from the current state.
+                    // Preserve fake participants.
                     const fakeParticipants = currentVTA.filter(vta => vta.isFake);
                     newVTA.push(...fakeParticipants);
 
-
                     if (!_.isEqual(newVTA, currentVTA)) {
-                        console.info("Setting new VTA list (streamId-keyed):", JSON.stringify(newVTA));
+                        console.info("Setting new VTA list (stitched):", JSON.stringify(newVTA));
                         setParticipantUpdated(p => !p);
                         requestSyncAdministrativeFields();
                         return newVTA;
