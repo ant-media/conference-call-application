@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  antmedia:
+    platform: linux/amd64
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+      args:
+        AntMediaServer: ant-media-server-enterprise-2.15.0-20250805_0738.zip
+        LicenseKey: ${LICENSE_KEY}
+    env_file:
+      - .env
+    environment:
+      - ANT_OPTS=-Dred5.server.http_address=127.0.0.1
+    container_name: antmedia
+    restart: unless-stopped
+    entrypoint: /usr/local/antmedia/start.sh
+    ports:
+      - "5080:5080" # HTTP
+      - "5443:5443" # HTTPS
+      - "1935:1935" # RTMP
+      - "5554:5554/udp" # WebRTC
+#   volumes:
+#      - ./plugins:/usr/local/antmedia/plugins
+#volumes:
+#  antmedia_vol:
+#    external: true
+#    name:
+#      antmedia_volume
