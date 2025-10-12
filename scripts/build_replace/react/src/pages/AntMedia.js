@@ -2300,52 +2300,72 @@ function AntMedia(props) {
                     console.log("Unpinning screen share video:", notificationEvent.streamId);
                     pinVideo(notificationEvent.streamId); //this will unpin
                 }
+            } else if (eventType === "SCREEN_SHARED_OFF") {
+                console.log("Received SCREEN_SHARED_OFF for", notificationEvent.streamId);
+                let participant = allParticipants[notificationEvent.streamId];
+                if (participant && participant.isPinned) {
+                    console.log("Unpinning screen share video:", notificationEvent.streamId);
+                    pinVideo(notificationEvent.streamId); //this will unpin
+                }
             } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
+                const receivedVTA = notificationEvent.payload;
+                console.info("Received VTA list:", JSON.stringify(receivedVTA));
+                console.info("Current VTA list before update:", JSON.stringify(videoTrackAssignments));
 
-            // There are 2 operations here:
-            // 1. VTA available in both sides -> Update
-            // 2. VTA available in the current state but not in the new list -> Remove
-            // We don't need to add new VTA because it will be added by the handlePlayVideo function
+                setVideoTrackAssignments(currentVTA => {
+                    const newVTA = [...currentVTA];
+                    const localAssignment = newVTA.find(v => v.isMine);
 
-            let receivedVideoTrackAssignments = notificationEvent.payload;
+                    // Create a map of received VTAs for efficient lookup
+                    const receivedVTAMap = new Map(receivedVTA.map(v => [v.videoLabel, v]));
 
-            console.info("Received VTA list:", JSON.stringify(receivedVideoTrackAssignments));
-            console.info("Current VTA list:", JSON.stringify(videoTrackAssignments));
+                    // Update existing tracks and add new ones
+                    receivedVTA.forEach(vta => {
+                        const existingVTA = newVTA.find(v => v.videoLabel === vta.videoLabel);
+                        if (existingVTA) {
+                            // Update trackId if it's different
+                            if (existingVTA.streamId !== vta.trackId) {
+                                console.log(`Updating trackId for ${vta.videoLabel} from ${existingVTA.streamId} to ${vta.trackId}`);
+                                existingVTA.streamId = vta.trackId;
+                            }
+                        } else {
+                            // Add new VTA, but don't add the local user again if they are already present
+                            if (!localAssignment || vta.videoLabel !== localAssignment.videoLabel) {
+                                console.log(`Adding new VTA: ${vta.videoLabel}`);
+                                newVTA.push({
+                                    videoLabel: vta.videoLabel,
+                                    streamId: vta.trackId,
+                                    track: null,
+                                    isReserved: vta.reserved,
+                                    isMine: false,
+                                    isFake: false,
+                                });
+                            }
+                        }
+                    });
 
-            const labelToTrackMap = new Map(videoTrackAssignments.map(vta => [vta.videoLabel, vta.track]));
-            const localVideoAssignment = videoTrackAssignments.find(vta => vta.isMine);
+                    // Remove tracks that are no longer in the received list, but preserve the local user and fakes
+                    const filteredVTA = newVTA.filter(vta => {
+                        const isInReceived = receivedVTAMap.has(vta.videoLabel);
+                        const isLocalOrFake = vta.isMine || vta.isFake;
+                        if (!isInReceived && !isLocalOrFake) {
+                            console.log(`Removing stale VTA: ${vta.videoLabel}`);
+                        }
+                        return isInReceived || isLocalOrFake;
+                    });
 
-            let newVideoTrackAssignments = receivedVideoTrackAssignments.map(vta => {
-              const isLocal = localVideoAssignment && vta.videoLabel === localVideoAssignment.videoLabel;
-              return {
-                videoLabel: vta.videoLabel,
-                streamId: isLocal ? localVideoAssignment.streamId : vta.trackId,
-                track: labelToTrackMap.get(vta.videoLabel) || null,
-                isReserved: vta.reserved,
-                isMine: isLocal,
-                isFake: false,
-              };
-            });
+                    if (!_.isEqual(filteredVTA, currentVTA)) {
+                        console.info("Setting new VTA list:", JSON.stringify(filteredVTA));
+                        setParticipantUpdated(p => !p);
+                        requestSyncAdministrativeFields();
+                        return filteredVTA;
+                    }
 
-            // If the local user was not in the received list, add it back.
-            if (localVideoAssignment && !newVideoTrackAssignments.some(vta => vta.isMine)) {
-                newVideoTrackAssignments.push(localVideoAssignment);
-            }
+                    return currentVTA;
+                });
 
-            const fakeParticipants = videoTrackAssignments.filter(vta => vta.isFake);
-            newVideoTrackAssignments.push(...fakeParticipants);
-
-
-            if (!_.isEqual(newVideoTrackAssignments, videoTrackAssignments)) {
-              console.info("Setting new VTA list:", JSON.stringify(newVideoTrackAssignments));
-              setVideoTrackAssignments(newVideoTrackAssignments);
-              requestSyncAdministrativeFields();
-              setParticipantUpdated(!participantUpdated);
-            }
-
-            checkScreenSharingStatus();
-
-        } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
+                checkScreenSharingStatus();
+            } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
                 // FIXME: to be able to reduce render
                 if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
                   return;
