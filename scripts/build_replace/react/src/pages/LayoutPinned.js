@@ -118,7 +118,7 @@ function LayoutPinned (props) {
           playingParticipantsCount ++;
           playingParticipants.push(element);
           return (
-              <div className="unpinned" key={index}>
+              <div className="unpinned" key={element.streamId}>
                 <div className="single-video-container">
                   <VideoCard
                       isMobileView={isMobileView}
