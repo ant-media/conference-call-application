@@ -382,6 +382,8 @@ function AntMedia(props) {
     const {sendMessage, latestMessage, isWebSocketConnected} = useWebSocket();
 
     const [videoTrackAssignments, setVideoTrackAssignments] = useState([]);
+    
+    const [previousVideoTrackAssignments, setPreviousVideoTrackAssignments] = useState([]);
 
   /*
    * allParticipants: is a dictionary of (streamId, broadcastObject) for the sum of the paged participants and the participants in videoTrackAssignments.
@@ -404,9 +406,6 @@ function AntMedia(props) {
     const [isPublished, setIsPublished] = useState(false);
     const [isPlayed, setIsPlayed] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
-    const [participants, setParticipants] = useState([]);
-    const [pendingTracks, setPendingTracks] = React.useState(new Map());
-    const recentlyStoppedStream = React.useRef(null);
 
     const [selectedCamera, setSelectedCamera] = React.useState(localStorage.getItem('selectedCamera'));
     const [selectedMicrophone, setSelectedMicrophone] = React.useState(localStorage.getItem('selectedMicrophone'));
@@ -484,46 +483,11 @@ function AntMedia(props) {
     const theme = useTheme();
 
   useEffect(() => {
-    const pinnedParticipant = Object.values(allParticipants).find(p => p.isPinned);
-
-    const getParticipants = () => {
-      let participants = videoTrackAssignments
-        .map((vta) => {
-          const participant = allParticipants[vta.streamId];
-          if (participant) {
-            return { ...vta, ...participant };
-          }
-          return vta;
-        })
-        .filter((p) => {
-          let isPlayOnly;
-          try {
-            isPlayOnly = JSON.parse(p?.metaData)?.isPlayOnly;
-          } catch (e) {
-            isPlayOnly = false;
-          }
-          return p.name && p.name !== "" && !isPlayOnly && p.name !== "Anonymous";
-        });
-
-      // Custom sort logic
-      participants.sort((a, b) => {
-        if (pinnedParticipant?.isScreenShared) {
-          const screenSharerBaseStreamId = pinnedParticipant.streamId.replace('_presentation', '');
-          if (a.streamId === screenSharerBaseStreamId) return -1;
-          if (b.streamId === screenSharerBaseStreamId) return 1;
-        }
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
-        return 0;
-      });
-
-      return participants;
-    };
-
-    setParticipants(getParticipants());
-    setParticipantUpdated(val => !val);
-
-  }, [videoTrackAssignments, allParticipants]);
+    setTimeout(() => {
+      setParticipantUpdated(!participantUpdated);
+      //console.log("setParticipantUpdated due to videoTrackAssignments or allParticipants change.");
+    }, 5000);
+  }, [videoTrackAssignments, allParticipants]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleUnauthorizedDialogExitClicked() {
 
@@ -2089,43 +2053,10 @@ function AntMedia(props) {
     }
 
     function handleStopScreenShare() {
-        console.log("[StopScreenShare] handleStopScreenShare called");
-        if (screenShareStreamId.current) {
-            const stoppedStreamId = screenShareStreamId.current;
-            recentlyStoppedStream.current = stoppedStreamId;
-            setTimeout(() => recentlyStoppedStream.current = null, 5000); // Clear after 5 seconds
-
-            // Immediately remove the screen share from the video assignments to prevent AbortError
-            setVideoTrackAssignments(currentAssignments =>
-                currentAssignments.filter(a => a.streamId !== stoppedStreamId)
-            );
-
-            // Also remove from allParticipants
-            setAllParticipants(currentParticipants => {
-                const newParticipants = { ...currentParticipants };
-                delete newParticipants[stoppedStreamId];
-                return newParticipants;
-            });
-
-            // Send a notification to others that screen sharing has stopped.
-            let notEvent = {
-                streamId: stoppedStreamId, eventType: "SCREEN_SHARED_OFF"
-            };
-            console.info("[StopScreenShare] Sending SCREEN_SHARED_OFF notification:", notEvent);
-            webRTCAdaptor?.sendData(publishStreamId, JSON.stringify(notEvent));
-
-            // Stop the screen sharing stream.
-            if (screenShareWebRtcAdaptor.current) {
-                screenShareWebRtcAdaptor.current.stop(stoppedStreamId);
-                screenShareWebRtcAdaptor.current.closeStream();
-                screenShareWebRtcAdaptor.current.closeWebSocket();
-                screenShareWebRtcAdaptor.current = null;
-            }
-            
-            screenShareStreamId.current = null;
-            setIsScreenShared(false);
-            console.log("[StopScreenShare] Screen share stopped and cleaned up.");
-        }
+        setIsScreenShared(false);
+        screenShareWebRtcAdaptor.current.stop(screenShareStreamId.current);
+        screenShareWebRtcAdaptor.current.closeStream();
+        screenShareWebRtcAdaptor.current.closeWebSocket();
     }
 
     function handleSetMessages(newMessage) {
@@ -2354,80 +2285,77 @@ function AntMedia(props) {
                 if (notificationEvent.streamId === publishStreamId && !isScreenShared) {
                     updateVideoSendResolution(false);
                 }
-            } else if (eventType === "SCREEN_SHARED_OFF") {
-                console.log("Received SCREEN_SHARED_OFF for", notificationEvent.streamId);
-                let participant = allParticipants[notificationEvent.streamId];
-                if (participant && participant.isPinned) {
-                    console.log("Unpinning screen share video:", notificationEvent.streamId);
-                    pinVideo(notificationEvent.streamId); //this will unpin
-                }
             } else if (eventType === "VIDEO_TRACK_ASSIGNMENT_LIST") {
-                const receivedVTA = notificationEvent.payload;
-                console.info("Received VTA list:", JSON.stringify(receivedVTA));
-                console.info("Current VTA list before update:", JSON.stringify(videoTrackAssignments));
+                const vtar = notificationEvent.payload;
+                console.info("VIDEO_TRACK_ASSIGNMENT_LIST -> ", JSON.stringify(vtar));
 
-                setVideoTrackAssignments(currentVTA => {
-                    const newPendingTracks = new Map(pendingTracks);
+                let processedVtar = [...vtar];
 
-                    // Build the new VTA list from the server data
-                    let newVTA = receivedVTA
-                        .filter(vta => vta.trackId && vta.trackId.length > 0 && vta.trackId !== recentlyStoppedStream.current)
-                        .map(vta => {
-                            // Check if there's a pending track for this videoLabel
-                            const pendingTrack = newPendingTracks.get(vta.videoLabel);
-                            if (pendingTrack) {
-                                console.log(`Found pending track for ${vta.videoLabel}, assigning to ${vta.trackId}`);
-                                newPendingTracks.delete(vta.videoLabel); // Consume the track
-                            }
+                // Check for the shuffle condition: same length, same labels, but different trackIds.
+                const isShuffle =
+                    vtar.length === previousVideoTrackAssignments.length &&
+                    !_.isEqual(vtar.map(v => v.trackId), previousVideoTrackAssignments.map(v => v.trackId)) &&
+                    _.isEqual(vtar.map(v => v.videoLabel), previousVideoTrackAssignments.map(v => v.videoLabel));
 
-                            // Try to find the track from the current VTA if it wasn't pending
-                            const currentAssignment = currentVTA.find(c => c.streamId === vta.trackId);
-
-                            return {
-                                videoLabel: vta.videoLabel,
-                                streamId: vta.trackId,
-                                track: pendingTrack || currentAssignment?.track || null,
-                                isReserved: vta.reserved,
-                                isMine: false, // Will be corrected below
-                                isFake: false,
-                            };
-                        });
-
-                    // Preserve the local user from the original current state.
-                    const localAssignment = currentVTA.find(v => v.isMine);
-                    if (localAssignment) {
-                        const localInNew = newVTA.find(v => v.streamId === localAssignment.streamId);
-                        if (localInNew) {
-                            localInNew.isMine = true;
-                            if (localAssignment.track) {
-                                localInNew.track = localAssignment.track;
-                            }
-                        } else {
-                            newVTA.push(localAssignment);
+                if (isShuffle) {
+                    // If it's a shuffle, find the assignment with the empty trackId.
+                    const emptyTrackIndex = processedVtar.findIndex(p => p.trackId === "");
+                    if (emptyTrackIndex > -1) {
+                        // Patch the empty trackId with the one from the previous state.
+                        const oldTrackId = previousVideoTrackAssignments[emptyTrackIndex]?.trackId;
+                        if (oldTrackId) {
+                            console.log(`Patching empty trackId at index ${emptyTrackIndex} with previous trackId ${oldTrackId}`);
+                            processedVtar[emptyTrackIndex].trackId = oldTrackId;
                         }
                     }
+                }
 
-                    // Preserve fake participants.
-                    const fakeParticipants = currentVTA.filter(vta => vta.isFake);
-                    newVTA.push(...fakeParticipants);
+                setVideoTrackAssignments(currentAssignments => {
+                    // Create a map of the current assignments for efficient lookup.
+                    const currentAssignmentsMap = new Map(currentAssignments.map(a => [a.streamId, a]));
 
-                    // Update the pending tracks state
-                    if (newPendingTracks.size !== pendingTracks.size) {
-                        setPendingTracks(newPendingTracks);
+                    let finalAssignments = processedVtar.map(p => {
+                        const streamId = p.trackId;
+                        // Try to find an existing assignment to preserve the MediaStreamTrack object.
+                        const existingAssignment = currentAssignments.find(c => c.streamId === streamId || c.videoLabel === p.videoLabel);
+
+                        return {
+                            videoLabel: p.videoLabel,
+                            streamId: streamId,
+                            // If we found an existing assignment with a track, use it. Otherwise, it's null for now.
+                            track: existingAssignment ? existingAssignment.track : null,
+                            isMine: streamId === publishStreamId,
+                            isReserved: p.reserved,
+                        };
+                    });
+
+                    // Ensure the local participant's video is always in the list if they are publishing.
+                    if (!isPlayOnly && !finalAssignments.some(a => a.isMine)) {
+                        const localVideoAssignment = currentAssignments.find(a => a.isMine);
+                        if (localVideoAssignment) {
+                            finalAssignments.push(localVideoAssignment);
+                        }
+                    }
+                    
+                    // Fetch broadcast objects for any new participants that don't have one yet.
+                    processedVtar.forEach(p => {
+                        if (p.trackId && !allParticipants[p.trackId]) {
+                            webRTCAdaptor?.getBroadcastObject(p.trackId);
+                        }
+                    });
+
+
+                    if (!_.isEqual(finalAssignments, currentAssignments)) {
+                        setParticipantUpdated(val => !val);
+                        return finalAssignments;
                     }
 
-                    // Only update if the list has actually changed
-                    if (!_.isEqual(newVTA, currentVTA)) {
-                        console.info("Setting new VTA list:", JSON.stringify(newVTA));
-                        setParticipantUpdated(p => !p);
-                        requestSyncAdministrativeFields();
-                        return newVTA;
-                    }
-
-                    return currentVTA;
+                    return currentAssignments;
                 });
 
-                checkScreenSharingStatus();
+                // IMPORTANT: Update the previous assignments with the *original* payload for the next cycle.
+                setPreviousVideoTrackAssignments(vtar);
+
             } else if (eventType === "AUDIO_TRACK_ASSIGNMENT") {
                 // FIXME: to be able to reduce render
                 if (role === WebinarRoles.Host || role === WebinarRoles.ActiveHost) {
@@ -2716,22 +2644,34 @@ function AntMedia(props) {
 
     function handlePlayVideo(obj) {
         console.log("handlePlayVideo: " + JSON.stringify(obj));
-        const videoLabel = obj?.trackId?.substring("ARDAMSx".length);
-        globals.trackEvents.push({ track: obj.track.id, event: "added" });
+        let index = obj?.trackId?.substring("ARDAMSx".length);
+        globals.trackEvents.push({track: obj.track.id, event: "added"});
 
         if (obj.track.kind === "audio") {
-            const newAudioTrack = {
-                id: videoLabel,
-                track: obj.track,
-                streamId: obj.streamId,
+            var newAudioTrack = {
+                id: index, track: obj.track, streamId: obj.streamId
             };
-            setAudioTracks(prev => [...prev, newAudioTrack]);
+
+            //append new audio track, track id should be unique because of audio track limitation
+            let temp = audioTracks;
+            temp.push(newAudioTrack);
+            setAudioTracks(temp);
         } else if (obj.track.kind === "video") {
-            // Instead of directly adding to videoTrackAssignments,
-            // let's add it to a temporary pending list.
-            // The VIDEO_TRACK_ASSIGNMENT_LIST handler will then pick it up.
-            console.log(`Track with label ${videoLabel} is pending`);
-            setPendingTracks(prev => new Map(prev).set(videoLabel, obj.track));
+            let newVideoTrackAssignment = {
+                videoLabel: index, track: obj.track, streamId: obj.streamId, isReserved: false
+            };
+
+            if (isVideoLabelExists(newVideoTrackAssignment.videoLabel, videoTrackAssignments)) {
+                console.error("Video label is already exist: " + newVideoTrackAssignment.videoLabel);
+            } else {
+                console.log("add vta:"+newVideoTrackAssignment.videoLabel)
+                setVideoTrackAssignments((videoTrackAssignments) => [...videoTrackAssignments, newVideoTrackAssignment]);
+                setParticipantUpdated(!participantUpdated);
+                console.log("document.hidden",document.hidden);
+                if (document.hidden) {
+                    playJoinRoomSound();
+                }
+            }
         }
     }
 
@@ -3138,7 +3078,6 @@ function AntMedia(props) {
                         numberOfUnReadMessages,
                         participantUpdated,
                         allParticipants,
-                        participants,
                         globals,
                         isPlayOnly,
                         setIsPlayOnly,
