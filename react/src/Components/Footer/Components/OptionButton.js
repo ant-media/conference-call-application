@@ -8,8 +8,10 @@ import SettingsDialog from "./SettingsDialog";
 import {LayoutSettingsDialog} from "./LayoutSettingsDialog";
 import {ListItemIcon, ListItemText, Tooltip} from "@mui/material";
 import {useTranslation} from "react-i18next";
-import {ConferenceContext} from 'pages/AntMedia';
-import {GeneralSettingsDialog} from "./GeneralSettingsDialog";
+import GeneralSettingsDialog from "./GeneralSettingsDialog";
+import {ThemeList} from "../../../styles/themeList";
+import {ThemeContext} from "../../../App";
+import i18n from "i18next";
 
 const CustomizedBtn = styled(Button)(({theme}) => ({
   "&.footer-icon-button": {
@@ -25,8 +27,7 @@ const CustomizedBtn = styled(Button)(({theme}) => ({
   },
 }));
 
-function OptionButton({footer, ...props}) {
-  const conference = React.useContext(ConferenceContext);
+function OptionButton(props) {
   const {t} = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -34,6 +35,31 @@ function OptionButton({footer, ...props}) {
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
   const theme = useTheme();
+  const themeContext = React.useContext(ThemeContext);
+
+  // Language and theme states
+  const [currentLanguage, setCurrentLanguage] = React.useState(
+      localStorage.getItem("i18nextLng") || "en"
+  );
+  const [currentTheme, setCurrentTheme] = React.useState(
+      themeContext?.currentTheme || ThemeList.Green
+  );
+
+  // Language handler
+  const switchLanguage = (value) => {
+    localStorage.setItem("i18nextLng", value);
+    i18n.changeLanguage(value).then(() => {
+      setCurrentLanguage(value);
+      console.log("Language switched to", value);
+    });
+  };
+
+  // Theme handler
+  const switchTheme = (value) => {
+    localStorage.setItem("selectedTheme", value);
+    themeContext.setCurrentTheme(value);
+    setCurrentTheme(value);
+  };
 
   // if you select camera then we are going to focus on camera button.
   const [selectFocus, setSelectFocus] = React.useState(null);
@@ -79,20 +105,39 @@ function OptionButton({footer, ...props}) {
         open={dialogOpen}
         onClose={handleDialogClose}
         selectFocus={selectFocus}
+        handleBackgroundReplacement={props.handleBackgroundReplacement}
+        microphoneSelected={(mic) => props?.microphoneSelected(mic)}
+        devices={props?.devices}
+        selectedCamera={props?.selectedCamera}
+        cameraSelected={(camera) => props?.cameraSelected(camera)}
+        selectedMicrophone={props?.selectedMicrophone}
+        selectedBackgroundMode={props?.selectedBackgroundMode}
+        setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
+        videoSendResolution={props?.videoSendResolution}
+        setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
       />
       <LayoutSettingsDialog
         open={layoutDialogOpen}
         onClose={handleLayoutDialogClose}
         selectFocus={selectFocus}
+        globals={props?.globals}
+        allParticipants={props?.allParticipants}
+        pinVideo={(streamId)=>props?.pinVideo(streamId)}
+        pinFirstVideo={props?.pinFirstVideo}
+        handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
       />
       <GeneralSettingsDialog
         open={generalSettingsDialogOpen}
         onClose={handleGeneralSettingsDialogClose}
         selectFocus={selectFocus}
+        currentLanguage={currentLanguage}
+        switchLanguage={switchLanguage}
+        currentTheme={currentTheme}
+        switchTheme={switchTheme}
       />
       <Tooltip title={t("More options")} placement="top">
         <CustomizedBtn
-          className={footer ? "footer-icon-button" : ""}
+          className={props?.footer ? "footer-icon-button" : ""}
           id="settings-button"
           variant="contained"
           color={open ? "primary" : "secondary"}
@@ -122,7 +167,7 @@ function OptionButton({footer, ...props}) {
         }}
       >
         {process.env.REACT_APP_OPTION_MENU_GENERAL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
-        <MenuItem onClick={() => handleGeneralSettingsDialogOpen()}>
+        <MenuItem key="general-settings" onClick={() => handleGeneralSettingsDialogOpen()}>
           <ListItemIcon>
             <SvgIcon size={36} name={"settings"} color={theme.palette?.iconColor?.primary}/>
           </ListItemIcon>
@@ -135,7 +180,7 @@ function OptionButton({footer, ...props}) {
             : null}
 
         {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
-        <MenuItem onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
+        <MenuItem key="layout"  onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
           <ListItemIcon>
             <SvgIcon size={36} name={"layout"} color={theme.palette?.iconColor?.primary}/>
           </ListItemIcon>
@@ -145,9 +190,9 @@ function OptionButton({footer, ...props}) {
         </MenuItem>
             : null}
 
-        {conference.isPlayOnly === false
+        {props?.isPlayOnly === false
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
-          <MenuItem onClick={() => handleDialogOpen()} id="call-settings">
+          <MenuItem key="call-settings" onClick={() => handleDialogOpen()} id="call-settings">
             <ListItemIcon>
               <SvgIcon size={36} name={"call-settings"} color={theme.palette?.iconColor?.primary}/>
             </ListItemIcon>
@@ -155,9 +200,9 @@ function OptionButton({footer, ...props}) {
           </MenuItem>
           : null}
 
-        {conference.isPlayOnly === false
+        {props?.isPlayOnly === false
         && process.env.REACT_APP_CALL_SETTINGS_VIRTUAL_BACKGROUND_MODE_VISIBILITY === 'true' ?
-            <MenuItem onClick={() => { conference.handleEffectsOpen(!conference.effectsDrawerOpen); handleClose(); }} 
+            <MenuItem key="background-replacement" onClick={() => { props?.handleEffectsOpen(!props?.effectsDrawerOpen); handleClose(); }}
               id="virtual-effects">
               <ListItemIcon>
                 <SvgIcon size={36} name={"background-replacement"} color={theme.palette?.iconColor?.primary} />
@@ -166,10 +211,10 @@ function OptionButton({footer, ...props}) {
             </MenuItem>
           : null}
 
-        {process.env.REACT_APP_RECORDING_MANAGED_BY_ADMIN === 'false' || conference.isAdmin === true ?
+        {process.env.REACT_APP_RECORDING_MANAGED_BY_ADMIN === 'false' || props?.isAdmin === true ?
           [
-            (conference.isRecordPluginActive === false && conference.isRecordPluginInstalled === true) &&
-            (<MenuItem onClick={() => { conference.startRecord(); handleClose(); } } id="start-recording-button"
+            (props?.isRecordPluginActive === false && props?.isRecordPluginInstalled === true) &&
+            (<MenuItem key="start-recording" onClick={() => { props?.startRecord(); handleClose(); } } id="start-recording-button"
             >
               <ListItemIcon>
                 <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />
@@ -178,8 +223,8 @@ function OptionButton({footer, ...props}) {
             </MenuItem>
             ),
 
-            (conference.isRecordPluginActive === true && conference.isRecordPluginInstalled === true) &&
-            (<MenuItem onClick={() => { conference.stopRecord(); handleClose(); }} id="stop-recording-button"
+            (props?.isRecordPluginActive === true && props?.isRecordPluginInstalled === true) &&
+            (<MenuItem key="stop-recording" onClick={() => { props?.stopRecord(); handleClose(); }} id="stop-recording-button"
           >
             <ListItemIcon>
               <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />
@@ -192,6 +237,7 @@ function OptionButton({footer, ...props}) {
 
         {process.env.REACT_APP_OPTION_MENU_REPORT_PROBLEM_BUTTON_VISIBILITY === 'true' ?
           <MenuItem
+            key="report-problem"
             component={"a"}
             href={process.env.REACT_APP_REPORT_PROBLEM_URL}
             target={"_blank"}

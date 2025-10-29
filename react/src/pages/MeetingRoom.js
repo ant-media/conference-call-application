@@ -1,8 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable */
 import VideoCard from "Components/Cards/VideoCard";
 import React from "react";
 import Footer from "Components/Footer/Footer";
-import {ConferenceContext} from "./AntMedia";
 import LayoutPinned from "./LayoutPinned";
 import LayoutTiled from "./LayoutTiled";
 import {ReactionBarSelector} from "@charkour/react-reactions";
@@ -12,8 +11,10 @@ import {t} from "i18next";
 import {isComponentMode} from "../utils";
 import BecomePublisherConfirmationDialog from "../Components/BecomePublisherConfirmationDialog";
 import RecordingButton from "../Components/RecordingButton";
+import TalkingIndicator from "../Components/TalkingIndicator";
 import {Container} from "@mui/material";
 import {isMobile} from "react-device-detect";
+import {UnitTestContext} from "./AntMedia";
 
 function debounce(fn, ms) {
   let timer;
@@ -28,19 +29,19 @@ function debounce(fn, ms) {
 
 
 const MeetingRoom = React.memo((props) => {
-  const conference = React.useContext(ConferenceContext)
+  const unitTestContext = React.useContext(UnitTestContext);
   const [gallerySize, setGallerySize] = React.useState({"w": 100, "h": 100});
 
   const theme = useTheme();
 
   React.useEffect(() => {
     handleGalleryResize(false);
-    window.conference = conference;
-  }, [conference.videoTrackAssignments, conference.allParticipants, conference.participantUpdated]);
+    window.conference = unitTestContext;
+  }, [props?.videoTrackAssignments, props?.allParticipants, props?.participantUpdated]);
 
   React.useEffect(() => {
     handleGalleryResize(true);
-  }, [conference.messageDrawerOpen, conference.participantListDrawerOpen, conference.effectsDrawerOpen, conference.publisherRequestListDrawerOpen]);
+  }, [props?.messageDrawerOpen, props?.participantListDrawerOpen, props?.effectsDrawerOpen, props?.publisherRequestListDrawerOpen]);
 
   React.useEffect(() => {
     const debouncedHandleResize = debounce(handleGalleryResize, 500);
@@ -53,8 +54,8 @@ const MeetingRoom = React.memo((props) => {
 
   //this trigger ReactionBarSelector to render everytime, useCallback by making sure about conference dependency - mekya
   function sendEmoji(emoji) {
-    conference?.sendReactions(emoji);
-    conference?.setShowEmojis(!conference.showEmojis);
+    props?.sendReactions(emoji);
+    props?.setShowEmojis(!props?.showEmojis);
   }
 
   const reactionList = [
@@ -75,7 +76,7 @@ const MeetingRoom = React.memo((props) => {
 
     if (gallery) {
       if (calcDrawer) {
-        if (conference.messageDrawerOpen || conference.participantListDrawerOpen || conference.effectsDrawerOpen || conference.publisherRequestListDrawerOpen) {
+        if (props?.messageDrawerOpen || props?.participantListDrawerOpen || props?.effectsDrawerOpen || props?.publisherRequestListDrawerOpen) {
           gallery.classList.add("drawer-open");
         } else {
           gallery.classList.remove("drawer-open");
@@ -88,77 +89,186 @@ const MeetingRoom = React.memo((props) => {
     }
   }
 
-  function getPinnedParticipant() {
-    let firstPinnedParticipant;
-    conference.allParticipants = conference.allParticipants || {};
-    Object.keys(conference.allParticipants).forEach(streamId => {
-      let participant = conference.allParticipants[streamId];
-      if (typeof participant.isPinned !== 'undefined'
-        && participant.isPinned === true
-        && typeof firstPinnedParticipant === 'undefined') {
+  const pinnedParticipant = props?.allParticipants[props.currentPinInfo?.streamId];
 
-        firstPinnedParticipant = conference.allParticipants[streamId];
-        return firstPinnedParticipant;
-      }
-    });
-    return firstPinnedParticipant;
-  }
+  const pinLayout = (typeof props.currentPinInfo !== "undefined" && props.currentPinInfo?.pinned);
 
-  const firstPinnedParticipant = getPinnedParticipant();
-
-  const pinLayout = (typeof firstPinnedParticipant !== "undefined");
-
+  /* istanbul ignore next */
   return (
       <Container
-        id="meeting-room"
+          id="meeting-room"
       >
-        {conference?.isRecordPluginActive === true ?
+        {props?.isRecordPluginActive === true ?
             <RecordingButton/> : null
         }
-        <MuteParticipantDialog/>
-        <BecomePublisherConfirmationDialog/>
-        {conference.audioTracks.map((audioTrackAssignment, index) => (
-            <VideoCard
-                key={index}
-                trackAssignment={audioTrackAssignment}
-                autoPlay
-                name={""}
-                style={{display: "none"}}
-            />
-        ))}
-        <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
-          {pinLayout ?
-              (<LayoutPinned
-                  pinnedParticipant={firstPinnedParticipant}
-                  width={gallerySize.w}
-                  height={gallerySize.h}
-                  isMobile={isMobile}
-              />)
-              :
-              (<LayoutTiled
-                  width={gallerySize.w}
-                  height={gallerySize.h}
-              />)
-          }
-        </div>
+        <MuteParticipantDialog
+            isMuteParticipantDialogOpen={props?.isMuteParticipantDialogOpen}
+            setMuteParticipantDialogOpen={(open)=>props?.setMuteParticipantDialogOpen(open)}
+            participantIdMuted={props?.participantIdMuted}
+            setParticipantIdMuted={(participant)=>props?.setParticipantIdMuted(participant)}
+            turnOffYourMicNotification={(streamId)=>props?.turnOffYourMicNotification(streamId)}
+        />
+        <BecomePublisherConfirmationDialog
+            setBecomePublisherConfirmationDialogOpen={(open)=>props?.setBecomePublisherConfirmationDialogOpen(open)}
+            handleStartBecomePublisher={()=>props?.handleStartBecomePublisher()}
+            isBecomePublisherConfirmationDialogOpen={props?.isBecomePublisherConfirmationDialogOpen}
+        />
 
-        {conference.showEmojis && (
-            <div id="meeting-reactions" style={{
-              position: isComponentMode() ? "absolute" : "fixed",
-              bottom: 80,
-              display: "flex",
-              alignItems: "center",
-              padding: 16,
-              zIndex: 666,
-              height: 46,
-            }}>
-              <ReactionBarSelector reactions={reactionList} iconSize={28}
-                                   style={{backgroundColor: theme.palette.themeColor[70]}} onSelect={sendEmoji}/>
-            </div>)
-        }
-        <Footer {...props} />
-      </Container>
-  );
-});
+        {props?.audioTracks.map((audioTrackAssignment, index) => (
+                <VideoCard
+                    key={index}
+                    trackAssignment={audioTrackAssignment}
+                    autoPlay
+                    name={""}
+                    style={{display: "none"}}
+                    streamName={props?.streamName}
+                    isPublished={props?.isPublished}
+                    isPlayOnly={props?.isPlayOnly}
+                    isMyMicMuted={props?.isMyMicMuted}
+                    isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                    allParticipants={props?.allParticipants}
+                    setParticipantIdMuted={(participant) => props?.setParticipantIdMuted(participant)}
+                    turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                    turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                    turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                    pinVideo={props?.pinVideo}
+                    isAdmin={props?.isAdmin}
+                    publishStreamId={props?.publishStreamId}
+                    localVideo={props?.localVideo}
+                    localVideoCreate={props?.localVideoCreate}
+                />
+              ))}
+              <div id="meeting-gallery" style={{height: "calc(100vh - 80px)"}}>
+                {pinLayout ?
+                    (<LayoutPinned
+                        pinnedParticipant={pinnedParticipant}
+                        width={gallerySize.w}
+                        height={gallerySize.h}
+                        globals={props?.globals}
+                        publishStreamId={props?.publishStreamId}
+                        pinVideo={props?.pinVideo}
+                        unpinVideo={props?.unpinVideo}
+                        allParticipants={props?.allParticipants}
+                        videoTrackAssignments={props?.videoTrackAssignments}
+                        updateMaxVideoTrackCount={props?.updateMaxVideoTrackCount}
+                        talkers={props?.talkers}
+                        streamName={props?.streamName}
+                        isPublished={props?.isPublished}
+                        isPlayOnly={props?.isPlayOnly}
+                        isMyMicMuted={props?.isMyMicMuted}
+                        isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                        setAudioLevelListener={props?.setAudioLevelListener}
+                        setParticipantIdMuted={props?.setParticipantIdMuted}
+                        turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                        turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                        turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                        isAdmin={props?.isAdmin}
+                        localVideo={props?.localVideo}
+                        localVideoCreate={props?.localVideoCreate}
+                    />)
+                    :
+                    (<LayoutTiled
+                        width={gallerySize.w}
+                        height={gallerySize.h}
+                        videoTrackAssignments={props?.videoTrackAssignments}
+                        participantUpdated={props?.participantUpdated}
+                        allParticipants={props?.allParticipants}
+                        globals={props?.globals}
+                        updateMaxVideoTrackCount={props?.updateMaxVideoTrackCount}
+                        publishStreamId={props?.publishStreamId}
+                        talkers={props?.talkers}
+                        streamName={props?.streamName}
+                        isPublished={props?.isPublished}
+                        isPlayOnly={props?.isPlayOnly}
+                        isMyMicMuted={props?.isMyMicMuted}
+                        isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                        setAudioLevelListener={props?.setAudioLevelListener}
+                        setParticipantIdMuted={props?.setParticipantIdMuted}
+                        turnOnYourMicNotification={props?.turnOnYourMicNotification}
+                        turnOffYourMicNotification={props?.turnOffYourMicNotification}
+                        turnOffYourCamNotification={props?.turnOffYourCamNotification}
+                        pinVideo={props?.pinVideo}
+                        unpinVideo={props?.unpinVideo}
+                        isAdmin={props?.isAdmin}
+                        localVideo={props?.localVideo}
+                        localVideoCreate={props?.localVideoCreate}
+                    />)
+                }
+              </div>
 
-export default MeetingRoom;
+              {props?.showEmojis && (
+                  <div id="meeting-reactions" style={{
+                    position: isComponentMode() ? "absolute" : "fixed",
+                    bottom: 100,
+                    left: "50%",
+                    transform: "translate(-50%, 50%)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 16,
+                    zIndex: 666,
+                    height: 46,
+                  }}>
+                    <ReactionBarSelector reactions={reactionList} iconSize={28}
+                                         style={{backgroundColor: theme.palette.themeColor?.[70]}} onSelect={sendEmoji}/>
+                  </div>)
+              }
+              <Footer
+                  isPlayOnly={props?.isPlayOnly}
+                  isRecordPluginActive={props?.isRecordPluginActive}
+                  isEnterDirectly={props?.isEnterDirectly}
+                  isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                  cameraButtonDisabled={props?.cameraButtonDisabled}
+                  checkAndTurnOffLocalCamera={props?.checkAndTurnOffLocalCamera}
+                  checkAndTurnOnLocalCamera={props?.checkAndTurnOnLocalCamera}
+                  isMyMicMuted={props?.isMyMicMuted}
+                  toggleMic={props?.toggleMic}
+                  microphoneButtonDisabled={props?.microphoneButtonDisabled}
+                  isScreenShared={props?.isScreenShared}
+                  handleStartScreenShare={props?.handleStartScreenShare}
+                  handleStopScreenShare={props?.handleStopScreenShare}
+                  showEmojis={props?.showEmojis}
+                  setShowEmojis={props?.setShowEmojis}
+                  numberOfUnReadMessages={props?.numberOfUnReadMessages}
+                  toggleSetNumberOfUnreadMessages={props?.toggleSetNumberOfUnreadMessages}
+                  messageDrawerOpen={props?.messageDrawerOpen}
+                  handleMessageDrawerOpen={props?.handleMessageDrawerOpen}
+                  participantCount={props?.participantCount}
+                  participantListDrawerOpen={props?.participantListDrawerOpen}
+                  handleParticipantListOpen={props?.handleParticipantListOpen}
+                  requestSpeakerList={props?.requestSpeakerList}
+                  publisherRequestListDrawerOpen={props?.publisherRequestListDrawerOpen}
+                  handlePublisherRequestListOpen={props?.handlePublisherRequestListOpen}
+                  handlePublisherRequest={()=> {props?.handlePublisherRequest()}}
+                  setLeftTheRoom={props?.setLeftTheRoom}
+                  addFakeParticipant={props?.addFakeParticipant}
+                  removeFakeParticipant={props?.removeFakeParticipant}
+                  fakeReconnect={props?.fakeReconnect}
+                  isBroadcasting={props?.isBroadcasting}
+                  handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
+                  allParticipants={props?.allParticipants}
+                  pinVideo={(streamId)=>props?.pinVideo(streamId)}
+                  pinFirstVideo={props?.pinFirstVideo}
+                  handleBackgroundReplacement={props?.handleBackgroundReplacement}
+                  microphoneSelected={(mic) => props?.microphoneSelected(mic)}
+                  devices={props?.devices}
+                  selectedCamera={props?.selectedCamera}
+                  cameraSelected={(camera) => props?.cameraSelected(camera)}
+                  selectedMicrophone={props?.selectedMicrophone}
+                  selectedBackgroundMode={props?.selectedBackgroundMode}
+                  setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
+                  videoSendResolution={props?.videoSendResolution}
+                  setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
+                  isAdmin={props?.isAdmin}
+                  isRecordPluginInstalled={props?.isRecordPluginInstalled}
+                  startRecord={props?.startRecord}
+                  stopRecord={props?.stopRecord}
+                  effectsDrawerOpen={props?.effectsDrawerOpen}
+                  handleEffectsOpen={props?.handleEffectsOpen}
+                  globals={props?.globals}
+              />
+          </Container>
+        );
+        });
+
+        export default MeetingRoom;

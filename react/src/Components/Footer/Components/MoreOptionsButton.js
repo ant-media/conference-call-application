@@ -8,9 +8,11 @@ import SettingsDialog from "./SettingsDialog";
 import { LayoutSettingsDialog } from "./LayoutSettingsDialog";
 import { ListItemIcon, ListItemText, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { ConferenceContext } from 'pages/AntMedia';
-import {GeneralSettingsDialog} from "./GeneralSettingsDialog";
+import GeneralSettingsDialog from "./GeneralSettingsDialog";
 import {isMobile,isTablet} from "react-device-detect";
+import i18n from "i18next";
+import {ThemeList} from "../../../styles/themeList";
+import {ThemeContext} from "../../../App";
 
 const CustomizedBtn = styled(Button)(({ theme }) => ({
   "&.footer-icon-button": {
@@ -26,8 +28,7 @@ const CustomizedBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-function MoreOptionsButton({ footer, ...props }) {
-  const conference = React.useContext(ConferenceContext);
+function MoreOptionsButton(props) {
   const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -35,6 +36,31 @@ function MoreOptionsButton({ footer, ...props }) {
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
   const theme = useTheme();
+    const themeContext = React.useContext(ThemeContext);
+
+    // Language and theme states
+    const [currentLanguage, setCurrentLanguage] = React.useState(
+        localStorage.getItem("i18nextLng") || "en"
+    );
+    const [currentTheme, setCurrentTheme] = React.useState(
+        themeContext?.currentTheme || ThemeList.Green
+    );
+
+    // Language handler
+    const switchLanguage = (value) => {
+        localStorage.setItem("i18nextLng", value);
+        i18n.changeLanguage(value).then(() => {
+            setCurrentLanguage(value);
+            console.log("Language switched to", value);
+        });
+    };
+
+    // Theme handler
+    const switchTheme = (value) => {
+        localStorage.setItem("selectedTheme", value);
+        themeContext.setCurrentTheme(value);
+        setCurrentTheme(value);
+    };
 
 
   const handleClick = (event) => {
@@ -61,18 +87,36 @@ function MoreOptionsButton({ footer, ...props }) {
           <SettingsDialog
               open={dialogOpen}
               onClose={handleDialogClose}
+              handleBackgroundReplacement={props.handleBackgroundReplacement}
+              microphoneSelected={(mic) => props?.microphoneSelected(mic)}
+              devices={props?.devices}
+              selectedCamera={props?.selectedCamera}
+              cameraSelected={(camera) => props?.cameraSelected(camera)}
+              selectedMicrophone={props?.selectedMicrophone}
+              selectedBackgroundMode={props?.selectedBackgroundMode}
+              setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
+              videoSendResolution={props?.videoSendResolution}
+              setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
           />
           <LayoutSettingsDialog
               open={layoutDialogOpen}
               onClose={handleLayoutDialogClose}
+              globals={props?.globals}
+              allParticipants={props?.allParticipants}
+              pinVideo={(streamId) => props?.pinVideo(streamId)}
+              handleSetDesiredTileCount={props?.handleSetDesiredTileCount}
           />
           <GeneralSettingsDialog
             open={generalSettingsDialogOpen}
             onClose={handleGeneralSettingsDialogClose}
+            currentLanguage={currentLanguage}
+            switchLanguage={switchLanguage}
+            currentTheme={currentTheme}
+            switchTheme={switchTheme}
           />
           <Tooltip title={t("More options")} placement="top">
             <CustomizedBtn
-                className={footer ? "footer-icon-button" : ""}
+                className={props?.footer ? "footer-icon-button" : ""}
                 id="more-button"
                 data-testid="more-button-test"
                 variant="contained"
@@ -103,12 +147,12 @@ function MoreOptionsButton({ footer, ...props }) {
               }}
           >
 
-            {(conference.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') ?
+            {(props?.isPlayOnly === false) && (!isMobile) && (!isTablet) && (process.env.REACT_APP_FOOTER_SCREEN_SHARE_BUTTON_VISIBILITY === 'true') ?
               <MenuItem onClick={() => {
-                if (conference.isScreenShared) {
-                conference.handleStopScreenShare();
+                if (props?.isScreenShared) {
+                props?.handleStopScreenShare();
               } else {
-                conference.handleStartScreenShare();
+                props?.handleStartScreenShare();
                 // send other that you are sharing screen.
               }
                 handleClose();
@@ -119,13 +163,13 @@ function MoreOptionsButton({ footer, ...props }) {
                 <ListItemText
                   id="more-options-share-screen-button"
                 >
-                  {conference.isScreenShared ? t("You are presenting") : t("Present now")}
+                  {props?.isScreenShared ? t("You are presenting") : t("Present now")}
                 </ListItemText>
               </MenuItem>
               : null}
 
             {process.env.REACT_APP_FOOTER_REACTIONS_BUTTON_VISIBILITY === 'true' ?
-              <MenuItem onClick={() => {conference.setShowEmojis(!conference.showEmojis); handleClose();}}>
+              <MenuItem onClick={() => {props?.setShowEmojis(!props?.showEmojis); handleClose();}}>
                 <ListItemIcon>
                   <SvgIcon size={36} name={'smiley-face'} color={theme.palette?.iconColor?.primary} />
                 </ListItemIcon>
@@ -139,10 +183,10 @@ function MoreOptionsButton({ footer, ...props }) {
 
             {(process.env.REACT_APP_FOOTER_MESSAGE_BUTTON_VISIBILITY === 'true') ?
               <MenuItem onClick={() => {
-                if (!conference?.messageDrawerOpen) {
-                  conference?.toggleSetNumberOfUnreadMessages(0);
+                if (!props?.messageDrawerOpen) {
+                  props?.toggleSetNumberOfUnreadMessages(0);
                 }
-                conference?.handleMessageDrawerOpen(!conference?.messageDrawerOpen);
+                props?.handleMessageDrawerOpen(!props?.messageDrawerOpen);
                 handleClose();
               }}>
                 <ListItemIcon>
@@ -154,7 +198,7 @@ function MoreOptionsButton({ footer, ...props }) {
 
             {process.env.REACT_APP_FOOTER_PARTICIPANT_LIST_BUTTON_VISIBILITY === 'true' ?
               <MenuItem
-                  onClick={() => {conference?.handleParticipantListOpen(!conference?.participantListDrawerOpen); handleClose();}}
+                  onClick={() => {props?.handleParticipantListOpen(!props?.participantListDrawerOpen); handleClose();}}
               >
                 <ListItemIcon>
                   <SvgIcon size={36} name={"participants"} color={theme.palette?.iconColor?.primary} />
@@ -163,25 +207,25 @@ function MoreOptionsButton({ footer, ...props }) {
               </MenuItem>
               : null}
 
-              {(process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isAdmin === true) ?
+              {(process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (props?.isAdmin === true) ?
                   <MenuItem
-                      onClick={() => {conference?.handlePublisherRequestListOpen(!conference?.publisherRequestListDrawerOpen); handleClose();}}
+                      onClick={() => {props?.handlePublisherRequestListOpen(!props?.publisherRequestListDrawerOpen); handleClose();}}
                   >
                       <ListItemIcon>
                           <SvgIcon size={36} name={"raise-hand"} color={"white"} />
                       </ListItemIcon>
-                      <ListItemText id={"publisher-request-list-button"}>{t("Publisher Request List")}</ListItemText>
+                      <ListItemText id={"more-options-publisher-request-list-button"}>{t("Publisher Request List")}</ListItemText>
                   </MenuItem>
                   : null}
 
-              {(process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (conference.isPlayOnly === true) ?
+              {(process.env.REACT_APP_FOOTER_PUBLISHER_REQUEST_BUTTON_VISIBILITY === 'true') && (props?.isPlayOnly === true) ?
                   <MenuItem
-                      onClick={() => {conference?.handlePublisherRequest(); handleClose();}}
+                      onClick={() => {props?.handlePublisherRequest(); handleClose();}}
                   >
                       <ListItemIcon>
                           <SvgIcon size={36} name={"raise-hand"} color={"white"} />
                       </ListItemIcon>
-                      <ListItemText id={"request-to-publisher-button"}>{t("Request becoming publisher")}</ListItemText>
+                      <ListItemText id={"more-options-request-publish-button"}>{t("Request becoming publisher")}</ListItemText>
                   </MenuItem>
                   : null}
 
