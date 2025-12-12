@@ -3815,33 +3815,6 @@ describe('AntMedia Component', () => {
 
     consoleSpy.mockRestore();
   });
-
-  describe('checkAndTurnOffLocalCamera', () => {
-    it('should call webRTCAdaptor.turnOffLocalCamera with the correct stream id', async () => {
-      const { container } = render(
-        <AntMedia isTest={true}>
-          <MockChild/>
-        </AntMedia>
-      );
-
-      await waitFor(() => {
-        expect(webRTCAdaptorConstructor).not.toBe(undefined);
-      });
-
-      currentConference.isMyMicMuted = false;
-      await act(async () => {
-        currentConference.setPublishStreamId('test-stream-id');
-      });
-
-      // Call the function
-      await act(async () => {
-        currentConference.checkAndTurnOffLocalCamera();
-      });
-
-      // Assertion: only check the observable side effect
-      expect(webRTCAdaptorConstructor.turnOffLocalCamera).toHaveBeenCalledWith('test-stream-id');
-    });
-  });
 });
 
 

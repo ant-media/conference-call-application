@@ -2286,10 +2286,7 @@ function AntMedia(props) {
             handleStopScreenShare();
         }
 
-        if(role === WebinarRoles.TempListener) {
-            setInitialized(false);
-            createWebRTCAdaptor();
-        }
+        //createWebRTCAdaptor();
 
         setWaitingOrMeetingRoom("waiting");
     }, [isPlayOnly]);
@@ -2934,7 +2931,7 @@ function AntMedia(props) {
 
     function checkAndTurnOnLocalCamera() {
         if (isVideoEffectRunning) {
-            webRTCAdaptor?.turnOnEffectCamera(publishStreamId);
+            webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = true;
         } else {
             webRTCAdaptor?.turnOnLocalCamera(publishStreamId);
         }
@@ -2946,7 +2943,11 @@ function AntMedia(props) {
     }
 
     function checkAndTurnOffLocalCamera(streamId) {
+        if (isVideoEffectRunning) {
+            webRTCAdaptor.mediaManager.localStream.getVideoTracks()[0].enabled = false;
+        } else {
             webRTCAdaptor?.turnOffLocalCamera(publishStreamId);
+        }
 
         updateUserStatusMetadata(isMyMicMuted, false);
         setIsMyCamTurnedOff(true);

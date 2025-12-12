@@ -74,6 +74,13 @@ function WaitingRoom(props) {
         isMine: true
     };
 
+    React.useEffect(() => {
+        if (props?.role === WebinarRoles.TempListener) {
+            const tempLocalVideo = document.getElementById("localVideo");
+            props?.localVideoCreate(tempLocalVideo);
+            console.log("TempListener local video created");
+        }
+    }, []);
 
     React.useEffect(() => {
 
@@ -496,7 +503,6 @@ function WaitingRoom(props) {
                                         placeholder={t("Your name")}
                                         readOnly={true}
                                         id="participant_name"
-                                        autocomplete="given-name"
                                     />
                                     : <TextField
                                         autoFocus
@@ -508,7 +514,6 @@ function WaitingRoom(props) {
                                         onChange={(e) => props?.setStreamName(e.target.value)}
                                         placeholder={t("Your name")}
                                         id="participant_name"
-                                        autocomplete="given-name"
                                     />}
                             </Grid>
                             <Grid container justifyContent={"center"}>

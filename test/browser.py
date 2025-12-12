@@ -33,6 +33,7 @@ class Browser:
     browser_options.add_argument('--disable-setuid-sandbox')
     browser_options.add_argument('--enable-logging')
     browser_options.add_argument('--v=1')
+    browser_options.add_argument("--mute-audio") 
     
     if is_headless:
       browser_options.add_argument("--headless")
@@ -43,6 +44,7 @@ class Browser:
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
   def open_in_new_tab(self, url):
+    print("url opening:" + url)
     self.driver.switch_to.new_window('tab')
     self.driver.get(url)
     return self.driver.current_window_handle
@@ -103,6 +105,8 @@ class Browser:
             else:
                 print(f"Element not found by {by} with value {value} after {retries} attempts: {e}")
                 #print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
+                self.save_ss_as_file("not-found.png")
+
                 raise
             
   def get_all_elements(self, by, value):
@@ -204,11 +208,3 @@ class Browser:
     for handle in self.driver.window_handles:
       self.driver.switch_to.window(handle)
       self.driver.close()
-
-    try:
-        subprocess.run(['pkill', 'chrome'], check=True)
-        print("Successfully killed all Chrome processes.")
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred: {e}")
-    except FileNotFoundError:
-        print("The pkill command is not available on this system.")
