@@ -4,6 +4,11 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import DialogContent from '@mui/material/DialogContent';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import InputAdornment from '@mui/material/InputAdornment';
 import { SvgIcon } from 'Components/SvgIcon';
 import { useTranslation } from 'react-i18next';
 
@@ -36,6 +41,12 @@ export function GoToLobbyDialog(props) {
   const [copied, setCopied] = React.useState(false);
   const { onClose, url, open, onGoToLobbyClicked } = props;
 
+  React.useEffect(() => {
+    if (open) {
+      setCopied(false);
+    }
+  }, [open, url]);
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(url);
     setCopied(true);
@@ -50,49 +61,45 @@ export function GoToLobbyDialog(props) {
   }
 
   return (
-    <Dialog onClose={handleClose} open={open}  maxWidth={'sm'}>
+    <Dialog onClose={handleClose} open={open} maxWidth={'sm'} fullWidth>
       <AntDialogTitle onClose={handleClose}>{t('Share this Url with Your Attendees')}</AntDialogTitle>
       <DialogContent>
-
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <a
-      href={url}
-      title={url} // Tooltip showing the full URL on hover
-      style={{
-        color: '#fff',
-        fontSize: '1em',
-        cursor: 'pointer',
-        display: 'inline-block',
-        maxWidth: '350px',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {url}
-    </a>
-      <span
-        style={{ textDecoration: 'underline', cursor: 'pointer', fontSize: '1.5em', marginTop:'15px'}}
-        onClick={copyToClipboard}
-      >
-        {copied ? 'Copied!' : 'Copy'}
-      </span>
-    </div>
-
-        <Button
-                  style={{marginTop:'35px'}}
-
-            onClick={goToLobbyClicked}
-            size='medium'
-            color="secondary"
-            variant="contained"
-            type="submit"
-            id="go_to_lobby_button"
-        >
-        {t("Go to Lobby")}
-        </Button>
-
-
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            {t('Anyone with this link can join the room.')}
+          </Typography>
+          <TextField
+            value={url || ''}
+            fullWidth
+            variant="outlined"
+            InputProps={{
+              readOnly: true,
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Button
+                    onClick={copyToClipboard}
+                    color="secondary"
+                    variant={copied ? "contained" : "outlined"}
+                  >
+                    {copied ? t('Copied!') : t('Copy')}
+                  </Button>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+            <Button
+              onClick={goToLobbyClicked}
+              size='medium'
+              color="secondary"
+              variant="contained"
+              type="submit"
+              id="go_to_lobby_button"
+            >
+              {t("Go to Lobby")}
+            </Button>
+          </Stack>
+        </Box>
       </DialogContent>
     </Dialog>
   );

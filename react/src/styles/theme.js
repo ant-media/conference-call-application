@@ -4,6 +4,7 @@ import { getGreenTheme } from "./greenTheme";
 import {getBlueTheme} from "./blueTheme";
 import {getGrayTheme} from "./grayTheme";
 import {getWhiteTheme} from "./whiteTheme";
+import {getRedWhiteTheme} from "./redWhiteTheme";
 
 const getTheme = (theme) => {
   let themeObject;
@@ -24,6 +25,9 @@ const getTheme = (theme) => {
       break;
     case ThemeList.White:
       themeObject = getWhiteTheme();
+      break;
+    case ThemeList.RedWhite:
+      themeObject = getRedWhiteTheme();
       break;
     default:
       themeObject = getGreenTheme();

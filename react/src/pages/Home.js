@@ -8,6 +8,7 @@ import Stack from "@mui/material/Stack";
 import { RoomCreationPasswordDialog } from "Components/Footer/Components/RoomCreationPasswordDialog";
 import { GoToLobbyDialog } from 'Components/Footer/Components/GoToLobbyDialog';
 import { useWebSocket } from 'Components/WebSocketProvider';
+import IletisimBaskanligiLogo from "../static/images/iletisim-baskanligi.png";
 
 
 
@@ -27,6 +28,47 @@ function Home(props) {
 
     const { sendMessage, latestMessage, isWebSocketConnected } = useWebSocket();
 
+    const getAppPath = () => {
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      return pathParts.length > 0 ? `/${pathParts[0]}` : "";
+    };
+
+    const getRestBaseUrl = () => `${window.location.origin}${getAppPath()}/rest/v2`;
+
+    const buildMeetingUrl = (roomId, tokenValue) => {
+      const basePath = `${window.location.origin}${getAppPath()}/${roomId}`;
+      return `${basePath}?token=${tokenValue}`;
+    };
+
+    const createJwtTokenForRoom = async (roomId) => {
+      const expireDate = 1795689600;
+      const url = `http://localhost:5080/live/rest/v2/broadcasts/app-jwt-token?expireDate=${expireDate}&type=publish`
+    
+      const response = await fetch(url);
+      console.log("response-----------", response);
+      if (!response.ok) {
+        throw new Error(`Token request failed: ${response.status}`);
+      }
+      const data = await response.json();
+      if (!data || !data.tokenId) {
+        throw new Error("Token response is missing tokenId");
+      }
+      return data.tokenId;
+    };
+
+    const openLobbyDialogForRoom = async (roomId) => {
+      try {
+        const jwtToken = await createJwtTokenForRoom(roomId);
+        joinToken.current = jwtToken;
+        joinRoomUrl.current = buildMeetingUrl(roomId, jwtToken);
+        setRoomName(roomId);
+        setGoToLobbyDialogOpen(true);
+      } catch (error) {
+        console.error("Failed to generate JWT token:", error);
+        alert("JWT token generation failed. Check jwtStreamSecretKey, jwtScope, and publishJwtControlEnabled.");
+      }
+    };
+
 
     const handleCreateRoomPasswordChange = (newPassword) => {
         setCreateRoomPassword(newPassword);
@@ -42,7 +84,8 @@ function Home(props) {
                 setCreateRoomPasswordDialogOpen(true);
             }
             else {
-              goToLobby()
+              const newRoomId = roomName || nanoid(8);
+              openLobbyDialogForRoom(newRoomId);
             }
 
       };
@@ -98,11 +141,7 @@ function Home(props) {
           {
             if(obj.authenticated && obj.joinToken && obj.roomName)
             {
-                  const currentURL = window.location.href;
-                  joinToken.current = obj.joinToken
-                  joinRoomUrl.current = currentURL + obj.roomName +"?token="+ obj.joinToken
-                  setRoomName(obj.roomName);
-                  setGoToLobbyDialogOpen(true)
+                  openLobbyDialogForRoom(obj.roomName);
             }else{
                 alert("Room creation password is not correct. Please set password on app configuration file and enable JWT token stream security from settings.")
             }
@@ -141,6 +180,19 @@ function Home(props) {
 
             <Grid container justifyContent={"center"} sx={{mt: 8}}>
                 <Box py={8}>
+                    <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+                        <Box
+                            component="img"
+                            src={IletisimBaskanligiLogo}
+                            alt="Iletisim Baskanligi logo"
+                            sx={{
+                                width: { xs: "280px", sm: "360px", md: "420px" },
+                                height: "auto",
+                                objectFit: "contain",
+                                filter: "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2))",
+                            }}
+                        />
+                    </Box>
                     <Typography variant="h1" align="center">
                         {t("Join our meeting room")}
                     </Typography>
@@ -163,7 +215,7 @@ function Home(props) {
                                 color="primary"
                                 variant="outlined"
                                 autoComplete="off"
-                                placeholder={t("Room name")}
+                                placeholder={t("Meeting name")}
                                 id="room_name"
                             />
 
@@ -172,13 +224,10 @@ function Home(props) {
                                 color="secondary"
                                 variant="contained"
                                 type="submit"
-                                onClick={() => {
-                                    let roomName = document.getElementById("room_name").value;
-                                    navigate(`/${roomName}`);
-                                }}
+                                onClick={handleCreateMeeting}
                                 id="room_join_button"
                             >
-                                {t("Join the room")}
+                                {t("Create Meeting")}
                             </Button>
                         </Stack>
 
@@ -189,15 +238,9 @@ function Home(props) {
                     </Grid>
                 </Grid>
                 <Grid container justifyContent={'center'}>
-                    <Typography
-      variant="body1"
-
-      style={{ textDecoration: 'underline', cursor: 'pointer',       color: 'white' // Set text color to white
-    }}
-      onClick={handleCreateMeeting}
-    >
-      {t('Create Meeting')}
-    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                        {t('You can name the meeting or leave it blank for a random link.')}
+                    </Typography>
                 </Grid>
             </Grid>
         </>

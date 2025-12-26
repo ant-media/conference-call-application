@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Backdrop, Box, CircularProgress, Grid } from "@mui/material";
-import { useBeforeUnload, useParams } from "react-router-dom";
+import { useBeforeUnload, useLocation, useParams } from "react-router-dom";
 import WaitingRoom from "./WaitingRoom";
 import _ from "lodash";
 import MeetingRoom from "./MeetingRoom";
@@ -188,8 +188,6 @@ function getToken() {
     return token;
 }
 
-var token = getToken();
-
 function getRole() {
     const dataRole = document.getElementById("root")?.getAttribute("data-role");
     let role = (dataRole) ? dataRole : getUrlParameter("role");
@@ -285,6 +283,8 @@ function AntMedia(props) {
     // eslint-disable-next-line
     const initialRoomName = (isComponentMode()) ? getRootAttribute("data-room-name") : useParams().id;
     const [roomName, setRoomName] = useState(initialRoomName);
+    const location = useLocation();
+    const token = React.useMemo(() => getToken(), [location.search, location.pathname]);
 
     const [role, setRole] = useState(roleInit);
 

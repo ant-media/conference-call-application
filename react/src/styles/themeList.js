@@ -3,4 +3,5 @@ export const ThemeList = {
   Blue: "blue",
   Gray: "gray",
   White: "white",
+  RedWhite: "redwhite",
 };

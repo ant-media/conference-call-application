@@ -35,6 +35,11 @@ function OptionButton(props) {
   const [layoutDialogOpen, setLayoutDialogOpen] = React.useState(false);
   const [generalSettingsDialogOpen, setGeneralSettingsDialogOpen] = React.useState(false);
   const theme = useTheme();
+  const buttonBgColor = open ? theme.palette?.primary?.main : theme.palette?.secondary?.main;
+  const buttonIconColor = theme.palette?.getContrastText && buttonBgColor
+    ? theme.palette.getContrastText(buttonBgColor)
+    : theme.palette?.text?.primary;
+  const menuIconColor = theme.palette?.text?.primary;
   const themeContext = React.useContext(ThemeContext);
 
   // Language and theme states
@@ -146,7 +151,7 @@ function OptionButton(props) {
           aria-expanded={open ? "true" : undefined}
           onClick={handleClick}
         >
-          <SvgIcon size={40} name={'settings'} color={open ? theme.palette?.darkIconColor?.primary : theme.palette?.iconColor?.primary}/>
+          <SvgIcon size={40} name={'settings'} color={buttonIconColor}/>
         </CustomizedBtn>
       </Tooltip>
       <Menu
@@ -169,7 +174,7 @@ function OptionButton(props) {
         {process.env.REACT_APP_OPTION_MENU_GENERAL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
         <MenuItem key="general-settings" onClick={() => handleGeneralSettingsDialogOpen()}>
           <ListItemIcon>
-            <SvgIcon size={36} name={"settings"} color={theme.palette?.iconColor?.primary}/>
+            <SvgIcon size={36} name={"settings"} color={menuIconColor}/>
           </ListItemIcon>
           <ListItemText
             id="general-button"
@@ -182,7 +187,7 @@ function OptionButton(props) {
         {process.env.REACT_APP_OPTION_MENU_CHANGE_LAYOUT_BUTTON_VISIBILITY === 'true' ?
         <MenuItem key="layout"  onClick={() => handleLayoutDialogOpen()} id="change-layout-button">
           <ListItemIcon>
-            <SvgIcon size={36} name={"layout"} color={theme.palette?.iconColor?.primary}/>
+            <SvgIcon size={36} name={"layout"} color={menuIconColor}/>
           </ListItemIcon>
           <ListItemText>
             {t("Change Layout")}
@@ -194,7 +199,7 @@ function OptionButton(props) {
         && process.env.REACT_APP_OPTION_MENU_CALL_SETTINGS_BUTTON_VISIBILITY === 'true' ?
           <MenuItem key="call-settings" onClick={() => handleDialogOpen()} id="call-settings">
             <ListItemIcon>
-              <SvgIcon size={36} name={"call-settings"} color={theme.palette?.iconColor?.primary}/>
+              <SvgIcon size={36} name={"call-settings"} color={menuIconColor}/>
             </ListItemIcon>
             <ListItemText>{t("Call Settings")}</ListItemText>
           </MenuItem>
@@ -205,7 +210,7 @@ function OptionButton(props) {
             <MenuItem key="background-replacement" onClick={() => { props?.handleEffectsOpen(!props?.effectsDrawerOpen); handleClose(); }}
               id="virtual-effects">
               <ListItemIcon>
-                <SvgIcon size={36} name={"background-replacement"} color={theme.palette?.iconColor?.primary} />
+                <SvgIcon size={36} name={"background-replacement"} color={menuIconColor} />
               </ListItemIcon>
               <ListItemText>{t("Virtual Effects")}</ListItemText>
             </MenuItem>
@@ -217,7 +222,7 @@ function OptionButton(props) {
             (<MenuItem key="start-recording" onClick={() => { props?.startRecord(); handleClose(); } } id="start-recording-button"
             >
               <ListItemIcon>
-                <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />
+                <SvgIcon size={36} name={"camera"} color={menuIconColor} />
               </ListItemIcon>
               <ListItemText>{t("Start Record")}</ListItemText>
             </MenuItem>
@@ -227,7 +232,7 @@ function OptionButton(props) {
             (<MenuItem key="stop-recording" onClick={() => { props?.stopRecord(); handleClose(); }} id="stop-recording-button"
           >
             <ListItemIcon>
-              <SvgIcon size={36} name={"camera"} color={theme.palette?.iconColor?.primary} />
+              <SvgIcon size={36} name={"camera"} color={menuIconColor} />
             </ListItemIcon>
             <ListItemText>{t("Stop Record")}</ListItemText>
           </MenuItem>
@@ -244,7 +249,7 @@ function OptionButton(props) {
             rel="noopener noreferrer"
           >
             <ListItemIcon>
-              <SvgIcon size={36} name={"report"} color={theme.palette?.iconColor?.primary}/>
+              <SvgIcon size={36} name={"report"} color={menuIconColor}/>
             </ListItemIcon>
             <ListItemText>{t("Report Problem")}</ListItemText>
           </MenuItem>

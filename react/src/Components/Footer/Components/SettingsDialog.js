@@ -12,7 +12,7 @@ import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 const AntDialogTitle = props => {
-  const { children, onClose, ...other } = props;
+  const { children, onClose, closeIconColor, ...other } = props;
 
   return (
     <DialogTitle {...other}>
@@ -27,7 +27,7 @@ const AntDialogTitle = props => {
             top: 27,
           }}
         >
-          <SvgIcon size={30} name={'close'} color={'#fff'} />
+          <SvgIcon size={30} name={'close'} color={closeIconColor} />
         </Button>
       ) : null}
     </DialogTitle>
@@ -38,6 +38,7 @@ export default function SettingsDialog(props) {
   const { t } = useTranslation();
 
   const theme = useTheme();
+  const textColor = theme.palette?.text?.primary || "#000";
   const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
   const handleClose = (event, reason) => {
@@ -64,12 +65,14 @@ export default function SettingsDialog(props) {
 
   return (
     <Dialog onClose={handleClose} open={props?.open} fullScreen={fullScreen} maxWidth={'sm'} id="settings-dialog">
-      <AntDialogTitle onClose={handleClose}>{t('Set Camera and Microphone')}</AntDialogTitle>
+      <AntDialogTitle onClose={handleClose} closeIconColor={textColor}>
+        {t('Set Camera and Microphone')}
+      </AntDialogTitle>
       <DialogContent>
         <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
           <Grid container>
             <Grid container>
-              <InputLabel>{t('Camera')}</InputLabel>
+              <InputLabel sx={{ color: textColor }}>{t('Camera')}</InputLabel>
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
@@ -80,7 +83,7 @@ export default function SettingsDialog(props) {
                   variant="outlined"
                   value={props?.selectedCamera}
                   onChange={e => switchVideoMode(e.target.value)}
-                  sx={{ color: '#fff' }}
+                  sx={{ color: textColor }}
                 >
                   {props?.devices && props?.devices?.length > 0 && props?.devices
                     .filter(device => device.kind === 'videoinput')
@@ -93,14 +96,14 @@ export default function SettingsDialog(props) {
               </Grid>
               <Hidden xsDown>
                 <Grid item>
-                  <SvgIcon size={30} name={'camera'} color={'#fff'} />
+                  <SvgIcon size={30} name={'camera'} color={textColor} />
                 </Grid>
               </Hidden>
             </Grid>
           </Grid>
           <Grid container sx={{ mt: 4 }}>
             <Grid container>
-              <InputLabel>{t('Video Send resolution (maximum)')}</InputLabel>
+              <InputLabel sx={{ color: textColor }}>{t('Video Send resolution (maximum)')}</InputLabel>
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
@@ -109,7 +112,7 @@ export default function SettingsDialog(props) {
                     fullWidth
                     value={props?.videoSendResolution}
                     onChange={e => props?.setVideoSendResolution(e.target.value)}
-                    sx={{ color: '#fff' }}
+                    sx={{ color: textColor }}
                     id="setting-dialog-resolution-select"
                 >
                   <MenuItem key="auto" value="auto">
@@ -128,14 +131,14 @@ export default function SettingsDialog(props) {
               </Grid>
               <Hidden xsDown>
                 <Grid item>
-                  <SvgIcon size={36} name={'resolution'} color={'#fff'} />
+                  <SvgIcon size={36} name={'resolution'} color={textColor} />
                 </Grid>
               </Hidden>
             </Grid>
           </Grid>
           <Grid container sx={{ mt: 4 }}>
             <Grid container>
-              <InputLabel>{t('Microphone')}</InputLabel>
+              <InputLabel sx={{ color: textColor }}>{t('Microphone')}</InputLabel>
             </Grid>
             <Grid container alignItems={'center'} spacing={2}>
               <Grid item xs={10}>
@@ -145,7 +148,7 @@ export default function SettingsDialog(props) {
                     fullWidth
                     value={props?.selectedMicrophone}
                     onChange={e => switchAudioMode(e.target.value)}
-                    sx={{ color: '#fff' }}
+                    sx={{ color: textColor }}
                     id="setting-dialog-mic-select"
                 >
                   {props?.devices && props?.devices?.length > 0 && props?.devices
@@ -159,7 +162,7 @@ export default function SettingsDialog(props) {
               </Grid>
               <Hidden xsDown>
                 <Grid item>
-                  <SvgIcon size={36} name={'microphone'} color={'#fff'} />
+                  <SvgIcon size={36} name={'microphone'} color={textColor} />
                 </Grid>
               </Hidden>
             </Grid>

@@ -26,6 +26,7 @@ import {useTheme} from "@mui/material/styles";
 import {WebinarRoles} from "../WebinarRoles";
 import TalkingIndicator from "../Components/TalkingIndicator";
 import {UnitTestContext} from "./AntMedia";
+import IletisimBaskanligiLogo from "../static/images/iletisim-baskanligi.png";
 
 
 function getPublishStreamId() {
@@ -57,6 +58,10 @@ function WaitingRoom(props) {
     const [speedTestModalButtonVisibility, setSpeedTestModalButtonVisibility] = React.useState(props.speedTestModalButtonVisibilityForTestPurposes ? props.speedTestModalButtonVisibilityForTestPurposes : false);
 
     const theme = useTheme();
+    const settingsButtonBg = theme.palette?.secondary?.main || "#000";
+    const settingsIconColor = theme.palette?.getContrastText
+        ? theme.palette.getContrastText(settingsButtonBg)
+        : theme.palette.text?.primary;
 
     const roomName = id;
 
@@ -247,7 +252,29 @@ function WaitingRoom(props) {
     return (
         <Container
             id="waiting-room"
+            sx={{ pt: { xs: 7, sm: 8 } }}
         >
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: 12, sm: 16 },
+                    left: { xs: 12, sm: 16 },
+                    zIndex: 1200,
+                    display: "flex",
+                    alignItems: "center",
+                }}
+            >
+                <Box
+                    component="img"
+                    src={IletisimBaskanligiLogo}
+                    alt="Iletisim Baskanligi logo"
+                    sx={{
+                        width: { xs: "190px", sm: "230px" },
+                        height: "auto",
+                        objectFit: "contain",
+                    }}
+                />
+            </Box>
             <SettingsDialog
                 open={dialogOpen}
                 onClose={handleDialogClose}
@@ -417,7 +444,7 @@ function WaitingRoom(props) {
                                                 id="waiting-room-more-options"
                                             >
                                                 <SvgIcon size={40} name={"settings"}
-                                                         color={theme.palette?.iconColor?.primary}/>
+                                                         color={settingsIconColor}/>
                                             </CustomizedBtn>
                                         </Tooltip>
                                     </Grid>

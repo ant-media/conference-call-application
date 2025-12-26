@@ -12,6 +12,7 @@ import { useSnackbar } from 'notistack';
 const StyledListItemText = styled(ListItemText)(({ theme }) => ({
     '& .MuiListItemText-primary': {
         fontSize: 14,
+        color: theme.palette.themeColor?.[90] || '#fff',
     },
 }));
 
@@ -19,6 +20,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     cursor: 'default',
     padding: '8px 12px',
     paddingTop: 4,
+    color: theme.palette.themeColor?.[90] || '#fff',
 }));
 
 function InfoButton(props) {
@@ -28,6 +30,8 @@ function InfoButton(props) {
     const open = Boolean(anchorEl);
     const theme = useTheme();
     const meetingLink = window.location.href;
+    const menuBg = theme.palette.themeColor?.[70] || theme.palette.grey?.[900] || '#111';
+    const menuText = theme.palette.themeColor?.[90] || '#fff';
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -68,7 +72,7 @@ function InfoButton(props) {
                 onClose={handleClose}
                 MenuListProps={{
                     'aria-labelledby': 'basic-button',
-                    sx: { bgcolor: 'gray.90', minWidth: 275 },
+                    sx: { bgcolor: menuBg, minWidth: 275 },
                 }}
                 anchorOrigin={{
                     vertical: 'top',
@@ -79,7 +83,7 @@ function InfoButton(props) {
                     horizontal: 'left',
                 }}
             >
-                <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color="#fff">
+                <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color={menuText}>
                     {t('Meeting link')}
                 </Typography>
                 <StyledMenuItem>
@@ -103,7 +107,7 @@ function InfoButton(props) {
                                     );
                                 }}
                             >
-                                <SvgIcon size={14} viewBox="0 0 500 1000" name={'copy'} color={'#fff'} />
+                                <SvgIcon size={14} viewBox="0 0 500 1000" name={'copy'} color={menuText} />
                             </Button>
                         </Tooltip>
                     </ListItemIcon>
@@ -111,7 +115,7 @@ function InfoButton(props) {
 
                 {props?.isPlayOnly === false ? (
                     <div>
-                        <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color="#fff">
+                        <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color={menuText}>
                             {t('Resolution')}
                         </Typography>
                         <StyledMenuItem>
@@ -119,7 +123,7 @@ function InfoButton(props) {
                         </StyledMenuItem>
                     </div>
                 ) : (
-                    <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color="#fff">
+                    <Typography variant="body2" sx={{ px: 1.5, py: 0.5, fontSize: 14, fontWeight: 700 }} color={menuText}>
                         {t('You are in play only mode')}
                     </Typography>
                 )}

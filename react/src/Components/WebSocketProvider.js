@@ -34,7 +34,7 @@ export const WebSocketProvider = ({ children }) => {
     }
 
     const webSocketUrl = websocketUrlTemp
-    const applicationWebSocketUrl = webSocketUrl + "/application";
+    const applicationWebSocketUrl = webSocketUrl + "";
 
     useEffect(() => {
             console.log("--> websocket url connection: " + applicationWebSocketUrl);

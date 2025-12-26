@@ -16,17 +16,11 @@ i18n.use(initReactI18next).init({
 }).then(r => console.log("i18n is initialized"));
 
 const availableLanguagesList = Object.keys(AvailableLanguages);
-let preferredLanguage = localStorage.getItem("i18nextLng");
-if (!preferredLanguage) {
-  preferredLanguage = window.navigator.language.slice(0, 2);
-}
-if (availableLanguagesList.includes(preferredLanguage)) {
-  localStorage.setItem("i18nextLng", preferredLanguage);
-} else {
-  // Falling back to english.
-  localStorage.setItem("i18nextLng", "en");
+let preferredLanguage = "tr";
+if (!availableLanguagesList.includes(preferredLanguage)) {
   preferredLanguage = "en";
 }
+localStorage.setItem("i18nextLng", preferredLanguage);
 
 i18n.changeLanguage(preferredLanguage).then(r => console.log("Language is set to", preferredLanguage));
 
