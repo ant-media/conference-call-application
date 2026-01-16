@@ -2027,8 +2027,11 @@ function AntMedia(props) {
     function startRecord() {
 
         displayMessage("Recording is about to start...", "white")
+
+        var isWebinar = getRole() != WebinarRoles.Default;
+
         var jsCmd = {
-            command: "startRecording", streamId: roomName, websocketURL: websocketURL, token: token
+            command: "startRecording", streamId: roomName, websocketURL: websocketURL, token: token , isWebinar : isWebinar
         };
 
         sendMessage(JSON.stringify(jsCmd));

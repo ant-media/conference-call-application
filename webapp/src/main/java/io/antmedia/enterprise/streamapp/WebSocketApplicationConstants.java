@@ -70,11 +70,13 @@ public class WebSocketApplicationConstants {
 
     public static final String RECEIVER_STREAM_ID_FIELD = "receiverStreamId";
 	
-	public static final String WEBSOCKET_URL_FIELD = "websocketURL";
+    public static final String WEBSOCKET_URL_FIELD = "websocketURL";
 
-	public static final String START_RECORDING_RESPONSE = "startRecordingResponse";
+    public static final String IS_WEBINAR = "isWebinar";
 
-	public static final String STOP_RECORDING_RESPONSE = "stopRecordingResponse";
+    public static final String START_RECORDING_RESPONSE = "startRecordingResponse";
+
+    public static final String STOP_RECORDING_RESPONSE = "stopRecordingResponse";
 
     public static final String CHECK_IF_HAS_ADMIN_RIGHTS_RESPONSE = "checkIfHasAdminRightsResponse";
 

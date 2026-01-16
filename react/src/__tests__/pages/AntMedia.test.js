@@ -160,11 +160,9 @@ describe('AntMedia Component', () => {
     jest.clearAllMocks();
 
     useWebSocket.mockImplementation(() => ({
-      return: {
-        sendMessage: jest.fn(),
-        latestMessage: null,
-        isWebSocketConnected: true,
-      }
+      sendMessage: jest.fn(),
+      latestMessage: null,
+      isWebSocketConnected: true,
     }));
 
     useSnackbar.mockImplementation(() => ({
@@ -3814,6 +3812,110 @@ describe('AntMedia Component', () => {
     jest.runAllTimers();
 
     consoleSpy.mockRestore();
+  });
+
+  describe('testRecordWebinar', () => {
+    it('should call sendMessage with correct startRecording params for webinar and non-webinar roles', async () => {
+      // Scenario 1: role = Host => isWebinar should be true
+      const sendMessageMock1 = jest.fn();
+      useWebSocket.mockReturnValue({
+        sendMessage: sendMessageMock1,
+        latestMessage: null,
+        isWebSocketConnected: true,
+      });
+
+      const rootEl1 = document.createElement("div");
+      rootEl1.id = "root";
+      rootEl1.setAttribute("data-role", WebinarRoles.Host);
+      document.body.appendChild(rootEl1);
+
+      const { unmount: unmount1 } = render(
+        <AntMedia isTest={true}>
+          <MockChild />
+        </AntMedia>
+      );
+
+      await waitFor(() => {
+        expect(currentConference).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.startRecord();
+      });
+
+      const parsedPayloads1 = sendMessageMock1.mock.calls
+        .map(([rawMessage]) => {
+          try {
+            return JSON.parse(rawMessage);
+          } catch (e) {
+            return null;
+          }
+        })
+        .filter(Boolean);
+
+      const payload1 = parsedPayloads1.find((p) => p?.command === "startRecording");
+      expect(payload1).not.toBe(undefined);
+      expect(payload1).toMatchObject({
+        command: "startRecording",
+        streamId: "room",
+        isWebinar: true,
+      });
+      expect(payload1).toHaveProperty("websocketURL");
+      expect(typeof payload1.websocketURL).toBe("string");
+      expect(payload1).toHaveProperty("token");
+      expect(typeof payload1.token).toBe("string");
+
+      unmount1();
+      rootEl1.remove();
+
+      // Scenario 2: role = Default => isWebinar should be false
+      const sendMessageMock2 = jest.fn();
+      useWebSocket.mockReturnValue({
+        sendMessage: sendMessageMock2,
+        latestMessage: null,
+        isWebSocketConnected: true,
+      });
+
+      const rootEl2 = document.createElement("div");
+      rootEl2.id = "root";
+      rootEl2.setAttribute("data-role", WebinarRoles.Default);
+      document.body.appendChild(rootEl2);
+
+      const { unmount: unmount2 } = render(
+        <AntMedia isTest={true}>
+          <MockChild />
+        </AntMedia>
+      );
+
+      await waitFor(() => {
+        expect(currentConference).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.startRecord();
+      });
+
+      const parsedPayloads2 = sendMessageMock2.mock.calls
+        .map(([rawMessage]) => {
+          try {
+            return JSON.parse(rawMessage);
+          } catch (e) {
+            return null;
+          }
+        })
+        .filter(Boolean);
+
+      const payload2 = parsedPayloads2.find((p) => p?.command === "startRecording");
+      expect(payload2).not.toBe(undefined);
+      expect(payload2).toMatchObject({
+        command: "startRecording",
+        streamId: "room",
+        isWebinar: false,
+      });
+
+      unmount2();
+      rootEl2.remove();
+    });
   });
 
   describe('checkAndTurnOffLocalCamera', () => {
