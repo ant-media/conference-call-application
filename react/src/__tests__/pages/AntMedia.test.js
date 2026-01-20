@@ -3815,8 +3815,10 @@ describe('AntMedia Component', () => {
   });
 
   describe('testRecordWebinar', () => {
-    it('should call sendMessage with correct startRecording params for webinar and non-webinar roles', async () => {
-      // Scenario 1: role = Host => isWebinar should be true
+    it('should call sendMessage with correct startRecording params including recordingMode', async () => {
+      const oldRecordingMode = process.env.REACT_APP_RECORDING_MODE;
+      process.env.REACT_APP_RECORDING_MODE = "test";
+
       const sendMessageMock1 = jest.fn();
       useWebSocket.mockReturnValue({
         sendMessage: sendMessageMock1,
@@ -3826,7 +3828,7 @@ describe('AntMedia Component', () => {
 
       const rootEl1 = document.createElement("div");
       rootEl1.id = "root";
-      rootEl1.setAttribute("data-role", WebinarRoles.Host);
+      rootEl1.setAttribute("data-role", WebinarRoles.Default);
       document.body.appendChild(rootEl1);
 
       const { unmount: unmount1 } = render(
@@ -3858,7 +3860,7 @@ describe('AntMedia Component', () => {
       expect(payload1).toMatchObject({
         command: "startRecording",
         streamId: "room",
-        isWebinar: true,
+        recordingMode: "test",
       });
       expect(payload1).toHaveProperty("websocketURL");
       expect(typeof payload1.websocketURL).toBe("string");
@@ -3867,54 +3869,7 @@ describe('AntMedia Component', () => {
 
       unmount1();
       rootEl1.remove();
-
-      // Scenario 2: role = Default => isWebinar should be false
-      const sendMessageMock2 = jest.fn();
-      useWebSocket.mockReturnValue({
-        sendMessage: sendMessageMock2,
-        latestMessage: null,
-        isWebSocketConnected: true,
-      });
-
-      const rootEl2 = document.createElement("div");
-      rootEl2.id = "root";
-      rootEl2.setAttribute("data-role", WebinarRoles.Default);
-      document.body.appendChild(rootEl2);
-
-      const { unmount: unmount2 } = render(
-        <AntMedia isTest={true}>
-          <MockChild />
-        </AntMedia>
-      );
-
-      await waitFor(() => {
-        expect(currentConference).not.toBe(undefined);
-      });
-
-      await act(async () => {
-        currentConference.startRecord();
-      });
-
-      const parsedPayloads2 = sendMessageMock2.mock.calls
-        .map(([rawMessage]) => {
-          try {
-            return JSON.parse(rawMessage);
-          } catch (e) {
-            return null;
-          }
-        })
-        .filter(Boolean);
-
-      const payload2 = parsedPayloads2.find((p) => p?.command === "startRecording");
-      expect(payload2).not.toBe(undefined);
-      expect(payload2).toMatchObject({
-        command: "startRecording",
-        streamId: "room",
-        isWebinar: false,
-      });
-
-      unmount2();
-      rootEl2.remove();
+      process.env.REACT_APP_RECORDING_MODE = oldRecordingMode;
     });
   });
 
