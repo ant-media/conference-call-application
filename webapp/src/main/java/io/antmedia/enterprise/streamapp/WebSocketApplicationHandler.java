@@ -244,7 +244,7 @@ public class WebSocketApplicationHandler
 			String streamId = (String)jsonObject.get(WebSocketConstants.STREAM_ID);
 			String websocketUrl = (String) jsonObject.get(WebSocketApplicationConstants.WEBSOCKET_URL_FIELD);
 			String token =  (String) jsonObject.get(WebSocketConstants.TOKEN);
-			boolean isWebinar =  (boolean) jsonObject.get(WebSocketApplicationConstants.IS_WEBINAR);
+			String recordingMode =  (String) jsonObject.get(WebSocketApplicationConstants.RECORDING_MODE);
 
 			Result result = new Result(false);
 			try {
@@ -266,8 +266,8 @@ public class WebSocketApplicationHandler
 				//http://127.0.0.1:5080/ConferenceCall/roomId+"?playOnly=true&enterDirectly=true"
 				String urlToPublish;
 
-				if(isWebinar){
-					urlToPublish = url + streamId + "?playOnly=true&enterDirectly=true&role=listener&streamName=test&token="+token;
+				if(recordingMode != null && recordingMode.equals(WebSocketApplicationConstants.MODE_WEBINAR)){
+					urlToPublish = url + streamId + "?playOnly=true&enterDirectly=true&role=listener&streamName=record&token="+token;
 				}
 				else{
 					urlToPublish = url + streamId + "?playOnly=true&enterDirectly=true&token="+token;
