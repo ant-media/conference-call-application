@@ -261,5 +261,75 @@ form {
   }
   .single-video-container.pinned {
     height: auto;
+    width: 100% !important;
+  }
+}
+
+/* Mobile floating camera thumbnails when screen share is active */
+#mobile-camera-overlay {
+  position: absolute;
+  bottom: 90px;
+  right: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  z-index: 50;
+  max-width: 60%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#mobile-camera-overlay .mobile-video-card {
+  width: 80px;
+  min-width: 80px;
+  height: 110px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  background-color: #000;
+  flex-shrink: 0;
+}
+
+#mobile-camera-overlay .mobile-video-card > div {
+  width: 100%;
+  height: 100%;
+}
+
+#mobile-camera-overlay .mobile-video-card .single-video-card {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #000 !important;
+}
+
+#mobile-camera-overlay .mobile-video-card .single-video-card > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#mobile-camera-overlay .mobile-video-card video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  background-color: #000 !important;
+}
+
+/* Landscape mode adjustments for mobile camera overlay */
+@media (orientation: landscape) and (max-height: 500px) {
+  #mobile-camera-overlay {
+    bottom: auto;
+    top: 8px;
+    right: 8px;
+    flex-direction: column;
+    max-width: none;
+    max-height: calc(100% - 80px);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  #mobile-camera-overlay .mobile-video-card {
+    width: 90px;
+    min-width: 90px;
+    height: 70px;
+    min-height: 70px;
   }
 }

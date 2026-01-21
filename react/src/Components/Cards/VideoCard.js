@@ -156,6 +156,7 @@ function VideoCard(props) {
                 className="pin-overlay"
                 sx={{
                     opacity: displayHover ? 1 : 0,
+                    pointerEvents: displayHover ? "auto" : "none",
                     transition: "opacity 0.3s ease",
                     position: "absolute",
                     left: 0,
@@ -309,12 +310,12 @@ function VideoCard(props) {
     }, []);
 
     const cardStyle = React.useMemo(() => ({
-        height: props.isMobileView ? "40%" : "100%",
-        width: props.isMobileView ? "20%" : "100%",
+        height: "100%",
+        width: "100%",
         position: "relative",
         borderRadius: 4,
         overflow: "hidden",
-    }), [props.isMobileView]);
+    }), []);
 
     return isMine || isVideoTrack ? (
         <>
