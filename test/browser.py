@@ -9,7 +9,7 @@ from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import StaleElementReferenceException
-from selenium.common.exceptions import NoSuchElementException, JavascriptException, UnexpectedAlertPresentException
+from selenium.common.exceptions import NoSuchElementException, JavascriptException, UnexpectedAlertPresentException, ElementClickInterceptedException
 
 from selenium.webdriver import ActionChains
 
@@ -227,7 +227,30 @@ class Browser:
     element.send_keys(text)
 
   def click_element(self, element):
-    element.click()
+    try:
+      element.click()
+      return
+    except ElementClickInterceptedException:
+      pass
+    except Exception as e:
+      # Selenium sometimes throws a generic WebDriverException for intercepted clicks
+      if "element click intercepted" not in str(e):
+        raise
+
+    # Scroll into view and retry. If still intercepted, fall back to JS click.
+    try:
+      self.driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
+    except JavascriptException:
+      pass
+    time.sleep(0.2)
+    try:
+      element.click()
+      return
+    except Exception as e:
+      if isinstance(e, ElementClickInterceptedException) or "element click intercepted" in str(e):
+        self.driver.execute_script("arguments[0].click();", element)
+        return
+      raise
 
   def click_element_as_script(self, element):
     self.driver.execute_script("arguments[0].click();", element)
