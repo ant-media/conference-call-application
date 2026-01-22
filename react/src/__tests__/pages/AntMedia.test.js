@@ -160,11 +160,9 @@ describe('AntMedia Component', () => {
     jest.clearAllMocks();
 
     useWebSocket.mockImplementation(() => ({
-      return: {
-        sendMessage: jest.fn(),
-        latestMessage: null,
-        isWebSocketConnected: true,
-      }
+      sendMessage: jest.fn(),
+      latestMessage: null,
+      isWebSocketConnected: true,
     }));
 
     useSnackbar.mockImplementation(() => ({
@@ -3814,6 +3812,65 @@ describe('AntMedia Component', () => {
     jest.runAllTimers();
 
     consoleSpy.mockRestore();
+  });
+
+  describe('testRecordWebinar', () => {
+    it('should call sendMessage with correct startRecording params including recordingMode', async () => {
+      const oldRecordingMode = process.env.REACT_APP_RECORDING_MODE;
+      process.env.REACT_APP_RECORDING_MODE = "test";
+
+      const sendMessageMock1 = jest.fn();
+      useWebSocket.mockReturnValue({
+        sendMessage: sendMessageMock1,
+        latestMessage: null,
+        isWebSocketConnected: true,
+      });
+
+      const rootEl1 = document.createElement("div");
+      rootEl1.id = "root";
+      rootEl1.setAttribute("data-role", WebinarRoles.Default);
+      document.body.appendChild(rootEl1);
+
+      const { unmount: unmount1 } = render(
+        <AntMedia isTest={true}>
+          <MockChild />
+        </AntMedia>
+      );
+
+      await waitFor(() => {
+        expect(currentConference).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.startRecord();
+      });
+
+      const parsedPayloads1 = sendMessageMock1.mock.calls
+        .map(([rawMessage]) => {
+          try {
+            return JSON.parse(rawMessage);
+          } catch (e) {
+            return null;
+          }
+        })
+        .filter(Boolean);
+
+      const payload1 = parsedPayloads1.find((p) => p?.command === "startRecording");
+      expect(payload1).not.toBe(undefined);
+      expect(payload1).toMatchObject({
+        command: "startRecording",
+        streamId: "room",
+        recordingMode: "test",
+      });
+      expect(payload1).toHaveProperty("websocketURL");
+      expect(typeof payload1.websocketURL).toBe("string");
+      expect(payload1).toHaveProperty("token");
+      expect(typeof payload1.token).toBe("string");
+
+      unmount1();
+      rootEl1.remove();
+      process.env.REACT_APP_RECORDING_MODE = oldRecordingMode;
+    });
   });
 
   describe('checkAndTurnOffLocalCamera', () => {

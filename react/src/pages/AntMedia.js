@@ -2027,8 +2027,11 @@ function AntMedia(props) {
     function startRecord() {
 
         displayMessage("Recording is about to start...", "white")
+
+        var recordingMode = process.env.REACT_APP_RECORDING_MODE;
+
         var jsCmd = {
-            command: "startRecording", streamId: roomName, websocketURL: websocketURL, token: token
+            command: "startRecording", streamId: roomName, websocketURL: websocketURL, token: token , recordingMode : recordingMode
         };
 
         sendMessage(JSON.stringify(jsCmd));

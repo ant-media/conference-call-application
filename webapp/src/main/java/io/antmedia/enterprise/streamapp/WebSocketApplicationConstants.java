@@ -56,6 +56,8 @@ public class WebSocketApplicationConstants {
      */
 	public static final String SETTINGS = "settings";
 
+    public static final String MODE_WEBINAR = "webinar";
+
     public static final String PING_COMMAND = "ping";
 
     public static final String SYNC_ADMINISTRATIVE_FIELDS_COMMAND = "syncAdministrativeFields";
@@ -70,11 +72,13 @@ public class WebSocketApplicationConstants {
 
     public static final String RECEIVER_STREAM_ID_FIELD = "receiverStreamId";
 	
-	public static final String WEBSOCKET_URL_FIELD = "websocketURL";
+    public static final String WEBSOCKET_URL_FIELD = "websocketURL";
 
-	public static final String START_RECORDING_RESPONSE = "startRecordingResponse";
+    public static final String RECORDING_MODE = "recordingMode";
 
-	public static final String STOP_RECORDING_RESPONSE = "stopRecordingResponse";
+    public static final String START_RECORDING_RESPONSE = "startRecordingResponse";
+
+    public static final String STOP_RECORDING_RESPONSE = "stopRecordingResponse";
 
     public static final String CHECK_IF_HAS_ADMIN_RIGHTS_RESPONSE = "checkIfHasAdminRightsResponse";
 
