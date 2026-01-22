@@ -165,6 +165,7 @@ const MeetingRoom = React.memo((props) => {
                         isAdmin={props?.isAdmin}
                         localVideo={props?.localVideo}
                         localVideoCreate={props?.localVideoCreate}
+                        isMobile={isMobile}
                     />)
                     :
                     (<LayoutTiled

@@ -73,72 +73,70 @@ function LayoutPinned (props) {
   }
 
   const videoCards = (isMobileView) => {
-    return (
-      <>
-      {
-      // eslint-disable-next-line
-      props.videoTrackAssignments.map((element, index) => {
+    const cards = [];
+    // eslint-disable-next-line
+    props.videoTrackAssignments.forEach((element, index) => {
 
-        let isPlayOnly;
+      let isPlayOnly;
 
-        try {
-          isPlayOnly = JSON.parse(props?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
-        } catch (e) {
-          isPlayOnly = false;
-        }
+      try {
+        isPlayOnly = JSON.parse(props?.allParticipants[element?.streamId]?.metaData)?.isPlayOnly;
+      } catch (e) {
+        isPlayOnly = false;
+      }
 
-        let participantName = props?.allParticipants[element?.streamId]?.name;
+      let participantName = props?.allParticipants[element?.streamId]?.name;
 
-        if (participantName === "" || typeof participantName === 'undefined' || isPlayOnly || participantName === "Anonymous") {
-          return null;
-        }
+      if (participantName === "" || typeof participantName === 'undefined' || isPlayOnly || participantName === "Anonymous") {
+        return;
+      }
 
-        if(element?.streamId !== pinnedParticipant?.streamId && playingParticipantsCount < maxPlayingParticipantsCount) {
-          playingParticipantsCount ++;
-          playingParticipants.push(element);
-          /* istanbul ignore next */
-          return (
-              <div className="unpinned" key={index}>
-                <div className="single-video-container">
-                  <div style={{position: "relative", width: "100%", height: "100%"}}>
-                    <TalkingIndicator
-                        trackAssignment={element}
-                        isTalking={props?.isTalking}
-                        streamId={element.streamId}
-                        talkers={props?.talkers}
-                        setAudioLevelListener={props?.setAudioLevelListener}
-                    />
-                    <VideoCard
-                        isMobileView={isMobileView}
-                        trackAssignment={element}
-                        autoPlay
-                        name={participantName}
-                        streamName={props?.streamName}
-                        isPublished={props?.isPublished}
-                        isPlayOnly={props?.isPlayOnly}
-                        isMyMicMuted={props?.isMyMicMuted}
-                        isMyCamTurnedOff={props?.isMyCamTurnedOff}
-                        allParticipants={props?.allParticipants}
-                        setParticipantIdMuted={(participant) => props?.setParticipantIdMuted(participant)}
-                        turnOnYourMicNotification={(streamId) =>props?.turnOnYourMicNotification(streamId)}
-                        turnOffYourMicNotification={(streamId) =>props?.turnOffYourMicNotification(streamId)}
-                        turnOffYourCamNotification={(streamId) =>props?.turnOffYourCamNotification(streamId)}
-                        pinVideo={(streamId)=>props?.pinVideo(streamId)}
-                        unpinVideo={props?.unpinVideo}
-                        isAdmin={props?.isAdmin}
-                        publishStreamId={props?.publishStreamId}
-                        localVideo={props?.localVideo}
-                        localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
-                    />
-                  </div>
-                  </div>
+      if(element?.streamId !== pinnedParticipant?.streamId && playingParticipantsCount < maxPlayingParticipantsCount) {
+        playingParticipantsCount ++;
+        playingParticipants.push(element);
+        /* istanbul ignore next */
+        cards.push(
+            <div className={isMobileView ? "mobile-video-card" : "unpinned"} key={index}>
+              <div className={isMobileView ? "" : "single-video-container"}>
+                <div style={{position: "relative", width: "100%", height: "100%"}}>
+                  <TalkingIndicator
+                      trackAssignment={element}
+                      isTalking={props?.isTalking}
+                      streamId={element.streamId}
+                      talkers={props?.talkers}
+                      setAudioLevelListener={props?.setAudioLevelListener}
+                  />
+                  <VideoCard
+                      isMobileView={isMobileView}
+                      trackAssignment={element}
+                      autoPlay
+                      name={isMobileView ? "" : participantName}
+                      streamName={props?.streamName}
+                      isPublished={props?.isPublished}
+                      isPlayOnly={props?.isPlayOnly}
+                      isMyMicMuted={props?.isMyMicMuted}
+                      isMyCamTurnedOff={props?.isMyCamTurnedOff}
+                      allParticipants={props?.allParticipants}
+                      setParticipantIdMuted={(participant) => props?.setParticipantIdMuted(participant)}
+                      turnOnYourMicNotification={(streamId) =>props?.turnOnYourMicNotification(streamId)}
+                      turnOffYourMicNotification={(streamId) =>props?.turnOffYourMicNotification(streamId)}
+                      turnOffYourCamNotification={(streamId) =>props?.turnOffYourCamNotification(streamId)}
+                      pinVideo={(streamId)=>props?.pinVideo(streamId)}
+                      unpinVideo={props?.unpinVideo}
+                      isAdmin={props?.isAdmin}
+                      publishStreamId={props?.publishStreamId}
+                      localVideo={props?.localVideo}
+                      localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
+                      hidePin={isMobileView}
+                  />
                 </div>
-                );
-                }
-                })}
-              </>
-          );
-        }
+                </div>
+              </div>
+              );
+              }
+              });
+    return <>{cards}</>;
+          }
 
         const othersCard = () => {
           /* istanbul ignore next */
@@ -169,11 +167,14 @@ function LayoutPinned (props) {
             {videoCards(false)}
             {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
           </div>
-          : <><div id="unpinned-gallery">
-            {props?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
-            {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
-          </div>
-            {videoCards(true)}
+          : <>
+            <div id="unpinned-gallery">
+              {props?.videoTrackAssignments.length === 0 ? <p>{process.env.REACT_APP_PLAY_ONLY_ROOM_EMPTY_MESSAGE}</p> : null}
+              {process.env.REACT_APP_LAYOUT_OTHERS_CARD_VISIBILITY === 'true' ? othersCard() : null}
+            </div>
+            <div id="mobile-camera-overlay">
+              {videoCards(true)}
+            </div>
           </>}
     </>
   );
