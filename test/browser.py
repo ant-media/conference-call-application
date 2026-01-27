@@ -9,7 +9,7 @@ from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import StaleElementReferenceException
-from selenium.common.exceptions import NoSuchElementException, JavascriptException
+from selenium.common.exceptions import NoSuchElementException, JavascriptException, UnexpectedAlertPresentException, ElementClickInterceptedException
 
 from selenium.webdriver import ActionChains
 
@@ -118,16 +118,63 @@ class Browser:
   def print_console_logs(self):
     for entry in self.driver.get_log('browser'):
       print("#####\n"+str(entry)+"\n#####")
+  
+  def dismiss_alert_if_present(self):
+    """Dismiss any alert that might be present"""
+    try:
+      alert = self.driver.switch_to.alert
+      alert_text = alert.text
+      print(f"Dismissing alert: {alert_text}")
+      alert.accept()
+      return True
+    except Exception as e:
+      # No alert present or error accessing alert
+      return False
     
   def get_element(self, by, value, timeout=15):
+    max_retries = 3
+    retry_count = 0
+    
+    while retry_count < max_retries:
+      try:
+        element_present = EC.element_to_be_clickable((by, value))
+        WebDriverWait(self.driver, timeout).until(element_present)
+        # If we get here, element is ready, try to find it
+        try:
+          return self.driver.find_element(by, value)
+        except UnexpectedAlertPresentException:
+          # If alert appears during find_element, dismiss it and retry
+          print("Unexpected alert present during find_element, dismissing it...")
+          self.dismiss_alert_if_present()
+          retry_count += 1
+          continue
+      except TimeoutException:
+        print("Timed out waiting for element to be clickable by "+str(by)+" with value "+str(value))
+        #print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
+        # Try to find element anyway even if timeout
+        try:
+          return self.driver.find_element(by, value)
+        except UnexpectedAlertPresentException:
+          print("Unexpected alert present after timeout, dismissing it...")
+          self.dismiss_alert_if_present()
+          retry_count += 1
+          continue
+        break
+      except UnexpectedAlertPresentException:
+        # If an alert is present, dismiss it and retry
+        print("Unexpected alert present, dismissing it...")
+        self.dismiss_alert_if_present()
+        retry_count += 1
+        time.sleep(0.5)  # Brief pause before retry
+        continue
+    
+    # Final attempt to find element
     try:
-      element_present = EC.element_to_be_clickable((by, value))
-      WebDriverWait(self.driver, timeout).until(element_present)
-    except TimeoutException:
-      print("Timed out waiting for element to be clickable by "+str(by)+" with value "+str(value))
-      #print("SS as base64: \n"+self.driver.get_screenshot_as_base64())
-      
-    return self.driver.find_element(by, value)
+      return self.driver.find_element(by, value)
+    except UnexpectedAlertPresentException:
+      print("Unexpected alert present in final attempt, dismissing it...")
+      self.dismiss_alert_if_present()
+      return self.driver.find_element(by, value)
 
 
   def get_all_elements_in_element(self, element, by, value, timeout=15):
@@ -180,7 +227,30 @@ class Browser:
     element.send_keys(text)
 
   def click_element(self, element):
-    element.click()
+    try:
+      element.click()
+      return
+    except ElementClickInterceptedException:
+      pass
+    except Exception as e:
+      # Selenium sometimes throws a generic WebDriverException for intercepted clicks
+      if "element click intercepted" not in str(e):
+        raise
+
+    # Scroll into view and retry. If still intercepted, fall back to JS click.
+    try:
+      self.driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
+    except JavascriptException:
+      pass
+    time.sleep(0.2)
+    try:
+      element.click()
+      return
+    except Exception as e:
+      if isinstance(e, ElementClickInterceptedException) or "element click intercepted" in str(e):
+        self.driver.execute_script("arguments[0].click();", element)
+        return
+      raise
 
   def click_element_as_script(self, element):
     self.driver.execute_script("arguments[0].click();", element)
