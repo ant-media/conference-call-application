@@ -127,20 +127,34 @@ function WaitingRoom(props) {
         }
 
         if (process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true' && enterDirectly === false && skipSpeedTest == false) {
-            let speedTestObjectDefault = {};
-            speedTestObjectDefault.message = "Please wait while we are testing your connection speed";
-            speedTestObjectDefault.isfinished = false;
-            speedTestObjectDefault.isfailed = false;
-            speedTestObjectDefault.errorMessage = "";
-            speedTestObjectDefault.progressValue = 10;
-
-            props?.setSpeedTestObject(speedTestObjectDefault);
             if (props?.speedTestStreamId) {
                 props.speedTestStreamId.current = streamId;
             }
 
+            // If speed test already completed in background, join directly
+            if (props?.speedTestObject?.isfinished === true) {
+                props?.setIsJoining(true);
+                props?.joinRoom(roomName, streamId);
+                if (props?.isPlayOnly) {
+                    setDialogOpen(false);
+                }
+                return;
+            }
+
+            // If speed test is still running or not started, show the modal
             setSpeedTestModelVisibility(true);
-            props?.startSpeedTest();
+
+            // Only start speed test if not already running (progress is at initial state)
+            if (!props?.speedTestObject?.progressValue || props?.speedTestObject?.progressValue <= 10) {
+                let speedTestObjectDefault = {};
+                speedTestObjectDefault.message = "Please wait while we are testing your connection speed";
+                speedTestObjectDefault.isfinished = false;
+                speedTestObjectDefault.isfailed = false;
+                speedTestObjectDefault.errorMessage = "";
+                speedTestObjectDefault.progressValue = 10;
+                props?.setSpeedTestObject(speedTestObjectDefault);
+                props?.startSpeedTest();
+            }
         } else {
             props?.setIsJoining(true);
             props?.joinRoom(roomName, streamId);
