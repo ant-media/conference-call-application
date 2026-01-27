@@ -312,7 +312,9 @@ function WaitingRoom(props) {
                         display: props?.speedTestObject?.isfailed ? "block" : "none"
                         
                     }}>
-                        {props?.speedTestObject?.errorMessage}
+                        {props?.speedTestObject?.isfailed && props?.isPlayOnly
+                            ? "Speed test failed. You can still join as a listener, but you may experience interruptions."
+                            : props?.speedTestObject?.errorMessage}
                     </Typography>
     
                     <Button
@@ -323,7 +325,7 @@ function WaitingRoom(props) {
                         }}>Close</Button>
                     <Button
                         id={"speed-test-modal-join-button"}
-                        sx={(speedTestModalButtonVisibility) ? {display: "inline-flex"} : {display: "none"}}
+                        sx={(speedTestModalButtonVisibility || (props?.speedTestObject?.isfailed && props?.isPlayOnly)) ? {display: "inline-flex"} : {display: "none"}}
                             onClick={() => {
                                 speedTestModalJoinButton();
                             }}>Join</Button>
