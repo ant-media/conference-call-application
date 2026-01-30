@@ -2576,10 +2576,17 @@ function AntMedia(props) {
         //we might already send assignVideoTrack to server but it might be before track creation. Here we check and resend
         if(!isNull(currentPinInfo)) {
             let assignedVideoTrack = videoTrackAssignments.find(el => el.videoLabel == currentPinInfo.videoLabel);
-            if(assignedVideoTrack?.streamId !== currentPinInfo.streamId) {
+            if(!isNull(assignedVideoTrack) && assignedVideoTrack?.streamId !== currentPinInfo.streamId) {
                 //send reservation request for the stream id
                 webRTCAdaptor?.assignVideoTrack(currentPinInfo.videoLabel, currentPinInfo.streamId, true);
                 console.log(currentPinInfo.videoLabel + " will be assigned to " + currentPinInfo.streamId+" (retry)");
+            }
+
+            //sometimes the assigned video track is not found (listener room screen share case)
+            //so we try to find it by stream id
+            if(isNull(assignedVideoTrack)) {
+                let assignedVideoTrack = videoTrackAssignments.find(el => (el.streamId == currentPinInfo.streamId) || (el.streamId == ""));
+                webRTCAdaptor?.assignVideoTrack(assignedVideoTrack.videoLabel, currentPinInfo.streamId, true);
             }
         }
 
