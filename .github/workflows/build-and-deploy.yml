@@ -253,11 +253,21 @@ jobs:
 
       - name: Install Selenium
         run: |
-          LATEST_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.Stable.version')
-          wget https://storage.googleapis.com/chrome-for-testing-public/${LATEST_VERSION}/linux64/chromedriver-linux64.zip      
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+          CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1)
+
+          echo "Chrome version: $CHROME_VERSION"
+          echo "Chrome major: $CHROME_MAJOR"
+
+          DRIVER_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json \
+            | jq -r ".versions[] | select(.version | startswith(\"$CHROME_MAJOR.\")) | .version" | tail -n 1)
+
+          echo "Matching ChromeDriver version: $DRIVER_VERSION"
+
+          wget https://storage.googleapis.com/chrome-for-testing-public/$DRIVER_VERSION/linux64/chromedriver-linux64.zip
           unzip chromedriver-linux64.zip
-          sudo cp chromedriver-linux64/chromedriver /tmp
-          ls -al /tmp
+          sudo cp chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
           pip3 install selenium==4.14
           pip3 install requests
           pip3 show selenium 
@@ -328,11 +338,21 @@ jobs:
 
       - name: Install Selenium
         run: |
-          LATEST_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.Stable.version')
-          wget https://storage.googleapis.com/chrome-for-testing-public/${LATEST_VERSION}/linux64/chromedriver-linux64.zip      
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+          CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1)
+
+          echo "Chrome version: $CHROME_VERSION"
+          echo "Chrome major: $CHROME_MAJOR"
+
+          DRIVER_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json \
+            | jq -r ".versions[] | select(.version | startswith(\"$CHROME_MAJOR.\")) | .version" | tail -n 1)
+
+          echo "Matching ChromeDriver version: $DRIVER_VERSION"
+
+          wget https://storage.googleapis.com/chrome-for-testing-public/$DRIVER_VERSION/linux64/chromedriver-linux64.zip
           unzip chromedriver-linux64.zip
-          sudo cp chromedriver-linux64/chromedriver /tmp
-          ls -al /tmp
+          sudo cp chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
           pip3 install selenium==4.14
           pip3 install requests
           pip3 show selenium 
