@@ -254,7 +254,7 @@ jobs:
       - name: Install Selenium
         run: |
           LATEST_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.Stable.version')
-          wget https://storage.googleapis.com/chrome-for-testing-public/${LATEST_VERSION}/linux64/chromedriver-linux64.zip      
+          wget https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.109/linux64/chromedriver-linux64.zip  
           unzip chromedriver-linux64.zip
           sudo cp chromedriver-linux64/chromedriver /tmp
           ls -al /tmp
@@ -329,7 +329,7 @@ jobs:
       - name: Install Selenium
         run: |
           LATEST_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.Stable.version')
-          wget https://storage.googleapis.com/chrome-for-testing-public/${LATEST_VERSION}/linux64/chromedriver-linux64.zip      
+          wget https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.109/linux64/chromedriver-linux64.zip
           unzip chromedriver-linux64.zip
           sudo cp chromedriver-linux64/chromedriver /tmp
           ls -al /tmp
