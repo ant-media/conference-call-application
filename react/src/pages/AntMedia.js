@@ -3386,7 +3386,9 @@ function AntMedia(props) {
                     checkVideoTrackHealth,
                     setInitialized,
                     currentPinInfo,
-                    unpinVideo
+                    unpinVideo,
+                    mirrorCamera,
+                    handleSetMirrorCamera
                 }}
             >
                 {props.children}

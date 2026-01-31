@@ -3899,6 +3899,44 @@ describe('AntMedia Component', () => {
       expect(webRTCAdaptorConstructor.turnOffLocalCamera).toHaveBeenCalledWith('test-stream-id');
     });
   });
+
+  describe('Mirror Camera', () => {
+    it('should default mirrorCamera to true', async () => {
+      localStorage.removeItem("mirrorCamera");
+
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>);
+
+      await waitFor(() => {
+        expect(currentConference.mirrorCamera).toBe(true);
+      });
+    });
+
+    it('should update mirrorCamera and persist to localStorage', async () => {
+      localStorage.removeItem("mirrorCamera");
+
+      const { container } = render(
+          <AntMedia isTest={true}>
+            <MockChild/>
+          </AntMedia>);
+
+      await waitFor(() => {
+        expect(currentConference.mirrorCamera).toBe(true);
+      });
+
+      await act(async () => {
+        currentConference.handleSetMirrorCamera(false);
+      });
+
+      await waitFor(() => {
+        expect(currentConference.mirrorCamera).toBe(false);
+      });
+
+      expect(localStorage.getItem("mirrorCamera")).toBe("false");
+    });
+  });
 });
 
 
