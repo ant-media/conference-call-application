@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import DialogContent from '@mui/material/DialogContent';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
-import { Grid, Hidden, MenuItem, useMediaQuery } from '@mui/material';
+import { FormControlLabel, Grid, Hidden, MenuItem, Switch, useMediaQuery } from '@mui/material';
 import { SvgIcon } from 'Components/SvgIcon';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -97,6 +97,19 @@ export default function SettingsDialog(props) {
                 </Grid>
               </Hidden>
             </Grid>
+          </Grid>
+          <Grid container sx={{ mt: 2, pl: 1 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={props?.mirrorCamera ?? true}
+                  onChange={(e) => props?.setMirrorCamera(e.target.checked)}
+                  id="setting-dialog-mirror-switch"
+                />
+              }
+              label={t('Mirror my camera')}
+              sx={{ color: '#fff' }}
+            />
           </Grid>
           <Grid container sx={{ mt: 4 }}>
             <Grid container>

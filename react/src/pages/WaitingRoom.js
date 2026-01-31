@@ -262,6 +262,8 @@ function WaitingRoom(props) {
                 setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
                 videoSendResolution={props?.videoSendResolution}
                 setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
+                mirrorCamera={props?.mirrorCamera}
+                setMirrorCamera={props?.setMirrorCamera}
             />
 
             <Modal
@@ -374,6 +376,7 @@ function WaitingRoom(props) {
                                     publishStreamId={props?.publishStreamId}
                                     localVideo={props?.localVideo}
                                     localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
+                                    mirrorCamera={props?.mirrorCamera}
                                 />
                             </div>
 

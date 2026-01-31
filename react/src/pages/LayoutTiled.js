@@ -131,6 +131,7 @@ function LayoutTiled(props) {
                       publishStreamId={props?.publishStreamId}
                       localVideo={props?.localVideo}
                       localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
+                      mirrorCamera={props?.mirrorCamera}
                   />
                 </div>
               </div>

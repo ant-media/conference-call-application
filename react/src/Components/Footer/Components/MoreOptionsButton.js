@@ -97,6 +97,8 @@ function MoreOptionsButton(props) {
               setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
               videoSendResolution={props?.videoSendResolution}
               setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
+              mirrorCamera={props?.mirrorCamera}
+              setMirrorCamera={props?.setMirrorCamera}
           />
           <LayoutSettingsDialog
               open={layoutDialogOpen}
