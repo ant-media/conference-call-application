@@ -65,6 +65,7 @@ function LayoutPinned (props) {
               publishStreamId={props?.publishStreamId}
               localVideo={props?.localVideo}
               localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
+              mirrorCamera={props?.mirrorCamera}
             />
           </div>
         </div>
@@ -127,6 +128,7 @@ function LayoutPinned (props) {
                       publishStreamId={props?.publishStreamId}
                       localVideo={props?.localVideo}
                       localVideoCreate={(tempLocalVideo) => props?.localVideoCreate(tempLocalVideo)}
+                      mirrorCamera={props?.mirrorCamera}
                       hidePin={isMobileView}
                   />
                 </div>

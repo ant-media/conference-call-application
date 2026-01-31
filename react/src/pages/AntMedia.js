@@ -451,6 +451,13 @@ function AntMedia(props) {
     // possible values: "auto", "highDefinition", "standartDefinition", "lowDefinition"
     const [videoSendResolution, setVideoSendResolution] = React.useState(localStorage.getItem("videoSendResolution") ? localStorage.getItem("videoSendResolution") : "auto");
 
+    const [mirrorCamera, setMirrorCamera] = React.useState(localStorage.getItem("mirrorCamera") !== "false");
+
+    const handleSetMirrorCamera = React.useCallback((value) => {
+        setMirrorCamera(value);
+        localStorage.setItem("mirrorCamera", value.toString());
+    }, []);
+
     const [messages, setMessages] = React.useState([]);
 
     const [devices, setDevices] = React.useState([]);
@@ -3474,6 +3481,8 @@ function AntMedia(props) {
                         setSelectedBackgroundMode={(mode) => setSelectedBackgroundMode(mode)}
                         videoSendResolution={videoSendResolution}
                         setVideoSendResolution={(resolution) => setVideoSendResolution(resolution)}
+                        mirrorCamera={mirrorCamera}
+                        setMirrorCamera={handleSetMirrorCamera}
                         talkers={talkers.current}
                         isPublished={isPublished}
                         allParticipants={allParticipants}
@@ -3559,6 +3568,8 @@ function AntMedia(props) {
                             setSelectedBackgroundMode={(mode) => setSelectedBackgroundMode(mode)}
                             videoSendResolution={videoSendResolution}
                             setVideoSendResolution={(resolution) => setVideoSendResolution(resolution)}
+                            mirrorCamera={mirrorCamera}
+                            setMirrorCamera={handleSetMirrorCamera}
                             isRecordPluginInstalled={isRecordPluginInstalled}
                             startRecord={() => startRecord()}
                             stopRecord={() => stopRecord()}
