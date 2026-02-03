@@ -1,11 +1,14 @@
 package io.antmedia.enterprise.streamapp;
 
+import com.google.gson.Gson;
 import io.antmedia.AntMediaApplicationAdapter;
+import io.antmedia.AppSettings;
 import io.antmedia.datastore.db.DataStore;
 import io.antmedia.datastore.db.DataStoreFactory;
 import io.antmedia.datastore.db.IDataStoreFactory;
 import io.antmedia.datastore.db.types.Broadcast;
 import io.antmedia.datastore.db.types.BroadcastUpdate;
+import io.antmedia.muxer.IAntMediaStreamHandler;
 import io.antmedia.rest.model.Result;
 import io.antmedia.rest.RestServiceBase;
 import org.jetbrains.annotations.NotNull;
@@ -21,14 +24,17 @@ public class AMSBroadcastManager implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
     private AntMediaApplicationAdapter appAdaptor;
+    private ConferenceRoomSettings conferenceRoomSettings;
+    private AppSettings appSettings;
+    private Gson gson = new Gson();
 
     @Override
     public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
 
-    public ApplicationContext getApplicationContext() {
-        return applicationContext;
+        IAntMediaStreamHandler app = getApplication();
+        appSettings = app.getAppSettings();
+        fetchConferenceRoomSettings();
     }
 
     public AntMediaApplicationAdapter getApplication() {
@@ -78,4 +84,39 @@ public class AMSBroadcastManager implements ApplicationContextAware {
 
         return result;
     }
+
+    public void fetchConferenceRoomSettings() {
+        Object circleSettingsString = appSettings.getCustomSetting("circle");
+        if (circleSettingsString == null) {
+            logger.error("Using default settings for Conference Room Settings because no Circle settings in the AppSettings");
+
+            conferenceRoomSettings = new ConferenceRoomSettings();
+        }
+        else {
+            try {
+                conferenceRoomSettings = gson.fromJson(circleSettingsString.toString(), ConferenceRoomSettings.class);
+            }
+            catch (Exception e)
+            {
+                logger.error("Invalid Conference room settings, using default conference room settings");
+                conferenceRoomSettings = new ConferenceRoomSettings();
+            }
+        }
+        conferenceRoomSettings.init();
+
+        String participantVisibilityMatrix = appSettings.getParticipantVisibilityMatrix().toString();
+
+        if (participantVisibilityMatrix != null && conferenceRoomSettings.getParticipantVisibilityMatrix() == null) {
+            conferenceRoomSettings.setParticipantVisibilityMatrix(participantVisibilityMatrix);
+        }
+
+        int maxVideoTrackCount = appSettings.getMaxVideoTrackCount();
+
+        conferenceRoomSettings.setMaxVideoTrackCount(maxVideoTrackCount);
+    }
+
+    public ConferenceRoomSettings getConferenceRoomSettings() {
+        return conferenceRoomSettings;
+    }
+
 }
