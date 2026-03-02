@@ -446,6 +446,7 @@ function AntMedia(props) {
     const speedTestCounter = React.useRef(0);
     const speedTestForPlayWebRtcAdaptor = React.useRef(null);
     const statsList = React.useRef([]);
+    const speedTestStarted = React.useRef(false);
 
     // video send resolution for publishing
     // possible values: "auto", "highDefinition", "standartDefinition", "lowDefinition"
@@ -529,6 +530,7 @@ function AntMedia(props) {
         }
         speedTestForPublishWebRtcAdaptor.current = null;
         speedTestForPlayWebRtcAdaptor.current = null;
+        speedTestStarted.current = false;
 
         //we need to listen device changes with main webRTCAdaptor
         webRTCAdaptor.mediaManager?.trackDeviceChange();
@@ -1449,8 +1451,22 @@ function AntMedia(props) {
         }
 
 
-        // eslint-disable-next-line 
+        // eslint-disable-next-line
     }, [initialized]);
+
+    // Auto-start speed test in background when entering waiting room
+    React.useEffect(() => {
+        if (initialized &&
+            waitingOrMeetingRoom === "waiting" &&
+            !speedTestStarted.current &&
+            !enterDirectly &&
+            process.env.REACT_APP_SPEED_TEST_BEFORE_JOINING_THE_ROOM === 'true') {
+
+            speedTestStarted.current = true;
+            startSpeedTest();
+        }
+        // eslint-disable-next-line
+    }, [initialized, waitingOrMeetingRoom]);
 
     function infoCallback(info, obj) {
         if (info === "initialized") {
