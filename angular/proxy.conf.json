@@ -1,0 +1,17 @@
+{
+  "/websocket": {
+    "target": "http://localhost:5080/Conference",
+    "secure": false,
+    "ws": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/rest": {
+    "target": "http://localhost:5080/Conference",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
+
+

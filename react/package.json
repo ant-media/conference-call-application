@@ -45,6 +45,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build && node custom-post-build.js",
+    "build:webcomponent": "node ./scripts/build-webcomponent.mjs",
+    "watch:webcomponent": "node ./scripts/build-webcomponent.mjs --watch",
     "eject": "react-scripts eject",
     "test": "jest --verbose",
     "upload-coverage": "codecov"
@@ -78,6 +80,7 @@
     "istanbul": "^0.4.5",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
-    "jest-preview": "^0.3.1"
+    "jest-preview": "^0.3.1",
+    "esbuild": "^0.24.0"
   }
 }
