@@ -15,8 +15,24 @@ from selenium.webdriver import ActionChains
 
 import time
 import subprocess
+import os
+import shutil
 
 class Browser:
+  def _resolve_chromedriver_path(self):
+    driver_candidates = [
+      os.environ.get("CHROMEDRIVER_PATH"),
+      "/tmp/chromedriver",
+      "/usr/local/bin/chromedriver",
+      shutil.which("chromedriver"),
+    ]
+
+    for driver_path in driver_candidates:
+      if driver_path and os.path.isfile(driver_path) and os.access(driver_path, os.X_OK):
+        return driver_path
+
+    return None
+
   def init(self, is_headless=True, is_fake_camera=True, mic_file=None):
     browser_options = Options()
     browser_options.add_experimental_option("detach", True)
@@ -37,8 +53,14 @@ class Browser:
     
     if is_headless:
       browser_options.add_argument("--headless")
-    
-    service = Service(executable_path='/tmp/chromedriver', service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
+
+    driver_path = self._resolve_chromedriver_path()
+    if driver_path is not None:
+      print("Using chromedriver at: " + driver_path)
+      service = Service(executable_path=driver_path, service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
+    else:
+      print("Chromedriver not found in known locations, letting Selenium resolve it.")
+      service = Service(service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
     
     browser_options.set_capability( "goog:loggingPrefs", { 'browser':'ALL' } )
     self.driver = webdriver.Chrome(service=service, options=browser_options)
