@@ -274,6 +274,19 @@ class Browser:
         return
       raise
 
+  def click_element_with_retry(self, by, value, retries=3, timeout=15, wait_time=1):
+    for attempt in range(retries):
+      try:
+        element = self.get_element(by, value, timeout=timeout)
+        self.click_element(element)
+        return
+      except (StaleElementReferenceException, NoSuchElementException, TimeoutException) as e:
+        print(f"Click attempt {attempt + 1} failed for element by {by} with value {value}: {e}")
+        if attempt < retries - 1:
+          time.sleep(wait_time)
+        else:
+          raise
+
   def click_element_as_script(self, element):
     self.driver.execute_script("arguments[0].click();", element)
 
