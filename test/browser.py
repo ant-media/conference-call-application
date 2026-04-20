@@ -35,7 +35,7 @@ class Browser:
 
   def init(self, is_headless=True, is_fake_camera=True, mic_file=None):
     browser_options = Options()
-    browser_options.add_experimental_option("detach", True)
+    browser_options.add_experimental_option("detach", not is_headless)
     if is_fake_camera:
       browser_options.add_argument("--use-fake-ui-for-media-stream") 
       browser_options.add_argument("--use-fake-device-for-media-stream")
@@ -313,3 +313,9 @@ class Browser:
     for handle in self.driver.window_handles:
       self.driver.switch_to.window(handle)
       self.driver.close()
+
+  def quit(self):
+    try:
+      self.driver.quit()
+    except Exception:
+      pass

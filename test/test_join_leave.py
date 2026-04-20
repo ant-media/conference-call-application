@@ -52,6 +52,7 @@ class TestJoinLeave(unittest.TestCase):
     """Ensure the monitoring thread stops after tests."""
     self.keep_running = False
     self.monitor_thread.join()
+    self.chrome.quit()
     print(self._testMethodName, " ending...\n","----------------")
 
   def create_participants_with_test_tool(self, participant_name, room, count):
