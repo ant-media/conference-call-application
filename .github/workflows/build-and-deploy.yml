@@ -325,6 +325,16 @@ jobs:
       - name: Debug WAR file paths
         run: ls -alh /tmp
 
+      - name: Install latest Google Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Check Chrome version
+        run: google-chrome --version
+
       - name: Install Selenium
         run: |
           set -euxo pipefail
@@ -344,22 +354,7 @@ jobs:
           chromedriver --version
 
           pip3 install selenium==4.14 requests psutil
-          pip3 show selenium
-
-      - name: Check Chrome version
-        run: google-chrome --version
-
-      - name: Install Selenium
-        run: |
-          LATEST_VERSION=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.Stable.version')
-          wget https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.109/linux64/chromedriver-linux64.zip
-          unzip chromedriver-linux64.zip
-          sudo cp chromedriver-linux64/chromedriver /tmp
-          ls -al /tmp
-          pip3 install selenium==4.14
-          pip3 install requests
-          pip3 show selenium 
-          pip3 install psutil      
+          pip3 show selenium   
         
       - name: Run Integration Test for webinar
         run: |
