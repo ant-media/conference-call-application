@@ -9,7 +9,7 @@ from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import StaleElementReferenceException
-from selenium.common.exceptions import NoSuchElementException, JavascriptException, UnexpectedAlertPresentException, ElementClickInterceptedException
+from selenium.common.exceptions import NoSuchElementException, JavascriptException, UnexpectedAlertPresentException, ElementClickInterceptedException, WebDriverException
 
 from selenium.webdriver import ActionChains
 
@@ -65,11 +65,49 @@ class Browser:
     browser_options.set_capability( "goog:loggingPrefs", { 'browser':'ALL' } )
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
-  def open_in_new_tab(self, url):
+  def open_in_new_tab(self, url, retries=2, wait_time=2):
     print("url opening:" + url)
-    self.driver.switch_to.new_window('tab')
-    self.driver.get(url)
-    return self.driver.current_window_handle
+    last_exception = None
+
+    for attempt in range(retries + 1):
+      previous_handle = None
+      try:
+        previous_handle = self.driver.current_window_handle
+      except WebDriverException:
+        pass
+
+      try:
+        self.driver.switch_to.new_window('tab')
+        self.driver.get(url)
+        return self.driver.current_window_handle
+      except WebDriverException as e:
+        last_exception = e
+        message = str(e).lower()
+        if "tab crashed" not in message or attempt == retries:
+          raise
+
+        print(f"Tab crashed while opening {url}. Retrying attempt {attempt + 2}/{retries + 1}")
+        crashed_handle = None
+        try:
+          crashed_handle = self.driver.current_window_handle
+        except WebDriverException:
+          pass
+
+        if crashed_handle is not None:
+          try:
+            self.driver.close()
+          except WebDriverException:
+            pass
+
+        if previous_handle is not None:
+          try:
+            self.driver.switch_to.window(previous_handle)
+          except WebDriverException:
+            pass
+
+        time.sleep(wait_time)
+
+    raise last_exception
 
   def switch_to_tab(self,tab_id):
     self.driver.switch_to.window(tab_id)
@@ -310,9 +348,12 @@ class Browser:
     self.driver.close()
 
   def close_all(self):
-    for handle in self.driver.window_handles:
-      self.driver.switch_to.window(handle)
-      self.driver.close()
+    for handle in list(self.driver.window_handles):
+      try:
+        self.driver.switch_to.window(handle)
+        self.driver.close()
+      except WebDriverException as e:
+        print(f"Could not close tab {handle}: {e}")
 
   def quit(self):
     try:
