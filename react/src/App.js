@@ -63,6 +63,7 @@ export const ThemeContext = React.createContext(null);
 function App()
 {
   const [currentTheme, setCurrentTheme] = React.useState(selectedTheme);
+  const currentMuiTheme = React.useMemo(() => theme(currentTheme), [currentTheme]);
 
   React.useEffect(() => {
   const handleFullScreen = (e) => {
@@ -82,8 +83,13 @@ function App()
       window.removeEventListener("dblclick", handleFullScreen);
     };
   }, []);
+
+  React.useEffect(() => {
+    document.body.style.backgroundColor = currentMuiTheme.palette.background?.default || "";
+  }, [currentMuiTheme]);
+
   return (
-    <ThemeProvider theme={theme(currentTheme)}>
+    <ThemeProvider theme={currentMuiTheme}>
       <CssBaseline/>
       <SnackbarProvider
         anchorOrigin={{

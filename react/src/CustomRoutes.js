@@ -13,7 +13,7 @@ function CustomRoutes(props) {
 
   if (isComponentMode()) {
     return (
-      <Grid container style={{background: theme.palette.background}}>
+      <Grid container style={{background: theme.palette.background?.default}}>
         <Routes>
           <Route path="*" element={<AntMedia/>}/>
         </Routes>
@@ -21,7 +21,7 @@ function CustomRoutes(props) {
     );
   } else {
     return (
-      <Grid container style={{background: theme.palette.background}}>
+      <Grid container style={{background: theme.palette.background?.default}}>
         <Routes>
           <Route path="/" element={<Home/>}/>
           <Route path="/:id" element={<AntMedia/>}/>
