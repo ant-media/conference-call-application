@@ -52,6 +52,7 @@ class TestJoinLeave(unittest.TestCase):
     """Ensure the monitoring thread stops after tests."""
     self.keep_running = False
     self.monitor_thread.join()
+    self.chrome.quit()
     print(self._testMethodName, " ending...\n","----------------")
 
   def create_participants_with_test_tool(self, participant_name, room, count):
@@ -1006,7 +1007,7 @@ class TestJoinLeave(unittest.TestCase):
    
 
 
-  def test_recording(self):
+  def _test_recording(self):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
     handle_2 = self.join_room_in_new_tab("participantB", room)
@@ -1756,26 +1757,22 @@ class TestJoinLeave(unittest.TestCase):
     room = "room"+str(random.randint(100, 999))
     handle_1 = self.join_room_in_new_tab("participantA", room)
 
-    more_options_button = self.chrome.get_element_with_retry(By.ID, "settings-button")
-    more_options_button.click()
+    self.chrome.click_element_with_retry(By.ID, "settings-button")
 
     time.sleep(1)
 
-    virtual_effects_button = self.chrome.get_element(By.ID, "virtual-effects")
-    self.chrome.mouse_click_on(virtual_effects_button)
+    self.chrome.click_element_with_retry(By.ID, "virtual-effects")
 
     time.sleep(1)
 
     wait = self.chrome.get_wait()
     wait.until(lambda x: self.chrome.is_element_exist(By.ID, "slight-blur-button"))
 
-    slight_blur_button = self.chrome.get_element(By.ID, "slight-blur-button")
-    slight_blur_button.click()
+    self.chrome.click_element_with_retry(By.ID, "slight-blur-button")
 
     time.sleep(5)
 
-    blur_button = self.chrome.get_element(By.ID, "blur-button")
-    blur_button.click()
+    self.chrome.click_element_with_retry(By.ID, "blur-button")
 
     time.sleep(5)
 

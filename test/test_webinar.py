@@ -50,6 +50,7 @@ class TestWebinarScenario(unittest.TestCase):
     """Ensure the monitoring thread stops after tests."""
     self.keep_running = False
     self.monitor_thread.join()
+    self.chrome.quit()
     print(self._testMethodName, " ending...\n","----------------")
 
   def startLoadTest(self):

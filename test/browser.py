@@ -9,17 +9,33 @@ from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import StaleElementReferenceException
-from selenium.common.exceptions import NoSuchElementException, JavascriptException, UnexpectedAlertPresentException, ElementClickInterceptedException
+from selenium.common.exceptions import NoSuchElementException, JavascriptException, UnexpectedAlertPresentException, ElementClickInterceptedException, WebDriverException
 
 from selenium.webdriver import ActionChains
 
 import time
 import subprocess
+import os
+import shutil
 
 class Browser:
+  def _resolve_chromedriver_path(self):
+    driver_candidates = [
+      os.environ.get("CHROMEDRIVER_PATH"),
+      "/tmp/chromedriver",
+      "/usr/local/bin/chromedriver",
+      shutil.which("chromedriver"),
+    ]
+
+    for driver_path in driver_candidates:
+      if driver_path and os.path.isfile(driver_path) and os.access(driver_path, os.X_OK):
+        return driver_path
+
+    return None
+
   def init(self, is_headless=True, is_fake_camera=True, mic_file=None):
     browser_options = Options()
-    browser_options.add_experimental_option("detach", True)
+    browser_options.add_experimental_option("detach", not is_headless)
     if is_fake_camera:
       browser_options.add_argument("--use-fake-ui-for-media-stream") 
       browser_options.add_argument("--use-fake-device-for-media-stream")
@@ -37,17 +53,61 @@ class Browser:
     
     if is_headless:
       browser_options.add_argument("--headless")
-    
-    service = Service(executable_path='/tmp/chromedriver', service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
+
+    driver_path = self._resolve_chromedriver_path()
+    if driver_path is not None:
+      print("Using chromedriver at: " + driver_path)
+      service = Service(executable_path=driver_path, service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
+    else:
+      print("Chromedriver not found in known locations, letting Selenium resolve it.")
+      service = Service(service_args=["--verbose","--log-path=/tmp/chromedriver.log"])
     
     browser_options.set_capability( "goog:loggingPrefs", { 'browser':'ALL' } )
     self.driver = webdriver.Chrome(service=service, options=browser_options)
 
-  def open_in_new_tab(self, url):
+  def open_in_new_tab(self, url, retries=2, wait_time=2):
     print("url opening:" + url)
-    self.driver.switch_to.new_window('tab')
-    self.driver.get(url)
-    return self.driver.current_window_handle
+    last_exception = None
+
+    for attempt in range(retries + 1):
+      previous_handle = None
+      try:
+        previous_handle = self.driver.current_window_handle
+      except WebDriverException:
+        pass
+
+      try:
+        self.driver.switch_to.new_window('tab')
+        self.driver.get(url)
+        return self.driver.current_window_handle
+      except WebDriverException as e:
+        last_exception = e
+        message = str(e).lower()
+        if "tab crashed" not in message or attempt == retries:
+          raise
+
+        print(f"Tab crashed while opening {url}. Retrying attempt {attempt + 2}/{retries + 1}")
+        crashed_handle = None
+        try:
+          crashed_handle = self.driver.current_window_handle
+        except WebDriverException:
+          pass
+
+        if crashed_handle is not None:
+          try:
+            self.driver.close()
+          except WebDriverException:
+            pass
+
+        if previous_handle is not None:
+          try:
+            self.driver.switch_to.window(previous_handle)
+          except WebDriverException:
+            pass
+
+        time.sleep(wait_time)
+
+    raise last_exception
 
   def switch_to_tab(self,tab_id):
     self.driver.switch_to.window(tab_id)
@@ -252,6 +312,19 @@ class Browser:
         return
       raise
 
+  def click_element_with_retry(self, by, value, retries=3, timeout=15, wait_time=1):
+    for attempt in range(retries):
+      try:
+        element = self.get_element(by, value, timeout=timeout)
+        self.click_element(element)
+        return
+      except (StaleElementReferenceException, NoSuchElementException, TimeoutException) as e:
+        print(f"Click attempt {attempt + 1} failed for element by {by} with value {value}: {e}")
+        if attempt < retries - 1:
+          time.sleep(wait_time)
+        else:
+          raise
+
   def click_element_as_script(self, element):
     self.driver.execute_script("arguments[0].click();", element)
 
@@ -275,6 +348,15 @@ class Browser:
     self.driver.close()
 
   def close_all(self):
-    for handle in self.driver.window_handles:
-      self.driver.switch_to.window(handle)
-      self.driver.close()
+    for handle in list(self.driver.window_handles):
+      try:
+        self.driver.switch_to.window(handle)
+        self.driver.close()
+      except WebDriverException as e:
+        print(f"Could not close tab {handle}: {e}")
+
+  def quit(self):
+    try:
+      self.driver.quit()
+    except Exception:
+      pass
