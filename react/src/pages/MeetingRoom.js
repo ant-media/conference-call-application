@@ -165,6 +165,7 @@ const MeetingRoom = React.memo((props) => {
                         isAdmin={props?.isAdmin}
                         localVideo={props?.localVideo}
                         localVideoCreate={props?.localVideoCreate}
+                        mirrorCamera={props?.mirrorCamera}
                         isMobile={isMobile}
                     />)
                     :
@@ -193,6 +194,7 @@ const MeetingRoom = React.memo((props) => {
                         isAdmin={props?.isAdmin}
                         localVideo={props?.localVideo}
                         localVideoCreate={props?.localVideoCreate}
+                        mirrorCamera={props?.mirrorCamera}
                     />)
                 }
               </div>
@@ -260,6 +262,8 @@ const MeetingRoom = React.memo((props) => {
                   setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
                   videoSendResolution={props?.videoSendResolution}
                   setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
+                  mirrorCamera={props?.mirrorCamera}
+                  setMirrorCamera={props?.setMirrorCamera}
                   isAdmin={props?.isAdmin}
                   isRecordPluginInstalled={props?.isRecordPluginInstalled}
                   startRecord={props?.startRecord}

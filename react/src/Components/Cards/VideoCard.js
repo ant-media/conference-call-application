@@ -198,7 +198,7 @@ function VideoCard(props) {
                     container
                     style={{
                         height: "100%",
-                        transform: isMine ? "rotateY(180deg)" : "none",
+                        transform: isMine && props?.mirrorCamera ? "rotateY(180deg)" : "none",
                     }}
                 >
                     <CustomizedVideo

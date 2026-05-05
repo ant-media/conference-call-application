@@ -131,6 +131,8 @@ function Footer(props) {
                           setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
                           videoSendResolution={props?.videoSendResolution}
                           setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
+                          mirrorCamera={props?.mirrorCamera}
+                          setMirrorCamera={props?.setMirrorCamera}
                       />
                     </Grid>
                     : null}
@@ -297,6 +299,8 @@ function Footer(props) {
                           setSelectedBackgroundMode={(mode) => props?.setSelectedBackgroundMode(mode)}
                           videoSendResolution={props?.videoSendResolution}
                           setVideoSendResolution={(resolution) => props?.setVideoSendResolution(resolution)}
+                          mirrorCamera={props?.mirrorCamera}
+                          setMirrorCamera={props?.setMirrorCamera}
                           globals={props?.globals}
                           handleParticipantListOpen={(open)=>props?.handleParticipantListOpen(open)}
                       />
