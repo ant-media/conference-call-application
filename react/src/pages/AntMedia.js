@@ -3115,7 +3115,7 @@ function AntMedia(props) {
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [isMyMicMuted, isPlayOnly, isMyCamTurnedOff, publishStreamId]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [isMyMicMuted, isPlayOnly, isMyCamTurnedOff, publishStreamId]); // eslint-disable-line
 
     const setAudioLevelListener = (listener, period) => {
         if (audioListenerIntervalJob == null) {
