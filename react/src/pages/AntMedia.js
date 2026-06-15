@@ -3067,7 +3067,25 @@ function AntMedia(props) {
     }
 
     function unmuteLocalMic() {
-        webRTCAdaptor?.unmuteLocalMic();
+        const audioTrack = webRTCAdaptor?.mediaManager?.localStream?.getAudioTracks?.()?.[0];
+
+        // If the active mic track has ended — e.g. an external audio device such as a
+        // Continuity iPhone was disconnected mid-call — re-enabling it just produces
+        // silence, because an "ended" MediaStreamTrack is dead permanently. Re-acquire a
+        // live track from the selected device first, then unmute that.
+        if (audioTrack && audioTrack.readyState === "ended") {
+            try {
+                webRTCAdaptor
+                    ?.switchAudioInputSource(publishStreamId, getSelectedDevices().audioDeviceId)
+                    .then(() => webRTCAdaptor?.unmuteLocalMic())
+                    .catch((e) => console.error("Failed to re-acquire microphone on unmute", e));
+            } catch (e) {
+                console.error("Failed to re-acquire microphone on unmute", e);
+            }
+        } else {
+            webRTCAdaptor?.unmuteLocalMic();
+        }
+
         updateUserStatusMetadata(false, !isMyCamTurnedOff);
         setIsMyMicMuted(false);
 
