@@ -65,6 +65,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       stop : jest.fn(),
       turnOffLocalCamera : jest.fn(),
       muteLocalMic: jest.fn(),
+      unmuteLocalMic: jest.fn(),
       switchVideoCameraCapture: jest.fn(),
       switchAudioInputSource: jest.fn(),
       displayMessage: jest.fn(),
@@ -3897,6 +3898,82 @@ describe('AntMedia Component', () => {
 
       // Assertion: only check the observable side effect
       expect(webRTCAdaptorConstructor.turnOffLocalCamera).toHaveBeenCalledWith('test-stream-id');
+    });
+  });
+
+  describe('spacebar mic toggle', () => {
+    const dispatchSpace = async (target) => {
+      await act(async () => {
+        const event = new KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true });
+        (target || window).dispatchEvent(event);
+      });
+    };
+
+    const renderConference = async () => {
+      const result = render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      );
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+      return result;
+    };
+
+    it('mutes the mic when spacebar is pressed and the mic is on', async () => {
+      await renderConference();
+
+      await dispatchSpace();
+
+      expect(webRTCAdaptorConstructor.muteLocalMic).toHaveBeenCalled();
+      expect(webRTCAdaptorConstructor.unmuteLocalMic).not.toHaveBeenCalled();
+    });
+
+    it('unmutes the mic when spacebar is pressed and the mic is muted', async () => {
+      await renderConference();
+
+      // First press mutes, second press unmutes.
+      await dispatchSpace();
+      await dispatchSpace();
+
+      expect(webRTCAdaptorConstructor.unmuteLocalMic).toHaveBeenCalled();
+    });
+
+    it('ignores spacebar while typing in an input field', async () => {
+      await renderConference();
+
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+
+      await dispatchSpace(input);
+
+      expect(webRTCAdaptorConstructor.muteLocalMic).not.toHaveBeenCalled();
+      input.remove();
+    });
+
+    it('ignores spacebar for play-only participants', async () => {
+      await renderConference();
+
+      await act(async () => {
+        currentConference.setIsPlayOnly(true);
+      });
+
+      await dispatchSpace();
+
+      expect(webRTCAdaptorConstructor.muteLocalMic).not.toHaveBeenCalled();
+    });
+
+    it('removes the keydown listener on unmount', async () => {
+      const { unmount } = await renderConference();
+
+      await act(async () => {
+        unmount();
+      });
+
+      await dispatchSpace();
+
+      expect(webRTCAdaptorConstructor.muteLocalMic).not.toHaveBeenCalled();
     });
   });
 });
