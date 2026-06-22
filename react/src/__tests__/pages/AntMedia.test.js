@@ -65,6 +65,7 @@ jest.mock('@antmedia/webrtc_adaptor', () => ({
       stop : jest.fn(),
       turnOffLocalCamera : jest.fn(),
       muteLocalMic: jest.fn(),
+      unmuteLocalMic: jest.fn(),
       switchVideoCameraCapture: jest.fn(),
       switchAudioInputSource: jest.fn(),
       displayMessage: jest.fn(),
@@ -3897,6 +3898,155 @@ describe('AntMedia Component', () => {
 
       // Assertion: only check the observable side effect
       expect(webRTCAdaptorConstructor.turnOffLocalCamera).toHaveBeenCalledWith('test-stream-id');
+    });
+  });
+
+  describe('unmuteLocalMic', () => {
+    it('re-acquires the mic when the active audio track has ended', async () => {
+      render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      );
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setPublishStreamId('test-stream-id');
+      });
+
+      const endedTrack = { readyState: 'ended', enabled: false };
+      webRTCAdaptorConstructor.mediaManager = {
+        localStream: {
+          getAudioTracks: jest.fn().mockReturnValue([endedTrack]),
+        },
+      };
+      webRTCAdaptorConstructor.switchAudioInputSource = jest.fn().mockResolvedValue();
+      webRTCAdaptorConstructor.unmuteLocalMic = jest.fn();
+
+      await act(async () => {
+        currentConference.unmuteLocalMic();
+      });
+
+      // It should re-acquire a fresh track for the current stream instead of
+      // just re-enabling the dead one.
+      expect(webRTCAdaptorConstructor.switchAudioInputSource).toHaveBeenCalled();
+      expect(webRTCAdaptorConstructor.switchAudioInputSource.mock.calls[0][0]).toBe('test-stream-id');
+
+      // And only enable the mic once the new track is in place.
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor.unmuteLocalMic).toHaveBeenCalled();
+      });
+      expect(currentConference.isMyMicMuted).toBe(false);
+    });
+
+    it('just enables the existing track when it is still live', async () => {
+      render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      );
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setPublishStreamId('test-stream-id');
+      });
+
+      const liveTrack = { readyState: 'live', enabled: false };
+      webRTCAdaptorConstructor.mediaManager = {
+        localStream: {
+          getAudioTracks: jest.fn().mockReturnValue([liveTrack]),
+        },
+      };
+      webRTCAdaptorConstructor.switchAudioInputSource = jest.fn().mockResolvedValue();
+      webRTCAdaptorConstructor.unmuteLocalMic = jest.fn();
+
+      await act(async () => {
+        currentConference.unmuteLocalMic();
+      });
+
+      expect(webRTCAdaptorConstructor.unmuteLocalMic).toHaveBeenCalled();
+      expect(webRTCAdaptorConstructor.switchAudioInputSource).not.toHaveBeenCalled();
+      expect(currentConference.isMyMicMuted).toBe(false);
+    });
+
+    it('logs an error when re-acquiring the mic fails', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      );
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setPublishStreamId('test-stream-id');
+      });
+
+      const endedTrack = { readyState: 'ended', enabled: false };
+      webRTCAdaptorConstructor.mediaManager = {
+        localStream: {
+          getAudioTracks: jest.fn().mockReturnValue([endedTrack]),
+        },
+      };
+      webRTCAdaptorConstructor.switchAudioInputSource = jest.fn().mockRejectedValue(new Error('no device'));
+      webRTCAdaptorConstructor.unmuteLocalMic = jest.fn();
+
+      await act(async () => {
+        currentConference.unmuteLocalMic();
+      });
+
+      await waitFor(() => {
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to re-acquire microphone on unmute', expect.any(Error));
+      });
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('logs an error when re-acquiring the mic throws synchronously', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      render(
+        <AntMedia isTest={true}>
+          <MockChild/>
+        </AntMedia>
+      );
+
+      await waitFor(() => {
+        expect(webRTCAdaptorConstructor).not.toBe(undefined);
+      });
+
+      await act(async () => {
+        currentConference.setPublishStreamId('test-stream-id');
+      });
+
+      const endedTrack = { readyState: 'ended', enabled: false };
+      webRTCAdaptorConstructor.mediaManager = {
+        localStream: {
+          getAudioTracks: jest.fn().mockReturnValue([endedTrack]),
+        },
+      };
+      webRTCAdaptorConstructor.switchAudioInputSource = jest.fn().mockImplementation(() => {
+        throw new Error('sync failure');
+      });
+      webRTCAdaptorConstructor.unmuteLocalMic = jest.fn();
+
+      await act(async () => {
+        currentConference.unmuteLocalMic();
+      });
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to re-acquire microphone on unmute', expect.any(Error));
+
+      consoleErrorSpy.mockRestore();
     });
   });
 });
