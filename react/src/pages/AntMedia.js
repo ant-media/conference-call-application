@@ -3074,6 +3074,49 @@ function AntMedia(props) {
         handleSendNotificationEvent("MIC_UNMUTED", publishStreamId);
     }
 
+    // Toggle mic with the spacebar, like most meeting apps.
+    React.useEffect(() => {
+        // Don't hijack the spacebar when it would interfere with the focused element:
+        // text inputs (chat, name) and natively-activatable controls (buttons, links)
+        // that the browser already toggles/clicks on spacebar.
+        const shouldDeferToTarget = (target) => {
+            if (!target) {
+                return false;
+            }
+            const tagName = target.tagName;
+            return (
+                tagName === "INPUT" ||
+                tagName === "TEXTAREA" ||
+                tagName === "SELECT" ||
+                tagName === "BUTTON" ||
+                tagName === "A" ||
+                target.isContentEditable === true ||
+                target.getAttribute?.("role") === "button"
+            );
+        };
+
+        const handleKeyDown = (e) => {
+            if (e.code !== "Space" && e.key !== " ") {
+                return;
+            }
+            // Ignore auto-repeat from holding the key down, and focused controls/inputs.
+            if (e.repeat || shouldDeferToTarget(e.target)) {
+                return;
+            }
+            // Play-only participants have no microphone to toggle.
+            if (isPlayOnly) {
+                return;
+            }
+            e.preventDefault();
+            toggleMic(!isMyMicMuted);
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isMyMicMuted, isPlayOnly, isMyCamTurnedOff, publishStreamId, webRTCAdaptor]); // eslint-disable-line
+
     const setAudioLevelListener = (listener, period) => {
         if (audioListenerIntervalJob == null) {
             audioListenerIntervalJob = setInterval(() => {
